@@ -1,0 +1,32 @@
+#MPIMAP setup
+[default]
+name=  test2
+inidata=tests.dat #initial data
+nprocs=4
+bodies=39
+map=1 #single run -- 0, map -- 1
+
+[logs]
+dump=2000
+period=92.891234
+epoch=2007.0
+inidata=dump.dat
+
+[planetA]
+m = 1.2
+a = 2.7
+e = 0.045
+i = 0.001
+o = 23.4
+c = 172.9
+l = 123.1
+
+[farm]
+xres = 5
+yres = 6
+method = 0 #single pixel -- 0, userdefined -- 6
+#define output data vector
+#it is a multidimensional array of long double values
+#max 1024x1024
+datasetx = 512
+datasety = 3
