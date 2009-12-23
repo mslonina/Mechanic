@@ -46,6 +46,10 @@ int npxc = 0; //number of all sent pixels
 int count = 0; //number of pixels to receive
 int source_tag = 0, data_tag = 2, result_tag = 59, terminate_tag = 99; //data tags
 
+int buff_size = 100;
+int *ibuff;
+float *fbuff;
+
 unsigned int membersize, maxsize;
 int position, msgsize;
 char *buffer;
@@ -67,16 +71,56 @@ int main(int argc, char* argv[]){
 
   inifile = "config";
   
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+
   /**
    * Each slave knows exactly what is all about
    * -- it is much easier to handle
    */
-  allopts = readConfigValues();
+  ibuff = malloc(buff_size*sizeof(*ibuff));
+  fbuff = malloc(buff_size*sizeof(*fbuff));
+  if (mpi_rank == 0) {
+    allopts = readConfigValues();
 
-  MPI_Init(&argc, &argv);
-	MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    fbuff[0] = m;
+    fbuff[1] = a;
+    fbuff[2] = e;
+    fbuff[3] = inc;
+    fbuff[4] = o;
 
+    ibuff[0] = xres;
+    ibuff[1] = yres;
+    ibuff[2] = method;
+    ibuff[3] = datasetx;
+    ibuff[4] = datasety;
+
+    // BEWARE: dataname is not broadcasted
+
+    MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
+
+  } else {
+
+    MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
+
+    m   = fbuff[0];
+    a   = fbuff[1];
+    e   = fbuff[2];
+    inc = fbuff[3];
+    o   = fbuff[4];
+
+    xres     = ibuff[0];
+    yres     = ibuff[1];
+    method   = ibuff[2];
+    datasetx = ibuff[3];
+    datasety = ibuff[4];
+
+  }
+  free(ibuff);
+  free(fbuff);
   /**
    * Create data pack
    */
