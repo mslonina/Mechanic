@@ -40,6 +40,9 @@ int npxc = 0; //number of all sent pixels
 int count = 0; //number of pixels to receive
 int source_tag = 0, data_tag = 2, result_tag = 59, terminate_tag = 99; //data tags
 
+int masteralone = 0;
+int nodes = 0;
+
 unsigned int membersize, maxsize;
 int position, msgsize;
 char *buffer;
@@ -71,6 +74,12 @@ int main(int argc, char* argv[]){
    */
   if(mpi_rank == 0){
     allopts = userdefined_readConfigValues(inifile, sep, comm, &d); 
+   
+    if (d.xres == 0 || d.yres == 0){
+       printf("X/Y map resolution should not set to 0!\n");
+       printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
+       MPI_Abort(MPI_COMM_WORLD, 911);
+    }
     userdefined_mpiBcast(mpi_rank,&d);
   }else{
     userdefined_mpiBcast(mpi_rank,&d);
@@ -85,6 +94,17 @@ int main(int argc, char* argv[]){
   MPI_Pack_size(MAX_RESULT_LENGTH, MY_MPI_DATATYPE, MPI_COMM_WORLD, &membersize);
   maxsize += membersize;
   buffer = malloc(maxsize);
+      
+  if (mpi_size == 1){
+     printf("You should have at least one slave!\n");
+     masteralone = 1;
+
+     /**
+      * In the future we can allow the master node to perform all tasks
+      * but for now, we just abort.
+      */
+     MPI_Abort(MPI_COMM_WORLD, 911);
+  }
 
   if(mpi_rank == 0) {
       master();
@@ -107,7 +127,7 @@ static void master(void){
    masterData rawdata;
 	 MY_DATATYPE rdata[MAX_RESULT_LENGTH][1];
    int i = 0, k = 0, j = 0;
-
+   
    clearArray(rawdata.res,ITEMS_IN_ARRAY(rawdata.res));
    
    printf("MAP RESOLUTION = %dx%d.\n", d.xres, d.yres);
@@ -233,11 +253,21 @@ static void master(void){
    /**
     * FARM STARTS
     */
-    
+
+   /**
+    * Security check if farm resolution is greater than number of slaves.
+    * Needed when we have i.e. 3 slaves and only one pixel to compute.
+    */
+   if (farm_res > mpi_size){
+     nodes = mpi_size;
+   }else{
+     nodes = farm_res + 1;
+   }
+
    /**
     * Send tasks to all slaves
     */
-   for (i = 1; i < mpi_size; i++){
+   for (i = 1; i < nodes; i++){
       userdefined_master_beforeSend(i,&d,&rawdata);
       MPI_Send(map2d(npxc), 3, MPI_INT, i, data_tag, MPI_COMM_WORLD);
       userdefined_master_afterSend(i,&d,&rawdata);
@@ -324,9 +354,10 @@ static void master(void){
          */
         off[0] = rawdata.coords[0];
         off[1] = rawdata.coords[1];
+        
         fdata[0][0] = 1;
         H5Sselect_hyperslab(mapspace, H5S_SELECT_SET, off, NULL, co, NULL);
-        hdf_status = H5Dwrite(dset_board, H5T_NATIVE_DOUBLE, memmapspace, mapspace, H5P_DEFAULT, fdata);
+        hdf_status = H5Dwrite(dset_board, H5T_NATIVE_INT, memmapspace, mapspace, H5P_DEFAULT, fdata);
         
         /**
          * Data

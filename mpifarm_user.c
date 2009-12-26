@@ -156,12 +156,18 @@ void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s){
 
   clearArray(s->points, ITEMS_IN_ARRAY(s->points));
 
-  hid_t sfile_id, sdatagroup, gid;
+  hid_t sfile_id, sdatagroup, gid, string_type;
+  hid_t dataset, dataspace;
+  hid_t rank = 1;
+  hsize_t dimens_1d;
   herr_t serr;
   const char sbase[] = "slave";
   char node[512];
   const char gbase[] = "slave";
   char group[512];
+
+  const char cbase[] = "Hello from slave ";
+  char comment[1024];
 
   sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
   sprintf(group, "%s%d", gbase, slave);
@@ -171,10 +177,23 @@ void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s){
    * each slave can create different dataspaces and datasets here, 
    * perform different computations, even read different config file!
    */
-
   sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   gid = H5Gcreate(sfile_id, group, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  
+  sprintf(comment, "%s%d.",cbase,slave); 
+  string_type = H5Tcopy(H5T_C_S1);
+  H5Tset_size(string_type, strlen(comment));
 
+  rank = 1;
+  dimens_1d = 1;
+
+  dataspace = H5Screate_simple(rank, &dimens_1d, NULL);
+  
+  dataset = H5Dcreate(gid, "comment", string_type, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  serr = H5Dwrite(dataset, string_type, H5S_ALL, dataspace, H5P_DEFAULT, comment);
+
+  H5Sclose(dataspace);
+  H5Dclose(dataset);
   H5Gclose(gid);
   H5Fclose(sfile_id);
 
