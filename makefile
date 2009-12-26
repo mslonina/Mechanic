@@ -27,5 +27,8 @@ skel:
 main:
 	$(MPICC) $(MPICCFLAGS) -o $(NAME) $(OBJECTS) $(LIBS) $(LADD)
 
-clean:
+cleanall:
 	$(RM) mpifarm $(OBJECTS) *.a *.o
+
+clean:
+	$(RM) $(OBJECTS) *.a *.o
