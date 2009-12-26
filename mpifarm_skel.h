@@ -41,21 +41,21 @@ typedef struct {
  * userdefined functions
  */
 extern int userdefined_farmResolution(int, int);
-extern void userdefined_pixelCompute(int, masterData *r, slaveData *s);
-extern void userdefined_pixelCoords(int, int t[], masterData *r, slaveData *s);
+extern void userdefined_pixelCompute(int, inputData *d, masterData *r, slaveData *s);
+extern void userdefined_pixelCoords(int, int t[], inputData *d, masterData *r, slaveData *s);
 extern void userdefined_pixelCoordsMap(int ind[], int, int, int);
-extern void userdefined_masterIN();
-extern void userdefined_masterOUT();
-extern void userdefined_slaveIN(int, masterData *r, slaveData *s);
-extern void userdefined_slaveOUT(int, masterData *r, slaveData *s);
-extern void userdefined_master_beforeSend(int, masterData *r);
-extern void userdefined_master_afterSend(int, masterData *r);
-extern void userdefined_master_beforeReceive(masterData *r);
-extern void userdefined_master_afterReceive(int, masterData *r);
-extern void userdefined_slave_beforeSend(int, masterData *r, slaveData *s);
+extern void userdefined_masterIN(inputData *d);
+extern void userdefined_masterOUT(inputData *d, masterData *r);
+extern void userdefined_slaveIN(int, inputData *d, masterData *r, slaveData *s);
+extern void userdefined_slaveOUT(int, inputData *d, masterData *r, slaveData *s);
+extern void userdefined_master_beforeSend(int, inputData *d, masterData *r);
+extern void userdefined_master_afterSend(int, inputData *d, masterData *r);
+extern void userdefined_master_beforeReceive(inputData *d, masterData *r);
+extern void userdefined_master_afterReceive(int, inputData *d, masterData *r);
+extern void userdefined_slave_beforeSend(int, inputData *d, masterData *r, slaveData *s);
 extern void userdefined_slave_afterSend(int, inputData *d,  masterData *r, slaveData *s);
-extern void userdefined_slave_beforeReceive(int, masterData *r, slaveData *s);
-extern void userdefined_slave_afterReceive(int, masterData *r, slaveData *s);
+extern void userdefined_slave_beforeReceive(int, inputData *d, masterData *r, slaveData *s);
+extern void userdefined_slave_afterReceive(int, inputData *d, masterData *r, slaveData *s);
 
 extern int userdefined_readConfigValues(char*, char*, char*, inputData *d);
 extern void userdefined_mpiBcast(int, inputData *d);

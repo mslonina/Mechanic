@@ -1,11 +1,17 @@
-#include "mpifarm.h"
+#include "mpifarm_skel.h"
+#include <string.h>
+#include "libreadconfig.h"
 
 /**
- * Output Data struct is defined as follows:
+ * Master Data struct is defined as follows:
  * typedef struct{
  *   int count[3]; <-- this handles x,y coords and number of the pixel
  *   MY_DATATYPE res[MAX_RESULT_LENGTH]; <-- this handles result vector
  * }
+ *
+ * Master Data is the only data received by master node,
+ * however, You can do much with slaveData struct -- You can redefined it in
+ * mpifarm_user.h and use during simulation
  *
  */
 
@@ -26,7 +32,7 @@ int userdefined_farmResolution(int x, int y){
  * USER DEFINED PIXEL CHOORDS
  * 
  */
-void userdefined_pixelCoords(int slave, int t[],outputData *r){
+void userdefined_pixelCoords(int slave, int t[], inputData *d, masterData *r, slaveData *s){
           
   r->coords[0] = t[0];
   r->coords[1] = t[1];
@@ -42,10 +48,10 @@ void userdefined_pixelCoordsMap(int ind[], int p, int x, int y){
 }
 
 /**
- * COMPUTE PIXEL
+ * USER DEFINED PIXEL COMPUTE
  * 
  */
-void userdefined_pixelCompute(int slave, outputData *r){
+void userdefined_pixelCompute(int slave, inputData *d, masterData *r, slaveData *s){
 
    r->res[0] = (MY_DATATYPE) r->coords[0]; 
    r->res[1] = (MY_DATATYPE) r->coords[1];
@@ -61,7 +67,7 @@ void userdefined_pixelCompute(int slave, outputData *r){
  * USER DEFINED MASTER_IN FUNCTION
  *
  */
-void userdefined_masterIN(){
+void userdefined_masterIN(inputData *d){
   return;
 }
 
@@ -69,7 +75,7 @@ void userdefined_masterIN(){
  * USER DEFINED MASTER_OUT FUNCTION
  *
  */
-void userdefined_masterOUT(){
+void userdefined_masterOUT(inputData *d, masterData *r){
     
   printf("Master process OVER & OUT.\n");
   
@@ -81,24 +87,31 @@ void userdefined_masterOUT(){
  * called before/after send/receive
  * 
  */
-void userdefined_master_beforeSend(int slave, outputData *r){
+void userdefined_master_beforeSend(int slave, inputData *d, masterData *r){
   return;
 }
-void userdefined_master_afterSend(int slave, outputData *r){
+void userdefined_master_afterSend(int slave, inputData *d, masterData *r){
   return;
 }
-void userdefined_master_beforeReceive(outputData *r){
+void userdefined_master_beforeReceive(inputData *d, masterData *r){
   return;
 }
-void userdefined_master_afterReceive(int slave, outputData *r){
+void userdefined_master_afterReceive(int slave, inputData *d, masterData *r){
   return;
 }
 
 /**
  * USER DEFINED SLAVE_IN FUNCTION
- *
+ * 
+ * Do some preparation here, i.e. 
+ * -- clear proper arrays in slaveData s
+ * -- read data to struct s, even from different files
+ * -- create group/dataset for the slave etc.
  */
-void userdefined_slaveIN(int slave){
+void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s){
+
+  clearArray(s->points, ITEMS_IN_ARRAY(s->points));
+
   return;
 }
 
@@ -106,7 +119,7 @@ void userdefined_slaveIN(int slave){
  * USER DEFINED SLAVE_OUT FUNCTION
  *
  */
-void userdefined_slaveOUT(int slave){
+void userdefined_slaveOUT(int slave, inputData *d, masterData *r, slaveData *s){
   
   printf("SLAVE[%d] OVER & OUT\n",slave);
 
@@ -118,20 +131,130 @@ void userdefined_slaveOUT(int slave){
  * called before/after send/receive
  * 
  */
-void userdefined_slave_beforeSend(int slave, outputData *r){
+void userdefined_slave_beforeSend(int slave, inputData *d, masterData *r, slaveData *s){
   
   printf("SLAVE[%d] working on pixel [ %d , %d ]: %f\n", slave, r->coords[0], r->coords[1], r->res[2]);
   
   return;
 }
-void userdefined_slave_afterSend(int slave, outputData *r){
+void userdefined_slave_afterSend(int slave, inputData *d, masterData *r, slaveData *s){
+
+  hid_t file_id, slaveset, slavememspace;
+  herr_t hdfs_status;
+
+  //file_id = H5Fopen(d->datafile, H5F_ACC_RDWR, H5P_DEFAULT);
+  //H5Fclose(file_id);
+
+
   return;
 }
-void userdefined_slave_beforeReceive(int slave, outputData *r){
+void userdefined_slave_beforeReceive(int slave, inputData *d, masterData *r, slaveData *s){
   return;
 }
-void userdefined_slave_afterReceive(int slave, outputData *r){
+void userdefined_slave_afterReceive(int slave, inputData *d, masterData *r, slaveData *s){
   return;
 }
 
+/**
+ * HELPER FUNCTION -- READ CONFIG VALUES
+ * see libreadconfig.h for details
+ *
+ * Adjust the parser to Your initial data struct from mpifarm_user.h
+ */
+int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData *d){
 
+  int i = 0, k = 0, opts = 0, offset = 0;
+  
+  opts = parseConfigFile(inifile, sep, comm);
+
+	for(i = 0; i < opts; i++){
+    if(strcmp(configSpace[i].space,"default") == 0){
+		  for(k = 0; k < configSpace[i].num; k++){
+			  if(strcmp(configSpace[i].options[k].name,"name") == 0){
+          strcpy(d->name,configSpace[i].options[k].value);
+          strcpy(d->datafile, strcat(configSpace[i].options[k].value,".h5"));  
+        }
+        if(strcmp(configSpace[i].options[k].name,"bodies") == 0) d->bodies = atoi(configSpace[i].options[k].value);
+    }
+    }
+		if(strncmp(configSpace[i].space,"planet*",1) == 0){
+		  for(k = 0; k < configSpace[i].num; k++){
+        d->el[offset+k] = atof(configSpace[i].options[k].value);
+		  }
+      offset = offset + k;
+		}
+    if(strcmp(configSpace[i].space,"farm") == 0){
+		  for(k = 0; k < configSpace[i].num; k++){
+			  if(strcmp(configSpace[i].options[k].name,"xres") == 0) d->xres = atoi(configSpace[i].options[k].value);  
+        if(strcmp(configSpace[i].options[k].name,"yres") == 0) d->yres = atoi(configSpace[i].options[k].value); 
+			  if(strcmp(configSpace[i].options[k].name,"method") == 0) d->method = atoi(configSpace[i].options[k].value); 
+      }
+    }
+	}
+
+  return opts;
+}
+
+/**
+ * USERDEFINED MPI BCAST
+ * We send the only information needed by slaves
+ */
+
+void userdefined_mpiBcast(int mpi_rank, inputData *d){
+
+  int buff_size = 1000;
+  int *ibuff;
+  float *fbuff;
+  char *sbuff;
+
+  ibuff = malloc(buff_size*sizeof(*ibuff));
+  fbuff = malloc(buff_size*sizeof(*fbuff));
+  sbuff = malloc(buff_size*sizeof(*sbuff));
+ 
+  if (mpi_rank == 0) {
+
+    fbuff[0] = d->el[0];
+    fbuff[1] = d->el[1];
+    fbuff[2] = d->el[2];
+    fbuff[3] = d->el[3];
+    fbuff[4] = d->el[4];
+
+    ibuff[0] = d->xres;
+    ibuff[1] = d->yres;
+    ibuff[2] = d->method;
+    ibuff[3] = d->dump;
+    ibuff[4] = d->bodies;
+
+    strcpy(sbuff,d->datafile);
+
+    MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
+    MPI_Bcast (sbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
+
+  } else {
+
+    MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
+    MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
+    MPI_Bcast (sbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
+
+    d->el[0]   = fbuff[0];
+    d->el[1]   = fbuff[1];
+    d->el[2]   = fbuff[2];
+    d->el[3]   = fbuff[3];
+    d->el[4]   = fbuff[4];
+
+    d->xres     = ibuff[0];
+    d->yres     = ibuff[1];
+    d->method   = ibuff[2];
+    d->dump = ibuff[3];
+    d->bodies = ibuff[4];
+
+    strcpy(d->datafile,sbuff);
+
+  }
+  free(ibuff);
+  free(fbuff);
+  free(sbuff);
+  
+  return;
+}

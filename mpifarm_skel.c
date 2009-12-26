@@ -4,17 +4,16 @@
  * by mariusz slonina <mariusz.slonina@gmail.com>
  * with a little help of kacper kowalik <xarthisius.kk@gmail.com>
  *
- * last updated: 22/12/2009
+ * last updated: 25/12/2009
  *
  */
-#include "mpifarm.h"
-#include "readconfig.h" //read config file
+#include "mpifarm_skel.h"
+#include <string.h>
 
 static int* map2d(int);
 static void master(void);
 static void slave(void);
 void clearArray(MY_DATATYPE*,int);
-int readConfigValues(void);
 
 /* Simplified struct for writing config data to hdf file */
 typedef struct {
@@ -46,10 +45,6 @@ int npxc = 0; //number of all sent pixels
 int count = 0; //number of pixels to receive
 int source_tag = 0, data_tag = 2, result_tag = 59, terminate_tag = 99; //data tags
 
-int buff_size = 100;
-int *ibuff;
-float *fbuff;
-
 unsigned int membersize, maxsize;
 int position, msgsize;
 char *buffer;
@@ -57,7 +52,7 @@ char *buffer;
 int i = 0, j = 0, k = 0, opts = 0, n = 0;
 
 /* hdf */
-hid_t file_id, dset_board, dset_data, dset_config, configspace, configmemspace, mapspace, memmapspace, rawspace, memrawspace, maprawspace, plist_id;
+hid_t file_id, dset_board, dset_data, dset_config, data_group, configspace, configmemspace, mapspace, memmapspace, rawspace, memrawspace, maprawspace, plist_id;
 hsize_t dimsf[2], dimsr[2], co[2], rco[2], off[2], stride[2];
 int fdata[1][1];
 herr_t hdf_status;
@@ -79,48 +74,13 @@ int main(int argc, char* argv[]){
    * Each slave knows exactly what is all about
    * -- it is much easier to handle
    */
-  ibuff = malloc(buff_size*sizeof(*ibuff));
-  fbuff = malloc(buff_size*sizeof(*fbuff));
-  if (mpi_rank == 0) {
-    allopts = readConfigValues();
-
-    fbuff[0] = m;
-    fbuff[1] = a;
-    fbuff[2] = e;
-    fbuff[3] = inc;
-    fbuff[4] = o;
-
-    ibuff[0] = xres;
-    ibuff[1] = yres;
-    ibuff[2] = method;
-    ibuff[3] = datasetx;
-    ibuff[4] = datasety;
-
-    // BEWARE: dataname is not broadcasted
-
-    MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
-
-  } else {
-
-    MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
-
-    m   = fbuff[0];
-    a   = fbuff[1];
-    e   = fbuff[2];
-    inc = fbuff[3];
-    o   = fbuff[4];
-
-    xres     = ibuff[0];
-    yres     = ibuff[1];
-    method   = ibuff[2];
-    datasetx = ibuff[3];
-    datasety = ibuff[4];
-
+  if(mpi_rank == 0){
+    allopts = userdefined_readConfigValues(inifile, sep, comm, &d); 
+    userdefined_mpiBcast(mpi_rank,&d);
+  }else{
+    userdefined_mpiBcast(mpi_rank,&d);
   }
-  free(ibuff);
-  free(fbuff);
+
   /**
    * Create data pack
    */
@@ -130,6 +90,30 @@ int main(int argc, char* argv[]){
   MPI_Pack_size(MAX_RESULT_LENGTH, MY_MPI_DATATYPE, MPI_COMM_WORLD, &membersize);
   maxsize += membersize;
   buffer = malloc(maxsize);
+ 
+   /**
+    * HDF5 Storage
+    *
+    * We write data in the following scheme:
+    * /config -- configuration file
+    * /board -- map of computed pixels
+    * /data -- output data group
+    * /data/master -- master dataset
+    *
+    */
+
+   /**
+    * Parallel file access
+    */
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, MPI_INFO_NULL);
+
+    file_id = H5Fcreate(d.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
+    
+    H5Pclose(plist_id);
+    
+    
+
 
   if(mpi_rank == 0) {
       master();
@@ -137,6 +121,8 @@ int main(int argc, char* argv[]){
       slave(); 
   }
   
+//  H5Gclose(data_group);
+  H5Fclose(file_id);
 	MPI_Finalize();
 	
   return 0;
@@ -149,41 +135,29 @@ int main(int argc, char* argv[]){
 static void master(void){
 
    int *tab; 
-   outputData rawdata;
+   masterData rawdata;
 	 MY_DATATYPE rdata[MAX_RESULT_LENGTH][1];
    int i = 0, k = 0, j = 0;
 
    clearArray(rawdata.res,ITEMS_IN_ARRAY(rawdata.res));
    
-   printf("MAP RESOLUTION = %dx%d.\n", xres, yres);
+   printf("MAP RESOLUTION = %dx%d.\n", d.xres, d.yres);
    printf("COMM_SIZE = %d.\n", mpi_size);
-   printf("METHOD = %d.\n", method);
+   printf("METHOD = %d.\n", d.method);
 
    /**
     * Master can do something useful before computations
     */
-   userdefined_masterIN();
+   userdefined_masterIN(&d);
 
    /**
     * Align farm resolution for given method
     */
-   if (method == 0) farm_res = xres*yres; //one pixel per each slave
-   if (method == 1) farm_res = xres; //sliceX
-   if (method == 2) farm_res = yres; //sliceY
-   if (method == 6) farm_res = userdefined_farmResolution(xres, yres);
-  
-   /**
-    * HDF5 Storage
-    *
-    * We write data in the following scheme:
-    * /config -- configuration file
-    * /board -- map of computed pixels
-    * /data -- output data
-    *
-    */
-    file_id = H5Fcreate(datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-    hsize_t dim[1];
+   if (method == 0) farm_res = d.xres*d.yres; //one pixel per each slave
+   if (method == 1) farm_res = d.xres; //sliceX
+   if (method == 2) farm_res = d.yres; //sliceY
+   if (method == 6) farm_res = userdefined_farmResolution(d.xres, d.yres);
+     hsize_t dim[1];
     unsigned rr = 1;
 
     j = 0;
@@ -208,7 +182,7 @@ static void master(void){
           j++;
         }
       }
-  
+
     /* Config data space */
     configspace = H5Screate_simple(rr, dim, NULL);
 
@@ -239,17 +213,22 @@ static void master(void){
     H5Sclose(configmemspace);
     
     /* Control board space */
-    dimsf[0] = xres;
-    dimsf[1] = yres;
+    dimsf[0] = d.xres;
+    dimsf[1] = d.yres;
     mapspace = H5Screate_simple(HDF_RANK, dimsf, NULL);
 
+    data_group = H5Gcreate(file_id, DATAGROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    
     /* Result data space  */
-    dimsr[0] = xres*yres;
+    dimsr[0] = d.xres*d.yres;
     dimsr[1] = MAX_RESULT_LENGTH;
     rawspace = H5Screate_simple(HDF_RANK, dimsr, NULL);
 
-    dset_board = H5Dcreate(file_id, DATASETMAP, H5T_NATIVE_INT, mapspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    dset_data = H5Dcreate(file_id, DATASETRAW, H5T_NATIVE_DOUBLE, rawspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset_board = H5Dcreate(file_id, DATABOARD, H5T_NATIVE_INT, mapspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+
+    /* Create master dataset */
+    dset_data = H5Dcreate(data_group, DATASETMASTER, H5T_NATIVE_DOUBLE, rawspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   
    /**
     * We write pixels one by one
@@ -276,9 +255,9 @@ static void master(void){
     * Send tasks to all slaves
     */
    for (i = 1; i < mpi_size; i++){
-      userdefined_master_beforeSend(i,&rawdata);
+      userdefined_master_beforeSend(i,&d,&rawdata);
       MPI_Send(map2d(npxc), 3, MPI_INT, i, data_tag, MPI_COMM_WORLD);
-      userdefined_master_afterSend(i,&rawdata);
+      userdefined_master_afterSend(i,&d,&rawdata);
       count++;
       npxc++;
    }
@@ -288,7 +267,7 @@ static void master(void){
     */
    while (1) {
     
-      userdefined_master_beforeReceive(&rawdata);
+      userdefined_master_beforeReceive(&d,&rawdata);
       MPI_Recv(buffer, maxsize, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
       count--;
       
@@ -299,7 +278,7 @@ static void master(void){
       MPI_Get_count(&mpi_status, MPI_PACKED, &msgsize);
       MPI_Unpack(buffer, msgsize, &position, rawdata.coords, 3, MPI_INT, MPI_COMM_WORLD);
       MPI_Unpack(buffer, msgsize, &position, rawdata.res, MAX_RESULT_LENGTH, MY_MPI_DATATYPE, MPI_COMM_WORLD);
-      userdefined_master_afterReceive(mpi_status.MPI_SOURCE, &rawdata);
+      userdefined_master_afterReceive(mpi_status.MPI_SOURCE, &d, &rawdata);
 
       /**
        * Write results to file
@@ -330,11 +309,11 @@ static void master(void){
        * Send next task to the slave
        */
       if (npxc < farm_res){
-         userdefined_master_beforeSend(mpi_status.MPI_SOURCE, &rawdata);
+         userdefined_master_beforeSend(mpi_status.MPI_SOURCE, &d, &rawdata);
          MPI_Send(map2d(npxc), 3, MPI_INT, mpi_status.MPI_SOURCE, data_tag, MPI_COMM_WORLD);
          npxc++;
          count++;
-         userdefined_master_afterSend(mpi_status.MPI_SOURCE, &rawdata);
+         userdefined_master_afterSend(mpi_status.MPI_SOURCE, &d, &rawdata);
       } else {
         break;
       }
@@ -345,13 +324,13 @@ static void master(void){
      * We've got exactly 'count' messages to receive 
      */
     for (i = 0; i < count; i++){
-        userdefined_master_beforeReceive(&rawdata);
+        userdefined_master_beforeReceive(&d, &rawdata);
         MPI_Recv(buffer, maxsize, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
         position = 0;
         MPI_Get_count(&mpi_status, MPI_PACKED, &msgsize);
         MPI_Unpack(buffer, msgsize, &position, rawdata.coords, 3, MPI_INT, MPI_COMM_WORLD);
         MPI_Unpack(buffer, msgsize, &position, rawdata.res, MAX_RESULT_LENGTH, MY_MPI_DATATYPE, MPI_COMM_WORLD);
-        userdefined_master_afterReceive(mpi_status.MPI_SOURCE, &rawdata);
+        userdefined_master_afterReceive(mpi_status.MPI_SOURCE, &d, &rawdata);
         
         /**
          * Write outstanding results to file
@@ -401,12 +380,13 @@ static void master(void){
     H5Sclose(memmapspace);
     H5Sclose(rawspace);
     H5Sclose(memrawspace);
-    H5Fclose(file_id);
+    H5Gclose(data_group);
+ //  H5Fclose(file_id);
 
     /**
      * Master can do something usefull after the computations 
      */
-    userdefined_masterOUT();
+    userdefined_masterOUT(&d, &rawdata);
     
     return;
 }
@@ -420,19 +400,20 @@ static void slave(void){
     int *tab=malloc(3*sizeof(*tab));
     int k = 0, i = 0, j = 0;
     
-    outputData rawdata;
+    masterData rawdata;
+    slaveData s;
 	  MY_DATATYPE rdata[MAX_RESULT_LENGTH][1];
     
     clearArray(rawdata.res,ITEMS_IN_ARRAY(rawdata.res));
-    
+   
     /**
      * Slave can do something useful before computations
      */
-    userdefined_slaveIN(mpi_rank);
+    userdefined_slaveIN(mpi_rank, &d, &rawdata, &s);
 
-    userdefined_slave_beforeReceive(mpi_rank, &rawdata);
+    userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, &s);
     MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-    userdefined_slave_afterReceive(mpi_rank, &rawdata);
+    userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, &s);
 
     while(1){
 
@@ -450,18 +431,18 @@ static void slave(void){
           /**
            * DO SOMETHING HERE
            */
-          userdefined_pixelCompute(mpi_rank, &rawdata);
+          userdefined_pixelCompute(mpi_rank, &d, &rawdata, &s);
 
-          userdefined_slave_beforeSend(mpi_rank, &rawdata);
+          userdefined_slave_beforeSend(mpi_rank, &d, &rawdata, &s);
           position = 0;
           MPI_Pack(&rawdata.coords, 3, MPI_INT, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Pack(&rawdata.res, MAX_RESULT_LENGTH, MY_MPI_DATATYPE, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Send(buffer, position, MPI_PACKED, mpi_dest, result_tag, MPI_COMM_WORLD);
-          userdefined_slave_afterSend(mpi_rank, &rawdata);
+          userdefined_slave_afterSend(mpi_rank, &d, &rawdata, &s);
         
-          userdefined_slave_beforeReceive(mpi_rank, &rawdata);
+          userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, &s);
           MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-          userdefined_slave_afterReceive(mpi_rank, &rawdata);
+          userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, &s);
         }
 
        if (method == 6){
@@ -471,19 +452,19 @@ static void slave(void){
            * and pixelCompute
            *
            */
-          userdefined_pixelCoords(mpi_rank, tab, &rawdata);
-          userdefined_pixelCompute(mpi_rank, &rawdata);
+          userdefined_pixelCoords(mpi_rank, tab, &d, &rawdata, &s);
+          userdefined_pixelCompute(mpi_rank, &d, &rawdata, &s);
           
-          userdefined_slave_beforeSend(mpi_rank, &rawdata);
+          userdefined_slave_beforeSend(mpi_rank, &d, &rawdata, &s);
           position = 0;
           MPI_Pack(&rawdata.coords, 3, MPI_INT, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Pack(&rawdata.res, MAX_RESULT_LENGTH, MY_MPI_DATATYPE, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Send(buffer, position, MPI_PACKED, mpi_dest, result_tag, MPI_COMM_WORLD);
-          userdefined_slave_afterSend(mpi_rank, &rawdata);
+          userdefined_slave_afterSend(mpi_rank, &d, &rawdata, &s);
           
-          userdefined_slave_beforeReceive(mpi_rank, &rawdata);
+          userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, &s);
           MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-          userdefined_slave_afterReceive(mpi_rank, &rawdata);
+          userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, &s);
        }
     }
       
@@ -493,7 +474,7 @@ static void slave(void){
     /**
      * Slave can do something useful after computations
      */
-    userdefined_slaveOUT(mpi_rank);
+    userdefined_slaveOUT(mpi_rank, &d, &rawdata, &s);
 
     return;
 }
@@ -505,63 +486,26 @@ static void slave(void){
 
 int* map2d(int c){
    int *ind = malloc(3*sizeof(*ind));
+   int x, y;
+   x = d.xres;
+   y = d.yres;
   
    ind[2] = c; //we need number of current pixel to store too
 
    /**
     * Method 0: one pixel per each slave
-    * counting from the bottom left corner of the map
     */
    if(method == 0){
-    if(c < yres) ind[0] = c / yres; ind[1] = c;
-    if(c > yres - 1) ind[0] = c / yres; ind[1] = c % yres;
+    if(c < y) ind[0] = c / y; ind[1] = c;
+    if(c > y - 1) ind[0] = c / y; ind[1] = c % y;
    }
 
    /**
     * Method 6: user defined control
     */
-   if(method == 6) userdefined_pixelCoordsMap(ind, c, xres, yres);
+   if(method == 6) userdefined_pixelCoordsMap(ind, c, x, y);
 
    return ind;
-}
-
-/**
- * HELPER FUNCTION -- READ CONFIG VALUES
- * see readconfig.h for details
- */
-int readConfigValues(void){
-  
-  int i = 0, k = 0, opts = 0;
-  
-  opts = parseConfigFile(inifile, sep, comm);
-
-	for(i = 0; i < opts; i++){
-    if(strcmp(configSpace[i].space,"default") == 0){
-		  for(k = 0; k < configSpace[i].num; k++){
-			  if(strcmp(configSpace[i].options[k].name,"name") == 0) datafile = strcat(configSpace[i].options[k].value,".h5");  
-      }
-    }
-		if(strcmp(configSpace[i].space,"planetA") == 0){
-		  for(k = 0; k < configSpace[i].num; k++){
-			  if(strcmp(configSpace[i].options[k].name,"m") == 0) m = atof(configSpace[i].options[k].value);  
-			  if(strcmp(configSpace[i].options[k].name,"a") == 0) a = atof(configSpace[i].options[k].value); 
-			  if(strcmp(configSpace[i].options[k].name,"e") == 0) e = atof(configSpace[i].options[k].value); 
-			  if(strcmp(configSpace[i].options[k].name,"i") == 0) inc = atof(configSpace[i].options[k].value); 
-			  if(strcmp(configSpace[i].options[k].name,"o") == 0) o = atof(configSpace[i].options[k].value); 
-		  }
-		}
-    if(strcmp(configSpace[i].space,"farm") == 0){
-		  for(k = 0; k < configSpace[i].num; k++){
-			  if(strcmp(configSpace[i].options[k].name,"xres") == 0) xres = atoi(configSpace[i].options[k].value);  
-        if(strcmp(configSpace[i].options[k].name,"yres") == 0) yres = atoi(configSpace[i].options[k].value); 
-			  if(strcmp(configSpace[i].options[k].name,"method") == 0) method = atoi(configSpace[i].options[k].value); 
-			  if(strcmp(configSpace[i].options[k].name,"datasetx") == 0) datasetx = atoi(configSpace[i].options[k].value);  
-        if(strcmp(configSpace[i].options[k].name,"datasety") == 0) datasety = atoi(configSpace[i].options[k].value); 
-      }
-    }
-	}
-
-  return opts;
 }
 
 void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
