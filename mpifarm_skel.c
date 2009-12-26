@@ -4,7 +4,7 @@
  * by mariusz slonina <mariusz.slonina@gmail.com>
  * with a little help of kacper kowalik <xarthisius.kk@gmail.com>
  *
- * last updated: 25/12/2009
+ * last updated: 26/12/2009
  *
  */
 #include "mpifarm_skel.h"
@@ -27,15 +27,10 @@ char* inifile;
 char* datafile;
 
 /* settings */ 
-float period = 0.0, epoch = 0.0; int nprocs = 0, nbody = 0, dump = 0;
 int allopts = 0; //number of options read
-
-/* orbital elements */ 
-float m = 0.0, a = 0.0, e = 0.0, inc = 0.0, o = 0.0, c = 0.0, l = 0.0;
 
 /* farm */ 
 int xres = 0, yres = 0, method = 0, datasetx = 1, datasety = 3;
-double vmin = 0.0, vmax = 0.0;
 
 /* mpi */ 
 MPI_Status mpi_status;
@@ -90,30 +85,6 @@ int main(int argc, char* argv[]){
   MPI_Pack_size(MAX_RESULT_LENGTH, MY_MPI_DATATYPE, MPI_COMM_WORLD, &membersize);
   maxsize += membersize;
   buffer = malloc(maxsize);
- 
-   /**
-    * HDF5 Storage
-    *
-    * We write data in the following scheme:
-    * /config -- configuration file
-    * /board -- map of computed pixels
-    * /data -- output data group
-    * /data/master -- master dataset
-    *
-    */
-
-   /**
-    * Parallel file access
-    */
-    plist_id = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plist_id, MPI_COMM_WORLD, MPI_INFO_NULL);
-
-    file_id = H5Fcreate(d.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, plist_id);
-    
-    H5Pclose(plist_id);
-    
-    
-
 
   if(mpi_rank == 0) {
       master();
@@ -121,8 +92,6 @@ int main(int argc, char* argv[]){
       slave(); 
   }
   
-//  H5Gclose(data_group);
-  H5Fclose(file_id);
 	MPI_Finalize();
 	
   return 0;
@@ -148,7 +117,7 @@ static void master(void){
    /**
     * Master can do something useful before computations
     */
-   userdefined_masterIN(&d);
+   userdefined_masterIN(mpi_size, &d);
 
    /**
     * Align farm resolution for given method
@@ -157,9 +126,23 @@ static void master(void){
    if (method == 1) farm_res = d.xres; //sliceX
    if (method == 2) farm_res = d.yres; //sliceY
    if (method == 6) farm_res = userdefined_farmResolution(d.xres, d.yres);
-     hsize_t dim[1];
-    unsigned rr = 1;
 
+   hsize_t dim[1];
+   unsigned rr = 1;
+ 
+   /**
+    * HDF5 Storage
+    *
+    * We write data in the following scheme:
+    * /config -- configuration file
+    * /board -- map of computed pixels
+    * /data -- output data group
+    * /data/master -- master dataset
+    *
+    */
+
+    file_id = H5Fcreate(d.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    
     j = 0;
     for(i = 0; i < allopts; i++){
       for(k = 0; k < configSpace[i].num; k++){
@@ -381,12 +364,12 @@ static void master(void){
     H5Sclose(rawspace);
     H5Sclose(memrawspace);
     H5Gclose(data_group);
- //  H5Fclose(file_id);
+    H5Fclose(file_id);
 
     /**
      * Master can do something usefull after the computations 
      */
-    userdefined_masterOUT(&d, &rawdata);
+    userdefined_masterOUT(mpi_size, &d, &rawdata);
     
     return;
 }

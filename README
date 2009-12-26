@@ -1,75 +1,90 @@
 MPI FARM SKELETON
 by mariusz slonina <mariusz.slonina@gmail.com>
 
-Features:
+== Features ==
 - N-processors MPI2 task farm (one master and N-1 slaves)
 - HDF5 (>1.8) storage
-- reading config files with help of readconfig.h
+- reading config files with help of libreadconfig
 
-Config options:
+== Config options ==
 - method: 0 - pixel by pixel, 6 - user defined
 - xres/yres: x,y size of the farm, can be 1x100 or 10x10 etc
-- name: name of the farm (also name of the hdf file)
+- name: name of the farm (also name of the hdf files)
 
-HDF data scheme:
+== HDF data scheme ==
 /config - all config data from config file
 /board - map of computed pixels (0 - not computed, 1 - computed)
-/data - output data, size is defined in mpifarm_user.h by MAX_RESULT_LENGTH
+/data - output group data, size is defined in mpifarm_user.h by MAX_RESULT_LENGTH
+/data/master - data received by the master node
 
-Data vector is defined by struct( int coords[3], MY_DATATYPE res[MAX_RESULT_LENGTH]).
+== Data ==
+Master data vector is defined by struct( int coords[3], MY_DATATYPE res[MAX_RESULT_LENGTH]).
+It is the only vector received by master node and written to master data file.
+
 MY_DATATYPE can be any standard type. If You change default double definition,
 remember to adjust accordingly MPI_MY_DATATYPE in mpifarm_user.h.
+
+You can create as many data files as needed, using User API from mpifarm_user.c. 
+See mpifarm_user.c for examples.
+
+Each slave has a user-defined data struct, You can redefine it and use during computations.
+See mpifarm_user.h for an example.
+
+Input data (i.e. from config file) is user-defined. In case of any changes, remember to adjust
+userdefined_readConfigValues and userdefined_mpiBcast functions -- this is important,
+because each slaves needs this data.
+
+== Files ==
 
 Skeleton files (You may not modify these files unless you know what you are doing):
 - mpifarm_skel.c
 - mpifarm.h
-- readconfig.h
+- libreadconfig
 - makefile
 
 User defined functions (you may modify these files):
 - mpifarm_user.h
 - mpifarm_user.c
 
-User defined API functions:
+== User defined API functions ==
 
 int userdefined_farmResolution(int xres, int yres)
 - computes farm size
 
-void userdefined_pixelCompute(int slave, outputData *r)
+void userdefined_pixelCompute(int slave, inputData *d, masterData *r, slaveData *s)
 - computes given pixel
 
-void userdefined_pixelCoords(int slave, int mastercoords[], outputData *r)
+void userdefined_pixelCoords(int slave, int mastercoords[], inputData *d, masterData *r, slaveData *s)
 - computes pixel for given slave (used only when method = 6)
 
 void userdefined_pixelCoordsMap(int ind[], int x, int y, int numofpixel)
 - map coords function (used only when method = 6)
 
-void userdefined_masterIN()
+void userdefined_masterIN(int mpi_size, inputData *d)
 - functions to do before farm start
 
-void userdefined_masterOUT()
+void userdefined_masterOUT(int mpi_size, inputData *d)
 - functions to do after farm finish
 
-void userdefined_slaveIN(int slave)
+void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s)
 - functions to do before slave start
 
-void userdefined_slaveOUT(int slave)
+void userdefined_slaveOUT(int slave, inputData *d, masterData *r, slaveData *s)
 - functions to do after slave is finished
 
-void userdefined_master_beforeSend(int slave, outputData *r)
-void userdefined_master_afterSend(int slave, outputData *r)
-void userdefined_master_beforeReceive(outputData *r)
-void userdefined_master_afterReceive(int slave, outputData *r)
+void userdefined_master_beforeSend(int slave, inputData *d, masterData *r)
+void userdefined_master_afterSend(int slave, inputData *d, masterData *r)
+void userdefined_master_beforeReceive(inputData *d, masterData *r)
+void userdefined_master_afterReceive(int slave, inputData *d, masterData *r)
 - functions to do before/after data send/receive (master)
 
-void userdefined_slave_beforeSend(int slave, outputData *r)
-void userdefined_slave_afterSend(int slave, outputData *r)
-void userdefined_slave_beforeReceive(int slave, outputData *r)
-void userdefined_slave_afterReceive(int slave, outputData *r)
+void userdefined_slave_beforeSend(int slave, inputData *d, masterData *r, slaveData *s)
+void userdefined_slave_afterSend(int slave, inputData *d, masterData *r, slaveData *s)
+void userdefined_slave_beforeReceive(int slave, inputData *d, masterData *r, slaveData *s)
+void userdefined_slave_afterReceive(int slave, inputData *d, masterData *r, slaveData *s)
 - functions to do before/after data send/receive (slave)
 
 Todo (too many to mention all...):
 - restart
 - command line args
-- dynamic allocating and writing of result struct (probably nested HDF compound storage)
 

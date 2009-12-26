@@ -1,8 +1,10 @@
-#include "mpifarm_skel.h"
-#include <string.h>
-#include "libreadconfig.h"
-
 /**
+ * MPIFARM USER API
+ *
+ * Functions provided here are called during farm operations. 
+ * We provide You with simple examples of using them -- 
+ * the only limit is You imagination.
+ *
  * Master Data struct is defined as follows:
  * typedef struct{
  *   int count[3]; <-- this handles x,y coords and number of the pixel
@@ -10,10 +12,15 @@
  * }
  *
  * Master Data is the only data received by master node,
- * however, You can do much with slaveData struct -- You can redefined it in
+ * however, You can do much with Slave Data struct -- You can redefine it in
  * mpifarm_user.h and use during simulation
  *
+ * Input Data struct can be also redefined in mpifarm_user.h
  */
+
+#include "mpifarm_skel.h"
+#include <string.h>
+#include "libreadconfig.h"
 
 /**
  * USER DEFINED FARM RESOLUTION
@@ -58,25 +65,54 @@ void userdefined_pixelCompute(int slave, inputData *d, masterData *r, slaveData 
    r->res[2] = r->res[0]*r->res[1];
    r->res[3] = 5.25;
    r->res[4] = 6.75;
-   /* etc. */
   
    return;
 }
 
 /**
  * USER DEFINED MASTER_IN FUNCTION
+ * This function is called before any farm operations.
  *
  */
-void userdefined_masterIN(inputData *d){
+void userdefined_masterIN(int mpi_size, inputData *d){
   return;
 }
 
 /**
  * USER DEFINED MASTER_OUT FUNCTION
  *
+ * This function is called after all operations are performed.
+ * Here, we just copy slave data files into one master file
+ *
  */
-void userdefined_masterOUT(inputData *d, masterData *r){
-    
+void userdefined_masterOUT(int mpi_size, inputData *d, masterData *r){
+  
+  int i;
+  hid_t fname, masterfile, masterdatagroup;
+  herr_t stat;
+  const char groupbase[] = "slave";
+  char groupname[512];
+  const char filebase[] = "slave";
+  char filename[512];
+
+  masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
+  masterdatagroup = H5Gopen(masterfile, DATAGROUP, H5P_DEFAULT);
+  
+  /**
+   * Copy data from slaves to one master file
+   */
+  for(i = 1; i < mpi_size; i++){
+    sprintf(groupname,"%s%d", groupbase,i);
+    sprintf(filename,"%s-%s%d.h5", d->name, filebase,i);
+   
+    fname = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
+    H5Fclose(fname);
+
+  }
+
+  H5Gclose(masterdatagroup);
+  H5Fclose(masterfile);
   printf("Master process OVER & OUT.\n");
   
   return;
@@ -107,12 +143,33 @@ void userdefined_master_afterReceive(int slave, inputData *d, masterData *r){
  * -- clear proper arrays in slaveData s
  * -- read data to struct s, even from different files
  * -- create group/dataset for the slave etc.
+ *
+ * Here we create slave specific data file.
+ * You can handle here any type of datasets etc.
+ *
+ * Data group is incorporated in MASTER_OUT function to one master data file.
  */
 void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s){
 
   clearArray(s->points, ITEMS_IN_ARRAY(s->points));
 
-  return;
+  hid_t sfile_id, sdatagroup, gid;
+  herr_t serr;
+  const char sbase[] = "slave";
+  char node[512];
+  const char gbase[] = "slave";
+  char group[512];
+
+  sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
+  sprintf(group, "%s%d", gbase, slave);
+
+  sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  gid = H5Gcreate(sfile_id, group, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+  H5Gclose(gid);
+  H5Fclose(sfile_id);
+
+   return;
 }
 
 /**
@@ -138,14 +195,6 @@ void userdefined_slave_beforeSend(int slave, inputData *d, masterData *r, slaveD
   return;
 }
 void userdefined_slave_afterSend(int slave, inputData *d, masterData *r, slaveData *s){
-
-  hid_t file_id, slaveset, slavememspace;
-  herr_t hdfs_status;
-
-  //file_id = H5Fopen(d->datafile, H5F_ACC_RDWR, H5P_DEFAULT);
-  //H5Fclose(file_id);
-
-
   return;
 }
 void userdefined_slave_beforeReceive(int slave, inputData *d, masterData *r, slaveData *s){
@@ -172,7 +221,7 @@ int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData
 		  for(k = 0; k < configSpace[i].num; k++){
 			  if(strcmp(configSpace[i].options[k].name,"name") == 0){
           strcpy(d->name,configSpace[i].options[k].value);
-          strcpy(d->datafile, strcat(configSpace[i].options[k].value,".h5"));  
+          strcpy(d->datafile, strcat(configSpace[i].options[k].value,"-master.h5"));  
         }
         if(strcmp(configSpace[i].options[k].name,"bodies") == 0) d->bodies = atoi(configSpace[i].options[k].value);
     }
@@ -205,11 +254,12 @@ void userdefined_mpiBcast(int mpi_rank, inputData *d){
   int buff_size = 1000;
   int *ibuff;
   float *fbuff;
-  char *sbuff;
+  char *sbuff, *nbuff;
 
   ibuff = malloc(buff_size*sizeof(*ibuff));
   fbuff = malloc(buff_size*sizeof(*fbuff));
   sbuff = malloc(buff_size*sizeof(*sbuff));
+  nbuff = malloc(buff_size*sizeof(*nbuff));
  
   if (mpi_rank == 0) {
 
@@ -226,16 +276,19 @@ void userdefined_mpiBcast(int mpi_rank, inputData *d){
     ibuff[4] = d->bodies;
 
     strcpy(sbuff,d->datafile);
+    strcpy(nbuff,d->name);
 
     MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
     MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
     MPI_Bcast (sbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
+    MPI_Bcast (nbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
 
   } else {
 
     MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
     MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
     MPI_Bcast (sbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
+    MPI_Bcast (nbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
 
     d->el[0]   = fbuff[0];
     d->el[1]   = fbuff[1];
@@ -250,11 +303,13 @@ void userdefined_mpiBcast(int mpi_rank, inputData *d){
     d->bodies = ibuff[4];
 
     strcpy(d->datafile,sbuff);
+    strcpy(d->name,nbuff);
 
   }
   free(ibuff);
   free(fbuff);
   free(sbuff);
+  free(nbuff);
   
   return;
 }
