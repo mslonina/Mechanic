@@ -82,6 +82,8 @@ void userdefined_masterIN(int mpi_size, inputData *d){
  * USER DEFINED MASTER_OUT FUNCTION
  *
  * This function is called after all operations are performed.
+ * 
+ * Example:
  * Here, we just copy slave data files into one master file
  *
  */
@@ -144,6 +146,7 @@ void userdefined_master_afterReceive(int slave, inputData *d, masterData *r){
  * -- read data to struct s, even from different files
  * -- create group/dataset for the slave etc.
  *
+ * Example:
  * Here we create slave specific data file.
  * You can handle here any type of datasets etc.
  *
@@ -163,6 +166,12 @@ void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s){
   sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
   sprintf(group, "%s%d", gbase, slave);
 
+  /**
+   * Imagine this:
+   * each slave can create different dataspaces and datasets here, 
+   * perform different computations, even read different config file!
+   */
+
   sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   gid = H5Gcreate(sfile_id, group, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -175,6 +184,8 @@ void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s){
 /**
  * USER DEFINED SLAVE_OUT FUNCTION
  *
+ * Example:
+ * Just prints a message from the slave.
  */
 void userdefined_slaveOUT(int slave, inputData *d, masterData *r, slaveData *s){
   
