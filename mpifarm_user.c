@@ -7,8 +7,8 @@
  *
  * Master Data struct is defined as follows:
  * typedef struct{
- *   int count[3]; <-- this handles x,y coords and number of the pixel
- *   MY_DATATYPE res[MAX_RESULT_LENGTH]; <-- this handles result vector
+ *   int count[3]; <-- handles x,y coords and number of the pixel
+ *   MY_DATATYPE res[MAX_RESULT_LENGTH]; <-- handles result vector
  * }
  *
  * Master Data is the only data received by master node,
@@ -16,6 +16,7 @@
  * mpifarm_user.h and use during simulation
  *
  * Input Data struct can be also redefined in mpifarm_user.h
+ *
  */
 
 #include "mpifarm_skel.h"
@@ -24,6 +25,8 @@
 
 /**
  * USER DEFINED FARM RESOLUTION
+ *
+ * Returns farm resolution
  *
  */
 int userdefined_farmResolution(int x, int y){
@@ -36,27 +39,49 @@ int userdefined_farmResolution(int x, int y){
 }
 
 /**
- * USER DEFINED PIXEL CHOORDS
+ * USER DEFINED PIXEL COORDS MAP
+ *
+ * t[] is sent to each slave.
+ * You can overwrite default pixel coords alignment here.
+ *
+ * Used only when method = 6.
  * 
  */
-void userdefined_pixelCoords(int slave, int t[], inputData *d, masterData *r, slaveData *s){
-          
-  r->coords[0] = t[0];
-  r->coords[1] = t[1];
-  r->coords[2] = t[2];
+void userdefined_pixelCoordsMap(int t[], int p, int x, int y){
   
-  return;
-}
-void userdefined_pixelCoordsMap(int ind[], int p, int x, int y){
-  
-    if(p < y) ind[0] = p / y; ind[1] = p;
-    if(p > y - 1) ind[0] = p / y; ind[1] = p % y;
+    if(p < y) t[0] = p / y; t[1] = p;
+    if(p > y - 1) t[0] = p / y; t[1] = p % y;
   return;
 }
 
 /**
+ * USER DEFINED PIXEL COORDS
+ *
+ * Each slaves takes the pixel coordinates and then do its work.
+ * Here You can change pixel assignment to output masterData r.
+ *
+ * Used only when method = 6.
+ *
+ */
+void userdefined_pixelCoords(int slave, int t[], inputData *d, masterData *r, slaveData *s){
+          
+  r->coords[0] = t[0]; //x 
+  r->coords[1] = t[1]; //y
+  r->coords[2] = t[2]; //number of the pixel
+  
+  return;
+}
+
+
+/**
  * USER DEFINED PIXEL COMPUTE
  * 
+ * The heart. Here You can compute your pixels.
+ *
+ * Example:
+ * We assign some values to the result array of masterData r.
+ * Size of the array is controlled by MAX_RESULT_LENGTH from mpifarm_user.h 
+ *
  */
 void userdefined_pixelCompute(int slave, inputData *d, masterData *r, slaveData *s){
 
@@ -71,6 +96,7 @@ void userdefined_pixelCompute(int slave, inputData *d, masterData *r, slaveData 
 
 /**
  * USER DEFINED MASTER_IN FUNCTION
+ * 
  * This function is called before any farm operations.
  *
  */
@@ -122,7 +148,8 @@ void userdefined_masterOUT(int mpi_size, inputData *d, masterData *r){
 
 /**
  * USER DEFINED MASTER HELPER FUNCTIONS
- * called before/after send/receive
+ * 
+ * Called before/after send/receive
  * 
  */
 void userdefined_master_beforeSend(int slave, inputData *d, masterData *r){
@@ -141,6 +168,8 @@ void userdefined_master_afterReceive(int slave, inputData *d, masterData *r){
 /**
  * USER DEFINED SLAVE_IN FUNCTION
  * 
+ * Called before slave starts its work.
+ *
  * Do some preparation here, i.e. 
  * -- clear proper arrays in slaveData s
  * -- read data to struct s, even from different files
@@ -151,6 +180,7 @@ void userdefined_master_afterReceive(int slave, inputData *d, masterData *r){
  * You can handle here any type of datasets etc.
  *
  * Data group is incorporated in MASTER_OUT function to one master data file.
+ *
  */
 void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s){
 
@@ -203,6 +233,8 @@ void userdefined_slaveIN(int slave, inputData *d, masterData *r, slaveData *s){
 /**
  * USER DEFINED SLAVE_OUT FUNCTION
  *
+ * Called after slave done its work.
+ *
  * Example:
  * Just prints a message from the slave.
  */
@@ -215,7 +247,8 @@ void userdefined_slaveOUT(int slave, inputData *d, masterData *r, slaveData *s){
 
 /**
  * USER DEFINED SLAVE HELPER FUNCTIONS
- * called before/after send/receive
+ * 
+ * Called before/after send/receive
  * 
  */
 void userdefined_slave_beforeSend(int slave, inputData *d, masterData *r, slaveData *s){
@@ -236,9 +269,11 @@ void userdefined_slave_afterReceive(int slave, inputData *d, masterData *r, slav
 
 /**
  * HELPER FUNCTION -- READ CONFIG VALUES
+ * 
  * see libreadconfig.h for details
  *
  * Adjust the parser to Your initial data struct from mpifarm_user.h
+ *
  */
 int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData *d){
 
@@ -275,8 +310,10 @@ int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData
 }
 
 /**
- * USERDEFINED MPI BCAST
+ * USER DEFINED MPI BCAST
+ * 
  * We send the only information needed by slaves
+ *
  */
 
 void userdefined_mpiBcast(int mpi_rank, inputData *d){

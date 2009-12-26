@@ -50,7 +50,9 @@ char *buffer;
 int i = 0, j = 0, k = 0, opts = 0, n = 0;
 
 /* hdf */
-hid_t file_id, dset_board, dset_data, dset_config, data_group, configspace, configmemspace, mapspace, memmapspace, rawspace, memrawspace, maprawspace, plist_id;
+hid_t file_id, dset_board, dset_data, dset_config, data_group;
+hid_t configspace, configmemspace, mapspace, memmapspace, rawspace, memrawspace, maprawspace; 
+hid_t plist_id;
 hsize_t dimsf[2], dimsr[2], co[2], rco[2], off[2], stride[2];
 int fdata[1][1];
 herr_t hdf_status;
@@ -88,7 +90,6 @@ int main(int argc, char* argv[]){
   /**
    * Create data pack
    */
-
   MPI_Pack_size(3, MPI_INT, MPI_COMM_WORLD, &membersize);
   maxsize = membersize;
   MPI_Pack_size(MAX_RESULT_LENGTH, MY_MPI_DATATYPE, MPI_COMM_WORLD, &membersize);
@@ -159,10 +160,15 @@ static void master(void){
     * /data -- output data group
     * /data/master -- master dataset
     *
+    * Each slave can write own data files if needed.
+    * In such case, please edit slaveIN/OUT functions in mpifarm_user.c.
+    *
     */
 
+   /* Create master datafile */
     file_id = H5Fcreate(d.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     
+    /* Number of options to write */
     j = 0;
     for(i = 0; i < allopts; i++){
       for(k = 0; k < configSpace[i].num; k++){
@@ -186,10 +192,10 @@ static void master(void){
         }
       }
 
-    /* Config data space */
+    /* Config dataspace */
     configspace = H5Screate_simple(rr, dim, NULL);
 
-    /* Create compound data type for handling struct */
+    /* Create compound data type for handling config struct */
     hid_t hdf_optsarr_dt = H5Tcreate(H5T_COMPOUND, sizeof(simpleopts));
     
       hid_t space_dt = H5Tcopy(H5T_C_S1);
@@ -219,16 +225,16 @@ static void master(void){
     dimsf[0] = d.xres;
     dimsf[1] = d.yres;
     mapspace = H5Screate_simple(HDF_RANK, dimsf, NULL);
+    
+    dset_board = H5Dcreate(file_id, DATABOARD, H5T_NATIVE_INT, mapspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
+    /* Master data group */
     data_group = H5Gcreate(file_id, DATAGROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     
     /* Result data space  */
     dimsr[0] = d.xres*d.yres;
     dimsr[1] = MAX_RESULT_LENGTH;
     rawspace = H5Screate_simple(HDF_RANK, dimsr, NULL);
-
-    dset_board = H5Dcreate(file_id, DATABOARD, H5T_NATIVE_INT, mapspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
 
     /* Create master dataset */
     dset_data = H5Dcreate(data_group, DATASETMASTER, H5T_NATIVE_DOUBLE, rawspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -255,7 +261,7 @@ static void master(void){
     */
 
    /**
-    * Security check if farm resolution is greater than number of slaves.
+    * Security check -- if farm resolution is greater than number of slaves.
     * Needed when we have i.e. 3 slaves and only one pixel to compute.
     */
    if (farm_res > mpi_size){
@@ -285,7 +291,7 @@ static void master(void){
       count--;
       
       /**
-       * Unpack data send by the slave
+       * Unpack data sent by the slave
        */
       position = 0;
       MPI_Get_count(&mpi_status, MPI_PACKED, &msgsize);
@@ -294,7 +300,7 @@ static void master(void){
       userdefined_master_afterReceive(mpi_status.MPI_SOURCE, &d, &rawdata);
 
       /**
-       * Write results to file
+       * Write results to master file
        */
       
       /**
@@ -398,7 +404,7 @@ static void master(void){
     H5Fclose(file_id);
 
     /**
-     * Master can do something usefull after the computations 
+     * Master can do something useful after the computations 
      */
     userdefined_masterOUT(mpi_size, &d, &rawdata);
     
@@ -522,6 +528,9 @@ int* map2d(int c){
    return ind;
 }
 
+/**
+ * Clears arrays
+ */
 void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 
 	int i;
