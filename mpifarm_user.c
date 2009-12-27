@@ -79,17 +79,21 @@ void userdefined_pixelCoords(int slave, int t[], inputData *d, masterData *r, sl
  * The heart. Here You can compute your pixels.
  *
  * Example:
- * We assign some values to the result array of masterData r.
+ * We assign some values to the result array of masterData r and 
+ * do some weird computations.
  * Size of the array is controlled by MAX_RESULT_LENGTH from mpifarm_user.h 
  *
  */
 void userdefined_pixelCompute(int slave, inputData *d, masterData *r, slaveData *s){
 
+  int i = 0;
    r->res[0] = (MY_DATATYPE) r->coords[0]; 
    r->res[1] = (MY_DATATYPE) r->coords[1];
-   r->res[2] = r->res[0]*r->res[1];
-   r->res[3] = 5.25;
-   r->res[4] = 6.75;
+   
+   for(i = 2; i < MAX_RESULT_LENGTH; i++){
+      r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
+      r->res[i] = i*r->res[i]/(pow(slave, 2.0));
+   }
   
    return;
 }

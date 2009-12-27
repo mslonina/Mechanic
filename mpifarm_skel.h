@@ -12,6 +12,7 @@
 #include <fcntl.h>
 #include <sys/dir.h>
 #include <dirent.h>
+#include <math.h>
 
 #include "mpi.h"
 #include "hdf5.h"
