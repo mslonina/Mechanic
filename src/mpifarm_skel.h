@@ -19,7 +19,7 @@
 #include "hdf5_hl.h"
 
 #include "mpifarm_user.h"
-#include "libreadconfig.h"
+#include "readconfig.h"
 
 #define DATASETCONFIG "/config"
 #define DATABOARD "/board" 

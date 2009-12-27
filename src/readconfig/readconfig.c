@@ -18,7 +18,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "libreadconfig.h"
+#include "readconfig.h"
 
 /**
  * HELPER FUNCTIONS

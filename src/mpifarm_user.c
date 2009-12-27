@@ -21,7 +21,7 @@
 
 #include "mpifarm_skel.h"
 #include <string.h>
-#include "libreadconfig.h"
+#include "readconfig.h"
 
 /**
  * USER DEFINED FARM RESOLUTION
