@@ -1,5 +1,6 @@
+[[this file is not up-to-date since we are creating plugin architecture]]
+
 MPI FARM SKELETON
-by mariusz slonina <mariusz.slonina@gmail.com>
 
 == Features ==
 - N-processors MPI2 task farm (one master and N-1 slaves)

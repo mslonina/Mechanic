@@ -1,3 +1,5 @@
+Four step install:
+
 autoreconf --install
 ./configure 
 make 
