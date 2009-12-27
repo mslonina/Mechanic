@@ -1,2 +1,2 @@
-lib_LTLIBRARIES = libreadconfig.la
-libreadconfig_la_SOURCES = readconfig.c readconfig.h
+noinst_LIBRARIES = libreadconfig.a
+libreadconfig_a_SOURCES = readconfig.c readconfig.h

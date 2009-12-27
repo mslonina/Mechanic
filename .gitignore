@@ -3,6 +3,8 @@
 *.[oa]
 *.lo
 *.la
+build
+m4/l*
 stamp*
 config*
 Makefile*

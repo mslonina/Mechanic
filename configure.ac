@@ -1,9 +1,12 @@
-AC_INIT([mpifarm.cc], [1.0], [slonina@astri.umk.pl])
+AC_INIT([Mpifarm], [1.0], [slonina@astri.umk.pl])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC
+LT_INIT
 AC_PROG_LIBTOOL
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
+
+AC_PREFIX_DEFAULT(`pwd`/build)
 
 save_CC=$CC
 AX_MPI([USE_MPI="yes"],[USE_MPI="no"])
