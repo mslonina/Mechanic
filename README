@@ -46,6 +46,7 @@ User defined functions (you may modify these files):
 - mpifarm_user.h
 - mpifarm_user.c
 
+TODO: PLUGIN ARCHITECTURE HERE
 == User defined API functions ==
 
 int userdefined_farmResolution(int xres, int yres)
