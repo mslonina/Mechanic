@@ -23,15 +23,15 @@
 #include "mpifarm_user.h"
 #include "readconfig.h"
 
+#define CONFIG_FILE_DEFAULT "config"
+#define MODULE_DEFAULT "default"
+
 #define DATASETCONFIG "/config"
 #define DATABOARD "/board" 
 #define DATAGROUP "/data"
 #define DATASETMASTER "master"
 
 #define HDF_RANK 2
-
-#define CONFIG_FILE_DEFAULT "config"
-#define MODULE_DEFAULT "test"
 
 #undef MY_DATATYPE
 #define MY_DATATYPE double
@@ -55,14 +55,14 @@ typedef struct {
 struct yourdata;
 extern struct yourdata *makeyourdata(void);
 
-typedef void (*module_init) ();
-module_init mpifarm_module_init;
+typedef void (*module_init_f) ();
+module_init_f init;
 
-typedef void (*module_query) ();
-module_query mpifarm_module_query;
+typedef void (*module_query_f) ();
+module_query_f query;
 
-typedef void (*module_cleanup) ();
-module_cleanup mpifarm_module_cleanup;
+typedef void (*module_cleanup_f) ();
+module_cleanup_f cleanup;
 
 /*extern void mpifarm_module_init(struct yourdata *);
 extern void mpifarm_module_cleanup(struct yourdata *);

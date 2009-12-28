@@ -72,46 +72,45 @@ int main(int argc, char *argv[]){
   char optvalue;
 
   void *prestartmode;
-  int restartmode;
+  int restartmode = 0;
   int poptflags = 0;
   int error;
-
-  module_init init;
-  module_cleanup cleanup;
 
   /*  Default config and module file */
   inifile = CONFIG_FILE_DEFAULT;
   module_name = MODULE_DEFAULT;
 
   struct poptOption cmdopts[] = {
-    {"restart", 'r', POPT_ARG_NONE, &prestartmode, 'r',
-    "enable restart mode [TODO]"},
-    {"config", 'c', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 'c',
-    "change config file"},
-    {"module", 'm', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &module_name, 'm',
-    "provide the module"},
     POPT_AUTOHELP
-    {NULL, 0, 0, NULL, 0, NULL, NULL}
+    {"restart", 'r', POPT_ARG_NONE, &prestartmode, 'r',
+    "enable restart mode [TODO]","RESTART"},
+    {"config", 'c', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 'c',
+    "change config file", "CONFIG"},
+    {"module", 'm', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &module_name, 'm',
+    "provide the module", "MODULE"},
+    POPT_TABLEEND
   };
   
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-  poptContext poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
+  poptContext poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, POPT_CONTEXT_POSIXMEHARDER);
 
   if(argc < 2){
         poptPrintHelp(poptcon, stderr, poptflags);
         MPI_Finalize();
         return 0;
   }
-  /*
+  
   while((optvalue = poptGetNextOpt(poptcon)) >= 0){
     switch (optvalue){
       case 'c':
         break;
       case 'm':
         break;
+      case '?':
+        poptPrintHelp(poptcon, stderr, poptflags);
       case 'r':
         poptPrintHelp(poptcon, stderr, poptflags);
         MPI_Finalize();
@@ -119,7 +118,7 @@ int main(int argc, char *argv[]){
       default:
         break;
     }
-  }*/
+  }
   if (optvalue < -1){
     fprintf(stderr, "%s: %s\n",
         poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), 
@@ -127,7 +126,6 @@ int main(int argc, char *argv[]){
         MPI_Finalize();
         return 1;
   }
-  poptFreeContext(poptcon);
 
   /**
    * Plugin loading, if option -m is not set, use default
@@ -140,7 +138,7 @@ int main(int argc, char *argv[]){
     MPI_Abort(MPI_COMM_WORLD, 913);
   }
 
-  mpifarm_module_init = dlsym(module, "mpifarm_module_init");
+  init = dlsym(module, "mpifarm_module_init");
   dlresult = dlerror();
   if(dlresult){
     printf("Cannot find mpifarm_module_init in module '%s': %s\n", module_name, dlresult);
@@ -150,7 +148,16 @@ int main(int argc, char *argv[]){
   struct yourdata *pointer;
   pointer = makeyourdata();
   
-  mpifarm_module_init(pointer);
+  init();
+
+  query = dlsym(module, "mpifarm_module_query");
+  dlresult = dlerror();
+  if(dlresult){
+    printf("Cannot find mpifarm_module_query in module '%s': %s\n", module_name, dlresult);
+    MPI_Abort(MPI_COMM_WORLD, 914);
+  }
+
+  query();
  
   /**
    * Each slave knows exactly what is all about
@@ -195,17 +202,18 @@ int main(int argc, char *argv[]){
       slave(); 
   }
  
-  mpifarm_module_cleanup = dlsym(module, "mpifarm_module_cleanup");
+  cleanup = dlsym(module, "mpifarm_module_cleanup");
   dlresult = dlerror();
   if(dlresult){
     printf("Cannot find mpifarm_module_cleanup in module '%s': %s\n", module_name, dlresult);
     MPI_Abort(MPI_COMM_WORLD, 914);
   }
 
-  mpifarm_module_cleanup(pointer);
+  cleanup(pointer);
   
   dlclose(module);
 
+  poptFreeContext(poptcon);
 	MPI_Finalize();
 	
   return 0;

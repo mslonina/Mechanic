@@ -1,5 +1,5 @@
 /**
- * MPIFARM USER API
+ * MPIFARM PLUGIN DEFAULT
  *
  * Functions provided here are called during farm operations. 
  * We provide You with simple examples of using them -- 
@@ -19,22 +19,22 @@
  *
  */
 
-#include "mpifarm_module_ttt.h"
+#include "mpifarm_module_default.h"
 #include <string.h>
 //#include "readconfig.h"
 
 void mpifarm_module_init(struct yourdata *pointer){
-  printf("Module TTT INIT\n");
-  pointer->tt = 1;
+  printf("Module DEFAULT INIT\n");
   return;
 }
 
 void mpifarm_module_query(struct yourdata *pointer){
+  printf("Module DEFAULT QUERY\n");
   return;
 }
 
 void mpifarm_module_cleanup(struct yourdata *pointer){
-  printf("Module TTT CLEANUP\n");
+  printf("Module DEFAULT CLEANUP\n");
   return;
 }
 

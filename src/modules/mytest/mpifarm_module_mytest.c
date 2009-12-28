@@ -1,5 +1,5 @@
 /**
- * MPIFARM USER API
+ * MPIFARM MODULE MYTEST
  *
  * Functions provided here are called during farm operations. 
  * We provide You with simple examples of using them -- 
@@ -19,22 +19,22 @@
  *
  */
 
-#include "hdf5.h"
-#include "mpifarm_module_test.h"
+#include "mpifarm_module_mytest.h"
 #include <string.h>
 //#include "readconfig.h"
 
 void mpifarm_module_init(struct yourdata *pointer){
-  printf("Module TEST INIT\n");
-  pointer->tt = 1;
+  printf("Module MYTEST INIT\n");
   return;
 }
 
 void mpifarm_module_query(struct yourdata *pointer){
+  printf("Module MYTEST QUERY\n");
   return;
 }
 
 void mpifarm_module_cleanup(struct yourdata *pointer){
+  printf("Module MYTEST CLEANUP\n");
   return;
 }
 

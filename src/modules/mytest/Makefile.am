@@ -1,3 +1,3 @@
-pkglib_LTLIBRARIES = mpifarm_module_test.la
-mpifarm_module_test_la_SOURCES = mpifarm_module_test.c mpifarm_module_test.h
-mpifarm_module_test_la_LDFLAGS = -shared -module
+pkglib_LTLIBRARIES = mpifarm_module_mytest.la
+mpifarm_module_mytest_la_SOURCES = mpifarm_module_mytest.c mpifarm_module_mytest.h
+mpifarm_module_mytest_la_LDFLAGS = -module

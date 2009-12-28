@@ -1,1 +1,1 @@
-SUBDIRS = mytest ttt
+SUBDIRS = mytest default
