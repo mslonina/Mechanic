@@ -68,18 +68,16 @@ int main(int argc, char *argv[]){
   char *module_name;
   char module_file[256];
   void *module;
-  char *dlresult;
+  const char *dlresult;
   char optvalue;
 
   void *prestartmode;
   int restartmode;
   int poptflags = 0;
+  int error;
 
-
-  typedef void(*init_f) ();
-  init_f init;
-  typedef void(*cleanup_f) ();
-  cleanup_f cleanup;
+  module_init init;
+  module_cleanup cleanup;
 
   /*  Default config and module file */
   inifile = CONFIG_FILE_DEFAULT;
@@ -142,27 +140,18 @@ int main(int argc, char *argv[]){
     MPI_Abort(MPI_COMM_WORLD, 913);
   }
 
-  init = dlsym(module, "mpifarm_module_init");
+  mpifarm_module_init = dlsym(module, "mpifarm_module_init");
   dlresult = dlerror();
   if(dlresult){
     printf("Cannot find mpifarm_module_init in module '%s': %s\n", module_name, dlresult);
     MPI_Abort(MPI_COMM_WORLD, 914);
   }
 
-  mpifarm_module_init();
-
-  cleanup = dlsym(module, "mpifarm_module_cleanup");
-  dlresult = dlerror();
-  if(dlresult){
-    printf("Cannot find mpifarm_module_cleanup in module '%s': %s\n", module_name, dlresult);
-    MPI_Abort(MPI_COMM_WORLD, 914);
-  }
-
-  mpifarm_module_cleanup();
+  struct yourdata *pointer;
+  pointer = makeyourdata();
   
-  dlclose(module);
-  
-  
+  mpifarm_module_init(pointer);
+ 
   /**
    * Each slave knows exactly what is all about
    * -- it is much easier to handle
@@ -189,14 +178,14 @@ int main(int argc, char *argv[]){
   maxsize += membersize;
   buffer = malloc(maxsize);
       
+  /**
+   * BY DESIGN
+   * Master cannot work alone.
+   */
   if (mpi_size == 1){
      printf("You should have at least one slave!\n");
      masteralone = 1;
 
-     /**
-      * In the future we can allow the master node to perform all tasks
-      * but for now, we just abort.
-      */
      MPI_Abort(MPI_COMM_WORLD, 911);
   }
 
@@ -205,7 +194,18 @@ int main(int argc, char *argv[]){
 	} else {
       slave(); 
   }
+ 
+  mpifarm_module_cleanup = dlsym(module, "mpifarm_module_cleanup");
+  dlresult = dlerror();
+  if(dlresult){
+    printf("Cannot find mpifarm_module_cleanup in module '%s': %s\n", module_name, dlresult);
+    MPI_Abort(MPI_COMM_WORLD, 914);
+  }
+
+  mpifarm_module_cleanup(pointer);
   
+  dlclose(module);
+
 	MPI_Finalize();
 	
   return 0;
@@ -514,19 +514,22 @@ static void slave(void){
     int k = 0, i = 0, j = 0;
     
     masterData rawdata;
-    slaveData s;
 	  MY_DATATYPE rdata[MAX_RESULT_LENGTH][1];
     
     clearArray(rawdata.res,ITEMS_IN_ARRAY(rawdata.res));
    
-    /**
+  
+    struct slaveData_t *s;
+    s = makeSlaveData();
+    
+  /**
      * Slave can do something useful before computations
      */
-    userdefined_slaveIN(mpi_rank, &d, &rawdata, &s);
+    userdefined_slaveIN(mpi_rank, &d, &rawdata, s);
 
-    userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, &s);
+    userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, s);
     MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-    userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, &s);
+    userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, s);
 
     while(1){
 
@@ -544,18 +547,18 @@ static void slave(void){
           /**
            * DO SOMETHING HERE
            */
-          userdefined_pixelCompute(mpi_rank, &d, &rawdata, &s);
+          userdefined_pixelCompute(mpi_rank, &d, &rawdata, s);
 
-          userdefined_slave_beforeSend(mpi_rank, &d, &rawdata, &s);
+          userdefined_slave_beforeSend(mpi_rank, &d, &rawdata, s);
           position = 0;
           MPI_Pack(&rawdata.coords, 3, MPI_INT, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Pack(&rawdata.res, MAX_RESULT_LENGTH, MY_MPI_DATATYPE, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Send(buffer, position, MPI_PACKED, mpi_dest, result_tag, MPI_COMM_WORLD);
-          userdefined_slave_afterSend(mpi_rank, &d, &rawdata, &s);
+          userdefined_slave_afterSend(mpi_rank, &d, &rawdata, s);
         
-          userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, &s);
+          userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, s);
           MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-          userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, &s);
+          userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, s);
         }
 
        if (method == 6){
@@ -565,19 +568,19 @@ static void slave(void){
            * and pixelCompute
            *
            */
-          userdefined_pixelCoords(mpi_rank, tab, &d, &rawdata, &s);
-          userdefined_pixelCompute(mpi_rank, &d, &rawdata, &s);
+          userdefined_pixelCoords(mpi_rank, tab, &d, &rawdata, s);
+          userdefined_pixelCompute(mpi_rank, &d, &rawdata, s);
           
-          userdefined_slave_beforeSend(mpi_rank, &d, &rawdata, &s);
+          userdefined_slave_beforeSend(mpi_rank, &d, &rawdata, s);
           position = 0;
           MPI_Pack(&rawdata.coords, 3, MPI_INT, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Pack(&rawdata.res, MAX_RESULT_LENGTH, MY_MPI_DATATYPE, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Send(buffer, position, MPI_PACKED, mpi_dest, result_tag, MPI_COMM_WORLD);
-          userdefined_slave_afterSend(mpi_rank, &d, &rawdata, &s);
+          userdefined_slave_afterSend(mpi_rank, &d, &rawdata, s);
           
-          userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, &s);
+          userdefined_slave_beforeReceive(mpi_rank, &d, &rawdata, s);
           MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-          userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, &s);
+          userdefined_slave_afterReceive(mpi_rank, &d, &rawdata, s);
        }
     }
       
@@ -587,7 +590,7 @@ static void slave(void){
     /**
      * Slave can do something useful after computations
      */
-    userdefined_slaveOUT(mpi_rank, &d, &rawdata, &s);
+    userdefined_slaveOUT(mpi_rank, &d, &rawdata, s);
 
     return;
 }

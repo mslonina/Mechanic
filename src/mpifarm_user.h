@@ -1,11 +1,17 @@
 #ifndef MPIFARM_USER_H
 #define MPIFARM_USER_H
 
+#undef MAX_RESULT_LENGTH
 #define MAX_RESULT_LENGTH 12
+
+#undef MY_DATATYPE
 #define MY_DATATYPE double
+
+#undef MY_MPI_DATATYPE
 #define MY_MPI_DATATYPE MPI_DOUBLE
 
-typedef struct {
+
+typedef struct inputData_t {
   char name[256];
   char datafile[260];
   int bodies;
@@ -16,15 +22,8 @@ typedef struct {
   int xres;
   int yres;
   int method;
-} inputData;
+} inputData_t;
 
-inputData d;
-
-typedef struct {
-  MY_DATATYPE points[20];
-} slaveData;
-
-slaveData s;
-
+inputData_t d;
 
 #endif

@@ -1,20 +1,7 @@
-#ifndef MPIFARM_MODULE_TEST_H
-#define MPIFARM_MODULE_TEST_H
+#ifndef PLUGIN_H
+#define PLUGIN_H
 
-#undef MAX_RESULT_LENGTH
-#define MAX_RESULT_LENGTH 30
-
-#undef MY_DATATYPE
-#define MY_DATATYPE double
-
-#undef MY_MPI_DATATYPE
-#define MY_MPI_DATATYPE MPI_DOUBLE
-
-#undef ELEMENTS
 #define ELEMENTS 20
-
-#include <stdio.h>
-#include <stdlib.h>
 
 struct slaveData_t {
   int test;
@@ -49,5 +36,7 @@ struct slaveData_t *makeSlaveData(void){
   pointer->test = 0;
   return pointer;
 };
+
+
 
 #endif

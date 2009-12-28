@@ -1,1 +1,1 @@
-SUBDIRS = mytest
+SUBDIRS = mytest ttt
