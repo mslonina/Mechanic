@@ -14,6 +14,7 @@ static int* map2d(int);
 static void master(void);
 static void slave(void);
 void clearArray(MY_DATATYPE*,int);
+void usage(const char *program);
 
 /* Simplified struct for writing config data to hdf file */
 typedef struct {
@@ -62,14 +63,107 @@ hid_t hdf_config_datatype;
  * MAIN
  *
  */
-int main(int argc, char* argv[]){  
+int main(int argc, char *argv[]){  
 
-  inifile = "config";
+  char *plugin_name;
+  char plugin_file[256];
+  void *plugin;
+  char *dlresult;
+  char optvalue;
+
+  void *prestartmode;
+  int restartmode;
+  int poptflags = 0;
+
+
+  typedef void(*init_f) ();
+  init_f init;
+  typedef void(*cleanup_f) ();
+  cleanup_f cleanup;
+
+  /*  Default config and plugin file */
+  inifile = CONFIG_FILE_DEFAULT;
+  plugin_name = PLUGIN_DEFAULT;
+
+  struct poptOption cmdopts[] = {
+    {"restart", 'r', POPT_ARG_NONE, &prestartmode, 'r',
+    "enable restart mode [TODO]"},
+    {"config", 'c', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 'c',
+    "change config file"},
+    {"module", 'm', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &plugin_name, 'm',
+    "provide the module"},
+    POPT_AUTOHELP
+    {NULL, 0, 0, NULL, 0, NULL, NULL}
+  };
   
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
+  poptContext poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
+
+  if(argc < 2){
+        poptPrintHelp(poptcon, stderr, poptflags);
+        MPI_Finalize();
+        return 0;
+  }
+  /*
+  while((optvalue = poptGetNextOpt(poptcon)) >= 0){
+    switch (optvalue){
+      case 'c':
+        break;
+      case 'm':
+        break;
+      case 'r':
+        poptPrintHelp(poptcon, stderr, poptflags);
+        MPI_Finalize();
+        return 0;
+      default:
+        break;
+    }
+  }*/
+  if (optvalue < -1){
+    fprintf(stderr, "%s: %s\n",
+        poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), 
+        poptStrerror(optvalue));
+        MPI_Finalize();
+        return 1;
+  }
+  poptFreeContext(poptcon);
+
+  /**
+   * Plugin loading, if option -m is not set, use default
+   */
+  sprintf(plugin_file, "mpifarm_plugin_%s.so", plugin_name);
+  //printf("plugin: '%s'\n",plugin_name);
+  
+  plugin = dlopen(plugin_file, RTLD_NOW || RTLD_GLOBAL);
+  if(!plugin){
+    printf("Cannot load plugin '%s': %s\n", plugin_name, dlerror()); 
+    MPI_Abort(MPI_COMM_WORLD, 913);
+  }
+
+  init = dlsym(plugin, "mpifarm_plugin_init");
+  dlresult = dlerror();
+  if(dlresult){
+    printf("Cannot find mpifarm_plugin_init in plugin '%s': %s\n", plugin_name, dlresult);
+    MPI_Abort(MPI_COMM_WORLD, 914);
+  }
+
+  mpifarm_plugin_init();
+
+  cleanup = dlsym(plugin, "mpifarm_plugin_cleanup");
+  dlresult = dlerror();
+  if(dlresult){
+    printf("Cannot find mpifarm_plugin_cleanup in plugin '%s': %s\n", plugin_name, dlresult);
+    MPI_Abort(MPI_COMM_WORLD, 914);
+  }
+
+  mpifarm_plugin_cleanup();
+  
+  dlclose(plugin);
+  
+  
   /**
    * Each slave knows exactly what is all about
    * -- it is much easier to handle
@@ -539,4 +633,11 @@ void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 	}
 
 	return;
+}
+
+/**
+ * USAGE
+ */
+void usage(const char *program){
+  printf("Usage: %s [-c config-file] [-m plugin-name]\n", program);
 }

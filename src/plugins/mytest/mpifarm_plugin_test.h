@@ -1,0 +1,4 @@
+#ifndef MPIFARM_PLUGIN_TEST_H
+#define MPIFARM_PLUGIN_TEST_H
+
+#endif

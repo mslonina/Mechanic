@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <dlfcn.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -13,6 +14,7 @@
 #include <sys/dir.h>
 #include <dirent.h>
 #include <math.h>
+#include <popt.h>
 
 #include "mpi.h"
 #include "hdf5.h"
@@ -27,6 +29,9 @@
 #define DATASETMASTER "master"
 
 #define HDF_RANK 2
+
+#define CONFIG_FILE_DEFAULT "config"
+#define PLUGIN_DEFAULT "test"
 
 /**
  * Master data struct
@@ -60,6 +65,9 @@ extern void userdefined_slave_afterReceive(int, inputData *d, masterData *r, sla
 
 extern int userdefined_readConfigValues(char*, char*, char*, inputData *d);
 extern void userdefined_mpiBcast(int, inputData *d);
+
+extern void mpifarm_plugin_init();
+extern void mpifarm_plugin_cleanup();
 
 configOptions options[MAX_OPTIONS_NUM];
 configNamespace configSpace[MAX_CONFIG_SIZE];

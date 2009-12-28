@@ -37,7 +37,6 @@ void mpifarm_plugin_cleanup(){
   return;
 }
 
-
 /**
  * USER DEFINED FARM RESOLUTION
  *

@@ -1,6 +1,6 @@
 ACLOCAL_AMFLAGS = -I m4
 SUBDIRS = src
-EXTRA_DIST = doc/config doc/qfarm.sh
+EXTRA_DIST = doc/mpifarm-config doc/qfarm.sh
 dist_doc_DATA = $(EXTRA_DIST)
 
 clean-local:
