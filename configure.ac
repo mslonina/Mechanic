@@ -20,6 +20,7 @@ AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
 
 AC_SUBST(USE_MPI) 
 AC_CHECK_LIB(m, pow)
+AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(popt, poptGetNextOpt)
 AC_CHECK_LIB(hdf5, H5open)
 AC_OUTPUT(Makefile src/Makefile src/readconfig/Makefile src/modules/Makefile src/modules/mytest/Makefile)
