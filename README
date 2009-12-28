@@ -12,7 +12,7 @@ MPI FARM SKELETON
 - name: name of the farm (also name of the hdf files)
 
 == Commandline options ==
--m --module: loads additional module (plugin)
+-m --module: loads additional module (module)
 -c --config: reads given config file
 -r --restart: restart mode [TODO]
 
@@ -27,28 +27,28 @@ Master data vector is defined by struct( int coords[3], MY_DATATYPE res[MAX_RESU
 It is the only vector received by master node and written to master data file.
 
 MY_DATATYPE can be any standard type. If You change default double definition,
-remember to adjust accordingly MPI_MY_DATATYPE in mpifarm_plugin_[PLUGIN_NAME].h.
+remember to adjust accordingly MPI_MY_DATATYPE in mpifarm_module_[PLUGIN_NAME].h.
 
-You can create as many data files as needed, using User API from mpifarm_plugin_[PLUGIN_NAME].c. 
-See mpifarm_plugin_test.c for examples.
+You can create as many data files as needed, using User API from mpifarm_module_[PLUGIN_NAME].c. 
+See mpifarm_module_test.c for examples.
 
 Each slave has a user-defined data struct, You can redefine it and use during computations.
-See mpifarm_plugin_test.h for an example.
+See mpifarm_module_test.h for an example.
 
 Input data (i.e. from config file) is user-defined. In case of any changes, remember to adjust
 userdefined_readConfigValues and userdefined_mpiBcast functions -- this is important,
 because each slaves needs this data.
 
 == Plugin architecture ==
-You can write Your own plugin to MpiFarm and use it for computation.
-Please refer to src/plugin/test for examples.
+You can write Your own module to MpiFarm and use it for computation.
+Please refer to src/module/test for examples.
 
 Plugins are loaded during runtime with commandline switch -m [--module=PLUGIN_NAME]
 
 == User defined API functions ==
 
-void mpifarm_plugin_init();
-void mpifarm_plugin_cleanup();
+void mpifarm_module_init();
+void mpifarm_module_cleanup();
 
 int userdefined_farmResolution(int xres, int yres)
 - computes farm size

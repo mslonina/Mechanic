@@ -65,9 +65,9 @@ hid_t hdf_config_datatype;
  */
 int main(int argc, char *argv[]){  
 
-  char *plugin_name;
-  char plugin_file[256];
-  void *plugin;
+  char *module_name;
+  char module_file[256];
+  void *module;
   char *dlresult;
   char optvalue;
 
@@ -81,16 +81,16 @@ int main(int argc, char *argv[]){
   typedef void(*cleanup_f) ();
   cleanup_f cleanup;
 
-  /*  Default config and plugin file */
+  /*  Default config and module file */
   inifile = CONFIG_FILE_DEFAULT;
-  plugin_name = PLUGIN_DEFAULT;
+  module_name = MODULE_DEFAULT;
 
   struct poptOption cmdopts[] = {
     {"restart", 'r', POPT_ARG_NONE, &prestartmode, 'r',
     "enable restart mode [TODO]"},
     {"config", 'c', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 'c',
     "change config file"},
-    {"module", 'm', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &plugin_name, 'm',
+    {"module", 'm', POPT_ARG_STRING || POPT_ARGFLAG_SHOW_DEFAULT, &module_name, 'm',
     "provide the module"},
     POPT_AUTOHELP
     {NULL, 0, 0, NULL, 0, NULL, NULL}
@@ -134,34 +134,33 @@ int main(int argc, char *argv[]){
   /**
    * Plugin loading, if option -m is not set, use default
    */
-  sprintf(plugin_file, "mpifarm_plugin_%s.so", plugin_name);
-  //printf("plugin: '%s'\n",plugin_name);
+  sprintf(module_file, "mpifarm_module_%s.so", module_name);
   
-  plugin = dlopen(plugin_file, RTLD_NOW || RTLD_GLOBAL);
-  if(!plugin){
-    printf("Cannot load plugin '%s': %s\n", plugin_name, dlerror()); 
+  module = dlopen(module_file, RTLD_NOW || RTLD_GLOBAL);
+  if(!module){
+    printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
     MPI_Abort(MPI_COMM_WORLD, 913);
   }
 
-  init = dlsym(plugin, "mpifarm_plugin_init");
+  init = dlsym(module, "mpifarm_module_init");
   dlresult = dlerror();
   if(dlresult){
-    printf("Cannot find mpifarm_plugin_init in plugin '%s': %s\n", plugin_name, dlresult);
+    printf("Cannot find mpifarm_module_init in module '%s': %s\n", module_name, dlresult);
     MPI_Abort(MPI_COMM_WORLD, 914);
   }
 
-  mpifarm_plugin_init();
+  mpifarm_module_init();
 
-  cleanup = dlsym(plugin, "mpifarm_plugin_cleanup");
+  cleanup = dlsym(module, "mpifarm_module_cleanup");
   dlresult = dlerror();
   if(dlresult){
-    printf("Cannot find mpifarm_plugin_cleanup in plugin '%s': %s\n", plugin_name, dlresult);
+    printf("Cannot find mpifarm_module_cleanup in module '%s': %s\n", module_name, dlresult);
     MPI_Abort(MPI_COMM_WORLD, 914);
   }
 
-  mpifarm_plugin_cleanup();
+  mpifarm_module_cleanup();
   
-  dlclose(plugin);
+  dlclose(module);
   
   
   /**
@@ -635,9 +634,3 @@ void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 	return;
 }
 
-/**
- * USAGE
- */
-void usage(const char *program){
-  printf("Usage: %s [-c config-file] [-m plugin-name]\n", program);
-}

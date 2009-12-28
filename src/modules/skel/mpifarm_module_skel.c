@@ -26,14 +26,14 @@
 /**
  * MPIFARM PLUGIN INIT
  */
-void mpifarm_plugin_init(){
+void mpifarm_module_init(){
   return;
 }
 
 /**
  * MPIFARM PLUGIN CLEANUP
  */
-void mpifarm_plugin_cleanup(){
+void mpifarm_module_cleanup(){
   return;
 }
 
