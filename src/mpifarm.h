@@ -47,7 +47,7 @@
  */
 typedef struct {
  int coords[3]; //0 - x 1 - y 2 - number of the pixel
- MY_DATATYPE res[MAX_RESULT_LENGTH];
+ MY_DATATYPE res[1];
 } masterData;
 
 #define ITEMS_IN_ARRAY(x) sizeof(x)/sizeof(*(x))

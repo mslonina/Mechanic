@@ -37,6 +37,4 @@ struct slaveData_t *makeSlaveData(void){
   return pointer;
 };
 
-
-
 #endif

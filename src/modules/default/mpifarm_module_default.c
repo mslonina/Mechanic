@@ -25,23 +25,24 @@
 #include <string.h>
 #include <dlfcn.h>
 #include "hdf5.h"
+#include <math.h>
 
 void mpifarm_module_init(struct yourdata *pointer){
-  printf("Module DEFAULT INIT\n");
-  pointer->aa = 1.1;
-  pointer->bb = 2.2;
+  //printf("Module DEFAULT INIT\n");
+  //pointer->aa = 1.1;
+  //pointer->bb = 2.2;
   return;
 }
 
 void mpifarm_module_query(struct yourdata *pointer){
-  printf("Module DEFAULT QUERY\n");
+  //printf("Module DEFAULT QUERY\n");
   return;
 }
 
 void mpifarm_module_cleanup(struct yourdata *pointer){
-  printf("Module DEFAULT CLEANUP: %f\n", pointer->aa + pointer->bb);
+  //printf("Module DEFAULT CLEANUP: %f\n", pointer->aa + pointer->bb);
 
-  free(pointer);
+ // free(pointer);
   return;
 }
 
@@ -106,15 +107,16 @@ void userdefined_pixelCoords(int slave, int t[], inputData_t *d, masterData *r, 
  * Size of the array is controlled by MAX_RESULT_LENGTH from mpifarm_user.h 
  *
  */
-void userdefined_pixelCompute(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_pixelCompute(int slave, int mrl, inputData_t *d, masterData *r, struct slaveData_t *s){
 
   int i = 0;
-   r->res[0] = (MY_DATATYPE) r->coords[0]; 
-   r->res[1] = (MY_DATATYPE) r->coords[1];
+   //r->res[0] = (MY_DATATYPE) r->coords[0]; 
+   //r->res[1] = (MY_DATATYPE) r->coords[1];
    
-   for(i = 2; i < MAX_RESULT_LENGTH; i++){
-      r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
-      r->res[i] = i*r->res[i]/(pow(slave, 2.0));
+   for(i = 0; i < mrl; i++){
+     // r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
+     // r->res[i] = i*r->res[i]/(pow(slave, 2.0));
+     r->res[i] = 1.0 * i;
    }
   
    return;
@@ -140,7 +142,7 @@ void userdefined_masterIN(int mpi_size, inputData_t *d){
  *
  */
 void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
-  
+ /* 
   int i;
   hid_t fname, masterfile, masterdatagroup;
   herr_t stat;
@@ -151,11 +153,11 @@ void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
 
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
   masterdatagroup = H5Gopen(masterfile, DATAGROUP, H5P_DEFAULT);
-  
+  */
   /**
    * Copy data from slaves to one master file
    */
-  for(i = 1; i < mpi_size; i++){
+  /*for(i = 1; i < mpi_size; i++){
     sprintf(groupname,"%s%d", groupbase,i);
     sprintf(filename,"%s-%s%d.h5", d->name, filebase,i);
    
@@ -167,8 +169,8 @@ void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
 
   H5Gclose(masterdatagroup);
   H5Fclose(masterfile);
+  */
   printf("Master process OVER & OUT.\n");
-  
   return;
 }
 
@@ -188,6 +190,7 @@ void userdefined_master_beforeReceive(inputData_t *d, masterData *r){
   return;
 }
 void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
+  printf("RECV from s[%d]: px[%d, %d, %d], res[%d] = %f.\n", slave, r->coords[0], r->coords[1], r->coords[2], 4, r->res[4]);
   return;
 }
 
@@ -254,6 +257,8 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
   H5Gclose(gid);
   H5Fclose(sfile_id);
 
+  printf("Slave[%d] out\n", slave);
+
    return;
 }
 
@@ -267,7 +272,7 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
  */
 void userdefined_slaveOUT(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
   
-  printf("SLAVE[%d] OVER & OUT\n",slave);
+  //printf("SLAVE[%d] OVER & OUT\n",slave);
 
   return;
 }
@@ -280,7 +285,7 @@ void userdefined_slaveOUT(int slave, inputData_t *d, masterData *r, struct slave
  */
 void userdefined_slave_beforeSend(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
   
-  printf("SLAVE[%d] working on pixel [ %d , %d ]: %f\n", slave, r->coords[0], r->coords[1], r->res[2]);
+  printf("SLAVE[%d] working on pixel [ %d , %d ]: %f\n", slave, r->coords[0], r->coords[1], r->res[4]);
   
   return;
 }
@@ -312,7 +317,7 @@ int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData
   void *module;
   const char dlr;
 
-  module = dlopen("libreadconfig.so", RTLD_NOW || RTLD_GLOBAL);
+  module = dlopen("libreadconfig.so", RTLD_NOW);
   if(!module){
     printf("Cannot load module libreadconfig: %s\n", dlerror()); 
     exit(1);
