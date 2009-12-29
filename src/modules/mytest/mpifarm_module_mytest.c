@@ -25,6 +25,7 @@
 
 void mpifarm_module_init(struct yourdata *pointer){
   printf("Module MYTEST INIT\n");
+  pointer->tt = 1;
   return;
 }
 
@@ -34,7 +35,9 @@ void mpifarm_module_query(struct yourdata *pointer){
 }
 
 void mpifarm_module_cleanup(struct yourdata *pointer){
-  printf("Module MYTEST CLEANUP\n");
+  printf("Module MYTEST CLEANUP: %d\n", pointer->tt);
+
+  free(pointer);
   return;
 }
 

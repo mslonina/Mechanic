@@ -19,12 +19,17 @@
  *
  */
 
+#include "mpifarm.h"
+#include "readconfig.h"
 #include "mpifarm_module_default.h"
 #include <string.h>
-//#include "readconfig.h"
+#include <dlfcn.h>
+#include "hdf5.h"
 
 void mpifarm_module_init(struct yourdata *pointer){
   printf("Module DEFAULT INIT\n");
+  pointer->aa = 1.1;
+  pointer->bb = 2.2;
   return;
 }
 
@@ -34,7 +39,9 @@ void mpifarm_module_query(struct yourdata *pointer){
 }
 
 void mpifarm_module_cleanup(struct yourdata *pointer){
-  printf("Module DEFAULT CLEANUP\n");
+  printf("Module DEFAULT CLEANUP: %f\n", pointer->aa + pointer->bb);
+
+  free(pointer);
   return;
 }
 
@@ -44,7 +51,7 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
  * Returns farm resolution
  *
  */
-/*int userdefined_farmResolution(int x, int y){
+int userdefined_farmResolution(int x, int y){
   
   int farm;
 
@@ -52,7 +59,7 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
 
   return farm;
 }
-*/
+
 /**
  * USER DEFINED PIXEL COORDS MAP
  *
@@ -62,12 +69,12 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
  * Used only when method = 6.
  * 
  */
-/*void userdefined_pixelCoordsMap(int t[], int p, int x, int y){
+void userdefined_pixelCoordsMap(int t[], int p, int x, int y){
   
     if(p < y) t[0] = p / y; t[1] = p;
     if(p > y - 1) t[0] = p / y; t[1] = p % y;
   return;
-}*/
+}
 
 /**
  * USER DEFINED PIXEL COORDS
@@ -78,7 +85,7 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
  * Used only when method = 6.
  *
  */
-/*void userdefined_pixelCoords(int slave, int t[], inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_pixelCoords(int slave, int t[], inputData_t *d, masterData *r, struct slaveData_t *s){
           
   r->coords[0] = t[0]; //x 
   r->coords[1] = t[1]; //y
@@ -86,7 +93,7 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
   
   return;
 }
-*/
+
 
 /**
  * USER DEFINED PIXEL COMPUTE
@@ -99,7 +106,7 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
  * Size of the array is controlled by MAX_RESULT_LENGTH from mpifarm_user.h 
  *
  */
-/*void userdefined_pixelCompute(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_pixelCompute(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
 
   int i = 0;
    r->res[0] = (MY_DATATYPE) r->coords[0]; 
@@ -112,17 +119,17 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
   
    return;
 }
-*/
+
 /**
  * USER DEFINED MASTER_IN FUNCTION
  * 
  * This function is called before any farm operations.
  *
  */
-/*void userdefined_masterIN(int mpi_size, inputData_t *d){
+void userdefined_masterIN(int mpi_size, inputData_t *d){
   return;
 }
-*/
+
 /**
  * USER DEFINED MASTER_OUT FUNCTION
  *
@@ -132,7 +139,7 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
  * Here, we just copy slave data files into one master file
  *
  */
-/*void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
+void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
   
   int i;
   hid_t fname, masterfile, masterdatagroup;
@@ -144,11 +151,11 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
 
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
   masterdatagroup = H5Gopen(masterfile, DATAGROUP, H5P_DEFAULT);
-  */
+  
   /**
    * Copy data from slaves to one master file
    */
-/*  for(i = 1; i < mpi_size; i++){
+  for(i = 1; i < mpi_size; i++){
     sprintf(groupname,"%s%d", groupbase,i);
     sprintf(filename,"%s-%s%d.h5", d->name, filebase,i);
    
@@ -164,14 +171,14 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
   
   return;
 }
-*/
+
 /**
  * USER DEFINED MASTER HELPER FUNCTIONS
  * 
  * Called before/after send/receive
  * 
  */
-/*void userdefined_master_beforeSend(int slave, inputData_t *d, masterData *r){
+void userdefined_master_beforeSend(int slave, inputData_t *d, masterData *r){
   return;
 }
 void userdefined_master_afterSend(int slave, inputData_t *d, masterData *r){
@@ -183,7 +190,7 @@ void userdefined_master_beforeReceive(inputData_t *d, masterData *r){
 void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
   return;
 }
-*/
+
 /**
  * USER DEFINED SLAVE_IN FUNCTION
  * 
@@ -201,7 +208,7 @@ void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
  * Data group is incorporated in MASTER_OUT function to one master data file.
  *
  */
-/*void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
 
   //clearArray(s->points, ITEMS_IN_ARRAY(s->points));
 
@@ -220,13 +227,13 @@ void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
 
   sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
   sprintf(group, "%s%d", gbase, slave);
-*/
+
   /**
    * Imagine this:
    * each slave can create different dataspaces and datasets here, 
    * perform different computations, even read different config file!
    */
-  /*sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   gid = H5Gcreate(sfile_id, group, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  
   s->points[2] = slave*2;
@@ -249,7 +256,7 @@ void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
 
    return;
 }
-*/
+
 /**
  * USER DEFINED SLAVE_OUT FUNCTION
  *
@@ -258,35 +265,38 @@ void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
  * Example:
  * Just prints a message from the slave.
  */
-/*void userdefined_slaveOUT(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slaveOUT(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
   
   printf("SLAVE[%d] OVER & OUT\n",slave);
 
   return;
 }
-*/
+
 /**
  * USER DEFINED SLAVE HELPER FUNCTIONS
  * 
  * Called before/after send/receive
  * 
  */
-/*void userdefined_slave_beforeSend(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slave_beforeSend(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
   
   printf("SLAVE[%d] working on pixel [ %d , %d ]: %f\n", slave, r->coords[0], r->coords[1], r->res[2]);
   
   return;
 }
 void userdefined_slave_afterSend(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+  //printf("SLAVE[%d] qafterS\n",slave);
   return;
 }
 void userdefined_slave_beforeReceive(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+  //printf("SLAVE[%d] qbeforeR\n",slave);
   return;
 }
 void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+  //printf("SLAVE[%d] qafterR\n",slave);
   return;
 }
-*/
+
 /**
  * HELPER FUNCTION -- READ CONFIG VALUES
  * 
@@ -295,11 +305,23 @@ void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, st
  * Adjust the parser to Your initial data struct from mpifarm_user.h
  *
  */
-/*int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData_t *d){
+int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData_t *d){
 
   int i = 0, k = 0, opts = 0, offset = 0;
+  module_query_int_f qinit;
+  void *module;
+  const char dlr;
+
+  module = dlopen("libreadconfig.so", RTLD_NOW || RTLD_GLOBAL);
+  if(!module){
+    printf("Cannot load module libreadconfig: %s\n", dlerror()); 
+    exit(1);
+  }
+  qinit = dlsym(module, "parseConfigFile");
   
-  opts = parseConfigFile(inifile, sep, comm);
+  opts = qinit(inifile, sep, comm);
+
+  dlclose(module);
 
 	for(i = 0; i < opts; i++){
     if(strcmp(configSpace[i].space,"default") == 0){
@@ -328,7 +350,7 @@ void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, st
 
   return opts;
 }
-*/
+
 /**
  * USER DEFINED MPI BCAST
  * 
@@ -336,7 +358,7 @@ void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, st
  *
  */
 
-/*void userdefined_mpiBcast(int mpi_rank, inputData_t *d){
+void userdefined_mpiBcast(int mpi_rank, inputData_t *d){
 
   int buff_size = 1000;
   int *ibuff;
@@ -399,4 +421,4 @@ void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, st
   free(nbuff);
   
   return;
-}*/
+}

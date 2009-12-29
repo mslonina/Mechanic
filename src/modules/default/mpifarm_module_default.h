@@ -22,7 +22,8 @@ struct slaveData_t {
 };
 
 struct yourdata{
-  int tt;
+  float aa;
+  float bb;
 };
 
 struct yourdata *makeyourdata(void){
@@ -30,7 +31,8 @@ struct yourdata *makeyourdata(void){
  if(pointer == NULL)
    return NULL;
 
- pointer->tt = 0;
+ pointer->aa = 0.0;
+ pointer->bb = 0.0;
 
  return pointer;
   
