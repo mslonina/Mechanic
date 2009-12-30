@@ -1,5 +1,5 @@
-#ifndef MPIFARM_SKEL_H
-#define MPIFARM_SKEL_H
+#ifndef MPIFARM_H
+#define MPIFARM_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,9 +18,7 @@
 
 #include "mpi.h"
 #include "hdf5.h"
-#include "hdf5_hl.h"
 
-#include "mpifarm_user.h"
 #include "readconfig.h"
 
 #define CONFIG_FILE_DEFAULT "config"
@@ -35,9 +33,6 @@
 
 #undef MY_DATATYPE
 #define MY_DATATYPE double
-
-#undef MAX_RESULT_LENGTH
-#define MAX_RESULT_LENGTH 12
 
 #undef MY_MPI_DATATYPE
 #define MY_MPI_DATATYPE MPI_DOUBLE
@@ -82,5 +77,7 @@ extern struct slaveData_t *makeSlaveData(void);
 
 configOptions options[MAX_OPTIONS_NUM];
 configNamespace configSpace[MAX_CONFIG_SIZE];
+
+#include "module.h"
 
 #endif

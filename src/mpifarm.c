@@ -52,6 +52,9 @@ int fdata[1][1];
 herr_t hdf_status;
 hid_t hdf_config_datatype;
 
+    
+struct slaveData_t *s;
+
 /**
  * MAIN
  *
@@ -91,6 +94,18 @@ int main(int argc, char *argv[]){
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
+  /**
+   * BY DESIGN
+   * Master cannot work alone.
+   */
+  if (mpi_size == 1){
+     printf("You should have at least one slave!\n");
+     masteralone = 1;
+
+     MPI_Abort(MPI_COMM_WORLD, 911);
+  }
+
+
   poptContext poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, POPT_CONTEXT_POSIXMEHARDER);
 
   if(argc < 2){
@@ -115,6 +130,7 @@ int main(int argc, char *argv[]){
         break;
     }
   }
+
   if (optvalue < -1){
     fprintf(stderr, "%s: %s\n",
         poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), 
@@ -122,28 +138,7 @@ int main(int argc, char *argv[]){
         MPI_Finalize();
         return 1;
   }
-
-  /**
-   * Module loading, if option -m is not set, use default
-   */
-  sprintf(module_file, "mpifarm_module_%s.so", module_name);
   
-  module = dlopen(module_file, RTLD_NOW);
-  if(!module){
-    printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
-    MPI_Abort(MPI_COMM_WORLD, 913);
-  }
-
-  init = dlsym(module, "mpifarm_module_init");
-
-  /* test only */
-  struct yourdata *pointer;
-  pointer = makeyourdata();
-  
-  init(pointer);
-
-  query = dlsym(module, "mpifarm_module_query");
-  query(pointer);
  
   /**
    * Each slave knows exactly what is all about
@@ -163,18 +158,31 @@ int main(int argc, char *argv[]){
   }else{
     MPI_Bcast(&d, 1, defaultConfigType, 0, MPI_COMM_WORLD);
   }
+ 
   MPI_Type_free(&defaultConfigType);
-
+  
   /**
-   * BY DESIGN
-   * Master cannot work alone.
+   * Module loading, if option -m is not set, use default
    */
-  if (mpi_size == 1){
-     printf("You should have at least one slave!\n");
-     masteralone = 1;
-
-     MPI_Abort(MPI_COMM_WORLD, 911);
+  sprintf(module_file, "mpifarm_module_%s.so", module_name);
+  
+  module = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
+  if(!module){
+    printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
+    MPI_Abort(MPI_COMM_WORLD, 913);
   }
+
+  init = dlsym(module, "mpifarm_module_init");
+
+  /* test only */
+  //struct yourdata *pointer;
+  //pointer = makeyourdata();
+  
+  init(s);
+
+  query = dlsym(module, "mpifarm_module_query");
+  query();
+ 
 
   if(mpi_rank == 0) {
       master(module, mrl);
@@ -184,9 +192,13 @@ int main(int argc, char *argv[]){
 
   cleanup = dlsym(module, "mpifarm_module_cleanup");
 
-  cleanup(pointer);
+  printf("CLEANUP\n");
+  cleanup(s);
+  printf("DLCLOSE\n");
   dlclose(module);
+  printf("POPTFREE\n");
   poptFreeContext(poptcon);
+  printf("FINALIZE\n");
 	MPI_Finalize();
 
   return 0;
@@ -383,7 +395,7 @@ static void master(void* module, int mrl){
     * terminate them
     */
    for(i = nodes; i < mpi_size; i++){
-  //   MPI_Send(map2d(npxc, module), 3, MPI_INT, i, terminate_tag, MPI_COMM_WORLD);
+    // MPI_Send(map2d(npxc, module), 3, MPI_INT, i, terminate_tag, MPI_COMM_WORLD);
    }
 
    /**
@@ -491,12 +503,12 @@ static void master(void* module, int mrl){
         hdf_status = H5Dwrite(dset_data, H5T_NATIVE_DOUBLE, memrawspace, rawspace, H5P_DEFAULT, rdata);
 
     }
-   //MPI_Type_free(&masterResultsType);
+   MPI_Type_free(&masterResultsType);
 
     /**
      * Now, terminate the slaves 
      */
-    for (i = 1; i < mpi_size; i++){
+    for (i = 1; i < nodes; i++){
         MPI_Send(map2d(npxc, module), 3, MPI_INT, i, terminate_tag, MPI_COMM_WORLD);
     }
 
@@ -543,8 +555,8 @@ static void slave(void* module, int mrl){
     
     clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
    
-    struct slaveData_t *s;
-    s = makeSlaveData();
+    //query = dlsym(module, "makeSlaveData");
+    //s = query();
    
     /**
      * Slave can do something useful before computations

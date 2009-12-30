@@ -26,7 +26,7 @@
 #include <dlfcn.h>
 #include "hdf5.h"
 #include <math.h>
-
+/*
 void mpifarm_module_init(struct yourdata *pointer){
   //printf("Module DEFAULT INIT\n");
   //pointer->aa = 1.1;
@@ -45,7 +45,24 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
   free(pointer);
   return;
 }
+*/
+void mpifarm_module_init(struct slaveData_t *s){
 
+    s = makeSlaveData();
+    s->test = 7;
+    s->points[0] = 3.4;
+  
+    return;
+}
+void mpifarm_module_query(){
+  return;
+}
+void mpifarm_module_cleanup(struct slaveData_t *s){
+
+  printf("Module DEFAULT CLEANUP: %d %f\n", s->test, s->points[0]);
+  free(s);
+  return;
+}
 /**
  * USER DEFINED FARM RESOLUTION
  *
@@ -165,7 +182,7 @@ void userdefined_masterOUT(int nodes, inputData_t *d, masterData *r){
    
     printf("filename[%d]: %s\n", i, filename);
     fname = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-    stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
+    //stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
   //  if(stat < 0) printf("copy error\n");
     H5Fclose(fname);
 

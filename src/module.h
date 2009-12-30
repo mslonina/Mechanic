@@ -3,6 +3,18 @@
 
 #define ELEMENTS 20
 
+typedef struct inputData_t {
+  char name[256];
+  char datafile[260];
+  int dump;
+  int xres;
+  int yres;
+  int method;
+} inputData_t;
+
+inputData_t d;
+
+/*
 struct slaveData_t {
   int test;
   MY_DATATYPE points[ELEMENTS];
@@ -36,5 +48,5 @@ struct slaveData_t *makeSlaveData(void){
   pointer->test = 0;
   return pointer;
 };
-
+*/
 #endif
