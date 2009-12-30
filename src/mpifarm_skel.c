@@ -4,18 +4,17 @@
  * by mariusz slonina <mariusz.slonina@gmail.com>
  * with a little help of kacper kowalik <xarthisius.kk@gmail.com>
  *
- * last updated: 26/12/2009
- *
+ * BE CEAREFUL -- almost no error handling (TODO)
  */
 #include "mpifarm.h"
 #include <string.h>
 
 static int* map2d(int, void *);
-static void master(void *, char *, int);
-static void slave(void *, char *, int);
+static void master(lt_dlhandle, int);
+static void slave(lt_dlhandle, int);
+static void master_test(lt_dlhandle);
+static void slave_test(lt_dlhandle);
 void clearArray(MY_DATATYPE*,int);
-void usage(const char *program);
-void* load_sym(char*, char*);
 
 /* Simplified struct for writing config data to hdf file */
 typedef struct {
@@ -68,8 +67,8 @@ int main(int argc, char *argv[]){
 
   char *module_name;
   char module_file[256];
-  void *module;
-  const char *dlresult;
+  lt_dlhandle module;
+  char *dlresult;
   char optvalue;
 
   void *prestartmode;
@@ -97,7 +96,8 @@ int main(int argc, char *argv[]){
     "provide the module", "MODULE"},
     POPT_TABLEEND
   };
-  
+
+  lt_dlinit();
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -139,28 +139,29 @@ int main(int argc, char *argv[]){
    */
   sprintf(module_file, "mpifarm_module_%s.so", module_name);
   
-  module = dlopen(module_file, RTLD_LAZY||RTLD_NODELETE);
+  module = lt_dlopen(module_file);
   if(!module){
-    printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
+    printf("Cannot load module '%s': %s\n", module_name, lt_dlerror()); 
     MPI_Abort(MPI_COMM_WORLD, 913);
   }
 
-  init = load_sym(module, "mpifarm_module_init");
+  init = lt_dlsym(module, "mpifarm_module_init");
 
-  //struct yourdata *pointer;
-  //pointer = makeyourdata();
+  /* test only */
+  struct yourdata *pointer;
+  pointer = makeyourdata();
   
-  init();
+  init(pointer);
 
-  query = load_sym(module, "mpifarm_module_query");
-  query();
+  query = lt_dlsym(module, "mpifarm_module_query");
+  query(pointer);
  
   /**
    * Each slave knows exactly what is all about
    * -- it is much easier to handle
    */
   if(mpi_rank == 0){
-    qconfig = load_sym(module, "userdefined_readConfigValues");
+    qconfig = lt_dlsym(module, "userdefined_readConfigValues");
     allopts = qconfig(inifile, sep, comm, &d); 
    
     if (d.xres == 0 || d.yres == 0){
@@ -168,10 +169,10 @@ int main(int argc, char *argv[]){
        printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
        MPI_Abort(MPI_COMM_WORLD, 911);
     }
-    qbcast = load_sym(module, "userdefined_mpiBcast");
+    qbcast = lt_dlsym(module, "userdefined_mpiBcast");
     qbcast(mpi_rank,&d);
   }else{
-    qbcast = load_sym(module, "userdefined_mpiBcast");
+    qbcast = lt_dlsym(module, "userdefined_mpiBcast");
     qbcast(mpi_rank,&d);
   }
 
@@ -196,30 +197,34 @@ int main(int argc, char *argv[]){
   }
 
   if(mpi_rank == 0) {
-      master(module, module_name, mrl);
+      master(module, mrl);
+  //    master_test(module);
 	} else {
-      slave(module, module_name, mrl); 
+      slave(module, mrl); 
+//      slave_test(module);
   }
 
-  printf("cleanup load_sym\n");
-  cleanup = load_sym(module, "mpifarm_module_cleanup");
+  //printf("cleanup lt_dlsym\n");
+  cleanup = lt_dlsym(module, "mpifarm_module_cleanup");
 
-  printf("cleanup \n");
-  cleanup();
+  //printf("cleanup \n");
+  cleanup(pointer);
   
-  printf("module close\n");
-  dlclose(module);
-    printf("Closing module '%s': %s\n", module_name, dlerror()); 
+  //printf("module close\n");
+ // lt_dlerror();
+  lt_dlclose(module);
+ //   printf("Closing module '%s': %s\n", module_name, lt_dlerror()); 
 
-  printf("poptFree\n");
+  //printf("poptFree\n");
   poptFreeContext(poptcon);
 
-  printf("free buffer\n");
+  //printf("free buffer\n");
   free(buffer);
 
-  printf("mpi final\n");
+  //printf("mpi final\n");
 	MPI_Finalize();
-	
+	lt_dlexit();
+
   return 0;
 }
 
@@ -227,20 +232,24 @@ int main(int argc, char *argv[]){
  * MASTER
  *
  */
-static void master(void* module, char* module_name, int mrl){
+static void master(lt_dlhandle module, int mrl){
 
    int *tab; 
 	 MY_DATATYPE rdata[mrl][1];
    int i = 0, k = 0, j = 0;
    
-   module_query_void_f query, qbeforeS, qafterS, qbeforeR, qafterR;
+   module_query_void_f queryIN, queryOUT, qbeforeS, qafterS, qbeforeR, qafterR;
    module_query_int_f qr;
   
    masterData raw;
    masterData *rawdata;
+ 
+  /**
+    * Allocate memory for rawdata.res array
+    */
    rawdata = malloc(sizeof(rawdata) + (mrl-1) * sizeof(MY_DATATYPE));
 
-   //clearArray(rawdata.res,ITEMS_IN_ARRAY(rawdata.res));
+  // clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
    
    printf("MAP RESOLUTION = %dx%d.\n", d.xres, d.yres);
    printf("COMM_SIZE = %d.\n", mpi_size);
@@ -249,7 +258,7 @@ static void master(void* module, char* module_name, int mrl){
    /**
     * Master can do something useful before computations
     */
-   query = load_sym(module, "userdefined_masterIN");
+   query = lt_dlsym(module, "userdefined_masterIN");
    query(mpi_size, &d);
 
    /**
@@ -260,7 +269,7 @@ static void master(void* module, char* module_name, int mrl){
    if (method == 1) farm_res = d.xres; //sliceX
    if (method == 2) farm_res = d.yres; //sliceY
    if (method == 6){
-     qr = load_sym(module, "userdefined_farmResolution");
+     qr = lt_dlsym(module, "userdefined_farmResolution");
      farm_res = qr(d.xres, d.yres);
    }
 
@@ -388,12 +397,12 @@ static void master(void* module, char* module_name, int mrl){
     * Send tasks to all slaves
     */
    for (i = 1; i < nodes; i++){
-     qbeforeS = load_sym(module,"userdefined_master_beforeSend");
+     qbeforeS = lt_dlsym(module,"userdefined_master_beforeSend");
      qbeforeS(i,&d,rawdata);
 
      MPI_Send(map2d(npxc, module), 3, MPI_INT, i, data_tag, MPI_COMM_WORLD);
      
-     qafterS = load_sym(module, "userdefined_master_afterSend");
+     qafterS = lt_dlsym(module, "userdefined_master_afterSend");
      qafterS(i,&d,rawdata);
      
      count++;
@@ -405,7 +414,7 @@ static void master(void* module, char* module_name, int mrl){
     */
    while (1) {
     
-     qbeforeR = load_sym(module, "userdefined_master_beforeReceive");
+     qbeforeR = lt_dlsym(module, "userdefined_master_beforeReceive");
      qbeforeR(&d,rawdata);
       
      MPI_Recv(buffer, maxsize, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
@@ -419,7 +428,7 @@ static void master(void* module, char* module_name, int mrl){
       MPI_Unpack(buffer, msgsize, &position, rawdata->coords, 3, MPI_INT, MPI_COMM_WORLD);
       MPI_Unpack(buffer, msgsize, &position, rawdata->res, mrl, MY_MPI_DATATYPE, MPI_COMM_WORLD);
      
-      qafterR = load_sym(module, "userdefined_master_afterReceive");
+      qafterR = lt_dlsym(module, "userdefined_master_afterReceive");
       qafterR(mpi_status.MPI_SOURCE, &d, rawdata);
 
       /**
@@ -452,14 +461,14 @@ static void master(void* module, char* module_name, int mrl){
        */
       if (npxc < farm_res){
        
-        qbeforeS = load_sym(module, "userdefined_master_beforeSend");
+        qbeforeS = lt_dlsym(module, "userdefined_master_beforeSend");
         qbeforeS(mpi_status.MPI_SOURCE, &d, rawdata);
          
         MPI_Send(map2d(npxc, module), 3, MPI_INT, mpi_status.MPI_SOURCE, data_tag, MPI_COMM_WORLD);
         npxc++;
         count++;
         
-        qafterS = load_sym(module, "userdefined_master_afterSend");
+        qafterS = lt_dlsym(module, "userdefined_master_afterSend");
         qafterS(mpi_status.MPI_SOURCE, &d, rawdata);
       } else {
         break;
@@ -472,7 +481,7 @@ static void master(void* module, char* module_name, int mrl){
      */
     for (i = 0; i < count; i++){
       
-      qbeforeR = load_sym(module, "userdefined_master_beforeReceive");
+      qbeforeR = lt_dlsym(module, "userdefined_master_beforeReceive");
       qbeforeR(&d, rawdata);
         
       MPI_Recv(buffer, maxsize, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
@@ -481,7 +490,7 @@ static void master(void* module, char* module_name, int mrl){
       MPI_Unpack(buffer, msgsize, &position, rawdata->coords, 3, MPI_INT, MPI_COMM_WORLD);
       MPI_Unpack(buffer, msgsize, &position, rawdata->res, mrl, MY_MPI_DATATYPE, MPI_COMM_WORLD);
       
-      qafterR = load_sym(module, "userdefined_master_afterReceive");
+      qafterR = lt_dlsym(module, "userdefined_master_afterReceive");
       qafterR(mpi_status.MPI_SOURCE, &d, rawdata);
         
         /**
@@ -539,11 +548,10 @@ static void master(void* module, char* module_name, int mrl){
     /**
      * Master can do something useful after the computations 
      */
-    query = load_sym(module,"userdefined_masterOUT");
+   // printf("master out\n");
+    query = lt_dlsym(module,"userdefined_masterOUT");
     query(mpi_size, &d, rawdata);
 
-    //free(rawdata);
-    
     return;
 }
 
@@ -551,18 +559,19 @@ static void master(void* module, char* module_name, int mrl){
  * SLAVE
  *
  */
-static void slave(void *module, char *module_name, int mrl){
+static void slave(lt_dlhandle module, int mrl){
 
     int *tab=malloc(3*sizeof(*tab));
     int k = 0, i = 0, j = 0;
-    const char *dlr;
+    //const char *dlr;
 
     module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qpx, qpc;
     
     masterData raw;
     masterData *rawdata;
     rawdata = malloc(sizeof(rawdata) + (mrl-1) * sizeof(MY_DATATYPE));
-    //clearArray(rawdata.res,ITEMS_IN_ARRAY(rawdata.res));
+    
+//    clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
    
     struct slaveData_t *s;
     s = makeSlaveData();
@@ -570,15 +579,15 @@ static void slave(void *module, char *module_name, int mrl){
     /**
      * Slave can do something useful before computations
      */
-    query = load_sym(module, "userdefined_slaveIN");
+    query = lt_dlsym(module, "userdefined_slaveIN");
     query(mpi_rank, &d, rawdata, s);
 
-    qbeforeR = load_sym(module, "userdefined_slave_beforeReceive");
+    qbeforeR = lt_dlsym(module, "userdefined_slave_beforeReceive");
     qbeforeR(mpi_rank, &d, rawdata, s);
     
     MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
     
-    qafterR = load_sym(module, "userdefined_slave_afterReceive");
+    qafterR = lt_dlsym(module, "userdefined_slave_afterReceive");
     qafterR(mpi_rank, &d, rawdata, s);
 
     while(1){
@@ -597,10 +606,10 @@ static void slave(void *module, char *module_name, int mrl){
           /**
            * DO SOMETHING HERE
            */
-          qpx = load_sym(module, "userdefined_pixelCompute");
+          qpx = lt_dlsym(module, "userdefined_pixelCompute");
           qpx(mpi_rank, mrl, &d, rawdata, s);
           
-          qbeforeS = load_sym(module, "userdefined_slave_beforeSend");
+          qbeforeS = lt_dlsym(module, "userdefined_slave_beforeSend");
           qbeforeS(mpi_rank, &d, rawdata, s);
           
           position = 0;
@@ -608,15 +617,15 @@ static void slave(void *module, char *module_name, int mrl){
           MPI_Pack(rawdata->res, mrl, MY_MPI_DATATYPE, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Send(buffer, position, MPI_PACKED, mpi_dest, result_tag, MPI_COMM_WORLD);
           
-          qafterS = load_sym(module, "userdefined_slave_afterSend");
+          qafterS = lt_dlsym(module, "userdefined_slave_afterSend");
           qafterS(mpi_rank, &d, rawdata, s);
         
-          qbeforeR = load_sym(module, "userdefined_slave_beforeReceive");
+          qbeforeR = lt_dlsym(module, "userdefined_slave_beforeReceive");
           qbeforeR(mpi_rank, &d, rawdata, s);
           
           MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
           
-          qafterR = load_sym(module, "userdefined_slave_afterReceive");
+          qafterR = lt_dlsym(module, "userdefined_slave_afterReceive");
           qafterR(mpi_rank, &d, rawdata, s);
         }
 
@@ -627,13 +636,13 @@ static void slave(void *module, char *module_name, int mrl){
            * and pixelCompute
            *
            */
-          qpc = load_sym(module, "userdefined_pixelCoords");
+          qpc = lt_dlsym(module, "userdefined_pixelCoords");
           qpc(mpi_rank, tab, &d, rawdata, s);
           
-          qpx = load_sym(module, "userdefined_pixelCompute");
+          qpx = lt_dlsym(module, "userdefined_pixelCompute");
           qpx(mpi_rank, mrl, &d, rawdata, s);
           
-          qbeforeS = load_sym(module, "userdefined_slave_beforeSend");
+          qbeforeS = lt_dlsym(module, "userdefined_slave_beforeSend");
           qbeforeS(mpi_rank, &d, rawdata, s);
           
           position = 0;
@@ -641,15 +650,15 @@ static void slave(void *module, char *module_name, int mrl){
           MPI_Pack(rawdata->res, mrl, MY_MPI_DATATYPE, buffer, maxsize, &position, MPI_COMM_WORLD);
           MPI_Send(buffer, position, MPI_PACKED, mpi_dest, result_tag, MPI_COMM_WORLD);
           
-          qafterS = load_sym(module, "userdefined_slave_afterSend");
+          qafterS = lt_dlsym(module, "userdefined_slave_afterSend");
           qafterS(mpi_rank, &d, rawdata, s);
           
-          qbeforeR = load_sym(module, "userdefined_slave_beforeReceive");
+          qbeforeR = lt_dlsym(module, "userdefined_slave_beforeReceive");
           qbeforeR(mpi_rank, &d, rawdata, s);
           
           MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
           
-          qafterR = load_sym(module, "userdefined_slave_afterReceive");
+          qafterR = lt_dlsym(module, "userdefined_slave_afterReceive");
           qafterR(mpi_rank, &d, rawdata, s);
        }
     }
@@ -660,10 +669,9 @@ static void slave(void *module, char *module_name, int mrl){
     /**
      * Slave can do something useful after computations
      */
-    query = load_sym(module, "userdefined_slaveOUT");
+    query = lt_dlsym(module, "userdefined_slaveOUT");
     query(mpi_rank, &d, rawdata, s);
 
- //   free(rawdata);
     return;
 }
 
@@ -693,7 +701,7 @@ int* map2d(int c, void *module){
     * Method 6: user defined control
     */
    if(method == 6){
-    qpcm = load_sym(module, "userdefined_pixelCoordsMap"); 
+    qpcm = lt_dlsym(module, "userdefined_pixelCoordsMap"); 
     qpcm(ind, c, x, y);
    }
 
@@ -713,18 +721,17 @@ void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 	return;
 }
 
-void* load_sym(char *module, char *func){
-  
-  void* handler;
-  const char* dlr;
-
-  dlerror();
-  handler = dlsym(module, func);
-  dlr = dlerror();
-  if(dlr){
-    printf("Cannot find mpifarm_module_init in module '%s': %s\n", module, dlr);
-    MPI_Abort(MPI_COMM_WORLD, 914);
-  }
-  return handler;
+static void master_test(lt_dlhandle mod){
+  module_query_void_f qq;
+  qq = lt_dlsym(mod,"mpifarm_module_query");
+  return;
 }
-
+static void slave_test(lt_dlhandle mod){
+  module_query_void_f qq;
+    
+  struct slaveData_t *s;
+  s = makeSlaveData();
+   
+  qq = lt_dlsym(mod,"mpifarm_module_query");
+  return;
+}

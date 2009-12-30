@@ -1,8 +1,8 @@
 #ifndef MPIFARM_USER_H
 #define MPIFARM_USER_H
 
-#undef MAX_RESULT_LENGTH
-#define MAX_RESULT_LENGTH 12
+//#undef MAX_RESULT_LENGTH
+//#define MAX_RESULT_LENGTH 12
 
 #undef MY_DATATYPE
 #define MY_DATATYPE double

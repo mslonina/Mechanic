@@ -1,5 +1,5 @@
-#ifndef PLUGIN_H
-#define PLUGIN_H
+#ifndef MODULE_H
+#define MODULE_H
 
 #define ELEMENTS 20
 

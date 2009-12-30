@@ -23,7 +23,7 @@
 #include "readconfig.h"
 #include "mpifarm_module_default.h"
 #include <string.h>
-#include <dlfcn.h>
+#include <ltdl.h>
 #include "hdf5.h"
 #include <math.h>
 
@@ -42,7 +42,7 @@ void mpifarm_module_query(struct yourdata *pointer){
 void mpifarm_module_cleanup(struct yourdata *pointer){
   //printf("Module DEFAULT CLEANUP: %f\n", pointer->aa + pointer->bb);
 
- // free(pointer);
+  free(pointer);
   return;
 }
 
@@ -116,7 +116,7 @@ void userdefined_pixelCompute(int slave, int mrl, inputData_t *d, masterData *r,
    for(i = 0; i < mrl; i++){
      // r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
      // r->res[i] = i*r->res[i]/(pow(slave, 2.0));
-     r->res[i] = 1.0 * i;
+     r->res[i] = (MY_DATATYPE) 1.0 * i;
    }
   
    return;
@@ -142,7 +142,7 @@ void userdefined_masterIN(int mpi_size, inputData_t *d){
  *
  */
 void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
- /* 
+  
   int i;
   hid_t fname, masterfile, masterdatagroup;
   herr_t stat;
@@ -153,11 +153,11 @@ void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
 
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
   masterdatagroup = H5Gopen(masterfile, DATAGROUP, H5P_DEFAULT);
-  */
+  
   /**
    * Copy data from slaves to one master file
    */
-  /*for(i = 1; i < mpi_size; i++){
+  for(i = 1; i < mpi_size; i++){
     sprintf(groupname,"%s%d", groupbase,i);
     sprintf(filename,"%s-%s%d.h5", d->name, filebase,i);
    
@@ -169,7 +169,7 @@ void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
 
   H5Gclose(masterdatagroup);
   H5Fclose(masterfile);
-  */
+  
   printf("Master process OVER & OUT.\n");
   return;
 }
@@ -257,8 +257,6 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
   H5Gclose(gid);
   H5Fclose(sfile_id);
 
-  printf("Slave[%d] out\n", slave);
-
    return;
 }
 
@@ -272,7 +270,7 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
  */
 void userdefined_slaveOUT(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
   
-  //printf("SLAVE[%d] OVER & OUT\n",slave);
+  printf("SLAVE[%d] OVER & OUT\n",slave);
 
   return;
 }
@@ -314,19 +312,19 @@ int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData
 
   int i = 0, k = 0, opts = 0, offset = 0;
   module_query_int_f qinit;
-  void *module;
+  lt_dlhandle module;
   const char dlr;
 
-  module = dlopen("libreadconfig.so", RTLD_NOW);
+  module = lt_dlopen("libreadconfig.so");
   if(!module){
-    printf("Cannot load module libreadconfig: %s\n", dlerror()); 
+    printf("Cannot load module libreadconfig: %s\n", lt_dlerror()); 
     exit(1);
   }
-  qinit = dlsym(module, "parseConfigFile");
+  qinit = lt_dlsym(module, "parseConfigFile");
   
   opts = qinit(inifile, sep, comm);
 
-  dlclose(module);
+  lt_dlclose(module);
 
 	for(i = 0; i < opts; i++){
     if(strcmp(configSpace[i].space,"default") == 0){

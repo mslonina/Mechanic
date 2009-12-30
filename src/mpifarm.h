@@ -14,7 +14,8 @@
 #include <dirent.h>
 #include <math.h>
 #include <popt.h>
-#include <dlfcn.h>
+//#include <dlfcn.h>
+#include <ltdl.h>
 
 #include "mpi.h"
 #include "hdf5.h"
@@ -47,7 +48,7 @@
  */
 typedef struct {
  int coords[3]; //0 - x 1 - y 2 - number of the pixel
- MY_DATATYPE res[1];
+ MY_DATATYPE res[10];
 } masterData;
 
 #define ITEMS_IN_ARRAY(x) sizeof(x)/sizeof(*(x))
