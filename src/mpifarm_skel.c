@@ -14,6 +14,8 @@ static void master(void*, int);
 static void slave(void*, int);
 void clearArray(MY_DATATYPE*,int);
 void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
+void buildDefaultConfigType(inputData_t* d, MPI_Datatype* defaultConfigType_ptr);
+int readDefaultConfig(char* inifile, char* sep, char* comm, inputData_t *d);
 
 /* Simplified struct for writing config data to hdf file */
 typedef struct {
@@ -69,9 +71,6 @@ int main(int argc, char *argv[]){
 
   int mrl;
   mrl = 15;
-
-  module_query_int_f qconfig;
-  module_query_void_f qbcast;
 
   /*  Default config and module file */
   inifile = CONFIG_FILE_DEFAULT;
@@ -150,21 +149,21 @@ int main(int argc, char *argv[]){
    * Each slave knows exactly what is all about
    * -- it is much easier to handle
    */
+  MPI_Datatype defaultConfigType;
+  buildDefaultConfigType(&d, &defaultConfigType);
+
   if(mpi_rank == 0){
-    qconfig = dlsym(module, "userdefined_readConfigValues");
-    allopts = qconfig(inifile, sep, comm, &d); 
-   
+   allopts = readDefaultConfig(inifile, sep, comm, &d);
     if (d.xres == 0 || d.yres == 0){
-       printf("X/Y map resolution should not set to 0!\n");
+       printf("X/Y map resolution should not be set to 0!\n");
        printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
        MPI_Abort(MPI_COMM_WORLD, 911);
     }
-    //qbcast = dlsym(module, "userdefined_mpiBcast");
-    //qbcast(mpi_rank,&d);
+    MPI_Bcast(&d, 1, defaultConfigType, 0, MPI_COMM_WORLD);
   }else{
-    //qbcast = dlsym(module, "userdefined_mpiBcast");
-    //qbcast(mpi_rank,&d);
+    MPI_Bcast(&d, 1, defaultConfigType, 0, MPI_COMM_WORLD);
   }
+  MPI_Type_free(&defaultConfigType);
 
   /**
    * BY DESIGN
@@ -186,11 +185,8 @@ int main(int argc, char *argv[]){
   cleanup = dlsym(module, "mpifarm_module_cleanup");
 
   cleanup(pointer);
-  
   dlclose(module);
-
   poptFreeContext(poptcon);
-
 	MPI_Finalize();
 
   return 0;
@@ -387,7 +383,7 @@ static void master(void* module, int mrl){
     * terminate them
     */
    for(i = nodes; i < mpi_size; i++){
-     MPI_Send(map2d(npxc, module), 3, MPI_INT, i, terminate_tag, MPI_COMM_WORLD);
+  //   MPI_Send(map2d(npxc, module), 3, MPI_INT, i, terminate_tag, MPI_COMM_WORLD);
    }
 
    /**
@@ -450,12 +446,13 @@ static void master(void* module, int mrl){
         break;
       }
     }
+   //MPI_Type_free(&masterResultsType);
 
     /** 
      * No more work to do, receive the outstanding results from the slaves 
      * We've got exactly 'count' messages to receive 
      */
-    buildMasterResultsType(mrl, rawdata, &masterResultsType);
+    //buildMasterResultsType(mrl, rawdata, &masterResultsType);
     for (i = 0; i < count; i++){
       
       qbeforeR = dlsym(module, "userdefined_master_beforeReceive");
@@ -494,11 +491,12 @@ static void master(void* module, int mrl){
         hdf_status = H5Dwrite(dset_data, H5T_NATIVE_DOUBLE, memrawspace, rawspace, H5P_DEFAULT, rdata);
 
     }
+   //MPI_Type_free(&masterResultsType);
 
     /**
      * Now, terminate the slaves 
      */
-    for (i = 1; i < nodes; i++){
+    for (i = 1; i < mpi_size; i++){
         MPI_Send(map2d(npxc, module), 3, MPI_INT, i, terminate_tag, MPI_COMM_WORLD);
     }
 
@@ -522,7 +520,7 @@ static void master(void* module, int mrl){
      * Master can do something useful after the computations 
      */
     query = dlsym(module,"userdefined_masterOUT");
-    query(mpi_size, &d, rawdata);
+    query(nodes, &d, rawdata);
 
     return;
 }
@@ -667,6 +665,36 @@ void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 }
 
 /**
+ * DEFAULT CONFIG FILE PARSER
+ */
+int readDefaultConfig(char* inifile, char* sep, char* comm, inputData_t *d){
+
+  int i = 0, k = 0, opts = 0, offset = 0;
+
+  opts = parseConfigFile(inifile, sep, comm);
+	for(i = 0; i < opts; i++){
+    if(strcmp(configSpace[i].space,"default") == 0){
+		  for(k = 0; k < configSpace[i].num; k++){
+			  if(strcmp(configSpace[i].options[k].name,"name") == 0){
+          strcpy(d->name,configSpace[i].options[k].value);
+          strcpy(d->datafile, strcat(configSpace[i].options[k].value,"-master.h5"));  
+        }
+			  if(strcmp(configSpace[i].options[k].name,"xres") == 0) d->xres = atoi(configSpace[i].options[k].value);  
+        if(strcmp(configSpace[i].options[k].name,"yres") == 0) d->yres = atoi(configSpace[i].options[k].value); 
+			  if(strcmp(configSpace[i].options[k].name,"method") == 0) d->method = atoi(configSpace[i].options[k].value); 
+    }
+    }
+    if(strcmp(configSpace[i].space,"logs") == 0){
+		  for(k = 0; k < configSpace[i].num; k++){
+			  if(strcmp(configSpace[i].options[k].name,"dump") == 0) d->dump = atoi(configSpace[i].options[k].value); 
+      }
+    }
+	}
+
+  return opts;
+}
+
+/**
  * MPI DERIVED DATATYPE 
  * for master result Send/Recv
  */
@@ -674,8 +702,8 @@ void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResults
 
   int block_lengths[2];
   MPI_Aint displacements[2];
-  MPI_Aint addresses[3];
   MPI_Datatype typelist[2];
+  MPI_Aint addresses[3];
 
   typelist[0] = MPI_INT;
   typelist[1] = MPI_DOUBLE;
@@ -693,3 +721,49 @@ void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResults
   MPI_Type_struct(2, block_lengths, displacements, typelist, masterResultsType_ptr);
   MPI_Type_commit(masterResultsType_ptr);
 }
+
+/**
+ * MPI DERIVED TYPE
+ * for reading default config file
+ */
+void buildDefaultConfigType(inputData_t* d, MPI_Datatype* defaultConfigType_ptr){
+  
+  int block_lengths[6];
+  MPI_Aint displacements[6];
+  MPI_Datatype typelist[6];
+  MPI_Aint addresses[7];
+
+  typelist[0] = MPI_INT;
+  typelist[1] = MPI_INT;
+  typelist[2] = MPI_INT;
+  typelist[3] = MPI_INT;
+  typelist[4] = MPI_CHAR;
+  typelist[5] = MPI_CHAR;
+
+  block_lengths[0] = 1;
+  block_lengths[1] = 1;
+  block_lengths[2] = 1;
+  block_lengths[3] = 1;
+  block_lengths[4] = 256;
+  block_lengths[5] = 260;
+
+  MPI_Address(d, &addresses[0]);
+  MPI_Address(&(d->xres), &addresses[1]);
+  MPI_Address(&(d->yres), &addresses[2]);
+  MPI_Address(&(d->method), &addresses[3]);
+  MPI_Address(&(d->dump), &addresses[4]);
+  MPI_Address(&(d->name), &addresses[5]);
+  MPI_Address(&(d->datafile), &addresses[6]);
+
+  displacements[0] = addresses[1] - addresses[0];
+  displacements[1] = addresses[2] - addresses[0];
+  displacements[2] = addresses[3] - addresses[0];
+  displacements[3] = addresses[4] - addresses[0];
+  displacements[4] = addresses[5] - addresses[0];
+  displacements[5] = addresses[6] - addresses[0];
+  
+  MPI_Type_struct(6, block_lengths, displacements, typelist, defaultConfigType_ptr);
+  MPI_Type_commit(defaultConfigType_ptr);
+
+}
+

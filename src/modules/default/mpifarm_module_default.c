@@ -141,9 +141,9 @@ void userdefined_masterIN(int mpi_size, inputData_t *d){
  * Here, we just copy slave data files into one master file
  *
  */
-void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
+void userdefined_masterOUT(int nodes, inputData_t *d, masterData *r){
   
-  int i;
+  int i = 0;
   hid_t fname, masterfile, masterdatagroup;
   herr_t stat;
   const char groupbase[] = "slave";
@@ -151,21 +151,26 @@ void userdefined_masterOUT(int mpi_size, inputData_t *d, masterData *r){
   const char filebase[] = "slave";
   char filename[512];
 
+  printf("masterfile: %s\n", d->datafile);
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
   masterdatagroup = H5Gopen(masterfile, DATAGROUP, H5P_DEFAULT);
   
   /**
    * Copy data from slaves to one master file
    */
-  for(i = 1; i < mpi_size; i++){
+  printf("before loop [%d]\n",nodes);
+  for(i = 1; i < nodes; i++){
     sprintf(groupname,"%s%d", groupbase,i);
     sprintf(filename,"%s-%s%d.h5", d->name, filebase,i);
    
+    printf("filename[%d]: %s\n", i, filename);
     fname = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
+  //  if(stat < 0) printf("copy error\n");
     H5Fclose(fname);
 
   }
+  printf("after loop\n");
 
   H5Gclose(masterdatagroup);
   H5Fclose(masterfile);
@@ -190,7 +195,6 @@ void userdefined_master_beforeReceive(inputData_t *d, masterData *r){
   return;
 }
 void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
-//  printf("RECV from s[%d]: px[%d, %d, %d], res[%d] = %f.\n", slave, r->coords[0], r->coords[1], r->coords[2], 4, r->res[4]);
   return;
 }
 
@@ -228,8 +232,7 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
   const char cbase[] = "Hello from slave ";
   char comment[1024];
 
-  sprintf(node, "test2-%s%d.h5", sbase, slave);
-  //sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
+  sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
   sprintf(group, "%s%d", gbase, slave);
 
   /**
@@ -289,15 +292,12 @@ void userdefined_slave_beforeSend(int slave, inputData_t *d, masterData *r, stru
   return;
 }
 void userdefined_slave_afterSend(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
-  //printf("SLAVE[%d] qafterS\n",slave);
   return;
 }
 void userdefined_slave_beforeReceive(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
-  //printf("SLAVE[%d] qbeforeR\n",slave);
   return;
 }
 void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
-  //printf("SLAVE[%d] qafterR\n",slave);
   return;
 }
 
@@ -309,7 +309,7 @@ void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, st
  * Adjust the parser to Your initial data struct from mpifarm_user.h
  *
  */
-int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData_t *d){
+/*int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData_t *d){
 
   int i = 0, k = 0, opts = 0, offset = 0;
   module_query_int_f qinit;
@@ -353,7 +353,7 @@ int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData
 
   return opts;
 }
-
+*/
 /**
  * USER DEFINED MPI BCAST
  * 
@@ -361,7 +361,7 @@ int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData
  *
  */
 
-void userdefined_mpiBcast(int mpi_rank, inputData_t *d){
+/*void userdefined_mpiBcast(int mpi_rank, inputData_t *d){
 
   int buff_size = 1000;
   int *ibuff;
@@ -424,4 +424,4 @@ void userdefined_mpiBcast(int mpi_rank, inputData_t *d){
   free(nbuff);
   
   return;
-}
+}*/
