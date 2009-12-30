@@ -23,7 +23,7 @@
 #include "readconfig.h"
 #include "mpifarm_module_default.h"
 #include <string.h>
-#include <ltdl.h>
+#include <dlfcn.h>
 #include "hdf5.h"
 #include <math.h>
 
@@ -190,7 +190,7 @@ void userdefined_master_beforeReceive(inputData_t *d, masterData *r){
   return;
 }
 void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
-  printf("RECV from s[%d]: px[%d, %d, %d], res[%d] = %f.\n", slave, r->coords[0], r->coords[1], r->coords[2], 4, r->res[4]);
+//  printf("RECV from s[%d]: px[%d, %d, %d], res[%d] = %f.\n", slave, r->coords[0], r->coords[1], r->coords[2], 4, r->res[4]);
   return;
 }
 
@@ -228,7 +228,8 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
   const char cbase[] = "Hello from slave ";
   char comment[1024];
 
-  sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
+  sprintf(node, "test2-%s%d.h5", sbase, slave);
+  //sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
   sprintf(group, "%s%d", gbase, slave);
 
   /**
@@ -312,19 +313,18 @@ int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData
 
   int i = 0, k = 0, opts = 0, offset = 0;
   module_query_int_f qinit;
-  lt_dlhandle module;
-  const char dlr;
+  void* module;
 
-  module = lt_dlopen("libreadconfig.so");
+  module = dlopen("libreadconfig.so", RTLD_NOW);
   if(!module){
-    printf("Cannot load module libreadconfig: %s\n", lt_dlerror()); 
+    printf("Cannot load module libreadconfig: %s\n", dlerror()); 
     exit(1);
   }
-  qinit = lt_dlsym(module, "parseConfigFile");
+  qinit = dlsym(module, "parseConfigFile");
   
   opts = qinit(inifile, sep, comm);
 
-  lt_dlclose(module);
+  dlclose(module);
 
 	for(i = 0; i < opts; i++){
     if(strcmp(configSpace[i].space,"default") == 0){

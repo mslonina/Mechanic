@@ -9,12 +9,11 @@
 #include "mpifarm.h"
 #include <string.h>
 
-static int* map2d(int, void *);
-static void master(lt_dlhandle, int);
-static void slave(lt_dlhandle, int);
-static void master_test(lt_dlhandle);
-static void slave_test(lt_dlhandle);
+static int* map2d(int, void*);
+static void master(void*, int);
+static void slave(void*, int);
 void clearArray(MY_DATATYPE*,int);
+void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
 
 /* Simplified struct for writing config data to hdf file */
 typedef struct {
@@ -36,17 +35,9 @@ int xres = 0, yres = 0, method = 0, datasetx = 1, datasety = 3;
 /* mpi */ 
 MPI_Status mpi_status;
 int mpi_rank, mpi_size, mpi_dest = 0, mpi_tag = 0;
-int farm_res = 0;
-int npxc = 0; //number of all sent pixels
-int count = 0; //number of pixels to receive
 int source_tag = 0, data_tag = 2, result_tag = 59, terminate_tag = 99; //data tags
 
 int masteralone = 0;
-int nodes = 0;
-
-unsigned int membersize, maxsize;
-int position, msgsize;
-char *buffer;
 
 int i = 0, j = 0, k = 0, opts = 0, n = 0;
 
@@ -67,7 +58,7 @@ int main(int argc, char *argv[]){
 
   char *module_name;
   char module_file[256];
-  lt_dlhandle module;
+  void* module;
   char *dlresult;
   char optvalue;
 
@@ -97,7 +88,6 @@ int main(int argc, char *argv[]){
     POPT_TABLEEND
   };
 
-  lt_dlinit();
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
@@ -135,17 +125,17 @@ int main(int argc, char *argv[]){
   }
 
   /**
-   * Plugin loading, if option -m is not set, use default
+   * Module loading, if option -m is not set, use default
    */
   sprintf(module_file, "mpifarm_module_%s.so", module_name);
   
-  module = lt_dlopen(module_file);
+  module = dlopen(module_file, RTLD_NOW);
   if(!module){
-    printf("Cannot load module '%s': %s\n", module_name, lt_dlerror()); 
+    printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
     MPI_Abort(MPI_COMM_WORLD, 913);
   }
 
-  init = lt_dlsym(module, "mpifarm_module_init");
+  init = dlsym(module, "mpifarm_module_init");
 
   /* test only */
   struct yourdata *pointer;
@@ -153,7 +143,7 @@ int main(int argc, char *argv[]){
   
   init(pointer);
 
-  query = lt_dlsym(module, "mpifarm_module_query");
+  query = dlsym(module, "mpifarm_module_query");
   query(pointer);
  
   /**
@@ -161,7 +151,7 @@ int main(int argc, char *argv[]){
    * -- it is much easier to handle
    */
   if(mpi_rank == 0){
-    qconfig = lt_dlsym(module, "userdefined_readConfigValues");
+    qconfig = dlsym(module, "userdefined_readConfigValues");
     allopts = qconfig(inifile, sep, comm, &d); 
    
     if (d.xres == 0 || d.yres == 0){
@@ -169,22 +159,13 @@ int main(int argc, char *argv[]){
        printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
        MPI_Abort(MPI_COMM_WORLD, 911);
     }
-    qbcast = lt_dlsym(module, "userdefined_mpiBcast");
-    qbcast(mpi_rank,&d);
+    //qbcast = dlsym(module, "userdefined_mpiBcast");
+    //qbcast(mpi_rank,&d);
   }else{
-    qbcast = lt_dlsym(module, "userdefined_mpiBcast");
-    qbcast(mpi_rank,&d);
+    //qbcast = dlsym(module, "userdefined_mpiBcast");
+    //qbcast(mpi_rank,&d);
   }
 
-  /**
-   * Create data pack
-   */
-  MPI_Pack_size(3, MPI_INT, MPI_COMM_WORLD, &membersize);
-  maxsize = membersize;
-  MPI_Pack_size(mrl, MY_MPI_DATATYPE, MPI_COMM_WORLD, &membersize);
-  maxsize += membersize;
-  buffer = malloc(maxsize);
-      
   /**
    * BY DESIGN
    * Master cannot work alone.
@@ -198,32 +179,19 @@ int main(int argc, char *argv[]){
 
   if(mpi_rank == 0) {
       master(module, mrl);
-  //    master_test(module);
 	} else {
       slave(module, mrl); 
-//      slave_test(module);
   }
 
-  //printf("cleanup lt_dlsym\n");
-  cleanup = lt_dlsym(module, "mpifarm_module_cleanup");
+  cleanup = dlsym(module, "mpifarm_module_cleanup");
 
-  //printf("cleanup \n");
   cleanup(pointer);
   
-  //printf("module close\n");
- // lt_dlerror();
-  lt_dlclose(module);
- //   printf("Closing module '%s': %s\n", module_name, lt_dlerror()); 
+  dlclose(module);
 
-  //printf("poptFree\n");
   poptFreeContext(poptcon);
 
-  //printf("free buffer\n");
-  free(buffer);
-
-  //printf("mpi final\n");
 	MPI_Finalize();
-	lt_dlexit();
 
   return 0;
 }
@@ -232,11 +200,15 @@ int main(int argc, char *argv[]){
  * MASTER
  *
  */
-static void master(lt_dlhandle module, int mrl){
+static void master(void* module, int mrl){
 
    int *tab; 
 	 MY_DATATYPE rdata[mrl][1];
    int i = 0, k = 0, j = 0;
+   int nodes = 0;
+   int farm_res = 0;
+   int npxc = 0; //number of all sent pixels
+   int count = 0; //number of pixels to receive
    
    module_query_void_f queryIN, queryOUT, qbeforeS, qafterS, qbeforeR, qafterR;
    module_query_int_f qr;
@@ -244,21 +216,21 @@ static void master(lt_dlhandle module, int mrl){
    masterData raw;
    masterData *rawdata;
  
-  /**
+   /**
     * Allocate memory for rawdata.res array
     */
    rawdata = malloc(sizeof(rawdata) + (mrl-1) * sizeof(MY_DATATYPE));
 
-  // clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
+   clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
    
    printf("MAP RESOLUTION = %dx%d.\n", d.xres, d.yres);
-   printf("COMM_SIZE = %d.\n", mpi_size);
+   printf("MPI_SIZE = %d.\n", mpi_size);
    printf("METHOD = %d.\n", d.method);
 
    /**
     * Master can do something useful before computations
     */
-   query = lt_dlsym(module, "userdefined_masterIN");
+   query = dlsym(module, "userdefined_masterIN");
    query(mpi_size, &d);
 
    /**
@@ -269,7 +241,7 @@ static void master(lt_dlhandle module, int mrl){
    if (method == 1) farm_res = d.xres; //sliceX
    if (method == 2) farm_res = d.yres; //sliceY
    if (method == 6){
-     qr = lt_dlsym(module, "userdefined_farmResolution");
+     qr = dlsym(module, "userdefined_farmResolution");
      farm_res = qr(d.xres, d.yres);
    }
 
@@ -394,43 +366,47 @@ static void master(lt_dlhandle module, int mrl){
    if (farm_res < mpi_size) nodes = farm_res + 1;
 
    /**
-    * Send tasks to all slaves
+    * Send tasks to all slaves,
+    * remembering what the farm resolution is
     */
    for (i = 1; i < nodes; i++){
-     qbeforeS = lt_dlsym(module,"userdefined_master_beforeSend");
+     qbeforeS = dlsym(module,"userdefined_master_beforeSend");
      qbeforeS(i,&d,rawdata);
 
      MPI_Send(map2d(npxc, module), 3, MPI_INT, i, data_tag, MPI_COMM_WORLD);
      
-     qafterS = lt_dlsym(module, "userdefined_master_afterSend");
+     qafterS = dlsym(module, "userdefined_master_afterSend");
      qafterS(i,&d,rawdata);
      
      count++;
      npxc++;
    }
+   
+   /**
+    * We don't want to have slaves idle, so, if there are some idle slaves
+    * terminate them
+    */
+   for(i = nodes; i < mpi_size; i++){
+     MPI_Send(map2d(npxc, module), 3, MPI_INT, i, terminate_tag, MPI_COMM_WORLD);
+   }
 
    /**
     * Receive data and send tasks
     */
+   MPI_Datatype masterResultsType;
+   buildMasterResultsType(mrl, rawdata, &masterResultsType);
+   
    while (1) {
     
-     qbeforeR = lt_dlsym(module, "userdefined_master_beforeReceive");
+     qbeforeR = dlsym(module, "userdefined_master_beforeReceive");
      qbeforeR(&d,rawdata);
       
-     MPI_Recv(buffer, maxsize, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
+     MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
      count--;
       
-      /**
-       * Unpack data sent by the slave
-       */
-      position = 0;
-      MPI_Get_count(&mpi_status, MPI_PACKED, &msgsize);
-      MPI_Unpack(buffer, msgsize, &position, rawdata->coords, 3, MPI_INT, MPI_COMM_WORLD);
-      MPI_Unpack(buffer, msgsize, &position, rawdata->res, mrl, MY_MPI_DATATYPE, MPI_COMM_WORLD);
-     
-      qafterR = lt_dlsym(module, "userdefined_master_afterReceive");
+      qafterR = dlsym(module, "userdefined_master_afterReceive");
       qafterR(mpi_status.MPI_SOURCE, &d, rawdata);
-
+      
       /**
        * Write results to master file
        */
@@ -461,14 +437,14 @@ static void master(lt_dlhandle module, int mrl){
        */
       if (npxc < farm_res){
        
-        qbeforeS = lt_dlsym(module, "userdefined_master_beforeSend");
+        qbeforeS = dlsym(module, "userdefined_master_beforeSend");
         qbeforeS(mpi_status.MPI_SOURCE, &d, rawdata);
          
         MPI_Send(map2d(npxc, module), 3, MPI_INT, mpi_status.MPI_SOURCE, data_tag, MPI_COMM_WORLD);
         npxc++;
         count++;
         
-        qafterS = lt_dlsym(module, "userdefined_master_afterSend");
+        qafterS = dlsym(module, "userdefined_master_afterSend");
         qafterS(mpi_status.MPI_SOURCE, &d, rawdata);
       } else {
         break;
@@ -479,18 +455,15 @@ static void master(lt_dlhandle module, int mrl){
      * No more work to do, receive the outstanding results from the slaves 
      * We've got exactly 'count' messages to receive 
      */
+    buildMasterResultsType(mrl, rawdata, &masterResultsType);
     for (i = 0; i < count; i++){
       
-      qbeforeR = lt_dlsym(module, "userdefined_master_beforeReceive");
+      qbeforeR = dlsym(module, "userdefined_master_beforeReceive");
       qbeforeR(&d, rawdata);
         
-      MPI_Recv(buffer, maxsize, MPI_PACKED, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-      position = 0;
-      MPI_Get_count(&mpi_status, MPI_PACKED, &msgsize);
-      MPI_Unpack(buffer, msgsize, &position, rawdata->coords, 3, MPI_INT, MPI_COMM_WORLD);
-      MPI_Unpack(buffer, msgsize, &position, rawdata->res, mrl, MY_MPI_DATATYPE, MPI_COMM_WORLD);
+      MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
       
-      qafterR = lt_dlsym(module, "userdefined_master_afterReceive");
+      qafterR = dlsym(module, "userdefined_master_afterReceive");
       qafterR(mpi_status.MPI_SOURCE, &d, rawdata);
         
         /**
@@ -525,7 +498,7 @@ static void master(lt_dlhandle module, int mrl){
     /**
      * Now, terminate the slaves 
      */
-    for (i = 1; i < mpi_size; i++){
+    for (i = 1; i < nodes; i++){
         MPI_Send(map2d(npxc, module), 3, MPI_INT, i, terminate_tag, MPI_COMM_WORLD);
     }
 
@@ -548,8 +521,7 @@ static void master(lt_dlhandle module, int mrl){
     /**
      * Master can do something useful after the computations 
      */
-   // printf("master out\n");
-    query = lt_dlsym(module,"userdefined_masterOUT");
+    query = dlsym(module,"userdefined_masterOUT");
     query(mpi_size, &d, rawdata);
 
     return;
@@ -559,11 +531,11 @@ static void master(lt_dlhandle module, int mrl){
  * SLAVE
  *
  */
-static void slave(lt_dlhandle module, int mrl){
+static void slave(void* module, int mrl){
 
     int *tab=malloc(3*sizeof(*tab));
     int k = 0, i = 0, j = 0;
-    //const char *dlr;
+    MPI_Datatype masterResultsType;
 
     module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qpx, qpc;
     
@@ -571,7 +543,7 @@ static void slave(lt_dlhandle module, int mrl){
     masterData *rawdata;
     rawdata = malloc(sizeof(rawdata) + (mrl-1) * sizeof(MY_DATATYPE));
     
-//    clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
+    clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
    
     struct slaveData_t *s;
     s = makeSlaveData();
@@ -579,19 +551,22 @@ static void slave(lt_dlhandle module, int mrl){
     /**
      * Slave can do something useful before computations
      */
-    query = lt_dlsym(module, "userdefined_slaveIN");
+    query = dlsym(module, "userdefined_slaveIN");
     query(mpi_rank, &d, rawdata, s);
 
-    qbeforeR = lt_dlsym(module, "userdefined_slave_beforeReceive");
+    qbeforeR = dlsym(module, "userdefined_slave_beforeReceive");
     qbeforeR(mpi_rank, &d, rawdata, s);
     
     MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
     
-    qafterR = lt_dlsym(module, "userdefined_slave_afterReceive");
+    qafterR = dlsym(module, "userdefined_slave_afterReceive");
     qafterR(mpi_rank, &d, rawdata, s);
 
+    buildMasterResultsType(mrl, rawdata, &masterResultsType);
+    
     while(1){
 
+     if(mpi_status.MPI_TAG == terminate_tag) break;     
      if(mpi_status.MPI_TAG == data_tag){ 
       
        /**
@@ -602,74 +577,44 @@ static void slave(lt_dlhandle module, int mrl){
           rawdata->coords[0] = tab[0];
           rawdata->coords[1] = tab[1];
           rawdata->coords[2] = tab[2];
-          
-          /**
-           * DO SOMETHING HERE
-           */
-          qpx = lt_dlsym(module, "userdefined_pixelCompute");
-          qpx(mpi_rank, mrl, &d, rawdata, s);
-          
-          qbeforeS = lt_dlsym(module, "userdefined_slave_beforeSend");
-          qbeforeS(mpi_rank, &d, rawdata, s);
-          
-          position = 0;
-          MPI_Pack(rawdata->coords, 3, MPI_INT, buffer, maxsize, &position, MPI_COMM_WORLD);
-          MPI_Pack(rawdata->res, mrl, MY_MPI_DATATYPE, buffer, maxsize, &position, MPI_COMM_WORLD);
-          MPI_Send(buffer, position, MPI_PACKED, mpi_dest, result_tag, MPI_COMM_WORLD);
-          
-          qafterS = lt_dlsym(module, "userdefined_slave_afterSend");
-          qafterS(mpi_rank, &d, rawdata, s);
-        
-          qbeforeR = lt_dlsym(module, "userdefined_slave_beforeReceive");
-          qbeforeR(mpi_rank, &d, rawdata, s);
-          
-          MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-          
-          qafterR = lt_dlsym(module, "userdefined_slave_afterReceive");
-          qafterR(mpi_rank, &d, rawdata, s);
-        }
-
+       }
        if (method == 6){
 
           /**
            * Use userdefined pixelCoords method
-           * and pixelCompute
-           *
            */
-          qpc = lt_dlsym(module, "userdefined_pixelCoords");
+          qpc = dlsym(module, "userdefined_pixelCoords");
           qpc(mpi_rank, tab, &d, rawdata, s);
-          
-          qpx = lt_dlsym(module, "userdefined_pixelCompute");
+       } 
+          /**
+           * DO SOMETHING HERE
+           */
+          qpx = dlsym(module, "userdefined_pixelCompute");
           qpx(mpi_rank, mrl, &d, rawdata, s);
           
-          qbeforeS = lt_dlsym(module, "userdefined_slave_beforeSend");
+          qbeforeS = dlsym(module, "userdefined_slave_beforeSend");
           qbeforeS(mpi_rank, &d, rawdata, s);
-          
-          position = 0;
-          MPI_Pack(rawdata->coords, 3, MPI_INT, buffer, maxsize, &position, MPI_COMM_WORLD);
-          MPI_Pack(rawdata->res, mrl, MY_MPI_DATATYPE, buffer, maxsize, &position, MPI_COMM_WORLD);
-          MPI_Send(buffer, position, MPI_PACKED, mpi_dest, result_tag, MPI_COMM_WORLD);
-          
-          qafterS = lt_dlsym(module, "userdefined_slave_afterSend");
+         
+          MPI_Send(rawdata, 1, masterResultsType, mpi_dest, result_tag, MPI_COMM_WORLD);
+
+          qafterS = dlsym(module, "userdefined_slave_afterSend");
           qafterS(mpi_rank, &d, rawdata, s);
-          
-          qbeforeR = lt_dlsym(module, "userdefined_slave_beforeReceive");
+        
+          qbeforeR = dlsym(module, "userdefined_slave_beforeReceive");
           qbeforeR(mpi_rank, &d, rawdata, s);
           
           MPI_Recv(tab, 3, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
           
-          qafterR = lt_dlsym(module, "userdefined_slave_afterReceive");
+          qafterR = dlsym(module, "userdefined_slave_afterReceive");
           qafterR(mpi_rank, &d, rawdata, s);
-       }
-    }
+        }
       
-     if(mpi_status.MPI_TAG == terminate_tag) break;     
     }
     
     /**
      * Slave can do something useful after computations
      */
-    query = lt_dlsym(module, "userdefined_slaveOUT");
+    query = dlsym(module, "userdefined_slaveOUT");
     query(mpi_rank, &d, rawdata, s);
 
     return;
@@ -680,7 +625,7 @@ static void slave(lt_dlhandle module, int mrl){
  *
  */
 
-int* map2d(int c, void *module){
+int* map2d(int c, void* module){
    int *ind = malloc(3*sizeof(*ind));
    int x, y;
    x = d.xres;
@@ -701,7 +646,7 @@ int* map2d(int c, void *module){
     * Method 6: user defined control
     */
    if(method == 6){
-    qpcm = lt_dlsym(module, "userdefined_pixelCoordsMap"); 
+    qpcm = dlsym(module, "userdefined_pixelCoordsMap"); 
     qpcm(ind, c, x, y);
    }
 
@@ -721,17 +666,30 @@ void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 	return;
 }
 
-static void master_test(lt_dlhandle mod){
-  module_query_void_f qq;
-  qq = lt_dlsym(mod,"mpifarm_module_query");
-  return;
-}
-static void slave_test(lt_dlhandle mod){
-  module_query_void_f qq;
-    
-  struct slaveData_t *s;
-  s = makeSlaveData();
-   
-  qq = lt_dlsym(mod,"mpifarm_module_query");
-  return;
+/**
+ * MPI DERIVED DATATYPE 
+ * for master result Send/Recv
+ */
+void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr){
+
+  int block_lengths[2];
+  MPI_Aint displacements[2];
+  MPI_Aint addresses[3];
+  MPI_Datatype typelist[2];
+
+  typelist[0] = MPI_INT;
+  typelist[1] = MPI_DOUBLE;
+
+  block_lengths[0] = 3;
+  block_lengths[1] = mrl;
+
+  MPI_Address(md, &addresses[0]);
+  MPI_Address(md->coords, &addresses[1]);
+  MPI_Address(md->res, &addresses[2]);
+
+  displacements[0] = addresses[1] - addresses[0];
+  displacements[1] = addresses[2] - addresses[0];
+
+  MPI_Type_struct(2, block_lengths, displacements, typelist, masterResultsType_ptr);
+  MPI_Type_commit(masterResultsType_ptr);
 }
