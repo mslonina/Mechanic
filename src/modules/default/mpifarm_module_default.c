@@ -121,7 +121,7 @@ void userdefined_pixelCompute(int slave, configData *d, masterData *r){
    int t;
      t = d->mrl;
 
-     printf("D->MRL = %d\n",d->mrl);
+   //  printf("D->MRL = %d\n",d->mrl);
 
    for(i = 0; i < d->mrl; i++){
      // r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
@@ -174,7 +174,7 @@ void userdefined_masterOUT(int nodes, configData *d, masterData *r){
    
     printf("filename[%d]: %s, groupname[%d]: %s\n", i, filename, i, groupname);
     fname = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-    //stat = H5Ocopy(fname, "/slave%d", masterdatagroup, "slave%d", H5P_DEFAULT, H5P_DEFAULT);
+    stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
     if(stat < 0) printf("copy error\n");
     H5Fclose(fname);
 
