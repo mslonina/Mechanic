@@ -7,7 +7,7 @@
 #undef MY_MPI_DATATYPE
 #define MY_MPI_DATATYPE MPI_DOUBLE
 */
-#undef ELEMENTS
+//#undef ELEMENTS
 #define ELEMENTS 20
 
 #include <stdio.h>

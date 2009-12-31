@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 #include <unistd.h>
 #include <stdarg.h>
 #include <sys/stat.h>
@@ -22,7 +24,9 @@
 #include "readconfig.h"
 
 #define CONFIG_FILE_DEFAULT "config"
+#define NAME_DEFAULT "showme"
 #define MODULE_DEFAULT "default"
+#define MASTER_FILE_DEFAULT "default-master.h5"
 
 #define DATASETCONFIG "/config"
 #define DATABOARD "/board" 
@@ -78,6 +82,27 @@ extern struct slaveData_t *makeSlaveData(void);
 configOptions options[MAX_OPTIONS_NUM];
 configNamespace configSpace[MAX_CONFIG_SIZE];
 
-#include "module.h"
+/* Main config file struct */
+typedef struct {
+  char name[256];
+  char datafile[260];
+  char module[256];
+  int xres;
+  int yres;
+  int method;
+  int mrl;
+  int dump;
+} configData;
+
+/* Simplified struct for writing config data to hdf file */
+typedef struct {
+      char space[MAX_NAME_LENGTH];
+      char varname[MAX_NAME_LENGTH];
+      char value[MAX_VALUE_LENGTH];
+    } simpleopts;
+
+char* sep = "="; char* comm = "#";
+char* inifile;
+char* datafile;
 
 #endif

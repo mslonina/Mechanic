@@ -20,12 +20,8 @@
  */
 
 #include "mpifarm.h"
-#include "readconfig.h"
 #include "mpifarm_module_default.h"
-#include <string.h>
-#include <dlfcn.h>
-#include "hdf5.h"
-#include <math.h>
+
 /*
 void mpifarm_module_init(struct yourdata *pointer){
   //printf("Module DEFAULT INIT\n");
@@ -46,23 +42,16 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
   return;
 }
 */
-void mpifarm_module_init(struct slaveData_t *s){
-
-    s = makeSlaveData();
-    s->test = 7;
-    s->points[0] = 3.4;
-  
-    return;
+void mpifarm_module_init(){
+  return;
 }
 void mpifarm_module_query(){
   return;
 }
-void mpifarm_module_cleanup(struct slaveData_t *s){
-
-  printf("Module DEFAULT CLEANUP: %d %f\n", s->test, s->points[0]);
-  free(s);
+void mpifarm_module_cleanup(){
   return;
 }
+
 /**
  * USER DEFINED FARM RESOLUTION
  *
@@ -103,7 +92,7 @@ void userdefined_pixelCoordsMap(int t[], int p, int x, int y){
  * Used only when method = 6.
  *
  */
-void userdefined_pixelCoords(int slave, int t[], inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_pixelCoords(int slave, int t[], configData *d, masterData *r){
           
   r->coords[0] = t[0]; //x 
   r->coords[1] = t[1]; //y
@@ -124,13 +113,13 @@ void userdefined_pixelCoords(int slave, int t[], inputData_t *d, masterData *r, 
  * Size of the array is controlled by MAX_RESULT_LENGTH from mpifarm_user.h 
  *
  */
-void userdefined_pixelCompute(int slave, int mrl, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_pixelCompute(int slave, configData *d, masterData *r){
 
   int i = 0;
    //r->res[0] = (MY_DATATYPE) r->coords[0]; 
    //r->res[1] = (MY_DATATYPE) r->coords[1];
    
-   for(i = 0; i < mrl; i++){
+   for(i = 0; i < d->mrl; i++){
      // r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
      // r->res[i] = i*r->res[i]/(pow(slave, 2.0));
      r->res[i] = (MY_DATATYPE) 1.0 * i;
@@ -145,7 +134,7 @@ void userdefined_pixelCompute(int slave, int mrl, inputData_t *d, masterData *r,
  * This function is called before any farm operations.
  *
  */
-void userdefined_masterIN(int mpi_size, inputData_t *d){
+void userdefined_masterIN(int mpi_size, configData *d){
   return;
 }
 
@@ -158,14 +147,12 @@ void userdefined_masterIN(int mpi_size, inputData_t *d){
  * Here, we just copy slave data files into one master file
  *
  */
-void userdefined_masterOUT(int nodes, inputData_t *d, masterData *r){
+void userdefined_masterOUT(int nodes, configData *d, masterData *r){
   
   int i = 0;
   hid_t fname, masterfile, masterdatagroup;
   herr_t stat;
-  const char groupbase[] = "slave";
   char groupname[512];
-  const char filebase[] = "slave";
   char filename[512];
 
   printf("masterfile: %s\n", d->datafile);
@@ -175,19 +162,17 @@ void userdefined_masterOUT(int nodes, inputData_t *d, masterData *r){
   /**
    * Copy data from slaves to one master file
    */
-  printf("before loop [%d]\n",nodes);
   for(i = 1; i < nodes; i++){
-    sprintf(groupname,"%s%d", groupbase,i);
-    sprintf(filename,"%s-%s%d.h5", d->name, filebase,i);
+    sprintf(groupname,"slave%d", i);
+    sprintf(filename,"%s-slave%d.h5", d->name,i);
    
-    printf("filename[%d]: %s\n", i, filename);
+    printf("filename[%d]: %s, groupname[%d]: %s\n", i, filename, i, groupname);
     fname = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-    //stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
-  //  if(stat < 0) printf("copy error\n");
+    //stat = H5Ocopy(fname, "/slave%d", masterdatagroup, "slave%d", H5P_DEFAULT, H5P_DEFAULT);
+    if(stat < 0) printf("copy error\n");
     H5Fclose(fname);
 
   }
-  printf("after loop\n");
 
   H5Gclose(masterdatagroup);
   H5Fclose(masterfile);
@@ -202,16 +187,16 @@ void userdefined_masterOUT(int nodes, inputData_t *d, masterData *r){
  * Called before/after send/receive
  * 
  */
-void userdefined_master_beforeSend(int slave, inputData_t *d, masterData *r){
+void userdefined_master_beforeSend(int slave, configData *d, masterData *r){
   return;
 }
-void userdefined_master_afterSend(int slave, inputData_t *d, masterData *r){
+void userdefined_master_afterSend(int slave, configData *d, masterData *r){
   return;
 }
-void userdefined_master_beforeReceive(inputData_t *d, masterData *r){
+void userdefined_master_beforeReceive(configData *d, masterData *r){
   return;
 }
-void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
+void userdefined_master_afterReceive(int slave, configData *d, masterData *r){
   return;
 }
 
@@ -232,7 +217,7 @@ void userdefined_master_afterReceive(int slave, inputData_t *d, masterData *r){
  * Data group is incorporated in MASTER_OUT function to one master data file.
  *
  */
-void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slaveIN(int slave, configData *d, masterData *r){
 
   //clearArray(s->points, ITEMS_IN_ARRAY(s->points));
 
@@ -241,12 +226,12 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
   hid_t rank = 1;
   hsize_t dimens_1d;
   herr_t serr;
-  const char sbase[] = "slave";
+  char sbase[] = "slave";
   char node[512];
-  const char gbase[] = "slave";
+  char gbase[] = "slave";
   char group[512];
 
-  const char cbase[] = "Hello from slave ";
+  char cbase[] = "Hello from slave ";
   char comment[1024];
 
   sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
@@ -260,8 +245,7 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
   sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   gid = H5Gcreate(sfile_id, group, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  
-  s->points[2] = slave*2;
-  sprintf(comment, "%s%d. Points = %f.",cbase,slave,s->points[2]); 
+  sprintf(comment, "%s%d. ",cbase,slave); 
   string_type = H5Tcopy(H5T_C_S1);
   H5Tset_size(string_type, strlen(comment));
 
@@ -289,7 +273,7 @@ void userdefined_slaveIN(int slave, inputData_t *d, masterData *r, struct slaveD
  * Example:
  * Just prints a message from the slave.
  */
-void userdefined_slaveOUT(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slaveOUT(int slave, configData *d, masterData *r, struct slaveData_t *s){
   
   printf("SLAVE[%d] OVER & OUT\n",slave);
 
@@ -302,19 +286,19 @@ void userdefined_slaveOUT(int slave, inputData_t *d, masterData *r, struct slave
  * Called before/after send/receive
  * 
  */
-void userdefined_slave_beforeSend(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slave_beforeSend(int slave, configData *d, masterData *r){
   
   printf("SLAVE[%d] working on pixel [ %d , %d ]: %f\n", slave, r->coords[0], r->coords[1], r->res[4]);
   
   return;
 }
-void userdefined_slave_afterSend(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slave_afterSend(int slave, configData *d, masterData *r){
   return;
 }
-void userdefined_slave_beforeReceive(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slave_beforeReceive(int slave, configData *d, masterData *r){
   return;
 }
-void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, struct slaveData_t *s){
+void userdefined_slave_afterReceive(int slave, configData *d, masterData *r){
   return;
 }
 
@@ -326,7 +310,7 @@ void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, st
  * Adjust the parser to Your initial data struct from mpifarm_user.h
  *
  */
-/*int userdefined_readConfigValues(char* inifile, char* sep, char* comm, inputData_t *d){
+/*int userdefined_readConfigValues(char* inifile, char* sep, char* comm, configData *d){
 
   int i = 0, k = 0, opts = 0, offset = 0;
   module_query_int_f qinit;
@@ -378,7 +362,7 @@ void userdefined_slave_afterReceive(int slave, inputData_t *d, masterData *r, st
  *
  */
 
-/*void userdefined_mpiBcast(int mpi_rank, inputData_t *d){
+/*void userdefined_mpiBcast(int mpi_rank, configData *d){
 
   int buff_size = 1000;
   int *ibuff;
