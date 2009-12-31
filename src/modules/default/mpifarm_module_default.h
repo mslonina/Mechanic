@@ -1,17 +1,7 @@
 #ifndef MPIFARM_MODULE_DEFAULT_H
 #define MPIFARM_MODULE_DEFAULT_H
-/*
-#undef MY_DATATYPE
-#define MY_DATATYPE double
 
-#undef MY_MPI_DATATYPE
-#define MY_MPI_DATATYPE MPI_DOUBLE
-*/
-//#undef ELEMENTS
 #define ELEMENTS 20
-
-#include <stdio.h>
-#include <stdlib.h>
 
 struct slaveData_t {
   int test;

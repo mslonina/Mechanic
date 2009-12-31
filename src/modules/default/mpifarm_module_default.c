@@ -118,11 +118,15 @@ void userdefined_pixelCompute(int slave, configData *d, masterData *r){
   int i = 0;
    //r->res[0] = (MY_DATATYPE) r->coords[0]; 
    //r->res[1] = (MY_DATATYPE) r->coords[1];
-   
-   for(i = 0; i < d->mrl; i++){
+   int t;
+     t = d->mrl;
+
+     printf("D->MRL = %d\n",d->mrl);
+
+   for(i = 0; i < t; i++){
      // r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
      // r->res[i] = i*r->res[i]/(pow(slave, 2.0));
-     r->res[i] = (MY_DATATYPE) 1.0 * i;
+     r->res[i] =  1.0 * i;
    }
   
    return;
@@ -156,6 +160,8 @@ void userdefined_masterOUT(int nodes, configData *d, masterData *r){
   char filename[512];
 
   printf("masterfile: %s\n", d->datafile);
+
+  stat = H5open();
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
   masterdatagroup = H5Gopen(masterfile, DATAGROUP, H5P_DEFAULT);
   
@@ -176,6 +182,7 @@ void userdefined_masterOUT(int nodes, configData *d, masterData *r){
 
   H5Gclose(masterdatagroup);
   H5Fclose(masterfile);
+  stat = H5close();
   
   printf("Master process OVER & OUT.\n");
   return;
@@ -273,7 +280,7 @@ void userdefined_slaveIN(int slave, configData *d, masterData *r){
  * Example:
  * Just prints a message from the slave.
  */
-void userdefined_slaveOUT(int slave, configData *d, masterData *r, struct slaveData_t *s){
+void userdefined_slaveOUT(int slave, configData *d, masterData *r){
   
   printf("SLAVE[%d] OVER & OUT\n",slave);
 
@@ -355,74 +362,3 @@ void userdefined_slave_afterReceive(int slave, configData *d, masterData *r){
   return opts;
 }
 */
-/**
- * USER DEFINED MPI BCAST
- * 
- * We send the only information needed by slaves
- *
- */
-
-/*void userdefined_mpiBcast(int mpi_rank, configData *d){
-
-  int buff_size = 1000;
-  int *ibuff;
-  float *fbuff;
-  char *sbuff, *nbuff;
-
-  ibuff = malloc(buff_size*sizeof(*ibuff));
-  fbuff = malloc(buff_size*sizeof(*fbuff));
-  sbuff = malloc(buff_size*sizeof(*sbuff));
-  nbuff = malloc(buff_size*sizeof(*nbuff));
- 
-  if (mpi_rank == 0) {
-
-    fbuff[0] = d->el[0];
-    fbuff[1] = d->el[1];
-    fbuff[2] = d->el[2];
-    fbuff[3] = d->el[3];
-    fbuff[4] = d->el[4];
-
-    ibuff[0] = d->xres;
-    ibuff[1] = d->yres;
-    ibuff[2] = d->method;
-    ibuff[3] = d->dump;
-    ibuff[4] = d->bodies;
-
-    strcpy(sbuff,d->datafile);
-    strcpy(nbuff,d->name);
-
-    MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
-    MPI_Bcast (sbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
-    MPI_Bcast (nbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
-
-  } else {
-
-    MPI_Bcast (fbuff, buff_size, MPI_FLOAT, 0, MPI_COMM_WORLD);
-    MPI_Bcast (ibuff, buff_size, MPI_INT,   0, MPI_COMM_WORLD);
-    MPI_Bcast (sbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
-    MPI_Bcast (nbuff, buff_size, MPI_CHAR,   0, MPI_COMM_WORLD);
-
-    d->el[0]   = fbuff[0];
-    d->el[1]   = fbuff[1];
-    d->el[2]   = fbuff[2];
-    d->el[3]   = fbuff[3];
-    d->el[4]   = fbuff[4];
-
-    d->xres     = ibuff[0];
-    d->yres     = ibuff[1];
-    d->method   = ibuff[2];
-    d->dump = ibuff[3];
-    d->bodies = ibuff[4];
-
-    strcpy(d->datafile,sbuff);
-    strcpy(d->name,nbuff);
-
-  }
-  free(ibuff);
-  free(fbuff);
-  free(sbuff);
-  free(nbuff);
-  
-  return;
-}*/

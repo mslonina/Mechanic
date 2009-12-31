@@ -76,8 +76,8 @@ module_cleanup_f cleanup;
 struct inputData_t;
 extern struct inputData_t *makeInputData(void);
 */
-struct slaveData_t;
-extern struct slaveData_t *makeSlaveData(void);
+//struct slaveData_t;
+//extern struct slaveData_t *makeSlaveData(void);
 
 configOptions options[MAX_OPTIONS_NUM];
 configNamespace configSpace[MAX_CONFIG_SIZE];
