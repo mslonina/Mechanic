@@ -1,54 +1,12 @@
-#MPIMAP setup
+#MPIFARM setup
 [default]
 name=test2
-bodies=4
+xres = 4 #must be greater than 0
+yres = 3 #must be greater than 0
+method = 0 #single pixel -- 0, userdefined -- 6
+mrl = 10
+module = default
 
 [logs]
 dump=2000
 
-[settings]
-period=92.891234
-
-[cmass]
-m = 4.5
-
-[planetA]
-m = 1.2
-a = 2.7
-e = 0.045
-i = 0.001
-o = 23.4
-c = 172.9
-l = 123.1
-
-[planetB]
-m = 1.2
-a = 2.7
-e = 0.045
-i = 0.001
-o = 23.4
-c = 172.9
-l = 123.1
-
-[planetC]
-m = 1.2
-a = 2.7
-e = 0.045
-i = 0.001
-o = 23.4
-c = 172.9
-l = 123.1
-
-[planetD]
-m = 1.2
-a = 2.7
-e = 0.045
-i = 0.001
-o = 23.4
-c = 172.9
-l = 123.1
-
-[farm]
-xres = 4 #must be greater than 0
-yres = 2 #must be greater than 0
-method = 6 #single pixel -- 0, userdefined -- 6
