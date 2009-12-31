@@ -123,10 +123,10 @@ void userdefined_pixelCompute(int slave, configData *d, masterData *r){
 
      printf("D->MRL = %d\n",d->mrl);
 
-   for(i = 0; i < t; i++){
+   for(i = 0; i < d->mrl; i++){
      // r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
      // r->res[i] = i*r->res[i]/(pow(slave, 2.0));
-     r->res[i] =  1.0 * i;
+     r->res[i] =  1.0 * (double) i;
    }
   
    return;

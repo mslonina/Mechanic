@@ -227,7 +227,7 @@ void master(void* module, configData *d){
    /**
     * Allocate memory for rawdata.res array
     */
-   rawdata = malloc(sizeof(rawdata) + (d->mrl) * sizeof(MY_DATATYPE));
+   rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MY_DATATYPE));
 
    clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
    
@@ -249,9 +249,8 @@ void master(void* module, configData *d){
    if (d->method == 1) farm_res = d->xres; //sliceX
    if (d->method == 2) farm_res = d->yres; //sliceY
    if (d->method == 6){
-     farm_res = d->xres*d->yres;
-     //qr = dlsym(module, "userdefined_farmResolution");
-     //farm_res = qr(d->xres, d->yres);
+     qr = dlsym(module, "userdefined_farmResolution");
+     farm_res = qr(d->xres, d->yres);
    }
 
    hsize_t dim[1];
@@ -554,9 +553,10 @@ void slave(void* module, configData *d){
     
     masterData raw;
     masterData *rawdata;
-    rawdata = malloc(sizeof(rawdata) + (d->mrl) * sizeof(MY_DATATYPE));
     
-    //clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
+    rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MY_DATATYPE));
+
+    clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
    
     /**
      * Slave can do something useful before computations
@@ -593,8 +593,8 @@ void slave(void* module, configData *d){
           /**
            * Use userdefined pixelCoords method
            */
-      //    qpc = dlsym(module, "userdefined_pixelCoords");
-      //    qpc(mpi_rank, tab, d, rawdata);
+          qpc = dlsym(module, "userdefined_pixelCoords");
+          qpc(mpi_rank, tab, d, rawdata);
        } 
           /**
            * DO SOMETHING HERE
