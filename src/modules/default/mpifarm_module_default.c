@@ -43,12 +43,15 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
 }
 */
 void mpifarm_module_init(){
+  sd.test = 21;
   return;
 }
-void mpifarm_module_query(){
+/*void mpifarm_module_query(){
+//  printf("TEST = %d\n", s->test);
   return;
-}
+}*/
 void mpifarm_module_cleanup(){
+  printf("SD.TEST = %d\n", sd.test);
   return;
 }
 
@@ -116,17 +119,11 @@ void userdefined_pixelCoords(int slave, int t[], configData *d, masterData *r){
 void userdefined_pixelCompute(int slave, configData *d, masterData *r){
 
   int i = 0;
-   //r->res[0] = (MY_DATATYPE) r->coords[0]; 
-   //r->res[1] = (MY_DATATYPE) r->coords[1];
-   int t;
-     t = d->mrl;
 
    //  printf("D->MRL = %d\n",d->mrl);
 
    for(i = 0; i < d->mrl; i++){
-     // r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
-     // r->res[i] = i*r->res[i]/(pow(slave, 2.0));
-     r->res[i] =  1.0 * (double) i;
+      r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
    }
   
    return;
@@ -159,7 +156,7 @@ void userdefined_masterOUT(int nodes, configData *d, masterData *r){
   char groupname[512];
   char filename[512];
 
-  printf("masterfile: %s\n", d->datafile);
+  //printf("masterfile: %s\n", d->datafile);
 
   stat = H5open();
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
@@ -172,7 +169,7 @@ void userdefined_masterOUT(int nodes, configData *d, masterData *r){
     sprintf(groupname,"slave%d", i);
     sprintf(filename,"%s-slave%d.h5", d->name,i);
    
-    printf("filename[%d]: %s, groupname[%d]: %s\n", i, filename, i, groupname);
+    //printf("filename[%d]: %s, groupname[%d]: %s\n", i, filename, i, groupname);
     fname = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
     if(stat < 0) printf("copy error\n");

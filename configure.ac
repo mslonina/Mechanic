@@ -1,6 +1,7 @@
 AC_INIT([Mpifarm], [1.0], [slonina@astri.umk.pl])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC
+AC_PROG_F77
 LT_INIT
 AC_PROG_LIBTOOL
 AC_CONFIG_MACRO_DIR([m4])

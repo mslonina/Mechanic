@@ -28,6 +28,16 @@
 #define MODULE_DEFAULT "default"
 #define MASTER_FILE_DEFAULT "default-master.h5"
 
+#define MODULE_SILENT 0
+#define MODULE_WARN 1
+#define MODULE_ERROR 2
+
+#define MPI_DEST 0
+#define MPI_SOURCE_TAG 0
+#define MPI_DATA_TAG 2
+#define MPI_RESULT_TAG 59
+#define MPI_TERMINATE_TAG 99
+
 #define DATASETCONFIG "/config"
 #define DATABOARD "/board" 
 #define DATAGROUP "/data"
@@ -41,21 +51,18 @@
 #undef MY_MPI_DATATYPE
 #define MY_MPI_DATATYPE MPI_DOUBLE
 
+#define ITEMS_IN_ARRAY(x) sizeof(x)/sizeof(*(x))
+
 /**
- * Master data struct
+ * MASTER DATA
  */
 typedef struct {
  int coords[3]; //0 - x 1 - y 2 - number of the pixel
  MY_DATATYPE res[1];
 } masterData;
 
-#define ITEMS_IN_ARRAY(x) sizeof(x)/sizeof(*(x))
-
-struct yourdata;
-extern struct yourdata *makeyourdata(void);
-
 /**
- * Plugin architecture function handlers
+ * MODULE ARCHITECTURE FUNCTION HANDLERS
  */
 typedef void (*module_init_f) ();
 module_init_f init;
@@ -69,20 +76,26 @@ module_query_int_f iquery;
 typedef void (*module_cleanup_f) ();
 module_cleanup_f cleanup;
 
+//typedef struct (*slaveData_f) ();
+//slaveData_f qs;
+
 /**
- * Plugin architecture datatypes prototypes
+ * Module architecture datatypes prototypes
  */
 /*
 struct inputData_t;
 extern struct inputData_t *makeInputData(void);
 */
-//struct slaveData_t;
-//extern struct slaveData_t *makeSlaveData(void);
+//yourData yd;
+//extern yourData *makeyourdata(void);
+//struct slaveData;
+//struct slaveData *s;
+//extern struct slaveData *makeSlaveData(void);
 
 configOptions options[MAX_OPTIONS_NUM];
 configNamespace configSpace[MAX_CONFIG_SIZE];
 
-/* Main config file struct */
+/* MAIN CONFIG DATA */
 typedef struct {
   char name[256];
   char datafile[260];
@@ -101,8 +114,20 @@ typedef struct {
       char value[MAX_VALUE_LENGTH];
     } simpleopts;
 
-char* sep = "="; char* comm = "#";
+/* GLOBALS */
 char* inifile;
 char* datafile;
+int allopts, mpi_rank, mpi_size;
+
+/* FUNCTION PROTOTYPES */
+int* map2d(int, void*, configData *d);
+void master(void*, configData *d);
+void slave(void*, configData *d);
+void clearArray(MY_DATATYPE*,int);
+void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
+void buildDefaultConfigType(configData *d, MPI_Datatype* defaultConfigType_ptr);
+int readDefaultConfig(char* inifile, configData *cd);
+void* load_sym(void* module, char* function, int status);
+void writeConfig(hid_t file_id, int allopts);
 
 #endif
