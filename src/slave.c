@@ -4,22 +4,25 @@
  * SLAVE
  *
  */
-void slave(void* module, configData *d){
+void slave(void* module, configData* d){
 
-    int *tab=malloc(3*sizeof(*tab));
+    int* tab=malloc(3*sizeof(*tab));
     int k = 0, i = 0, j = 0;
     
-    MPI_Datatype masterResultsType;
-    MPI_Status mpi_status;
-
     module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qpx, qpc;
     
     masterData raw;
-    masterData *rawdata;
+    masterData* rawdata;
+    
+    MPI_Datatype masterResultsType;
+    MPI_Status mpi_status;
     
     rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MY_DATATYPE));
 
     clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
+    
+    /* Build derived type for master result */
+    buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
    
     /**
      * Slave can do something useful before computations.
@@ -34,8 +37,6 @@ void slave(void* module, configData *d){
     
     qafterR = load_sym(module, "userdefined_slave_afterReceive", MODULE_SILENT);
     if(qafterR) qafterR(mpi_rank, d, rawdata);
-
-    buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
     
     while(1){
 

@@ -43,15 +43,15 @@ void mpifarm_module_cleanup(struct yourdata *pointer){
 }
 */
 void mpifarm_module_init(){
-  sd.test = 21;
+//  sd.test = 21;
   return;
 }
-/*void mpifarm_module_query(){
+void mpifarm_module_query(){
 //  printf("TEST = %d\n", s->test);
   return;
-}*/
+}
 void mpifarm_module_cleanup(){
-  printf("SD.TEST = %d\n", sd.test);
+//  printf("SD.TEST = %d\n", sd.test);
   return;
 }
 
@@ -95,7 +95,7 @@ void userdefined_pixelCoordsMap(int t[], int p, int x, int y){
  * Used only when method = 6.
  *
  */
-void userdefined_pixelCoords(int slave, int t[], configData *d, masterData *r){
+void userdefined_pixelCoords(int slave, int t[], configData* d, masterData* r){
           
   r->coords[0] = t[0]; //x 
   r->coords[1] = t[1]; //y
@@ -103,7 +103,6 @@ void userdefined_pixelCoords(int slave, int t[], configData *d, masterData *r){
   
   return;
 }
-
 
 /**
  * USER DEFINED PIXEL COMPUTE
@@ -116,7 +115,7 @@ void userdefined_pixelCoords(int slave, int t[], configData *d, masterData *r){
  * Size of the array is controlled by MAX_RESULT_LENGTH from mpifarm_user.h 
  *
  */
-void userdefined_pixelCompute(int slave, configData *d, masterData *r){
+void userdefined_pixelCompute(int slave, configData* d, masterData* r){
 
   int i = 0;
 
@@ -135,7 +134,7 @@ void userdefined_pixelCompute(int slave, configData *d, masterData *r){
  * This function is called before any farm operations.
  *
  */
-void userdefined_masterIN(int mpi_size, configData *d){
+void userdefined_masterIN(int mpi_size, configData* d){
   return;
 }
 
@@ -148,7 +147,7 @@ void userdefined_masterIN(int mpi_size, configData *d){
  * Here, we just copy slave data files into one master file
  *
  */
-void userdefined_masterOUT(int nodes, configData *d, masterData *r){
+void userdefined_masterOUT(int nodes, configData* d, masterData* r){
   
   int i = 0;
   hid_t fname, masterfile, masterdatagroup;
@@ -191,16 +190,16 @@ void userdefined_masterOUT(int nodes, configData *d, masterData *r){
  * Called before/after send/receive
  * 
  */
-void userdefined_master_beforeSend(int slave, configData *d, masterData *r){
+void userdefined_master_beforeSend(int slave, configData* d, masterData* r){
   return;
 }
-void userdefined_master_afterSend(int slave, configData *d, masterData *r){
+void userdefined_master_afterSend(int slave, configData* d, masterData* r){
   return;
 }
-void userdefined_master_beforeReceive(configData *d, masterData *r){
+void userdefined_master_beforeReceive(configData* d, masterData* r){
   return;
 }
-void userdefined_master_afterReceive(int slave, configData *d, masterData *r){
+void userdefined_master_afterReceive(int slave, configData* d, masterData* r){
   return;
 }
 
@@ -221,7 +220,7 @@ void userdefined_master_afterReceive(int slave, configData *d, masterData *r){
  * Data group is incorporated in MASTER_OUT function to one master data file.
  *
  */
-void userdefined_slaveIN(int slave, configData *d, masterData *r){
+void userdefined_slaveIN(int slave, configData* d, masterData* r){
 
   //clearArray(s->points, ITEMS_IN_ARRAY(s->points));
 
@@ -277,7 +276,7 @@ void userdefined_slaveIN(int slave, configData *d, masterData *r){
  * Example:
  * Just prints a message from the slave.
  */
-void userdefined_slaveOUT(int slave, configData *d, masterData *r){
+void userdefined_slaveOUT(int slave, configData* d, masterData* r){
   
   printf("SLAVE[%d] OVER & OUT\n",slave);
 
@@ -290,72 +289,19 @@ void userdefined_slaveOUT(int slave, configData *d, masterData *r){
  * Called before/after send/receive
  * 
  */
-void userdefined_slave_beforeSend(int slave, configData *d, masterData *r){
+void userdefined_slave_beforeSend(int slave, configData* d, masterData* r){
   
   printf("SLAVE[%d] working on pixel [ %d , %d ]: %f\n", slave, r->coords[0], r->coords[1], r->res[4]);
   
   return;
 }
-void userdefined_slave_afterSend(int slave, configData *d, masterData *r){
+void userdefined_slave_afterSend(int slave, configData* d, masterData* r){
   return;
 }
-void userdefined_slave_beforeReceive(int slave, configData *d, masterData *r){
+void userdefined_slave_beforeReceive(int slave, configData* d, masterData* r){
   return;
 }
-void userdefined_slave_afterReceive(int slave, configData *d, masterData *r){
+void userdefined_slave_afterReceive(int slave, configData* d, masterData* r){
   return;
 }
 
-/**
- * HELPER FUNCTION -- READ CONFIG VALUES
- * 
- * see libreadconfig.h for details
- *
- * Adjust the parser to Your initial data struct from mpifarm_user.h
- *
- */
-/*int userdefined_readConfigValues(char* inifile, char* sep, char* comm, configData *d){
-
-  int i = 0, k = 0, opts = 0, offset = 0;
-  module_query_int_f qinit;
-  void* module;
-
-  module = dlopen("libreadconfig.so", RTLD_NOW);
-  if(!module){
-    printf("Cannot load module libreadconfig: %s\n", dlerror()); 
-    exit(1);
-  }
-  qinit = dlsym(module, "parseConfigFile");
-  
-  opts = qinit(inifile, sep, comm);
-
-  dlclose(module);
-
-	for(i = 0; i < opts; i++){
-    if(strcmp(configSpace[i].space,"default") == 0){
-		  for(k = 0; k < configSpace[i].num; k++){
-			  if(strcmp(configSpace[i].options[k].name,"name") == 0){
-          strcpy(d->name,configSpace[i].options[k].value);
-          strcpy(d->datafile, strcat(configSpace[i].options[k].value,"-master.h5"));  
-        }
-        if(strcmp(configSpace[i].options[k].name,"bodies") == 0) d->bodies = atoi(configSpace[i].options[k].value);
-    }
-    }
-		if(strncmp(configSpace[i].space,"planet*",1) == 0){
-		  for(k = 0; k < configSpace[i].num; k++){
-        d->el[offset+k] = atof(configSpace[i].options[k].value);
-		  }
-      offset = offset + k;
-		}
-    if(strcmp(configSpace[i].space,"farm") == 0){
-		  for(k = 0; k < configSpace[i].num; k++){
-			  if(strcmp(configSpace[i].options[k].name,"xres") == 0) d->xres = atoi(configSpace[i].options[k].value);  
-        if(strcmp(configSpace[i].options[k].name,"yres") == 0) d->yres = atoi(configSpace[i].options[k].value); 
-			  if(strcmp(configSpace[i].options[k].name,"method") == 0) d->method = atoi(configSpace[i].options[k].value); 
-      }
-    }
-	}
-
-  return opts;
-}
-*/

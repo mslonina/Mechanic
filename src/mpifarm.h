@@ -120,14 +120,16 @@ char* datafile;
 int allopts, mpi_rank, mpi_size;
 
 /* FUNCTION PROTOTYPES */
-int* map2d(int, void*, configData *d);
-void master(void*, configData *d);
-void slave(void*, configData *d);
+int* map2d(int, void*, configData* d);
+void master(void*, configData* d);
+void slave(void*, configData* d);
 void clearArray(MY_DATATYPE*,int);
 void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
-void buildDefaultConfigType(configData *d, MPI_Datatype* defaultConfigType_ptr);
-int readDefaultConfig(char* inifile, configData *cd);
+void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
+int readDefaultConfig(char* inifile, configData* cd);
 void* load_sym(void* module, char* function, int status);
 void writeConfig(hid_t file_id, int allopts);
+void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, masterData* rawdata);
+void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, masterData* rawdata);
 
 #endif

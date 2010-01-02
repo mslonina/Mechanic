@@ -4,21 +4,22 @@
  * MASTER
  *
  */
-void master(void* module, configData *d){
+void master(void* module, configData* d){
 
-   int *tab; 
+   int* tab; 
 	 MY_DATATYPE rdata[d->mrl][1];
    int i = 0, k = 0, j = 0, nodes = 0, farm_res = 0;
    int npxc = 0; //number of all sent pixels
    int count = 0; //number of pixels to receive
+   
+   masterData raw;
+   masterData *rawdata;
 
    MPI_Status mpi_status;
+   MPI_Datatype masterResultsType;
    
    module_query_void_f queryIN, queryOUT, qbeforeS, qafterS, qbeforeR, qafterR;
    module_query_int_f qr;
-  
-   masterData raw;
-   masterData *rawdata;
  
    /* hdf */
    hid_t file_id, dset_board, dset_data, data_group;
@@ -34,7 +35,13 @@ void master(void* module, configData *d){
    rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MY_DATATYPE));
 
    clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
+  
+   /* Build derived type for master result */
+   buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
    
+   /**
+    * Welcome message.
+    */
    printf("MAP RESOLUTION = %dx%d.\n", d->xres, d->yres);
    printf("MPI_SIZE = %d.\n", mpi_size);
    printf("METHOD = %d.\n", d->method);
@@ -48,7 +55,6 @@ void master(void* module, configData *d){
    /**
     * Align farm resolution for given method.
     */
-
    if (d->method == 0) farm_res = d->xres*d->yres; //one pixel per each slave
    if (d->method == 1) farm_res = d->xres; //sliceX
    if (d->method == 2) farm_res = d->yres; //sliceY
@@ -71,7 +77,7 @@ void master(void* module, configData *d){
     *
     */
  
-   /* Create master datafile */
+    /* Create master datafile */
     file_id = H5Fcreate(d->datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
     /* First of all, save configuration */
@@ -95,7 +101,7 @@ void master(void* module, configData *d){
     /* Create master dataset */
     dset_data = H5Dcreate(data_group, DATASETMASTER, H5T_NATIVE_DOUBLE, rawspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   
-   /* We write pixels one by one */
+    /* We write pixels one by one */
     co[0] = 1;
     co[1] = 1;
     memmapspace = H5Screate_simple(HDF_RANK, co, NULL);
@@ -104,7 +110,6 @@ void master(void* module, configData *d){
     rco[1] = d->mrl;
     memrawspace = H5Screate_simple(HDF_RANK, rco, NULL);
    
-   /* Select hyperslab in the file */
     mapspace = H5Dget_space(dset_board);
     rawspace = H5Dget_space(dset_data);
   
@@ -139,10 +144,11 @@ void master(void* module, configData *d){
    
    /**
     * We don't want to have slaves idle, so, if there are some idle slaves
-    * terminate them
+    * terminate them (when farm resolution < mpi size).
     */
    if(farm_res < mpi_size){
     for(i = nodes; i < mpi_size; i++){
+      printf("Terminating idle slave %d.\n", i);
       MPI_Send(map2d(npxc, module, d), 3, MPI_INT, i, MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
    }
@@ -150,9 +156,6 @@ void master(void* module, configData *d){
    /**
     * Receive data and send tasks.
     */
-   MPI_Datatype masterResultsType;
-   buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
-   
    while (1) {
     
      qbeforeR = load_sym(module, "userdefined_master_beforeReceive", MODULE_SILENT);
@@ -169,21 +172,10 @@ void master(void* module, configData *d){
        */
       
       /* Control board -- each computed pixel is marked with 1. */
-      off[0] = rawdata->coords[0];
-      off[1] = rawdata->coords[1];
-      fdata[0][0] = 1;
-      H5Sselect_hyperslab(mapspace, H5S_SELECT_SET, off, NULL, co, NULL);
-      hdf_status = H5Dwrite(dset_board, H5T_NATIVE_INT, memmapspace, mapspace, H5P_DEFAULT, fdata);
+      H5writeBoard(dset_board, memmapspace, mapspace, rawdata);
 
       /* Data */
-      off[0] = rawdata->coords[2];
-      off[1] = 0;
-      for (j = 0; j < d->mrl; j++){
-        rdata[j][0] = rawdata->res[j];
-      }
-      
-      H5Sselect_hyperslab(rawspace, H5S_SELECT_SET, off, NULL, rco, NULL);
-      hdf_status = H5Dwrite(dset_data, H5T_NATIVE_DOUBLE, memrawspace, rawspace, H5P_DEFAULT, rdata);
+      H5writeMaster(dset_data, memrawspace, rawspace, d, rawdata);
 
       /* Send next task to the slave */
       if (npxc < farm_res){
@@ -197,6 +189,7 @@ void master(void* module, configData *d){
         
         qafterS = load_sym(module, "userdefined_master_afterSend", MODULE_SILENT);
         if(qafterS) qafterS(mpi_status.MPI_SOURCE, d, rawdata);
+
       } else {
         break;
       }
@@ -221,26 +214,12 @@ void master(void* module, configData *d){
          */
       
         /* Control board */
-        off[0] = rawdata->coords[0];
-        off[1] = rawdata->coords[1];
-        
-        fdata[0][0] = 1;
-        H5Sselect_hyperslab(mapspace, H5S_SELECT_SET, off, NULL, co, NULL);
-        hdf_status = H5Dwrite(dset_board, H5T_NATIVE_INT, memmapspace, mapspace, H5P_DEFAULT, fdata);
-        
+        H5writeBoard(dset_board, memmapspace, mapspace, rawdata);
+     
         /* Data */
-        off[0] = rawdata->coords[2];
-        off[1] = 0;
-        
-        for (j = 0; j < d->mrl; j++){
-          rdata[j][0] = rawdata->res[j];
-        }
-      
-        H5Sselect_hyperslab(rawspace, H5S_SELECT_SET, off, NULL, rco, NULL);
-        hdf_status = H5Dwrite(dset_data, H5T_NATIVE_DOUBLE, memrawspace, rawspace, H5P_DEFAULT, rdata);
+        H5writeMaster(dset_data, memrawspace, rawspace, d, rawdata);
 
     }
-   MPI_Type_free(&masterResultsType);
 
     /**
      * Now, terminate the slaves 
@@ -253,6 +232,8 @@ void master(void* module, configData *d){
      * FARM ENDS
      */
    
+    MPI_Type_free(&masterResultsType);
+    
     /**
      * CLOSE HDF5 STORAGE
      */

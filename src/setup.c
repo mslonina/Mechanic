@@ -7,7 +7,7 @@
 /**
  * Default config file parser.
  */
-int readDefaultConfig(char* inifile, configData *d){
+int readDefaultConfig(char* inifile, configData* d){
 
   int i = 0, k = 0, opts = 0, offset = 0;
   char* sep = "=";

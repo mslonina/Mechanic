@@ -8,7 +8,7 @@
  */
 #include "mpifarm.h"
 
-/* settings */ 
+/* Global settings */ 
 int allopts = 0; //number of options read
 
 int masteralone = 0;
@@ -21,13 +21,13 @@ int i = 0, j = 0, k = 0, opts = 0, n = 0;
  */
 int main(int argc, char *argv[]){  
 
-  char *module_name;
+  char* module_name;
   char module_file[256];
   void* module;
-  char *dlresult;
+  char* dlresult;
   char optvalue;
 
-  void *prestartmode;
+  void* prestartmode;
   int restartmode = 0;
   int poptflags = 0;
   int error;
@@ -35,9 +35,9 @@ int main(int argc, char *argv[]){
   int x = 0, y = 0, l = 0, method = 0;
 
   configData cd;
-  configData *d;
+  configData* d;
 
-  /*  Set defaults */
+  /* Set defaults */
   inifile = CONFIG_FILE_DEFAULT;
   module_name = MODULE_DEFAULT;
 
@@ -140,7 +140,7 @@ int main(int argc, char *argv[]){
   
   /**
    * MPI CONFIG BCAST
-   * Inform slaves what is all about
+   * Inform slaves what is all about.
    */
   MPI_Datatype defaultConfigType;
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]){
   
   /**
    * MODULE LOAD
-   * If option -m is not set, use default
+   * If option -m is not set, use default.
    */
   sprintf(module_file, "mpifarm_module_%s.so", module_name);
   

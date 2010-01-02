@@ -34,7 +34,7 @@ void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResults
 /**
  * Bcast default config file
  */
-void buildDefaultConfigType(configData *d, MPI_Datatype* defaultConfigType_ptr){
+void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   
   int block_lengths[8];
   MPI_Aint displacements[8];
@@ -73,6 +73,7 @@ void buildDefaultConfigType(configData *d, MPI_Datatype* defaultConfigType_ptr){
   for(i = 0; i < 8; i++){
     displacements[i] = addresses[i+1] - addresses[0];
   }
+
   MPI_Type_struct(8, block_lengths, displacements, typelist, defaultConfigType_ptr);
   MPI_Type_commit(defaultConfigType_ptr);
 
