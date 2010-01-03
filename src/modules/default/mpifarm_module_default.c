@@ -239,9 +239,12 @@ void default_slaveIN(int slave, configData* d, masterData* r){
   char node[512];
   char gbase[] = "slave";
   char group[512];
+  char oldfile[MAX_VALUE_LENGTH];
 
   char cbase[] = "Hello from slave ";
   char comment[1024];
+
+  struct stat st;
 
   sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
   sprintf(group, "%s%d", gbase, slave);
@@ -251,6 +254,13 @@ void default_slaveIN(int slave, configData* d, masterData* r){
    * each slave can create different dataspaces and datasets here, 
    * perform different computations, even read different config file!
    */
+   if(stat(node,&st) == 0){
+      sprintf(oldfile,"old-%s",node);
+      /*printf("-> File %s exists!\n", cd.datafile);
+      printf("-> I will back it up for You now\n");
+      printf("-> Backuped file: %s\n",oldfile);*/
+      rename(node,oldfile);
+    }
   sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   gid = H5Gcreate(sfile_id, group, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  
