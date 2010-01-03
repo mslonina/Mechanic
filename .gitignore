@@ -18,3 +18,4 @@ ltmain.sh
 src/mpifarm
 !Makefile.am
 !configure.ac
+src/old/*.*

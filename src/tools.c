@@ -52,7 +52,7 @@ int* map2d(int c, void* module, configData* d){
  * Wrapper to load_sym().
  * Handles error messages and abort if necessary.
  */
-void* load_sym(void* module, char* function, int rank){
+void* load_sym(void* module, char* function, int type){
  
   void* handler;
   char* err;
@@ -60,20 +60,20 @@ void* load_sym(void* module, char* function, int rank){
   dlerror();
   handler = dlsym(module, function);
   if((err = dlerror()) != NULL){
-    switch (rank){
+    switch (type){
       case MODULE_SILENT:
         break;
       case MODULE_WARN:
-        printf("Module warning: Cannot load function '%s': %s\n", function, err); 
+        printf("-> Module warning: Cannot load function '%s': %s\n", function, err); 
         break;
       case MODULE_ERROR:
-        printf("Module error: Cannot load function '%s': %s\n", function, err); 
+        printf("-> Module error: Cannot load function '%s': %s\n", function, err); 
         break;
       default:
         break;
     }
-    if(rank == MODULE_ERROR){
-      MPI_Abort(MPI_COMM_WORLD, 913);
+    if(type == MODULE_ERROR){
+      MPI_Abort(MPI_COMM_WORLD, ERR_MODULE);
     }else{
       return NULL;
     }
@@ -132,3 +132,29 @@ void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, masterData *rawdata){
   hdf_status = H5Dwrite(dset, H5T_NATIVE_INT, memspace, space, H5P_DEFAULT, rdata);
 
 }
+
+/**
+ * Override default popt behaviour. This code is taken from popt.h. 
+ * Adjusted it only to MPI.
+ */
+void mpi_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+    char* arg, void* data){
+
+  if(mpi_rank == 0){
+    if (key->shortName == '?')
+      poptPrintHelp(con, stdout, 0);
+    else 
+      poptPrintUsage(con, stdout, 0);
+  }
+  con = poptFreeContext(con);
+}
+void mpi_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+    char* arg, void* data){
+    
+    if (key->shortName == '?')
+      help = 1;
+    else
+      usage = 1;
+
+}
+

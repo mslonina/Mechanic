@@ -7,6 +7,13 @@
 #define MAX_VALUE_LENGTH 256
 #define MAX_OPTIONS_NUM 50
 
+#define E_CONFIG_SYNTAX "Config file syntax error."
+#define E_MISSING_VAR "Missing variable name."
+#define E_MISSING_VAL "Missing value."
+#define E_MISSING_SEP "Missing separator."
+#define E_MISSING_BRACKET "Missing bracket in namespace."
+#define E_TOOMANY_SEP "To many separators."
+
 /**
  * define options structs
  */
@@ -25,8 +32,8 @@ void configError(int, char*);
 char* trim(char*);
 char* nametrim(char*, int);
 int charcount(char*, char*);
-int parsefile(FILE*, char*, char*);
-void printAll(int);
-int parseConfigFile(char*, char*, char*);
+int parsefile(FILE*, char*, char*, configNamespace*);
+void printAll(int, configNamespace*);
+int parseConfigFile(char*, char*, char*, configNamespace*);
 
 #endif

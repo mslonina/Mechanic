@@ -1,7 +1,7 @@
 /**
  * ReadConfig -- config file parser
  * mariusz slonina <mariusz.slonina@gmail.com>
- * last modified: 22/12/2009
+ * last modified: 25/12/2009
  *
  */
 #include <stdio.h>
@@ -17,24 +17,7 @@
 #include <dirent.h>
 #include <ctype.h>
 #include <string.h>
-
-#include "readconfig.h"
-
-/**
- * HELPER FUNCTIONS
- *
- * void configError(int j, char *m)
- * char* trim(char *str)
- * char* nametrim(inf j, char *l)
- * int charcount(char *l, char *s)
- */
-
-#define E_CONFIG_SYNTAX "Config file syntax error."
-#define E_MISSING_VAR "Missing variable name."
-#define E_MISSING_VAL "Missing value."
-#define E_MISSING_SEP "Missing separator."
-#define E_MISSING_BRACKET "Missing bracket in namespace."
-#define E_TOOMANY_SEP "To many separators."
+#include "libreadconfig.h"
 
 /**
  * configError(
@@ -144,11 +127,6 @@ int charcount(char *l, char* s){
  */
 
 /**
- * create array of struct
- */
-configNamespace configSpace[MAX_CONFIG_SIZE];
-
-/**
  * parsefile (
  *  FILE* read, 
  *  char* SEP, 
@@ -158,7 +136,7 @@ configNamespace configSpace[MAX_CONFIG_SIZE];
  * reads config namespaces, vars names and values into global options structure
  * and returns number of config vars
  */
-int parsefile(FILE* read, char* SEP, char* COMM){
+int parsefile(FILE* read, char* SEP, char* COMM, configNamespace* configSpace){
   
   int i = 0; int j = 0; int n = 0; int sepc = 0;
   char* line; char l[MAX_LINE_LENGTH]; char* b; char* c;
@@ -248,7 +226,7 @@ int parsefile(FILE* read, char* SEP, char* COMM){
 /**
  * prints all options
  */
-void printAll(int n){
+void printAll(int n, configNamespace* configSpace){
   int i = 0; int k = 0;
   for (i = 0; i < n; i++){
 		printf("Namespace [%s]:\n",configSpace[i].space);
@@ -262,14 +240,14 @@ void printAll(int n){
 /**
  * reads config file -- wrapper function
  */
-int parseConfigFile(char* inif, char* sep, char* comm){
+int parseConfigFile(char* inif, char* sep, char* comm, configNamespace* configSpace){
   
   FILE* read;
   int opts;
 
 	read = fopen(inif,"r");
 	if(read != NULL){
-		opts = parsefile(read, sep, comm); //read and parse config file
+		opts = parsefile(read, sep, comm, configSpace); //read and parse config file
 	}else{
 		perror("Error opening config file:");
 		exit(1);

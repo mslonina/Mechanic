@@ -21,12 +21,21 @@
 #include "mpi.h"
 #include "hdf5.h"
 
-#include "readconfig.h"
+#include "libreadconfig.h"
+
+#define VERSION "UNSTABLE-2"
+#define AUTHOR "MSlonina, TCfA, NCU"
+#define EMAIL "mariusz.slonina@gmail.com"
 
 #define CONFIG_FILE_DEFAULT "config"
 #define NAME_DEFAULT "showme"
 #define MODULE_DEFAULT "default"
 #define MASTER_FILE_DEFAULT "default-master.h5"
+#define XRES_DEFAULT 5
+#define YRES_DEFAULT 5
+#define METHOD_DEFAULT 0
+#define MRL_DEFAULT 10
+#define DUMP_DEFAULT 2000
 
 #define MODULE_SILENT 0
 #define MODULE_WARN 1
@@ -42,6 +51,11 @@
 #define DATABOARD "/board" 
 #define DATAGROUP "/data"
 #define DATASETMASTER "master"
+
+#define ERR_MPI 911
+#define ERR_HDF 912
+#define ERR_MODULE 913
+#define ERR_OTHER 999
 
 #define HDF_RANK 2
 
@@ -92,8 +106,6 @@ extern struct inputData_t *makeInputData(void);
 //struct slaveData *s;
 //extern struct slaveData *makeSlaveData(void);
 
-configOptions options[MAX_OPTIONS_NUM];
-configNamespace configSpace[MAX_CONFIG_SIZE];
 
 /* MAIN CONFIG DATA */
 typedef struct {
@@ -118,6 +130,7 @@ typedef struct {
 char* inifile;
 char* datafile;
 int allopts, mpi_rank, mpi_size;
+int usage, help;
 
 /* FUNCTION PROTOTYPES */
 int* map2d(int, void*, configData* d);
@@ -126,10 +139,22 @@ void slave(void*, configData* d);
 void clearArray(MY_DATATYPE*,int);
 void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
 void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
-int readDefaultConfig(char* inifile, configData* cd);
-void* load_sym(void* module, char* function, int status);
-void writeConfig(hid_t file_id, int allopts);
+void* load_sym(void* module, char* function, int type);
+int readDefaultConfig(char* inifile, configNamespace* cs, int flag);
+void assignConfigValues(int opts, configData* d, configNamespace* cs, int flag, int popt);
+void writeConfig(hid_t file_id, int allopts, configNamespace* cs);
 void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, masterData* rawdata);
 void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, masterData* rawdata);
+void mpi_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+    char* arg, void* data);
+void mpi_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+    char* arg, void* data);
+void poptTestC(char* i, char* j);
+void poptTestI(char* i, int j);
+
+#define MPI_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mpi_poptHelpOptions, \
+			0, "Help options:", NULL },
+
+#define MESSAGE(x) printf("-> "); printf(x);
 
 #endif

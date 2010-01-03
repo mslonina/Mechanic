@@ -40,13 +40,6 @@ void master(void* module, configData* d){
    buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
    
    /**
-    * Welcome message.
-    */
-   printf("MAP RESOLUTION = %dx%d.\n", d->xres, d->yres);
-   printf("MPI_SIZE = %d.\n", mpi_size);
-   printf("METHOD = %d.\n", d->method);
-
-   /**
     * Master can do something useful before computations.
     */
    query = load_sym(module, "userdefined_masterIN", MODULE_SILENT);
@@ -77,11 +70,8 @@ void master(void* module, configData* d){
     *
     */
  
-    /* Create master datafile */
-    file_id = H5Fcreate(d->datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-    /* First of all, save configuration */
-    writeConfig(file_id, allopts);
+        /* Open file */
+    file_id = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
     
     /* Control board space */
     dimsf[0] = d->xres;
@@ -148,7 +138,7 @@ void master(void* module, configData* d){
     */
    if(farm_res < mpi_size){
     for(i = nodes; i < mpi_size; i++){
-      printf("Terminating idle slave %d.\n", i);
+      printf("-> Terminating idle slave %d.\n", i);
       MPI_Send(map2d(npxc, module, d), 3, MPI_INT, i, MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
    }
