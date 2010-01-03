@@ -4,7 +4,7 @@
  * SLAVE
  *
  */
-void slave(void* module, configData* d){
+void slave(void* handler, moduleInfo* md, configData* d){
 
     int* tab=malloc(3*sizeof(*tab));
     int k = 0, i = 0, j = 0;
@@ -27,15 +27,15 @@ void slave(void* module, configData* d){
     /**
      * Slave can do something useful before computations.
      */
-    query = load_sym(module, "userdefined_slaveIN", MODULE_SILENT);
+    query = load_sym(handler, md, "slaveIN", MODULE_SILENT);
     if(query) query(mpi_rank, d, rawdata);
 
-    qbeforeR = load_sym(module, "userdefined_slave_beforeReceive", MODULE_SILENT);
+    qbeforeR = load_sym(handler, md, "slave_beforeReceive", MODULE_SILENT);
     if(qbeforeR) qbeforeR(mpi_rank, d, rawdata);
     
        MPI_Recv(tab, 3, MPI_INT, MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
     
-    qafterR = load_sym(module, "userdefined_slave_afterReceive", MODULE_SILENT);
+    qafterR = load_sym(handler, md, "slave_afterReceive", MODULE_SILENT);
     if(qafterR) qafterR(mpi_rank, d, rawdata);
     
     while(1){
@@ -56,27 +56,27 @@ void slave(void* module, configData* d){
           /**
            * Use userdefined pixelCoords method.
            */
-          qpc = load_sym(module, "userdefined_pixelCoords", MODULE_ERROR);
+          qpc = load_sym(handler, md, "pixelCoords", MODULE_ERROR);
           if(qpc) qpc(mpi_rank, tab, d, rawdata);
        } 
           /* PIXEL COMPUTATION */
-          qpx = load_sym(module, "userdefined_pixelCompute", MODULE_ERROR);
+          qpx = load_sym(handler, md, "pixelCompute", MODULE_ERROR);
           if(qpx) qpx(mpi_rank, d, rawdata);
           
-          qbeforeS = load_sym(module, "userdefined_slave_beforeSend", MODULE_SILENT);
+          qbeforeS = load_sym(handler, md, "slave_beforeSend", MODULE_SILENT);
           if(qbeforeS) qbeforeS(mpi_rank, d, rawdata);
          
              MPI_Send(rawdata, 1, masterResultsType, MPI_DEST, MPI_RESULT_TAG, MPI_COMM_WORLD);
 
-          qafterS = load_sym(module, "userdefined_slave_afterSend", MODULE_SILENT);
+          qafterS = load_sym(handler, md, "slave_afterSend", MODULE_SILENT);
           if(qafterS) qafterS(mpi_rank, d, rawdata);
         
-          qbeforeR = load_sym(module, "userdefined_slave_beforeReceive", MODULE_SILENT);
+          qbeforeR = load_sym(handler, md, "slave_beforeReceive", MODULE_SILENT);
           if(qbeforeR) qbeforeR(mpi_rank, d, rawdata);
            
              MPI_Recv(tab, 3, MPI_INT, MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
           
-          qafterR = load_sym(module, "userdefined_slave_afterReceive", MODULE_SILENT);
+          qafterR = load_sym(handler, md, "slave_afterReceive", MODULE_SILENT);
           if(qafterR) qafterR(mpi_rank, d, rawdata);
         }
       
@@ -85,7 +85,7 @@ void slave(void* module, configData* d){
     /**
      * Slave can do something useful after computations.
      */
-    query = load_sym(module, "userdefined_slaveOUT", MODULE_SILENT);
+    query = load_sym(handler, md, "slaveOUT", MODULE_SILENT);
     if(query) query(mpi_rank, d, rawdata);
 
     free(rawdata);

@@ -22,10 +22,9 @@ int main(int argc, char *argv[]){
   char* module_name;
   char* name;
   char module_file[MAX_VALUE_LENGTH];
-  void* module;
-  void* lib;
   char* dlresult;
   char optvalue;
+  void* handler;
   module_query_int_f qd;
 
   int restartmode = 0;
@@ -36,6 +35,8 @@ int main(int argc, char *argv[]){
   hid_t file_id;
 
   configData cd; //struct for command line args
+  moduleInfo md;
+  moduleInfo lib;
 
   MPI_Datatype defaultConfigType;
   
@@ -204,16 +205,18 @@ int main(int argc, char *argv[]){
        MPI_Abort(MPI_COMM_WORLD, ERR_MPI);
     }
 
-    lib = dlopen("libreadconfig.so", RTLD_NOW);
-    if(!lib){
+    lib.name = "libreadconfig";
+
+    handler = dlopen("libreadconfig.so", RTLD_NOW);
+    if(!handler){
       printf("Cannot load libreadconfig: %s\n", dlerror()); 
       MPI_Abort(MPI_COMM_WORLD, ERR_OTHER);
     }
 
-    qd = load_sym(lib,"printAll", MODULE_SILENT);
+    qd = load_sym(handler,&lib,"printAll", MODULE_SILENT);
     printf("\n-> Mpifarm will use these startup values:\n\n");
     qd(allopts,cs);
-    dlclose(lib);
+    dlclose(handler);
   }
 
   poptFreeContext(poptcon);
@@ -249,32 +252,33 @@ int main(int argc, char *argv[]){
    * If option -m is not set, use default.
    */
   sprintf(module_file, "mpifarm_module_%s.so", module_name);
-  
-  module = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
-  if(!module){
+ 
+  md.name = module_name;
+  handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
+  if(!handler){
     printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
     MPI_Abort(MPI_COMM_WORLD, ERR_MODULE);
   }
 
-  init = load_sym(module, "mpifarm_module_init", MODULE_ERROR);
-  if(init) init();
+  init = load_sym(handler,&md, "init", MODULE_ERROR);
+  if(init) init(&md);
 
-  query = load_sym(module, "mpifarm_module_query", MODULE_SILENT);
+  query = load_sym(handler,&md, "query", MODULE_SILENT);
   if(query) query();
 
   /**
    * NOW, DO IT!
    */
   if(mpi_rank == 0) {
-      master(module, &cd);
+      master(handler, &md, &cd);
 	} else {
-      slave(module, &cd); 
+      slave(handler, &md, &cd); 
   }
 
-  cleanup = load_sym(module, "mpifarm_module_cleanup", MODULE_ERROR);
+  cleanup = load_sym(handler, &md, "cleanup", MODULE_ERROR);
   if(cleanup) cleanup();
 
-  dlclose(module);
+  dlclose(handler);
   MPI_Type_free(&defaultConfigType);
   
   /* HDF5 FINALIZE */

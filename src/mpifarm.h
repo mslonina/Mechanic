@@ -126,6 +126,15 @@ typedef struct {
       char value[MAX_VALUE_LENGTH];
     } simpleopts;
 
+/* Module info and handler */
+typedef struct {
+      const char *name;
+      const char *author;
+      const char *date;
+      const char *version;
+} moduleInfo;
+
+
 /* GLOBALS */
 char* inifile;
 char* datafile;
@@ -133,13 +142,13 @@ int allopts, mpi_rank, mpi_size;
 int usage, help;
 
 /* FUNCTION PROTOTYPES */
-int* map2d(int, void*, configData* d);
-void master(void*, configData* d);
-void slave(void*, configData* d);
+int* map2d(int, void* handler, moduleInfo*, configData* d);
+void master(void* handler, moduleInfo*, configData* d);
+void slave(void* handler, moduleInfo*, configData* d);
 void clearArray(MY_DATATYPE*,int);
 void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
 void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
-void* load_sym(void* module, char* function, int type);
+void* load_sym(void* handler, moduleInfo*, char* function, int type);
 int readDefaultConfig(char* inifile, configNamespace* cs, int flag);
 void assignConfigValues(int opts, configData* d, configNamespace* cs, int flag, int popt);
 void writeConfig(hid_t file_id, int allopts, configNamespace* cs);
@@ -151,10 +160,9 @@ void mpi_displayUsage(poptContext con, enum poptCallbackReason reason, const str
     char* arg, void* data);
 void poptTestC(char* i, char* j);
 void poptTestI(char* i, int j);
+void welcome();
 
 #define MPI_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mpi_poptHelpOptions, \
 			0, "Help options:", NULL },
-
-#define MESSAGE(x) printf("-> "); printf(x);
 
 #endif

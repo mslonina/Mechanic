@@ -1,5 +1,8 @@
 MPI FARM SKELETON
 
+Project is in early stage of development, new features and tasks 
+are added day by day.
+
 == Features ==
 - N-processors MPI2 task farm (one master and N-1 slaves)
 - HDF5 (>1.8) storage
@@ -27,9 +30,10 @@ You can adjust any config option by commandline args.
 If you want your slaves to read config files, please do it in your module.
 
 == Commandline options ==
--m --module: loads additional module (module)
+-p --module: loads additional module (module)
 -c --config: reads given config file
 -n --name: problem name
+-m --method: method of pixel choice
 -x --xres: x resolution
 -y --yres: y resolution
 -l --mrl: master result length
@@ -49,7 +53,7 @@ Master data vector is defined by struct( int coords[3], MY_DATATYPE res[mrl]).
 It is the only vector received by master node and written to master data file. 
 You can adjust the length of this vector by setting mrl.
 
-TODO: allow to safely change MY_DATATYPe (currently its double).
+TODO: allow to safely change MY_DATATYPE (currently its double).
 
 You can create as many data files as needed, using User API from mpifarm_module_[MODULE_NAME].c. 
 See mpifarm_module_default.c for examples. Each slave can have own config and datafile, too.
@@ -58,46 +62,46 @@ See mpifarm_module_default.c for examples. Each slave can have own config and da
 You can write Your own module to MpiFarm and use it for computation.
 Please refer to src/modules/default for examples.
 
-Modules are loaded during runtime with commandline switch -m [--module=MODULE_NAME]
+Modules are loaded during runtime with commandline switch -p [--module=MODULE_NAME]
 
 == User defined API functions ==
-void mpifarm_module_init() [required]
-void mpifarm_module_cleanup() [required]
+void [MODULE]_init(moduleInfo *md) [required]
+void [MODULE]_cleanup() [required]
 
-int userdefined_farmResolution(int xres, int yres)
+int [MODULE]_farmResolution(int xres, int yres)
 - computes farm size
 
-void userdefined_pixelCompute(int slave, configData *d, masterData *r) [required]
+void [MODULE]_pixelCompute(int slave, configData *d, masterData *r) [required]
 - computes given pixel
 
-void userdefined_pixelCoords(int slave, int mastercoords[], configData *d, masterData *r)
+void [MODULE]_pixelCoords(int slave, int mastercoords[], configData *d, masterData *r)
 - computes pixel for given slave (used only when method = 6) [required for method 6]
 
-void userdefined_pixelCoordsMap(int ind[], int x, int y, int numofpixel)
+void [MODULE]_pixelCoordsMap(int ind[], int x, int y, int numofpixel)
 - map coords function (used only when method = 6) [required for method 6]
 
-void userdefined_masterIN(int mpi_size, configData *d)
+void [MODULE]_masterIN(int mpi_size, configData *d)
 - functions to do before farm start
 
-void userdefined_masterOUT(int mpi_size, configData *d)
+void [MODULE]_masterOUT(int mpi_size, configData *d)
 - functions to do after farm finish
 
-void userdefined_slaveIN(int slave, configData *d, masterData *r)
+void [MODULE]_slaveIN(int slave, configData *d, masterData *r)
 - functions to do before slave start
 
-void userdefined_slaveOUT(int slave, configData *d, masterData *r)
+void [MODULE]_slaveOUT(int slave, configData *d, masterData *r)
 - functions to do after slave is finished
 
-void userdefined_master_beforeSend(int slave, configData *d, masterData *r)
-void userdefined_master_afterSend(int slave, configData *d, masterData *r)
-void userdefined_master_beforeReceive(configData *d, masterData *r)
-void userdefined_master_afterReceive(int slave, configData *d, masterData *r)
+void [MODULE]_master_beforeSend(int slave, configData *d, masterData *r)
+void [MODULE]_master_afterSend(int slave, configData *d, masterData *r)
+void [MODULE]_master_beforeReceive(configData *d, masterData *r)
+void [MODULE]_master_afterReceive(int slave, configData *d, masterData *r)
 - functions to do before/after data send/receive (master)
 
-void userdefined_slave_beforeSend(int slave, configData *d, masterData *r)
-void userdefined_slave_afterSend(int slave, configData *d, masterData *r)
-void userdefined_slave_beforeReceive(int slave, configData *d, masterData *r)
-void userdefined_slave_afterReceive(int slave, configData *d, masterData *r)
+void [MODULE]_slave_beforeSend(int slave, configData *d, masterData *r)
+void [MODULE]_slave_afterSend(int slave, configData *d, masterData *r)
+void [MODULE]_slave_beforeReceive(int slave, configData *d, masterData *r)
+void [MODULE]_slave_afterReceive(int slave, configData *d, masterData *r)
 - functions to do before/after data send/receive (slave)
 
 Todo (too many to mention all...):
@@ -113,19 +117,22 @@ Create to files:
 
 Main module files have to be named in that convention.
 
-Now, edit c source code:
+Now, edit c source code. Remember, each function must be prefixed with your module's name.
 <code>
 #include <mpifarm/mpifarm.h> //if your module isn't installed with MpiFarm
 #include "mpifarm_module_hello.h" //and whatever libs you need
 
-void mpifarm_module_init(){
+void hello_init(moduleInfo* md){
+  //adjust module info here
+  md->name = "hello";
+  md->author = "Jeff";
   return;
 }
-void mpifarm_module_cleanup(){
+void hello_cleanup(){
   return;
 }
 
-void userdefined_pixelCompute(int slave, configData *d, masterData *r){
+void hello_pixelCompute(int slave, configData *d, masterData *r){
 
   //here you can images much complicated computations, but for simplicity:
   r->res[0] = (double)r->coords[0];
@@ -137,7 +144,7 @@ void userdefined_pixelCompute(int slave, configData *d, masterData *r){
   return;
 }
 
-void userdefined_slaveOUT(int slave, configData *d, masterData *r){
+void hello_slaveOUT(int slave, configData *d, masterData *r){
   //slave can do something useful, for now, just tell us something
   printf("Hello from slave[%d]\n", slave);
   return;

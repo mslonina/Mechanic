@@ -136,7 +136,7 @@ int charcount(char *l, char* s){
  * reads config namespaces, vars names and values into global options structure
  * and returns number of config vars
  */
-int parsefile(FILE* read, char* SEP, char* COMM, configNamespace* configSpace){
+int libreadconfig_parsefile(FILE* read, char* SEP, char* COMM, configNamespace* configSpace){
   
   int i = 0; int j = 0; int n = 0; int sepc = 0;
   char* line; char l[MAX_LINE_LENGTH]; char* b; char* c;
@@ -226,7 +226,7 @@ int parsefile(FILE* read, char* SEP, char* COMM, configNamespace* configSpace){
 /**
  * prints all options
  */
-void printAll(int n, configNamespace* configSpace){
+void libreadconfig_printAll(int n, configNamespace* configSpace){
   int i = 0; int k = 0;
   for (i = 0; i < n; i++){
 		printf("Namespace [%s]:\n",configSpace[i].space);
@@ -247,7 +247,7 @@ int parseConfigFile(char* inif, char* sep, char* comm, configNamespace* configSp
 
 	read = fopen(inif,"r");
 	if(read != NULL){
-		opts = parsefile(read, sep, comm, configSpace); //read and parse config file
+		opts = libreadconfig_parsefile(read, sep, comm, configSpace); //read and parse config file
 	}else{
 		perror("Error opening config file:");
 		exit(1);

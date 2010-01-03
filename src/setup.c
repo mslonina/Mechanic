@@ -13,12 +13,15 @@ int readDefaultConfig(char* inifile, configNamespace* cs, int flag){
   char* sep = "=";
   char* comm = "#";
   module_query_int_f qd;
-  void* lib;
+  moduleInfo rc;
+  void* handler;
+
+  rc.name = "libreadconfig";
 
   FILE* read;
 
-  lib = dlopen("libreadconfig.so", RTLD_NOW);
-  if(!lib){
+  handler = dlopen("libreadconfig.so", RTLD_NOW);
+  if(!handler){
     printf("-> Cannot load libreadconfig: %s\n", dlerror()); 
     MPI_Abort(MPI_COMM_WORLD, ERR_OTHER);
   }
@@ -31,7 +34,7 @@ int readDefaultConfig(char* inifile, configNamespace* cs, int flag){
   /* Default behaviour: try to read default config file. */
   if(read != NULL){
    printf("-> Parsing config file \"%s\"... ", inifile);
-   qd = load_sym(lib,"parsefile", MODULE_ERROR);
+   qd = load_sym(handler, &rc,"parsefile", MODULE_ERROR);
    opts = qd(read, sep, comm, cs);
    printf(" done.\n");
    fclose(read);
@@ -53,7 +56,7 @@ int readDefaultConfig(char* inifile, configNamespace* cs, int flag){
   
   //qd = load_sym(lib,"printAll", MODULE_SILENT);
   //qd(opts,cs);
-  dlclose(lib);
+  dlclose(handler);
  
   return opts;
 }

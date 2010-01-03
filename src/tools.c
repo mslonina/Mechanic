@@ -20,7 +20,7 @@ void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 /**
  * Map 1D index to 2D array.
  */
-int* map2d(int c, void* module, configData* d){
+int* map2d(int c, void* handler, moduleInfo *md, configData* d){
    int* ind = malloc(3*sizeof(*ind));
    int x, y;
    x = d->xres;
@@ -41,7 +41,7 @@ int* map2d(int c, void* module, configData* d){
     * Method 6: user defined control.
     */
    if(d->method == 6){
-    qpcm = load_sym(module, "userdefined_pixelCoordsMap", MODULE_ERROR); 
+    qpcm = load_sym(handler, md, "pixelCoordsMap", MODULE_ERROR); 
     if(qpcm) qpcm(ind, c, x, y);
    }
 
@@ -49,25 +49,28 @@ int* map2d(int c, void* module, configData* d){
 }
 
 /**
- * Wrapper to load_sym().
+ * Wrapper to dlsym().
  * Handles error messages and abort if necessary.
  */
-void* load_sym(void* module, char* function, int type){
+void* load_sym(void* handler, moduleInfo *md, char* function, int type){
  
-  void* handler;
+  void* handler_f;
   char* err;
+  char func[1024];
 
   dlerror();
-  handler = dlsym(module, function);
+  sprintf(func,"%s_%s",md->name, function);
+  //printf("mod: %s func: %s\n", md->name, func);
+  handler_f = dlsym(handler, func);
   if((err = dlerror()) != NULL){
     switch (type){
       case MODULE_SILENT:
         break;
       case MODULE_WARN:
-        printf("-> Module warning: Cannot load function '%s': %s\n", function, err); 
+        printf("-> Module warning: Cannot load function '%s': %s\n", func, err); 
         break;
       case MODULE_ERROR:
-        printf("-> Module error: Cannot load function '%s': %s\n", function, err); 
+        printf("-> Module error: Cannot load function '%s': %s\n", func, err); 
         break;
       default:
         break;
@@ -78,7 +81,7 @@ void* load_sym(void* module, char* function, int type){
       return NULL;
     }
   }else{
-    return handler;
+    return handler_f;
   }
 }
 

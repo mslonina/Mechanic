@@ -32,8 +32,8 @@ void configError(int, char*);
 char* trim(char*);
 char* nametrim(char*, int);
 int charcount(char*, char*);
-int parsefile(FILE*, char*, char*, configNamespace*);
-void printAll(int, configNamespace*);
+int libreadconfig_parsefile(FILE*, char*, char*, configNamespace*);
+void libreadconfig_printAll(int, configNamespace*);
 int parseConfigFile(char*, char*, char*, configNamespace*);
 
 #endif

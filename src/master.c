@@ -4,7 +4,7 @@
  * MASTER
  *
  */
-void master(void* module, configData* d){
+void master(void* handler, moduleInfo* md, configData* d){
 
    int* tab; 
 	 MY_DATATYPE rdata[d->mrl][1];
@@ -42,7 +42,7 @@ void master(void* module, configData* d){
    /**
     * Master can do something useful before computations.
     */
-   query = load_sym(module, "userdefined_masterIN", MODULE_SILENT);
+   query = load_sym(handler, md, "masterIN", MODULE_SILENT);
    if(query) query(mpi_size, d);
 
    /**
@@ -52,7 +52,7 @@ void master(void* module, configData* d){
    if (d->method == 1) farm_res = d->xres; //sliceX
    if (d->method == 2) farm_res = d->yres; //sliceY
    if (d->method == 6){
-     qr = load_sym(module, "userdefined_farmResolution", MODULE_ERROR);
+     qr = load_sym(handler, md, "farmResolution", MODULE_ERROR);
      if(qr) farm_res = qr(d->xres, d->yres);
    }
 
@@ -120,12 +120,12 @@ void master(void* module, configData* d){
     * remembering what the farm resolution is.
     */
    for (i = 1; i < nodes; i++){
-     qbeforeS = load_sym(module,"userdefined_master_beforeSend", MODULE_SILENT);
+     qbeforeS = load_sym(handler, md,"master_beforeSend", MODULE_SILENT);
      if(qbeforeS) qbeforeS(i,d,rawdata);
 
-     MPI_Send(map2d(npxc, module, d), 3, MPI_INT, i, MPI_DATA_TAG, MPI_COMM_WORLD);
+     MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MPI_DATA_TAG, MPI_COMM_WORLD);
      
-     qafterS = load_sym(module, "userdefined_master_afterSend", MODULE_SILENT);
+     qafterS = load_sym(handler, md, "master_afterSend", MODULE_SILENT);
      if(qafterS) qafterS(i,d,rawdata);
      
      count++;
@@ -139,7 +139,7 @@ void master(void* module, configData* d){
    if(farm_res < mpi_size){
     for(i = nodes; i < mpi_size; i++){
       printf("-> Terminating idle slave %d.\n", i);
-      MPI_Send(map2d(npxc, module, d), 3, MPI_INT, i, MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+      MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
    }
 
@@ -148,13 +148,13 @@ void master(void* module, configData* d){
     */
    while (1) {
     
-     qbeforeR = load_sym(module, "userdefined_master_beforeReceive", MODULE_SILENT);
+     qbeforeR = load_sym(handler, md, "master_beforeReceive", MODULE_SILENT);
      if(qbeforeR) qbeforeR(d,rawdata);
       
      MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
      count--;
       
-      qafterR = load_sym(module, "userdefined_master_afterReceive", MODULE_SILENT);
+      qafterR = load_sym(handler, md, "master_afterReceive", MODULE_SILENT);
       if(qafterR) qafterR(mpi_status.MPI_SOURCE, d, rawdata);
       
       /**
@@ -170,14 +170,14 @@ void master(void* module, configData* d){
       /* Send next task to the slave */
       if (npxc < farm_res){
        
-        qbeforeS = load_sym(module, "userdefined_master_beforeSend", MODULE_SILENT);
+        qbeforeS = load_sym(handler, md, "master_beforeSend", MODULE_SILENT);
         if(qbeforeS) qbeforeS(mpi_status.MPI_SOURCE, &d, rawdata);
          
-        MPI_Send(map2d(npxc, module, d), 3, MPI_INT, mpi_status.MPI_SOURCE, MPI_DATA_TAG, MPI_COMM_WORLD);
+        MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, mpi_status.MPI_SOURCE, MPI_DATA_TAG, MPI_COMM_WORLD);
         npxc++;
         count++;
         
-        qafterS = load_sym(module, "userdefined_master_afterSend", MODULE_SILENT);
+        qafterS = load_sym(handler, md, "master_afterSend", MODULE_SILENT);
         if(qafterS) qafterS(mpi_status.MPI_SOURCE, d, rawdata);
 
       } else {
@@ -191,12 +191,12 @@ void master(void* module, configData* d){
      */
     for (i = 0; i < count; i++){
       
-      qbeforeR = load_sym(module, "userdefined_master_beforeReceive", MODULE_SILENT);
+      qbeforeR = load_sym(handler, md, "master_beforeReceive", MODULE_SILENT);
       if(qbeforeR) qbeforeR(d, rawdata);
         
       MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
       
-      qafterR = load_sym(module, "userdefined_master_afterReceive", MODULE_SILENT);
+      qafterR = load_sym(handler, md, "master_afterReceive", MODULE_SILENT);
       if(qafterR) qafterR(mpi_status.MPI_SOURCE, d, rawdata);
         
         /**
@@ -215,7 +215,7 @@ void master(void* module, configData* d){
      * Now, terminate the slaves 
      */
     for (i = 1; i < nodes; i++){
-        MPI_Send(map2d(npxc, module, d), 3, MPI_INT, i, MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+        MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
 
     /**
@@ -239,7 +239,7 @@ void master(void* module, configData* d){
     /**
      * Master can do something useful after the computations.
      */
-    query = load_sym(module,"userdefined_masterOUT", MODULE_SILENT);
+    query = load_sym(handler, md,"masterOUT", MODULE_SILENT);
     if(query) query(nodes, d, rawdata);
 
     free(rawdata);
