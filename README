@@ -47,6 +47,7 @@ If you want your slaves to read config files, please do it in your module.
 /data/master - data received by the master node
 
 Default module shows, how to write slave data to master datafile.
+If file exists, it will be automatically renamed to old-FILENAME.h5
 
 == Data ==
 Master data vector is defined by struct( int coords[3], MY_DATATYPE res[mrl]).
