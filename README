@@ -67,39 +67,99 @@ void mpifarm_module_cleanup() [required]
 int userdefined_farmResolution(int xres, int yres)
 - computes farm size
 
-void userdefined_pixelCompute(int slave, inputData *d, masterData *r) [required]
+void userdefined_pixelCompute(int slave, configData *d, masterData *r) [required]
 - computes given pixel
 
-void userdefined_pixelCoords(int slave, int mastercoords[], inputData *d, masterData *r)
+void userdefined_pixelCoords(int slave, int mastercoords[], configData *d, masterData *r)
 - computes pixel for given slave (used only when method = 6) [required for method 6]
 
 void userdefined_pixelCoordsMap(int ind[], int x, int y, int numofpixel)
 - map coords function (used only when method = 6) [required for method 6]
 
-void userdefined_masterIN(int mpi_size, inputData *d)
+void userdefined_masterIN(int mpi_size, configData *d)
 - functions to do before farm start
 
-void userdefined_masterOUT(int mpi_size, inputData *d)
+void userdefined_masterOUT(int mpi_size, configData *d)
 - functions to do after farm finish
 
-void userdefined_slaveIN(int slave, inputData *d, masterData *r)
+void userdefined_slaveIN(int slave, configData *d, masterData *r)
 - functions to do before slave start
 
-void userdefined_slaveOUT(int slave, inputData *d, masterData *r)
+void userdefined_slaveOUT(int slave, configData *d, masterData *r)
 - functions to do after slave is finished
 
-void userdefined_master_beforeSend(int slave, inputData *d, masterData *r)
-void userdefined_master_afterSend(int slave, inputData *d, masterData *r)
-void userdefined_master_beforeReceive(inputData *d, masterData *r)
-void userdefined_master_afterReceive(int slave, inputData *d, masterData *r)
+void userdefined_master_beforeSend(int slave, configData *d, masterData *r)
+void userdefined_master_afterSend(int slave, configData *d, masterData *r)
+void userdefined_master_beforeReceive(configData *d, masterData *r)
+void userdefined_master_afterReceive(int slave, configData *d, masterData *r)
 - functions to do before/after data send/receive (master)
 
-void userdefined_slave_beforeSend(int slave, inputData *d, masterData *r)
-void userdefined_slave_afterSend(int slave, inputData *d, masterData *r)
-void userdefined_slave_beforeReceive(int slave, inputData *d, masterData *r)
-void userdefined_slave_afterReceive(int slave, inputData *d, masterData *r)
+void userdefined_slave_beforeSend(int slave, configData *d, masterData *r)
+void userdefined_slave_afterSend(int slave, configData *d, masterData *r)
+void userdefined_slave_beforeReceive(int slave, configData *d, masterData *r)
+void userdefined_slave_afterReceive(int slave, configData *d, masterData *r)
 - functions to do before/after data send/receive (slave)
 
 Todo (too many to mention all...):
 - restart
 - file checking
+
+== Creating sample module "hello" ==
+It is really simple:)
+
+Create to files: 
+- mpifarm_module_hello.c
+- mpifarm_module_hello.h
+
+Main module files have to be named in that convention.
+
+Now, edit c source code:
+<code>
+#include <mpifarm/mpifarm.h> //if your module isn't installed with MpiFarm
+#include "mpifarm_module_hello.h" //and whatever libs you need
+
+void mpifarm_module_init(){
+  return;
+}
+void mpifarm_module_cleanup(){
+  return;
+}
+
+void userdefined_pixelCompute(int slave, configData *d, masterData *r){
+
+  //here you can images much complicated computations, but for simplicity:
+  r->res[0] = (double)r->coords[0];
+  r->res[1] = (double)r->coords[1];
+  r->res[2] = (double)r->coords[2];
+
+  //use your skills to edit this function and make your module powerfull!
+
+  return;
+}
+
+void userdefined_slaveOUT(int slave, configData *d, masterData *r){
+  //slave can do something useful, for now, just tell us something
+  printf("Hello from slave[%d]\n", slave);
+  return;
+}
+</code>
+
+Save the code. Now we need to build shared library and load it to MpiFarm.
+<code>
+mpicc -Wall -g -fPIC -c -o mpifarm_module_hello.o mpifarm_module_hello.c
+mpicc -shared -o mpifarm_module_hello.so mpifarm_module_hello.o
+</code>
+
+To use the module, you need to adjust LD_LIBRARY_PATH to point to the module,
+or copy it where ld can find it.
+
+After that, you can load the module
+<code>
+mpirun -np 3 mpifarm -p hello
+</code>
+
+This example should is included in doc dir in file hello.tgz
+
+Happy coding!
+
+

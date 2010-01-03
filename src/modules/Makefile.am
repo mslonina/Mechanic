@@ -1,1 +1,1 @@
-SUBDIRS = mytest default
+SUBDIRS = default
