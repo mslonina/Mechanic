@@ -4,7 +4,7 @@
  * by mariusz slonina <mariusz.slonina@gmail.com>
  * with a little help of kacper kowalik <xarthisius.kk@gmail.com>
  *
- * BE CAREFUL -- almost no error handling (TODO)
+ * BE CAREFUL -- only partial error handling (TODO)
  */
 #include "mpifarm.h"
 
@@ -26,11 +26,14 @@ int main(int argc, char *argv[]){
   char optvalue;
   void* handler;
   module_query_int_f qd;
+  char oldfile[MAX_VALUE_LENGTH];
 
   int restartmode = 0;
   int poptflags = 0;
   int error;
   int configfile = 0;
+
+  struct stat st; //stat.h
 
   hid_t file_id;
 
@@ -226,7 +229,14 @@ int main(int argc, char *argv[]){
   
   /* Config file read */
   if(mpi_rank == 0){
-
+    /* Need support for restart mode here */
+    if(stat(cd.datafile,&st) == 0){
+      sprintf(oldfile,"old-%s",cd.datafile);
+      printf("-> File %s exists!\n", cd.datafile);
+      printf("-> I will back it up for You now\n");
+      printf("-> Backuped file: %s\n",oldfile);
+      rename(cd.datafile,oldfile);
+    }
   /* Create master datafile */
   file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -249,7 +259,7 @@ int main(int argc, char *argv[]){
   
   /**
    * MODULE LOAD
-   * If option -m is not set, use default.
+   * If option -p is not set, use default.
    */
   sprintf(module_file, "mpifarm_module_%s.so", module_name);
  
