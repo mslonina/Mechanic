@@ -19,3 +19,5 @@ src/mpifarm
 !Makefile.am
 !configure.ac
 src/old/*.*
+*.tar.gz
+*.tgz
