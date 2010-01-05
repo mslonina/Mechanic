@@ -1,0 +1,22 @@
+CC=mpicc
+CCFLAGS=-Wall -O0 -g 
+CCDYNAMICFLAGS=${CCFLAGS} -fPIC 
+LDDYNAMICFLAGS=${LDFLAGS} -shared
+
+OBJECTS=mpifarm_module_hello.o
+
+all: mpifarm_module_hello.so
+
+%.o: %.c
+	${CC} ${CCDYNAMICFLAGS} -c -o $@ $<
+
+%.so: %.o
+	${CC} ${LDDYNAMICFLAGS} -o $@ $<
+
+
+clean: 
+	-rm -f *.o *.so 
+
+.SECONDARY: ${OBJECTS}
+
+

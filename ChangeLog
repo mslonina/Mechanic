@@ -2,5 +2,20 @@ For up-to-date changelog, see git logs:
 hum://home/slonina/MpiFarm
 
 Branch 'master' is quite stable, but quite boring:)
-Branch 'experimental' with new feautres is more interesting;)
+Branch 'experimental' with new features is more interesting;)
 
+Unstable 2
+* Dynamic module architecture -- the functionality of the farm can be easily
+extended.
+* Almost no global variables in use.
+* Libreadconfig updated. 
+* Full commandline arg handling (popt library).
+* New data storage scheme. Master node writes config files, map of pixels and
+special vector to master data file. Any other data can be stored, too -- just
+code it in your module.
+
+Unstable 1
+* Initial release.
+* HDF5 storage.
+* MPI2 task farm.
+* Using libreadconfig for config files.
