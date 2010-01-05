@@ -38,7 +38,6 @@ int main(int argc, char *argv[]){
 
   configData cd; //struct for command line args
   moduleInfo md;
-  moduleInfo lib;
 
   MPI_Datatype defaultConfigType;
   
@@ -57,10 +56,10 @@ int main(int argc, char *argv[]){
   cd.dump = DUMP_DEFAULT;
   cd.restartmode = 0;
 
-  configNamespace cs[] = {
-    {"default",{{"name", ""},{"xres", ""},{"yres", ""},
-        {"method", ""},{"mrl", ""},{"module", ""},},6},
-    {"logs", {{"dump", ""}}, 1}
+  LRC_configNamespace cs[] = {
+    {"default",{{"name", "", LRC_CHAR},{"xres", "", LRC_INT},{"yres", "", LRC_INT},
+        {"method", "", LRC_INT},{"mrl", "", LRC_INT},{"module", "", LRC_CHAR},},6},
+    {"logs", {{"dump", "", LRC_INT}}, 1}
   };
   allopts = 2;
 
@@ -72,6 +71,19 @@ int main(int argc, char *argv[]){
   sprintf(cs[0].options[4].value,"%d",MRL_DEFAULT);
   sprintf(cs[0].options[5].value,"%s",MODULE_DEFAULT);
   sprintf(cs[1].options[0].value,"%d",DUMP_DEFAULT);
+
+  /* Assign allowed values */
+  LRC_configTypes ct[] = {
+    {"name", LRC_CHAR},
+    {"xres", LRC_INT},
+    {"yres", LRC_INT},
+    {"method", LRC_INT},
+    {"mrl", LRC_INT},
+    {"module", LRC_CHAR},
+    {"dump", LRC_INT}
+  };
+ 
+  int numCT = 7;
 
   /**
    * POPT CONFIG
@@ -175,22 +187,26 @@ int main(int argc, char *argv[]){
     configfile = 1;
   }
 
+  if(mpi_rank == 0) welcome();
+
   /* Reset options, we need to reuse them
    * to override values read from specified config file */
   if(mpi_rank == 0){
-    
-    welcome();
 
-    /* Read config file. If the file is present,
-     * all read values becomes new defaults. */
-    allopts = readDefaultConfig(inifile, cs, configfile);
+    /* Read config file */
+    allopts = readDefaultConfig(inifile, cs, ct, numCT, configfile);
+
+    /**
+     * Config file parsed. All read values becomes
+     * new defaults 
+     */
     assignConfigValues(allopts, &cd, cs, configfile, 0);
 
     /* Reset pointers */
     name = cd.name;
     module_name = cd.module;
   
-    /* Override the vealues by command line args */
+    /* Override the values by command line args */
     poptResetContext(poptcon);
     poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
     optvalue = poptGetNextOpt(poptcon);
@@ -208,18 +224,8 @@ int main(int argc, char *argv[]){
        MPI_Abort(MPI_COMM_WORLD, ERR_MPI);
     }
 
-    lib.name = "libreadconfig";
-
-    handler = dlopen("libreadconfig.so", RTLD_NOW);
-    if(!handler){
-      printf("Cannot load libreadconfig: %s\n", dlerror()); 
-      MPI_Abort(MPI_COMM_WORLD, ERR_OTHER);
-    }
-
-    qd = load_sym(handler,&lib,"printAll", MODULE_SILENT);
     printf("\n-> Mpifarm will use these startup values:\n\n");
-    qd(allopts,cs);
-    dlclose(handler);
+    LRC_printAll(allopts,cs);
   }
 
   poptFreeContext(poptcon);

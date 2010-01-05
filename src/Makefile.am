@@ -1,6 +1,7 @@
 bin_PROGRAMS = mpifarm
-mpifarm_SOURCES = main.c mpifarm.h master.c slave.c setup.c derived.c tools.c readconfig/libreadconfig.h
-mpifarm_CFLAGS = -Ireadconfig/ -rdynamic 
-SUBDIRS = readconfig modules
-library_includedir=$(includedir)/${PACKAGE}
+mpifarm_SOURCES = main.c mpifarm.h master.c slave.c setup.c derived.c tools.c
+mpifarm_CFLAGS = -rdynamic 
+mpifarm_LDFLAGS = -L/home/slonina/usr/lib/libreadconfig -lreadconfig 
+SUBDIRS = modules
+library_includedir=$(includedir)
 library_include_HEADERS = mpifarm.h

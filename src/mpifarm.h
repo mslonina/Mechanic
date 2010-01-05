@@ -55,6 +55,7 @@
 #define ERR_MPI 911
 #define ERR_HDF 912
 #define ERR_MODULE 913
+#define ERR_SETUP 914
 #define ERR_OTHER 999
 
 #define HDF_RANK 2
@@ -150,9 +151,9 @@ void clearArray(MY_DATATYPE*,int);
 void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
 void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
 void* load_sym(void* handler, moduleInfo*, char* function, int type);
-int readDefaultConfig(char* inifile, configNamespace* cs, int flag);
-void assignConfigValues(int opts, configData* d, configNamespace* cs, int flag, int popt);
-void writeConfig(hid_t file_id, int allopts, configNamespace* cs);
+int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag);
+void assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int flag, int popt);
+void writeConfig(hid_t file_id, int allopts, LRC_configNamespace* cs);
 void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, masterData* rawdata);
 void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, masterData* rawdata);
 void mpi_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 

@@ -7,42 +7,27 @@
 /**
  * Default config file parser.
  */
-int readDefaultConfig(char* inifile, configNamespace* cs, int flag){
+int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag){
 
   int i = 0, k = 0, opts = 0, offset = 0;
   char* sep = "=";
   char* comm = "#";
-  module_query_int_f qd;
-  moduleInfo rc;
-  void* handler;
-
-  rc.name = "libreadconfig";
 
   FILE* read;
-
-  handler = dlopen("libreadconfig.so", RTLD_NOW);
-  if(!handler){
-    printf("-> Cannot load libreadconfig: %s\n", dlerror()); 
-    MPI_Abort(MPI_COMM_WORLD, ERR_OTHER);
-  }
-  /* Diagnostic only */
-  //qd = load_sym(lib,"printAll", MODULE_SILENT);
-  //qd(2,cs);
 
   read = fopen(inifile, "r");
   
   /* Default behaviour: try to read default config file. */
   if(read != NULL){
    printf("-> Parsing config file \"%s\"... ", inifile);
-   qd = load_sym(handler, &rc,"parsefile", MODULE_ERROR);
-   opts = qd(read, sep, comm, cs);
-   printf(" done.\n");
+   opts = LRC_parseFile(read, sep, comm, cs, ct, numCT);
+   if(opts >= 0) printf(" done.\n");
    fclose(read);
   }
   /* If -c is set, but file doesn't exist, abort. */
   else if((read == NULL) && (flag == 1)){
 		perror("-> Error opening config file:");
-    MPI_Abort(MPI_COMM_WORLD, ERR_OTHER);
+    MPI_Abort(MPI_COMM_WORLD, ERR_SETUP);
 	}
   /* We don't insist on having config file present, we just use defaults instead */
   else{
@@ -53,16 +38,14 @@ int readDefaultConfig(char* inifile, configNamespace* cs, int flag){
   if(opts == 0){
 		printf("-> Config file seems to be empty.\n");
 	}
+
+  if(opts < 0) MPI_Abort(MPI_COMM_WORLD, ERR_SETUP);
   
-  //qd = load_sym(lib,"printAll", MODULE_SILENT);
-  //qd(opts,cs);
-  dlclose(handler);
- 
   return opts;
 }
 
 /* Assign config values, one by one. Final struct contains config values of the run */
-void assignConfigValues(int opts, configData* d, configNamespace* cs, int cflag, int popt){
+void assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cflag, int popt){
 
   int i = 0, k = 0;
 
@@ -120,7 +103,7 @@ void poptTestI(char* i, int j){
 /**
  * HDF5 config file storage.
  */
-void writeConfig(hid_t file_id, int allopts, configNamespace* cs){
+void writeConfig(hid_t file_id, int allopts, LRC_configNamespace* cs){
   
   hid_t dset_config, configspace, configmemspace, hdf_config_datatype;
   herr_t hdf_status;
