@@ -28,7 +28,6 @@ int main(int argc, char *argv[]){
   module_query_int_f qd;
   char oldfile[MAX_VALUE_LENGTH];
 
-  int restartmode = 0;
   int poptflags = 0;
   int error;
   int configfile = 0;
@@ -56,6 +55,7 @@ int main(int argc, char *argv[]){
   cd.method = METHOD_DEFAULT;
   cd.mrl = MRL_DEFAULT;
   cd.dump = DUMP_DEFAULT;
+  cd.restartmode = 0;
 
   configNamespace cs[] = {
     {"default",{{"name", ""},{"xres", ""},{"yres", ""},
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]){
   sprintf(cs[0].options[5].value,"%s",MODULE_DEFAULT);
   sprintf(cs[1].options[0].value,"%d",DUMP_DEFAULT);
 
-   /**
+  /**
    * POPT CONFIG
    */
   struct poptOption mpi_poptHelpOptions[] = {
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]){
     "master result array length", "LENGTH"},
     {"dump", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.dump, 0,
     "how often write dump file [TODO]", "DUMP"},
-    {"restart", 'r', POPT_ARG_VAL, &restartmode, 1,
+    {"restart", 'r', POPT_ARG_VAL, &cd.restartmode, 1,
     "restart mode [TODO]","RESTART"},
     POPT_TABLEEND
   };
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]){
   }
   
   /* Restart mode set */
-  if (restartmode == 1){
+  if (cd.restartmode == 1){
     if(mpi_rank == 0) printf("TODO: restart mode\n");
      MPI_Finalize();
      return 0;

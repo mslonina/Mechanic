@@ -117,6 +117,7 @@ typedef struct {
   int method;
   int mrl;
   int dump;
+  int restartmode;
 } configData;
 
 /* Simplified struct for writing config data to hdf file */

@@ -36,10 +36,10 @@ void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResults
  */
 void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   
-  int block_lengths[8];
-  MPI_Aint displacements[8];
-  MPI_Datatype typelist[8];
-  MPI_Aint addresses[9];
+  int block_lengths[9];
+  MPI_Aint displacements[9];
+  MPI_Datatype typelist[9];
+  MPI_Aint addresses[10];
   int i = 0;
 
   typelist[0] = MPI_CHAR; //problem name
@@ -50,6 +50,7 @@ void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   typelist[5] = MPI_INT; //method
   typelist[6] = MPI_INT; //master result length
   typelist[7] = MPI_INT; //dump
+  typelist[8] = MPI_INT; //restartmode
 
   block_lengths[0] = 256;
   block_lengths[1] = 260;
@@ -59,6 +60,7 @@ void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   block_lengths[5] = 1;
   block_lengths[6] = 1;
   block_lengths[7] = 1;
+  block_lengths[8] = 1;
 
   MPI_Address(d, &addresses[0]);
   MPI_Address(&(d->name), &addresses[1]);
@@ -69,12 +71,13 @@ void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   MPI_Address(&(d->method), &addresses[6]);
   MPI_Address(&(d->mrl), &addresses[7]);
   MPI_Address(&(d->dump), &addresses[8]);
+  MPI_Address(&(d->restartmode), &addresses[9]);
 
-  for(i = 0; i < 8; i++){
+  for(i = 0; i < 9; i++){
     displacements[i] = addresses[i+1] - addresses[0];
   }
 
-  MPI_Type_struct(8, block_lengths, displacements, typelist, defaultConfigType_ptr);
+  MPI_Type_struct(9, block_lengths, displacements, typelist, defaultConfigType_ptr);
   MPI_Type_commit(defaultConfigType_ptr);
 
 }
