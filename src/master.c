@@ -1,4 +1,5 @@
 #include "mpifarm.h"
+#include "mpifarm-internals.h"
 
 /**
  * MASTER
@@ -7,13 +8,16 @@
 void master(void* handler, moduleInfo* md, configData* d){
 
    int* tab; 
-	 MY_DATATYPE rdata[d->mrl][1];
    int i = 0, k = 0, j = 0, nodes = 0, farm_res = 0;
    int npxc = 0; //number of all sent pixels
    int count = 0; //number of pixels to receive
+   int check = 0;
    
-   masterData raw;
    masterData *rawdata;
+
+   /* Checkpoint storage */
+   int **coordsarr;
+   MY_DATATYPE **resultarr;
 
    MPI_Status mpi_status;
    MPI_Datatype masterResultsType;
@@ -21,21 +25,25 @@ void master(void* handler, moduleInfo* md, configData* d){
    module_query_void_f queryIN, queryOUT, qbeforeS, qafterS, qbeforeR, qafterR;
    module_query_int_f qr;
  
-   /* hdf */
-   hid_t file_id, dset_board, dset_data, data_group;
-   hid_t mapspace, memmapspace, rawspace, memrawspace, maprawspace; 
-   hid_t plist_id;
-   hsize_t dimsf[2], dimsr[2], co[2], rco[2], off[2], stride[2];
-   int fdata[1][1];
-   herr_t hdf_status;
-
    /**
     * Allocate memory for rawdata.res array.
     */
    rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MY_DATATYPE));
 
-   clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
-  
+   clearArray(rawdata->res, ITEMS_IN_ARRAY(rawdata->res));
+
+   /**
+    * Allocate memory for checkpoint mode.
+    */
+   coordsarr = malloc(sizeof(int*)*d->checkpoint);
+   resultarr = malloc(sizeof(MY_DATATYPE*)*d->checkpoint);
+
+   for(i = 0; i < d->checkpoint; i++){
+     coordsarr[i] = malloc(sizeof(int*)*3);
+     resultarr[i] = malloc(sizeof(MY_DATATYPE*)*d->mrl);
+     clearArray(resultarr[i],ITEMS_IN_ARRAY(resultarr[i]));
+   }
+   
    /* Build derived type for master result */
    buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
    
@@ -55,54 +63,7 @@ void master(void* handler, moduleInfo* md, configData* d){
      qr = load_sym(handler, md, "farmResolution", MODULE_ERROR);
      if(qr) farm_res = qr(d->xres, d->yres);
    }
-
-   /**
-    * HDF5 Storage
-    *
-    * We write data in the following scheme:
-    * /config -- configuration file
-    * /board -- map of computed pixels
-    * /data -- output data group
-    * /data/master -- master dataset
-    *
-    * Each slave can write own data files if needed.
-    * In such case, please edit slaveIN/OUT functions in your module.
-    *
-    */
  
-        /* Open file */
-    file_id = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
-    
-    /* Control board space */
-    dimsf[0] = d->xres;
-    dimsf[1] = d->yres;
-    mapspace = H5Screate_simple(HDF_RANK, dimsf, NULL);
-    
-    dset_board = H5Dcreate(file_id, DATABOARD, H5T_NATIVE_INT, mapspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    /* Master data group */
-    data_group = H5Gcreate(file_id, DATAGROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    
-    /* Result data space  */
-    dimsr[0] = d->xres*d->yres;
-    dimsr[1] = d->mrl;
-    rawspace = H5Screate_simple(HDF_RANK, dimsr, NULL);
-
-    /* Create master dataset */
-    dset_data = H5Dcreate(data_group, DATASETMASTER, H5T_NATIVE_DOUBLE, rawspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  
-    /* We write pixels one by one */
-    co[0] = 1;
-    co[1] = 1;
-    memmapspace = H5Screate_simple(HDF_RANK, co, NULL);
-
-    rco[0] = 1;
-    rco[1] = d->mrl;
-    memrawspace = H5Screate_simple(HDF_RANK, rco, NULL);
-   
-    mapspace = H5Dget_space(dset_board);
-    rawspace = H5Dget_space(dset_data);
-  
    /**
     * FARM STARTS
     */
@@ -156,16 +117,27 @@ void master(void* handler, moduleInfo* md, configData* d){
       
       qafterR = load_sym(handler, md, "master_afterReceive", MODULE_SILENT);
       if(qafterR) qafterR(mpi_status.MPI_SOURCE, d, rawdata);
+    
+      /* Copy data to checkpoint arrays */
+      coordsarr[check][0] = rawdata->coords[0];
+      coordsarr[check][1] = rawdata->coords[1];
+      coordsarr[check][2] = rawdata->coords[2];
       
-      /**
-       * WRITE RESULTS TO MASTER FILE
-       */
-      
-      /* Control board -- each computed pixel is marked with 1. */
-      H5writeBoard(dset_board, memmapspace, mapspace, rawdata);
+      for(j = 0; j < d->mrl; j++){
+        resultarr[check][j] = rawdata->res[j];
+      }
+      check++;
 
-      /* Data */
-      H5writeMaster(dset_data, memrawspace, rawspace, d, rawdata);
+      /* We write data only on checkpoint:
+       * it is more healthier for disk, but remember --
+       * if you set up checkpoints very often and your simulations are
+       * very fast, your disks will not be happy
+       * */
+      if(check % d->checkpoint == 0){//FIX ME: add UPS checks  
+        H5writeCheckPoint(d, check, coordsarr, resultarr);
+        for(i = 0; i < check; i++) clearArray(resultarr[i], ITEMS_IN_ARRAY(resultarr[i]));
+        check = 0;
+      }
 
       /* Send next task to the slave */
       if (npxc < farm_res){
@@ -198,18 +170,22 @@ void master(void* handler, moduleInfo* md, configData* d){
       
       qafterR = load_sym(handler, md, "master_afterReceive", MODULE_SILENT);
       if(qafterR) qafterR(mpi_status.MPI_SOURCE, d, rawdata);
-        
-        /**
-         * Write outstanding results to file
-         */
-      
-        /* Control board */
-        H5writeBoard(dset_board, memmapspace, mapspace, rawdata);
      
-        /* Data */
-        H5writeMaster(dset_data, memrawspace, rawspace, d, rawdata);
-
+      /* Copy data to checkpoint arrays */
+      coordsarr[check][0] = rawdata->coords[0];
+      coordsarr[check][1] = rawdata->coords[1];
+      coordsarr[check][2] = rawdata->coords[2];
+      
+      for(j = 0; j < d->mrl; j++){
+        resultarr[check][j] = rawdata->res[j];
+      }
+      check++;
     }
+        
+    /**
+     * Write outstanding results to file
+     */
+    H5writeCheckPoint(d, check, coordsarr, resultarr);
 
     /**
      * Now, terminate the slaves 
@@ -221,28 +197,24 @@ void master(void* handler, moduleInfo* md, configData* d){
     /**
      * FARM ENDS
      */
-   
     MPI_Type_free(&masterResultsType);
     
     /**
-     * CLOSE HDF5 STORAGE
-     */
-    H5Dclose(dset_board);
-    H5Dclose(dset_data);
-    H5Sclose(mapspace);
-    H5Sclose(memmapspace);
-    H5Sclose(rawspace);
-    H5Sclose(memrawspace);
-    H5Gclose(data_group);
-    H5Fclose(file_id);
-
-    /**
      * Master can do something useful after the computations.
      */
-    query = load_sym(handler, md,"masterOUT", MODULE_SILENT);
+    query = load_sym(handler, md, "masterOUT", MODULE_SILENT);
     if(query) query(nodes, d, rawdata);
 
+    /* Free memory allocations */
+    for(i = 0; i < d->checkpoint; i++){
+     free(coordsarr[i]);
+     free(resultarr[i]);
+    }
+
+    free(coordsarr);
+    free(resultarr);
     free(rawdata);
+    
     return;
 }
 

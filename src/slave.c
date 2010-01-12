@@ -1,4 +1,5 @@
 #include "mpifarm.h"
+#include "mpifarm-internals.h"
 
 /**
  * SLAVE
@@ -16,7 +17,8 @@ void slave(void* handler, moduleInfo* md, configData* d){
     
     MPI_Datatype masterResultsType;
     MPI_Status mpi_status;
-    
+
+    /* Allocate memory for rawdata.res array */
     rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MY_DATATYPE));
 
     clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));

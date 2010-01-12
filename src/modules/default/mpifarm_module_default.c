@@ -129,6 +129,7 @@ void default_pixelCompute(int slave, configData* d, masterData* r){
 
    for(i = 0; i < d->mrl; i++){
       r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
+      r->res[i] = (double)r->coords[2]*(double)i;
    }
   
    return;
@@ -161,8 +162,6 @@ void default_masterOUT(int nodes, configData* d, masterData* r){
   char groupname[512];
   char filename[512];
 
-  //printf("masterfile: %s\n", d->datafile);
-
   stat = H5open();
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
   masterdatagroup = H5Gopen(masterfile, DATAGROUP, H5P_DEFAULT);
@@ -174,7 +173,6 @@ void default_masterOUT(int nodes, configData* d, masterData* r){
     sprintf(groupname,"slave%d", i);
     sprintf(filename,"%s-slave%d.h5", d->name,i);
    
-    //printf("filename[%d]: %s, groupname[%d]: %s\n", i, filename, i, groupname);
     fname = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
     if(stat < 0) printf("copy error\n");
@@ -228,8 +226,6 @@ void default_master_afterReceive(int slave, configData* d, masterData* r){
  */
 void default_slaveIN(int slave, configData* d, masterData* r){
 
-  //clearArray(s->points, ITEMS_IN_ARRAY(s->points));
-
   hid_t sfile_id, sdatagroup, gid, string_type;
   hid_t dataset, dataspace;
   hid_t rank = 1;
@@ -254,13 +250,14 @@ void default_slaveIN(int slave, configData* d, masterData* r){
    * each slave can create different dataspaces and datasets here, 
    * perform different computations, even read different config file!
    */
-   if(stat(node,&st) == 0){
+  if(stat(node,&st) == 0){
       sprintf(oldfile,"old-%s",node);
       /*printf("-> File %s exists!\n", cd.datafile);
       printf("-> I will back it up for You now\n");
       printf("-> Backuped file: %s\n",oldfile);*/
       rename(node,oldfile);
-    }
+  }
+
   sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   gid = H5Gcreate(sfile_id, group, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  
@@ -281,7 +278,7 @@ void default_slaveIN(int slave, configData* d, masterData* r){
   H5Gclose(gid);
   H5Fclose(sfile_id);
 
-   return;
+  return;
 }
 
 /**
@@ -307,7 +304,11 @@ void default_slaveOUT(int slave, configData* d, masterData* r){
  */
 void default_slave_beforeSend(int slave, configData* d, masterData* r){
   
-  printf("SLAVE[%d] working on pixel [ %d , %d ]: %f\n", slave, r->coords[0], r->coords[1], r->res[4]);
+  int i = 0;
+  //printf("S[%d] px[%3d, %3d]: ", slave, r->coords[0], r->coords[1]);
+  
+  //for(i = 0; i < d->mrl; i++) printf("%3.0f", r->res[i]);
+  //printf("\n");
   
   return;
 }

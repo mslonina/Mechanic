@@ -1,15 +1,14 @@
 #include "mpifarm.h"
+#include "mpifarm-internals.h"
 
 /**
  * HELPER FUNCTIONS
  */
 
-/**
- * Clears arrays.
- */
+/* Clears arrays */
 void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 
-	int i;
+	int i = 0;
 	for(i = 0;i < no_of_items_in_array; i++){
 		array[i] = (MY_DATATYPE)0.0;
 	}
@@ -17,11 +16,10 @@ void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
 	return;
 }
 
-/**
- * Map 1D index to 2D array.
- */
+/* Map 1D index to 2D array */
 int* map2d(int c, void* handler, moduleInfo *md, configData* d){
-   int* ind = malloc(3*sizeof(*ind));
+   
+  int* ind = malloc(3*sizeof(*ind));
    int x, y;
    x = d->xres;
    y = d->yres;
@@ -60,8 +58,8 @@ void* load_sym(void* handler, moduleInfo *md, char* function, int type){
 
   dlerror();
   sprintf(func,"%s_%s",md->name, function);
-  //printf("mod: %s func: %s\n", md->name, func);
   handler_f = dlsym(handler, func);
+  
   if((err = dlerror()) != NULL){
     switch (type){
       case MODULE_SILENT:
@@ -75,65 +73,15 @@ void* load_sym(void* handler, moduleInfo *md, char* function, int type){
       default:
         break;
     }
-    if(type == MODULE_ERROR){
+  
+    if(type == MODULE_ERROR)
       MPI_Abort(MPI_COMM_WORLD, ERR_MODULE);
-    }else{
+    else
       return NULL;
-    }
+    
   }else{
     return handler_f;
   }
-}
-
-/**
- * HDF5 error handling.
- */
-void H5errcheck(hid_t handler, herr_t stat, char* message, int rank){
-  return;
-}
-
-/**
- * HDF5 data storage
- */
-void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, masterData* rawdata){
-  
-  MY_DATATYPE rdata[d->mrl][1];
-  hsize_t co[2], off[2];
-  herr_t hdf_status;
-  int j = 0;
-      
-  co[0] = 1;
-  co[1] = d->mrl;
-
-  off[0] = rawdata->coords[2];
-  off[1] = 0;
-  
-  for (j = 0; j < d->mrl; j++){
-    rdata[j][0] = rawdata->res[j];
-  }
-      
-  H5Sselect_hyperslab(space, H5S_SELECT_SET, off, NULL, co, NULL);
-  hdf_status = H5Dwrite(dset, H5T_NATIVE_DOUBLE, memspace, space, H5P_DEFAULT, rdata);
-
-}
-
-void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, masterData *rawdata){
-  
-  int rdata[1][1];
-  hsize_t co[2], off[2];
-  herr_t hdf_status;
-      
-  co[0] = 1;
-  co[1] = 1;
-
-  off[0] = rawdata->coords[0];
-  off[1] = rawdata->coords[1];
- 
-  rdata[0][0] = 1;
-      
-  H5Sselect_hyperslab(space, H5S_SELECT_SET, off, NULL, co, NULL);
-  hdf_status = H5Dwrite(dset, H5T_NATIVE_INT, memspace, space, H5P_DEFAULT, rdata);
-
 }
 
 /**
@@ -151,6 +99,7 @@ void mpi_displayArgs(poptContext con, enum poptCallbackReason reason, const stru
   }
   con = poptFreeContext(con);
 }
+
 void mpi_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data){
     

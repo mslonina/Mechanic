@@ -1,4 +1,5 @@
 #include "mpifarm.h"
+#include "mpifarm-internals.h"
 
 /**
  * SETUP TOOLS
@@ -82,9 +83,9 @@ void assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cf
     }
     if(strcmp(cs[i].space,"logs") == 0){
 		  for(k = 0; k < cs[i].num; k++){
-			  if(strcmp(cs[i].options[k].name,"dump") == 0){
-          if(popt == 1) poptTestI(cs[i].options[k].value, d->dump);
-          d->dump = atoi(cs[i].options[k].value); 
+			  if(strcmp(cs[i].options[k].name,"checkpoint") == 0){
+          if(popt == 1) poptTestI(cs[i].options[k].value, d->checkpoint);
+          d->checkpoint = atoi(cs[i].options[k].value); 
         }
       }
     }

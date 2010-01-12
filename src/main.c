@@ -4,21 +4,27 @@
  * by mariusz slonina <mariusz.slonina@gmail.com>
  * with a little help of kacper kowalik <xarthisius.kk@gmail.com>
  *
- * BE CAREFUL -- only partial error handling (TODO)
+ * FIX ME! -- only partial error handling:
+ * 1) HDF5 error handling with H5E (including file storage)
+ * 2) dlopen error handling (done)
+ * 3) user input error handling (done in libreadconfig)
+ * 4) malloc error handling
+ * 
+ * Maybe void functions should return int value?
+ *
  */
 #include "mpifarm.h"
+#include "mpifarm-internals.h"
 
-/* Global settings */ 
-int allopts = 0; //number of options read
-
-int i = 0, j = 0, k = 0, opts = 0, n = 0;
-    
 /**
  * MAIN
  *
  */
 int main(int argc, char *argv[]){  
 
+  int allopts = 0; //number of options read
+  int i = 0, j = 0, k = 0, opts = 0, n = 0;
+  
   char* module_name;
   char* name;
   char module_file[MAX_VALUE_LENGTH];
@@ -46,20 +52,20 @@ int main(int argc, char *argv[]){
   inifile = CONFIG_FILE_DEFAULT;
   module_name = MODULE_DEFAULT;
   
-  sprintf(cd.name,"%s",NAME_DEFAULT);
-  sprintf(cd.datafile,"%s", MASTER_FILE_DEFAULT); 
-  sprintf(cd.module,"%s",MODULE_DEFAULT);
+  sprintf(cd.name, "%s", NAME_DEFAULT);
+  sprintf(cd.datafile, "%s", MASTER_FILE_DEFAULT); 
+  sprintf(cd.module, "%s", MODULE_DEFAULT);
   cd.xres = XRES_DEFAULT;
   cd.yres = YRES_DEFAULT;
   cd.method = METHOD_DEFAULT;
   cd.mrl = MRL_DEFAULT;
-  cd.dump = DUMP_DEFAULT;
+  cd.checkpoint = DUMP_DEFAULT;
   cd.restartmode = 0;
 
   LRC_configNamespace cs[] = {
     {"default",{{"name", "", LRC_CHAR},{"xres", "", LRC_INT},{"yres", "", LRC_INT},
         {"method", "", LRC_INT},{"mrl", "", LRC_INT},{"module", "", LRC_CHAR},},6},
-    {"logs", {{"dump", "", LRC_INT}}, 1}
+    {"logs", {{"checkpoint", "", LRC_INT}}, 1}
   };
   allopts = 2;
 
@@ -80,9 +86,10 @@ int main(int argc, char *argv[]){
     {"method", LRC_INT},
     {"mrl", LRC_INT},
     {"module", LRC_CHAR},
-    {"dump", LRC_INT}
+    {"checkpoint", LRC_INT}
   };
- 
+
+  /* Number of allowed values */
   int numCT = 7;
 
   /**
@@ -111,8 +118,8 @@ int main(int argc, char *argv[]){
     "y resolution", "YRES"},
     {"mrl", 'l', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mrl, 0,
     "master result array length", "LENGTH"},
-    {"dump", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.dump, 0,
-    "how often write dump file [TODO]", "DUMP"},
+    {"checkpoint", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.checkpoint, 0,
+    "how often write checkpoint file", "CHECKPOINT"},
     {"restart", 'r', POPT_ARG_VAL, &cd.restartmode, 1,
     "restart mode [TODO]","RESTART"},
     POPT_TABLEEND
@@ -124,8 +131,13 @@ int main(int argc, char *argv[]){
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   
   /**
-   * BY DESIGN
-   * Master cannot work alone.
+   * FIX ME! 
+   * 1) move farm to core module
+   * 2) allow user to change modes:
+   *  -- farm mode (default)
+   *  -- grid mode (multifarm)
+   *  -- grid with communication between slaves
+   *  -- masteralone 
    */
   if (mpi_size == 1){
      printf("You should have at least one slave!\n");
@@ -175,7 +187,23 @@ int main(int argc, char *argv[]){
     return 0;
   }
   
-  /* Restart mode set */
+  /**
+   * RESTART MODE
+   *
+   * TODO:
+   * 1) -r should take problem name as an argument
+   * 2) check if master file exists
+   *  -- if exists, check if it's not corrupted (is hdf5)
+   *  -- if it's corrupted, check for old copy
+   *  -- if the copy exists, check if it's not corrupted
+   *  -- if the copy is corrupted or does not exist, abort restart
+   * 3) read config values from master file, ignore all command line opts etc.
+   * 4) check board status
+   *  -- if board is full, abort, because we don't need restart completed simulation
+   *  -- if board is not full, check for empty pixels and compute them
+   *      (map2d function should check if pixel is computed or not)
+   * 5) perform normal operations, i.e. write new restart files
+   */
   if (cd.restartmode == 1){
     if(mpi_rank == 0) printf("TODO: restart mode\n");
      MPI_Finalize();
@@ -243,8 +271,27 @@ int main(int argc, char *argv[]){
       printf("-> Backuped file: %s\n",oldfile);
       rename(cd.datafile,oldfile);
     }
+
+   /**
+    * HDF5 Storage
+    *
+    * We write data in the following scheme:
+    * /config -- configuration file
+    * /board -- map of computed pixels
+    * /data -- output data group
+    * /data/master -- master dataset
+    *
+    * Each slave can write own data files if needed.
+    * In such case, please edit slaveIN/OUT functions in your module.
+    *
+    * FIX ME!:
+    * Add logs functionality
+    *
+    */
+
   /* Create master datafile */
   file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  H5createMasterDataScheme(file_id, &cd);
 
   /* First of all, save configuration */
   writeConfig(file_id, allopts, cs);
@@ -252,7 +299,7 @@ int main(int argc, char *argv[]){
 
   /**
    * MPI CONFIG BCAST
-   * Inform slaves what is all about.
+   * Inform slaves what it is all about.
    */
 
     buildDefaultConfigType(&cd, &defaultConfigType);

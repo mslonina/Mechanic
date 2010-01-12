@@ -1,12 +1,11 @@
 #include "mpifarm.h"
+#include "mpifarm-internals.h"
 
 /**
  * MPI DERIVED DATATYPES
  */
 
-/**
- * Master result Send/Recv
- */
+/* Master result Send/Recv */
 void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr){
 
   int block_lengths[2];
@@ -31,9 +30,7 @@ void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResults
   MPI_Type_commit(masterResultsType_ptr);
 }
 
-/**
- * Bcast default config file
- */
+/* Bcast default config file */
 void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   
   int block_lengths[9];
@@ -49,7 +46,7 @@ void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   typelist[4] = MPI_INT; //yres
   typelist[5] = MPI_INT; //method
   typelist[6] = MPI_INT; //master result length
-  typelist[7] = MPI_INT; //dump
+  typelist[7] = MPI_INT; //checkpoint
   typelist[8] = MPI_INT; //restartmode
 
   block_lengths[0] = 256;
@@ -70,7 +67,7 @@ void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   MPI_Address(&(d->yres), &addresses[5]);
   MPI_Address(&(d->method), &addresses[6]);
   MPI_Address(&(d->mrl), &addresses[7]);
-  MPI_Address(&(d->dump), &addresses[8]);
+  MPI_Address(&(d->checkpoint), &addresses[8]);
   MPI_Address(&(d->restartmode), &addresses[9]);
 
   for(i = 0; i < 9; i++){

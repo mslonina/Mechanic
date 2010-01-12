@@ -91,23 +91,6 @@ module_query_int_f iquery;
 typedef void (*module_cleanup_f) ();
 module_cleanup_f cleanup;
 
-//typedef struct (*slaveData_f) ();
-//slaveData_f qs;
-
-/**
- * Module architecture datatypes prototypes
- */
-/*
-struct inputData_t;
-extern struct inputData_t *makeInputData(void);
-*/
-//yourData yd;
-//extern yourData *makeyourdata(void);
-//struct slaveData;
-//struct slaveData *s;
-//extern struct slaveData *makeSlaveData(void);
-
-
 /* MAIN CONFIG DATA */
 typedef struct {
   char name[256];
@@ -117,7 +100,7 @@ typedef struct {
   int yres;
   int method;
   int mrl;
-  int dump;
+  int checkpoint;
   int restartmode;
 } configData;
 
@@ -135,36 +118,5 @@ typedef struct {
       const char *date;
       const char *version;
 } moduleInfo;
-
-
-/* GLOBALS */
-char* inifile;
-char* datafile;
-int allopts, mpi_rank, mpi_size;
-int usage, help;
-
-/* FUNCTION PROTOTYPES */
-int* map2d(int, void* handler, moduleInfo*, configData* d);
-void master(void* handler, moduleInfo*, configData* d);
-void slave(void* handler, moduleInfo*, configData* d);
-void clearArray(MY_DATATYPE*,int);
-void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
-void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
-void* load_sym(void* handler, moduleInfo*, char* function, int type);
-int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag);
-void assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int flag, int popt);
-void writeConfig(hid_t file_id, int allopts, LRC_configNamespace* cs);
-void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, masterData* rawdata);
-void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, masterData* rawdata);
-void mpi_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
-    char* arg, void* data);
-void mpi_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
-    char* arg, void* data);
-void poptTestC(char* i, char* j);
-void poptTestI(char* i, int j);
-void welcome();
-
-#define MPI_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mpi_poptHelpOptions, \
-			0, "Help options:", NULL },
 
 #endif
