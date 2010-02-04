@@ -23,48 +23,50 @@
 
 #include "libreadconfig.h"
 
-#define VERSION "UNSTABLE-2"
-#define AUTHOR "MSlonina, TCfA, NCU"
-#define EMAIL "mariusz.slonina@gmail.com"
+#define MECHANIC_VERSION "UNSTABLE-2"
+#define MECHANIC_AUTHOR "MSlonina, TCfA, NCU"
+#define MECHANIC_EMAIL "mariusz.slonina@gmail.com"
 
-#define CONFIG_FILE_DEFAULT "config"
-#define NAME_DEFAULT "showme"
-#define MODULE_DEFAULT "default"
-#define MASTER_FILE_DEFAULT "default-master.h5"
-#define XRES_DEFAULT 5
-#define YRES_DEFAULT 5
-#define METHOD_DEFAULT 0
-#define MRL_DEFAULT 10
-#define DUMP_DEFAULT 2000
+#define MECHANIC_CONFIG_FILE_DEFAULT "config"
+#define MECHANIC_NAME_DEFAULT "showme"
+#define MECHANIC_MODULE_DEFAULT "default"
+#define MECHANIC_MASTER_FILE_DEFAULT "default-master.h5"
+#define MECHANIC_XRES_DEFAULT 5
+#define MECHANIC_YRES_DEFAULT 5
+#define MECHANIC_METHOD_DEFAULT 0
+#define MECHANIC_MRL_DEFAULT 10
+#define MECHANIC_DUMP_DEFAULT 2000
+#define MECHANIC_FILE 1024
+#define MECHANIC_FILE_OLD 1028
 
-#define MODULE_SILENT 0
-#define MODULE_WARN 1
-#define MODULE_ERROR 2
+#define MECHANIC_MODULE_SILENT 0
+#define MECHANIC_MODULE_WARN 1
+#define MECHANIC_MODULE_ERROR 2
 
-#define MPI_DEST 0
-#define MPI_SOURCE_TAG 0
-#define MPI_DATA_TAG 2
-#define MPI_RESULT_TAG 59
-#define MPI_TERMINATE_TAG 99
+#define MECHANIC_MPI_DEST 0
+#define MECHANIC_MPI_SOURCE_TAG 0
+#define MECHANIC_MPI_DATA_TAG 2
+#define MECHANIC_MPI_RESULT_TAG 59
+#define MECHANIC_MPI_TERMINATE_TAG 99
 
-#define DATASETCONFIG "/config"
-#define DATABOARD "/board" 
-#define DATAGROUP "/data"
-#define DATASETMASTER "master"
+#define MECHANIC_DATASETCONFIG "/config"
+#define MECHANIC_DATABOARD "/board" 
+#define MECHANIC_DATAGROUP "/data"
+#define MECHANIC_DATASETMASTER "master"
 
-#define ERR_MPI 911
-#define ERR_HDF 912
-#define ERR_MODULE 913
-#define ERR_SETUP 914
-#define ERR_OTHER 999
+#define MECHANIC_ERR_MPI 911
+#define MECHANIC_ERR_HDF 912
+#define MECHANIC_ERR_MODULE 913
+#define MECHANIC_ERR_SETUP 914
+#define MECHANIC_ERR_OTHER 999
 
-#define HDF_RANK 2
+#define MECHANIC_HDF_RANK 2
 
-#undef MY_DATATYPE
-#define MY_DATATYPE double
+#undef MECHANIC_DATATYPE
+#define MECHANIC_DATATYPE double
 
-#undef MY_MPI_DATATYPE
-#define MY_MPI_DATATYPE MPI_DOUBLE
+#undef MECHANIC_MPI_DATATYPE
+#define MECHANIC_MPI_DATATYPE MPI_DOUBLE
 
 #define ITEMS_IN_ARRAY(x) sizeof(x)/sizeof(*(x))
 
@@ -73,7 +75,7 @@
  */
 typedef struct {
  int coords[3]; //0 - x 1 - y 2 - number of the pixel
- MY_DATATYPE res[1];
+ MECHANIC_DATATYPE res[1];
 } masterData;
 
 /**
@@ -103,13 +105,6 @@ typedef struct {
   int checkpoint;
   int restartmode;
 } configData;
-
-/* Simplified struct for writing config data to hdf file */
-typedef struct {
-      char space[MAX_NAME_LENGTH];
-      char varname[MAX_NAME_LENGTH];
-      char value[MAX_VALUE_LENGTH];
-    } simpleopts;
 
 /* Module info and handler */
 typedef struct {

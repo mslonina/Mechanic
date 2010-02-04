@@ -11,7 +11,7 @@
 
 struct slaveData{
   int test;
-  MY_DATATYPE points[ELEMENTS];
+  MECHANIC_DATATYPE points[ELEMENTS];
 };
 
 struct slaveData sd;

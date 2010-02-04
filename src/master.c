@@ -5,9 +5,9 @@
  * MASTER
  *
  */
-void master(void* handler, moduleInfo* md, configData* d){
+void master(void* handler, moduleInfo* md, configData* d, int restartmode){
 
-   int* tab; 
+   int* tab;
    int i = 0, k = 0, j = 0, nodes = 0, farm_res = 0;
    int npxc = 0; //number of all sent pixels
    int count = 0; //number of pixels to receive
@@ -17,7 +17,10 @@ void master(void* handler, moduleInfo* md, configData* d){
 
    /* Checkpoint storage */
    int **coordsarr;
-   MY_DATATYPE **resultarr;
+   MECHANIC_DATATYPE **resultarr;
+   
+   /* Restart mode board */
+   int** board;
 
    MPI_Status mpi_status;
    MPI_Datatype masterResultsType;
@@ -28,7 +31,7 @@ void master(void* handler, moduleInfo* md, configData* d){
    /**
     * Allocate memory for rawdata.res array.
     */
-   rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MY_DATATYPE));
+   rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MECHANIC_DATATYPE));
 
    clearArray(rawdata->res, ITEMS_IN_ARRAY(rawdata->res));
 
@@ -36,21 +39,41 @@ void master(void* handler, moduleInfo* md, configData* d){
     * Allocate memory for checkpoint mode.
     */
    coordsarr = malloc(sizeof(int*)*d->checkpoint);
-   resultarr = malloc(sizeof(MY_DATATYPE*)*d->checkpoint);
+   resultarr = malloc(sizeof(MECHANIC_DATATYPE*)*d->checkpoint);
 
    for(i = 0; i < d->checkpoint; i++){
      coordsarr[i] = malloc(sizeof(int*)*3);
-     resultarr[i] = malloc(sizeof(MY_DATATYPE*)*d->mrl);
+     resultarr[i] = malloc(sizeof(MECHANIC_DATATYPE*)*d->mrl);
      clearArray(resultarr[i],ITEMS_IN_ARRAY(resultarr[i]));
    }
    
    /* Build derived type for master result */
    buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
    
+   /* Allocate memory for board */
+   if(restartmode == 1){
+    board = malloc(sizeof(int*)*d->xres);
+    for(i = 0; i < d->xres; i++) 
+      board[i] = malloc(sizeof(int*)*d->yres);
+    
+   }
+
+   if(restartmode == 1) H5readBoard(d, board);
+   /*printf("\n");
+   for(i = 0; i < d->xres; i++){
+    for(j = 0; j < d->yres; j++){
+      printf(" %3d", board[i][j]);
+    }
+    printf("\n");
+   }
+   */
+
+
+
    /**
     * Master can do something useful before computations.
     */
-   query = load_sym(handler, md, "masterIN", MODULE_SILENT);
+   query = load_sym(handler, md, "masterIN", MECHANIC_MODULE_SILENT);
    if(query) query(mpi_size, d);
 
    /**
@@ -60,7 +83,7 @@ void master(void* handler, moduleInfo* md, configData* d){
    if (d->method == 1) farm_res = d->xres; //sliceX
    if (d->method == 2) farm_res = d->yres; //sliceY
    if (d->method == 6){
-     qr = load_sym(handler, md, "farmResolution", MODULE_ERROR);
+     qr = load_sym(handler, md, "farmResolution", MECHANIC_MODULE_ERROR);
      if(qr) farm_res = qr(d->xres, d->yres);
    }
  
@@ -81,12 +104,12 @@ void master(void* handler, moduleInfo* md, configData* d){
     * remembering what the farm resolution is.
     */
    for (i = 1; i < nodes; i++){
-     qbeforeS = load_sym(handler, md,"master_beforeSend", MODULE_SILENT);
+     qbeforeS = load_sym(handler, md,"master_beforeSend", MECHANIC_MODULE_SILENT);
      if(qbeforeS) qbeforeS(i,d,rawdata);
 
-     MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MPI_DATA_TAG, MPI_COMM_WORLD);
+     MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
      
-     qafterS = load_sym(handler, md, "master_afterSend", MODULE_SILENT);
+     qafterS = load_sym(handler, md, "master_afterSend", MECHANIC_MODULE_SILENT);
      if(qafterS) qafterS(i,d,rawdata);
      
      count++;
@@ -100,7 +123,7 @@ void master(void* handler, moduleInfo* md, configData* d){
    if(farm_res < mpi_size){
     for(i = nodes; i < mpi_size; i++){
       printf("-> Terminating idle slave %d.\n", i);
-      MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+      MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
    }
 
@@ -109,13 +132,13 @@ void master(void* handler, moduleInfo* md, configData* d){
     */
    while (1) {
     
-     qbeforeR = load_sym(handler, md, "master_beforeReceive", MODULE_SILENT);
+     qbeforeR = load_sym(handler, md, "master_beforeReceive", MECHANIC_MODULE_SILENT);
      if(qbeforeR) qbeforeR(d,rawdata);
       
      MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
      count--;
       
-      qafterR = load_sym(handler, md, "master_afterReceive", MODULE_SILENT);
+      qafterR = load_sym(handler, md, "master_afterReceive", MECHANIC_MODULE_SILENT);
       if(qafterR) qafterR(mpi_status.MPI_SOURCE, d, rawdata);
     
       /* Copy data to checkpoint arrays */
@@ -142,14 +165,14 @@ void master(void* handler, moduleInfo* md, configData* d){
       /* Send next task to the slave */
       if (npxc < farm_res){
        
-        qbeforeS = load_sym(handler, md, "master_beforeSend", MODULE_SILENT);
+        qbeforeS = load_sym(handler, md, "master_beforeSend", MECHANIC_MODULE_SILENT);
         if(qbeforeS) qbeforeS(mpi_status.MPI_SOURCE, &d, rawdata);
          
-        MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, mpi_status.MPI_SOURCE, MPI_DATA_TAG, MPI_COMM_WORLD);
+        MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
         npxc++;
         count++;
         
-        qafterS = load_sym(handler, md, "master_afterSend", MODULE_SILENT);
+        qafterS = load_sym(handler, md, "master_afterSend", MECHANIC_MODULE_SILENT);
         if(qafterS) qafterS(mpi_status.MPI_SOURCE, d, rawdata);
 
       } else {
@@ -163,12 +186,12 @@ void master(void* handler, moduleInfo* md, configData* d){
      */
     for (i = 0; i < count; i++){
       
-      qbeforeR = load_sym(handler, md, "master_beforeReceive", MODULE_SILENT);
+      qbeforeR = load_sym(handler, md, "master_beforeReceive", MECHANIC_MODULE_SILENT);
       if(qbeforeR) qbeforeR(d, rawdata);
         
       MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
       
-      qafterR = load_sym(handler, md, "master_afterReceive", MODULE_SILENT);
+      qafterR = load_sym(handler, md, "master_afterReceive", MECHANIC_MODULE_SILENT);
       if(qafterR) qafterR(mpi_status.MPI_SOURCE, d, rawdata);
      
       /* Copy data to checkpoint arrays */
@@ -191,7 +214,7 @@ void master(void* handler, moduleInfo* md, configData* d){
      * Now, terminate the slaves 
      */
     for (i = 1; i < nodes; i++){
-        MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+        MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
 
     /**
@@ -202,7 +225,7 @@ void master(void* handler, moduleInfo* md, configData* d){
     /**
      * Master can do something useful after the computations.
      */
-    query = load_sym(handler, md, "masterOUT", MODULE_SILENT);
+    query = load_sym(handler, md, "masterOUT", MECHANIC_MODULE_SILENT);
     if(query) query(nodes, d, rawdata);
 
     /* Free memory allocations */
@@ -214,7 +237,13 @@ void master(void* handler, moduleInfo* md, configData* d){
     free(coordsarr);
     free(resultarr);
     free(rawdata);
-    
-    return;
+  
+   if(restartmode == 1){
+    for(i = 0; i < d->xres; i++) free(board[i]);
+    free(board);
+   }  
+  
+   
+   return;
 }
 

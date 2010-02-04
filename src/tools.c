@@ -6,11 +6,11 @@
  */
 
 /* Clears arrays */
-void clearArray(MY_DATATYPE* array, int no_of_items_in_array){
+void clearArray(MECHANIC_DATATYPE* array, int no_of_items_in_array){
 
 	int i = 0;
 	for(i = 0;i < no_of_items_in_array; i++){
-		array[i] = (MY_DATATYPE)0.0;
+		array[i] = (MECHANIC_DATATYPE)0.0;
 	}
 
 	return;
@@ -39,11 +39,15 @@ int* map2d(int c, void* handler, moduleInfo *md, configData* d){
     * Method 6: user defined control.
     */
    if(d->method == 6){
-    qpcm = load_sym(handler, md, "pixelCoordsMap", MODULE_ERROR); 
+    qpcm = load_sym(handler, md, "pixelCoordsMap", MECHANIC_MODULE_ERROR); 
     if(qpcm) qpcm(ind, c, x, y);
    }
 
    return ind;
+}
+
+int checkPixel(int pixel){
+  return pixel;
 }
 
 /**
@@ -62,20 +66,20 @@ void* load_sym(void* handler, moduleInfo *md, char* function, int type){
   
   if((err = dlerror()) != NULL){
     switch (type){
-      case MODULE_SILENT:
+      case MECHANIC_MODULE_SILENT:
         break;
-      case MODULE_WARN:
+      case MECHANIC_MODULE_WARN:
         printf("-> Module warning: Cannot load function '%s': %s\n", func, err); 
         break;
-      case MODULE_ERROR:
+      case MECHANIC_MODULE_ERROR:
         printf("-> Module error: Cannot load function '%s': %s\n", func, err); 
         break;
       default:
         break;
     }
   
-    if(type == MODULE_ERROR)
-      MPI_Abort(MPI_COMM_WORLD, ERR_MODULE);
+    if(type == MECHANIC_MODULE_ERROR)
+      MPI_Abort(MPI_COMM_WORLD, MECHANIC_ERR_MODULE);
     else
       return NULL;
     

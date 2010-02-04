@@ -27,16 +27,19 @@ int main(int argc, char *argv[]){
   
   char* module_name;
   char* name;
-  char module_file[MAX_VALUE_LENGTH];
+  char* restartname;
+  char module_file[MECHANIC_FILE];
   char* dlresult;
   char optvalue;
   void* handler;
   module_query_int_f qd;
-  char oldfile[MAX_VALUE_LENGTH];
+  char oldfile[MECHANIC_FILE_OLD];
+  char restartfile[MECHANIC_FILE];
 
   int poptflags = 0;
   int error;
   int configfile = 0;
+  int restartmode = 0;
 
   struct stat st; //stat.h
 
@@ -48,18 +51,19 @@ int main(int argc, char *argv[]){
   MPI_Datatype defaultConfigType;
   
   /* Assign default config values */
-  name = NAME_DEFAULT;
-  inifile = CONFIG_FILE_DEFAULT;
-  module_name = MODULE_DEFAULT;
+  name = MECHANIC_NAME_DEFAULT;
+  restartname = MECHANIC_NAME_DEFAULT;
+  inifile = MECHANIC_CONFIG_FILE_DEFAULT;
+  module_name = MECHANIC_MODULE_DEFAULT;
   
-  sprintf(cd.name, "%s", NAME_DEFAULT);
-  sprintf(cd.datafile, "%s", MASTER_FILE_DEFAULT); 
-  sprintf(cd.module, "%s", MODULE_DEFAULT);
-  cd.xres = XRES_DEFAULT;
-  cd.yres = YRES_DEFAULT;
-  cd.method = METHOD_DEFAULT;
-  cd.mrl = MRL_DEFAULT;
-  cd.checkpoint = DUMP_DEFAULT;
+  sprintf(cd.name, "%s", MECHANIC_NAME_DEFAULT);
+  sprintf(cd.datafile, "%s", MECHANIC_MASTER_FILE_DEFAULT); 
+  sprintf(cd.module, "%s", MECHANIC_MODULE_DEFAULT);
+  cd.xres = MECHANIC_XRES_DEFAULT;
+  cd.yres = MECHANIC_YRES_DEFAULT;
+  cd.method = MECHANIC_METHOD_DEFAULT;
+  cd.mrl = MECHANIC_MRL_DEFAULT;
+  cd.checkpoint = MECHANIC_DUMP_DEFAULT;
   cd.restartmode = 0;
 
   LRC_configNamespace cs[] = {
@@ -70,13 +74,13 @@ int main(int argc, char *argv[]){
   allopts = 2;
 
   /* This is the easiest way to assign values ic cs[] */
-  sprintf(cs[0].options[0].value,"%s",NAME_DEFAULT);
-  sprintf(cs[0].options[1].value,"%d",XRES_DEFAULT);
-  sprintf(cs[0].options[2].value,"%d",YRES_DEFAULT);
-  sprintf(cs[0].options[3].value,"%d",METHOD_DEFAULT);
-  sprintf(cs[0].options[4].value,"%d",MRL_DEFAULT);
-  sprintf(cs[0].options[5].value,"%s",MODULE_DEFAULT);
-  sprintf(cs[1].options[0].value,"%d",DUMP_DEFAULT);
+  sprintf(cs[0].options[0].value,"%s",MECHANIC_NAME_DEFAULT);
+  sprintf(cs[0].options[1].value,"%d",MECHANIC_XRES_DEFAULT);
+  sprintf(cs[0].options[2].value,"%d",MECHANIC_YRES_DEFAULT);
+  sprintf(cs[0].options[3].value,"%d",MECHANIC_METHOD_DEFAULT);
+  sprintf(cs[0].options[4].value,"%d",MECHANIC_MRL_DEFAULT);
+  sprintf(cs[0].options[5].value,"%s",MECHANIC_MODULE_DEFAULT);
+  sprintf(cs[1].options[0].value,"%d",MECHANIC_DUMP_DEFAULT);
 
   /* Assign allowed values */
   LRC_configTypes ct[] = {
@@ -120,7 +124,7 @@ int main(int argc, char *argv[]){
     "master result array length", "LENGTH"},
     {"checkpoint", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.checkpoint, 0,
     "how often write checkpoint file", "CHECKPOINT"},
-    {"restart", 'r', POPT_ARG_VAL, &cd.restartmode, 1,
+    {"restart", 'r', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &restartname, 0,
     "restart mode [TODO]","RESTART"},
     POPT_TABLEEND
   };
@@ -129,6 +133,9 @@ int main(int argc, char *argv[]){
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  
+  /* HDF5 INIT */
+  H5open();
   
   /**
    * FIX ME! 
@@ -171,6 +178,8 @@ int main(int argc, char *argv[]){
      return 0;
   }
   
+  if(mpi_rank == 0) welcome();
+  
   /* Long help message set */
   if (help == 1){
     if(mpi_rank == 0) poptPrintHelp(poptcon, stdout, 0);
@@ -191,9 +200,9 @@ int main(int argc, char *argv[]){
    * RESTART MODE
    *
    * TODO:
-   * 1) -r should take problem name as an argument
+   * 1) -r should take problem name as an argument -- DONE
    * 2) check if master file exists
-   *  -- if exists, check if it's not corrupted (is hdf5)
+   *  -- if exists, check if it's not corrupted (is hdf5) -- DONE
    *  -- if it's corrupted, check for old copy
    *  -- if the copy exists, check if it's not corrupted
    *  -- if the copy is corrupted or does not exist, abort restart
@@ -204,18 +213,35 @@ int main(int argc, char *argv[]){
    *      (map2d function should check if pixel is computed or not)
    * 5) perform normal operations, i.e. write new restart files
    */
-  if (cd.restartmode == 1){
-    if(mpi_rank == 0) printf("TODO: restart mode\n");
+  /*if (strlen(restartname) > 0){
+    cd.restartmode = 1;
+
+    if(mpi_rank == 0){
+      printf("We are in restart mode... Checking files... ");
+
+      sprintf(restartfile, "%s-master.h5", restartname);
+    
+      if(stat(restartfile, &st) == 0){
+      
+        if(H5Fis_hdf5(restartfile) > 0) 
+          printf("We can restart the simulation\n");
+        else
+          printf("Cannot restart the simulation\n");
+
+      }else{
+        printf("Master file does not exist\n");
+      }
+
+    }
      MPI_Finalize();
      return 0;
-  }
+  }*/
 
   /* Config file set */
-  if(strcmp(inifile,CONFIG_FILE_DEFAULT) != 0){
+  if(strcmp(inifile, MECHANIC_CONFIG_FILE_DEFAULT) != 0 && cd.restartmode == 0){
     configfile = 1;
   }
 
-  if(mpi_rank == 0) welcome();
 
   /* Reset options, we need to reuse them
    * to override values read from specified config file */
@@ -249,7 +275,7 @@ int main(int argc, char *argv[]){
     if (cd.xres == 0 || cd.yres == 0){
        printf("X/Y map resolution should not be set to 0!\n");
        printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
-       MPI_Abort(MPI_COMM_WORLD, ERR_MPI);
+       MPI_Abort(MPI_COMM_WORLD, MECHANIC_ERR_MPI);
     }
 
     printf("\n-> Mpifarm will use these startup values:\n\n");
@@ -258,8 +284,6 @@ int main(int argc, char *argv[]){
 
   poptFreeContext(poptcon);
   
-  /* HDF5 INIT */
-  H5open();
   
   /* Config file read */
   if(mpi_rank == 0){
@@ -294,7 +318,7 @@ int main(int argc, char *argv[]){
   H5createMasterDataScheme(file_id, &cd);
 
   /* First of all, save configuration */
-  writeConfig(file_id, allopts, cs);
+  LRC_writeHdfConfig(file_id, cs, allopts);
   H5Fclose(file_id);
 
   /**
@@ -303,11 +327,11 @@ int main(int argc, char *argv[]){
    */
 
     buildDefaultConfigType(&cd, &defaultConfigType);
-    MPI_Bcast(&cd, 1, defaultConfigType, MPI_DEST, MPI_COMM_WORLD);
+    MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
   
   }else{
     buildDefaultConfigType(&cd, &defaultConfigType);
-    MPI_Bcast(&cd, 1, defaultConfigType, MPI_DEST, MPI_COMM_WORLD);
+    MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
   }
   
   /**
@@ -320,25 +344,25 @@ int main(int argc, char *argv[]){
   handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
   if(!handler){
     printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
-    MPI_Abort(MPI_COMM_WORLD, ERR_MODULE);
+    MPI_Abort(MPI_COMM_WORLD, MECHANIC_ERR_MODULE);
   }
 
-  init = load_sym(handler,&md, "init", MODULE_ERROR);
+  init = load_sym(handler,&md, "init", MECHANIC_MODULE_ERROR);
   if(init) init(&md);
 
-  query = load_sym(handler,&md, "query", MODULE_SILENT);
+  query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
   if(query) query();
 
   /**
    * NOW, DO IT!
    */
   if(mpi_rank == 0) {
-      master(handler, &md, &cd);
+      master(handler, &md, &cd, restartmode);
 	} else {
       slave(handler, &md, &cd); 
   }
 
-  cleanup = load_sym(handler, &md, "cleanup", MODULE_ERROR);
+  cleanup = load_sym(handler, &md, "cleanup", MECHANIC_MODULE_ERROR);
   if(cleanup) cleanup();
 
   dlclose(handler);
@@ -356,6 +380,6 @@ int main(int argc, char *argv[]){
 void welcome(){
 
   printf("MPIFARM v.1.0 %s\n\tauthor: %s\n\tbugs: %s\n\n",
-          VERSION, AUTHOR, EMAIL);
+          MECHANIC_VERSION, MECHANIC_AUTHOR, MECHANIC_EMAIL);
 
 }
