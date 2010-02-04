@@ -13,8 +13,8 @@
  * Maybe void functions should return int value?
  *
  */
-#include "mpifarm.h"
-#include "mpifarm-internals.h"
+#include "mechanic.h"
+#include "mechanic-internals.h"
 
 /**
  * MAIN
@@ -338,7 +338,7 @@ int main(int argc, char *argv[]){
    * MODULE LOAD
    * If option -p is not set, use default.
    */
-  sprintf(module_file, "mpifarm_module_%s.so", module_name);
+  sprintf(module_file, "mechanic_module_%s.so", module_name);
  
   md.name = module_name;
   handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);

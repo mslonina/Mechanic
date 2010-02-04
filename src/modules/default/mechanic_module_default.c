@@ -1,5 +1,5 @@
 /**
- * MPIFARM PLUGIN DEFAULT
+ * MECHANIC MODULE DEFAULT
  *
  * Functions provided here are called during farm operations. 
  * We provide You with simple examples of using them -- 
@@ -13,29 +13,29 @@
  *
  * Master Data is the only data received by master node,
  * however, You can do much with Slave Data struct -- You can redefine it in
- * mpifarm_user.h and use during simulation
+ * mechanic_user.h and use during simulation
  *
- * Input Data struct can be also redefined in mpifarm_user.h
+ * Input Data struct can be also redefined in mechanic_user.h
  *
  */
 
-#include "mpifarm.h"
-#include "mpifarm_module_default.h"
+#include "mechanic.h"
+#include "mechanic_module_default.h"
 
 /*
-void mpifarm_module_init(struct yourdata *pointer){
+void mechanic_module_init(struct yourdata *pointer){
   //printf("Module DEFAULT INIT\n");
   //pointer->aa = 1.1;
   //pointer->bb = 2.2;
   return;
 }
 
-void mpifarm_module_query(struct yourdata *pointer){
+void mechanic_module_query(struct yourdata *pointer){
   //printf("Module DEFAULT QUERY\n");
   return;
 }
 
-void mpifarm_module_cleanup(struct yourdata *pointer){
+void mechanic_module_cleanup(struct yourdata *pointer){
   //printf("Module DEFAULT CLEANUP: %f\n", pointer->aa + pointer->bb);
 
   free(pointer);
@@ -118,7 +118,6 @@ void default_pixelCoords(int slave, int t[], configData* d, masterData* r){
  * Example:
  * We assign some values to the result array of masterData r and 
  * do some weird computations.
- * Size of the array is controlled by MAX_RESULT_LENGTH from mpifarm_user.h 
  *
  */
 void default_pixelCompute(int slave, configData* d, masterData* r){
@@ -164,7 +163,7 @@ void default_masterOUT(int nodes, configData* d, masterData* r){
 
   stat = H5open();
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
-  masterdatagroup = H5Gopen(masterfile, MECHANIC_DATAGROUP, H5P_DEFAULT);
+  masterdatagroup = H5Gopen(masterfile, "master", H5P_DEFAULT);
   
   /**
    * Copy data from slaves to one master file
@@ -235,7 +234,7 @@ void default_slaveIN(int slave, configData* d, masterData* r){
   char node[512];
   char gbase[] = "slave";
   char group[512];
-  char oldfile[MECHANIC_FILE_OLD];
+  char oldfile[1028];
 
   char cbase[] = "Hello from slave ";
   char comment[1024];

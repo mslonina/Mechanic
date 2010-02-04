@@ -1,4 +1,4 @@
-MPI TASK FARM SKELETON
+MECHANIC: MPI TASK FARM SKELETON
 
 Project is in early stage of development, new features and tasks 
 are added day by day.
@@ -43,7 +43,6 @@ If you want your slaves to read config files, please do it in your module.
 == HDF data scheme ==
 /config - all config data from config file
 /board - map of computed pixels (0 - not computed, 1 - computed)
-/data - output group data, size is defined in mpifarm_user.h by MAX_RESULT_LENGTH
 /data/master - data received by the master node
 
 Default module shows, how to write slave data to master datafile.
@@ -56,8 +55,8 @@ You can adjust the length of this vector by setting mrl.
 
 TODO: allow to safely change MY_DATATYPE (currently its double).
 
-You can create as many data files as needed, using User API from mpifarm_module_[MODULE_NAME].c. 
-See mpifarm_module_default.c for examples. Each slave can have own config and datafile, too.
+You can create as many data files as needed, using User API from mechanic_module_[MODULE_NAME].c. 
+See mechanic_module_default.c for examples. Each slave can have own config and datafile, too.
 
 == Module architecture ==
 You can write Your own module to MpiFarm and use it for computation.
@@ -113,15 +112,15 @@ Todo (too many to mention all...):
 It is really simple:)
 
 Create to files: 
-- mpifarm_module_hello.c
-- mpifarm_module_hello.h
+- mechanic_module_hello.c
+- mechanic_module_hello.h
 
 Main module files have to be named in that convention.
 
 Now, edit c source code. Remember, each function must be prefixed with your module's name.
 <code>
-#include <mpifarm/mpifarm.h> //if your module isn't installed with MpiFarm
-#include "mpifarm_module_hello.h" //and whatever libs you need
+#include <mechanic/mechanic.h> //if your module isn't installed with MpiFarm
+#include "mechanic_module_hello.h" //and whatever libs you need
 
 void hello_init(moduleInfo* md){
   //adjust module info here
@@ -154,8 +153,8 @@ void hello_slaveOUT(int slave, configData *d, masterData *r){
 
 Save the code. Now we need to build shared library and load it to MpiFarm.
 <code>
-mpicc -Wall -g -fPIC -c -o mpifarm_module_hello.o mpifarm_module_hello.c
-mpicc -shared -o mpifarm_module_hello.so mpifarm_module_hello.o
+mpicc -Wall -g -fPIC -c -o mechanic_module_hello.o mechanic_module_hello.c
+mpicc -shared -o mechanic_module_hello.so mechanic_module_hello.o
 </code>
 
 To use the module, you need to adjust LD_LIBRARY_PATH to point to the module,
@@ -163,7 +162,7 @@ or copy it where ld can find it.
 
 After that, you can load the module
 <code>
-mpirun -np 3 mpifarm -p hello
+mpirun -np 3 mechanic -p hello
 </code>
 
 This example should is included in doc dir in file hello.tgz

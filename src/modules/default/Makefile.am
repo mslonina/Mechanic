@@ -1,4 +1,4 @@
-pkglib_LTLIBRARIES = mpifarm_module_default.la
-mpifarm_module_default_la_SOURCES = mpifarm_module_default.c mpifarm_module_default.h
-mpifarm_module_default_la_LDFLAGS = -module -lm -lhdf5 -lreadconfig
-mpifarm_module_default_la_CFLAGS = -I. -I../.. 
+pkglib_LTLIBRARIES = mechanic_module_default.la
+mechanic_module_default_la_SOURCES = mechanic_module_default.c mechanic_module_default.h
+mechanic_module_default_la_LDFLAGS = -module -lm -lhdf5 -lreadconfig
+mechanic_module_default_la_CFLAGS = -I. -I../.. 

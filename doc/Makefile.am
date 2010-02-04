@@ -1,2 +1,2 @@
-EXTRA_DIST = mpifarm-config qfarm.sh
+EXTRA_DIST = mechanic-config qfarm.sh
 dist_doc_DATA = $(EXTRA_DIST)
