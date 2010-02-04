@@ -1,0 +1,12 @@
+#MECHANIC setup
+[default]
+name=test2
+xres = 4 #must be greater than 0
+yres = 3 #must be greater than 0
+method = 0 #single pixel -- 0, userdefined -- 6
+mrl = 10
+module = default
+
+[logs]
+dump=2000
+

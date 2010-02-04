@@ -91,9 +91,9 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
 void assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int flag, int popt);
 void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
 void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
-void mpi_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+void mechanic_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data);
-void mpi_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data);
 void poptTestC(char* i, char* j);
 void poptTestI(char* i, int j);
@@ -102,7 +102,7 @@ void H5createMasterDataScheme(hid_t file_id, configData* d);
 void H5writeCheckPoint(configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
 void H5readBoard(configData* d, int** board);
 
-#define MPI_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mpi_poptHelpOptions, \
+#define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptHelpOptions, \
 			0, "Help options:", NULL },
 
 

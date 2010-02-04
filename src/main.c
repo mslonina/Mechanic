@@ -32,16 +32,18 @@ int main(int argc, char *argv[]){
   char* dlresult;
   char optvalue;
   void* handler;
-  module_query_int_f qd;
   char oldfile[MECHANIC_FILE_OLD];
   char restartfile[MECHANIC_FILE];
 
   int poptflags = 0;
   int error;
+  int rc;
   int configfile = 0;
   int restartmode = 0;
 
   struct stat st; //stat.h
+  
+  module_query_int_f qd;
 
   hid_t file_id;
 
@@ -84,13 +86,13 @@ int main(int argc, char *argv[]){
 
   /* Assign allowed values */
   LRC_configTypes ct[] = {
-    {"name", LRC_CHAR},
-    {"xres", LRC_INT},
-    {"yres", LRC_INT},
-    {"method", LRC_INT},
-    {"mrl", LRC_INT},
-    {"module", LRC_CHAR},
-    {"checkpoint", LRC_INT}
+    {"default", "name", LRC_CHAR},
+    {"default", "xres", LRC_INT},
+    {"default", "yres", LRC_INT},
+    {"default", "method", LRC_INT},
+    {"default", "mrl", LRC_INT},
+    {"default", "module", LRC_CHAR},
+    {"logs", "checkpoint", LRC_INT}
   };
 
   /* Number of allowed values */
@@ -99,15 +101,15 @@ int main(int argc, char *argv[]){
   /**
    * POPT CONFIG
    */
-  struct poptOption mpi_poptHelpOptions[] = {
-    { NULL, '\0', POPT_ARG_CALLBACK, (void *)mpi_displayUsage, 0, NULL, NULL },
+  struct poptOption mechanic_poptHelpOptions[] = {
+    { NULL, '\0', POPT_ARG_CALLBACK, (void *)mechanic_displayUsage, 0, NULL, NULL },
     { "help", '?', 0, NULL, (int)'?', "Show this help message", NULL },
     { "usage", '\0', 0, NULL, (int)'u', "Display brief usage message", NULL },
       POPT_TABLEEND
     };
   
   struct poptOption cmdopts[] = {
-    MPI_POPT_AUTOHELP
+    MECHANIC_POPT_AUTOHELP
     {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &name, 0,
     "problem name", "NAME"},
     {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 0,
@@ -124,9 +126,14 @@ int main(int argc, char *argv[]){
     "master result array length", "LENGTH"},
     {"checkpoint", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.checkpoint, 0,
     "how often write checkpoint file", "CHECKPOINT"},
-    {"restart", 'r', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &restartname, 0,
+    {"restart", 'r', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.restartmode, 1,
     "restart mode [TODO]","RESTART"},
     POPT_TABLEEND
+  };
+
+  const char** rv;
+  struct poptAlias restartAlias = {
+    "restart", 'r', 3, rv
   };
  
   /* MPI INIT */
@@ -154,6 +161,7 @@ int main(int argc, char *argv[]){
 
   /* Parse command line */
   poptContext poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
+  poptAddAlias(poptcon, restartAlias, 0);
 
   /**
    * 1) Read defaults
@@ -213,8 +221,8 @@ int main(int argc, char *argv[]){
    *      (map2d function should check if pixel is computed or not)
    * 5) perform normal operations, i.e. write new restart files
    */
-  /*if (strlen(restartname) > 0){
-    cd.restartmode = 1;
+
+  if (cd.restartmode == 1){
 
     if(mpi_rank == 0){
       printf("We are in restart mode... Checking files... ");
@@ -235,7 +243,7 @@ int main(int argc, char *argv[]){
     }
      MPI_Finalize();
      return 0;
-  }*/
+  }
 
   /* Config file set */
   if(strcmp(inifile, MECHANIC_CONFIG_FILE_DEFAULT) != 0 && cd.restartmode == 0){

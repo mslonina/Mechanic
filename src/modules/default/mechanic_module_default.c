@@ -163,7 +163,7 @@ void default_masterOUT(int nodes, configData* d, masterData* r){
 
   stat = H5open();
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
-  masterdatagroup = H5Gopen(masterfile, "master", H5P_DEFAULT);
+  masterdatagroup = H5Gopen(masterfile, "data", H5P_DEFAULT);
   
   /**
    * Copy data from slaves to one master file

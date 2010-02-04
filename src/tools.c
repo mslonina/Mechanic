@@ -92,7 +92,7 @@ void* load_sym(void* handler, moduleInfo *md, char* function, int type){
  * Override default popt behaviour. This code is taken from popt.h. 
  * Adjusted it only to MPI.
  */
-void mpi_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+void mechanic_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data){
 
   if(mpi_rank == 0){
@@ -104,7 +104,7 @@ void mpi_displayArgs(poptContext con, enum poptCallbackReason reason, const stru
   con = poptFreeContext(con);
 }
 
-void mpi_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data){
     
     if (key->shortName == '?')
