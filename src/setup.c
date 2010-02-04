@@ -46,7 +46,7 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
 }
 
 /* Assign config values, one by one. Final struct contains config values of the run */
-void assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cflag, int popt){
+int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cflag, int popt){
 
   int i = 0, k = 0;
 
@@ -91,6 +91,7 @@ void assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cf
     }
 	}
 
+ return 0;
 }
 
 /* Helper tests */

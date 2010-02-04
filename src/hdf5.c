@@ -16,7 +16,7 @@ void H5log(){
 }
 
 /* Master data scheme */
-void H5createMasterDataScheme(hid_t file_id, configData* d){
+int H5createMasterDataScheme(hid_t file_id, configData* d){
 
  hsize_t dimsf[2], dimsr[2];
  hid_t boardspace, dataspace;
@@ -46,10 +46,11 @@ void H5createMasterDataScheme(hid_t file_id, configData* d){
  H5Sclose(dataspace);
  H5Gclose(data_group);
 
+ return 0;
 }
 
 /* Write data to master file */
-void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
+int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
   
   MECHANIC_DATATYPE rdata[d->mrl][1];
   hsize_t co[2], off[2];
@@ -69,10 +70,11 @@ void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* 
   H5Sselect_hyperslab(space, H5S_SELECT_SET, off, NULL, co, NULL);
   hdf_status = H5Dwrite(dset, H5T_NATIVE_DOUBLE, memspace, space, H5P_DEFAULT, rdata);
 
+  return 0;
 }
 
 /* Mark computed pixels on board */
-void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr){
+int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr){
   
   int rdata[1][1];
   hsize_t co[2], off[2];
@@ -89,12 +91,14 @@ void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr){
   H5Sselect_hyperslab(space, H5S_SELECT_SET, off, NULL, co, NULL);
   hdf_status = H5Dwrite(dset, H5T_NATIVE_INT, memspace, space, H5P_DEFAULT, rdata);
 
+  return 0;
 }
 
 /* Write checkpoint file (master file) */
-void H5writeCheckPoint(configData *d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr){
+int H5writeCheckPoint(configData *d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr){
  
-  int i = 0, j = 0; 
+  int i = 0, j = 0;
+  int mstat;
 
   /* hdf */
   hid_t file_id, dset_board, dset_data, data_group;
@@ -124,10 +128,10 @@ void H5writeCheckPoint(configData *d, int check, int** coordsarr, MECHANIC_DATAT
   for(i = 0; i < check; i++){
       
       /* Control board -- each computed pixel is marked with 1. */
-      H5writeBoard(dset_board, memmapspace, mapspace, coordsarr[i]);
+      mstat = H5writeBoard(dset_board, memmapspace, mapspace, coordsarr[i]);
       
       /* Data */
-      H5writeMaster(dset_data, memrawspace, rawspace, d, coordsarr[i], resultarr[i]);
+      mstat = H5writeMaster(dset_data, memrawspace, rawspace, d, coordsarr[i], resultarr[i]);
       
   }
 
@@ -140,6 +144,7 @@ void H5writeCheckPoint(configData *d, int check, int** coordsarr, MECHANIC_DATAT
   H5Gclose(data_group);
   H5Fclose(file_id);
 
+  return 0;
 }
 
 /**
@@ -149,7 +154,7 @@ void H5writeCheckPoint(configData *d, int check, int** coordsarr, MECHANIC_DATAT
  * I couldn't manage to do it with single call to H5Dread and malloc,
  * so I select pixels one by one and read them to board array
  * */
-void H5readBoard(configData* d, int** board){
+int H5readBoard(configData* d, int** board){
 
   hid_t file_id, dataset_id;
   hid_t dataspace_id, memspace_id;
@@ -203,4 +208,5 @@ void H5readBoard(configData* d, int** board){
   H5Dclose(dataset_id);
   H5Fclose(file_id);
  
+  return 0;
 }

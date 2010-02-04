@@ -1,5 +1,5 @@
-#include <mpifarm/mpifarm.h>
-#include "mpifarm_module_hello.h"
+#include <mechanic/mechanic.h>
+#include "mechanic_module_hello.h"
 
 /**
  * Sample module for MpiFarm
@@ -7,17 +7,17 @@
  */
 
 /* Required */
-void mpifarm_module_init(){
+void hello_module_init(){
   return;
 }
 
 /* Required */
-void mpifarm_module_cleanup(){
+void hello_module_cleanup(){
   return;
 }
 
 /* Required */
-void userdefined_pixelCompute(int slave, configData *d, masterData *r){
+void hello_pixelCompute(int slave, configData *d, masterData *r){
 
   r->res[0] = (double)r->coords[0];
   r->res[1] = (double)r->coords[1];
@@ -28,7 +28,7 @@ void userdefined_pixelCompute(int slave, configData *d, masterData *r){
 /**
  * Not required, but we want to show how useful it can be:)
  */
-void userdefined_slaveOUT(int slave, configData *d, masterData *r){
+void hello_slaveOUT(int slave, configData *d, masterData *r){
   printf("Hello from slave[%d]\n", slave);
   return;
 }

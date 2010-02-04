@@ -61,16 +61,16 @@
 /**
  * MODULE ARCHITECTURE FUNCTION HANDLERS
  */
-typedef void (*module_init_f) ();
+typedef int (*module_init_f) ();
 module_init_f init;
 
-typedef void (*module_query_void_f) ();
+typedef int (*module_query_void_f) ();
 module_query_void_f query;
 
 typedef int (*module_query_int_f) ();
 module_query_int_f iquery;
 
-typedef void (*module_cleanup_f) ();
+typedef int (*module_cleanup_f) ();
 module_cleanup_f cleanup;
 
 /* GLOBALS */
@@ -81,16 +81,16 @@ int usage, help;
 
 /* FUNCTION PROTOTYPES */
 int* map2d(int, void* handler, moduleInfo*, configData* d);
-void master(void* handler, moduleInfo*, configData* d, int restartmode);
-void slave(void* handler, moduleInfo*, configData* d);
+int master(void* handler, moduleInfo*, configData* d, int restartmode);
+int slave(void* handler, moduleInfo*, configData* d);
 void clearArray(MECHANIC_DATATYPE*,int);
-void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
-void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
+int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
+int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
 void* load_sym(void* handler, moduleInfo*, char* function, int type);
 int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag);
-void assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int flag, int popt);
-void H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
-void H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
+int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int flag, int popt);
+int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
+int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
 void mechanic_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data);
 void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
@@ -98,9 +98,9 @@ void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, cons
 void poptTestC(char* i, char* j);
 void poptTestI(char* i, int j);
 void welcome();
-void H5createMasterDataScheme(hid_t file_id, configData* d);
-void H5writeCheckPoint(configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
-void H5readBoard(configData* d, int** board);
+int H5createMasterDataScheme(hid_t file_id, configData* d);
+int H5writeCheckPoint(configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
+int H5readBoard(configData* d, int** board);
 
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptHelpOptions, \
 			0, "Help options:", NULL },

@@ -5,13 +5,15 @@
  * MASTER
  *
  */
-void master(void* handler, moduleInfo* md, configData* d, int restartmode){
+int master(void* handler, moduleInfo* md, configData* d, int restartmode){
 
    int* tab;
    int i = 0, k = 0, j = 0, nodes = 0, farm_res = 0;
    int npxc = 0; //number of all sent pixels
    int count = 0; //number of pixels to receive
    int check = 0;
+
+   int mstat;
    
    masterData *rawdata;
 
@@ -48,7 +50,7 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
    }
    
    /* Build derived type for master result */
-   buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
+   mstat = buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
    
    /* Allocate memory for board */
    if(restartmode == 1){
@@ -74,7 +76,7 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
     * Master can do something useful before computations.
     */
    query = load_sym(handler, md, "masterIN", MECHANIC_MODULE_SILENT);
-   if(query) query(mpi_size, d);
+   if(query) mstat = query(mpi_size, d);
 
    /**
     * Align farm resolution for given method.
@@ -105,12 +107,12 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
     */
    for (i = 1; i < nodes; i++){
      qbeforeS = load_sym(handler, md,"master_beforeSend", MECHANIC_MODULE_SILENT);
-     if(qbeforeS) qbeforeS(i,d,rawdata);
+     if(qbeforeS) mstat = qbeforeS(i,d,rawdata);
 
      MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
      
      qafterS = load_sym(handler, md, "master_afterSend", MECHANIC_MODULE_SILENT);
-     if(qafterS) qafterS(i,d,rawdata);
+     if(qafterS) mstat = qafterS(i,d,rawdata);
      
      count++;
      npxc++;
@@ -133,13 +135,13 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
    while (1) {
     
      qbeforeR = load_sym(handler, md, "master_beforeReceive", MECHANIC_MODULE_SILENT);
-     if(qbeforeR) qbeforeR(d,rawdata);
+     if(qbeforeR) mstat = qbeforeR(d,rawdata);
       
      MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
      count--;
       
       qafterR = load_sym(handler, md, "master_afterReceive", MECHANIC_MODULE_SILENT);
-      if(qafterR) qafterR(mpi_status.MPI_SOURCE, d, rawdata);
+      if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, d, rawdata);
     
       /* Copy data to checkpoint arrays */
       coordsarr[check][0] = rawdata->coords[0];
@@ -157,7 +159,7 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
        * very fast, your disks will not be happy
        * */
       if(check % d->checkpoint == 0){//FIX ME: add UPS checks  
-        H5writeCheckPoint(d, check, coordsarr, resultarr);
+        mstat = H5writeCheckPoint(d, check, coordsarr, resultarr);
         for(i = 0; i < check; i++) clearArray(resultarr[i], ITEMS_IN_ARRAY(resultarr[i]));
         check = 0;
       }
@@ -166,14 +168,14 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
       if (npxc < farm_res){
        
         qbeforeS = load_sym(handler, md, "master_beforeSend", MECHANIC_MODULE_SILENT);
-        if(qbeforeS) qbeforeS(mpi_status.MPI_SOURCE, &d, rawdata);
+        if(qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, &d, rawdata);
          
         MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
         npxc++;
         count++;
         
         qafterS = load_sym(handler, md, "master_afterSend", MECHANIC_MODULE_SILENT);
-        if(qafterS) qafterS(mpi_status.MPI_SOURCE, d, rawdata);
+        if(qafterS) mstat = qafterS(mpi_status.MPI_SOURCE, d, rawdata);
 
       } else {
         break;
@@ -187,12 +189,12 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
     for (i = 0; i < count; i++){
       
       qbeforeR = load_sym(handler, md, "master_beforeReceive", MECHANIC_MODULE_SILENT);
-      if(qbeforeR) qbeforeR(d, rawdata);
+      if(qbeforeR) mstat = qbeforeR(d, rawdata);
         
       MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
       
       qafterR = load_sym(handler, md, "master_afterReceive", MECHANIC_MODULE_SILENT);
-      if(qafterR) qafterR(mpi_status.MPI_SOURCE, d, rawdata);
+      if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, d, rawdata);
      
       /* Copy data to checkpoint arrays */
       coordsarr[check][0] = rawdata->coords[0];
@@ -208,7 +210,7 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
     /**
      * Write outstanding results to file
      */
-    H5writeCheckPoint(d, check, coordsarr, resultarr);
+    mstat = H5writeCheckPoint(d, check, coordsarr, resultarr);
 
     /**
      * Now, terminate the slaves 
@@ -226,7 +228,7 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
      * Master can do something useful after the computations.
      */
     query = load_sym(handler, md, "masterOUT", MECHANIC_MODULE_SILENT);
-    if(query) query(nodes, d, rawdata);
+    if(query) mstat = query(nodes, d, rawdata);
 
     /* Free memory allocations */
     for(i = 0; i < d->checkpoint; i++){
@@ -244,6 +246,6 @@ void master(void* handler, moduleInfo* md, configData* d, int restartmode){
    }  
   
    
-   return;
+   return 0;
 }
 

@@ -6,7 +6,7 @@
  */
 
 /* Master result Send/Recv */
-void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr){
+int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr){
 
   int block_lengths[2];
   MPI_Aint displacements[2];
@@ -28,10 +28,12 @@ void buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResults
 
   MPI_Type_struct(2, block_lengths, displacements, typelist, masterResultsType_ptr);
   MPI_Type_commit(masterResultsType_ptr);
+
+  return 0;
 }
 
 /* Bcast default config file */
-void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
+int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   
   int block_lengths[9];
   MPI_Aint displacements[9];
@@ -77,4 +79,5 @@ void buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   MPI_Type_struct(9, block_lengths, displacements, typelist, defaultConfigType_ptr);
   MPI_Type_commit(defaultConfigType_ptr);
 
+  return 0;
 }

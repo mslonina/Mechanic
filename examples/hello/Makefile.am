@@ -1,3 +1,3 @@
 pkgdatadir = $(datadir)/@PACKAGE@/examples/hello
-EXTRA_DIST = Sample-Makefile mpifarm_module_hello.c mpifarm_module_hello.h Readme
+EXTRA_DIST = Sample-Makefile mechanic_module_hello.c mechanic_module_hello.h README
 pkgdata_DATA = $(EXTRA_DIST)

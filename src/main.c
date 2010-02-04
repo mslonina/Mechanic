@@ -10,8 +10,6 @@
  * 3) user input error handling (done in libreadconfig)
  * 4) malloc error handling
  * 
- * Maybe void functions should return int value?
- *
  */
 #include "mechanic.h"
 #include "mechanic-internals.h"
@@ -40,6 +38,8 @@ int main(int argc, char *argv[]){
   int rc;
   int configfile = 0;
   int restartmode = 0;
+
+  int mstat;
 
   struct stat st; //stat.h
   
@@ -262,7 +262,7 @@ int main(int argc, char *argv[]){
      * Config file parsed. All read values becomes
      * new defaults 
      */
-    assignConfigValues(allopts, &cd, cs, configfile, 0);
+    mstat = assignConfigValues(allopts, &cd, cs, configfile, 0);
 
     /* Reset pointers */
     name = cd.name;
@@ -277,7 +277,7 @@ int main(int argc, char *argv[]){
      * we need to reassign config values. */
     if(strcmp(name, cd.name) != 0) sprintf(cd.name,"%s",name);
     if(strcmp(module_name, cd.module) != 0) sprintf(cd.module,"%s",module_name);
-    assignConfigValues(allopts, &cd, cs, configfile, 1);
+    mstat = assignConfigValues(allopts, &cd, cs, configfile, 1);
    
     /* Security check */
     if (cd.xres == 0 || cd.yres == 0){
@@ -323,7 +323,7 @@ int main(int argc, char *argv[]){
 
   /* Create master datafile */
   file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-  H5createMasterDataScheme(file_id, &cd);
+  mstat = H5createMasterDataScheme(file_id, &cd);
 
   /* First of all, save configuration */
   LRC_writeHdfConfig(file_id, cs, allopts);
@@ -334,11 +334,11 @@ int main(int argc, char *argv[]){
    * Inform slaves what it is all about.
    */
 
-    buildDefaultConfigType(&cd, &defaultConfigType);
+    mstat = buildDefaultConfigType(&cd, &defaultConfigType);
     MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
   
   }else{
-    buildDefaultConfigType(&cd, &defaultConfigType);
+    mstat = buildDefaultConfigType(&cd, &defaultConfigType);
     MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
   }
   
@@ -356,7 +356,7 @@ int main(int argc, char *argv[]){
   }
 
   init = load_sym(handler,&md, "init", MECHANIC_MODULE_ERROR);
-  if(init) init(&md);
+  if(init) mstat = init(&md);
 
   query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
   if(query) query();
@@ -365,13 +365,13 @@ int main(int argc, char *argv[]){
    * NOW, DO IT!
    */
   if(mpi_rank == 0) {
-      master(handler, &md, &cd, restartmode);
+      mstat = master(handler, &md, &cd, restartmode);
 	} else {
-      slave(handler, &md, &cd); 
+      mstat = slave(handler, &md, &cd); 
   }
 
   cleanup = load_sym(handler, &md, "cleanup", MECHANIC_MODULE_ERROR);
-  if(cleanup) cleanup();
+  if(cleanup) mstat = cleanup();
 
   dlclose(handler);
   MPI_Type_free(&defaultConfigType);

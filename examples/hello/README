@@ -6,4 +6,4 @@
 4) Enjoy!
 
 Load the module with -p switch:
-mpirun -np 3 mpifarm -p hello
+mpirun -np 3 mechanic -p hello
