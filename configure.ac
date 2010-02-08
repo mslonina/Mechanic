@@ -19,10 +19,26 @@ AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
    LIBS=$save_LIBS
 ])
 
+AC_DEFINE([HAVE_MPI_SUPPORT], 1, [Define mpi support])
 AC_SUBST(USE_MPI) 
 AC_CHECK_LIB(m, pow)
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(popt, poptGetNextOpt)
 AC_CHECK_LIB(hdf5, H5open)
 AC_CHECK_LIB(readconfig, LRC_hdfParser)
-AC_OUTPUT(Makefile src/Makefile src/modules/Makefile src/modules/default/Makefile doc/Makefile examples/Makefile examples/hello/Makefile)
+AC_OUTPUT(Makefile \
+          src/Makefile \
+          src/core/Makefile \
+          src/modes/Makefile \
+          src/modes/farm/Makefile \
+          src/modes/masteralone/Makefile \
+          src/modes/multifarm/Makefile \
+          src/engines/Makefile \
+          src/engines/gpu/Makefile \
+          src/engines/odex/Makefile \
+          src/engines/taylor/Makefile \
+          src/modules/Makefile \
+          src/modules/echo/Makefile \
+          doc/Makefile \
+          examples/Makefile \
+          examples/hello/Makefile)

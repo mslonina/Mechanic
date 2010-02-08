@@ -1,5 +1,5 @@
 #include "mechanic.h"
-#include "mechanic-internals.h"
+#include "mechanic_internals.h"
 
 /**
  * SETUP TOOLS
@@ -28,7 +28,7 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
   /* If -c is set, but file doesn't exist, abort. */
   else if((read == NULL) && (flag == 1)){
 		perror("-> Error opening config file:");
-    MPI_Abort(MPI_COMM_WORLD, MECHANIC_ERR_SETUP);
+    mechanic_abort(MECHANIC_ERR_SETUP);
 	}
   /* We don't insist on having config file present, we just use defaults instead */
   else{
@@ -40,7 +40,7 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
 		printf("-> Config file seems to be empty.\n");
 	}
 
-  if(opts < 0) MPI_Abort(MPI_COMM_WORLD, MECHANIC_ERR_SETUP);
+  if(opts < 0) mechanic_abort(MECHANIC_ERR_SETUP);
   
   return opts;
 }
@@ -78,6 +78,10 @@ int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cfl
 			  if(strcmp(cs[i].options[k].name,"mrl") == 0){
           if(popt == 1) poptTestI(cs[i].options[k].value, d->mrl);
           d->mrl = atoi(cs[i].options[k].value); 
+        }
+			  if(strcmp(cs[i].options[k].name,"mode") == 0){
+          if(popt == 1) poptTestI(cs[i].options[k].value, d->mode);
+          d->mode = atoi(cs[i].options[k].value); 
         }
     }
     }

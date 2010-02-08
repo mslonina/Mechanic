@@ -22,7 +22,10 @@
 #include <popt.h>
 #include <dlfcn.h>
 
-#include "mpi.h"
+#if HAVE_MPI_SUPPORT
+  #include "mpi.h"
+#endif
+
 #include "hdf5.h"
 
 #include "libreadconfig.h"
@@ -33,13 +36,20 @@
 
 #define MECHANIC_CONFIG_FILE_DEFAULT "config"
 #define MECHANIC_NAME_DEFAULT "showme"
-#define MECHANIC_MODULE_DEFAULT "default"
-#define MECHANIC_MASTER_FILE_DEFAULT "default-master.h5"
+#define MECHANIC_MODULE_DEFAULT "echo"
+#define MECHANIC_MASTER_FILE_DEFAULT "echo-master.h5"
 #define MECHANIC_XRES_DEFAULT 5
 #define MECHANIC_YRES_DEFAULT 5
 #define MECHANIC_METHOD_DEFAULT 0
 #define MECHANIC_MRL_DEFAULT 10
 #define MECHANIC_DUMP_DEFAULT 2000
+
+#if HAVE_MPI_SUPPORT
+  #define MECHANIC_MODE_DEFAULT 1
+#else
+  #define MECHANIC_MODE_DEFAULT 0
+#endif
+
 #define MECHANIC_FILE 1024
 #define MECHANIC_FILE_OLD 1028
 
@@ -47,16 +57,27 @@
 #define MECHANIC_MODULE_WARN 1
 #define MECHANIC_MODULE_ERROR 2
 
-#define MECHANIC_MPI_DEST 0
-#define MECHANIC_MPI_SOURCE_TAG 0
-#define MECHANIC_MPI_DATA_TAG 2
-#define MECHANIC_MPI_RESULT_TAG 59
-#define MECHANIC_MPI_TERMINATE_TAG 99
+#if HAVE_MPI_SUPPORT
+  #define MECHANIC_MPI_DEST 0
+  #define MECHANIC_MPI_SOURCE_TAG 0
+  #define MECHANIC_MPI_DATA_TAG 2
+  #define MECHANIC_MPI_RESULT_TAG 59
+  #define MECHANIC_MPI_TERMINATE_TAG 99
+#endif
 
 #define MECHANIC_DATASETCONFIG "/config"
 #define MECHANIC_DATABOARD "/board" 
 #define MECHANIC_DATAGROUP "/data"
 #define MECHANIC_DATASETMASTER "master"
+
+enum Modes {
+  MECHANIC_MASTERALONE, 
+#if HAVE_MPI_SUPPORT
+  MECHANIC_FARM, 
+  MECHANIC_GRID, 
+  MECHANIC_MULTIFARM
+#endif
+} mechanicModes;
 
 /**
  * MODULE ARCHITECTURE FUNCTION HANDLERS
@@ -81,29 +102,37 @@ int usage, help;
 
 /* FUNCTION PROTOTYPES */
 int* map2d(int, void* handler, moduleInfo*, configData* d);
-int master(void* handler, moduleInfo*, configData* d, int restartmode);
-int slave(void* handler, moduleInfo*, configData* d);
-void clearArray(MECHANIC_DATATYPE*,int);
+
+#if HAVE_MPI_SUPPORT
 int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
 int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
+#endif
+
 void* load_sym(void* handler, moduleInfo*, char* function, int type);
 int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag);
 int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int flag, int popt);
-int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
-int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
 void mechanic_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data);
 void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data);
 void poptTestC(char* i, char* j);
 void poptTestI(char* i, int j);
-void welcome();
+
+int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
+int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
 int H5createMasterDataScheme(hid_t file_id, configData* d);
 int H5writeCheckPoint(configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
 int H5readBoard(configData* d, int** board);
 
+void welcome();
+void clearArray(MECHANIC_DATATYPE*,int);
+int mechanic_finalize(int node);
+int mechanic_abort(int errcode);
+
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptHelpOptions, \
 			0, "Help options:", NULL },
 
+#define MECHANIC_POPT_MODES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptModes, \
+			0, "Modes:", NULL },
 
 #endif

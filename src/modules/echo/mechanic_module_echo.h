@@ -1,5 +1,5 @@
-#ifndef MECHANIC_MODULE_DEFAULT_H
-#define MECHANIC_MODULE_DEFAULT_H
+#ifndef MECHANIC_MODULE_ECHO_H
+#define MECHANIC_MODULE_ECHO_H
 
 #include <stdio.h>
 #include <stdlib.h>

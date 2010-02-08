@@ -1,0 +1,1 @@
+SUBDIRS = gpu taylor odex

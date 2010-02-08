@@ -1,11 +1,12 @@
 #include "mechanic.h"
-#include "mechanic-internals.h"
+#include "mechanic_internals.h"
+#include "mechanic_mode_farm.h"
 
 /**
  * SLAVE
  *
  */
-int slave(void* handler, moduleInfo* md, configData* d){
+int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData* d){
 
     int* tab=malloc(3*sizeof(*tab));
     int k = 0, i = 0, j = 0;

@@ -1,0 +1,4 @@
+#ifndef MECHANIC_MODE_MULTIFARM_H
+#define MECHANIC_MODE_MULTIFARM_H
+
+#endif

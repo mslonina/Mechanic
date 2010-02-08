@@ -1,0 +1,1 @@
+SUBDIRS = masteralone farm multifarm

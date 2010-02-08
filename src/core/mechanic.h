@@ -28,6 +28,7 @@ typedef struct {
   int mrl;
   int checkpoint;
   int restartmode;
+  int mode;
 } configData;
 
 

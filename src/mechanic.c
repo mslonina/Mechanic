@@ -1,5 +1,4 @@
-/* MPI FARM SKELETON
- * Task farm model
+/* MECHANIC CORE
  *
  * by mariusz slonina <mariusz.slonina@gmail.com>
  * with a little help of kacper kowalik <xarthisius.kk@gmail.com>
@@ -12,7 +11,7 @@
  * 
  */
 #include "mechanic.h"
-#include "mechanic-internals.h"
+#include "mechanic_internals.h"
 
 /**
  * MAIN
@@ -20,7 +19,7 @@
  */
 int main(int argc, char *argv[]){  
 
-  int allopts = 0; //number of options read
+  int allopts = 0; //number of namespaces read
   int i = 0, j = 0, k = 0, opts = 0, n = 0;
   
   char* module_name;
@@ -39,7 +38,9 @@ int main(int argc, char *argv[]){
   int configfile = 0;
   int restartmode = 0;
 
-  int mstat;
+  int node;
+
+  int mstat; //mechanic internal error value
 
   struct stat st; //stat.h
   
@@ -48,10 +49,12 @@ int main(int argc, char *argv[]){
   hid_t file_id;
 
   configData cd; //struct for command line args
-  moduleInfo md;
+  moduleInfo md; //struct for module info
 
+#if HAVE_MPI_SUPPORT
   MPI_Datatype defaultConfigType;
-  
+#endif
+
   /* Assign default config values */
   name = MECHANIC_NAME_DEFAULT;
   restartname = MECHANIC_NAME_DEFAULT;
@@ -67,11 +70,23 @@ int main(int argc, char *argv[]){
   cd.mrl = MECHANIC_MRL_DEFAULT;
   cd.checkpoint = MECHANIC_DUMP_DEFAULT;
   cd.restartmode = 0;
+  cd.mode = MECHANIC_MODE_DEFAULT;
 
   LRC_configNamespace cs[] = {
-    {"default",{{"name", "", LRC_CHAR},{"xres", "", LRC_INT},{"yres", "", LRC_INT},
-        {"method", "", LRC_INT},{"mrl", "", LRC_INT},{"module", "", LRC_CHAR},},6},
-    {"logs", {{"checkpoint", "", LRC_INT}}, 1}
+    {"default",{
+                 {"name", "", LRC_CHAR},
+                 {"xres", "", LRC_INT},
+                 {"yres", "", LRC_INT},
+                 {"method", "", LRC_INT},
+                 {"mrl", "", LRC_INT},
+                 {"module", "", LRC_CHAR},
+                 {"mode", "", LRC_INT},
+               },
+    7},
+    {"logs", {
+               {"checkpoint", "", LRC_INT}
+             }, 
+    1}
   };
   allopts = 2;
 
@@ -82,6 +97,7 @@ int main(int argc, char *argv[]){
   sprintf(cs[0].options[3].value,"%d",MECHANIC_METHOD_DEFAULT);
   sprintf(cs[0].options[4].value,"%d",MECHANIC_MRL_DEFAULT);
   sprintf(cs[0].options[5].value,"%s",MECHANIC_MODULE_DEFAULT);
+  sprintf(cs[0].options[6].value,"%d",MECHANIC_MODE_DEFAULT);
   sprintf(cs[1].options[0].value,"%d",MECHANIC_DUMP_DEFAULT);
 
   /* Assign allowed values */
@@ -92,11 +108,12 @@ int main(int argc, char *argv[]){
     {"default", "method", LRC_INT},
     {"default", "mrl", LRC_INT},
     {"default", "module", LRC_CHAR},
+    {"default", "mode", LRC_INT},
     {"logs", "checkpoint", LRC_INT}
   };
 
   /* Number of allowed values */
-  int numCT = 7;
+  int numCT = 8;
 
   /**
    * POPT CONFIG
@@ -107,6 +124,18 @@ int main(int argc, char *argv[]){
     { "usage", '\0', 0, NULL, (int)'u', "Display brief usage message", NULL },
       POPT_TABLEEND
     };
+
+  struct poptOption mechanic_poptModes[] = {
+    {"masteralone", '0', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 0,
+    "masteralone mode",NULL},
+#if HAVE_MPI_SUPPORT
+    {"farm", '1', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 1,
+    "MPI task farm mode",NULL},
+    {"multifarm", '2', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 2,
+    "MPI multi task farm mode",NULL},
+#endif
+      POPT_TABLEEND
+  };
   
   struct poptOption cmdopts[] = {
     MECHANIC_POPT_AUTOHELP
@@ -128,40 +157,24 @@ int main(int argc, char *argv[]){
     "how often write checkpoint file", "CHECKPOINT"},
     {"restart", 'r', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.restartmode, 1,
     "restart mode [TODO]","RESTART"},
+    MECHANIC_POPT_MODES
     POPT_TABLEEND
   };
 
-  const char** rv;
-  struct poptAlias restartAlias = {
-    "restart", 'r', 3, rv
-  };
- 
   /* MPI INIT */
+#if HAVE_MPI_SUPPORT
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-  
+#endif
+
   /* HDF5 INIT */
   H5open();
-  
-  /**
-   * FIX ME! 
-   * 1) move farm to core module
-   * 2) allow user to change modes:
-   *  -- farm mode (default)
-   *  -- grid mode (multifarm)
-   *  -- grid with communication between slaves
-   *  -- masteralone 
-   */
-  if (mpi_size == 1){
-     printf("You should have at least one slave!\n");
-     MPI_Finalize();
-     return 0;
-  }
 
+  /* Check the mode we are in */
+  
   /* Parse command line */
   poptContext poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
-  poptAddAlias(poptcon, restartAlias, 0);
 
   /**
    * 1) Read defaults
@@ -174,36 +187,43 @@ int main(int argc, char *argv[]){
    *
    */
   optvalue = poptGetNextOpt(poptcon);
-    
+ 
+  /* MODE */
+  node = 0;
+#if HAVE_MPI_SUPPORT
+  node = mpi_rank;
+#endif
+
   /* Bad option */
   if (optvalue < -1){
-    if(mpi_rank == 0){
+    if(node == 0){
       fprintf(stdout, "%s: %s\n", poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), poptStrerror(optvalue));
       poptPrintHelp(poptcon, stdout, poptflags);
      }
      poptFreeContext(poptcon);
-     MPI_Finalize();
+     mechanic_finalize(node);
      return 0;
   }
   
-  if(mpi_rank == 0) welcome();
+  if(node == 0) welcome();
   
   /* Long help message set */
   if (help == 1){
-    if(mpi_rank == 0) poptPrintHelp(poptcon, stdout, 0);
+    if(node == 0) poptPrintHelp(poptcon, stdout, 0);
     poptFreeContext(poptcon);
-    MPI_Finalize();
+    mechanic_finalize(node);
     return 0;
   }
    
   /* Brief help message set */
   if (usage == 1){
-    if(mpi_rank == 0) poptPrintUsage(poptcon, stdout, 0);
+    if(node == 0) poptPrintUsage(poptcon, stdout, 0);
     poptFreeContext(poptcon);
-    MPI_Finalize();
+    mechanic_finalize(node);
     return 0;
   }
-  
+
+ 
   /**
    * RESTART MODE
    *
@@ -221,7 +241,7 @@ int main(int argc, char *argv[]){
    *      (map2d function should check if pixel is computed or not)
    * 5) perform normal operations, i.e. write new restart files
    */
-
+/*
   if (cd.restartmode == 1){
 
     if(mpi_rank == 0){
@@ -244,7 +264,7 @@ int main(int argc, char *argv[]){
      MPI_Finalize();
      return 0;
   }
-
+*/
   /* Config file set */
   if(strcmp(inifile, MECHANIC_CONFIG_FILE_DEFAULT) != 0 && cd.restartmode == 0){
     configfile = 1;
@@ -253,7 +273,7 @@ int main(int argc, char *argv[]){
 
   /* Reset options, we need to reuse them
    * to override values read from specified config file */
-  if(mpi_rank == 0){
+  if(node == 0){
 
     /* Read config file */
     allopts = readDefaultConfig(inifile, cs, ct, numCT, configfile);
@@ -283,10 +303,10 @@ int main(int argc, char *argv[]){
     if (cd.xres == 0 || cd.yres == 0){
        printf("X/Y map resolution should not be set to 0!\n");
        printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
-       MPI_Abort(MPI_COMM_WORLD, MECHANIC_ERR_MPI);
+       mechanic_abort(MECHANIC_ERR_MPI);
     }
 
-    printf("\n-> Mpifarm will use these startup values:\n\n");
+    printf("\n-> Mechanic will use these startup values:\n\n");
     LRC_printAll(allopts,cs);
   }
 
@@ -294,7 +314,7 @@ int main(int argc, char *argv[]){
   
   
   /* Config file read */
-  if(mpi_rank == 0){
+  if(node == 0){
     /* Need support for restart mode here */
     if(stat(cd.datafile,&st) == 0){
       sprintf(oldfile,"old-%s",cd.datafile);
@@ -329,19 +349,24 @@ int main(int argc, char *argv[]){
   LRC_writeHdfConfig(file_id, cs, allopts);
   H5Fclose(file_id);
 
+#if HAVE_MPI_SUPPORT
   /**
    * MPI CONFIG BCAST
    * Inform slaves what it is all about.
    */
-
-    mstat = buildDefaultConfigType(&cd, &defaultConfigType);
-    MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+    if(cd.mode == 1 || cd.mode == 2){
+      mstat = buildDefaultConfigType(&cd, &defaultConfigType);
+      MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+      MPI_Type_free(&defaultConfigType);
   
-  }else{
-    mstat = buildDefaultConfigType(&cd, &defaultConfigType);
-    MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+    }else{
+      mstat = buildDefaultConfigType(&cd, &defaultConfigType);
+      MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+      MPI_Type_free(&defaultConfigType);
+    }
+#endif
   }
-  
+
   /**
    * MODULE LOAD
    * If option -p is not set, use default.
@@ -352,7 +377,7 @@ int main(int argc, char *argv[]){
   handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
   if(!handler){
     printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
-    MPI_Abort(MPI_COMM_WORLD, MECHANIC_ERR_MODULE);
+    mechanic_abort(MECHANIC_ERR_MODULE);
   }
 
   init = load_sym(handler,&md, "init", MECHANIC_MODULE_ERROR);
@@ -361,33 +386,39 @@ int main(int argc, char *argv[]){
   query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
   if(query) query();
 
-  /**
-   * NOW, DO IT!
-   */
-  if(mpi_rank == 0) {
-      mstat = master(handler, &md, &cd, restartmode);
-	} else {
-      mstat = slave(handler, &md, &cd); 
+  switch(cd.mode){
+    case 0:
+      mstat = mechanic_mode_masteralone(node, handler, &md, &cd);
+      break;
+#if HAVE_MPI_SUPPORT
+    case 1:
+      mstat = mechanic_mode_farm(node, handler, &md, &cd);
+      break;
+    case 2:
+      mstat = mechanic_mode_multifarm(node, handler, &md, &cd);
+      break;
+#endif
+    default:
+      break;
   }
 
   cleanup = load_sym(handler, &md, "cleanup", MECHANIC_MODULE_ERROR);
   if(cleanup) mstat = cleanup();
 
   dlclose(handler);
-  MPI_Type_free(&defaultConfigType);
   
   /* HDF5 FINALIZE */
   H5close();
 	
-  /* MPI FINALIZE */
-  MPI_Finalize();
+  /* FINALIZE */
+  mechanic_finalize(node);
 
   return 0;
 }
 
 void welcome(){
 
-  printf("MPIFARM v.1.0 %s\n\tauthor: %s\n\tbugs: %s\n\n",
+  printf("MECHANIC %s\n\tauthor: %s\n\tbugs: %s\n\n",
           MECHANIC_VERSION, MECHANIC_AUTHOR, MECHANIC_EMAIL);
 
 }

@@ -1,11 +1,12 @@
 #include "mechanic.h"
-#include "mechanic-internals.h"
+#include "mechanic_internals.h"
+#include "mechanic_mode_farm.h"
 
 /**
  * MASTER
  *
  */
-int master(void* handler, moduleInfo* md, configData* d, int restartmode){
+int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configData* d){
 
    int* tab;
    int i = 0, k = 0, j = 0, nodes = 0, farm_res = 0;
@@ -53,14 +54,14 @@ int master(void* handler, moduleInfo* md, configData* d, int restartmode){
    mstat = buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
    
    /* Allocate memory for board */
-   if(restartmode == 1){
+   if(d->restartmode == 1){
     board = malloc(sizeof(int*)*d->xres);
     for(i = 0; i < d->xres; i++) 
       board[i] = malloc(sizeof(int*)*d->yres);
     
    }
 
-   if(restartmode == 1) H5readBoard(d, board);
+   if(d->restartmode == 1) H5readBoard(d, board);
    /*printf("\n");
    for(i = 0; i < d->xres; i++){
     for(j = 0; j < d->yres; j++){
@@ -107,12 +108,12 @@ int master(void* handler, moduleInfo* md, configData* d, int restartmode){
     */
    for (i = 1; i < nodes; i++){
      qbeforeS = load_sym(handler, md,"master_beforeSend", MECHANIC_MODULE_SILENT);
-     if(qbeforeS) mstat = qbeforeS(i,d,rawdata);
+     if(qbeforeS) mstat = qbeforeS(i, d, rawdata);
 
      MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
      
      qafterS = load_sym(handler, md, "master_afterSend", MECHANIC_MODULE_SILENT);
-     if(qafterS) mstat = qafterS(i,d,rawdata);
+     if(qafterS) mstat = qafterS(i, d, rawdata);
      
      count++;
      npxc++;
@@ -135,7 +136,7 @@ int master(void* handler, moduleInfo* md, configData* d, int restartmode){
    while (1) {
     
      qbeforeR = load_sym(handler, md, "master_beforeReceive", MECHANIC_MODULE_SILENT);
-     if(qbeforeR) mstat = qbeforeR(d,rawdata);
+     if(qbeforeR) mstat = qbeforeR(d, rawdata);
       
      MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
      count--;
@@ -168,7 +169,7 @@ int master(void* handler, moduleInfo* md, configData* d, int restartmode){
       if (npxc < farm_res){
        
         qbeforeS = load_sym(handler, md, "master_beforeSend", MECHANIC_MODULE_SILENT);
-        if(qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, &d, rawdata);
+        if(qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, d, rawdata);
          
         MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
         npxc++;
@@ -240,7 +241,7 @@ int master(void* handler, moduleInfo* md, configData* d, int restartmode){
     free(resultarr);
     free(rawdata);
   
-   if(restartmode == 1){
+   if(d->restartmode == 1){
     for(i = 0; i < d->xres; i++) free(board[i]);
     free(board);
    }  

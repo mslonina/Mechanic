@@ -1,5 +1,5 @@
 #include "mechanic.h"
-#include "mechanic-internals.h"
+#include "mechanic_internals.h"
 
 /**
  * HELPER FUNCTIONS
@@ -40,7 +40,7 @@ int* map2d(int c, void* handler, moduleInfo *md, configData* d){
     */
    if(d->method == 6){
     qpcm = load_sym(handler, md, "pixelCoordsMap", MECHANIC_MODULE_ERROR); 
-    if(qpcm) qpcm(ind, c, x, y);
+    if(qpcm) qpcm(ind, c, x, y, d);
    }
 
    return ind;
@@ -114,3 +114,20 @@ void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, cons
 
 }
 
+int mechanic_finalize(int node){
+
+#if HAVE_MPI_SUPPORT
+  MPI_Finalize();
+#endif
+
+  return 0;
+}
+
+int mechanic_abort(int errcode){
+
+#if HAVE_MPI_SUPPORT
+  MPI_Abort(MPI_COMM_WORLD, errcode);
+#endif
+
+  return 0;
+}

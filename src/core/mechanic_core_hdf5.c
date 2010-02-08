@@ -1,5 +1,5 @@
 #include "mechanic.h"
-#include "mechanic-internals.h"
+#include "mechanic_internals.h"
 
 /**
  * HDF5 FUNCTIONS

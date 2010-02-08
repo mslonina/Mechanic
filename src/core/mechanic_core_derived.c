@@ -1,5 +1,5 @@
 #include "mechanic.h"
-#include "mechanic-internals.h"
+#include "mechanic_internals.h"
 
 /**
  * MPI DERIVED DATATYPES
@@ -35,10 +35,10 @@ int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsT
 /* Bcast default config file */
 int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   
-  int block_lengths[9];
-  MPI_Aint displacements[9];
-  MPI_Datatype typelist[9];
-  MPI_Aint addresses[10];
+  int block_lengths[10];
+  MPI_Aint displacements[10];
+  MPI_Datatype typelist[10];
+  MPI_Aint addresses[11];
   int i = 0;
 
   typelist[0] = MPI_CHAR; //problem name
@@ -50,6 +50,7 @@ int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   typelist[6] = MPI_INT; //master result length
   typelist[7] = MPI_INT; //checkpoint
   typelist[8] = MPI_INT; //restartmode
+  typelist[9] = MPI_INT; //mode
 
   block_lengths[0] = 256;
   block_lengths[1] = 260;
@@ -60,6 +61,7 @@ int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   block_lengths[6] = 1;
   block_lengths[7] = 1;
   block_lengths[8] = 1;
+  block_lengths[9] = 1;
 
   MPI_Address(d, &addresses[0]);
   MPI_Address(&(d->name), &addresses[1]);
@@ -71,12 +73,13 @@ int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   MPI_Address(&(d->mrl), &addresses[7]);
   MPI_Address(&(d->checkpoint), &addresses[8]);
   MPI_Address(&(d->restartmode), &addresses[9]);
+  MPI_Address(&(d->mode), &addresses[10]);
 
-  for(i = 0; i < 9; i++){
+  for(i = 0; i < 10; i++){
     displacements[i] = addresses[i+1] - addresses[0];
   }
 
-  MPI_Type_struct(9, block_lengths, displacements, typelist, defaultConfigType_ptr);
+  MPI_Type_struct(10, block_lengths, displacements, typelist, defaultConfigType_ptr);
   MPI_Type_commit(defaultConfigType_ptr);
 
   return 0;

@@ -31,7 +31,7 @@
  */
 
 #include "mechanic.h"
-#include "mechanic_module_default.h"
+#include "mechanic_module_echo.h"
 
 /*
 int mechanic_module_init(struct yourdata *pointer){
@@ -53,9 +53,9 @@ int mechanic_module_cleanup(struct yourdata *pointer){
   return 0;
 }
 */
-int default_init(moduleInfo *md){
+int echo_init(moduleInfo *md){
 
-  md->name = "default";
+  md->name = "echo";
   md->author = "MSlonina";
   md->date = "2010";
   md->version = "1.0";
@@ -63,19 +63,20 @@ int default_init(moduleInfo *md){
 //  sd.test = 21;
   return 0;
 }
-int default_query(){
+int echo_query(){
 //  printf("TEST = %d\n", s->test);
   return 0;
 }
-int default_cleanup(){
+int echo_cleanup(){
 //  printf("SD.TEST = %d\n", sd.test);
   return 0;
 }
 
 /**
- * @fn int default_farmResolution(int x, int y)
+ * @fn int echo_farmResolution(int x, int y)
  * @brief Defines the resolution of the farm.
  *
+ * @param mode
  * @param x
  * @param y
  *
@@ -83,7 +84,7 @@ int default_cleanup(){
  * Farm resolution
  *
  */
-int default_farmResolution(int x, int y){
+int echo_farmResolution(int x, int y, configData* d){
   
   int farm;
 
@@ -93,10 +94,10 @@ int default_farmResolution(int x, int y){
 }
 
 /**
- * @fn int default_pixelCoordsMap(int t[], int p, int x, int y)
+ * @fn int echo_pixelCoordsMap(int t[], int p, int x, int y)
  * @brief Defines pixel mapping in the farm.
  *
- * You can overwrite default pixel coords alignment here.
+ * You can overwrite echo pixel coords alignment here.
  * Used only when method = 6.
  *
  * @param t
@@ -106,7 +107,7 @@ int default_farmResolution(int x, int y){
  * @param y
  *
  */
-int default_pixelCoordsMap(int t[], int p, int x, int y){
+int echo_pixelCoordsMap(int t[], int p, int x, int y, configData *d){
   
     if(p < y) t[0] = p / y; t[1] = p;
     if(p > y - 1) t[0] = p / y; t[1] = p % y;
@@ -114,7 +115,7 @@ int default_pixelCoordsMap(int t[], int p, int x, int y){
 }
 
 /**
- * @fn int default_pixelCoords(int slave, int t[], configData* d, masterData* r)
+ * @fn int echo_pixelCoords(int slave, int t[], configData* d, masterData* r)
  * @brief Pixel coords mapping.
  *
  * Each slave takes the pixel coordinates and then do its work.
@@ -128,7 +129,7 @@ int default_pixelCoordsMap(int t[], int p, int x, int y){
  * @param r
  *
  */
-int default_pixelCoords(int slave, int t[], configData* d, masterData* r){
+int echo_pixelCoords(int slave, int t[], configData* d, masterData* r){
           
   r->coords[0] = t[0]; //x 
   r->coords[1] = t[1]; //y
@@ -138,7 +139,7 @@ int default_pixelCoords(int slave, int t[], configData* d, masterData* r){
 }
 
 /**
- * @fn int default_pixelCompute(int slave, configData* d, masterData* r)
+ * @fn int echo_pixelCompute(int slave, configData* d, masterData* r)
  * @brief Pixel compute routine.
  * 
  * The heart. Here You can compute your pixels. Possible extenstions:
@@ -156,7 +157,7 @@ int default_pixelCoords(int slave, int t[], configData* d, masterData* r){
  *
  *
  */
-int default_pixelCompute(int slave, configData* d, masterData* r){
+int echo_pixelCompute(int slave, configData* d, masterData* r){
 
   int i = 0;
 
@@ -171,7 +172,7 @@ int default_pixelCompute(int slave, configData* d, masterData* r){
 }
 
 /**
- * @fn int default_masterIN(int mpi_size, configData* d)
+ * @fn int echo_masterIN(int mpi_size, configData* d)
  * @brief This function is called before any farm operations.
  *
  * You can do something before computations starts.
@@ -180,12 +181,12 @@ int default_pixelCompute(int slave, configData* d, masterData* r){
  * @param d
  *
  */
-int default_masterIN(int mpi_size, configData* d){
+int echo_masterIN(int mpi_size, configData* d){
   return 0;
 }
 
 /**
- * @fn int default_masterOUT(int nodes, configData* d, masterData* r)
+ * @fn int echo_masterOUT(int nodes, configData* d, masterData* r)
  * @brief This function is called after all operations are performed.
  * 
  * Example:
@@ -195,7 +196,7 @@ int default_masterIN(int mpi_size, configData* d){
  * @param d
  * @param r
  */
-int default_masterOUT(int nodes, configData* d, masterData* r){
+int echo_masterOUT(int nodes, configData* d, masterData* r){
   
   int i = 0;
   hid_t fname, masterfile, masterdatagroup;
@@ -229,29 +230,29 @@ int default_masterOUT(int nodes, configData* d, masterData* r){
 
 /**
  * 
- * @fn int default_master_beforeSend(int slave, configData* d, masterData* r)
+ * @fn int echo_master_beforeSend(int slave, configData* d, masterData* r)
  * @brief Called before send data to slaves.
  *
- * @fn int default_master_afterSend(int slave, configData* d, masterData* r)
+ * @fn int echo_master_afterSend(int slave, configData* d, masterData* r)
  * @brief Called after data was send to slaves.
  *
- * @fn int default_master_beforeReceive(configData* d, masterData* r)
+ * @fn int echo_master_beforeReceive(configData* d, masterData* r)
  * @brief Called before data receive from the slave.
  *
- * @fn int default_master_afterReceive(int slave, configData* d, masterData* r)
+ * @fn int echo_master_afterReceive(int slave, configData* d, masterData* r)
  * @brief Called after data is received.
  * 
  */
-int default_master_beforeSend(int slave, configData* d, masterData* r){
+int echo_master_beforeSend(int slave, configData* d, masterData* r){
   return 0;
 }
-int default_master_afterSend(int slave, configData* d, masterData* r){
+int echo_master_afterSend(int slave, configData* d, masterData* r){
   return 0;
 }
-int default_master_beforeReceive(configData* d, masterData* r){
+int echo_master_beforeReceive(configData* d, masterData* r){
   return 0;
 }
-int default_master_afterReceive(int slave, configData* d, masterData* r){
+int echo_master_afterReceive(int slave, configData* d, masterData* r){
   return 0;
 }
 
@@ -272,7 +273,7 @@ int default_master_afterReceive(int slave, configData* d, masterData* r){
  * Data group is incorporated in MASTER_OUT function to one master data file.
  *
  */
-int default_slaveIN(int slave, configData* d, masterData* r){
+int echo_slaveIN(int slave, configData* d, masterData* r){
 
   hid_t sfile_id, sdatagroup, gid, string_type;
   hid_t dataset, dataspace;
@@ -337,7 +338,7 @@ int default_slaveIN(int slave, configData* d, masterData* r){
  * Example:
  * Just prints a message from the slave.
  */
-int default_slaveOUT(int slave, configData* d, masterData* r){
+int echo_slaveOUT(int slave, configData* d, masterData* r){
   
   printf("SLAVE[%d] OVER & OUT\n",slave);
 
@@ -350,7 +351,7 @@ int default_slaveOUT(int slave, configData* d, masterData* r){
  * Called before/after send/receive
  * 
  */
-int default_slave_beforeSend(int slave, configData* d, masterData* r){
+int echo_slave_beforeSend(int slave, configData* d, masterData* r){
   
   int i = 0;
   //printf("S[%d] px[%3d, %3d]: ", slave, r->coords[0], r->coords[1]);
@@ -360,13 +361,13 @@ int default_slave_beforeSend(int slave, configData* d, masterData* r){
   
   return 0;
 }
-int default_slave_afterSend(int slave, configData* d, masterData* r){
+int echo_slave_afterSend(int slave, configData* d, masterData* r){
   return 0;
 }
-int default_slave_beforeReceive(int slave, configData* d, masterData* r){
+int echo_slave_beforeReceive(int slave, configData* d, masterData* r){
   return 0;
 }
-int default_slave_afterReceive(int slave, configData* d, masterData* r){
+int echo_slave_afterReceive(int slave, configData* d, masterData* r){
   return 0;
 }
 
