@@ -1,20 +1,61 @@
-/* MECHANIC CORE
+/*
+ * MECHANIC Copyright (c) 2010, Mariusz Slonina (Nicolaus Copernicus University)
+ * All rights reserved.
+ * 
+ * This file is part of MECHANIC code. 
  *
- * by mariusz slonina <mariusz.slonina@gmail.com>
- * with a little help of kacper kowalik <xarthisius.kk@gmail.com>
+ * MECHANIC was created to help solving many numerical problems by providing tools
+ * for improving scalability and functionality of the code. MECHANIC was released 
+ * in belief it will be useful. If you are going to use this code, or its parts,
+ * please consider referring to the authors either by the website or the user guide 
+ * reference.
  *
- * FIX ME! -- only partial error handling:
- * 1) HDF5 error handling with H5E (including file storage)
- * 2) dlopen error handling (done)
- * 3) user input error handling (done in libreadconfig)
- * 4) malloc error handling
+ * http://mechanics.astri.umk.pl/projects/mechanic
+ *
+ * User guide should be provided with the package or 
+ * http://mechanics.astri.umk.pl/projects/mechanic/mechanic_userguide.pdf
+ *
+ * Redistribution and use in source and binary forms, 
+ * with or without modification, are permitted provided 
+ * that the following conditions are met:
+ * 
+ *  - Redistributions of source code must retain the above copyright notice, 
+ *    this list of conditions and the following disclaimer.
+ *  - Redistributions in binary form must reproduce the above copyright notice, 
+ *    this list of conditions and the following disclaimer in the documentation 
+ *    and/or other materials provided with the distribution.
+ *  - Neither the name of the Nicolaus Copernicus University nor the names of 
+ *    its contributors may be used to endorse or promote products derived from 
+ *    this software without specific prior written permission.
+ *  
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+ * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
+ * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+ * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ * OF SUCH DAMAGE.
+ */
+
+
+/* 
+ * @mainpage
+ * @author Mariusz Slonina <mariusz.slonina@gmail.com>
+ * with a little help of Kacper Kowalik <xarthisius.kk@gmail.com>
+ *
+ * @todo
+ *   - HDF5 error handling with H5E (including file storage)
+ *   - malloc error handling
  * 
  */
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
 /**
- * MAIN
+ * @page guide Quick Start Guide
  *
  */
 int main(int argc, char *argv[]){  
@@ -31,12 +72,12 @@ int main(int argc, char *argv[]){
   void* handler;
   char oldfile[MECHANIC_FILE_OLD];
   char restartfile[MECHANIC_FILE];
+  char checkpoint_path[MECHANIC_PATH];
 
+  poptContext poptcon;
   int poptflags = 0;
   int error;
-  int rc;
   int configfile = 0;
-  int restartmode = 0;
 
   int node;
 
@@ -51,13 +92,13 @@ int main(int argc, char *argv[]){
   configData cd; //struct for command line args
   moduleInfo md; //struct for module info
 
-#if HAVE_MPI_SUPPORT
-  MPI_Datatype defaultConfigType;
-#endif
+  #if HAVE_MPI_SUPPORT
+    MPI_Datatype defaultConfigType;
+  #endif
 
   /* Assign default config values */
   name = MECHANIC_NAME_DEFAULT;
-  restartname = MECHANIC_NAME_DEFAULT;
+  restartname = "";
   inifile = MECHANIC_CONFIG_FILE_DEFAULT;
   module_name = MECHANIC_MODULE_DEFAULT;
   
@@ -68,9 +109,10 @@ int main(int argc, char *argv[]){
   cd.yres = MECHANIC_YRES_DEFAULT;
   cd.method = MECHANIC_METHOD_DEFAULT;
   cd.mrl = MECHANIC_MRL_DEFAULT;
-  cd.checkpoint = MECHANIC_DUMP_DEFAULT;
+  cd.checkpoint = MECHANIC_CHECKPOINT_DEFAULT;
   cd.restartmode = 0;
   cd.mode = MECHANIC_MODE_DEFAULT;
+  cd.checkpoint_num = MECHANIC_CHECKPOINT_NUM_DEFAULT;
 
   LRC_configNamespace cs[] = {
     {"default",{
@@ -78,15 +120,15 @@ int main(int argc, char *argv[]){
                  {"xres", "", LRC_INT},
                  {"yres", "", LRC_INT},
                  {"method", "", LRC_INT},
-                 {"mrl", "", LRC_INT},
                  {"module", "", LRC_CHAR},
                  {"mode", "", LRC_INT},
                },
-    7},
+    6},
     {"logs", {
-               {"checkpoint", "", LRC_INT}
+               {"checkpoint", "", LRC_INT},
+               {"checkpoint_num", "", LRC_INT}
              }, 
-    1}
+    2}
   };
   allopts = 2;
 
@@ -95,10 +137,10 @@ int main(int argc, char *argv[]){
   sprintf(cs[0].options[1].value,"%d",MECHANIC_XRES_DEFAULT);
   sprintf(cs[0].options[2].value,"%d",MECHANIC_YRES_DEFAULT);
   sprintf(cs[0].options[3].value,"%d",MECHANIC_METHOD_DEFAULT);
-  sprintf(cs[0].options[4].value,"%d",MECHANIC_MRL_DEFAULT);
-  sprintf(cs[0].options[5].value,"%s",MECHANIC_MODULE_DEFAULT);
-  sprintf(cs[0].options[6].value,"%d",MECHANIC_MODE_DEFAULT);
-  sprintf(cs[1].options[0].value,"%d",MECHANIC_DUMP_DEFAULT);
+  sprintf(cs[0].options[4].value,"%s",MECHANIC_MODULE_DEFAULT);
+  sprintf(cs[0].options[5].value,"%d",MECHANIC_MODE_DEFAULT);
+  sprintf(cs[1].options[0].value,"%d",MECHANIC_CHECKPOINT_DEFAULT);
+  sprintf(cs[1].options[1].value,"%d",MECHANIC_CHECKPOINT_NUM_DEFAULT);
 
   /* Assign allowed values */
   LRC_configTypes ct[] = {
@@ -106,10 +148,10 @@ int main(int argc, char *argv[]){
     {"default", "xres", LRC_INT},
     {"default", "yres", LRC_INT},
     {"default", "method", LRC_INT},
-    {"default", "mrl", LRC_INT},
     {"default", "module", LRC_CHAR},
     {"default", "mode", LRC_INT},
-    {"logs", "checkpoint", LRC_INT}
+    {"logs", "checkpoint", LRC_INT},
+    {"logs", "checkpoint_num", LRC_INT}
   };
 
   /* Number of allowed values */
@@ -127,54 +169,64 @@ int main(int argc, char *argv[]){
 
   struct poptOption mechanic_poptModes[] = {
     {"masteralone", '0', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 0,
-    "masteralone mode",NULL},
-#if HAVE_MPI_SUPPORT
-    {"farm", '1', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 1,
-    "MPI task farm mode",NULL},
-    {"multifarm", '2', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 2,
-    "MPI multi task farm mode",NULL},
-#endif
-      POPT_TABLEEND
-  };
-  
-  struct poptOption cmdopts[] = {
-    MECHANIC_POPT_AUTOHELP
-    {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &name, 0,
-    "problem name", "NAME"},
-    {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 0,
-    "config file", "CONFIG"},
-    {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &module_name, 0,
-    "module", "MODULE"},
-    {"method", 'm', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.method, 0,
-    "method", "METHOD"},
-    {"xres", 'x', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.xres, 0,
-    "x resolution", "XRES"},
-    {"yres", 'y', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.yres, 0,
-    "y resolution", "YRES"},
-    {"mrl", 'l', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mrl, 0,
-    "master result array length", "LENGTH"},
-    {"checkpoint", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.checkpoint, 0,
-    "how often write checkpoint file", "CHECKPOINT"},
-    {"restart", 'r', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.restartmode, 1,
-    "restart mode [TODO]","RESTART"},
-    MECHANIC_POPT_MODES
+    "Masteralone",NULL},
+    #if HAVE_MPI_SUPPORT
+      {"farm", '1', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 1,
+        "MPI task farm",NULL},
+      {"multifarm", '2', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 2,
+        "MPI multi task farm",NULL},
+    #endif
     POPT_TABLEEND
   };
 
-  /* MPI INIT */
-#if HAVE_MPI_SUPPORT
-  MPI_Init(&argc, &argv);
-  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-#endif
+  struct poptOption mechanic_poptRestart[] = {
+    {"restart", 'r', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.restartmode, 0,
+      "Switch to restart mode", NULL},
+    {"rpath", 'b', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &checkpoint_path, 0,
+      "Path to checkpoint file", "/path/to/checkpoint/file"},
+    POPT_TABLEEND
+  };
+  
+  struct poptOption cmdopts[] = {
+    {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &name, 0,
+    "Problem name", "NAME"},
+    {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 0,
+    "Config file", "CONFIG"},
+    {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &module_name, 0,
+    "Module", "MODULE"},
+    {"method", 'm', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.method, 0,
+    "Pixel map method", "METHOD"},
+    {"xres", 'x', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.xres, 0,
+    "X resolution", "XRES"},
+    {"yres", 'y', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.yres, 0,
+    "Y resolution", "YRES"},
+    {"checkpoint", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.checkpoint, 0,
+    "Checkpoint file write interval", "CHECKPOINT"},
+    MECHANIC_POPT_MODES
+    MECHANIC_POPT_RESTART
+    MECHANIC_POPT_AUTOHELP
+    POPT_TABLEEND
+  };
 
-  /* HDF5 INIT */
+  #if HAVE_MPI_SUPPORT
+    // MPI INIT 
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  #endif
+
+  // HDF5 INIT 
   H5open();
 
-  /* Check the mode we are in */
+  node = 0;
+  #if HAVE_MPI_SUPPORT
+    node = mpi_rank;
+  #endif
   
-  /* Parse command line */
-  poptContext poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
+  if(node == 0) welcome();
+
+  // Parse command line 
+  poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
 
   /**
    * 1) Read defaults
@@ -188,12 +240,6 @@ int main(int argc, char *argv[]){
    */
   optvalue = poptGetNextOpt(poptcon);
  
-  /* MODE */
-  node = 0;
-#if HAVE_MPI_SUPPORT
-  node = mpi_rank;
-#endif
-
   /* Bad option */
   if (optvalue < -1){
     if(node == 0){
@@ -204,8 +250,6 @@ int main(int argc, char *argv[]){
      mechanic_finalize(node);
      return 0;
   }
-  
-  if(node == 0) welcome();
   
   /* Long help message set */
   if (help == 1){
@@ -223,7 +267,6 @@ int main(int argc, char *argv[]){
     return 0;
   }
 
- 
   /**
    * RESTART MODE
    *
@@ -303,7 +346,7 @@ int main(int argc, char *argv[]){
     if (cd.xres == 0 || cd.yres == 0){
        printf("X/Y map resolution should not be set to 0!\n");
        printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
-       mechanic_abort(MECHANIC_ERR_MPI);
+       mechanic_abort(MECHANIC_ERR_SETUP);
     }
 
     printf("\n-> Mechanic will use these startup values:\n\n");
@@ -313,10 +356,12 @@ int main(int argc, char *argv[]){
   poptFreeContext(poptcon);
   
   
-  /* Config file read */
+  // Config file read
   if(node == 0){
-    /* Need support for restart mode here */
-    if(stat(cd.datafile,&st) == 0){
+    // Backup master data file.
+    // If simulation was broken, and we are in restart mode
+    // we don't have any master files, only checkpoint files.
+    if(stat(cd.datafile,&st) == 0 && cd.restartmode == 0){
       sprintf(oldfile,"old-%s",cd.datafile);
       printf("-> File %s exists!\n", cd.datafile);
       printf("-> I will back it up for You now\n");
@@ -325,36 +370,35 @@ int main(int argc, char *argv[]){
     }
 
    /**
-    * HDF5 Storage
+    * @page storage HDF5 Storage Data Scheme
     *
     * We write data in the following scheme:
-    * /config -- configuration file
-    * /board -- map of computed pixels
-    * /data -- output data group
-    * /data/master -- master dataset
+    * - /config -- configuration file
+    * - /board -- map of computed pixels
+    * - /data -- output data group
+    * - /data/master -- master dataset
     *
     * Each slave can write own data files if needed.
     * In such case, please edit slaveIN/OUT functions in your module.
     *
-    * FIX ME!:
+    * @todo
     * Add logs functionality
     *
     */
 
-  /* Create master datafile */
+  // Create master datafile
   file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   mstat = H5createMasterDataScheme(file_id, &cd);
 
-  /* First of all, save configuration */
+  // First of all, save configuration 
   LRC_writeHdfConfig(file_id, cs, allopts);
   H5Fclose(file_id);
 
-#if HAVE_MPI_SUPPORT
-  /**
-   * MPI CONFIG BCAST
-   * Inform slaves what it is all about.
-   */
-    if(cd.mode == 1 || cd.mode == 2){
+  #if HAVE_MPI_SUPPORT
+   // MPI CONFIG BCAST
+   // Inform slaves what it is all about.
+   if(cd.mode == 1 || cd.mode == 2){
+    if(node == 0){
       mstat = buildDefaultConfigType(&cd, &defaultConfigType);
       MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
       MPI_Type_free(&defaultConfigType);
@@ -364,11 +408,14 @@ int main(int argc, char *argv[]){
       MPI_Bcast(&cd, 1, defaultConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
       MPI_Type_free(&defaultConfigType);
     }
-#endif
+   }
+  #endif
   }
 
   /**
-   * MODULE LOAD
+   * @page modules MODULE LOAD
+   *
+   * @brief
    * If option -p is not set, use default.
    */
   sprintf(module_file, "mechanic_module_%s.so", module_name);
@@ -386,31 +433,34 @@ int main(int argc, char *argv[]){
   query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
   if(query) query();
 
+  //Now load proper routines
   switch(cd.mode){
     case 0:
       mstat = mechanic_mode_masteralone(node, handler, &md, &cd);
       break;
-#if HAVE_MPI_SUPPORT
+    #if HAVE_MPI_SUPPORT
     case 1:
       mstat = mechanic_mode_farm(node, handler, &md, &cd);
       break;
     case 2:
       mstat = mechanic_mode_multifarm(node, handler, &md, &cd);
       break;
-#endif
+    #endif
     default:
       break;
   }
 
+  //cleanup module
   cleanup = load_sym(handler, &md, "cleanup", MECHANIC_MODULE_ERROR);
   if(cleanup) mstat = cleanup();
 
+  // MODULE UNLOAD
   dlclose(handler);
   
-  /* HDF5 FINALIZE */
+  // HDF5 FINALIZE 
   H5close();
 	
-  /* FINALIZE */
+  // FINALIZE 
   mechanic_finalize(node);
 
   return 0;

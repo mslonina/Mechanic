@@ -11,12 +11,13 @@
 #include <assert.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <sys/dir.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/param.h>
 #include <signal.h>
 #include <fcntl.h>
-#include <sys/dir.h>
 #include <dirent.h>
 #include <math.h>
 #include <popt.h>
@@ -30,7 +31,7 @@
 
 #include "libreadconfig.h"
 
-#define MECHANIC_VERSION "UNSTABLE-2"
+#define MECHANIC_VERSION "0.12 UNSTABLE-2"
 #define MECHANIC_AUTHOR "MSlonina, TCfA, NCU"
 #define MECHANIC_EMAIL "mariusz.slonina@gmail.com"
 
@@ -42,7 +43,9 @@
 #define MECHANIC_YRES_DEFAULT 5
 #define MECHANIC_METHOD_DEFAULT 0
 #define MECHANIC_MRL_DEFAULT 10
-#define MECHANIC_DUMP_DEFAULT 2000
+#define MECHANIC_CHECKPOINT_DEFAULT 2000
+#define MECHANIC_CHECKPOINTS 6
+#define MECHANIC_CHECKPOINT_NUM_DEFAULT 0
 
 #if HAVE_MPI_SUPPORT
   #define MECHANIC_MODE_DEFAULT 1
@@ -50,8 +53,9 @@
   #define MECHANIC_MODE_DEFAULT 0
 #endif
 
-#define MECHANIC_FILE 1024
-#define MECHANIC_FILE_OLD 1028
+#define MECHANIC_FILE 256
+#define MECHANIC_FILE_OLD 260
+#define MECHANIC_PATH MAXPATHLEN
 
 #define MECHANIC_MODULE_SILENT 0
 #define MECHANIC_MODULE_WARN 1
@@ -121,8 +125,11 @@ void poptTestI(char* i, int j);
 int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
 int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
 int H5createMasterDataScheme(hid_t file_id, configData* d);
-int H5writeCheckPoint(configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
+
+int manageCheckpoints(configData *d);
 int H5readBoard(configData* d, int** board);
+int H5writeCheckPoint(configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
+int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** resultarr, configData* d);
 
 void welcome();
 void clearArray(MECHANIC_DATATYPE*,int);
@@ -135,4 +142,6 @@ int mechanic_abort(int errcode);
 #define MECHANIC_POPT_MODES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptModes, \
 			0, "Modes:", NULL },
 
+#define MECHANIC_POPT_RESTART { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptRestart, \
+			0, "Restart options:", NULL },
 #endif

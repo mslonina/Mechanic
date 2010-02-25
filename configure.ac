@@ -39,6 +39,7 @@ AC_OUTPUT(Makefile \
           src/engines/taylor/Makefile \
           src/modules/Makefile \
           src/modules/echo/Makefile \
+          src/modules/mandelbrot/Makefile \
           doc/Makefile \
           examples/Makefile \
           examples/hello/Makefile)

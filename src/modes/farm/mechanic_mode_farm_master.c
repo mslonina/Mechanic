@@ -19,7 +19,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    masterData *rawdata;
 
    /* Checkpoint storage */
-   int **coordsarr;
+   int** coordsarr;
    MECHANIC_DATATYPE **resultarr;
    
    /* Restart mode board */
@@ -37,22 +37,16 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MECHANIC_DATATYPE));
 
    clearArray(rawdata->res, ITEMS_IN_ARRAY(rawdata->res));
+   
+  coordsarr = malloc(sizeof(int*)*d->checkpoint);
+  resultarr = malloc(sizeof(MECHANIC_DATATYPE*)*d->checkpoint);
 
-   /**
-    * Allocate memory for checkpoint mode.
-    */
-   coordsarr = malloc(sizeof(int*)*d->checkpoint);
-   resultarr = malloc(sizeof(MECHANIC_DATATYPE*)*d->checkpoint);
-
-   for(i = 0; i < d->checkpoint; i++){
+  for(i = 0; i < d->checkpoint; i++){
      coordsarr[i] = malloc(sizeof(int*)*3);
      resultarr[i] = malloc(sizeof(MECHANIC_DATATYPE*)*d->mrl);
      clearArray(resultarr[i],ITEMS_IN_ARRAY(resultarr[i]));
-   }
-   
-   /* Build derived type for master result */
-   mstat = buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
-   
+  }
+
    /* Allocate memory for board */
    if(d->restartmode == 1){
     board = malloc(sizeof(int*)*d->xres);
@@ -62,16 +56,10 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    }
 
    if(d->restartmode == 1) H5readBoard(d, board);
-   /*printf("\n");
-   for(i = 0; i < d->xres; i++){
-    for(j = 0; j < d->yres; j++){
-      printf(" %3d", board[i][j]);
-    }
-    printf("\n");
-   }
-   */
+   //printf("Checkpoint prepared\n");
 
-
+   /* Build derived type for master result */
+   mstat = buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
 
    /**
     * Master can do something useful before computations.
@@ -143,12 +131,12 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
       
       qafterR = load_sym(handler, md, "master_afterReceive", MECHANIC_MODULE_SILENT);
       if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, d, rawdata);
-    
+   
       /* Copy data to checkpoint arrays */
       coordsarr[check][0] = rawdata->coords[0];
       coordsarr[check][1] = rawdata->coords[1];
       coordsarr[check][2] = rawdata->coords[2];
-      
+     
       for(j = 0; j < d->mrl; j++){
         resultarr[check][j] = rawdata->res[j];
       }
@@ -159,9 +147,9 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
        * if you set up checkpoints very often and your simulations are
        * very fast, your disks will not be happy
        * */
+
       if(check % d->checkpoint == 0){//FIX ME: add UPS checks  
-        mstat = H5writeCheckPoint(d, check, coordsarr, resultarr);
-        for(i = 0; i < check; i++) clearArray(resultarr[i], ITEMS_IN_ARRAY(resultarr[i]));
+        mstat = atCheckPoint(check, coordsarr, board, resultarr, d);
         check = 0;
       }
 
@@ -211,7 +199,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     /**
      * Write outstanding results to file
      */
-    mstat = H5writeCheckPoint(d, check, coordsarr, resultarr);
+    mstat = atCheckPoint(check, coordsarr, board, resultarr, d);
 
     /**
      * Now, terminate the slaves 
@@ -231,21 +219,20 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     query = load_sym(handler, md, "masterOUT", MECHANIC_MODULE_SILENT);
     if(query) mstat = query(nodes, d, rawdata);
 
-    /* Free memory allocations */
-    for(i = 0; i < d->checkpoint; i++){
+    free(rawdata);
+ 
+  for(i = 0; i < d->checkpoint; i++){
      free(coordsarr[i]);
      free(resultarr[i]);
     }
 
     free(coordsarr);
     free(resultarr);
-    free(rawdata);
-  
+
    if(d->restartmode == 1){
     for(i = 0; i < d->xres; i++) free(board[i]);
     free(board);
-   }  
-  
+   }
    
    return 0;
 }

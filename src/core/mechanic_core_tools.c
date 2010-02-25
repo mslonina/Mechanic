@@ -1,12 +1,14 @@
+/**
+ * @page tools Core Tools
+ */
+
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
-/**
- * HELPER FUNCTIONS
- */
-
-/* Clears arrays */
-void clearArray(MECHANIC_DATATYPE* array, int no_of_items_in_array){
+void clearArray(//< @fn Clears arrays
+    MECHANIC_DATATYPE* array, //< [in, out] Array to clear
+    int no_of_items_in_array) //< [in] Number of items in the array
+{
 
 	int i = 0;
 	for(i = 0;i < no_of_items_in_array; i++){
@@ -16,28 +18,38 @@ void clearArray(MECHANIC_DATATYPE* array, int no_of_items_in_array){
 	return;
 }
 
-/* Map 1D index to 2D array */
-int* map2d(int c, void* handler, moduleInfo *md, configData* d){
+/**
+ * @fn int* map2d()
+ * @brief
+ * Maps coordinates of the current pixel.
+ *
+ * @return
+ * Array of mapped pixel
+ *
+ */
+int* map2d(
+    int c, //< [in] The number of the pixel
+    void* handler, //< [in] Module handler
+    moduleInfo* md, //< [in] Pointer to module info struct
+    configData* d) //< [in] Pointer to config data struct
+{
    
   int* ind = malloc(3*sizeof(*ind));
    int x, y;
    x = d->xres;
    y = d->yres;
    module_query_void_f qpcm;
-  
-   ind[2] = c; //we need number of current pixel to store too
 
-   /**
-    * Method 0: one pixel per each slave.
-    */
+   //we need number of current pixel to store too
+   ind[2] = c;
+
+   // Method 0: one pixel per each slave.
    if(d->method == 0){
     if(c < y) ind[0] = c / y; ind[1] = c;
     if(c > y - 1) ind[0] = c / y; ind[1] = c % y;
    }
 
-   /**
-    * Method 6: user defined control.
-    */
+   // Method 6: user defined control.
    if(d->method == 6){
     qpcm = load_sym(handler, md, "pixelCoordsMap", MECHANIC_MODULE_ERROR); 
     if(qpcm) qpcm(ind, c, x, y, d);
