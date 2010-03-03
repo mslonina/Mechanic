@@ -25,7 +25,6 @@ typedef struct {
   int xres;
   int yres;
   int method;
-  int mrl;
   int checkpoint;
   int restartmode;
   int mode;
@@ -47,6 +46,7 @@ typedef struct {
       const char *author;
       const char *date;
       const char *version;
+      int mrl;
 } moduleInfo;
 
 #endif

@@ -42,7 +42,6 @@
 #define MECHANIC_XRES_DEFAULT 5
 #define MECHANIC_YRES_DEFAULT 5
 #define MECHANIC_METHOD_DEFAULT 0
-#define MECHANIC_MRL_DEFAULT 10
 #define MECHANIC_CHECKPOINT_DEFAULT 2000
 #define MECHANIC_CHECKPOINTS 6
 #define MECHANIC_CHECKPOINT_NUM_DEFAULT 0
@@ -122,14 +121,14 @@ void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, cons
 void poptTestC(char* i, char* j);
 void poptTestI(char* i, int j);
 
-int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
+int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
 int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
-int H5createMasterDataScheme(hid_t file_id, configData* d);
+int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d);
 
 int manageCheckpoints(configData *d);
 int H5readBoard(configData* d, int** board);
-int H5writeCheckPoint(configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
-int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** resultarr, configData* d);
+int H5writeCheckPoint(moduleInfo *md, configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
+int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** resultarr, moduleInfo *md, configData* d);
 
 void welcome();
 void clearArray(MECHANIC_DATATYPE*,int);

@@ -34,7 +34,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    /**
     * Allocate memory for rawdata.res array.
     */
-   rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MECHANIC_DATATYPE));
+   rawdata = malloc(sizeof(masterData) + (md->mrl-1)*sizeof(MECHANIC_DATATYPE));
 
    clearArray(rawdata->res, ITEMS_IN_ARRAY(rawdata->res));
    
@@ -43,7 +43,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
 
   for(i = 0; i < d->checkpoint; i++){
      coordsarr[i] = malloc(sizeof(int*)*3);
-     resultarr[i] = malloc(sizeof(MECHANIC_DATATYPE*)*d->mrl);
+     resultarr[i] = malloc(sizeof(MECHANIC_DATATYPE*)*md->mrl);
      clearArray(resultarr[i],ITEMS_IN_ARRAY(resultarr[i]));
   }
 
@@ -59,7 +59,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    //printf("Checkpoint prepared\n");
 
    /* Build derived type for master result */
-   mstat = buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
+   mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);
 
    /**
     * Master can do something useful before computations.
@@ -137,7 +137,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
       coordsarr[check][1] = rawdata->coords[1];
       coordsarr[check][2] = rawdata->coords[2];
      
-      for(j = 0; j < d->mrl; j++){
+      for(j = 0; j < md->mrl; j++){
         resultarr[check][j] = rawdata->res[j];
       }
       check++;
@@ -149,7 +149,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
        * */
 
       if(check % d->checkpoint == 0){//FIX ME: add UPS checks  
-        mstat = atCheckPoint(check, coordsarr, board, resultarr, d);
+        mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
         check = 0;
       }
 
@@ -190,7 +190,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
       coordsarr[check][1] = rawdata->coords[1];
       coordsarr[check][2] = rawdata->coords[2];
       
-      for(j = 0; j < d->mrl; j++){
+      for(j = 0; j < md->mrl; j++){
         resultarr[check][j] = rawdata->res[j];
       }
       check++;
@@ -199,7 +199,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     /**
      * Write outstanding results to file
      */
-    mstat = atCheckPoint(check, coordsarr, board, resultarr, d);
+    mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
 
     /**
      * Now, terminate the slaves 

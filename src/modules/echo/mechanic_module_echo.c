@@ -33,42 +33,21 @@
 #include "mechanic.h"
 #include "mechanic_module_echo.h"
 
-/*
-int mechanic_module_init(struct yourdata *pointer){
-  //printf("Module DEFAULT INIT\n");
-  //pointer->aa = 1.1;
-  //pointer->bb = 2.2;
-  return 0;
-}
-
-int mechanic_module_query(struct yourdata *pointer){
-  //printf("Module DEFAULT QUERY\n");
-  return 0;
-}
-
-int mechanic_module_cleanup(struct yourdata *pointer){
-  //printf("Module DEFAULT CLEANUP: %f\n", pointer->aa + pointer->bb);
-
-  free(pointer);
-  return 0;
-}
-*/
 int echo_init(moduleInfo *md){
 
   md->name = "echo";
   md->author = "MSlonina";
   md->date = "2010";
   md->version = "1.0";
+  md->mrl = 10;
 
-//  sd.test = 21;
   return 0;
 }
+
 int echo_query(){
-//  printf("TEST = %d\n", s->test);
   return 0;
 }
 int echo_cleanup(){
-//  printf("SD.TEST = %d\n", sd.test);
   return 0;
 }
 
@@ -157,13 +136,13 @@ int echo_pixelCoords(int slave, int t[], configData* d, masterData* r){
  *
  *
  */
-int echo_pixelCompute(int slave, configData* d, masterData* r){
+int echo_pixelCompute(int slave, moduleInfo *md, configData* d, masterData* r){
 
   int i = 0;
 
    //  printf("D->MRL = %d\n",d->mrl);
 
-   for(i = 0; i < d->mrl; i++){
+   for(i = 0; i < md->mrl; i++){
       r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
       r->res[i] = (double)r->coords[2]*(double)i;
    }

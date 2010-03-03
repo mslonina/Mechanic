@@ -108,7 +108,6 @@ int main(int argc, char *argv[]){
   cd.xres = MECHANIC_XRES_DEFAULT;
   cd.yres = MECHANIC_YRES_DEFAULT;
   cd.method = MECHANIC_METHOD_DEFAULT;
-  cd.mrl = MECHANIC_MRL_DEFAULT;
   cd.checkpoint = MECHANIC_CHECKPOINT_DEFAULT;
   cd.restartmode = 0;
   cd.mode = MECHANIC_MODE_DEFAULT;
@@ -354,7 +353,29 @@ int main(int argc, char *argv[]){
   }
 
   poptFreeContext(poptcon);
+ 
+  /**
+   * @page modules MODULE LOAD
+   *
+   * @brief
+   * If option -p is not set, use default.
+   */
+  sprintf(module_file, "mechanic_module_%s.so", module_name);
   
+  md.name = module_name;
+  handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
+  if(!handler){
+    printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
+    mechanic_abort(MECHANIC_ERR_MODULE);
+  }
+
+  init = load_sym(handler,&md, "init", MECHANIC_MODULE_ERROR);
+  if(init) mstat = init(&md);
+
+  query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
+  if(query) query();
+
+ 
   
   // Config file read
   if(node == 0){
@@ -369,6 +390,7 @@ int main(int argc, char *argv[]){
       rename(cd.datafile,oldfile);
     }
 
+ 
    /**
     * @page storage HDF5 Storage Data Scheme
     *
@@ -386,9 +408,10 @@ int main(int argc, char *argv[]){
     *
     */
 
+  printf("MRL = %d\n", md.mrl);
   // Create master datafile
   file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-  mstat = H5createMasterDataScheme(file_id, &cd);
+  mstat = H5createMasterDataScheme(file_id, &md, &cd);
 
   // First of all, save configuration 
   LRC_writeHdfConfig(file_id, cs, allopts);
@@ -411,28 +434,7 @@ int main(int argc, char *argv[]){
    }
   #endif
   }
-
-  /**
-   * @page modules MODULE LOAD
-   *
-   * @brief
-   * If option -p is not set, use default.
-   */
-  sprintf(module_file, "mechanic_module_%s.so", module_name);
- 
-  md.name = module_name;
-  handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
-  if(!handler){
-    printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
-    mechanic_abort(MECHANIC_ERR_MODULE);
-  }
-
-  init = load_sym(handler,&md, "init", MECHANIC_MODULE_ERROR);
-  if(init) mstat = init(&md);
-
-  query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
-  if(query) query();
-
+  
   //Now load proper routines
   switch(cd.mode){
     case 0:

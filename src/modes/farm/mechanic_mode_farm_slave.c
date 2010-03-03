@@ -22,12 +22,10 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
     MPI_Status mpi_status;
 
     /* Allocate memory for rawdata.res array */
-    rawdata = malloc(sizeof(masterData) + (d->mrl-1)*sizeof(MECHANIC_DATATYPE));
+    rawdata = malloc(sizeof(masterData) + (md->mrl-1)*sizeof(MECHANIC_DATATYPE));
 
-    clearArray(rawdata->res,ITEMS_IN_ARRAY(rawdata->res));
-    
     /* Build derived type for master result */
-    mstat = buildMasterResultsType(d->mrl, rawdata, &masterResultsType);
+    mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);
    
     /**
      * Slave can do something useful before computations.
@@ -66,7 +64,7 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
        } 
           /* PIXEL COMPUTATION */
           qpx = load_sym(handler, md, "pixelCompute", MECHANIC_MODULE_ERROR);
-          if(qpx) mstat = qpx(mpi_rank, d, rawdata);
+          if(qpx) mstat = qpx(mpi_rank, md, d, rawdata);
           
           qbeforeS = load_sym(handler, md, "slave_beforeSend", MECHANIC_MODULE_SILENT);
           if(qbeforeS) mstat = qbeforeS(mpi_rank, d, rawdata);

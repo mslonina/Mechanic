@@ -16,7 +16,7 @@ void H5log(){
 }
 
 /* Master data scheme */
-int H5createMasterDataScheme(hid_t file_id, configData* d){
+int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 
  hsize_t dimsf[2], dimsr[2];
  hid_t boardspace, dataspace;
@@ -34,7 +34,7 @@ int H5createMasterDataScheme(hid_t file_id, configData* d){
  
  /* Result data space  */
  dimsr[0] = d->xres*d->yres;
- dimsr[1] = d->mrl;
+ dimsr[1] = md->mrl;
  dataspace = H5Screate_simple(MECHANIC_HDF_RANK, dimsr, NULL);
 
  /* Create master dataset */
@@ -50,20 +50,20 @@ int H5createMasterDataScheme(hid_t file_id, configData* d){
 }
 
 /* Write data to master file */
-int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
+int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
   
-  MECHANIC_DATATYPE rdata[d->mrl][1];
+  MECHANIC_DATATYPE rdata[md->mrl][1];
   hsize_t co[2], off[2];
   herr_t hdf_status;
   int j = 0;
       
   co[0] = 1;
-  co[1] = d->mrl;
+  co[1] = md->mrl;
 
   off[0] = coordsarr[2];
   off[1] = 0;
   
-  for (j = 0; j < d->mrl; j++){
+  for (j = 0; j < md->mrl; j++){
     rdata[j][0] = resultarr[j];
   }
       

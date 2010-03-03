@@ -1,13 +1,13 @@
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
-int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** resultarr, configData* d){
+int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** resultarr, moduleInfo *md, configData* d){
   
   int i, mstat;
 
   mstat = manageCheckPoints(d);
 
-  mstat = H5writeCheckPoint(d, check, coordsarr, resultarr);
+  mstat = H5writeCheckPoint(md, d, check, coordsarr, resultarr);
   
   //printf("At checkpoint\n");
   return 0;
@@ -35,7 +35,7 @@ int manageCheckPoints(configData* d){
 }
 
 /* Write checkpoint file (master file) */
-int H5writeCheckPoint(configData *d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr){
+int H5writeCheckPoint(moduleInfo *md, configData *d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr){
  
   int i = 0, j = 0;
   int mstat;
@@ -58,7 +58,7 @@ int H5writeCheckPoint(configData *d, int check, int** coordsarr, MECHANIC_DATATY
   memmapspace = H5Screate_simple(MECHANIC_HDF_RANK, co, NULL);
 
   rco[0] = 1;
-  rco[1] = d->mrl;
+  rco[1] = md->mrl;
   memrawspace = H5Screate_simple(MECHANIC_HDF_RANK, rco, NULL);
  
   mapspace = H5Dget_space(dset_board);
@@ -71,7 +71,7 @@ int H5writeCheckPoint(configData *d, int check, int** coordsarr, MECHANIC_DATATY
       mstat = H5writeBoard(dset_board, memmapspace, mapspace, coordsarr[i]);
       
       /* Data */
-      mstat = H5writeMaster(dset_data, memrawspace, rawspace, d, coordsarr[i], resultarr[i]);
+      mstat = H5writeMaster(dset_data, memrawspace, rawspace, md, d, coordsarr[i], resultarr[i]);
       
   }
 

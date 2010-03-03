@@ -9,17 +9,20 @@ int mandelbrot_init(moduleInfo *md){
   md->author = "MSlonina";
   md->date = "2010";
   md->version = "1.0";
+  md->mrl = 3;
 
   return 0;
 }
+
 int mandelbrot_query(){
   return 0;
 }
+
 int mandelbrot_cleanup(){
   return 0;
 }
 
-int mandelbrot_pixelCompute(int slave, configData* d, masterData* r){
+int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d, masterData* r){
 
   int i = 0;
   double real_min, real_max, imag_min, imag_max;
@@ -31,13 +34,10 @@ int mandelbrot_pixelCompute(int slave, configData* d, masterData* r){
   imag_min = -2.0;
   imag_max = 2.0;
   c = 4.0;
-  zoom = 1.0;
-  offx = 0.0;
-  offy = 0.0;
 
   //coordinate system
-  scale_real = (real_max - real_min)/(zoom*((double)d->xres - 1.0));
-  scale_imag = (imag_max - imag_min)/(zoom*((double)d->yres - 1.0));
+  scale_real = (real_max - real_min)/((double)d->xres - 1.0);
+  scale_imag = (imag_max - imag_min)/((double)d->yres - 1.0);
   
   r->res[0] = real_min + r->coords[0]*scale_real;
   r->res[1] = imag_max - r->coords[1]*scale_imag;

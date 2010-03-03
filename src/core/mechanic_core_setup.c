@@ -75,10 +75,6 @@ int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cfl
           if(popt == 1) poptTestI(cs[i].options[k].value, d->method);
           d->method = atoi(cs[i].options[k].value); 
         }
-	//		  if(strcmp(cs[i].options[k].name,"mrl") == 0){
-  //        if(popt == 1) poptTestI(cs[i].options[k].value, d->mrl);
-  //        d->mrl = atoi(cs[i].options[k].value); 
-  //      }
 			  if(strcmp(cs[i].options[k].name,"mode") == 0){
           if(popt == 1) poptTestI(cs[i].options[k].value, d->mode);
           d->mode = atoi(cs[i].options[k].value); 
