@@ -40,7 +40,6 @@
  * OF SUCH DAMAGE.
  */
 
-
 /* 
  * @mainpage
  * @author Mariusz Slonina <mariusz.slonina@gmail.com>
