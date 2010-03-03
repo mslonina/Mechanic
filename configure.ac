@@ -24,23 +24,35 @@ AC_SUBST(USE_MPI)
 AC_CHECK_LIB(m, pow)
 AC_CHECK_LIB(dl, dlopen)
 AC_CHECK_LIB(popt, poptGetNextOpt, [], [
+  echo
+  echo "---------------------------------"
   echo "Popt was not found on your system"
+  echo "---------------------------------"
   exit -1
 ])
 
 AC_CHECK_LIB(hdf5, H5Dopen2, [], [
+  echo
+  echo "-----------------------------------"
   echo "HDF1.8 was not found on your system"
+  echo "-----------------------------------"
   exit -1
 ])
 
 AC_CHECK_LIB(readconfig, LRC_parseConfigFile, [], [
+  echo
+  echo "---------------------------------"
   echo "You need LibReadConfig installed."
+  echo "---------------------------------"
   exit -1
 ])
 
 AC_CHECK_LIB(readconfig, LRC_hdfParser, [], [
+  echo
+  echo "---------------------------------------------------"
   echo "LibReadConfig has been builded without HDF support."
   echo "You need LibReadConfig with HDF support."
+  echo "---------------------------------------------------"
   exit -1
 ])
 
