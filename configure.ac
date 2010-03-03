@@ -23,9 +23,27 @@ AC_DEFINE([HAVE_MPI_SUPPORT], 1, [Define mpi support])
 AC_SUBST(USE_MPI) 
 AC_CHECK_LIB(m, pow)
 AC_CHECK_LIB(dl, dlopen)
-AC_CHECK_LIB(popt, poptGetNextOpt)
-AC_CHECK_LIB(hdf5, H5open)
-AC_CHECK_LIB(readconfig, LRC_hdfParser)
+AC_CHECK_LIB(popt, poptGetNextOpt, [], [
+  echo "Popt was not found on your system"
+  exit -1
+])
+
+AC_CHECK_LIB(hdf5, H5Dopen2, [], [
+  echo "HDF1.8 was not found on your system"
+  exit -1
+])
+
+AC_CHECK_LIB(readconfig, LRC_parseConfigFile, [], [
+  echo "You need LibReadConfig installed."
+  exit -1
+])
+
+AC_CHECK_LIB(readconfig, LRC_hdfParser, [], [
+  echo "LibReadConfig has been builded without HDF support."
+  echo "You need LibReadConfig with HDF support."
+  exit -1
+])
+
 AC_OUTPUT(Makefile \
           src/Makefile \
           src/core/Makefile \
