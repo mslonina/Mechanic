@@ -51,7 +51,7 @@ int mandelbrot_init(moduleInfo *md){
   md->author = "MSlonina";
   md->date = "2010";
   md->version = "1.0";
-  md->mrl = 3;
+  md->mrl = 4;
 
   return 0;
 }
@@ -86,6 +86,9 @@ int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d, masterData
 
   //Mandelbrot set
   r->res[2] = mandelbrot_generateFractal(r->res[0], r->res[1], c);
+
+  //We also store information about the slave
+  r->res[3] = slave;
 
    return 0;
 }

@@ -182,8 +182,6 @@ int echo_pixelCompute(int slave, moduleInfo *md, configData* d, masterData* r){
 
   int i = 0;
 
-   //  printf("D->MRL = %d\n",d->mrl);
-
    for(i = 0; i < md->mrl; i++){
       r->res[i] = pow(sin(i), 2.0) + pow(cos(i), 2.0) + pow(r->coords[0], 8.0) - pow(r->coords[1], 7.0);
       r->res[i] = (double)r->coords[2]*(double)i;

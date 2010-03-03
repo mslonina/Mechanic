@@ -374,8 +374,6 @@ int main(int argc, char *argv[]){
   query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
   if(query) query();
 
- 
-  
   // Config file read
   if(node == 0){
     // Backup master data file.
@@ -388,7 +386,6 @@ int main(int argc, char *argv[]){
       printf("-> Backuped file: %s\n",oldfile);
       rename(cd.datafile,oldfile);
     }
-
  
    /**
     * @page storage HDF5 Storage Data Scheme
@@ -407,7 +404,6 @@ int main(int argc, char *argv[]){
     *
     */
 
-  printf("MRL = %d\n", md.mrl);
   // Create master datafile
   file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   mstat = H5createMasterDataScheme(file_id, &md, &cd);
@@ -416,6 +412,7 @@ int main(int argc, char *argv[]){
   LRC_writeHdfConfig(file_id, cs, allopts);
   H5Fclose(file_id);
 
+  }
   #if HAVE_MPI_SUPPORT
    // MPI CONFIG BCAST
    // Inform slaves what it is all about.
@@ -432,7 +429,6 @@ int main(int argc, char *argv[]){
     }
    }
   #endif
-  }
   
   //Now load proper routines
   switch(cd.mode){
