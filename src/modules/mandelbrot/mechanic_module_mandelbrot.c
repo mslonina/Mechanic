@@ -40,11 +40,23 @@
  * OF SUCH DAMAGE.
  */
 
+/** 
+ * MECHANIC MODULE MANDELBROT
+ *
+ * This module shows how to use basic api of Mechanic to compute any numerical problem,
+ * in that case -- the Mandelbrot fractal.
+ *
+ * We use here only 3 functions: init(), cleanup() and pixelCompute(). There is an additional
+ * function, generatePixel(), which shows that you can even add external functions to your module.
+ *
+ * This module returns also the number of slave which computed given pixel.
+ */
 #include "mechanic.h"
 #include "mechanic_module_mandelbrot.h"
 
 int mandelbrot_generateFractal(double a, double b, double c);
 
+// _init() is required
 int mandelbrot_init(moduleInfo *md){
 
   md->name = "mandelbrot";
@@ -56,14 +68,12 @@ int mandelbrot_init(moduleInfo *md){
   return 0;
 }
 
-int mandelbrot_query(){
-  return 0;
-}
-
+// _cleanup() is required
 int mandelbrot_cleanup(){
   return 0;
 }
 
+// _pixelCompute() is required
 int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d, masterData* r){
 
   int i = 0;
@@ -88,11 +98,12 @@ int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d, masterData
   r->res[2] = mandelbrot_generateFractal(r->res[0], r->res[1], c);
 
   //We also store information about the slave
-  r->res[3] = slave;
+  r->res[3] = (double)slave;
 
    return 0;
 }
 
+// for the sake of clearness of the code we use additional function
 int mandelbrot_generateFractal(double a, double b, double c){
  
   double temp, lengthsq;
