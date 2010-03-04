@@ -41,7 +41,9 @@
  */
 
 /**
- * @page echo The Echo module
+ * @subpage modules 
+ *
+ * @subpage echo The Echo module
  * 
  * @brief The Echo module is the default module loaded by Mechanic and it uses all functions
  * provided in the User API.
@@ -56,21 +58,21 @@
  *   MY_DATATYPE res[1]; <-- handles result vector, resizable with mrl variable
  * }
  *
- * @section Case studies
- * @subsection Each slave does the same
+ * @section echocasestudies Case studies
+ * @subsection thesame Each slave does the same
  * This is the simplest case of using Mechanic. The only thing to do is to define 
  * pixelCompute function and return some data to master node with masterData struct.
  * You can also do something in functions IN/OUT, but in that case it is not really necessary.
  *
- * @subsection Each slave has different config file
+ * @subsection diffconf Each slave has different config file
  * This time You need to read config file for each slave separately. This can be done with 
  * LibReadConfig in slaveIN function and config files named after slave number, i.e. slave22.
  *
- * @subsection Each slave has different pixelCompute function.
+ * @subsection diffpxcomp Each slave has different pixelCompute function.
  * At this point You need to create some subfunctions of pixelCompute and choose them
  * accordingly to number of the slave, i.e. in the switch routine.
  *
- * @subsection Each slave has both different config file and different pixelCompute
+ * @subsection diffall Each slave has both different config file and different pixelCompute
  * Just combining two cases in simple switch routines and it should work too.
  *
  */
@@ -285,8 +287,7 @@ int echo_master_afterReceive(int slave, moduleInfo* md, configData* d, masterDat
   return 0;
 }
 
-/**
- * USER DEFINED SLAVE_IN FUNCTION
+/*
  * 
  * Called before slave starts its work.
  *
@@ -323,7 +324,7 @@ int echo_slaveIN(int slave, moduleInfo* md, configData* d, masterData* r){
   sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
   sprintf(group, "%s%d", gbase, slave);
 
-  /**
+  /*
    * Imagine this:
    * each slave can create different dataspaces and datasets here, 
    * perform different computations, even read different config file!
@@ -359,9 +360,7 @@ int echo_slaveIN(int slave, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
 
-/**
- * USER DEFINED SLAVE_OUT FUNCTION
- *
+/*
  * Called after slave done its work.
  *
  * Example:
@@ -374,9 +373,7 @@ int echo_slaveOUT(int slave, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
 
-/**
- * USER DEFINED SLAVE HELPER FUNCTIONS
- * 
+/*
  * Called before/after send/receive
  * 
  */

@@ -44,7 +44,7 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_farm.h"
 
-/**
+/*
  * SLAVE
  *
  */
@@ -63,15 +63,13 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
     MPI_Datatype masterResultsType;
     MPI_Status mpi_status;
 
-    /* Allocate memory for rawdata.res array */
+    // Allocate memory for rawdata.res array 
     rawdata = malloc(sizeof(masterData) + (md->mrl-1)*sizeof(MECHANIC_DATATYPE));
 
-    /* Build derived type for master result */
+    // Build derived type for master result 
     mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);
    
-    /**
-     * Slave can do something useful before computations.
-     */
+    // Slave can do something useful before computations.
     query = load_sym(handler, md, "slaveIN", MECHANIC_MODULE_SILENT);
     if(query) mstat = query(mpi_rank, md, d, rawdata);
 
@@ -88,9 +86,7 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
      if(mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG) break;     
      if(mpi_status.MPI_TAG == MECHANIC_MPI_DATA_TAG){ 
       
-       /**
-        * One pixel per each slave.
-        */
+       // One pixel per each slave.
        if (d->method == 0){
           rawdata->coords[0] = tab[0];
           rawdata->coords[1] = tab[1];
@@ -98,13 +94,11 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
        }
        if (d->method == 6){
 
-          /**
-           * Use userdefined pixelCoords method.
-           */
+          // Use userdefined pixelCoords method.
           qpc = load_sym(handler, md, "pixelCoords", MECHANIC_MODULE_ERROR);
           if(qpc) mstat = qpc(mpi_rank, tab, md, d, rawdata);
        } 
-          /* PIXEL COMPUTATION */
+          // PIXEL COMPUTATION
           qpx = load_sym(handler, md, "pixelCompute", MECHANIC_MODULE_ERROR);
           if(qpx) mstat = qpx(mpi_rank, md, d, rawdata);
           
@@ -127,9 +121,7 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
       
     }
     
-    /**
-     * Slave can do something useful after computations.
-     */
+    // Slave can do something useful after computations.
     query = load_sym(handler, md, "slaveOUT", MECHANIC_MODULE_SILENT);
     if(query) mstat = query(mpi_rank, md, d, rawdata);
 

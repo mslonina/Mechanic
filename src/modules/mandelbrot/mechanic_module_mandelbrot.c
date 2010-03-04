@@ -40,7 +40,7 @@
  * OF SUCH DAMAGE.
  */
 
-/** 
+/* 
  * MECHANIC MODULE MANDELBROT
  *
  * This module shows how to use basic api of Mechanic to compute any numerical problem,

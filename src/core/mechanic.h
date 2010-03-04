@@ -59,7 +59,7 @@
 
 #define ITEMS_IN_ARRAY(x) sizeof(x)/sizeof(*(x))
 
-/* MAIN CONFIG DATA */
+// MAIN CONFIG DATA 
 typedef struct {
   char name[256];
   char datafile[260];
@@ -74,7 +74,7 @@ typedef struct {
 } configData;
 
 
-/**
+/*
  * MASTER DATA
  */
 typedef struct {
@@ -82,7 +82,7 @@ typedef struct {
  MECHANIC_DATATYPE res[1];
 } masterData;
 
-/* Module info and handler */
+// Module info and handler 
 typedef struct {
       const char *name;
       const char *author;

@@ -40,10 +40,6 @@
  * OF SUCH DAMAGE.
  */
 
-/**
- * @page tools Core Tools
- */
-
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
@@ -104,7 +100,7 @@ int checkPixel(int pixel){
   return pixel;
 }
 
-/**
+/*
  * Wrapper to dlsym().
  * Handles error messages and abort if necessary.
  */
@@ -142,7 +138,7 @@ void* load_sym(void* handler, moduleInfo *md, char* function, int type){
   }
 }
 
-/**
+/*
  * Override default popt behaviour. This code is taken from popt.h. 
  * Adjusted it only to MPI.
  */

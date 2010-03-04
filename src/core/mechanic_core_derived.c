@@ -43,11 +43,11 @@
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
-/**
+/*
  * MPI DERIVED DATATYPES
  */
 
-/* Master result Send/Recv */
+// Master result Send/Recv 
 int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr){
 
   int block_lengths[2];
@@ -74,7 +74,7 @@ int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsT
   return 0;
 }
 
-/* Bcast default config file */
+// Bcast default config file 
 int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   
   int block_lengths[10];

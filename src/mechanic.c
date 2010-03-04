@@ -50,12 +50,62 @@
  *   - malloc error handling
  * 
  */
+
+/**
+ * @page overview Overview
+ * 
+ * @page installation Installation
+ * 
+ * @page storage Data scheme
+ * 
+ * @page api User API
+ * @subpage modules Modules
+ *
+ * @page guide User guide
+ * @subpage setup Setup
+ * @subpage example Creating a module
+ * 
+ * @page restart Checkpoints
+ * @page troubleshooting Troubleshooting
+ *
+ */
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
 /**
- * @page guide Quick Start Guide
+ * @page overview
  *
+ * Mechanic is a multi-purpose numerical framework and interface. It is written in
+ * ANSI C with help of MPI and HDF5 storage. It uses LibReadConfig for handling configuration
+ * and Popt library for commandline args.
+ *
+ * Mechanic provides user with powerfull API, Each numerical problem can be programmed as a module 
+ * and loaded dynamically during runtime.
+ *
+ * The latest snapshot can be grabbed from http://git.astri.umk.pl
+ *
+ * @page installation
+ * Mechanic follows standard UNIX-like installation procedure.
+ *
+ * For compiling and running Mechanic you need at least:
+ *  - MPI and HDF5 > 1.8
+ *  - LibReadConfig with HDF5 support
+ *  - Popt
+ *  - C compiler
+ *
+ * To compile Mechanic use following commands:
+ * @verbatim
+ * ./configure
+ * make
+ * make install
+ * @endverbatim
+ *
+ * @page troubleshooting
+ * Some known or not known bugs. 
+ *
+ * @page guide
+ * The Quick Start Guide itself.
+ * 
  */
 int main(int argc, char *argv[]){  
 
@@ -75,7 +125,7 @@ int main(int argc, char *argv[]){
 
   poptContext poptcon;
   int poptflags = 0;
-  int error;
+  int error = 0;
   int configfile = 0;
 
   int node;
@@ -95,7 +145,7 @@ int main(int argc, char *argv[]){
     MPI_Datatype defaultConfigType;
   #endif
 
-  /* Assign default config values */
+  // Assign default config values 
   name = MECHANIC_NAME_DEFAULT;
   restartname = "";
   inifile = MECHANIC_CONFIG_FILE_DEFAULT;
@@ -130,7 +180,7 @@ int main(int argc, char *argv[]){
   };
   allopts = 2;
 
-  /* This is the easiest way to assign values ic cs[] */
+  // This is the easiest way to assign values ic cs[] 
   sprintf(cs[0].options[0].value,"%s",MECHANIC_NAME_DEFAULT);
   sprintf(cs[0].options[1].value,"%d",MECHANIC_XRES_DEFAULT);
   sprintf(cs[0].options[2].value,"%d",MECHANIC_YRES_DEFAULT);
@@ -140,7 +190,7 @@ int main(int argc, char *argv[]){
   sprintf(cs[1].options[0].value,"%d",MECHANIC_CHECKPOINT_DEFAULT);
   sprintf(cs[1].options[1].value,"%d",MECHANIC_CHECKPOINT_NUM_DEFAULT);
 
-  /* Assign allowed values */
+  // Assign allowed values 
   LRC_configTypes ct[] = {
     {"default", "name", LRC_CHAR},
     {"default", "xres", LRC_INT},
@@ -152,11 +202,24 @@ int main(int argc, char *argv[]){
     {"logs", "checkpoint_num", LRC_INT}
   };
 
-  /* Number of allowed values */
+  // Number of allowed values 
   int numCT = 8;
 
   /**
-   * POPT CONFIG
+   * @subpage setup 
+   * There are two ways to setup the computations: the config file and commandline args.
+   * 
+   * Below is a setup steps:
+   *  - Read defaults
+   *  - Read args
+   *  - If one of arg is -c or --config read config file 
+   *  - Override config values according to args
+   *
+   * If default config file is not present, use fixed defaults.
+   * If option -c is set, but the file doesn't exit, abort.
+   *
+   * @section cli Commandline args
+   * Mechanic uses the Piopt library for handling commandline args.
    */
   struct poptOption mechanic_poptHelpOptions[] = {
     { NULL, '\0', POPT_ARG_CALLBACK, (void *)mechanic_displayUsage, 0, NULL, NULL },
@@ -227,18 +290,15 @@ int main(int argc, char *argv[]){
   poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
 
   /**
-   * 1) Read defaults
-   * 2) Read args
-   * 3) If one of arg is -c|--config read config file 
-   * 4) Override config values according to args
+   * @subpage setup
+   * @section configfile Config file
+   * Mechanic uses LibReadConfig for handling config files.
    *
-   * If default config file is not present, use fixed defaults.
-   * If option -c is set, but the file doesn't exit, abort.
    *
    */
   optvalue = poptGetNextOpt(poptcon);
  
-  /* Bad option */
+  // Bad option handling
   if (optvalue < -1){
     if(node == 0){
       fprintf(stdout, "%s: %s\n", poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), poptStrerror(optvalue));
@@ -249,7 +309,7 @@ int main(int argc, char *argv[]){
      return 0;
   }
   
-  /* Long help message set */
+  // Long help message set
   if (help == 1){
     if(node == 0) poptPrintHelp(poptcon, stdout, 0);
     poptFreeContext(poptcon);
@@ -257,7 +317,7 @@ int main(int argc, char *argv[]){
     return 0;
   }
    
-  /* Brief help message set */
+  // Brief help message set
   if (usage == 1){
     if(node == 0) poptPrintUsage(poptcon, stdout, 0);
     poptFreeContext(poptcon);
@@ -265,20 +325,20 @@ int main(int argc, char *argv[]){
     return 0;
   }
 
-  /**
-   * RESTART MODE
+  /*
+   * @page restart
    *
    * TODO:
    * 1) -r should take problem name as an argument -- DONE
    * 2) check if master file exists
-   *  -- if exists, check if it's not corrupted (is hdf5) -- DONE
-   *  -- if it's corrupted, check for old copy
-   *  -- if the copy exists, check if it's not corrupted
-   *  -- if the copy is corrupted or does not exist, abort restart
+   *  - if exists, check if it's not corrupted (is hdf5) -- DONE
+   *  - if it's corrupted, check for old copy
+   *  - if the copy exists, check if it's not corrupted
+   *  - if the copy is corrupted or does not exist, abort restart
    * 3) read config values from master file, ignore all command line opts etc.
    * 4) check board status
-   *  -- if board is full, abort, because we don't need restart completed simulation
-   *  -- if board is not full, check for empty pixels and compute them
+   *  - if board is full, abort, because we don't need restart completed simulation
+   *  - if board is not full, check for empty pixels and compute them
    *      (map2d function should check if pixel is computed or not)
    * 5) perform normal operations, i.e. write new restart files
    */
@@ -306,41 +366,37 @@ int main(int argc, char *argv[]){
      return 0;
   }
 */
-  /* Config file set */
+  // Config file set
   if(strcmp(inifile, MECHANIC_CONFIG_FILE_DEFAULT) != 0 && cd.restartmode == 0){
     configfile = 1;
   }
 
 
-  /* Reset options, we need to reuse them
-   * to override values read from specified config file */
+  // Reset options, we need to reuse them
+  // to override values read from specified config file
   if(node == 0){
 
-    /* Read config file */
+    // Read config file
     allopts = readDefaultConfig(inifile, cs, ct, numCT, configfile);
 
-    /**
-     * Config file parsed. All read values becomes
-     * new defaults 
-     */
+    // Config file parsed. All read values becomes new defaults 
     mstat = assignConfigValues(allopts, &cd, cs, configfile, 0);
 
-    /* Reset pointers */
+    // Reset pointers
     name = cd.name;
     module_name = cd.module;
   
-    /* Override the values by command line args */
+    // Override the values by commandline args
     poptResetContext(poptcon);
     poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
     optvalue = poptGetNextOpt(poptcon);
   
-    /* In case of any command line arg, 
-     * we need to reassign config values. */
+    // In case of any commandline arg, we need to reassign config values.
     if(strcmp(name, cd.name) != 0) sprintf(cd.name,"%s",name);
     if(strcmp(module_name, cd.module) != 0) sprintf(cd.module,"%s",module_name);
     mstat = assignConfigValues(allopts, &cd, cs, configfile, 1);
    
-    /* Security check */
+    // Security check
     if (cd.xres == 0 || cd.yres == 0){
        printf("X/Y map resolution should not be set to 0!\n");
        printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
@@ -354,7 +410,7 @@ int main(int argc, char *argv[]){
   poptFreeContext(poptcon);
  
   /**
-   * @page modules MODULE LOAD
+   * @subpage modules
    *
    * @brief
    * If option -p is not set, use default.
@@ -374,7 +430,7 @@ int main(int argc, char *argv[]){
   query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
   if(query) query(&md);
 
-  // Config file read
+  // Config file has been read
   if(node == 0){
     // Backup master data file.
     // If simulation was broken, and we are in restart mode
@@ -388,13 +444,13 @@ int main(int argc, char *argv[]){
     }
  
    /**
-    * @page storage HDF5 Storage Data Scheme
+    * @page storage 
     *
     * We write data in the following scheme:
-    * - /config -- configuration file
-    * - /board -- map of computed pixels
-    * - /data -- output data group
-    * - /data/master -- master dataset
+    *  - /config -- configuration file
+    *  - /board -- map of computed pixels
+    *  - /data -- output data group
+    *  - /data/master -- master dataset
     *
     * Each slave can write own data files if needed.
     * In such case, please edit slaveIN/OUT functions in your module.
@@ -430,7 +486,7 @@ int main(int argc, char *argv[]){
    }
   #endif
   
-  //Now load proper routines
+  // Now load proper routines
   switch(cd.mode){
     case 0:
       mstat = mechanic_mode_masteralone(node, handler, &md, &cd);
@@ -447,7 +503,7 @@ int main(int argc, char *argv[]){
       break;
   }
 
-  //cleanup module
+  // Module cleanup
   cleanup = load_sym(handler, &md, "cleanup", MECHANIC_MODULE_ERROR);
   if(cleanup) mstat = cleanup(&md);
 

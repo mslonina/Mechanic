@@ -124,7 +124,7 @@ enum Modes {
 #endif
 } mechanicModes;
 
-/**
+/*
  * MODULE ARCHITECTURE FUNCTION HANDLERS
  */
 typedef int (*module_init_f) ();
@@ -139,13 +139,13 @@ module_query_int_f iquery;
 typedef int (*module_cleanup_f) ();
 module_cleanup_f cleanup;
 
-/* GLOBALS */
+// GLOBALS 
 char* inifile;
 char* datafile;
 int allopts, mpi_rank, mpi_size;
 int usage, help;
 
-/* FUNCTION PROTOTYPES */
+// FUNCTION PROTOTYPES 
 int* map2d(int, void* handler, moduleInfo*, configData* d);
 
 #if HAVE_MPI_SUPPORT
