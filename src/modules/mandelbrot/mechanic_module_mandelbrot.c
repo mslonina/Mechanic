@@ -69,7 +69,7 @@ int mandelbrot_init(moduleInfo *md){
 }
 
 // _cleanup() is required
-int mandelbrot_cleanup(){
+int mandelbrot_cleanup(moduleInfo *md){
   return 0;
 }
 

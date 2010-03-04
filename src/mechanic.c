@@ -372,7 +372,7 @@ int main(int argc, char *argv[]){
   if(init) mstat = init(&md);
 
   query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
-  if(query) query();
+  if(query) query(&md);
 
   // Config file read
   if(node == 0){
@@ -449,7 +449,7 @@ int main(int argc, char *argv[]){
 
   //cleanup module
   cleanup = load_sym(handler, &md, "cleanup", MECHANIC_MODULE_ERROR);
-  if(cleanup) mstat = cleanup();
+  if(cleanup) mstat = cleanup(&md);
 
   // MODULE UNLOAD
   dlclose(handler);

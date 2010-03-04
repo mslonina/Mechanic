@@ -73,15 +73,15 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
      * Slave can do something useful before computations.
      */
     query = load_sym(handler, md, "slaveIN", MECHANIC_MODULE_SILENT);
-    if(query) mstat = query(mpi_rank, d, rawdata);
+    if(query) mstat = query(mpi_rank, md, d, rawdata);
 
     qbeforeR = load_sym(handler, md, "slave_beforeReceive", MECHANIC_MODULE_SILENT);
-    if(qbeforeR) mstat = qbeforeR(mpi_rank, d, rawdata);
+    if(qbeforeR) mstat = qbeforeR(mpi_rank, md, d, rawdata);
     
        MPI_Recv(tab, 3, MPI_INT, MECHANIC_MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
     
     qafterR = load_sym(handler, md, "slave_afterReceive", MECHANIC_MODULE_SILENT);
-    if(qafterR) mstat = qafterR(mpi_rank, d, rawdata);
+    if(qafterR) mstat = qafterR(mpi_rank, md, d, rawdata);
     
     while(1){
 
@@ -102,27 +102,27 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
            * Use userdefined pixelCoords method.
            */
           qpc = load_sym(handler, md, "pixelCoords", MECHANIC_MODULE_ERROR);
-          if(qpc) mstat = qpc(mpi_rank, tab, d, rawdata);
+          if(qpc) mstat = qpc(mpi_rank, tab, md, d, rawdata);
        } 
           /* PIXEL COMPUTATION */
           qpx = load_sym(handler, md, "pixelCompute", MECHANIC_MODULE_ERROR);
           if(qpx) mstat = qpx(mpi_rank, md, d, rawdata);
           
           qbeforeS = load_sym(handler, md, "slave_beforeSend", MECHANIC_MODULE_SILENT);
-          if(qbeforeS) mstat = qbeforeS(mpi_rank, d, rawdata);
+          if(qbeforeS) mstat = qbeforeS(mpi_rank, md, d, rawdata);
          
              MPI_Send(rawdata, 1, masterResultsType, MECHANIC_MPI_DEST, MECHANIC_MPI_RESULT_TAG, MPI_COMM_WORLD);
 
           qafterS = load_sym(handler, md, "slave_afterSend", MECHANIC_MODULE_SILENT);
-          if(qafterS) mstat = qafterS(mpi_rank, d, rawdata);
+          if(qafterS) mstat = qafterS(mpi_rank, md, d, rawdata);
         
           qbeforeR = load_sym(handler, md, "slave_beforeReceive", MECHANIC_MODULE_SILENT);
-          if(qbeforeR) mstat = qbeforeR(mpi_rank, d, rawdata);
+          if(qbeforeR) mstat = qbeforeR(mpi_rank, md, d, rawdata);
            
              MPI_Recv(tab, 3, MPI_INT, MECHANIC_MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
           
           qafterR = load_sym(handler, md, "slave_afterReceive", MECHANIC_MODULE_SILENT);
-          if(qafterR) mstat = qafterR(mpi_rank, d, rawdata);
+          if(qafterR) mstat = qafterR(mpi_rank, md, d, rawdata);
         }
       
     }
@@ -131,7 +131,7 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
      * Slave can do something useful after computations.
      */
     query = load_sym(handler, md, "slaveOUT", MECHANIC_MODULE_SILENT);
-    if(query) mstat = query(mpi_rank, d, rawdata);
+    if(query) mstat = query(mpi_rank, md, d, rawdata);
 
     free(rawdata);
     return 0;

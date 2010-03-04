@@ -86,10 +86,10 @@ int echo_init(moduleInfo *md){
   return 0;
 }
 
-int echo_query(){
+int echo_query(moduleInfo *md){
   return 0;
 }
-int echo_cleanup(){
+int echo_cleanup(moduleInfo *md){
   return 0;
 }
 
@@ -105,7 +105,7 @@ int echo_cleanup(){
  * Farm resolution
  *
  */
-int echo_farmResolution(int x, int y, configData* d){
+int echo_farmResolution(int x, int y, moduleInfo *md, configData* d){
   
   int farm;
 
@@ -128,7 +128,7 @@ int echo_farmResolution(int x, int y, configData* d){
  * @param y
  *
  */
-int echo_pixelCoordsMap(int t[], int p, int x, int y, configData *d){
+int echo_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo *md, configData *d){
   
     if(p < y) t[0] = p / y; t[1] = p;
     if(p > y - 1) t[0] = p / y; t[1] = p % y;
@@ -150,7 +150,7 @@ int echo_pixelCoordsMap(int t[], int p, int x, int y, configData *d){
  * @param r
  *
  */
-int echo_pixelCoords(int slave, int t[], configData* d, masterData* r){
+int echo_pixelCoords(int slave, int t[], moduleInfo *md, configData* d, masterData* r){
           
   r->coords[0] = t[0]; //x 
   r->coords[1] = t[1]; //y
@@ -200,7 +200,7 @@ int echo_pixelCompute(int slave, moduleInfo *md, configData* d, masterData* r){
  * @param d
  *
  */
-int echo_masterIN(int mpi_size, configData* d){
+int echo_masterIN(int mpi_size, moduleInfo *md, configData* d){
   return 0;
 }
 
@@ -215,7 +215,7 @@ int echo_masterIN(int mpi_size, configData* d){
  * @param d
  * @param r
  */
-int echo_masterOUT(int nodes, configData* d, masterData* r){
+int echo_masterOUT(int nodes, moduleInfo *md, configData* d, masterData* r){
   
   int i = 0;
   hid_t fname, masterfile, masterdatagroup;
@@ -262,16 +262,16 @@ int echo_masterOUT(int nodes, configData* d, masterData* r){
  * @brief Called after data is received.
  * 
  */
-int echo_master_beforeSend(int slave, configData* d, masterData* r){
+int echo_master_beforeSend(int slave, moduleInfo *md, configData* d, masterData* r){
   return 0;
 }
-int echo_master_afterSend(int slave, configData* d, masterData* r){
+int echo_master_afterSend(int slave, moduleInfo *md, configData* d, masterData* r){
   return 0;
 }
-int echo_master_beforeReceive(configData* d, masterData* r){
+int echo_master_beforeReceive(moduleInfo *md, configData* d, masterData* r){
   return 0;
 }
-int echo_master_afterReceive(int slave, configData* d, masterData* r){
+int echo_master_afterReceive(int slave, moduleInfo *md, configData* d, masterData* r){
   return 0;
 }
 
@@ -292,7 +292,7 @@ int echo_master_afterReceive(int slave, configData* d, masterData* r){
  * Data group is incorporated in MASTER_OUT function to one master data file.
  *
  */
-int echo_slaveIN(int slave, configData* d, masterData* r){
+int echo_slaveIN(int slave, moduleInfo *md, configData* d, masterData* r){
 
   hid_t sfile_id, sdatagroup, gid, string_type;
   hid_t dataset, dataspace;
@@ -357,7 +357,7 @@ int echo_slaveIN(int slave, configData* d, masterData* r){
  * Example:
  * Just prints a message from the slave.
  */
-int echo_slaveOUT(int slave, configData* d, masterData* r){
+int echo_slaveOUT(int slave, moduleInfo *md, configData* d, masterData* r){
   
   printf("SLAVE[%d] OVER & OUT\n",slave);
 
@@ -370,7 +370,7 @@ int echo_slaveOUT(int slave, configData* d, masterData* r){
  * Called before/after send/receive
  * 
  */
-int echo_slave_beforeSend(int slave, configData* d, masterData* r){
+int echo_slave_beforeSend(int slave, moduleInfo *md, configData* d, masterData* r){
   
   int i = 0;
   //printf("S[%d] px[%3d, %3d]: ", slave, r->coords[0], r->coords[1]);
@@ -380,13 +380,13 @@ int echo_slave_beforeSend(int slave, configData* d, masterData* r){
   
   return 0;
 }
-int echo_slave_afterSend(int slave, configData* d, masterData* r){
+int echo_slave_afterSend(int slave, moduleInfo *md, configData* d, masterData* r){
   return 0;
 }
-int echo_slave_beforeReceive(int slave, configData* d, masterData* r){
+int echo_slave_beforeReceive(int slave, moduleInfo *md, configData* d, masterData* r){
   return 0;
 }
-int echo_slave_afterReceive(int slave, configData* d, masterData* r){
+int echo_slave_afterReceive(int slave, moduleInfo *md, configData* d, masterData* r){
   return 0;
 }
 

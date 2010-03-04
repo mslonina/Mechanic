@@ -94,7 +94,7 @@ int* map2d(
    // Method 6: user defined control.
    if(d->method == 6){
     qpcm = load_sym(handler, md, "pixelCoordsMap", MECHANIC_MODULE_ERROR); 
-    if(qpcm) qpcm(ind, c, x, y, d);
+    if(qpcm) qpcm(ind, c, x, y, md, d);
    }
 
    return ind;
