@@ -1,4 +1,5 @@
-AC_INIT([Mechanic], [0.12-UNSTABLE-2], [mariusz.slonina@gmail.com])
+AC_INIT([Mechanic], [0.12-UNSTABLE-2], [mariusz.slonina@gmail.com],
+        [],[http://mechanics.astri.umk.pl/projects/mechanic])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_PROG_CC
 AC_PROG_F77

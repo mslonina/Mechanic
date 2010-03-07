@@ -72,11 +72,14 @@ int* map2d(
     configData* d) //< [in] Pointer to config data struct
 {
    
-  int* ind = malloc(3*sizeof(*ind));
+  int* ind;
    int x, y;
    x = d->xres;
    y = d->yres;
    module_query_void_f qpcm;
+
+  ind = malloc(3*sizeof(*ind));
+  if(ind == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
    //we need number of current pixel to store too
    ind[2] = c;
@@ -177,7 +180,23 @@ int mechanic_abort(int errcode){
 
 #if HAVE_MPI_SUPPORT
   MPI_Abort(MPI_COMM_WORLD, errcode);
+#else
+  exit(-1)
 #endif
 
   return 0;
+}
+
+void mechanic_message(int type, char *fmt, ...){
+
+  static char fmt2[2048];
+  va_list args;
+
+  va_start(args, fmt);
+    vsprintf(fmt2, fmt, args);
+    if(type == MECHANIC_MESSAGE_INFO) printf("-> %s", fmt2);
+    if(type == MECHANIC_MESSAGE_ERR) perror(fmt2);
+    if(type == MECHANIC_MESSAGE_CONT) printf("   %s", fmt2);
+  va_end(args);
+ 
 }

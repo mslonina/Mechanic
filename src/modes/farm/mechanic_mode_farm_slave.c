@@ -65,6 +65,7 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
 
     // Allocate memory for rawdata.res array 
     rawdata = malloc(sizeof(masterData) + (md->mrl-1)*sizeof(MECHANIC_DATATYPE));
+    if(rawdata == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
     // Build derived type for master result 
     mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);

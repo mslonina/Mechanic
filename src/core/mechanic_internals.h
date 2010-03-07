@@ -73,9 +73,11 @@
 
 #include "libreadconfig.h"
 
-#define MECHANIC_VERSION "0.12 UNSTABLE-2"
+#define MECHANIC_NAME PACKAGE_NAME
+#define MECHANIC_VERSION PACKAGE_VERSION
 #define MECHANIC_AUTHOR "MSlonina, TCfA, NCU"
-#define MECHANIC_EMAIL "mariusz.slonina@gmail.com"
+#define MECHANIC_BUGREPORT PACKAGE_BUGREPORT
+#define MECHANIC_URL PACKAGE_URL
 
 #define MECHANIC_CONFIG_FILE_DEFAULT "config"
 #define MECHANIC_NAME_DEFAULT "showme"
@@ -114,6 +116,7 @@
 #define MECHANIC_DATABOARD "/board" 
 #define MECHANIC_DATAGROUP "/data"
 #define MECHANIC_DATASETMASTER "master"
+
 
 enum Modes {
   MECHANIC_MASTERALONE, 
@@ -166,6 +169,7 @@ void poptTestI(char* i, int j);
 int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
 int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
 int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d);
+H5E_auto2_t H5error_handler(void*);
 
 int manageCheckpoints(configData *d);
 int H5readBoard(configData* d, int** board);
@@ -174,8 +178,6 @@ int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** re
 
 void welcome();
 void clearArray(MECHANIC_DATATYPE*,int);
-int mechanic_finalize(int node);
-int mechanic_abort(int errcode);
 
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptHelpOptions, \
 			0, "Help options:", NULL },

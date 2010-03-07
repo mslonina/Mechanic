@@ -40,68 +40,24 @@
  * OF SUCH DAMAGE.
  */
 
-#ifndef MECHANIC_H
-#define MECHANIC_H
+#include "mechanic.h"
+#include "mechanic_internals.h"
 
-#define MECHANIC_ERR_MPI 911
-#define MECHANIC_ERR_HDF 912
-#define MECHANIC_ERR_MODULE 913
-#define MECHANIC_ERR_SETUP 914
-#define MECHANIC_ERR_MEM 915
-#define MECHANIC_ERR_OTHER 999
+// HDF error handler
+H5E_auto2_t H5error_handler(void* unused){
+  fprintf(stderr, "An HDF5 error was detected. The error stack is:\n\n");
+  H5Eprint2(H5E_DEFAULT, stderr);
+  mechanic_abort(MECHANIC_ERR_HDF); 
+}
 
-#define MECHANIC_HDF_RANK 2
+// H5 logs 
+void H5log(){
+  return;
+}
 
-#undef MECHANIC_DATATYPE
-#define MECHANIC_DATATYPE double
+// Mechanic error handler
+void mechanic_error(int errcode){
 
-#undef MECHANIC_MPI_DATATYPE
-#define MECHANIC_MPI_DATATYPE MPI_DOUBLE
-
-#define ITEMS_IN_ARRAY(x) sizeof(x)/sizeof(*(x))
-
-enum Messages{
-  MECHANIC_MESSAGE_INFO,
-  MECHANIC_MESSAGE_ERR,
-  MECHANIC_MESSAGE_CONT,
-  MECHANIC_MESSAGE_WARN,
-} mechanicMessages;
-
-// MAIN CONFIG DATA 
-typedef struct {
-  char name[256];
-  char datafile[260];
-  char module[256];
-  int xres;
-  int yres;
-  int method;
-  int checkpoint;
-  int restartmode;
-  int mode;
-  int checkpoint_num;
-} configData;
-
-
-/*
- * MASTER DATA
- */
-typedef struct {
- int coords[3]; //0 - x 1 - y 2 - number of the pixel
- MECHANIC_DATATYPE res[1];
-} masterData;
-
-// Module info and handler 
-typedef struct {
-      const char *name;
-      const char *author;
-      const char *date;
-      const char *version;
-      int mrl;
-} moduleInfo;
-
-void mechanic_message(int type, char* fmt, ...);
-int mechanic_finalize(int node);
-int mechanic_abort(int errcode);
-void mechanic_error(int stat);
-
-#endif
+  if(errcode == MECHANIC_ERR_MEM) mechanic_abort(MECHANIC_ERR_MEM);
+  return;
+}

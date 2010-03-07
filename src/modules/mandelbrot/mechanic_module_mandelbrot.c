@@ -40,8 +40,10 @@
  * OF SUCH DAMAGE.
  */
 
-/* 
- * MECHANIC MODULE MANDELBROT
+/** 
+ * @page api
+ * @section modules
+ * @subsection mandelbrot The Mandelbrot module
  *
  * This module shows how to use basic api of Mechanic to compute any numerical problem,
  * in that case -- the Mandelbrot fractal.

@@ -47,25 +47,18 @@
  *
  * @todo
  *   - HDF5 error handling with H5E (including file storage)
- *   - malloc error handling
  * 
  */
 
 /**
  * @page overview Overview
- * 
  * @page installation Installation
- * 
  * @page storage Data scheme
- * 
+ * @page setup Setup
  * @page api User API
- * @subpage modules Modules
- *
- * @page guide User guide
- * @subpage setup Setup
- * @subpage example Creating a module
- * 
- * @page restart Checkpoints
+ * @section modules Modules
+ * @section example An example module
+ * @page checkpoint Checkpoints
  * @page troubleshooting Troubleshooting
  *
  */
@@ -95,17 +88,11 @@
  *
  * To compile Mechanic use following commands:
  * @verbatim
- * ./configure
- * make
- * make install
- * @endverbatim
+  ./configure
+  make
+  make install
+  @endverbatim
  *
- * @page troubleshooting
- * Some known or not known bugs. 
- *
- * @page guide
- * The Quick Start Guide itself.
- * 
  */
 int main(int argc, char *argv[]){  
 
@@ -206,7 +193,7 @@ int main(int argc, char *argv[]){
   int numCT = 8;
 
   /**
-   * @subpage setup 
+   * @page setup 
    * There are two ways to setup the computations: the config file and commandline args.
    * 
    * Below is a setup steps:
@@ -219,7 +206,7 @@ int main(int argc, char *argv[]){
    * If option -c is set, but the file doesn't exit, abort.
    *
    * @section cli Commandline args
-   * Mechanic uses the Piopt library for handling commandline args.
+   * Mechanic uses the Popt library for handling commandline args.
    */
   struct poptOption mechanic_poptHelpOptions[] = {
     { NULL, '\0', POPT_ARG_CALLBACK, (void *)mechanic_displayUsage, 0, NULL, NULL },
@@ -269,20 +256,18 @@ int main(int argc, char *argv[]){
     POPT_TABLEEND
   };
 
+  node = 0;
   #if HAVE_MPI_SUPPORT
     // MPI INIT 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    node = mpi_rank;
   #endif
 
   // HDF5 INIT 
   H5open();
-
-  node = 0;
-  #if HAVE_MPI_SUPPORT
-    node = mpi_rank;
-  #endif
+  H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL);
   
   if(node == 0) welcome();
 
@@ -290,10 +275,9 @@ int main(int argc, char *argv[]){
   poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
 
   /**
-   * @subpage setup
+   * @page setup
    * @section configfile Config file
    * Mechanic uses LibReadConfig for handling config files.
-   *
    *
    */
   optvalue = poptGetNextOpt(poptcon);
@@ -325,8 +309,8 @@ int main(int argc, char *argv[]){
     return 0;
   }
 
-  /*
-   * @page restart
+  /**
+   * @page checkpoint
    *
    * TODO:
    * 1) -r should take problem name as an argument -- DONE
@@ -410,10 +394,12 @@ int main(int argc, char *argv[]){
   poptFreeContext(poptcon);
  
   /**
-   * @subpage modules
+   * @page api
+   * @section modules 
+   * The module interface allows user to load dynamically code with almost any type of
+   * numerical problems. To load a module, use -p switch or "module" variable in the
+   * config file. Otherwise, the default Echo module will be used.
    *
-   * @brief
-   * If option -p is not set, use default.
    */
   sprintf(module_file, "mechanic_module_%s.so", module_name);
   
@@ -437,9 +423,9 @@ int main(int argc, char *argv[]){
     // we don't have any master files, only checkpoint files.
     if(stat(cd.datafile,&st) == 0 && cd.restartmode == 0){
       sprintf(oldfile,"old-%s",cd.datafile);
-      printf("-> File %s exists!\n", cd.datafile);
-      printf("-> I will back it up for You now\n");
-      printf("-> Backuped file: %s\n",oldfile);
+      mechanic_message(MECHANIC_MESSAGE_WARN, "File %s exists!\n", cd.datafile);
+      mechanic_message(MECHANIC_MESSAGE_WARN, "I will back it up for You now\n");
+      mechanic_message(MECHANIC_MESSAGE_WARN, "Backuped file: %s\n",oldfile);
       rename(cd.datafile,oldfile);
     }
  
@@ -519,9 +505,17 @@ int main(int argc, char *argv[]){
   return 0;
 }
 
+/** 
+ * @page troubleshooting
+ * Some known bugs. 
+ */
+
 void welcome(){
 
-  printf("MECHANIC %s\n\tauthor: %s\n\tbugs: %s\n\n",
-          MECHANIC_VERSION, MECHANIC_AUTHOR, MECHANIC_EMAIL);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "%s\n", MECHANIC_NAME);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "v. %s\n", MECHANIC_VERSION);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "Author: %s\n", MECHANIC_AUTHOR);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "Bugs: %s\n", MECHANIC_BUGREPORT);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "%s\n", MECHANIC_URL);
 
 }

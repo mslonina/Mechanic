@@ -41,9 +41,9 @@
  */
 
 /**
- * @subpage modules 
- *
- * @subpage echo The Echo module
+ * @page api
+ * @section modules
+ * @subsection echo The Echo module
  * 
  * @brief The Echo module is the default module loaded by Mechanic and it uses all functions
  * provided in the User API.
@@ -58,22 +58,22 @@
  *   MY_DATATYPE res[1]; <-- handles result vector, resizable with mrl variable
  * }
  *
- * @section echocasestudies Case studies
- * @subsection thesame Each slave does the same
- * This is the simplest case of using Mechanic. The only thing to do is to define 
- * pixelCompute function and return some data to master node with masterData struct.
- * You can also do something in functions IN/OUT, but in that case it is not really necessary.
+ * @subsubsection echocasestudies Case studies
+ *  - Each slave does the same -- 
+ *    This is the simplest case of using Mechanic. The only thing to do is to define 
+ *    pixelCompute function and return some data to master node with masterData struct.
+ *    You can also do something in functions IN/OUT, but in that case it is not really necessary.
  *
- * @subsection diffconf Each slave has different config file
- * This time You need to read config file for each slave separately. This can be done with 
- * LibReadConfig in slaveIN function and config files named after slave number, i.e. slave22.
+ *  - Each slave has different config file
+ *    This time You need to read config file for each slave separately. This can be done with 
+ *    LibReadConfig in slaveIN function and config files named after slave number, i.e. slave22.
  *
- * @subsection diffpxcomp Each slave has different pixelCompute function.
- * At this point You need to create some subfunctions of pixelCompute and choose them
- * accordingly to number of the slave, i.e. in the switch routine.
+ *  - Each slave has different pixelCompute function.
+ *    At this point You need to create some subfunctions of pixelCompute and choose them
+ *    accordingly to number of the slave, i.e. in the switch routine.
  *
- * @subsection diffall Each slave has both different config file and different pixelCompute
- * Just combining two cases in simple switch routines and it should work too.
+ *  - Each slave has both different config file and different pixelCompute
+ *    Just combining two cases in simple switch routines and it should work too.
  *
  */
 
@@ -246,7 +246,7 @@ int echo_masterOUT(int nodes, moduleInfo* md, configData* d, masterData* r){
    
     fname = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     stat = H5Ocopy(fname, groupname, masterdatagroup, groupname, H5P_DEFAULT, H5P_DEFAULT);
-    if(stat < 0) printf("copy error\n");
+    if(stat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "copy error\n");
     H5Fclose(fname);
 
   }
@@ -255,7 +255,7 @@ int echo_masterOUT(int nodes, moduleInfo* md, configData* d, masterData* r){
   H5Fclose(masterfile);
   stat = H5close();
   
-  printf("Master process OVER & OUT.\n");
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Master process OVER & OUT.\n");
   return 0;
 }
 
@@ -368,7 +368,7 @@ int echo_slaveIN(int slave, moduleInfo* md, configData* d, masterData* r){
  */
 int echo_slaveOUT(int slave, moduleInfo* md, configData* d, masterData* r){
   
-  printf("SLAVE[%d] OVER & OUT\n",slave);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "SLAVE[%d] OVER & OUT\n",slave);
 
   return 0;
 }

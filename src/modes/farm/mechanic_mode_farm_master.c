@@ -75,23 +75,34 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
  
    // Allocate memory for rawdata.res array.
    rawdata = malloc(sizeof(masterData) + (md->mrl-1)*sizeof(MECHANIC_DATATYPE));
+   if(rawdata == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
    clearArray(rawdata->res, ITEMS_IN_ARRAY(rawdata->res));
    
   coordsarr = malloc(sizeof(int*)*d->checkpoint);
+  if(coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
   resultarr = malloc(sizeof(MECHANIC_DATATYPE*)*d->checkpoint);
+  if(resultarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   for(i = 0; i < d->checkpoint; i++){
      coordsarr[i] = malloc(sizeof(int*)*3);
+     if(coordsarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
+     
      resultarr[i] = malloc(sizeof(MECHANIC_DATATYPE*)*md->mrl);
+     if(resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
+     
      clearArray(resultarr[i],ITEMS_IN_ARRAY(resultarr[i]));
   }
 
    // Allocate memory for board
    if(d->restartmode == 1){
     board = malloc(sizeof(int*)*d->xres);
+    if(board == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
     for(i = 0; i < d->xres; i++) 
       board[i] = malloc(sizeof(int*)*d->yres);
+      if(board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
     
    }
 

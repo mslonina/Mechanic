@@ -47,16 +47,6 @@
  * HDF5 FUNCTIONS
  */
 
-// Error handling 
-void H5errcheck(hid_t handler, herr_t stat, char* message, int rank){
-  return;
-}
-
-// H5 logs 
-void H5log(){
-  return;
-}
-
 // Master data scheme 
 int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 
