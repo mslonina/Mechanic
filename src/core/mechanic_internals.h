@@ -145,7 +145,7 @@ module_cleanup_f cleanup;
 // GLOBALS 
 char* inifile;
 char* datafile;
-int allopts, mpi_rank, mpi_size;
+int allopts, mpi_size;
 int usage, help;
 
 // FUNCTION PROTOTYPES 
@@ -156,10 +156,10 @@ int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsT
 int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
 #endif
 
-void* load_sym(void* handler, moduleInfo*, char* function, int type);
+void* load_sym(void* handler, moduleInfo*, char* function, char* function_override, int type);
 int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag);
 int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int flag, int popt);
-void mechanic_displayArgs(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
+void mechanic_displayArgs(int node, poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data);
 void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, const struct poptOption* key, 
     char* arg, void* data);

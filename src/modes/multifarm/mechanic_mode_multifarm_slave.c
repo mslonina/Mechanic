@@ -46,6 +46,6 @@
 
 int mechanic_mode_multifarm_slave(int node, void* handler, moduleInfo* md, configData* d){
 
-  printf("Multifarm SLAVE[%d]\n", node);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Multifarm SLAVE[%d]\n", node);
   return 0;
 }

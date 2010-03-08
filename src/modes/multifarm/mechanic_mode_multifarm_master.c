@@ -46,6 +46,6 @@
 
 int mechanic_mode_multifarm_master(int node, void* handler, moduleInfo* md, configData* d){
 
-  printf("Multifarm MASTER\n");
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Multifarm MASTER\n");
   return 0;
 }

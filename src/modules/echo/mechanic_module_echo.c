@@ -207,26 +207,62 @@ int echo_pixelCompute(int slave, moduleInfo* md, configData* d, masterData* r){
    return 0;
 }
 
-int echo_nodeIN(int mpi_size, int node, moduleInfo* md, configData* d){
-  return 0;
-}
+/**
+ * @page template Template system
+ *
+ * We have some template system:
+ * - nodeIN
+ * - nodeOUT
+ * - node_beforeSend
+ * - node_afterSend
+ * - node_beforeReceive
+ * - node_afterReceive
+ *
+ * Each function above can be overriden by master/slave function accordingly.
+ */
 
-int echo_nodeOUT(int mpi_size, int node, moduleInfo* md, configData* d){
-  return 0;
-}
 
 /**
- * @fn int echo_masterIN(int mpi_size, moduleInfo* md, configData* d)
+ * @fn int echo_nodeIN(int mpi_size, moduleInfo* md, configData* d)
  * @brief This function is called before any farm operations.
  *
  * You can do something before computations starts.
  *
  * @param mpi_size
+ * @param node
  * @param *md
  * @param *d
  *
+ * @ingroup themeable
+ *
  */
-int echo_masterIN(int mpi_size, moduleInfo* md, configData* d){
+
+int echo_nodeIN(int mpi_size, int node, moduleInfo* md, configData* d){
+  mechanic_message(MECHANIC_MESSAGE_INFO, "NodeIN [%d]\n", node);
+  return 0;
+}
+
+int echo_nodeOUT(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
+  mechanic_message(MECHANIC_MESSAGE_INFO, "NodeOUT [%d]\n", node);
+  return 0;
+}
+
+int echo_node_beforeSend(int node, moduleInfo* md, configData* d, masterData* r){
+  return 0;
+}
+
+int echo_node_afterSend(int node, moduleInfo* md, configData* d, masterData* r){
+  return 0;
+}
+
+int echo_node_beforeReceive(int node, moduleInfo* md, configData* d, masterData* r){
+  return 0;
+}
+
+int echo_node_afterReceive(int node, moduleInfo* md, configData* d, masterData* r){
+  return 0;
+}
+int echo_masterIN(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 
@@ -242,7 +278,7 @@ int echo_masterIN(int mpi_size, moduleInfo* md, configData* d){
  * @param *d
  * @param *r
  */
-int echo_masterOUT(int nodes, moduleInfo* md, configData* d, masterData* r){
+int echo_masterOUT(int nodes, int node, moduleInfo* md, configData* d, masterData* r){
   
   int i = 0;
   hid_t fname, masterfile, masterdatagroup;
@@ -289,16 +325,16 @@ int echo_masterOUT(int nodes, moduleInfo* md, configData* d, masterData* r){
  * @brief Called after data is received.
  * 
  */
-int echo_master_beforeSend(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_master_beforeSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
-int echo_master_afterSend(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_master_afterSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
-int echo_master_beforeReceive(moduleInfo* md, configData* d, masterData* r){
+int echo_master_beforeReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
-int echo_master_afterReceive(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_master_afterReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
 
@@ -318,7 +354,7 @@ int echo_master_afterReceive(int slave, moduleInfo* md, configData* d, masterDat
  * Data group is incorporated in MASTER_OUT function to one master data file.
  *
  */
-int echo_slaveIN(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_slaveIN(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
 
   hid_t sfile_id, sdatagroup, gid, string_type;
   hid_t dataset, dataspace;
@@ -326,7 +362,7 @@ int echo_slaveIN(int slave, moduleInfo* md, configData* d, masterData* r){
   hsize_t dimens_1d;
   herr_t serr;
   char sbase[] = "slave";
-  char node[512];
+  char nodename[512];
   char gbase[] = "slave";
   char group[512];
   char oldfile[1028];
@@ -336,26 +372,26 @@ int echo_slaveIN(int slave, moduleInfo* md, configData* d, masterData* r){
 
   struct stat st;
 
-  sprintf(node, "%s-%s%d.h5", d->name, sbase, slave);
-  sprintf(group, "%s%d", gbase, slave);
+  sprintf(nodename, "%s-%s%d.h5", d->name, sbase, node);
+  sprintf(group, "%s%d", gbase, node);
 
   /*
    * Imagine this:
    * each slave can create different dataspaces and datasets here, 
    * perform different computations, even read different config file!
    */
-  if(stat(node,&st) == 0){
-      sprintf(oldfile,"old-%s",node);
+  if(stat(nodename,&st) == 0){
+      sprintf(oldfile,"old-%s",nodename);
       /*printf("-> File %s exists!\n", cd.datafile);
       printf("-> I will back it up for You now\n");
       printf("-> Backuped file: %s\n",oldfile);*/
-      rename(node,oldfile);
+      rename(nodename,oldfile);
   }
 
-  sfile_id = H5Fcreate(node, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  sfile_id = H5Fcreate(nodename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   gid = H5Gcreate(sfile_id, group, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
  
-  sprintf(comment, "%s%d. ",cbase,slave); 
+  sprintf(comment, "%s%d. ",cbase,node); 
   string_type = H5Tcopy(H5T_C_S1);
   H5Tset_size(string_type, strlen(comment));
 
@@ -381,9 +417,9 @@ int echo_slaveIN(int slave, moduleInfo* md, configData* d, masterData* r){
  * Example:
  * Just prints a message from the slave.
  */
-int echo_slaveOUT(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_slaveOUT(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
   
-  mechanic_message(MECHANIC_MESSAGE_INFO, "SLAVE[%d] OVER & OUT\n",slave);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "SLAVE[%d] OVER & OUT\n", node);
 
   return 0;
 }
@@ -392,23 +428,16 @@ int echo_slaveOUT(int slave, moduleInfo* md, configData* d, masterData* r){
  * Called before/after send/receive
  * 
  */
-int echo_slave_beforeSend(int slave, moduleInfo* md, configData* d, masterData* r){
-  
-  int i = 0;
-  //printf("S[%d] px[%3d, %3d]: ", slave, r->coords[0], r->coords[1]);
-  
-  //for(i = 0; i < d->mrl; i++) printf("%3.0f", r->res[i]);
-  //printf("\n");
-  
+int echo_slave_beforeSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
-int echo_slave_afterSend(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_slave_afterSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
-int echo_slave_beforeReceive(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_slave_beforeReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
-int echo_slave_afterReceive(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_slave_afterReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
 

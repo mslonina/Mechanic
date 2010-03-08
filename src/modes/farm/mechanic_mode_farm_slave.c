@@ -71,16 +71,16 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
     mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);
    
     // Slave can do something useful before computations.
-    query = load_sym(handler, md, "slaveIN", MECHANIC_MODULE_SILENT);
-    if(query) mstat = query(mpi_rank, md, d, rawdata);
+    query = load_sym(handler, md, "nodeIN", "slaveIN", MECHANIC_MODULE_SILENT);
+    if(query) mstat = query(mpi_size, node, md, d, rawdata);
 
-    qbeforeR = load_sym(handler, md, "slave_beforeReceive", MECHANIC_MODULE_SILENT);
-    if(qbeforeR) mstat = qbeforeR(mpi_rank, md, d, rawdata);
+    qbeforeR = load_sym(handler, md, "node_beforeReceive", "slave_beforeReceive", MECHANIC_MODULE_SILENT);
+    if(qbeforeR) mstat = qbeforeR(node, md, d, rawdata);
     
        MPI_Recv(tab, 3, MPI_INT, MECHANIC_MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
     
-    qafterR = load_sym(handler, md, "slave_afterReceive", MECHANIC_MODULE_SILENT);
-    if(qafterR) mstat = qafterR(mpi_rank, md, d, rawdata);
+    qafterR = load_sym(handler, md, "node_afterReceive", "slave_afterReceive", MECHANIC_MODULE_SILENT);
+    if(qafterR) mstat = qafterR(node, md, d, rawdata);
     
     while(1){
 
@@ -96,41 +96,41 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
        if (d->method == 6){
 
           // Use userdefined pixelCoords method.
-          qpc = load_sym(handler, md, "pixelCoords", MECHANIC_MODULE_ERROR);
-          if(qpc) mstat = qpc(mpi_rank, tab, md, d, rawdata);
+          qpc = load_sym(handler, md, "pixelCoords", "pixelCoords", MECHANIC_MODULE_ERROR);
+          if(qpc) mstat = qpc(node, tab, md, d, rawdata);
        } 
-          qpb = load_sym(handler, md, "beforePixelCompute", MECHANIC_MODULE_SILENT);
-          if(qpb) mstat = qpb(mpi_rank, md, d, rawdata);
+          qpb = load_sym(handler, md, "beforePixelCompute", "beforePixelCompute", MECHANIC_MODULE_SILENT);
+          if(qpb) mstat = qpb(node, md, d, rawdata);
 
           // PIXEL COMPUTATION
-          qpx = load_sym(handler, md, "pixelCompute", MECHANIC_MODULE_ERROR);
-          if(qpx) mstat = qpx(mpi_rank, md, d, rawdata);
+          qpx = load_sym(handler, md, "pixelCompute", "pixelCompute", MECHANIC_MODULE_ERROR);
+          if(qpx) mstat = qpx(node, md, d, rawdata);
           
-          qpb = load_sym(handler, md, "afterPixelCompute", MECHANIC_MODULE_SILENT);
-          if(qpb) mstat = qpb(mpi_rank, md, d, rawdata);
+          qpb = load_sym(handler, md, "afterPixelCompute", "afterPixelCompute", MECHANIC_MODULE_SILENT);
+          if(qpb) mstat = qpb(node, md, d, rawdata);
           
-          qbeforeS = load_sym(handler, md, "slave_beforeSend", MECHANIC_MODULE_SILENT);
-          if(qbeforeS) mstat = qbeforeS(mpi_rank, md, d, rawdata);
+          qbeforeS = load_sym(handler, md, "node_beforeSend", "slave_beforeSend", MECHANIC_MODULE_SILENT);
+          if(qbeforeS) mstat = qbeforeS(node, md, d, rawdata);
          
              MPI_Send(rawdata, 1, masterResultsType, MECHANIC_MPI_DEST, MECHANIC_MPI_RESULT_TAG, MPI_COMM_WORLD);
 
-          qafterS = load_sym(handler, md, "slave_afterSend", MECHANIC_MODULE_SILENT);
-          if(qafterS) mstat = qafterS(mpi_rank, md, d, rawdata);
+          qafterS = load_sym(handler, md, "node_afterSend", "slave_afterSend", MECHANIC_MODULE_SILENT);
+          if(qafterS) mstat = qafterS(node, md, d, rawdata);
         
-          qbeforeR = load_sym(handler, md, "slave_beforeReceive", MECHANIC_MODULE_SILENT);
-          if(qbeforeR) mstat = qbeforeR(mpi_rank, md, d, rawdata);
+          qbeforeR = load_sym(handler, md, "node_beforeReceive", "slave_beforeReceive", MECHANIC_MODULE_SILENT);
+          if(qbeforeR) mstat = qbeforeR(node, md, d, rawdata);
            
              MPI_Recv(tab, 3, MPI_INT, MECHANIC_MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
           
-          qafterR = load_sym(handler, md, "slave_afterReceive", MECHANIC_MODULE_SILENT);
-          if(qafterR) mstat = qafterR(mpi_rank, md, d, rawdata);
+          qafterR = load_sym(handler, md, "node_afterReceive", "slave_afterReceive", MECHANIC_MODULE_SILENT);
+          if(qafterR) mstat = qafterR(node, md, d, rawdata);
         }
       
     }
     
     // Slave can do something useful after computations.
-    query = load_sym(handler, md, "slaveOUT", MECHANIC_MODULE_SILENT);
-    if(query) mstat = query(mpi_rank, md, d, rawdata);
+    query = load_sym(handler, md, "nodeOUT", "slaveOUT", MECHANIC_MODULE_SILENT);
+    if(query) mstat = query(mpi_size, node, md, d, rawdata);
 
     free(rawdata);
     return 0;

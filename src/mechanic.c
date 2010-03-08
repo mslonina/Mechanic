@@ -115,6 +115,7 @@ int main(int argc, char *argv[]){
   int error = 0;
   int configfile = 0;
 
+  int mpi_rank;
   int node;
 
   int mstat; //mechanic internal error value
@@ -410,10 +411,10 @@ int main(int argc, char *argv[]){
     mechanic_error(MECHANIC_ERR_MODULE);
   }
 
-  init = load_sym(handler,&md, "init", MECHANIC_MODULE_ERROR);
+  init = load_sym(handler,&md, "init", "init", MECHANIC_MODULE_ERROR);
   if(init) mstat = init(&md);
 
-  query = load_sym(handler,&md, "query", MECHANIC_MODULE_SILENT);
+  query = load_sym(handler,&md, "query", "query", MECHANIC_MODULE_SILENT);
   if(query) query(&md);
 
   // Config file has been read
@@ -490,7 +491,7 @@ int main(int argc, char *argv[]){
   }
 
   // Module cleanup
-  cleanup = load_sym(handler, &md, "cleanup", MECHANIC_MODULE_ERROR);
+  cleanup = load_sym(handler, &md, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
   if(cleanup) mstat = cleanup(&md);
 
   // MODULE UNLOAD

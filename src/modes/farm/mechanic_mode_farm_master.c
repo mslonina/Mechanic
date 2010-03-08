@@ -112,15 +112,15 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);
 
    // Master can do something useful before computations.
-   query = load_sym(handler, md, "masterIN", MECHANIC_MODULE_SILENT);
-   if(query) mstat = query(mpi_size, md, d);
+   query = load_sym(handler, md, "nodeIN", "masterIN", MECHANIC_MODULE_SILENT);
+   if(query) mstat = query(mpi_size, node, md, d);
 
    // Align farm resolution for given method.
    if (d->method == 0) farm_res = d->xres*d->yres; //one pixel per each slave
    if (d->method == 1) farm_res = d->xres; //sliceX
    if (d->method == 2) farm_res = d->yres; //sliceY
    if (d->method == 6){
-     qr = load_sym(handler, md, "farmResolution", MECHANIC_MODULE_ERROR);
+     qr = load_sym(handler, md, "farmResolution", "farmResolution", MECHANIC_MODULE_ERROR);
      if(qr) farm_res = qr(d->xres, d->yres, md);
    }
  
@@ -135,12 +135,12 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    // Send tasks to all slaves,
    // remembering what the farm resolution is.
    for (i = 1; i < nodes; i++){
-     qbeforeS = load_sym(handler, md,"master_beforeSend", MECHANIC_MODULE_SILENT);
+     qbeforeS = load_sym(handler, md, "node_beforeSend", "master_beforeSend", MECHANIC_MODULE_SILENT);
      if(qbeforeS) mstat = qbeforeS(i, md, d, rawdata);
 
      MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
      
-     qafterS = load_sym(handler, md, "master_afterSend", MECHANIC_MODULE_SILENT);
+     qafterS = load_sym(handler, md, "node_afterSend", "master_afterSend", MECHANIC_MODULE_SILENT);
      if(qafterS) mstat = qafterS(i, md, d, rawdata);
      
      count++;
@@ -151,7 +151,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    // terminate them (when farm resolution < mpi size).
    if(farm_res < mpi_size){
     for(i = nodes; i < mpi_size; i++){
-      printf("-> Terminating idle slave %d.\n", i);
+      mechanic_message(MECHANIC_MESSAGE_WARN, "Terminating idle slave %d.\n", i);
       MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
    }
@@ -159,13 +159,13 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    // Receive data and send tasks.
    while (1) {
     
-     qbeforeR = load_sym(handler, md, "master_beforeReceive", MECHANIC_MODULE_SILENT);
-     if(qbeforeR) mstat = qbeforeR(md, d, rawdata);
+     qbeforeR = load_sym(handler, md, "node_beforeReceive", "master_beforeReceive", MECHANIC_MODULE_SILENT);
+     if(qbeforeR) mstat = qbeforeR(0, md, d, rawdata);
       
      MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
      count--;
       
-      qafterR = load_sym(handler, md, "master_afterReceive", MECHANIC_MODULE_SILENT);
+      qafterR = load_sym(handler, md, "node_afterReceive", "master_afterReceive", MECHANIC_MODULE_SILENT);
       if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, rawdata);
    
       // Copy data to checkpoint arrays
@@ -192,14 +192,14 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
       // Send next task to the slave
       if (npxc < farm_res){
        
-        qbeforeS = load_sym(handler, md, "master_beforeSend", MECHANIC_MODULE_SILENT);
+        qbeforeS = load_sym(handler, md, "node_beforeSend", "master_beforeSend", MECHANIC_MODULE_SILENT);
         if(qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, rawdata);
          
         MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
         npxc++;
         count++;
         
-        qafterS = load_sym(handler, md, "master_afterSend", MECHANIC_MODULE_SILENT);
+        qafterS = load_sym(handler, md, "node_afterSend", "master_afterSend", MECHANIC_MODULE_SILENT);
         if(qafterS) mstat = qafterS(mpi_status.MPI_SOURCE, md, d, rawdata);
 
       } else {
@@ -213,12 +213,12 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
      */
     for (i = 0; i < count; i++){
       
-      qbeforeR = load_sym(handler, md, "master_beforeReceive", MECHANIC_MODULE_SILENT);
-      if(qbeforeR) mstat = qbeforeR(md, d, rawdata);
+      qbeforeR = load_sym(handler, md, "node_beforeReceive", "master_beforeReceive", MECHANIC_MODULE_SILENT);
+      if(qbeforeR) mstat = qbeforeR(0, md, d, rawdata);
         
       MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
       
-      qafterR = load_sym(handler, md, "master_afterReceive", MECHANIC_MODULE_SILENT);
+      qafterR = load_sym(handler, md, "node_afterReceive", "master_afterReceive", MECHANIC_MODULE_SILENT);
       if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, rawdata);
      
       // Copy data to checkpoint arrays
@@ -244,8 +244,8 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     MPI_Type_free(&masterResultsType);
     
     // Master can do something useful after the computations.
-    query = load_sym(handler, md, "masterOUT", MECHANIC_MODULE_SILENT);
-    if(query) mstat = query(nodes, md, d, rawdata);
+    query = load_sym(handler, md, "nodeOUT", "masterOUT", MECHANIC_MODULE_SILENT);
+    if(query) mstat = query(mpi_size, nodes, md, d, rawdata);
 
     free(rawdata);
  
