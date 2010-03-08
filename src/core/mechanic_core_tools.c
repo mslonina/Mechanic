@@ -112,6 +112,7 @@ void* load_sym(void* handler, moduleInfo *md, char* function, int type){
   void* handler_f;
   char* err;
   char func[1024];
+  char func_over[1024];
 
   dlerror();
   sprintf(func,"%s_%s",md->name, function);
@@ -122,17 +123,17 @@ void* load_sym(void* handler, moduleInfo *md, char* function, int type){
       case MECHANIC_MODULE_SILENT:
         break;
       case MECHANIC_MODULE_WARN:
-        printf("-> Module warning: Cannot load function '%s': %s\n", func, err); 
+        mechanic_message(MECHANIC_MESSAGE_WARN, "Module warning: Cannot load function '%s': %s\n", func, err); 
         break;
       case MECHANIC_MODULE_ERROR:
-        printf("-> Module error: Cannot load function '%s': %s\n", func, err); 
+        mechanic_message(MECHANIC_MESSAGE_ERR, "Module error: Cannot load function '%s': %s\n", func, err); 
         break;
       default:
         break;
     }
   
     if(type == MECHANIC_MODULE_ERROR)
-      MPI_Abort(MPI_COMM_WORLD, MECHANIC_ERR_MODULE);
+      mechanic_error(MECHANIC_ERR_MODULE);
     else
       return NULL;
     

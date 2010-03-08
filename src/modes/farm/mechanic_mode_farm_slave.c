@@ -55,7 +55,7 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
    
     int mstat;
 
-    module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qpx, qpc;
+    module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qpx, qpc, qpb;
     
     masterData raw;
     masterData* rawdata;
@@ -99,9 +99,15 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
           qpc = load_sym(handler, md, "pixelCoords", MECHANIC_MODULE_ERROR);
           if(qpc) mstat = qpc(mpi_rank, tab, md, d, rawdata);
        } 
+          qpb = load_sym(handler, md, "beforePixelCompute", MECHANIC_MODULE_SILENT);
+          if(qpb) mstat = qpb(mpi_rank, md, d, rawdata);
+
           // PIXEL COMPUTATION
           qpx = load_sym(handler, md, "pixelCompute", MECHANIC_MODULE_ERROR);
           if(qpx) mstat = qpx(mpi_rank, md, d, rawdata);
+          
+          qpb = load_sym(handler, md, "afterPixelCompute", MECHANIC_MODULE_SILENT);
+          if(qpb) mstat = qpb(mpi_rank, md, d, rawdata);
           
           qbeforeS = load_sym(handler, md, "slave_beforeSend", MECHANIC_MODULE_SILENT);
           if(qbeforeS) mstat = qbeforeS(mpi_rank, md, d, rawdata);

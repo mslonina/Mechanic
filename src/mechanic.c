@@ -384,7 +384,7 @@ int main(int argc, char *argv[]){
     if (cd.xres == 0 || cd.yres == 0){
        printf("X/Y map resolution should not be set to 0!\n");
        printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
-       mechanic_abort(MECHANIC_ERR_SETUP);
+       mechanic_error(MECHANIC_ERR_SETUP);
     }
 
     printf("\n-> Mechanic will use these startup values:\n\n");
@@ -406,8 +406,8 @@ int main(int argc, char *argv[]){
   md.name = module_name;
   handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
   if(!handler){
-    printf("Cannot load module '%s': %s\n", module_name, dlerror()); 
-    mechanic_abort(MECHANIC_ERR_MODULE);
+    mechanic_message(MECHANIC_MESSAGE_ERR, "Cannot load module '%s': %s\n", module_name, dlerror()); 
+    mechanic_error(MECHANIC_ERR_MODULE);
   }
 
   init = load_sym(handler,&md, "init", MECHANIC_MODULE_ERROR);

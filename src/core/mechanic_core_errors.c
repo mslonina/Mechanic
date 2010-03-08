@@ -45,9 +45,9 @@
 
 // HDF error handler
 H5E_auto2_t H5error_handler(void* unused){
-  fprintf(stderr, "An HDF5 error was detected. The error stack is:\n\n");
+  mechanic_message(MECHANIC_MESSAGE_ERR, "An HDF5 error was detected. The error stack is:\n\n");
   H5Eprint2(H5E_DEFAULT, stderr);
-  mechanic_abort(MECHANIC_ERR_HDF); 
+  mechanic_error(MECHANIC_ERR_HDF); 
 }
 
 // H5 logs 
@@ -58,6 +58,20 @@ void H5log(){
 // Mechanic error handler
 void mechanic_error(int errcode){
 
+  // We abort on any memory-type error, i.e. wrong mallocs
   if(errcode == MECHANIC_ERR_MEM) mechanic_abort(MECHANIC_ERR_MEM);
+
+  // Abort on any setup error, i.e. config file was not found and option -c is set
+  if(errcode == MECHANIC_ERR_SETUP){
+		mechanic_message(MECHANIC_MESSAGE_ERR,"Error opening config file:");
+    mechanic_abort(MECHANIC_ERR_SETUP);
+  }
+  
+  // We abort on any hdf-related error, i.e. error during data writing
+  if(errcode == MECHANIC_ERR_HDF) mechanic_abort(MECHANIC_ERR_HDF);
+
+  // We abort on any module-related error, i.e. module was not found
+  if(errcode == MECHANIC_ERR_MODULE) mechanic_abort(MECHANIC_ERR_MODULE);
+
   return;
 }

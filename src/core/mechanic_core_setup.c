@@ -68,10 +68,7 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
    fclose(read);
   }
   // If -c is set, but file doesn't exist, abort. 
-  else if((read == NULL) && (flag == 1)){
-		mechanic_message(MECHANIC_MESSAGE_ERR,"Error opening config file:");
-    mechanic_abort(MECHANIC_ERR_SETUP);
-	}
+  else if((read == NULL) && (flag == 1)) mechanic_error(MECHANIC_ERR_SETUP);
   // We don't insist on having config file present, we just use defaults instead 
   else{
     mechanic_message(MECHANIC_MESSAGE_WARN, "Config file not specified/doesn't exist. Will use defaults.\n");
@@ -82,7 +79,7 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
 		mechanic_message(MECHANIC_MESSAGE_WARN, "Config file seems to be empty.\n");
 	}
 
-  if(opts < 0) mechanic_abort(MECHANIC_ERR_SETUP);
+  if(opts < 0) mechanic_error(MECHANIC_ERR_SETUP);
   
   return opts;
 }

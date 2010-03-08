@@ -168,6 +168,13 @@ int echo_pixelCoords(int slave, int t[], moduleInfo* md, configData* d, masterDa
   return 0;
 }
 
+int echo_beforePixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
+  return 0;
+}
+
+int echo_afterPixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
+  return 0;
+}
 /**
  * @fn int echo_pixelCompute(int slave, moduleInfo* md, configData* d, masterData* r)
  * @brief Pixel compute routine.
@@ -198,6 +205,14 @@ int echo_pixelCompute(int slave, moduleInfo* md, configData* d, masterData* r){
    }
   
    return 0;
+}
+
+int echo_nodeIN(int mpi_size, int node, moduleInfo* md, configData* d){
+  return 0;
+}
+
+int echo_nodeOUT(int mpi_size, int node, moduleInfo* md, configData* d){
+  return 0;
 }
 
 /**
