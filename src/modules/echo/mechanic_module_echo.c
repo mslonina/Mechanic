@@ -40,46 +40,12 @@
  * OF SUCH DAMAGE.
  */
 
-/**
- * @page api
- * @section modules
- * @subsection echo The Echo module
- * 
- * @brief The Echo module is the default module loaded by Mechanic and it uses all functions
- * provided in the User API.
- *
- * The Echo module is the default module loaded by Mechanic and it uses
- * all functions provided in the User API. The main purpose of it is to show how to use 
- * these functions.
- *
- * Master Data struct is defined as follows:
- * typedef struct{
- *   int count[3]; <-- handles x,y coords and number of the pixel
- *   MY_DATATYPE res[1]; <-- handles result vector, resizable with mrl variable
- * }
- *
- * @subsubsection echocasestudies Case studies
- *  - Each slave does the same -- 
- *    This is the simplest case of using Mechanic. The only thing to do is to define 
- *    pixelCompute function and return some data to master node with masterData struct.
- *    You can also do something in functions IN/OUT, but in that case it is not really necessary.
- *
- *  - Each slave has different config file
- *    This time You need to read config file for each slave separately. This can be done with 
- *    LibReadConfig in slaveIN function and config files named after slave number, i.e. slave22.
- *
- *  - Each slave has different pixelCompute function.
- *    At this point You need to create some subfunctions of pixelCompute and choose them
- *    accordingly to number of the slave, i.e. in the switch routine.
- *
- *  - Each slave has both different config file and different pixelCompute
- *    Just combining two cases in simple switch routines and it should work too.
- *
- */
-
 #include "mechanic.h"
 #include "mechanic_module_echo.h"
 
+/**
+ * Implementation of module_init()
+ */
 int echo_init(moduleInfo* md){
 
   md->name = "echo";
@@ -91,25 +57,22 @@ int echo_init(moduleInfo* md){
   return 0;
 }
 
+/**
+ * Implementation of module_query()
+ */
 int echo_query(moduleInfo* md){
   return 0;
 }
+
+/**
+ * Implementation od module_cleanup()
+ */
 int echo_cleanup(moduleInfo* md){
   return 0;
 }
 
 /**
- * @fn int echo_farmResolution(int x, int y, moduleInfo* md, configData* d)
- * @brief Defines the resolution of the farm.
- *
- * @param mode
- * @param *md
- * @param x
- * @param y
- *
- * @return 
- * Farm resolution
- *
+ * Implementation of module_farmResolution()
  */
 int echo_farmResolution(int x, int y, moduleInfo* md, configData* d){
   
@@ -121,20 +84,7 @@ int echo_farmResolution(int x, int y, moduleInfo* md, configData* d){
 }
 
 /**
- * @fn int echo_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md, configData* d)
- * @brief Defines pixel mapping in the farm.
- *
- * You can overwrite echo pixel coords alignment here.
- * Used only when method = 6.
- *
- * @param t
- *   Coords array, sent to each slave.
- * @param p
- * @param x
- * @param y
- * @param *md
- * @param *d
- *
+ * Implementation of module_pixelCoordsMap
  */
 int echo_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md, configData* d){
   
@@ -144,22 +94,17 @@ int echo_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md, configData
 }
 
 /**
- * @fn int echo_pixelCoords(int slave, int t[], moduleInfo* md, configData* d, masterData* r)
- * @brief Pixel coords mapping.
+ * Implementation of module_pixelCoords()
  *
- * Each slave takes the pixel coordinates and then do its work.
- * Here You can change pixel assignment to output masterData r.
- *
- * Used only when method = 6.
- *
- * @param slave
- * @param t
- * @param *md
- * @param *d
- * @param *r
+ * Default assignment is to copy t[] values to master result array:
+ * @code
+ * r->coords[0] = t[0] //x
+ * r->coords[1] = t[1] //y
+ * r->coords[2] = t[2] //number of the pixel
+ * @endcode
  *
  */
-int echo_pixelCoords(int slave, int t[], moduleInfo* md, configData* d, masterData* r){
+int echo_pixelCoords(int node, int t[], moduleInfo* md, configData* d, masterData* r){
           
   r->coords[0] = t[0]; //x 
   r->coords[1] = t[1]; //y
@@ -168,34 +113,10 @@ int echo_pixelCoords(int slave, int t[], moduleInfo* md, configData* d, masterDa
   return 0;
 }
 
-int echo_beforePixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
-  return 0;
-}
-
-int echo_afterPixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
-  return 0;
-}
 /**
- * @fn int echo_pixelCompute(int slave, moduleInfo* md, configData* d, masterData* r)
- * @brief Pixel compute routine.
- * 
- * The heart. Here You can compute your pixels. Possible extenstions:
- * - Each slave has its own pixelCompute routine. You can use them accordingly to
- *   slave number in the switch loop.
- * - Each slave has the same pixelCompute routine. 
- *
- * Example:
- * We assign some values to the result array of masterData r and 
- * do some weird computations.
- *
- * @param slave
- * @param *md
- * @param *d
- * @param *r
- *
- *
+ * Implementation of module_pixelCompute()
  */
-int echo_pixelCompute(int slave, moduleInfo* md, configData* d, masterData* r){
+int echo_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
 
   int i = 0;
 
@@ -208,77 +129,77 @@ int echo_pixelCompute(int slave, moduleInfo* md, configData* d, masterData* r){
 }
 
 /**
- * @page template Template system
- *
- * We have some template system:
- * - nodeIN
- * - nodeOUT
- * - node_beforeSend
- * - node_afterSend
- * - node_beforeReceive
- * - node_afterReceive
- *
- * Each function above can be overriden by master/slave function accordingly.
+ * Implementation of module_node_beforePixelCompute()
  */
-
+int echo_node_beforePixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
+  return 0;
+}
 
 /**
- * @fn int echo_nodeIN(int mpi_size, moduleInfo* md, configData* d)
- * @brief This function is called before any farm operations.
- *
- * You can do something before computations starts.
- *
- * @param mpi_size
- * @param node
- * @param *md
- * @param *d
- *
- * @ingroup themeable
- *
+ * Implementation of module_node_afterPixelCompute()
  */
+int echo_node_afterPixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
+  return 0;
+}
 
-int echo_nodeIN(int mpi_size, int node, moduleInfo* md, configData* d){
+/**
+ * Implementation of module_node_in()
+ */
+int echo_node_in(int mpi_size, int node, moduleInfo* md, configData* d){
   mechanic_message(MECHANIC_MESSAGE_INFO, "NodeIN [%d]\n", node);
   return 0;
 }
 
-int echo_nodeOUT(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
+/**
+ * Implementation of module_node_out()
+ */
+int echo_node_out(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
   mechanic_message(MECHANIC_MESSAGE_INFO, "NodeOUT [%d]\n", node);
   return 0;
 }
 
+/**
+ * Implementation of module_node_beforeSend()
+ */
 int echo_node_beforeSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
 
+/**
+ * Implementation of module_node_afterSend()
+ */
 int echo_node_afterSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
 
+/**
+ * Implementation of module_node_beforeReceive()
+ */
 int echo_node_beforeReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
 
+/**
+ * Implementation of module_node_afterReceive()
+ */
 int echo_node_afterReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
+
+/**
+ * Implementation of module_node_in()
+ */
 int echo_masterIN(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 
 /**
- * @fn int echo_masterOUT(int nodes, moduleInfo* md, configData* d, masterData* r)
- * @brief This function is called after all operations are performed.
- * 
+ * Implementation of module_node_out()
+ *
  * Example:
  * Here, we just copy slave data files into one master file.
- *
- * @param nodes
- * @param *md
- * @param *d
- * @param *r
  */
-int echo_masterOUT(int nodes, int node, moduleInfo* md, configData* d, masterData* r){
+int echo_master_out(int nodes, int node, moduleInfo* md, configData* d, masterData* r){
   
   int i = 0;
   hid_t fname, masterfile, masterdatagroup;
@@ -306,46 +227,40 @@ int echo_masterOUT(int nodes, int node, moduleInfo* md, configData* d, masterDat
   H5Fclose(masterfile);
   stat = H5close();
   
-  mechanic_message(MECHANIC_MESSAGE_INFO, "Master process OVER & OUT.\n");
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Master process [%d] OVER & OUT.\n", node);
   return 0;
 }
 
 /**
- * 
- * @fn int echo_master_beforeSend(int slave, moduleInfo* md, configData* d, masterData* r)
- * @brief Called before send data to slaves.
- *
- * @fn int echo_master_afterSend(int slave, moduleInfo *md, configData* d, masterData* r)
- * @brief Called after data was send to slaves.
- *
- * @fn int echo_master_beforeReceive(moduleInfo* md, configData* d, masterData* r)
- * @brief Called before data receive from the slave.
- *
- * @fn int echo_master_afterReceive(int slave, moduleInfo* md, configData* d, masterData* r)
- * @brief Called after data is received.
- * 
+ * Implementation of module_node_beforeSend()
  */
 int echo_master_beforeSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
+
+/**
+ * Implementation of module_node_afterSend()
+ */
 int echo_master_afterSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
+
+/**
+ * Implementation of module_node_beforeReceive()
+ */
 int echo_master_beforeReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
+
+/**
+ * Implementation of module_node_afterReceive()
+ */
 int echo_master_afterReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
 
-/*
- * 
- * Called before slave starts its work.
- *
- * Do some preparation here, i.e. 
- * -- clear proper arrays in slaveData_t s
- * -- read data to struct s, even from different files
- * -- create group/dataset for the slave etc.
+/**
+ * Implementation of module_node_in()
  *
  * Example:
  * Here we create slave specific data file.
@@ -354,7 +269,7 @@ int echo_master_afterReceive(int node, moduleInfo* md, configData* d, masterData
  * Data group is incorporated in MASTER_OUT function to one master data file.
  *
  */
-int echo_slaveIN(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
+int echo_slave_in(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
 
   hid_t sfile_id, sdatagroup, gid, string_type;
   hid_t dataset, dataspace;
@@ -382,9 +297,6 @@ int echo_slaveIN(int mpi_size, int node, moduleInfo* md, configData* d, masterDa
    */
   if(stat(nodename,&st) == 0){
       sprintf(oldfile,"old-%s",nodename);
-      /*printf("-> File %s exists!\n", cd.datafile);
-      printf("-> I will back it up for You now\n");
-      printf("-> Backuped file: %s\n",oldfile);*/
       rename(nodename,oldfile);
   }
 
@@ -411,32 +323,40 @@ int echo_slaveIN(int mpi_size, int node, moduleInfo* md, configData* d, masterDa
   return 0;
 }
 
-/*
- * Called after slave done its work.
- *
- * Example:
- * Just prints a message from the slave.
+/**
+ * Implementation of module_node_out()
  */
-int echo_slaveOUT(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
+int echo_slave_out(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
   
   mechanic_message(MECHANIC_MESSAGE_INFO, "SLAVE[%d] OVER & OUT\n", node);
 
   return 0;
 }
 
-/*
- * Called before/after send/receive
- * 
+/**
+ * Implementation of module_node_beforeSend()
  */
 int echo_slave_beforeSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
+
+/**
+ * Implementation of module_node_afterSend()
+ */
 int echo_slave_afterSend(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
+
+/**
+ * Implementation of module_node_beforeReceive()
+ */
 int echo_slave_beforeReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }
+
+/**
+ * Implementation of module_node_afterReceive()
+ */
 int echo_slave_afterReceive(int node, moduleInfo* md, configData* d, masterData* r){
   return 0;
 }

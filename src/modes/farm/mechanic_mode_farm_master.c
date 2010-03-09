@@ -112,7 +112,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);
 
    // Master can do something useful before computations.
-   query = load_sym(handler, md, "nodeIN", "masterIN", MECHANIC_MODULE_SILENT);
+   query = load_sym(handler, md, "node_in", "master_in", MECHANIC_MODULE_SILENT);
    if(query) mstat = query(mpi_size, node, md, d);
 
    // Align farm resolution for given method.
@@ -244,8 +244,8 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     MPI_Type_free(&masterResultsType);
     
     // Master can do something useful after the computations.
-    query = load_sym(handler, md, "nodeOUT", "masterOUT", MECHANIC_MODULE_SILENT);
-    if(query) mstat = query(mpi_size, nodes, md, d, rawdata);
+    query = load_sym(handler, md, "node_out", "master_out", MECHANIC_MODULE_SILENT);
+    if(query) mstat = query(nodes, node, md, d, rawdata);
 
     free(rawdata);
  

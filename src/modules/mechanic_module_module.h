@@ -40,98 +40,29 @@
  * OF SUCH DAMAGE.
  */
 
-/** 
- * @page api
- * @section modules
- * @subsection mandelbrot The Mandelbrot module
- *
- * This module shows how to use basic api of Mechanic to compute any numerical problem,
- * in that case -- the Mandelbrot fractal.
- *
- * We use here only 3 functions: mandelbrot_init(), mandelbrot_cleanup() and 
- * mandelbrot_pixelCompute(). There is an additional function, mandelbrot_generateFractal(), 
- * which shows that you can even add external functions to your module.
- *
- * This module returns also the number of slave which computed given pixel.
- */
-#include "mechanic.h"
-#include "mechanic_module_mandelbrot.h"
+#ifndef MECHANIC_MODULE_MODULE_H
+#define MECHANIC_MODULE_MODULE_H
 
-int mandelbrot_generateFractal(double a, double b, double c);
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <sys/dir.h>
+#include <dirent.h>
+#include <math.h>
+#include <popt.h>
+#include <dlfcn.h>
 
-/**
- * Implementation of module_init()
- */
-int mandelbrot_init(moduleInfo *md){
+#include "mpi.h"
+#include "hdf5.h"
 
-  md->name = "mandelbrot";
-  md->author = "MSlonina";
-  md->date = "2010";
-  md->version = "1.0";
-  md->mrl = 4;
+#include "libreadconfig.h"
 
-  return 0;
-}
-
-/**
- * Implementation of module_cleanup()
- */
-int mandelbrot_cleanup(moduleInfo *md){
-  return 0;
-}
-
-/**
- * Implementation of module_pixelCompute()
- */
-int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d, masterData* r){
-
-  int i = 0;
-  double real_min, real_max, imag_min, imag_max;
-  double scale_real, scale_imag;
-  double c, zoom, offx, offy;
-
-  real_min = -2.0;
-  real_max = 2.0;
-  imag_min = -2.0;
-  imag_max = 2.0;
-  c = 4.0;
-
-  //coordinate system
-  scale_real = (real_max - real_min)/((double)d->xres - 1.0);
-  scale_imag = (imag_max - imag_min)/((double)d->yres - 1.0);
-  
-  r->res[0] = real_min + r->coords[0]*scale_real;
-  r->res[1] = imag_max - r->coords[1]*scale_imag;
-
-  //Mandelbrot set
-  r->res[2] = mandelbrot_generateFractal(r->res[0], r->res[1], c);
-
-  //We also store information about the slave
-  r->res[3] = (double)slave;
-
-  return 0;
-}
-
-/**
- * An example of a custom function
- */
-int mandelbrot_generateFractal(double a, double b, double c){
- 
-  double temp, lengthsq;
-  int max_iter = 256;
-  int count = 0;
-  double zr = 0.0, zi = 0.0;
-  
-  do{
-
-    temp = zr*zr - zi*zi + a;
-    zi = 2*zr*zi + b;
-    zr = temp;
-    lengthsq = zr*zr + zi*zi;
-    count++;
-
-  } while ((lengthsq < c) && (count < max_iter));
- 
-  return count;
-}
-
+#endif

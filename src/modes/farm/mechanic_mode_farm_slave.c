@@ -71,7 +71,7 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
     mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);
    
     // Slave can do something useful before computations.
-    query = load_sym(handler, md, "nodeIN", "slaveIN", MECHANIC_MODULE_SILENT);
+    query = load_sym(handler, md, "node_in", "slave_in", MECHANIC_MODULE_SILENT);
     if(query) mstat = query(mpi_size, node, md, d, rawdata);
 
     qbeforeR = load_sym(handler, md, "node_beforeReceive", "slave_beforeReceive", MECHANIC_MODULE_SILENT);
@@ -99,14 +99,14 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
           qpc = load_sym(handler, md, "pixelCoords", "pixelCoords", MECHANIC_MODULE_ERROR);
           if(qpc) mstat = qpc(node, tab, md, d, rawdata);
        } 
-          qpb = load_sym(handler, md, "beforePixelCompute", "beforePixelCompute", MECHANIC_MODULE_SILENT);
+          qpb = load_sym(handler, md, "node_beforePixelCompute", "slave_beforePixelCompute", MECHANIC_MODULE_SILENT);
           if(qpb) mstat = qpb(node, md, d, rawdata);
 
           // PIXEL COMPUTATION
           qpx = load_sym(handler, md, "pixelCompute", "pixelCompute", MECHANIC_MODULE_ERROR);
           if(qpx) mstat = qpx(node, md, d, rawdata);
           
-          qpb = load_sym(handler, md, "afterPixelCompute", "afterPixelCompute", MECHANIC_MODULE_SILENT);
+          qpb = load_sym(handler, md, "node_afterPixelCompute", "slave_afterPixelCompute", MECHANIC_MODULE_SILENT);
           if(qpb) mstat = qpb(node, md, d, rawdata);
           
           qbeforeS = load_sym(handler, md, "node_beforeSend", "slave_beforeSend", MECHANIC_MODULE_SILENT);
@@ -129,7 +129,7 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
     }
     
     // Slave can do something useful after computations.
-    query = load_sym(handler, md, "nodeOUT", "slaveOUT", MECHANIC_MODULE_SILENT);
+    query = load_sym(handler, md, "node_out", "slave_out", MECHANIC_MODULE_SILENT);
     if(query) mstat = query(mpi_size, node, md, d, rawdata);
 
     free(rawdata);

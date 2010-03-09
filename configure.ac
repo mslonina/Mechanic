@@ -10,6 +10,8 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_PREFIX_DEFAULT(`pwd`/build)
 
+AC_DEFINE([PACKAGE_URL], ["http://mechanics.astri.umk.pl/projects/mechanic"], [Define package url])
+
 save_CC=$CC
 AX_MPI([USE_MPI="yes"],[USE_MPI="no"])
 AS_IF([test AS_VAR_GET([USE_MPI]) != no],[
@@ -71,6 +73,7 @@ AC_OUTPUT(Makefile \
           src/modules/Makefile \
           src/modules/echo/Makefile \
           src/modules/mandelbrot/Makefile \
+          src/modules/hello/Makefile \
           doc/Makefile \
           examples/Makefile \
           examples/hello/Makefile)
