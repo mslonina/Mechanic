@@ -51,47 +51,93 @@
  */
 
 /**
- * @page overview Overview
- * @page installation Installation
- * @page storage Data scheme
- * @page setup Setup
- * @page api User API
- * @section modules Modules
- * @section example An example module
- * @page checkpoint Checkpoints
- * @page troubleshooting Troubleshooting
+ * @page manual User's Manual
+ * @defgroup g_setup
+ * @{
+ * @}
  *
  */
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
 /**
- * @page overview
+ * @mainpage
+ * @section overview
+ * 
+ * Handling numerical integrations is not a trivial task, either in one- or multi-cpu
+ * environments. It can be a very stressfull job, especially when you deal with many sets
+ * of initial conditions (like in many dynamical problems) and is full of human-based
+ * mistakes. 
  *
- * Mechanic is a multi-purpose numerical framework and interface. It is written in
- * ANSI C with help of MPI and HDF5 storage. It uses LibReadConfig for handling configuration
+ * Our main research is focused on studying dynamics of planetary systems, thus
+ * it requires numerical job to be carefully done. Most of the problems can be coded by
+ * hand, in fact, we did it in that way many times, however you can easily find that most
+ * of these task are in some way repeatable.
+ *
+ * Let's have an example: We want to study the dynamics of a four body problem -- we have
+ * a star, two massive planets and a big gap between them. We want to know the dynamical
+ * behaviour (stability or not) of a test earth-like body in the gap. We can observe the
+ * behaviour by using some values of semimajor axis and eccentricity of the small planet and
+ * check the state of the system after some time. Then, we can change these values by a
+ * small delta and observe the state of the system again. If we repeat it in some range of
+ * semimajor axes and in some range of eccentricities we will get a dynamical map of the
+ * planetary system (one can change semimajor axis and eccentricity by other orbital
+ * elements, too). Each pixel of the map is a standalone numerical simulation which takes
+ * some time on one cpu. 
+ *
+ * Now, the first approach is to use one cpu to do all the stuff. However, if computation
+ * of the pixel lasts too long (especially when the configuration is quite stable), the
+ * creation of the dynamical map is a very long process, and can take not one or two
+ * weeks, but one or two months.
+ *
+ * We found another approach. Let's say, we have not one, but 10 cpus. If we can handle
+ * sending initial conditions and receiving results, we can create the dynamical map of
+ * the system at least 10 times faster! 
+ *
+ * And that's the reason we created Mechanic. We needed some kind of a numerical interface
+ * or framework that will handle our dynamical studies. We started by creating simple MPI
+ * task farm model, however we realised quickly that using MPI framework can be useful not
+ * only in image-based operations (dynamical map is a some kind of an image), but also in
+ * many numerical problems with huge sets of initial conditions, or even tasks like
+ * observations reductions, which lasts too long on single cpu. Thus we found that our
+ * interface should handle such situations. 
+ *
+ * Now, Mechanic is a multi-purpose numerical framework and interface. It is written in
+ * ANSI C with help of MPI and HDF5 storage. It provides extensible user API and loadable
+ * module support -- each numerical problem can be coded as a standalone module and loaded
+ * dynamically during runtime. Mechanic uses LibReadConfig for handling configuration
  * and Popt library for commandline args.
  *
- * Mechanic provides user with powerfull API, Each numerical problem can be programmed as a module 
- * and loaded dynamically during runtime.
- *
  * The latest snapshot can be grabbed from http://git.astri.umk.pl
- *
- * @page installation
+ */
+
+/**
+ * @mainpage
+ * @section installation
  * Mechanic follows standard UNIX-like installation procedure.
  *
  * For compiling and running Mechanic you need at least:
+ *
  *  - MPI and HDF5 > 1.8
  *  - LibReadConfig with HDF5 support
  *  - Popt
  *  - C compiler
  *
  * To compile Mechanic use following commands:
- * @verbatim
-  ./configure
-  make
-  make install
-  @endverbatim
+ * 
+ * @code
+ * ./configure
+ * make
+ * make install
+ * @endcode
+ *
+ * The standard installation includes example modules and documentation and requires MPI.
+ * If you want to build Mechanic on a single-cpu environment, use @c --disable-mpi switch of
+ * @c configure. You can also disable example modules with @c --disable-examples and
+ * documentation @c --disable-doc.
+ *
+ * If you want to create a module with Fortran code, remember to use proper Fortran
+ * compiler. 
  *
  */
 int main(int argc, char *argv[]){  
@@ -194,20 +240,47 @@ int main(int argc, char *argv[]){
   int numCT = 8;
 
   /**
-   * @page setup 
+   * @mainpage
+   * @section setup Setup
+   *
    * There are two ways to setup the computations: the config file and commandline args.
    * 
-   * Below is a setup steps:
+   * The setup steps are as follows:
+   *
    *  - Read defaults
-   *  - Read args
-   *  - If one of arg is -c or --config read config file 
-   *  - Override config values according to args
+   *  - Read commandline args
+   *  - If one of the args is @c -c or @c --config read config file 
+   *  - Override config values according to the args
    *
-   * If default config file is not present, use fixed defaults.
-   * If option -c is set, but the file doesn't exit, abort.
+   * If default config file is not present, Mechanic will use fixed defaults.
+   * If option @-c is set, but the file doesn't exit, Mechanic will abort.
    *
-   * @section cli Commandline args
-   * Mechanic uses the Popt library for handling commandline args.
+   * The configuration is stored in master file, @see storage.
+   *
+   * @subsection cli Commandline args
+   * Mechanic uses the Popt library for handling commandline args. The possible arguments
+   * are:
+   *
+   * - @c --help @c --usage @c -? -- prints help message
+   * - @c --name @c -n  -- problem name
+   * - @c --config @c -c -- config file
+   * - @c --module @c -p -- module 
+   * - @c --method @c -m -- method (0 -- default, 6 -- user-defined)
+   * - @c --xres @c -x -- x resolution
+   * - @c --yres @c -y -- y resolution
+   * - @c --checkpoint @c -d -- checkpoint write interval
+   *
+   * Restart (checkpoints) options are:
+   *
+   * - @c --restart @c -r -- switch to restart mode
+   * - @c --rpath @c -b -- checkpoint file path
+   *
+   * Mechanic can operate in different modes, @see modes for detailes. You can switch
+   * between them by using:
+   *
+   * - @c -0 -- masteralone mode
+   * - @c -1 -- task farm mode
+   * - @c -2 -- multi task farm mode
    */
   struct poptOption mechanic_poptHelpOptions[] = {
     { NULL, '\0', POPT_ARG_CALLBACK, (void *)mechanic_displayUsage, 0, NULL, NULL },
@@ -276,9 +349,27 @@ int main(int argc, char *argv[]){
   poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
 
   /**
-   * @page setup
-   * @section configfile Config file
-   * Mechanic uses LibReadConfig for handling config files.
+   * @mainpage
+   * @subsection configfile Config file
+   *
+   * Mechanic uses LibReadConfig for handling config files. To load configuration from 
+   * custom config file use @c -c switch. The sample config file is given below:
+   *
+   * @code[default]
+   * name= hello
+   * xres = 4 #must be greater than 0
+   * yres = 4 #must be greater than 0
+   * method = 0 #single pixel -- 0, userdefined -- 6
+   * module = echo
+   * mode = 1
+   *
+   * [logs]
+   * checkpoint=4
+   * @endcode
+   *
+   * If any of variables is missing, Mechanic will use defaults. Namespaces are mandatory
+   * and Mechanic will abort if missing. The abort will occur also if any other not-known
+   * variable will be used in configuration file.
    *
    */
   optvalue = poptGetNextOpt(poptcon);
@@ -311,7 +402,8 @@ int main(int argc, char *argv[]){
   }
 
   /**
-   * @page checkpoint
+   * @page manual
+   * @section checkpoint Checkpoints
    *
    * TODO:
    * 1) -r should take problem name as an argument -- DONE
@@ -383,20 +475,21 @@ int main(int argc, char *argv[]){
    
     // Security check
     if (cd.xres == 0 || cd.yres == 0){
-       printf("X/Y map resolution should not be set to 0!\n");
-       printf("If You want to do only one simulation, please set xres = 1, yres = 1\n");
+       mechanic_message(MECHANIC_MESSAGE_ERR, "X/Y map resolution should not be set to 0!\n");
+       mechanic_message(MECHANIC_MESSAGE_ERR,"If You want to do only one simulation, please set xres = 1, yres = 1\n");
        mechanic_error(MECHANIC_ERR_SETUP);
     }
 
-    printf("\n-> Mechanic will use these startup values:\n\n");
+    mechanic_message(MECHANIC_MESSAGE_INFO,"Mechanic will use these startup values:\n\n");
     LRC_printAll(allopts,cs);
   }
 
   poptFreeContext(poptcon);
  
   /**
-   * @page api
-   * @section modules 
+   * @page manual
+   * @section api UserAPI
+   * @subsection modules 
    * The module interface allows user to load dynamically code with almost any type of
    * numerical problems. To load a module, use -p switch or "module" variable in the
    * config file. Otherwise, the default Echo module will be used.
@@ -431,7 +524,8 @@ int main(int argc, char *argv[]){
     }
  
    /**
-    * @page storage 
+    * @page manual
+    * @section storage Storage
     *
     * We write data in the following scheme:
     *  - /config -- configuration file
@@ -494,20 +588,21 @@ int main(int argc, char *argv[]){
   cleanup = load_sym(handler, &md, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
   if(cleanup) mstat = cleanup(&md);
 
-  // MODULE UNLOAD
+  // Module unload
   dlclose(handler);
   
-  // HDF5 FINALIZE 
+  // HDF5 finalize 
   H5close();
 	
-  // FINALIZE 
+  // Finalize
   mechanic_finalize(node);
 
   return 0;
 }
 
 /** 
- * @page troubleshooting
+ * @page manual
+ * @section troubleshooting Troubleshooting
  * Some known bugs. 
  */
 
