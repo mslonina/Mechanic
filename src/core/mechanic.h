@@ -87,8 +87,8 @@ typedef struct {
  * MASTER DATA
  */
 typedef struct {
- int coords[3]; //0 - x 1 - y 2 - number of the pixel
  MECHANIC_DATATYPE *res;
+ int coords[3]; //0 - x 1 - y 2 - number of the pixel
 } masterData;
 
 // Module info and handler 

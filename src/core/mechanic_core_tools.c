@@ -72,7 +72,7 @@ int* map2d(
     configData* d) //< [in] Pointer to config data struct
 {
    
-  int* ind;
+  uintptr_t* ind;
    int x, y;
    x = d->xres;
    y = d->yres;

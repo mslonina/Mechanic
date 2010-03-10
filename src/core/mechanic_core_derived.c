@@ -55,15 +55,15 @@ int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsT
   MPI_Datatype typelist[2];
   MPI_Aint addresses[3];
 
-  typelist[0] = MPI_INT;
-  typelist[1] = MPI_DOUBLE;
+  typelist[0] = MPI_DOUBLE;
+  typelist[1] = MPI_INT;
 
-  block_lengths[0] = 3;
-  block_lengths[1] = mrl;
+  block_lengths[0] = mrl;
+  block_lengths[1] = 3;
 
   MPI_Address(md, &addresses[0]);
-  MPI_Address(md->coords, &addresses[1]);
-  MPI_Address(md->res, &addresses[2]);
+  MPI_Address(md->res, &addresses[1]);
+  MPI_Address(md->coords, &addresses[2]);
 
   displacements[0] = addresses[1] - addresses[0];
   displacements[1] = addresses[2] - addresses[0];
