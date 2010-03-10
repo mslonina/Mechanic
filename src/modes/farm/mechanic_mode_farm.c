@@ -46,6 +46,7 @@
 
 int mechanic_mode_farm(int node, void* handler, moduleInfo* md, configData* d){
 
+	mechanic_message(MECHANIC_MESSAGE_DEBUG,"d = %d",d->checkpoint);
   if(node == 0) mechanic_mode_farm_master(node, handler, md, d);
   if(node != 0) mechanic_mode_farm_slave(node, handler, md, d);
 

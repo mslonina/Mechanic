@@ -222,6 +222,8 @@ void mechanic_message(int type, char *fmt, ...){
     if(type == MECHANIC_MESSAGE_INFO) printf("-> %s", fmt2);
     if(type == MECHANIC_MESSAGE_ERR) perror(fmt2);
     if(type == MECHANIC_MESSAGE_CONT) printf("   %s", fmt2);
+		if(type == MECHANIC_MESSAGE_WARN) printf("!! %s", fmt2);
+		//if(type == MECHANIC_MESSAGE_DEBUG) printf("  %s", fmt2);
   va_end(args);
  
 }

@@ -47,6 +47,7 @@
   #include <config.h>
 #endif
 
+#include <inttypes.h> //for 32 and 64 bits
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,6 +65,7 @@
 #include <math.h>
 #include <popt.h>
 #include <dlfcn.h>
+
 
 #if HAVE_MPI_SUPPORT
   #include "mpi.h"

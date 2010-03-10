@@ -54,11 +54,11 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    int i = 0, k = 0, j = 0, nodes = 0, farm_res = 0;
    int npxc = 0; //number of all sent pixels
    int count = 0; //number of pixels to receive
-   int check = 0;
+   int check = 0; //current number of received data
 
    int mstat;
    
-   masterData *rawdata;
+   masterData rawdata;
 
    // Checkpoint storage 
    int** coordsarr;
@@ -74,34 +74,36 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    module_query_int_f qr;
  
    // Allocate memory for rawdata.res array.
-   rawdata = malloc(sizeof(masterData) + (md->mrl-1)*sizeof(MECHANIC_DATATYPE));
-   if(rawdata == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-   clearArray(rawdata->res, ITEMS_IN_ARRAY(rawdata->res));
+   rawdata.res = realloc(NULL, ((uintptr_t)md->mrl)*sizeof(MECHANIC_DATATYPE));
+   if(rawdata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
+/* 
+ //Allocation tests
+	 for(i = 0; i < md->mrl; i++) rawdata.res[i] = (double)i;
+	 for(i = 0; i < md->mrl; i++) printf("res[%d] = %2.2f\n", i, rawdata.res[i]);
+*/
    
-  coordsarr = malloc(sizeof(int*)*d->checkpoint);
+  coordsarr = malloc(sizeof(uintptr_t)*((uintptr_t)d->checkpoint + 1));
   if(coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  resultarr = malloc(sizeof(MECHANIC_DATATYPE*)*d->checkpoint);
+  resultarr = malloc(sizeof(MECHANIC_DATATYPE)*((uintptr_t)d->checkpoint + 1));
   if(resultarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   for(i = 0; i < d->checkpoint; i++){
-     coordsarr[i] = malloc(sizeof(int*)*3);
+     coordsarr[i] = malloc(sizeof(uintptr_t)*3);
      if(coordsarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
      
-     resultarr[i] = malloc(sizeof(MECHANIC_DATATYPE*)*md->mrl);
+     resultarr[i] = malloc(sizeof(MECHANIC_DATATYPE)*((uintptr_t)md->mrl));
      if(resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
      
-     clearArray(resultarr[i],ITEMS_IN_ARRAY(resultarr[i]));
   }
 
    // Allocate memory for board
    if(d->restartmode == 1){
-    board = malloc(sizeof(int*)*d->xres);
+    board = malloc(sizeof(uintptr_t)*((uintptr_t)d->xres));
     if(board == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
     for(i = 0; i < d->xres; i++) 
-      board[i] = malloc(sizeof(int*)*d->yres);
+      board[i] = malloc(sizeof(uintptr_t)*((uintptr_t)d->yres));
       if(board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
     
    }
@@ -109,7 +111,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    if(d->restartmode == 1) H5readBoard(d, board);
 
    // Build derived type for master result
-   mstat = buildMasterResultsType(md->mrl, rawdata, &masterResultsType);
+   mstat = buildMasterResultsType(md->mrl, &rawdata, &masterResultsType);
 
    // Master can do something useful before computations.
    query = load_sym(handler, md, "node_in", "master_in", MECHANIC_MODULE_SILENT);
@@ -136,12 +138,12 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    // remembering what the farm resolution is.
    for (i = 1; i < nodes; i++){
      qbeforeS = load_sym(handler, md, "node_beforeSend", "master_beforeSend", MECHANIC_MODULE_SILENT);
-     if(qbeforeS) mstat = qbeforeS(i, md, d, rawdata);
+     if(qbeforeS) mstat = qbeforeS(i, md, d, &rawdata);
 
      MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
      
      qafterS = load_sym(handler, md, "node_afterSend", "master_afterSend", MECHANIC_MODULE_SILENT);
-     if(qafterS) mstat = qafterS(i, md, d, rawdata);
+     if(qafterS) mstat = qafterS(i, md, d, &rawdata);
      
      count++;
      npxc++;
@@ -160,22 +162,27 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    while (1) {
     
      qbeforeR = load_sym(handler, md, "node_beforeReceive", "master_beforeReceive", MECHANIC_MODULE_SILENT);
-     if(qbeforeR) mstat = qbeforeR(0, md, d, rawdata);
+     if(qbeforeR) mstat = qbeforeR(0, md, d, &rawdata);
       
-     MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
+     MPI_Recv(&rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
      count--;
       
       qafterR = load_sym(handler, md, "node_afterReceive", "master_afterReceive", MECHANIC_MODULE_SILENT);
-      if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, rawdata);
+      if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &rawdata);
    
       // Copy data to checkpoint arrays
-      coordsarr[check][0] = rawdata->coords[0];
-      coordsarr[check][1] = rawdata->coords[1];
-      coordsarr[check][2] = rawdata->coords[2];
+       coordsarr[check][0] = rawdata.coords[0];
+       coordsarr[check][1] = rawdata.coords[1];
+       coordsarr[check][2] = rawdata.coords[2];
+
+			 mechanic_message(MECHANIC_MESSAGE_DEBUG, "[%d, %d, %d]\n", rawdata.coords[0], rawdata.coords[1], rawdata.coords[2]);
      
       for(j = 0; j < md->mrl; j++){
-        resultarr[check][j] = rawdata->res[j];
+         resultarr[check][j] = rawdata.res[j];
+				 mechanic_message(MECHANIC_MESSAGE_DEBUG,"%2.2f\t",rawdata.res[j]);
       }
+			mechanic_message(MECHANIC_MESSAGE_DEBUG,"\n");
+
       check++;
 
       /* We write data only on checkpoint:
@@ -185,7 +192,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
        * */
 
       if(check % d->checkpoint == 0){//FIX ME: add UPS checks  
-        mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+      //  mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
         check = 0;
       }
 
@@ -193,14 +200,14 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
       if (npxc < farm_res){
        
         qbeforeS = load_sym(handler, md, "node_beforeSend", "master_beforeSend", MECHANIC_MODULE_SILENT);
-        if(qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, rawdata);
+        if(qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, &rawdata);
          
         MPI_Send(map2d(npxc, handler, md, d), 3, MPI_INT, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
         npxc++;
         count++;
         
         qafterS = load_sym(handler, md, "node_afterSend", "master_afterSend", MECHANIC_MODULE_SILENT);
-        if(qafterS) mstat = qafterS(mpi_status.MPI_SOURCE, md, d, rawdata);
+        if(qafterS) mstat = qafterS(mpi_status.MPI_SOURCE, md, d, &rawdata);
 
       } else {
         break;
@@ -214,26 +221,26 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     for (i = 0; i < count; i++){
       
       qbeforeR = load_sym(handler, md, "node_beforeReceive", "master_beforeReceive", MECHANIC_MODULE_SILENT);
-      if(qbeforeR) mstat = qbeforeR(0, md, d, rawdata);
+      if(qbeforeR) mstat = qbeforeR(0, md, d, &rawdata);
         
-      MPI_Recv(rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
+      MPI_Recv(&rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
       
       qafterR = load_sym(handler, md, "node_afterReceive", "master_afterReceive", MECHANIC_MODULE_SILENT);
-      if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, rawdata);
+      if(qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &rawdata);
      
       // Copy data to checkpoint arrays
-      coordsarr[check][0] = rawdata->coords[0];
-      coordsarr[check][1] = rawdata->coords[1];
-      coordsarr[check][2] = rawdata->coords[2];
+       coordsarr[check][0] = rawdata.coords[0];
+       coordsarr[check][1] = rawdata.coords[1];
+       coordsarr[check][2] = rawdata.coords[2];
       
       for(j = 0; j < md->mrl; j++){
-        resultarr[check][j] = rawdata->res[j];
+         resultarr[check][j] = rawdata.res[j];
       }
       check++;
     }
         
     // Write outstanding results to file
-    mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+     mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
 
     // Now, terminate the slaves 
     for (i = 1; i < nodes; i++){
@@ -245,9 +252,9 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     
     // Master can do something useful after the computations.
     query = load_sym(handler, md, "node_out", "master_out", MECHANIC_MODULE_SILENT);
-    if(query) mstat = query(nodes, node, md, d, rawdata);
+    if(query) mstat = query(nodes, node, md, d, &rawdata);
 
-    free(rawdata);
+    free(rawdata.res);
  
   for(i = 0; i < d->checkpoint; i++){
      free(coordsarr[i]);

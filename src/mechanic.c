@@ -61,7 +61,6 @@
 #include "mechanic_internals.h"
 
 /**
- * @mainpage
  * @section overview
  * 
  * Handling numerical integrations is not a trivial task, either in one- or multi-cpu
@@ -112,7 +111,6 @@
  */
 
 /**
- * @mainpage
  * @section installation
  * Mechanic follows standard UNIX-like installation procedure.
  *
@@ -240,7 +238,6 @@ int main(int argc, char *argv[]){
   int numCT = 8;
 
   /**
-   * @mainpage
    * @section setup Setup
    *
    * There are two ways to setup the computations: the config file and commandline args.
@@ -341,7 +338,7 @@ int main(int argc, char *argv[]){
 
   // HDF5 INIT 
   H5open();
-  H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL);
+  //H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL);
   
   if(node == 0) welcome();
 
@@ -349,7 +346,6 @@ int main(int argc, char *argv[]){
   poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
 
   /**
-   * @mainpage
    * @subsection configfile Config file
    *
    * Mechanic uses LibReadConfig for handling config files. To load configuration from 
@@ -377,7 +373,7 @@ int main(int argc, char *argv[]){
   // Bad option handling
   if (optvalue < -1){
     if(node == 0){
-      fprintf(stdout, "%s: %s\n", poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), poptStrerror(optvalue));
+      mechanic_message(MECHANIC_MESSAGE_WARN, "%s: %s\n", poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), poptStrerror(optvalue));
       poptPrintHelp(poptcon, stdout, poptflags);
      }
      poptFreeContext(poptcon);
@@ -468,6 +464,12 @@ int main(int argc, char *argv[]){
     poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
     optvalue = poptGetNextOpt(poptcon);
   
+		// Security check: if mpi_size = 1 switch to masteralone mode
+		if(mpi_size == 1){
+			cd.mode = 0;
+			mechanic_message(MECHANIC_MESSAGE_WARN, "MPI COMM SIZE = 1. Will switch to master alone mode now\n");
+		}
+
     // In case of any commandline arg, we need to reassign config values.
     if(strcmp(name, cd.name) != 0) sprintf(cd.name,"%s",name);
     if(strcmp(module_name, cd.module) != 0) sprintf(cd.module,"%s",module_name);

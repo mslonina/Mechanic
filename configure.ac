@@ -59,6 +59,8 @@ AC_CHECK_LIB(readconfig, LRC_hdfParser, [], [
   exit -1
 ])
 
+AC_DEFINE([HAVE_HDF5_SUPPORT], 1, [Define hdf5 support])
+
 AC_OUTPUT(Makefile \
           src/Makefile \
           src/core/Makefile \
