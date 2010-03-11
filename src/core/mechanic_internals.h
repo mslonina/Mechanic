@@ -66,7 +66,6 @@
 #include <popt.h>
 #include <dlfcn.h>
 
-
 #include "mpi.h"
 
 #include "hdf5.h"
@@ -110,7 +109,6 @@
 #define MECHANIC_DATABOARD "/board" 
 #define MECHANIC_DATAGROUP "/data"
 #define MECHANIC_DATASETMASTER "master"
-
 
 enum Modes {
   MECHANIC_MASTERALONE, 

@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+# wscript for Mechanic
+# Mariusz Slonina, 2010
+# encoding: utf-8
+
+bld.add_subdirs('core modes modules')
+obj = bld.new_task_gen('cc', 'cprogram')
+obj.uselib_local = 'core farm masteralone multifarm'
+obj.includes = '. core'
+obj.source = 'mechanic.c'
+obj.target = 'mechanic'
+obj.uselib = 'LRC HDF5 POPT'
+
