@@ -289,9 +289,7 @@ int main(int argc, char *argv[]){
   configData cd; //struct for command line args
   moduleInfo md; //struct for module info
 
-  #if HAVE_MPI_SUPPORT
-    MPI_Datatype defaultConfigType;
-  #endif
+  MPI_Datatype defaultConfigType;
 
   // Assign default config values 
   name = MECHANIC_NAME_DEFAULT;
@@ -428,12 +426,10 @@ int main(int argc, char *argv[]){
   struct poptOption mechanic_poptModes[] = {
     {"masteralone", '0', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 0,
     "Masteralone",NULL},
-    #if HAVE_MPI_SUPPORT
-      {"farm", '1', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 1,
-        "MPI task farm",NULL},
-      {"multifarm", '2', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 2,
-        "MPI multi task farm",NULL},
-    #endif
+    {"farm", '1', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 1,
+    "MPI task farm",NULL},
+    {"multifarm", '2', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 2,
+    "MPI multi task farm",NULL},
     POPT_TABLEEND
   };
 
@@ -467,13 +463,11 @@ int main(int argc, char *argv[]){
   };
 
   node = 0;
-  #if HAVE_MPI_SUPPORT
-    // MPI INIT 
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-    node = mpi_rank;
-  #endif
+  // MPI INIT 
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  node = mpi_rank;
 
   // HDF5 INIT 
   H5open();
@@ -488,7 +482,7 @@ int main(int argc, char *argv[]){
   // Bad option handling
   if (optvalue < -1){
     if(node == 0){
-      mechanic_message(MECHANIC_MESSAGE_WARN, "%s: %s\n", i
+      mechanic_message(MECHANIC_MESSAGE_WARN, "%s: %s\n", 
 					poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), poptStrerror(optvalue));
       poptPrintHelp(poptcon, stdout, poptflags);
      }
@@ -665,7 +659,6 @@ int main(int argc, char *argv[]){
   H5Fclose(file_id);
 
   }
-  #if HAVE_MPI_SUPPORT
    // MPI CONFIG BCAST
    // Inform slaves what it is all about.
    if(cd.mode == 1 || cd.mode == 2){
@@ -680,21 +673,18 @@ int main(int argc, char *argv[]){
       MPI_Type_free(&defaultConfigType);
     }
    }
-  #endif
   
   // Now load proper routines
   switch(cd.mode){
     case 0:
       mstat = mechanic_mode_masteralone(node, handler, &md, &cd);
       break;
-    #if HAVE_MPI_SUPPORT
     case 1:
       mstat = mechanic_mode_farm(node, handler, &md, &cd);
       break;
     case 2:
       mstat = mechanic_mode_multifarm(node, handler, &md, &cd);
       break;
-    #endif
     default:
       break;
   }

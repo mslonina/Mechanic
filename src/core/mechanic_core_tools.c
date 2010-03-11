@@ -194,20 +194,14 @@ void mechanic_displayUsage(poptContext con, enum poptCallbackReason reason, cons
 
 int mechanic_finalize(int node){
 
-#if HAVE_MPI_SUPPORT
   MPI_Finalize();
-#endif
 
   return 0;
 }
 
 int mechanic_abort(int errcode){
 
-#if HAVE_MPI_SUPPORT
   MPI_Abort(MPI_COMM_WORLD, errcode);
-#else
-  exit(-1)
-#endif
 
   return 0;
 }
