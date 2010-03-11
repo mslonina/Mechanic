@@ -47,21 +47,13 @@
  *
  * @todo
  *   - HDF5 error handling with H5E (including file storage)
- * 
  */
 
-/**
- * @page manual User's Manual
- * @defgroup g_setup
- * @{
- * @}
- *
- */
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
 /**
- * @section overview
+ * @page overview Overview
  * 
  * Handling numerical integrations is not a trivial task, either in one- or multi-cpu
  * environments. It can be a very stressfull job, especially when you deal with many sets
@@ -93,7 +85,7 @@
  * sending initial conditions and receiving results, we can create the dynamical map of
  * the system at least 10 times faster! 
  *
- * And that's the reason we created Mechanic. We needed some kind of a numerical interface
+ * And that's the reason we created @M. We needed some kind of a numerical interface
  * or framework that will handle our dynamical studies. We started by creating simple MPI
  * task farm model, however we realised quickly that using MPI framework can be useful not
  * only in image-based operations (dynamical map is a some kind of an image), but also in
@@ -101,42 +93,166 @@
  * observations reductions, which lasts too long on single cpu. Thus we found that our
  * interface should handle such situations. 
  *
- * Now, Mechanic is a multi-purpose numerical framework and interface. It is written in
+ * Now, @M is a multi-purpose numerical framework and interface. It is written in
  * ANSI C with help of MPI and HDF5 storage. It provides extensible user API and loadable
  * module support -- each numerical problem can be coded as a standalone module and loaded
  * dynamically during runtime. Mechanic uses LibReadConfig for handling configuration
  * and Popt library for commandline args.
  *
  * The latest snapshot can be grabbed from http://git.astri.umk.pl
+ *
+ * To teach you how to use @M as fast as possible, we decided to start this
+ * guide with short crash course of using our software in real life, and then we
+ * follow in details more advanced topics. Enjoy!
  */
 
 /**
- * @section installation
- * Mechanic follows standard UNIX-like installation procedure.
+ * @page installation Installation
+ * @M follows standard UNIX-like installation procedure.
  *
- * For compiling and running Mechanic you need at least:
+ * For compiling and running @M you need at least:
  *
  *  - MPI and HDF5 > 1.8
  *  - LibReadConfig with HDF5 support
  *  - Popt
  *  - C compiler
  *
- * To compile Mechanic use following commands:
+ * To compile @M use following commands:
  * 
- * @code
+ * @verbatim
  * ./configure
  * make
  * make install
- * @endcode
+ * @endverbatim
  *
  * The standard installation includes example modules and documentation and requires MPI.
- * If you want to build Mechanic on a single-cpu environment, use @c --disable-mpi switch of
+ * If you want to build @M on a single-cpu environment, use @c --disable-mpi switch of
  * @c configure. You can also disable example modules with @c --disable-examples and
  * documentation @c --disable-doc.
  *
  * If you want to create a module with Fortran code, remember to use proper Fortran
  * compiler. 
  *
+ */
+
+/**
+ * @page quickstart Getting started
+ * To fully understand what @M is, let's create a small C library, 
+ * named "myhello", as follows:
+ * @verbatim
+ * #include <stdio.h>
+ * #include "mechanic.h"
+ * 
+ * int myhello_init(moduleInfo* md){
+ * 
+ * 	md->author = "Mariusz Slonina"; 
+ * 	md->date = "2010";
+ * 	md->version = "1.0";
+ * 	md->mrl = 3;
+ * 
+ * 	return 0;
+ * }
+ * 
+ * int myhello_cleanup(moduleInfo* md){
+ * 	return 0;
+ * }
+ * 
+ * int myhello_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
+ *
+ * 	r->res[0] = (double)r->coords[0];
+ * 	r->res[1] = (double)r->coords[1];
+ * 	r->res[2] = (double)r->coords[2];
+ * 
+ * 	return 0;
+ * }
+ *
+ * int myhello_slave_out(int nodes, int node, moduleInfo* md, configData* d, masterData* r){
+ * 	mechanic_message(MECHANIC_MESSAGE_INFO, "Hello from slave[%d]\n", node);
+ *  return 0;
+ * } @endverbatim
+ *
+ * Let's save it as @c mechanic_module_myhello.c. The prefix @c mechanic_module_
+ * is important, as well as the name of the module -- as you can see, each
+ * function must be prefixed with the name. 
+ *
+ * The first three functions: @c myhello_init(), @c myhello_cleanup() and @c
+ * myhello_pixelCompute() are required for the module to work. @M will abort
+ * if any of them is missing. The fourth one, @c hello_slave_out() is optional
+ * and belongs to so-called themeable functions group.
+ *
+ * The @c myhello_init() function is called on module initialization and you need
+ * to provide some information about the module, especially, @c md->mrl, which
+ * is the length of the results array sended from the slave node to master node.
+ *
+ * The @c myhello_cleanup() function currently does nothing, however, it is
+ * required for future development. 
+ *
+ * The @c myhello_pixelCompute() is the heart of your module. Here you can compute
+ * any type of numerical problem, even call external applications. In this
+ * simple example we just assign coordinates of the pixel on the map to the
+ * result array.
+ *
+ * The @c myhello_slave_out() prints formatted message from the slave node on the screen.
+ *
+ * We need to compile this example to a shared library. We can do that by
+ * calling
+ * @verbatim
+ * gcc -fPIC mechanic_module_myhello.c -o mechanic_module_myhello.o
+ * gcc -shared mechanic_module_myhello.o -o mechanic_module_myhello.so @endverbatim
+ *
+ * However, @M need to know, where our module is, so we need to adjust @c
+ * LD_LIBRARY_PATH accordingly.
+ * 
+ * We run @M by specifing
+ * @verbatim
+ * mpirun -np 3 mechanic -p myhello @endverbatim
+ * This will run @M on three nodes, in task farm mode, with one master
+ * node and two slaves.
+ * @verbatim
+ * -> Mechanic
+ *  	v. 0.12-UNSTABLE-2
+ *  	Author: MSlonina, TCfA, NCU
+ *  	Bugs: mariusz.slonina@gmail.com
+ *  	http://mechanics.astri.umk.pl/projects/mechanic
+ * !! Config file not specified/doesn't exist. Will use defaults.
+ * -> Mechanic will use these startup values:
+ *
+ * Namespace [default]:
+ * name = mechanic [type 3]
+ * xres = 5 [type 0]
+ * yres = 5 [type 0]
+ * method = 0 [type 0]
+ * module = myhello [type 3]
+ * mode = 1 [type 0]
+ * 
+ * Namespace [logs]:
+ * checkpoint = 2000 [type 0]
+ * checkpoint_num = 0 [type 0]
+ * 
+ * -> Hello from slave[1]
+ * -> Hello from slave[2] @endverbatim
+ *
+ * Two last lines were printed using our simple module. In the working dir 
+ * you should find also @c mechanic-master.h5 file. It is a data file written 
+ * by the master node, and each run of Mechanic will produce such file. 
+ * It containes all information about the setup of the simulation and data received from slaves. 
+ * If you try
+ * @verbatim
+ * h5dump -n mechanic-master.h5 @endverbatim
+ * you should see the following output:
+ * @verbatim
+ * HDF5 "mechanic-master.h5" {
+ * FILE_CONTENTS {
+ *  group      /
+ *  dataset    /board
+ *  group      /config
+ *  dataset    /config/default
+ *  dataset    /config/logs
+ *  group      /data
+ *  dataset    /data/master
+ *  }
+ * }@endverbatim
+ * which describes the data storage in master file. 
  */
 int main(int argc, char *argv[]){  
 
@@ -238,7 +354,7 @@ int main(int argc, char *argv[]){
   int numCT = 8;
 
   /**
-   * @section setup Setup
+   * @page setup Setup
    *
    * There are two ways to setup the computations: the config file and commandline args.
    * 
@@ -252,9 +368,9 @@ int main(int argc, char *argv[]){
    * If default config file is not present, Mechanic will use fixed defaults.
    * If option @-c is set, but the file doesn't exit, Mechanic will abort.
    *
-   * The configuration is stored in master file, @see storage.
+   * The configuration is stored in master file, see storage.
    *
-   * @subsection cli Commandline args
+   * @section cli Commandline options
    * Mechanic uses the Popt library for handling commandline args. The possible arguments
    * are:
    *
@@ -272,12 +388,35 @@ int main(int argc, char *argv[]){
    * - @c --restart @c -r -- switch to restart mode
    * - @c --rpath @c -b -- checkpoint file path
    *
-   * Mechanic can operate in different modes, @see modes for detailes. You can switch
+   * Mechanic can operate in different modes, see modes for detailes. You can switch
    * between them by using:
    *
    * - @c -0 -- masteralone mode
    * - @c -1 -- task farm mode
    * - @c -2 -- multi task farm mode
+	 *
+   * @section configfile Config file
+   *
+   * Mechanic uses LibReadConfig for handling config files. To load configuration from 
+   * custom config file use @c -c switch. The sample config file is given below:
+   *
+   * @verbatim
+	 * [default]
+   * name= hello
+   * xres = 4 #must be greater than 0
+   * yres = 4 #must be greater than 0
+   * method = 0 #single pixel -- 0, userdefined -- 6
+   * module = echo
+   * mode = 1
+   *
+   * [logs]
+   * checkpoint=4
+   * @endverbatim
+   *
+   * If any of variables is missing, Mechanic will use defaults. Namespaces are mandatory
+   * and Mechanic will abort if missing. The abort will occur also if any other not-known
+   * variable will be used in configuration file.
+   *
    */
   struct poptOption mechanic_poptHelpOptions[] = {
     { NULL, '\0', POPT_ARG_CALLBACK, (void *)mechanic_displayUsage, 0, NULL, NULL },
@@ -344,36 +483,13 @@ int main(int argc, char *argv[]){
 
   // Parse command line 
   poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
-
-  /**
-   * @subsection configfile Config file
-   *
-   * Mechanic uses LibReadConfig for handling config files. To load configuration from 
-   * custom config file use @c -c switch. The sample config file is given below:
-   *
-   * @code[default]
-   * name= hello
-   * xres = 4 #must be greater than 0
-   * yres = 4 #must be greater than 0
-   * method = 0 #single pixel -- 0, userdefined -- 6
-   * module = echo
-   * mode = 1
-   *
-   * [logs]
-   * checkpoint=4
-   * @endcode
-   *
-   * If any of variables is missing, Mechanic will use defaults. Namespaces are mandatory
-   * and Mechanic will abort if missing. The abort will occur also if any other not-known
-   * variable will be used in configuration file.
-   *
-   */
   optvalue = poptGetNextOpt(poptcon);
  
   // Bad option handling
   if (optvalue < -1){
     if(node == 0){
-      mechanic_message(MECHANIC_MESSAGE_WARN, "%s: %s\n", poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), poptStrerror(optvalue));
+      mechanic_message(MECHANIC_MESSAGE_WARN, "%s: %s\n", i
+					poptBadOption(poptcon, POPT_BADOPTION_NOALIAS), poptStrerror(optvalue));
       poptPrintHelp(poptcon, stdout, poptflags);
      }
      poptFreeContext(poptcon);
@@ -398,8 +514,7 @@ int main(int argc, char *argv[]){
   }
 
   /**
-   * @page manual
-   * @section checkpoint Checkpoints
+   * @page checkpoint Checkpoints
    *
    * TODO:
    * 1) -r should take problem name as an argument -- DONE
@@ -489,9 +604,8 @@ int main(int argc, char *argv[]){
   poptFreeContext(poptcon);
  
   /**
-   * @page manual
-   * @section api UserAPI
-   * @subsection modules 
+   * @page api UserAPI
+   * @section modules 
    * The module interface allows user to load dynamically code with almost any type of
    * numerical problems. To load a module, use -p switch or "module" variable in the
    * config file. Otherwise, the default Echo module will be used.
@@ -526,8 +640,7 @@ int main(int argc, char *argv[]){
     }
  
    /**
-    * @page manual
-    * @section storage Storage
+    * @page storage Storage
     *
     * We write data in the following scheme:
     *  - /config -- configuration file
@@ -603,8 +716,7 @@ int main(int argc, char *argv[]){
 }
 
 /** 
- * @page manual
- * @section troubleshooting Troubleshooting
+ * @page troubleshooting Troubleshooting
  * Some known bugs. 
  */
 

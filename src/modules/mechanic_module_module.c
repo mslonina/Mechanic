@@ -41,6 +41,7 @@
  */
 
 /**
+ * @internal
  * @page api
  * @section modules
  * @subsection module The Echo module
@@ -74,6 +75,7 @@
 #include "mechanic_module_module.h"
 
 /**
+ * @internal
  * @defgroup module_required Required module functions
  * @{
  * @}
@@ -88,6 +90,7 @@
  */
 
 /**
+ * @internal
  * @fn int module_init(moduleInfo* md)
  * @brief The initial function of the module.
  *
@@ -123,6 +126,7 @@ int module_init(moduleInfo* md){
 }
 
 /**
+ * @internal
  * @fn int module_query(moduleInfo* md)
  * @brief The custom query of the module.
  *
@@ -139,6 +143,7 @@ int module_query(moduleInfo* md){
 }
 
 /**
+ * @internal
  * @fn int module_cleanup(moduleInfo* md)
  * @brief The cleanup functions of the module.
  *
@@ -155,6 +160,7 @@ int module_cleanup(moduleInfo* md){
 }
 
 /**
+ * @internal
  * @fn int module_farmResolution(int x, int y, moduleInfo* md, configData* d)
  * @brief Defines the resolution of the farm (method = 6)
  *
@@ -182,6 +188,7 @@ int module_farmResolution(int x, int y, moduleInfo* md, configData* d){
 }
 
 /**
+ * @internal
  * @fn int module_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md, configData* d)
  * @brief Defines pixel mapping in the farm (method = 6)
  *
@@ -216,6 +223,7 @@ int module_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md, configDa
 }
 
 /**
+ * @internal
  * @fn int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d, masterData* r)
  * @brief Pixel coords mapping
  *
@@ -255,6 +263,7 @@ int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d, masterD
 }
 
 /**
+ * @internal
  * @fn int module_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r)
  * @brief Pixel compute routine
  * 
@@ -285,6 +294,7 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
 }
 
 /**
+ * @internal
  * @page template The template system
  *
  * We have some kind of a template system. Each node-prefixed function can be
@@ -321,6 +331,7 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
  */
 
 /**
+ * @internal
  * @fn int module_node_beforePixelCompute(int node, moduleInfo* md, configData* d, masterData* r)
  * @brief Operates on data before pixel computation
  * 
@@ -348,6 +359,7 @@ int module_node_beforePixelCompute(int node, moduleInfo* md, configData* d, mast
 }
 
 /**
+ * @internal
  * @fn int module_node_afterPixelCompute(int node, moduleInfo* md, configData* d, masterData* r)
  * @brief Operates on data after pixel computation
  * 
@@ -375,6 +387,7 @@ int module_node_afterPixelCompute(int node, moduleInfo* md, configData* d, maste
 }
 
 /**
+ * @internal
  * @fn int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d)
  * @brief Called before any farm operations.
  *
@@ -402,6 +415,7 @@ int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d){
 }
 
 /**
+ * @internal
  * @fn int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d, masterData *r)
  * @brief Called after all farm operations.
  *
@@ -432,6 +446,7 @@ int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d, maste
 }
 
 /**
+ * @internal
  * @fn int module_node_beforeSend(int node, moduleInfo* md, configData* d, masterData* r)
  * @brief Called before send data to slaves.
  *
@@ -457,6 +472,7 @@ int module_node_beforeSend(int node, moduleInfo* md, configData* d, masterData* 
 }
 
 /**
+ * @internal
  * @fn int module_node_afterSend(int node, moduleInfo *md, configData* d, masterData* r)
  * @brief Called after data was send to slaves.
  *
@@ -483,6 +499,7 @@ int module_node_afterSend(int node, moduleInfo* md, configData* d, masterData* r
 }
 
 /**
+ * @internal
  * @fn int module_node_beforeReceive(int node, moduleInfo* md, configData* d, masterData* r)
  * @brief Called before data receive from the slave.
  *
@@ -509,6 +526,7 @@ int module_node_beforeReceive(int node, moduleInfo* md, configData* d, masterDat
 }
 
 /**
+ * @internal
  * @fn int module_node_afterReceive(int node, moduleInfo* md, configData* d, masterData* r)
  * @brief Called after data is received.
  *

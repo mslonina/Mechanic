@@ -84,7 +84,7 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 // Write data to master file 
 int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md, configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
   
-  MECHANIC_DATATYPE rdata[md->mrl][1];
+  MECHANIC_DATATYPE rdata[md->mrl][1]; //use malloc here
   hsize_t co[2], off[2];
   herr_t hdf_status;
   int j = 0;

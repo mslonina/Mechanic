@@ -41,8 +41,7 @@
  */
 
 /** 
- * @page api
- * @section modules
+ * @internal
  * @subsection mandelbrot The Mandelbrot module
  *
  * This module shows how to use basic api of Mechanic to compute any numerical problem,

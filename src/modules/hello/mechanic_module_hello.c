@@ -44,6 +44,7 @@
 #include "mechanic_module_hello.h"
 
 /**
+ * @internal
  * Sample module for Mechanic
  * Keep is simple, but powerful!
  */

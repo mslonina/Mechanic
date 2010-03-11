@@ -192,7 +192,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
        * */
 
       if(check % d->checkpoint == 0){//FIX ME: add UPS checks  
-      //  mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+        mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
         check = 0;
       }
 
