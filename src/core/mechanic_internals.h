@@ -67,10 +67,9 @@
 #include <dlfcn.h>
 
 #include "mpi.h"
-
 #include "hdf5.h"
-
 #include "libreadconfig.h"
+#include "libreadconfig_hdf5.h"
 
 #define MECHANIC_NAME PACKAGE_NAME
 #define MECHANIC_VERSION PACKAGE_VERSION
@@ -139,7 +138,7 @@ int allopts, mpi_size;
 int usage, help;
 
 // FUNCTION PROTOTYPES 
-int* map2d(int, void* handler, moduleInfo*, configData* d);
+uintptr_t* map2d(int, void* handler, moduleInfo*, configData* d);
 
 int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
 int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
@@ -159,13 +158,17 @@ int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
 int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d);
 H5E_auto2_t H5error_handler(void*);
 
-int manageCheckpoints(configData *d);
+int manageCheckPoints(configData *d);
 int H5readBoard(configData* d, int** board);
 int H5writeCheckPoint(moduleInfo *md, configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
 int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** resultarr, moduleInfo *md, configData* d);
 
 void welcome();
 void clearArray(MECHANIC_DATATYPE*,int);
+
+int mechanic_mode_multifarm(int node, void* handler, moduleInfo* md, configData* d);
+int mechanic_mode_farm(int node, void* handler, moduleInfo* md, configData* d);
+int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md, configData* d);
 
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptHelpOptions, \
 			0, "Help options:", NULL },

@@ -50,8 +50,7 @@
  */
 int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configData* d){
 
-   int* tab;
-   int i = 0, k = 0, j = 0, nodes = 0, farm_res = 0;
+   int i = 0, j = 0, nodes = 0, farm_res = 0;
    int npxc = 0; //number of all sent pixels
    int count = 0; //number of pixels to receive
    int check = 0; //current number of received data
@@ -70,7 +69,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
    MPI_Status mpi_status;
    MPI_Datatype masterResultsType;
    
-   module_query_void_f queryIN, queryOUT, qbeforeS, qafterS, qbeforeR, qafterR;
+   module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR;
    module_query_int_f qr;
  
    // Allocate memory for rawdata.res array.

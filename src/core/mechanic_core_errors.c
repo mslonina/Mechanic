@@ -44,12 +44,13 @@
 #include "mechanic_internals.h"
 
 // HDF error handler
-H5E_auto2_t H5error_handler(void* unused){
+/*H5E_auto2_t H5error_handler(void* unused){
   mechanic_message(MECHANIC_MESSAGE_ERR, "An HDF5 error was detected. The error stack is:\n\n");
   H5Eprint2(H5E_DEFAULT, stderr);
   mechanic_error(MECHANIC_ERR_HDF); 
+  return;
 }
-
+*/
 // H5 logs 
 void H5log(){
   return;

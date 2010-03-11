@@ -271,7 +271,7 @@ int echo_master_afterReceive(int node, moduleInfo* md, configData* d, masterData
  */
 int echo_slave_in(int mpi_size, int node, moduleInfo* md, configData* d, masterData* r){
 
-  hid_t sfile_id, sdatagroup, gid, string_type;
+  hid_t sfile_id, gid, string_type;
   hid_t dataset, dataspace;
   hid_t rank = 1;
   hsize_t dimens_1d;

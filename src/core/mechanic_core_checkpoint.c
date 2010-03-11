@@ -45,7 +45,7 @@
 
 int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** resultarr, moduleInfo* md, configData* d){
   
-  int i, mstat;
+  int mstat;
 
   mstat = manageCheckPoints(d);
 
@@ -56,7 +56,6 @@ int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** re
 
 int manageCheckPoints(configData* d){
 
-  int mstat;
   int i;
   char checkpoint[MECHANIC_FILE+6];
   char checkpoint_old[MECHANIC_FILE+6];
@@ -77,14 +76,13 @@ int manageCheckPoints(configData* d){
 // Write checkpoint file (master file) 
 int H5writeCheckPoint(moduleInfo *md, configData *d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr){
  
-  int i = 0, j = 0;
+  int i = 0;
   int mstat;
 
   // HDF 
   hid_t file_id, dset_board, dset_data, data_group;
-  hid_t mapspace, memmapspace, rawspace, memrawspace, maprawspace; 
-  hsize_t co[2], rco[2], off[2];
-  herr_t hdf_status;
+  hid_t mapspace, memmapspace, rawspace, memrawspace; 
+  hsize_t co[2], rco[2];
 
   // Open file 
   file_id = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);

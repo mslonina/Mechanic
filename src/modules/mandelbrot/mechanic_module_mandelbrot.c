@@ -84,10 +84,9 @@ int mandelbrot_cleanup(moduleInfo *md){
  */
 int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d, masterData* r){
 
-  int i = 0;
   double real_min, real_max, imag_min, imag_max;
   double scale_real, scale_imag;
-  double c, zoom, offx, offy;
+  double c;
 
   real_min = -2.0;
   real_max = 2.0;

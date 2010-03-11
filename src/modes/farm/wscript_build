@@ -6,6 +6,7 @@
 obj = bld.new_task_gen('cc', 'cstaticlib')
 obj.find_sources_in_dirs(".")
 obj.includes = ". ../../core"
+obj.uselib_local = 'core'
 obj.target = 'mechanic_mode_farm'
 obj.name = 'farm'
 

@@ -52,7 +52,7 @@
  */
 int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag){
 
-  int i = 0, k = 0, opts = 0, offset = 0;
+  int opts = 0;
   char* sep = "=";
   char* comm = "#";
 

@@ -6,5 +6,6 @@
 obj = bld.new_task_gen('cc', 'cshlib')
 obj.find_sources_in_dirs(".")
 obj.includes = ". ../../core"
+obj.uselib_local = "core"
 obj.target = 'mechanic_module_hello'
 obj.name = 'hello'

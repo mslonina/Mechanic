@@ -51,13 +51,11 @@
 int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData* d){
 
     int* tab=malloc(3*sizeof(*tab));
-    int k = 0, i = 0, j = 0;
    
     int mstat;
 
     module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qpx, qpc, qpb;
     
-    masterData raw;
     masterData rawdata;
     
     MPI_Datatype masterResultsType;

@@ -257,22 +257,18 @@
 int main(int argc, char *argv[]){  
 
   int allopts = 0; //number of namespaces read
-  int i = 0, j = 0, k = 0, opts = 0, n = 0;
   
   char* module_name;
   char* name;
   char* restartname;
   char module_file[MECHANIC_FILE];
-  char* dlresult;
   char optvalue;
   void* handler;
   char oldfile[MECHANIC_FILE_OLD];
-  char restartfile[MECHANIC_FILE];
   char checkpoint_path[MECHANIC_PATH];
 
   poptContext poptcon;
   int poptflags = 0;
-  int error = 0;
   int configfile = 0;
 
   int mpi_rank;
@@ -282,8 +278,6 @@ int main(int argc, char *argv[]){
 
   struct stat st; //stat.h
   
-  module_query_int_f qd;
-
   hid_t file_id;
 
   configData cd; //struct for command line args
@@ -605,7 +599,7 @@ int main(int argc, char *argv[]){
    * config file. Otherwise, the default Echo module will be used.
    *
    */
-  sprintf(module_file, "mechanic_module_%s.so", module_name);
+  sprintf(module_file, "libmechanic_module_%s.so", module_name);
   
   md.name = module_name;
   handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);

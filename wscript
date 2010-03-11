@@ -16,14 +16,47 @@ APPNAME='mechanic'
 URL='http://mechanics.astri.umk.pl/projects/mechanic'
 BUGS='mariusz.slonina@gmail.com'
 
-#LD_LIBRARY_PATH = string.split(os.environ.get("LD_LIBRARY_PATH"),':')
-#INCLUDE_PATH = string.split(os.environ.get("C_INCLUDE_PATH"),':')
-
 srcdir = '.'
 blddir = 'build'
 
-stdlibs = ['stdio.h', 'dlfcn.h', 'locale.h', 'memory.h', 'stdlib.h', 'stdint.h', 'inttypes.h', 
-           'strings.h', 'string.h', 'sys/stat.h', 'sys/types.h', 'unistd.h']
+# Standard headers
+stdheads = ['stdio.h', 'locale.h', 'memory.h', 'stdlib.h', 'stdint.h', 'inttypes.h', 
+           'strings.h', 'string.h', 'sys/stat.h', 'sys/types.h', 'unistd.h',
+					 'mpi.h']
+
+# Standard functions
+stdfunc = [['printf','stdio.h',1],
+					 ['memmove','memory.h',1],
+           ['strcspn','string.h',1],
+           ['strspn','string.h',1],
+           ['strstr','string.h',1],
+           ['strtol','stdlib.h',1],
+           ['strtok','string.h',1],
+					 ]
+
+# Standard types
+stdtypes = [['ssize_t','sys/types.h',1],
+            ['int','sys/types.h',1],
+            ['char','sys/types.h',1],
+            ['double','sys/types.h',1]
+            ]
+
+libm_test_code = '''
+#include <stdio.h>
+#include "math.h"
+
+int main(){
+  int i = 2, j = 4, k = 0;
+  k = pow(i,j);
+  return 0;
+}
+'''
+
+popt_test_code = '''
+'''
+
+dl_test_code = '''
+'''
 
 hdf5_test_code = '''
 #include <stdio.h>
@@ -61,8 +94,7 @@ int main()
 lrc_hdf_test_code='''
 #include <stdio.h>
 #include <stdlib.h>
-#define HAVE_HDF5_SUPPORT 1
-#include "libreadconfig.h"
+#include "libreadconfig_hdf5.h"
 #include "hdf5.h"
 
 int main(int argc, char* argv[]){
@@ -100,104 +132,50 @@ int main(int argc, char* argv[]){
 }
 
 '''
-
+#
 # [Helper] Check for standard headers/functions
-def _check_std_headers(conf, stdlibs):
+#
+def _check_std_headers(conf, heads, funcs, types):
+  for i in heads:
+    conf.check_cc(header_name=i, mandatory=True)
 
-  for i in stdlibs:
-    j = string.split(i,'.h')
-    l = string.split(j[0], '/')
-    if len(l) > 1:
-      j[0] = l[0] + l[1] 
+  for i in funcs:
+    conf.check_cc(function_name=i[0], header_name=i[1], mandatory=i[2])
+  
+  for i in types:
+    conf.check_cc(type_name=i[0], header_name=i[1], mandatory=i[2])
 
-    k = 'HAVE_' + j[0].upper() + '_H'
-    conf.check_cc(header_name=i, define_name=k, mandatory=True)
-
-  conf.check_cc(type_name='ssize_t', header_name='sys/types.h')
-  conf.check_cc(type_name='int', header_name='sys/types.h')
-  conf.check_cc(type_name='char', header_name='sys/types.h')
-  conf.check_cc(type_name='double', header_name='sys/types.h')
-  conf.check_cc(function_name='printf', header_name='stdio.h', mandatory=True)
-  conf.check_cc(function_name='memmove', header_name='memory.h', mandatory=True)
-  conf.check_cc(function_name='strcspn', header_name='string.h', mandatory=True)
-  conf.check_cc(function_name='strspn', header_name='string.h', mandatory=True)
-  conf.check_cc(function_name='strstr', header_name='string.h', mandatory=True)
-  conf.check_cc(function_name='strtol', header_name='stdlib.h', mandatory=True)
-  conf.check_cc(function_name='strtok', header_name='string.h', mandatory=True)
-
-def _check_popt(conf):
+#
+# [Helper] Check for library
+#
+def _check_lib(conf, l):
+  var = l[0].upper()
   try:
-    conf.check_cc(lib="popt", uselib_store="POPT", mandatory=True, msg="Looking for POPT library")
+    conf.check_cc(lib=l[0], uselib_store=var, mandatory=l[5], msg="Looking for "+l[0]+" library")
   except:
-    print "POPT library was not found on your system"
+    print l[0] + " library was not found on your system"
 
   try:
-    conf.check_cc(header_name='popt.h', uselib="POPT", mandatory=True)
+    conf.check_cc(header_name=l[1], uselib=var, mandatory=l[5])
   except:
-    print "POPT header was not found on your system :("
+    print l[1] + " header was not found on your system :("
+ 
+  if not len(l[3]) == 0:
+    try:
+      conf.check_cc(fragment=l[3], 
+                    execute=True, 
+                    uselib=var + ' ' + l[4], 
+                    define_ret=True, 
+                    mandatory=l[5], 
+                    msg="Checking if "+l[0]+" is usable")
+    except:
+      print l[0] + " is not usable :("
 
-
-# [Helper] Check for the HDF5 library
-def _check_hdf5(conf):
-  try:
-    conf.check_cc(lib='hdf5', uselib_store="HDF5", mandatory=True, msg="Looking for HDF5 library")
-  except:
-    print "HDF5 library was not found on your system :("
-
-  try:
-    conf.check_cc(header_name='hdf5.h', uselib="HDF5", mandatory=True)
-  except:
-    print "HDF5 header was not found on your system :("
-
-  try:
-    conf.check_cc(fragment=hdf5_test_code, 
-                  execute=True, 
-                  uselib="HDF5", 
-                  define_ret=True, 
-									define_name="HAVE_HDF5_SUPPORT",
-                  mandatory=True, 
-                  msg="Checking if HDF5 is usable")
-  except:
-    print "Cannot run HDF5 testprogram :("
-
-# [Helper] Check for the HDF5 library
-def _check_lrc(conf):
-  try:
-    conf.check_cc(lib='readconfig', 
-                  mandatory=True, 
-                  uselib_store="LRC",
-                  msg="Looking for LRC library");
-  except:
-    print "LRC library was not found on your system :("
-
-  try:
-    conf.check_cc(header_name='libreadconfig.h', 
-                  mandatory=True)
-  except:
-    print "LRC header was not found on your system :("
-
-  try:
-    conf.check_cc(fragment=lrc_hdf_test_code, 
-                  execute=True, 
-                  uselib="HDF5 LRC",
-                  define_ret=True, 
-                  mandatory=True, 
-                  msg="Checking if LRC is usable")
-  except:
-    print "Cannot run LRC testprogram :("
-
-
-
+#
 # [Helper] Check for MPI
+#
 def _check_mpi(conf):
-  conf.find_program('mpicc', mandatory=False)
-
-# [Helper] Yes/No at the summary
-def _check_defined(conf, define):
-	if conf.is_defined(define):
-		return "Yes"
-	else:
-		return "No"
+  conf.find_program('mpicc', var='MPI', mandatory=True)
 
 #
 # SET OPTIONS
@@ -217,14 +195,18 @@ def set_options(opt):
 # CONFIGURE
 #
 def configure(conf):
-  global stdlibs
+  global stdheads
+  global stdfunc
+  global stdtypes
   global hdf5_test_code
   conf.check_tool('compiler_cc')
   _check_mpi(conf)
-  _check_std_headers(conf, stdlibs)
-  _check_popt(conf)
-  _check_hdf5(conf)
-  _check_lrc(conf)
+  _check_std_headers(conf, stdheads, stdfunc, stdtypes)
+  _check_lib(conf,['m','math.h','pow', libm_test_code, '', 1])
+  _check_lib(conf,['hdf5','hdf5.h','H5Dopen2', hdf5_test_code, '', 1])
+  _check_lib(conf,['readconfig','libreadconfig_hdf5.h','LRC_writeHdfConfig',lrc_hdf_test_code, 'HDF5', 1])
+  _check_lib(conf,['dl','dlfcn.h','dlopen','','',1])
+  _check_lib(conf,['popt','popt.h','poptGetContext','','',1])
 	
 	# Check for doxygen
   BUILDDOC="No"
@@ -240,11 +222,14 @@ def configure(conf):
   conf.define('PACKAGE_VERSION', VERSION)
   conf.define('PACKAGE_BUGREPORT', BUGS)
   conf.define('PACKAGE_URL', URL)
+
+  conf.env['CC'] = ['mpicc']
+  conf.env['LINK_CC'] = ['mpicc']
   conf.env['CCFLAGS'] += ['-Wall']
+  conf.env['CCFLAGS'] += ['-fpic']
+  conf.env['CCFLAGS'] += ['-Dpic']
   conf.env['CPPFLAGS'] += ['-DHAVE_CONFIG_H']
   conf.env['CPPFLAGS'] += ['-I../build/default']
-  conf.env['CPPFLAGS'] += ['-Icore -I.']
-  conf.env['CPPFLAGS'] += ['-I.']
 
   # Write config.h
   conf.write_config_header('config.h')

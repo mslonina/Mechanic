@@ -65,7 +65,7 @@ void clearArray(//< @fn Clears arrays
  * Array of mapped pixel
  *
  */
-int* map2d(
+uintptr_t* map2d(
     int c, //< [in] The number of the pixel
     void* handler, //< [in] Module handler
     moduleInfo* md, //< [in] Pointer to module info struct
@@ -160,10 +160,11 @@ void* load_sym(void* handler, moduleInfo *md, char* function, char* function_ove
       return NULL;
     
   }else if (template == 1) {
-    return handler_f;
+    ret_handler = handler_f;
   }else if (template == 2) {
-    return handler_fo;
+    ret_handler = handler_fo;
   }
+  return ret_handler;
 }
 
 /*

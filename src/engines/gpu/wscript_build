@@ -3,11 +3,10 @@
 # Mariusz Slonina, 2010
 # encoding: utf-8
 
-obj = bld.new_task_gen('cc', 'cshlib')
+obj = bld.new_task_gen('cc', 'cstaticlib')
 obj.find_sources_in_dirs(".")
 obj.includes = ". ../../core"
 obj.uselib_local = "core"
-obj.uselib = "M"
-obj.target = 'mechanic_module_mandelbrot'
-obj.name = 'mandelbrot'
+obj.target = 'mechanic_engine_gpu'
+obj.name = 'gpu'
 

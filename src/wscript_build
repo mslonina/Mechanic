@@ -3,11 +3,12 @@
 # Mariusz Slonina, 2010
 # encoding: utf-8
 
-bld.add_subdirs('core modes modules')
+bld.add_subdirs('core engines modes modules')
 obj = bld.new_task_gen('cc', 'cprogram')
-obj.uselib_local = 'core farm masteralone multifarm'
+obj.uselib_local = 'farm masteralone multifarm gpu odex taylor core'
 obj.includes = '. core'
+obj.ccflags = '-rdynamic'
 obj.source = 'mechanic.c'
 obj.target = 'mechanic'
-obj.uselib = 'LRC HDF5 POPT'
+obj.uselib = 'READCONFIG HDF5 POPT M'
 

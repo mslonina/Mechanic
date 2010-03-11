@@ -1,6 +1,27 @@
-Four step install:
+MECHANIC uses Waf,
+see http://code.google.com/p/waf/ for details
 
-autoreconf --install
-./configure 
-make 
-make install
+Configure:
+
+./waf configure
+
+Build:
+
+./waf build
+
+Install:
+
+./waf install
+
+By default Waf will try to install Mechanic in /usr/local/lib and the header
+file in /usr/local/include. If you want to change installation prefix, run
+
+./waf configure --prefix=YOUR/PATH
+
+To build documentation use
+
+./waf configure --enable-doc
+
+For any additional options that come with Waf distribution, see:
+
+./waf help
