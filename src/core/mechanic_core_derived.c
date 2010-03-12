@@ -92,9 +92,9 @@ int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   typelist[8] = MPI_INT; /* mode */
   typelist[9] = MPI_INT; /* checkpoint number */
 
-  block_lengths[0] = 256;
-  block_lengths[1] = 260;
-  block_lengths[2] = 256;
+  block_lengths[0] = LRC_MAX_VALUE_LENGTH;
+  block_lengths[1] = LRC_MAX_VALUE_LENGTH;
+  block_lengths[2] = LRC_MAX_VALUE_LENGTH;
   block_lengths[3] = 1;
   block_lengths[4] = 1;
   block_lengths[5] = 1;

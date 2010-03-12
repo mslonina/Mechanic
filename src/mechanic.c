@@ -451,7 +451,6 @@ int main(int argc, char *argv[]){
   sprintf(cs[1].options[0].value,"%d",MECHANIC_CHECKPOINT_DEFAULT);
   sprintf(cs[1].options[1].value,"%d",MECHANIC_CHECKPOINT_NUM_DEFAULT);
 
-
   /* MPI INIT */
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -460,8 +459,7 @@ int main(int argc, char *argv[]){
 
   /* HDF5 INIT */
   H5open();
-  /* H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL); */
-  
+  /* H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL); */  
 
   /* Parse command line */
   poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
@@ -552,6 +550,14 @@ int main(int argc, char *argv[]){
 
     /* Config file parsed. All read values becomes new defaults */
     mstat = assignConfigValues(allopts, &cd, cs, configfile, 0);
+    
+    mechanic_message(MECHANIC_MESSAGE_DEBUG,"Config file contents:\n\n");
+    mechanic_message(MECHANIC_MESSAGE_WARN,"name: %s\n", cd.name);
+    mechanic_message(MECHANIC_MESSAGE_WARN,"module: %s\n", cd.module);
+    mechanic_message(MECHANIC_MESSAGE_WARN,"res[%d, %d]\n", cd.xres, cd.yres);
+    mechanic_message(MECHANIC_MESSAGE_WARN,"mode: %d\n", cd.mode);
+    mechanic_message(MECHANIC_MESSAGE_WARN,"method: %d\n", cd.method);
+    mechanic_message(MECHANIC_MESSAGE_WARN,"checkpoint: %d\n", cd.checkpoint);
 
     /* Reset pointers */
     name = cd.name;

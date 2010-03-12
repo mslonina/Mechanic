@@ -43,6 +43,8 @@
 #ifndef MECHANIC_H
 #define MECHANIC_H
 
+#include "libreadconfig.h"
+
 #define MECHANIC_ERR_MPI 911
 #define MECHANIC_ERR_HDF 912
 #define MECHANIC_ERR_MODULE 913
@@ -70,9 +72,9 @@ enum Messages{
 
 /* MAIN CONFIG DATA */
 typedef struct {
-  char name[256];
-  char datafile[260];
-  char module[256];
+  char name[LRC_MAX_VALUE_LENGTH];
+  char datafile[LRC_MAX_VALUE_LENGTH];
+  char module[LRC_MAX_VALUE_LENGTH];
   int xres;
   int yres;
   int method;
