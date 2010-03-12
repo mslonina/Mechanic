@@ -226,6 +226,8 @@ def configure(conf):
   conf.env['CC'] = ['mpicc']
   conf.env['LINK_CC'] = ['mpicc']
   conf.env['CCFLAGS'] += ['-Wall']
+  #conf.env['CCFLAGS'] += ['-ansi']
+  #conf.env['CCFLAGS'] += ['-pedantic']
   conf.env['CCFLAGS'] += ['-fpic']
   conf.env['CCFLAGS'] += ['-Dpic']
   conf.env['CPPFLAGS'] += ['-DHAVE_CONFIG_H']

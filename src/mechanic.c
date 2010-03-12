@@ -255,8 +255,6 @@
  * which describes the data storage in master file. 
  */
 int main(int argc, char *argv[]){  
-
-  int allopts = 0; //number of namespaces read
   
   char* module_name;
   char* name;
@@ -272,35 +270,18 @@ int main(int argc, char *argv[]){
   int configfile = 0;
 
   int mpi_rank;
-  int node;
+  int node = 0;
 
-  int mstat; //mechanic internal error value
+  int mstat; /* mechanic internal error value */
 
-  struct stat st; //stat.h
+  struct stat st; /* stat.h */
   
   hid_t file_id;
 
-  configData cd; //struct for command line args
-  moduleInfo md; //struct for module info
+  configData cd; /* struct for command line args */
+  moduleInfo md; /* struct for module info */
 
   MPI_Datatype defaultConfigType;
-
-  // Assign default config values 
-  name = MECHANIC_NAME_DEFAULT;
-  restartname = "";
-  inifile = MECHANIC_CONFIG_FILE_DEFAULT;
-  module_name = MECHANIC_MODULE_DEFAULT;
-  
-  sprintf(cd.name, "%s", MECHANIC_NAME_DEFAULT);
-  sprintf(cd.datafile, "%s", MECHANIC_MASTER_FILE_DEFAULT); 
-  sprintf(cd.module, "%s", MECHANIC_MODULE_DEFAULT);
-  cd.xres = MECHANIC_XRES_DEFAULT;
-  cd.yres = MECHANIC_YRES_DEFAULT;
-  cd.method = MECHANIC_METHOD_DEFAULT;
-  cd.checkpoint = MECHANIC_CHECKPOINT_DEFAULT;
-  cd.restartmode = 0;
-  cd.mode = MECHANIC_MODE_DEFAULT;
-  cd.checkpoint_num = MECHANIC_CHECKPOINT_NUM_DEFAULT;
 
   LRC_configNamespace cs[] = {
     {"default",{
@@ -318,19 +299,10 @@ int main(int argc, char *argv[]){
              }, 
     2}
   };
-  allopts = 2;
+  
+  int allopts = 2; /* number of namespaces read */
 
-  // This is the easiest way to assign values ic cs[] 
-  sprintf(cs[0].options[0].value,"%s",MECHANIC_NAME_DEFAULT);
-  sprintf(cs[0].options[1].value,"%d",MECHANIC_XRES_DEFAULT);
-  sprintf(cs[0].options[2].value,"%d",MECHANIC_YRES_DEFAULT);
-  sprintf(cs[0].options[3].value,"%d",MECHANIC_METHOD_DEFAULT);
-  sprintf(cs[0].options[4].value,"%s",MECHANIC_MODULE_DEFAULT);
-  sprintf(cs[0].options[5].value,"%d",MECHANIC_MODE_DEFAULT);
-  sprintf(cs[1].options[0].value,"%d",MECHANIC_CHECKPOINT_DEFAULT);
-  sprintf(cs[1].options[1].value,"%d",MECHANIC_CHECKPOINT_NUM_DEFAULT);
-
-  // Assign allowed values 
+  /* Assign allowed values */
   LRC_configTypes ct[] = {
     {"default", "name", LRC_CHAR},
     {"default", "xres", LRC_INT},
@@ -342,10 +314,10 @@ int main(int argc, char *argv[]){
     {"logs", "checkpoint_num", LRC_INT}
   };
 
-  // Number of allowed values 
+  /* Number of allowed values */
   int numCT = 8;
 
-  /**
+   /**
    * @page setup Setup
    *
    * There are two ways to setup the computations: the config file and commandline args.
@@ -418,62 +390,76 @@ int main(int argc, char *argv[]){
     };
 
   struct poptOption mechanic_poptModes[] = {
-    {"masteralone", '0', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 0,
-    "Masteralone",NULL},
-    {"farm", '1', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 1,
-    "MPI task farm",NULL},
-    {"multifarm", '2', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 2,
-    "MPI multi task farm",NULL},
+    {"masteralone", '0', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 0, "Masteralone",NULL},
+    {"farm", '1', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 1, "MPI task farm",NULL},
+    {"multifarm", '2', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 2, "MPI multi task farm",NULL},
     POPT_TABLEEND
   };
 
   struct poptOption mechanic_poptRestart[] = {
-    {"restart", 'r', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.restartmode, 0,
-      "Switch to restart mode", NULL},
-    {"rpath", 'b', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &checkpoint_path, 0,
-      "Path to checkpoint file", "/path/to/checkpoint/file"},
+    {"restart", 'r', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.restartmode, 0, "Switch to restart mode", NULL},
+    {"rpath", 'b', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &checkpoint_path, 0, "Path to checkpoint file", "/path/to/checkpoint/file"},
     POPT_TABLEEND
   };
   
   struct poptOption cmdopts[] = {
-    {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &name, 0,
-    "Problem name", "NAME"},
-    {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 0,
-    "Config file", "CONFIG"},
-    {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &module_name, 0,
-    "Module", "MODULE"},
-    {"method", 'm', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.method, 0,
-    "Pixel map method", "METHOD"},
-    {"xres", 'x', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.xres, 0,
-    "X resolution", "XRES"},
-    {"yres", 'y', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.yres, 0,
-    "Y resolution", "YRES"},
-    {"checkpoint", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.checkpoint, 0,
-    "Checkpoint file write interval", "CHECKPOINT"},
+    {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &name, 0, "Problem name", "NAME"},
+    {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &inifile, 0, "Config file", "CONFIG"},
+    {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &module_name, 0, "Module", "MODULE"},
+    {"method", 'm', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.method, 0, "Pixel map method", "METHOD"},
+    {"xres", 'x', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.xres, 0, "X resolution", "XRES"},
+    {"yres", 'y', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.yres, 0, "Y resolution", "YRES"},
+    {"checkpoint", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.checkpoint, 0, "Checkpoint file write interval", "CHECKPOINT"},
     MECHANIC_POPT_MODES
     MECHANIC_POPT_RESTART
     MECHANIC_POPT_AUTOHELP
     POPT_TABLEEND
   };
 
-  node = 0;
-  // MPI INIT 
+  /* Assign default config values */
+  name = MECHANIC_NAME_DEFAULT;
+  restartname = "";
+  inifile = MECHANIC_CONFIG_FILE_DEFAULT;
+  module_name = MECHANIC_MODULE_DEFAULT;
+  
+  sprintf(cd.name, "%s", MECHANIC_NAME_DEFAULT);
+  sprintf(cd.datafile, "%s", MECHANIC_MASTER_FILE_DEFAULT); 
+  sprintf(cd.module, "%s", MECHANIC_MODULE_DEFAULT);
+  cd.xres = MECHANIC_XRES_DEFAULT;
+  cd.yres = MECHANIC_YRES_DEFAULT;
+  cd.method = MECHANIC_METHOD_DEFAULT;
+  cd.checkpoint = MECHANIC_CHECKPOINT_DEFAULT;
+  cd.restartmode = 0;
+  cd.mode = MECHANIC_MODE_DEFAULT;
+  cd.checkpoint_num = MECHANIC_CHECKPOINT_NUM_DEFAULT;
+
+  /* This is the easiest way to assign values ic cs[] */
+  sprintf(cs[0].options[0].value,"%s",MECHANIC_NAME_DEFAULT);
+  sprintf(cs[0].options[1].value,"%d",MECHANIC_XRES_DEFAULT);
+  sprintf(cs[0].options[2].value,"%d",MECHANIC_YRES_DEFAULT);
+  sprintf(cs[0].options[3].value,"%d",MECHANIC_METHOD_DEFAULT);
+  sprintf(cs[0].options[4].value,"%s",MECHANIC_MODULE_DEFAULT);
+  sprintf(cs[0].options[5].value,"%d",MECHANIC_MODE_DEFAULT);
+  sprintf(cs[1].options[0].value,"%d",MECHANIC_CHECKPOINT_DEFAULT);
+  sprintf(cs[1].options[1].value,"%d",MECHANIC_CHECKPOINT_NUM_DEFAULT);
+
+  /* MPI INIT */
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   node = mpi_rank;
 
-  // HDF5 INIT 
+  /* HDF5 INIT */
   H5open();
-  //H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL);
+  /* H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL); */
   
   if(node == 0) welcome();
 
-  // Parse command line 
+  /* Parse command line */
   poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
   optvalue = poptGetNextOpt(poptcon);
  
-  // Bad option handling
+  /* Bad option handling */
   if (optvalue < -1){
     if(node == 0){
       mechanic_message(MECHANIC_MESSAGE_WARN, "%s: %s\n", 
@@ -485,7 +471,7 @@ int main(int argc, char *argv[]){
      return 0;
   }
   
-  // Long help message set
+  /* Long help message set */
   if (help == 1){
     if(node == 0) poptPrintHelp(poptcon, stdout, 0);
     poptFreeContext(poptcon);
@@ -493,7 +479,7 @@ int main(int argc, char *argv[]){
     return 0;
   }
    
-  // Brief help message set
+  /* Brief help message set */
   if (usage == 1){
     if(node == 0) poptPrintUsage(poptcon, stdout, 0);
     poptFreeContext(poptcon);
@@ -542,43 +528,43 @@ int main(int argc, char *argv[]){
      return 0;
   }
 */
-  // Config file set
+  /* Config file set */
   if(strcmp(inifile, MECHANIC_CONFIG_FILE_DEFAULT) != 0 && cd.restartmode == 0){
     configfile = 1;
   }
 
 
-  // Reset options, we need to reuse them
-  // to override values read from specified config file
+  /* Reset options, we need to reuse them */
+  /* to override values read from specified config file */
   if(node == 0){
 
-    // Read config file
+    /* Read config file */
     allopts = readDefaultConfig(inifile, cs, ct, numCT, configfile);
 
-    // Config file parsed. All read values becomes new defaults 
+    /* Config file parsed. All read values becomes new defaults */
     mstat = assignConfigValues(allopts, &cd, cs, configfile, 0);
 
-    // Reset pointers
+    /* Reset pointers */
     name = cd.name;
     module_name = cd.module;
   
-    // Override the values by commandline args
+    /* Override the values by commandline args */
     poptResetContext(poptcon);
     poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
     optvalue = poptGetNextOpt(poptcon);
   
-		// Security check: if mpi_size = 1 switch to masteralone mode
+		/* Security check: if mpi_size = 1 switch to masteralone mode */
 		if(mpi_size == 1){
 			cd.mode = 0;
 			mechanic_message(MECHANIC_MESSAGE_WARN, "MPI COMM SIZE = 1. Will switch to master alone mode now\n");
 		}
 
-    // In case of any commandline arg, we need to reassign config values.
+    /* In case of any commandline arg, we need to reassign config values. */
     if(strcmp(name, cd.name) != 0) sprintf(cd.name,"%s",name);
     if(strcmp(module_name, cd.module) != 0) sprintf(cd.module,"%s",module_name);
     mstat = assignConfigValues(allopts, &cd, cs, configfile, 1);
    
-    // Security check
+    /* Security check */
     if (cd.xres == 0 || cd.yres == 0){
        mechanic_message(MECHANIC_MESSAGE_ERR, "X/Y map resolution should not be set to 0!\n");
        mechanic_message(MECHANIC_MESSAGE_ERR,"If You want to do only one simulation, please set xres = 1, yres = 1\n");
@@ -614,11 +600,11 @@ int main(int argc, char *argv[]){
   query = load_sym(handler,&md, "query", "query", MECHANIC_MODULE_SILENT);
   if(query) query(&md);
 
-  // Config file has been read
+  /* Config file has been read */
   if(node == 0){
-    // Backup master data file.
-    // If simulation was broken, and we are in restart mode
-    // we don't have any master files, only checkpoint files.
+    /* Backup master data file.
+     * If simulation was broken, and we are in restart mode
+     * we don't have any master files, only checkpoint files.*/
     if(stat(cd.datafile,&st) == 0 && cd.restartmode == 0){
       sprintf(oldfile,"old-%s",cd.datafile);
       mechanic_message(MECHANIC_MESSAGE_WARN, "File %s exists!\n", cd.datafile);
@@ -644,17 +630,17 @@ int main(int argc, char *argv[]){
     *
     */
 
-  // Create master datafile
+  /* Create master datafile */
   file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   mstat = H5createMasterDataScheme(file_id, &md, &cd);
 
-  // First of all, save configuration 
+  /* First of all, save configuration */
   LRC_writeHdfConfig(file_id, cs, allopts);
   H5Fclose(file_id);
 
   }
-   // MPI CONFIG BCAST
-   // Inform slaves what it is all about.
+   /* MPI CONFIG BCAST
+    * Inform slaves what it is all about. */
    if(cd.mode == 1 || cd.mode == 2){
     if(node == 0){
       mstat = buildDefaultConfigType(&cd, &defaultConfigType);
@@ -668,7 +654,7 @@ int main(int argc, char *argv[]){
     }
    }
   
-  // Now load proper routines
+  /* Now load proper routines */
   switch(cd.mode){
     case 0:
       mstat = mechanic_mode_masteralone(node, handler, &md, &cd);
@@ -683,17 +669,17 @@ int main(int argc, char *argv[]){
       break;
   }
 
-  // Module cleanup
+  /* Module cleanup */
   cleanup = load_sym(handler, &md, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
   if(cleanup) mstat = cleanup(&md);
 
-  // Module unload
+  /* Module unload */
   dlclose(handler);
   
-  // HDF5 finalize 
+  /* HDF5 finalize */
   H5close();
 	
-  // Finalize
+  /* Finalize */
   mechanic_finalize(node);
 
   return 0;
@@ -713,3 +699,4 @@ void welcome(){
   mechanic_message(MECHANIC_MESSAGE_CONT, "%s\n", MECHANIC_URL);
 
 }
+

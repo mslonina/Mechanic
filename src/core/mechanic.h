@@ -65,10 +65,10 @@ enum Messages{
   MECHANIC_MESSAGE_ERR,
   MECHANIC_MESSAGE_CONT,
   MECHANIC_MESSAGE_WARN,
-	MECHANIC_MESSAGE_DEBUG,
+	MECHANIC_MESSAGE_DEBUG
 } mechanicMessages;
 
-// MAIN CONFIG DATA 
+/* MAIN CONFIG DATA */
 typedef struct {
   char name[256];
   char datafile[260];
@@ -83,15 +83,13 @@ typedef struct {
 } configData;
 
 
-/*
- * MASTER DATA
- */
+/* MASTER DATA */
 typedef struct {
  MECHANIC_DATATYPE *res;
- int coords[3]; //0 - x 1 - y 2 - number of the pixel
+ int coords[3]; /* 0 - x 1 - y 2 - number of the pixel */
 } masterData;
 
-// Module info and handler 
+/* Module info and handler */ 
 typedef struct {
       const char *name;
       const char *author;

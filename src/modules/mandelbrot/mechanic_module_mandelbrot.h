@@ -63,6 +63,4 @@
 #include "mpi.h"
 #include "hdf5.h"
 
-//#include "libreadconfig.h"
-
 #endif

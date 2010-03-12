@@ -43,13 +43,9 @@
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
-/*
- * SETUP TOOLS
- */
+/* SETUP TOOLS */
 
-/*
- * Default config file parser
- */
+/* Default config file parser */
 int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag){
 
   int opts = 0;
@@ -60,16 +56,16 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
 
   read = fopen(inifile, "r");
   
-  // Default behaviour: try to read default config file. 
+  /* Default behaviour: try to read default config file. */
   if(read != NULL){
    mechanic_message(MECHANIC_MESSAGE_INFO,"Parsing config file \"%s\"... ", inifile);
    opts = LRC_textParser(read, sep, comm, cs, ct, numCT);
    if(opts >= 0) mechanic_message(MECHANIC_MESSAGE_CONT," done.\n");
    fclose(read);
   }
-  // If -c is set, but file doesn't exist, abort. 
+  /* If -c is set, but file doesn't exist, abort. */
   else if((read == NULL) && (flag == 1)) mechanic_error(MECHANIC_ERR_SETUP);
-  // We don't insist on having config file present, we just use defaults instead 
+  /* We don't insist on having config file present, we just use defaults instead */
   else{
     mechanic_message(MECHANIC_MESSAGE_WARN, "Config file not specified/doesn't exist. Will use defaults.\n");
     opts = 2;
@@ -84,7 +80,7 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
   return opts;
 }
 
-// Assign config values, one by one. Final struct contains config values of the run 
+/* Assign config values, one by one. Final struct contains config values of the run */ 
 int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cflag, int popt){
 
   int i = 0, k = 0;
@@ -137,10 +133,11 @@ int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cfl
  return 0;
 }
 
-// Helper tests 
+/* Helper tests */
 void poptTestC(char* i, char* j){
     if(strcmp(i, j) != 0) sprintf(i,"%s",j); 
 }
 void poptTestI(char* i, int j){
     if(atoi(i) != j) sprintf(i,"%d",j);
 }
+

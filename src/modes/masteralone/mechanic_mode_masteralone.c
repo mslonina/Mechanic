@@ -47,6 +47,7 @@
 int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md, configData* d){
 
   int i = 0;
+  int ptab[3];
   
   if(node == 0){
     mechanic_message(MECHANIC_MESSAGE_INFO, "I will compute everything by self, I promise! \n");
@@ -55,7 +56,8 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md, configDat
   if(node == 0){
   for(i = 1; i < mpi_size; i++){
     mechanic_message(MECHANIC_MESSAGE_WARN, "Terminating SLAVE[%d]\n",i);
-    MPI_Send(map2d(1, handler, md, d), 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+    map2d(1, handler, md, d, ptab);
+    MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
   }
 }
 

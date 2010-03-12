@@ -94,17 +94,17 @@ int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d, masterData
   imag_max = 2.0;
   c = 4.0;
 
-  //coordinate system
+  /* coordinate system */
   scale_real = (real_max - real_min)/((double)d->xres - 1.0);
   scale_imag = (imag_max - imag_min)/((double)d->yres - 1.0);
   
   r->res[0] = real_min + r->coords[0]*scale_real;
   r->res[1] = imag_max - r->coords[1]*scale_imag;
 
-  //Mandelbrot set
+  /* Mandelbrot set */
   r->res[2] = mandelbrot_generateFractal(r->res[0], r->res[1], c);
 
-  //We also store information about the slave
+  /* We also store information about the slave */
   r->res[3] = (double)slave;
 
   return 0;

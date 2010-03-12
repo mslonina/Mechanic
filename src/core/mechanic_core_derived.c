@@ -43,11 +43,9 @@
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
-/*
- * MPI DERIVED DATATYPES
- */
+/* MPI DERIVED DATATYPES */
 
-// Master result Send/Recv 
+/* Master result Send/Recv */
 int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr){
 
   int block_lengths[2];
@@ -74,7 +72,7 @@ int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsT
   return 0;
 }
 
-// Bcast default config file 
+/* Bcast default config file */
 int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   
   int block_lengths[10];
@@ -83,16 +81,16 @@ int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   MPI_Aint addresses[11];
   int i = 0;
 
-  typelist[0] = MPI_CHAR; //problem name
-  typelist[1] = MPI_CHAR; //master datafile
-  typelist[2] = MPI_CHAR; //module
-  typelist[3] = MPI_INT; //xres
-  typelist[4] = MPI_INT; //yres
-  typelist[5] = MPI_INT; //method
-  typelist[6] = MPI_INT; //checkpoint
-  typelist[7] = MPI_INT; //restartmode
-  typelist[8] = MPI_INT; //mode
-  typelist[9] = MPI_INT; //checkpoint number
+  typelist[0] = MPI_CHAR; /* problem name */
+  typelist[1] = MPI_CHAR; /* master datafile */
+  typelist[2] = MPI_CHAR; /* module */
+  typelist[3] = MPI_INT; /* xres */
+  typelist[4] = MPI_INT; /* yres */
+  typelist[5] = MPI_INT; /* method */
+  typelist[6] = MPI_INT; /* checkpoint */
+  typelist[7] = MPI_INT; /* restartmode */
+  typelist[8] = MPI_INT; /* mode */
+  typelist[9] = MPI_INT; /* checkpoint number */
 
   block_lengths[0] = 256;
   block_lengths[1] = 260;

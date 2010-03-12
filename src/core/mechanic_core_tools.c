@@ -43,9 +43,9 @@
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
-void clearArray(//< @fn Clears arrays
-    MECHANIC_DATATYPE* array, //< [in, out] Array to clear
-    int no_of_items_in_array) //< [in] Number of items in the array
+void clearArray(/*< @fn Clears arrays */
+    MECHANIC_DATATYPE* array, /*< [in, out] Array to clear */
+    int no_of_items_in_array) /*< [in] Number of items in the array */
 {
 
 	int i = 0;
@@ -65,38 +65,38 @@ void clearArray(//< @fn Clears arrays
  * Array of mapped pixel
  *
  */
-uintptr_t* map2d(
-    int c, //< [in] The number of the pixel
-    void* handler, //< [in] Module handler
-    moduleInfo* md, //< [in] Pointer to module info struct
-    configData* d) //< [in] Pointer to config data struct
+int map2d(
+    int c, /* < [in] The number of the pixel */
+    void* handler, /*< [in] Module handler */
+    moduleInfo* md, /*< [in] Pointer to module info struct */
+    configData* d, /*< [in] Pointer to config data struct */
+    int ind[])
 {
    
-  uintptr_t* ind;
    int x, y;
-   x = d->xres;
-   y = d->yres;
    module_query_void_f qpcm;
 
-  ind = malloc(3*sizeof(*ind));
-  if(ind == NULL) mechanic_error(MECHANIC_ERR_MEM);
+   x = d->xres;
+   y = d->yres;
 
-   //we need number of current pixel to store too
+   /* we need number of current pixel to store too */
    ind[2] = c;
 
-   // Method 0: one pixel per each slave.
+   /* Method 0: one pixel per each slave. */
    if(d->method == 0){
     if(c < y) ind[0] = c / y; ind[1] = c;
     if(c > y - 1) ind[0] = c / y; ind[1] = c % y;
    }
 
-   // Method 6: user defined control.
+   /* Method 6: user defined control. */
    if(d->method == 6){
     qpcm = load_sym(handler, md, "pixelCoordsMap", "pixelCoordsMap", MECHANIC_MODULE_ERROR); 
     if(qpcm) qpcm(ind, c, x, y, md, d);
    }
+   
+   mechanic_message(MECHANIC_MESSAGE_DEBUG,"Pixel[%d]: %d %d\n", ind[2], ind[0], ind[1]);
 
-   return ind;
+   return 0;
 }
 
 int checkPixel(int pixel){
@@ -128,16 +128,16 @@ void* load_sym(void* handler, moduleInfo *md, char* function, char* function_ove
   handler_fo = dlsym(handler, func_over);
   err_o = dlerror();
  
-  // Template not found, override not found -- error check
+  /* Template not found, override not found -- error check */
   if(err != NULL && err_o != NULL) template = 0;
 
-  // Template found, override not -- will use template
+  /* Template found, override not -- will use template */
   if(err == NULL && err_o != NULL) template = 1;
 
-  // Template found, override found -- will use override
+  /* Template found, override found -- will use override */
   if(err == NULL && err_o == NULL) template = 2;
 
-  // Template not found, override found -- will use override
+  /* Template not found, override found -- will use override */
   if(err != NULL && err_o == NULL) template = 2;
 
   if(template == 0){
@@ -222,3 +222,4 @@ void mechanic_message(int type, char *fmt, ...){
   va_end(args);
  
 }
+

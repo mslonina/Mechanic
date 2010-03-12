@@ -47,7 +47,7 @@
   #include <config.h>
 #endif
 
-#include <inttypes.h> //for 32 and 64 bits
+#include <inttypes.h> /* for 32 and 64 bits */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -116,9 +116,7 @@ enum Modes {
   MECHANIC_MULTIFARM
 } mechanicModes;
 
-/*
- * MODULE ARCHITECTURE FUNCTION HANDLERS
- */
+/* MODULE ARCHITECTURE FUNCTION HANDLERS */
 typedef int (*module_init_f) ();
 module_init_f init;
 
@@ -131,14 +129,14 @@ module_query_int_f iquery;
 typedef int (*module_cleanup_f) ();
 module_cleanup_f cleanup;
 
-// GLOBALS 
+/* GLOBALS */
 char* inifile;
 char* datafile;
 int allopts, mpi_size;
 int usage, help;
 
-// FUNCTION PROTOTYPES 
-uintptr_t* map2d(int, void* handler, moduleInfo*, configData* d);
+/* FUNCTION PROTOTYPES */
+int map2d(int, void* handler, moduleInfo*, configData* d, int ind[]);
 
 int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
 int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr);
@@ -178,4 +176,6 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md, configDat
 
 #define MECHANIC_POPT_RESTART { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptRestart, \
 			0, "Restart options:", NULL },
+
 #endif
+

@@ -106,9 +106,9 @@ int echo_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md, configData
  */
 int echo_pixelCoords(int node, int t[], moduleInfo* md, configData* d, masterData* r){
           
-  r->coords[0] = t[0]; //x 
-  r->coords[1] = t[1]; //y
-  r->coords[2] = t[2]; //number of the pixel
+  r->coords[0] = t[0]; /* x */ 
+  r->coords[1] = t[1]; /* y */
+  r->coords[2] = t[2]; /* number of the pixel */
   
   return 0;
 }
@@ -211,7 +211,7 @@ int echo_master_out(int nodes, int node, moduleInfo* md, configData* d, masterDa
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
   masterdatagroup = H5Gopen(masterfile, "data", H5P_DEFAULT);
   
-  // Copy data from slaves to one master file
+  /* Copy data from slaves to one master file */
   for(i = 1; i < nodes; i++){
     sprintf(groupname,"slave%d", i);
     sprintf(filename,"%s-slave%d.h5", d->name,i);
