@@ -214,11 +214,13 @@ void mechanic_message(int type, char *fmt, ...){
 
   va_start(args, fmt);
     vsprintf(fmt2, fmt, args);
-    if(type == MECHANIC_MESSAGE_INFO) printf("-> %s", fmt2);
-    if(type == MECHANIC_MESSAGE_ERR) perror(fmt2);
-    if(type == MECHANIC_MESSAGE_CONT) printf("   %s", fmt2);
-		if(type == MECHANIC_MESSAGE_WARN) printf("!! %s", fmt2);
-		//if(type == MECHANIC_MESSAGE_DEBUG) printf("  %s", fmt2);
+    if(silent == 0){
+      if(type == MECHANIC_MESSAGE_INFO) printf("-> %s", fmt2);
+      if(type == MECHANIC_MESSAGE_CONT) printf("   %s", fmt2);
+		  if(type == MECHANIC_MESSAGE_DEBUG && debug == 1) printf("   %s", fmt2);
+    }
+      if(type == MECHANIC_MESSAGE_ERR) perror(fmt2);
+		  if(type == MECHANIC_MESSAGE_WARN) printf(".. %s", fmt2);
   va_end(args);
  
 }

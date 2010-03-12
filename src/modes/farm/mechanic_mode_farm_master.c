@@ -138,6 +138,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
      if(qbeforeS) mstat = qbeforeS(i, md, d, &rawdata);
 
      map2d(npxc, handler, md, d, ptab);
+     mechanic_message(MECHANIC_MESSAGE_DEBUG,"MASTER PTAB[%d, %d, %d\n]",ptab[0], ptab[1], ptab[2]);
      MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
      
      qafterS = load_sym(handler, md, "node_afterSend", "master_afterSend", MECHANIC_MODULE_SILENT);
@@ -153,6 +154,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     for(i = nodes; i < mpi_size; i++){
       mechanic_message(MECHANIC_MESSAGE_WARN, "Terminating idle slave %d.\n", i);
       map2d(npxc, handler, md, d, ptab);
+      mechanic_message(MECHANIC_MESSAGE_DEBUG,"MASTER PTAB[%d, %d, %d\n]",ptab[0], ptab[1], ptab[2]);
       MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
    }
@@ -174,7 +176,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
        coordsarr[check][1] = rawdata.coords[1];
        coordsarr[check][2] = rawdata.coords[2];
 
-			 mechanic_message(MECHANIC_MESSAGE_DEBUG, "N[%d] R[%d, %d, %d]\t", node, rawdata.coords[0], rawdata.coords[1], rawdata.coords[2]);
+			 mechanic_message(MECHANIC_MESSAGE_DEBUG, "MASTER RECV[%d, %d, %d]\t", node, rawdata.coords[0], rawdata.coords[1], rawdata.coords[2]);
      
       for(j = 0; j < md->mrl; j++){
          resultarr[check][j] = rawdata.res[j];
@@ -202,6 +204,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
         if(qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, &rawdata);
         
         map2d(npxc, handler, md, d, ptab);
+        mechanic_message(MECHANIC_MESSAGE_DEBUG,"MASTER PTAB[%d, %d, %d\n]",ptab[0], ptab[1], ptab[2]);
         MPI_Send(ptab, 3, MPI_INT, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
         npxc++;
         count++;
@@ -245,6 +248,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md, configDat
     /* Now, terminate the slaves */
     for (i = 1; i < nodes; i++){
         map2d(npxc, handler, md, d, ptab);
+        mechanic_message(MECHANIC_MESSAGE_DEBUG,"MASTER PTAB[%d, %d, %d\n]",ptab[0], ptab[1], ptab[2]);
         MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
 

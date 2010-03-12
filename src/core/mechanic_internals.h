@@ -133,7 +133,7 @@ module_cleanup_f cleanup;
 char* inifile;
 char* datafile;
 int allopts, mpi_size;
-int usage, help;
+int usage, help, debug, silent;
 
 /* FUNCTION PROTOTYPES */
 int map2d(int, void* handler, moduleInfo*, configData* d, int ind[]);
@@ -176,6 +176,9 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md, configDat
 
 #define MECHANIC_POPT_RESTART { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptRestart, \
 			0, "Restart options:", NULL },
+
+#define MECHANIC_POPT_DEBUG { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptDebug, \
+			0, "Debug/Massage interface options:", NULL },
 
 #endif
 

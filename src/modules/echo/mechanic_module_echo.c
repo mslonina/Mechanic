@@ -208,6 +208,7 @@ int echo_master_out(int nodes, int node, moduleInfo* md, configData* d, masterDa
   char filename[512];
 
   stat = H5open();
+  mechanic_message(MECHANIC_MESSAGE_INFO,"ECHO MASTER IN: %s\n",d->datafile);
   masterfile = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
   masterdatagroup = H5Gopen(masterfile, "data", H5P_DEFAULT);
   
@@ -287,6 +288,7 @@ int echo_slave_in(int mpi_size, int node, moduleInfo* md, configData* d, masterD
 
   struct stat st;
 
+  mechanic_message(MECHANIC_MESSAGE_INFO,"ECHO IN: %s\n",d->name);
   sprintf(nodename, "%s-%s%d.h5", d->name, sbase, node);
   sprintf(group, "%s%d", gbase, node);
 

@@ -47,8 +47,6 @@
 /* SLAVE */
 int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData* d){
 
-    //uintptr_t* tab;
-   
     int tab[3];
     int mstat;
 
@@ -58,9 +56,6 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
     
     MPI_Datatype masterResultsType;
     MPI_Status mpi_status;
-
-    //tab = malloc(3*sizeof(uintptr_t));
-    //if(tab == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
     /* Allocate memory for rawdata.res array */
     rawdata.res = realloc(NULL, ((uintptr_t)md->mrl)*sizeof(MECHANIC_DATATYPE));
@@ -92,8 +87,8 @@ int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md, configData
           rawdata.coords[1] = tab[1];
           rawdata.coords[2] = tab[2];
        }
-       mechanic_message(MECHANIC_MESSAGE_DEBUG,"N[%d]: T[%d, %d, %d]\n", node, tab[0], tab[1], tab[2]);
-       mechanic_message(MECHANIC_MESSAGE_DEBUG,"N[%d]: R[%d, %d, %d]\n", node, rawdata.coords[0], rawdata.coords[1], rawdata.coords[2]);
+       mechanic_message(MECHANIC_MESSAGE_DEBUG,"SLAVE[%d]: PTAB[%d, %d, %d]\n", node, tab[0], tab[1], tab[2]);
+       mechanic_message(MECHANIC_MESSAGE_DEBUG,"SLAVE[%d]: RTAB[%d, %d, %d]\n", node, rawdata.coords[0], rawdata.coords[1], rawdata.coords[2]);
 
        if (d->method == 6){
 

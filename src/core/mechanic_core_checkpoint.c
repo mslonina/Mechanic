@@ -87,7 +87,7 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check, int** coordsarr,
   /* Open file */
   file_id = H5Fopen(d->datafile,H5F_ACC_RDWR,H5P_DEFAULT);
 	
-/*	mechanic_message(MECHANIC_MESSAGE_DEBUG, "Checkpoint file: %s\n", d->datafile); */
+	mechanic_message(MECHANIC_MESSAGE_DEBUG, "Checkpoint file: %s\n", d->datafile); 
   
 	dset_board = H5Dopen(file_id, MECHANIC_DATABOARD, H5P_DEFAULT);   
   data_group = H5Gopen(file_id, MECHANIC_DATAGROUP, H5P_DEFAULT);
@@ -125,7 +125,7 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check, int** coordsarr,
   H5Gclose(data_group);
   H5Fclose(file_id);
 	
-	/* mechanic_message(MECHANIC_MESSAGE_DEBUG,"Checkpoint finished\n"); */
+	mechanic_message(MECHANIC_MESSAGE_DEBUG,"Checkpoint finished\n"); 
 
   return 0;
 }

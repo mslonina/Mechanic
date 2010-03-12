@@ -254,6 +254,7 @@
  * }@endverbatim
  * which describes the data storage in master file. 
  */
+  
 int main(int argc, char *argv[]){  
   
   char* module_name;
@@ -390,15 +391,21 @@ int main(int argc, char *argv[]){
     };
 
   struct poptOption mechanic_poptModes[] = {
-    {"masteralone", '0', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 0, "Masteralone",NULL},
-    {"farm", '1', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 1, "MPI task farm",NULL},
-    {"multifarm", '2', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.mode, 2, "MPI multi task farm",NULL},
+    {"masteralone", '0', POPT_ARG_VAL, &cd.mode, 0, "Masteralone",NULL},
+    {"farm", '1', POPT_ARG_VAL, &cd.mode, 1, "MPI task farm",NULL},
+    {"multifarm", '2', POPT_ARG_VAL, &cd.mode, 2, "MPI multi task farm",NULL},
     POPT_TABLEEND
   };
 
   struct poptOption mechanic_poptRestart[] = {
-    {"restart", 'r', POPT_ARG_VAL|POPT_ARGFLAG_SHOW_DEFAULT, &cd.restartmode, 0, "Switch to restart mode", NULL},
+    {"restart", 'r', POPT_ARG_VAL, &cd.restartmode, 0, "Switch to restart mode", NULL},
     {"rpath", 'b', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &checkpoint_path, 0, "Path to checkpoint file", "/path/to/checkpoint/file"},
+    POPT_TABLEEND
+  };
+
+  struct poptOption mechanic_poptDebug[] = {
+    {"debug", 'z', POPT_ARG_VAL, &debug, 1, "Debug mode", NULL},
+    {"silent", 's', POPT_ARG_VAL, &silent, 1, "Silent mode", NULL},
     POPT_TABLEEND
   };
   
@@ -412,6 +419,7 @@ int main(int argc, char *argv[]){
     {"checkpoint", 'd', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT, &cd.checkpoint, 0, "Checkpoint file write interval", "CHECKPOINT"},
     MECHANIC_POPT_MODES
     MECHANIC_POPT_RESTART
+    MECHANIC_POPT_DEBUG
     MECHANIC_POPT_AUTOHELP
     POPT_TABLEEND
   };
@@ -443,6 +451,7 @@ int main(int argc, char *argv[]){
   sprintf(cs[1].options[0].value,"%d",MECHANIC_CHECKPOINT_DEFAULT);
   sprintf(cs[1].options[1].value,"%d",MECHANIC_CHECKPOINT_NUM_DEFAULT);
 
+
   /* MPI INIT */
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
@@ -453,7 +462,6 @@ int main(int argc, char *argv[]){
   H5open();
   /* H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL); */
   
-  if(node == 0) welcome();
 
   /* Parse command line */
   poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
@@ -486,6 +494,8 @@ int main(int argc, char *argv[]){
     mechanic_finalize(node);
     return 0;
   }
+
+  if(node == 0) welcome();
 
   /**
    * @page checkpoint Checkpoints
@@ -533,7 +543,6 @@ int main(int argc, char *argv[]){
     configfile = 1;
   }
 
-
   /* Reset options, we need to reuse them */
   /* to override values read from specified config file */
   if(node == 0){
@@ -572,7 +581,7 @@ int main(int argc, char *argv[]){
     }
 
     mechanic_message(MECHANIC_MESSAGE_INFO,"Mechanic will use these startup values:\n\n");
-    LRC_printAll(allopts,cs);
+    if(silent == 0) LRC_printAll(allopts,cs);
   }
 
   poptFreeContext(poptcon);
