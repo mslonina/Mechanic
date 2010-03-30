@@ -100,33 +100,29 @@ lrc_hdf_test_code='''
 int main(int argc, char* argv[]){
 
   hid_t file;
-  int opts = 1;
-  int numCT = 4;
-
-  LRC_configTypes ct[4] = {
-    {"default", "char", LRC_CHAR},
-    {"default", "int", LRC_INT},
-    {"default", "double", LRC_DOUBLE},
-    {"default", "float", LRC_FLOAT},
-  };
-
-  LRC_configNamespace cs[] = {
-    {"default",{
-                 {"char","aaa",LRC_CHAR},
-                 {"int","44",LRC_INT},
-                 {"double","12.3456",LRC_DOUBLE},
-                 {"float","34.5678",LRC_FLOAT},
-               },
-    4}
-  };
   
-  file = H5Fcreate("lrc-hdf-test.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  LRC_configDefaults ct[] = {
+    {"default", "inidata", "test.dat", LRC_STRING},
+    {"default", "nprocs", "4", LRC_INT},
+    {"default", "bodies", "3", LRC_INT},
+    {"logs", "dump", "100", LRC_INT},
+    {"logs", "period", "23.47", LRC_DOUBLE},
+    {"logs", "epoch", "2003.0", LRC_FLOAT},
+    {"farm", "xres", "222", LRC_INT},
+    {"default", "bodies", "7", LRC_INT},
+    {"farm", "yres", "444", LRC_INT},
+    LRC_OPTIONS_END
+  };
+	
+  LRC_assignDefaults(ct); 
   
-  LRC_writeHdfConfig(file, cs, opts);
-
+	file = H5Fcreate("lrc-hdf-test.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  LRC_HDF5Writer(file);
   H5Fclose(file);
 
   remove("lrc-hdf-test.h5");
+
+	LRC_cleanup();
 	
   return 0;
 }
@@ -204,7 +200,7 @@ def configure(conf):
   _check_std_headers(conf, stdheads, stdfunc, stdtypes)
   _check_lib(conf,['m','math.h','pow', libm_test_code, '', 1])
   _check_lib(conf,['hdf5','hdf5.h','H5Dopen2', hdf5_test_code, '', 1])
-  _check_lib(conf,['readconfig','libreadconfig_hdf5.h','LRC_writeHdfConfig',lrc_hdf_test_code, 'HDF5', 1])
+  _check_lib(conf,['readconfig','libreadconfig_hdf5.h','LRC_HDF5Writer',lrc_hdf_test_code, 'HDF5', 1])
   _check_lib(conf,['dl','dlfcn.h','dlopen','','',1])
   _check_lib(conf,['popt','popt.h','poptGetContext','','',1])
 	
@@ -226,7 +222,7 @@ def configure(conf):
   conf.env['CC'] = ['mpicc']
   conf.env['LINK_CC'] = ['mpicc']
   conf.env['CCFLAGS'] += ['-Wall']
-  #conf.env['CCFLAGS'] += ['-ansi']
+  conf.env['CCFLAGS'] += ['-std=c99']
   #conf.env['CCFLAGS'] += ['-pedantic']
   conf.env['CCFLAGS'] += ['-fpic']
   conf.env['CCFLAGS'] += ['-Dpic']

@@ -225,3 +225,26 @@ void mechanic_message(int type, char *fmt, ...){
  
 }
 
+int mechanic_sms(int* message, int node, int tag){
+  
+  int i; 
+  MPI_Status mpi_status;
+
+  if(mpi_size > 1){
+    if(node == 0){
+      for(i = 1; i < mpi_size; i++){
+          if(tag == MECHANIC_MPI_TERMINATE_TAG) mechanic_message(MECHANIC_MESSAGE_DEBUG, "Terminating SLAVE[%d]\n",i);
+          MPI_Send(&message, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
+      }
+    }else{
+      MPI_Recv(&message, 1, MPI_INT, MECHANIC_MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
+      if(mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG){
+        mechanic_finalize(node);
+        return 0;
+      }
+    }
+  }
+
+  return 0;
+
+}

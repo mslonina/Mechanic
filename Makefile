@@ -7,6 +7,9 @@ clean:
 install:
 	./waf install
 
+uninstall:
+	./waf uninstall
+
 dist:
 	./waf dist
 

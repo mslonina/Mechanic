@@ -73,12 +73,12 @@ int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsT
 }
 
 /* Bcast default config file */
-int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
+int buildDefaultConfigType(int lengths[], configData* d, MPI_Datatype* defaultConfigType_ptr){
   
-  int block_lengths[10];
-  MPI_Aint displacements[10];
-  MPI_Datatype typelist[10];
-  MPI_Aint addresses[11];
+  int block_lengths[9];
+  MPI_Aint displacements[9];
+  MPI_Datatype typelist[9];
+  MPI_Aint addresses[10];
   int i = 0;
 
   typelist[0] = MPI_CHAR; /* problem name */
@@ -90,18 +90,16 @@ int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   typelist[6] = MPI_INT; /* checkpoint */
   typelist[7] = MPI_INT; /* restartmode */
   typelist[8] = MPI_INT; /* mode */
-  typelist[9] = MPI_INT; /* checkpoint number */
 
-  block_lengths[0] = LRC_MAX_VALUE_LENGTH;
-  block_lengths[1] = LRC_MAX_VALUE_LENGTH;
-  block_lengths[2] = LRC_MAX_VALUE_LENGTH;
+  block_lengths[0] = lengths[0] + 2;
+  block_lengths[1] = lengths[1] + 2;
+  block_lengths[2] = lengths[2] + 2;
   block_lengths[3] = 1;
   block_lengths[4] = 1;
   block_lengths[5] = 1;
   block_lengths[6] = 1;
   block_lengths[7] = 1;
   block_lengths[8] = 1;
-  block_lengths[9] = 1;
 
   MPI_Address(d, &addresses[0]);
   MPI_Address(&(d->name), &addresses[1]);
@@ -113,13 +111,12 @@ int buildDefaultConfigType(configData* d, MPI_Datatype* defaultConfigType_ptr){
   MPI_Address(&(d->checkpoint), &addresses[7]);
   MPI_Address(&(d->restartmode), &addresses[8]);
   MPI_Address(&(d->mode), &addresses[9]);
-  MPI_Address(&(d->checkpoint_num), &addresses[10]);
 
-  for(i = 0; i < 10; i++){
+  for(i = 0; i < 9; i++){
     displacements[i] = addresses[i+1] - addresses[0];
   }
 
-  MPI_Type_struct(10, block_lengths, displacements, typelist, defaultConfigType_ptr);
+  MPI_Type_struct(9, block_lengths, displacements, typelist, defaultConfigType_ptr);
   MPI_Type_commit(defaultConfigType_ptr);
 
   return 0;

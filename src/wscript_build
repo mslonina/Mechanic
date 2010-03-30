@@ -10,5 +10,5 @@ obj.includes = '. core'
 obj.ccflags = '-rdynamic'
 obj.source = 'mechanic.c'
 obj.target = 'mechanic'
-obj.uselib = 'READCONFIG HDF5 POPT M'
+obj.uselib = 'READCONFIG HDF5 POPT M DL'
 

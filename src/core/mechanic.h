@@ -72,16 +72,15 @@ enum Messages{
 
 /* MAIN CONFIG DATA */
 typedef struct {
-  char name[LRC_MAX_VALUE_LENGTH];
-  char datafile[LRC_MAX_VALUE_LENGTH];
-  char module[LRC_MAX_VALUE_LENGTH];
+  char* name;
+  char* datafile;
+  char* module;
   int xres;
   int yres;
   int method;
   int checkpoint;
   int restartmode;
   int mode;
-  int checkpoint_num;
 } configData;
 
 

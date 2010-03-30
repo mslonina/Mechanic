@@ -56,18 +56,18 @@ int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** re
 
 int manageCheckPoints(configData* d){
 
-  int i;
-  char checkpoint[MECHANIC_FILE+6];
+  /*int i;*/
+  /*char checkpoint[MECHANIC_FILE+6];
   char checkpoint_old[MECHANIC_FILE+6];
+*/
+  /*sprintf(checkpoint,"%s-cp%03d.h5", d->name, MECHANIC_CHECKPOINTS-1);*/
 
-  sprintf(checkpoint,"%s-cp%03d.h5", d->name, MECHANIC_CHECKPOINTS-1);
-
-  for(i = MECHANIC_CHECKPOINTS-2; i >= 0; i--){
-    sprintf(checkpoint,"%s-cp%03d.h5", d->name, i+1);
-    sprintf(checkpoint_old,"%s-cp%03d.h5", d->name, i);
+  /*for(i = MECHANIC_CHECKPOINTS-2; i >= 0; i--){*/
+    /*sprintf(checkpoint,"%s-cp%03d.h5", d->name, i+1);
+    sprintf(checkpoint_old,"%s-cp%03d.h5", d->name, i);*/
     /* rename(checkpoint_old, checkpoint); */
     /*  printf("File %s -> %s\n",checkpoint_old, checkpoint); */
-  }
+  /*}*/
 
   /* printf("File %s will be copied to %s and used\n", checkpoint, checkpoint_old); */
   return 0;

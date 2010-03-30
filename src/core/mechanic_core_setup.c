@@ -46,7 +46,7 @@
 /* SETUP TOOLS */
 
 /* Default config file parser */
-int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* ct, int numCT, int flag){
+int readDefaultConfig(char* inifile, int flag){
 
   int opts = 0;
   char* sep = "=";
@@ -59,7 +59,7 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
   /* Default behaviour: try to read default config file. */
   if(read != NULL){
    mechanic_message(MECHANIC_MESSAGE_INFO,"Parsing config file \"%s\"... ", inifile);
-   opts = LRC_textParser(read, sep, comm, cs, ct, numCT);
+   opts = LRC_ASCIIParser(read, sep, comm);
    if(opts >= 0) mechanic_message(MECHANIC_MESSAGE_CONT," done.\n");
    fclose(read);
   }
@@ -81,63 +81,91 @@ int readDefaultConfig(char* inifile, LRC_configNamespace* cs, LRC_configTypes* c
 }
 
 /* Assign config values, one by one. Final struct contains config values of the run */ 
-int assignConfigValues(int opts, configData* d, LRC_configNamespace* cs, int cflag, int popt){
+int assignConfigValues(configData* d){
 
-  int i = 0, k = 0;
+  char* n = NULL; char* tf = NULL; char* m = NULL;
+  size_t nlen, flen, fmlen, mlen;
+  char* tempaddr = NULL;
 
-  for(i = 0; i < opts; i++){
-    if(strcmp(cs[i].space,"default") == 0){
-		  for(k = 0; k < cs[i].num; k++){
-			  if(strcmp(cs[i].options[k].name,"name") == 0){
-          if(popt == 1) poptTestC(cs[i].options[k].value, d->name);
-          strcpy(d->name,cs[i].options[k].value);
-          strcpy(d->datafile, d->name);
-          strcpy(d->datafile, strcat(d->datafile,"-master.h5"));  
-        }
-			  if(strcmp(cs[i].options[k].name,"module") == 0){
-          if(popt == 1) poptTestC(cs[i].options[k].value, d->module);
-          strcpy(d->module,cs[i].options[k].value);
-        }
-			  if(strcmp(cs[i].options[k].name,"xres") == 0){
-          if(popt == 1) poptTestI(cs[i].options[k].value, d->xres);
-          d->xres = atoi(cs[i].options[k].value);  
-        }
-        if(strcmp(cs[i].options[k].name,"yres") == 0){
-          if(popt == 1) poptTestI(cs[i].options[k].value, d->yres);
-          d->yres = atoi(cs[i].options[k].value); 
-        }
-			  if(strcmp(cs[i].options[k].name,"method") == 0){
-          if(popt == 1) poptTestI(cs[i].options[k].value, d->method);
-          d->method = atoi(cs[i].options[k].value); 
-        }
-			  if(strcmp(cs[i].options[k].name,"mode") == 0){
-          if(popt == 1) poptTestI(cs[i].options[k].value, d->mode);
-          d->mode = atoi(cs[i].options[k].value); 
-        }
+  /* Prepare the name of the problem */
+  n = LRC_getOptionValue("default", "name");
+  nlen = strlen(n);
+  
+  if(d->name == NULL){
+    d->name = malloc(nlen + sizeof(char*));
+    if(d->name == NULL) {
+      mechanic_error(MECHANIC_ERR_MEM);
     }
+  }else{
+    tempaddr = realloc(d->name, nlen + sizeof(char*));
+    if(d->name == NULL){
+      mechanic_error(MECHANIC_ERR_MEM);
     }
-    if(strcmp(cs[i].space,"logs") == 0){
-		  for(k = 0; k < cs[i].num; k++){
-			  if(strcmp(cs[i].options[k].name,"checkpoint") == 0){
-          if(popt == 1) poptTestI(cs[i].options[k].value, d->checkpoint);
-          d->checkpoint = atoi(cs[i].options[k].value); 
-        }
-			  if(strcmp(cs[i].options[k].name,"checkpoint_num") == 0){
-          if(popt == 1) poptTestI(cs[i].options[k].value, d->checkpoint_num);
-          d->checkpoint_num = atoi(cs[i].options[k].value); 
-        }
-      }
+  }
+  
+  strncpy(d->name, n, nlen);
+  d->name[nlen] = LRC_NULL;
+  
+  /* Prepare the file name */
+  fmlen = strlen(MECHANIC_MASTER_SUFFIX_DEFAULT) + sizeof(char*);
+  flen = nlen + fmlen + 2*sizeof(char*);
+
+  tf = malloc(flen + sizeof(char*));
+  if(tf == NULL) {
+    mechanic_error(MECHANIC_ERR_MEM);
+  }
+
+  strncpy(tf, d->name, nlen);
+  tf[nlen] = LRC_NULL;
+
+  strncat(tf, MECHANIC_MASTER_SUFFIX_DEFAULT, fmlen);
+  tf[flen] = LRC_NULL;
+
+  if(d->datafile == NULL){
+    d->datafile = malloc(flen + sizeof(char*));
+    if(d->datafile == NULL){
+      mechanic_error(MECHANIC_ERR_MEM);
     }
-	}
+  }else{
+    tempaddr = realloc(d->datafile, flen + sizeof(char*));
+    if(d->datafile == NULL){
+      mechanic_error(MECHANIC_ERR_MEM);
+    }
+  }
+  
+  strncpy(d->datafile, tf, flen);
+  d->datafile[flen] = LRC_NULL;
+
+  /* Prepare the module name */
+  m = LRC_getOptionValue("default", "module");
+  mlen = strlen(m);
+  
+  if(d->module == NULL){
+    d->module = malloc(nlen + sizeof(char*));
+    if(d->module == NULL){
+      mechanic_error(MECHANIC_ERR_MEM);
+    }
+  }else{
+    tempaddr = realloc(d->module, nlen + sizeof(char*));
+    if(d->module == NULL){
+      mechanic_error(MECHANIC_ERR_MEM);
+    }
+  }
+
+  strncpy(d->module, m, mlen);
+  d->module[mlen] = LRC_NULL;
+
+  /* Other options */
+	d->xres = LRC_option2int("default", "xres");
+	d->yres = LRC_option2int("default", "yres");
+	d->method = LRC_option2int("default", "method");
+	d->checkpoint = LRC_option2int("logs", "checkpoint");
+	d->restartmode = 0;
+	d->mode = LRC_option2int("default", "mode");
+
+  /* Free resources */
+  free(tf);
 
  return 0;
-}
-
-/* Helper tests */
-void poptTestC(char* i, char* j){
-    if(strcmp(i, j) != 0) sprintf(i,"%s",j); 
-}
-void poptTestI(char* i, int j){
-    if(atoi(i) != j) sprintf(i,"%d",j);
 }
 
