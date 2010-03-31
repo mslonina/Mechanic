@@ -139,7 +139,6 @@ int usage, help, debug, silent;
 int map2d(int, void* handler, moduleInfo*, configData* d, int ind[]);
 
 int buildMasterResultsType(int mrl, masterData* md, MPI_Datatype* masterResultsType_ptr);
-int buildDefaultConfigType(int lengths[], configData* d, MPI_Datatype* defaultConfigType_ptr);
 
 void* load_sym(void* handler, moduleInfo*, char* function, char* function_override, int type);
 int readDefaultConfig(char* inifile, int flag);
@@ -159,14 +158,14 @@ int H5readBoard(configData* d, int** board);
 int H5writeCheckPoint(moduleInfo *md, configData* d, int check, int** coordsarr, MECHANIC_DATATYPE** resultarr);
 int atCheckPoint(int check, int** coordsarr, int** board, MECHANIC_DATATYPE** resultarr, moduleInfo *md, configData* d);
 
-void welcome();
+void mechanic_welcome();
 void clearArray(MECHANIC_DATATYPE*,int);
 
 int mechanic_mode_multifarm(int node, void* handler, moduleInfo* md, configData* d);
 int mechanic_mode_farm(int node, void* handler, moduleInfo* md, configData* d);
 int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md, configData* d);
 
-int mechanic_sms(int* message, int node, int tag);
+int mechanic_printConfig(configData* cd, int flag);
 
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE, mechanic_poptHelpOptions, \
 			0, "Help options:", NULL },

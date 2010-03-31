@@ -1,0 +1,9 @@
+This todo list contains some ideas or features...
+
+- Custom storage layout -- this requires adding new template functions available
+  for modules. In case the module uses its own storage layout is should provide
+  also custom MPI functions accordingly.
+
+- 3D and more -- currently we have 2D mapping of pixels. What if we want to map
+  pixels in 3D or more? This depends on secondary separator support in LRC,
+  rewrite mapping system, storing status in board etc.

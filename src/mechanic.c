@@ -426,7 +426,7 @@ int main(int argc, char *argv[]){
   H5open();
   /* H5Eset_auto2(H5E_DEFAULT, H5error_handler, NULL); */  
   
-  if(node == 0) welcome();
+  if(node == 0) mechanic_welcome();
 
   /* CONFIGURATION */
   if(node == 0){
@@ -446,7 +446,9 @@ int main(int argc, char *argv[]){
     mode = atoi(MECHANIC_MODE_DEFAULT);
 
   } 
-    /* Parse command line */
+    /* Parse command line 
+     * All nodes read commandline options, because of problems of finishing MPI
+     * in case of help/unknown option */
     poptcon = poptGetContext (NULL, argc, (const char **) argv, cmdopts, 0);
     optvalue = poptGetNextOpt(poptcon);
  
@@ -533,17 +535,11 @@ int main(int argc, char *argv[]){
 
     /* Step3: Options are processed, we can now assign config values. */
     mstat = assignConfigValues(&cd);
- 
+  
     mechanic_message(MECHANIC_MESSAGE_DEBUG,"Config file contents:\n\n");
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"name: %s\n", cd.name);
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"datafile: %s\n", cd.datafile);
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"module: %s\n", cd.module);
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"res[%d, %d]\n", cd.xres, cd.yres);
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"mode: %d\n", cd.mode);
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"method: %d\n", cd.method);
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"checkpoint: %d\n", cd.checkpoint);
-
-    /* Security check: if mpi_size = 1 switch to masteralone mode */
+    mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
+ 
+        /* Security check: if mpi_size = 1 switch to masteralone mode */
 		if(mpi_size == 1){
 			cd.mode = 0;
 			mechanic_message(MECHANIC_MESSAGE_WARN, "MPI COMM SIZE = 1. Will switch to master alone mode now\n");
@@ -557,7 +553,7 @@ int main(int argc, char *argv[]){
     }
 
     mechanic_message(MECHANIC_MESSAGE_INFO,"Mechanic will use these startup values:\n\n");
-    if(silent == 0) LRC_printAll(allopts,cs);
+    mechanic_printConfig(&cd, MECHANIC_MESSAGE_CONT);
 
     /* Backup master data file.
      * If simulation was broken, and we are in restart mode
@@ -688,13 +684,7 @@ int main(int argc, char *argv[]){
         MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position, &cd.mode, 1, MPI_INT, MPI_COMM_WORLD);
 
         mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node [%d] received following configuration:\n\n", node);
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,"name: %s\n", cd.name);
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,"datafile: %s\n", cd.datafile);
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,"module: %s\n", cd.module);
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,"res[%d, %d]\n", cd.xres, cd.yres);
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,"mode: %d\n", cd.mode);
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,"method: %d\n", cd.method);
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,"checkpoint: %d\n", cd.checkpoint);
+        mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
       }
  
@@ -798,6 +788,10 @@ int main(int argc, char *argv[]){
   /* Finalize */
   mechanic_finalize(node);
 
+  if(node == 0){
+    mechanic_message(MECHANIC_MESSAGE_INFO, "Mechanic finished his job\n");
+    mechanic_message(MECHANIC_MESSAGE_CONT, "Have a nice day!\n\n");
+  }
   return 0;
 }
 
@@ -806,15 +800,7 @@ int main(int argc, char *argv[]){
  * Some known bugs. 
  */
 
-void welcome(){
 
-  mechanic_message(MECHANIC_MESSAGE_INFO, "%s\n", MECHANIC_NAME);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "v. %s\n", MECHANIC_VERSION);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "Author: %s\n", MECHANIC_AUTHOR);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "Bugs: %s\n", MECHANIC_BUGREPORT);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "%s\n", MECHANIC_URL);
-
-}
 
 /**
    * @page checkpoint Checkpoints

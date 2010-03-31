@@ -225,26 +225,28 @@ void mechanic_message(int type, char *fmt, ...){
  
 }
 
-int mechanic_sms(int* message, int node, int tag){
-  
-  int i; 
-  MPI_Status mpi_status;
-
-  if(mpi_size > 1){
-    if(node == 0){
-      for(i = 1; i < mpi_size; i++){
-          if(tag == MECHANIC_MPI_TERMINATE_TAG) mechanic_message(MECHANIC_MESSAGE_DEBUG, "Terminating SLAVE[%d]\n",i);
-          MPI_Send(&message, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-      }
-    }else{
-      MPI_Recv(&message, 1, MPI_INT, MECHANIC_MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
-      if(mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG){
-        mechanic_finalize(node);
-        return 0;
-      }
-    }
+int mechanic_printConfig(configData *cd, int flag){
+    
+  if(silent == 0){
+    mechanic_message(flag,"name: %s\n", cd->name);
+    mechanic_message(flag,"datafile: %s\n", cd->datafile);
+    mechanic_message(flag,"module: %s\n", cd->module);
+    mechanic_message(flag,"res: [%d, %d]\n", cd->xres, cd->yres);
+    mechanic_message(flag,"mode: %d\n", cd->mode);
+    mechanic_message(flag,"method: %d\n", cd->method);
+    mechanic_message(flag,"checkpoint: %d\n", cd->checkpoint);
+    mechanic_message(flag,"\n");
   }
+    return 0;
+}
 
-  return 0;
+void mechanic_welcome(){
+
+  mechanic_message(MECHANIC_MESSAGE_INFO, "%s\n", MECHANIC_NAME);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "v. %s\n", MECHANIC_VERSION);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "Author: %s\n", MECHANIC_AUTHOR);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "Bugs: %s\n", MECHANIC_BUGREPORT);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "%s\n", MECHANIC_URL);
+  mechanic_message(MECHANIC_MESSAGE_CONT, "\n");
 
 }
