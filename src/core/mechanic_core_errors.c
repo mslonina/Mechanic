@@ -54,6 +54,7 @@
  *
  * - restart/checkpoint system
  * - HDF error handling in a better way
+ * - extenstion to the template system: overrides specific for given node
  *
  * @section errcodes Error codes
  *

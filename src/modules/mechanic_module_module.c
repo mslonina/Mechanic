@@ -45,25 +45,28 @@
 /* [CASES] */
 
 /**
- *
  * @section modulecasestudies Case studies
- *  - Each slave does the same
- *    This is the simplest case of using Mechanic. The only thing to do is to
- *    define pixelCompute function and return some data to master node with
- *    masterData struct. You can also do something in functions IN/OUT, but
- *    in that case it is not really necessary.
  *
- *  - Each slave has different config file
- *    This time You need to read config file for each slave separately.
- *    This can be done with LibReadConfig in slaveIN function and config files
+ * There are some basic use cases of @M and its template system:
+ *
+ *  - @sb Each slave does the same. @bs
+ *    This is the simplest case of using @M. The only thing to do is to
+ *    define @c pixelCompute() function and return data to the master node
+ *    with @c masterData structure. You can also do something more in
+ *    @c node_in/out functions, but in that case it is not really necessary.
+ *
+ *  - @sb Each slave has different config file. @bs
+ *    This time you need to read config file for each slave separately.
+ *    This can be done with @c LRC in @c slave_in() function and config files
  *    named after slave number, i.e. slave22.
  *
- *  - Each slave has different pixelCompute function.
- *    At this point You need to create some subfunctions of pixelCompute
+ *  - @sb Each slave has different @c pixelCompute function. @bs
+ *    At this point you need to create some subfunctions of @c pixelCompute
  *    and choose them accordingly to number of the slave, i.e.
  *    in the switch routine.
  *
- *  - Each slave has both different config file and different pixelCompute
+ *  - @sb Each slave has both different config file and different
+ *    @c pixelCompute. @bs
  *    Just combining two cases in simple switch routines and it should work.
  *
  */
@@ -158,6 +161,38 @@ int module_cleanup(moduleInfo* md){
   return 0;
 }
 
+/* [METHOD6] */
+/**
+ * @section method6 The Method 6
+ *
+ * You can change default @M pixel mapping and simulation handling by setting
+ * @ct method = 6 @tc. In this case, you need to provide additional functions
+ * in your module. If any of them is missing, @M will abort.
+ *
+ * The @c farmResolution() simply returns number of simulations to do.
+ *
+ * @code
+ * @icode modules/mechanic_module_module.c 6FARM
+ * @endcode
+ *
+ * The @c pixelCoordsMap() operates on @c t index and should return 0 on
+ * success, errcode otherwise. The default behaviour is to map pixels on 2D
+ * board, as shown below:
+ *
+ * @code
+ * @icode modules/mechanic_module_module.c 6COORDS
+ * @endcode
+ *
+ * The @c pixelCoords() assigns pixel coordinates to @ct masterData r@tc
+ * structure. The default behaviour is to copy @c t index to @ct r->coords @tc.
+ *
+ * @code
+ * @icode modules/mechanic_module_module.c 6PIXELS
+ * @endcode
+ *
+ */
+/* [/METHOD6] */
+
 /**
  * @internal
  * @fn int module_farmResolution(int x, int y, moduleInfo* md, configData* d)
@@ -183,9 +218,15 @@ int module_cleanup(moduleInfo* md){
  *
  * @ingroup module_method6
  */
+
+/* [6FARM] */
+
 int module_farmResolution(int x, int y, moduleInfo* md, configData* d){
+
   return x*y;
 }
+
+/* [/6FARM] */
 
 /**
  * @internal
@@ -220,10 +261,26 @@ int module_farmResolution(int x, int y, moduleInfo* md, configData* d){
  *
  * @ingroup module_method6
  */
-int module_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md,
+
+/* [6COORDS] */
+
+int module_pixelCoordsMap(int t[], int numofpx, int xres, int yres, moduleInfo* md,
     configData* d){
+
+  if (numofpx < yres) {
+    t[0] = numofpx / yres;
+    t[1] = numofpx;
+  }
+
+  if (numofpx > yres - 1) {
+    t[0] = numofpx / yres;
+    t[1] = numofpx % yres;
+  }
+
   return 0;
 }
+
+/* [/6COORDS] */
 
 /**
  * @internal
@@ -262,10 +319,20 @@ int module_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md,
  *
  * @ingroup module_method6
  */
+
+/* [6PIXELS] */
+
 int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
     masterData* r){
+
+  r->coords[0] = t[0];
+  r->coords[1] = t[1];
+  r->coords[2] = t[2];
+
   return 0;
 }
+
+/* [/6PIXELS] */
 
 /**
  * @internal
@@ -305,37 +372,45 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d,
 /**
  * @section template-system The template system
  *
- * We have some kind of a template system. Each node-prefixed function can be
- * overriden by master/slave function. The possible overrides are shown in the
- * following list:
+ * @M uses some kind of a template system. It allows developer to use
+ * different sets of functions at different modes. Below we present list of
+ * available template functions and their possible overrides. For sake of
+ * clearness, we omitted function's arguments.
  *
- * - module_node_in()
- *   - module_master_in()
- *   - module_slave_in()
- * - module_node_out()
- *   - module_master_out()
- *   - module_slave_out()
- * - module_node_beforeSend()
- *   - module_master_beforeSend()
- *   - module_slave_beforeSend()
- * - module_node_afterSend()
- *   - module_master_afterSend()
- *   - module_slave_afterSend()
- * - module_node_beforeReceive()
- *   - module_master_beforeReceive()
- *   - module_slave_beforeReceive()
- * - module_node_afterReceive()
- *   - module_master_afterReceive()
- *   - module_slave_afterReceive()
- * - module_node_before_pixelCompute()
- *   - module_master_beforePixelCompute()
- *   - module_slave_beforePixelCompute()
- * - module_node_after_pixelCompute()
- *   - module_master_afterPixelCompute()
- *   - module_slave_afterPixelCompute()
+ * - @ct module_node_in(int mpi_size, int node, moduleInfo* md, configData* d) @tc
+ *   - @c module_master_in()
+ *   - @c module_slave_in()
+ * - @ct module_node_out(int mpi_size, int node, moduleInfo* md, configData* d) @tc
+ *   - @c module_master_out()
+ *   - @c module_slave_out()
+ * - @ct module_node_beforeSend(int node, moduleInfo* md, configData* d,
+ *   masterData* r) @tc
+ *   - @c module_master_beforeSend()
+ *   - @c module_slave_beforeSend()
+ * - @ct module_node_afterSend(int node, moduleInfo* md, configData* d,
+ *   masterData* r) @tc
+ *   - @c module_master_afterSend()
+ *   - @c module_slave_afterSend()
+ * - @ct module_node_beforeReceive(int node, moduleInfo* md, configData* d,
+ *   masterData* r) @tc
+ *   - @c module_master_beforeReceive()
+ *   - @c module_slave_beforeReceive()
+ * - @ct module_node_afterReceive(int node, moduleInfo* md, configData* d,
+ *   masterData* r) @tc
+ *   - @c module_master_afterReceive()
+ *   - @c module_slave_afterReceive()
+ * - @ct module_node_before_pixelCompute(int node, moduleInfo* md, configData*
+ *   d, masterData* r) @tc
+ *   - @c module_master_beforePixelCompute()
+ *   - @c module_slave_beforePixelCompute()
+ * - @ct module_node_after_pixelCompute(int node, moduleInfo* md, configData*
+ *   d, masterData* r) @tc
+ *   - @c module_master_afterPixelCompute()
+ *   - @c module_slave_afterPixelCompute()
  *
- * Each template function is optional, so Mechanic will silently skip it if
- * it is missing.
+ * Each template function is optional, so @M will silently skip it if
+ * it is missing. Refer to @ref echo for a simple example of using
+ * the template system.
  *
  */
 

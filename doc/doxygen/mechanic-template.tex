@@ -1,4 +1,5 @@
 \documentclass[10pt]{article}
+\setcounter{tocdepth}{1}
 
 %% BEGIN DOXYGEN
 \usepackage{calc, array}
@@ -6,7 +7,7 @@
 \newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
 
 \newenvironment{Code}
-{\normalsize}
+{\footnotesize}
 {\normalsize}
 
 \newcommand{\doxyref}[3]{\textbf{#1} (\textnormal{#2}\,\pageref{#3})}
@@ -16,7 +17,7 @@
 {\normalsize}
 
 \newenvironment{VerbInclude}
-{\normalsize}
+{\footnotesize}
 {\normalsize}
 
 \newenvironment{Image}
@@ -109,7 +110,7 @@
 
 \maketitle
 \vskip 4\baselineskip
-\tableofcontents
+{\footnotesize \tableofcontents}
 \thispagestyle{empty}
 \vskip 4\baselineskip
 

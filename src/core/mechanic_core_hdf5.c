@@ -63,17 +63,23 @@
  *
  * The Parallel HDF has no support for MPI task farm, thus the only node
  * allowed to write master file is the master node. However, the module can
- * provide additional data files and operate on them, see @ref echo-module for
+ * provide additional data files and operate on them, see @ref echo for
  * the example.
- *
- * @subsection showdata Working with data
+ */
+
+/* [/STORAGE] */
+
+/* [DATA] */
+
+/**
+ * @section showdata Working with data
  *
  * Using h5dump, pytables, hdfview, vitables, vim and sed for first steps of
  * visualization of the date.
  *
  */
 
-/* [/STORAGE] */
+/* [/DATA] */
 
 /* HDF5 FUNCTIONS */
 

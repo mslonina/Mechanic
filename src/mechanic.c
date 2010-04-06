@@ -96,42 +96,51 @@
  *
  * And that's the reason we created @M. We needed some kind of a numerical
  * interface or framework that will handle our dynamical studies. We started
- * by creating simple MPI task farm model, however we realised quickly that
+ * by creating simple MPI Task farm model, however we quickly realised that
  * using MPI framework can be useful not only in image-based operations
  * (dynamical map is a some kind of an image), but also in many numerical
  * problems with huge sets of initial conditions, or even tasks like
- * observations reductions, which lasts too long on single cpu. Thus we found
- * that our interface should handle such situations.
+ * observations reductions, which lasts too long on single cpu. We found
+ * that our interface should handle such situations, too.
  *
  * Now, @M is a multi-purpose numerical framework and interface. It is written
- * in mostly C99 with help of MPI and HDF5 storage. It provides extensible
+ * in C99 with help of MPI and HDF5 storage. It provides extensible
  * user API and loadable module support -- each numerical problem
- * can be coded as a standalone module and loaded dynamically during runtime.
+ * can be coded as a standalone module, loaded dynamically during runtime.
  * @M uses @c LibReadConfig (@c LRC) for handling configuration aspects
- * and @c Popt library for commandline args.
+ * and @c Popt library for command line (@c CLI) options.
  *
- * @M is in pre-alpha stage, that means, that there are some bugs in code,
+ * @M is in pre-alpha stage, this means, that there are some bugs in code,
  * some parts are not finished, and some features are not implemented yet.
  * However, we try to keep the @c Master branch as stable and useful as
- * possible. Feel free to participate in the development, test it and send
- * bugs. The latest snapshot can be grabbed from http://git.astri.umk.pl.
- * The @c Experimental branch containes all bleeding-edge stuff.
+ * possible. Feel free to participate in the development, test the software
+ * and send bugs. The latest snapshot can be grabbed from
+ * http://git.astri.umk.pl. The @c Experimental branch containes
+ * all bleeding-edge stuff.
  *
- * @M is distributed under BSD license. This means you can use our software
- * both for personal and commercial stuff. We released the code to the public,
- * because we believe, that the science and its tools should be open for
- * everyone. If you find @M useful for your research, we will be appreciated
- * if you refer to this user guide and our project homepage:
+ * @M is distributed under terms od BSD license. This means you can use our
+ * software both for personal and commercial stuff. We released the code
+ * to the public, because we believe, that the science and its tools should
+ * be open for everyone. If you find @M useful for your research, we will be
+ * appreciated if you refer to this user guide and our project homepage:
  * http://mechanics.astri.umk.pl/project/mechanic.
+ *
+ * We assume you have some basic knowledge on C-programming and using
+ * Unix-shell.
  */
 
 /**
  * @page install Installation
- * @M uses @c waf build system, see http://code.google.com/p/waf for detailes.
+ * @M uses @c Waf build system, see http://code.google.com/p/waf for detailes.
  * @c Waf is build in Python, you should have at least Python 2.3 installed
  * on your system.
  *
- * We try to keep as less requirements as possible to use @M. To compile the
+ * To download the latest snapshot of @M try
+ * @code
+ * http://git.astri.umk.pl/?p=Mechanic.git
+ * @endcode
+ *
+ * We try to keep as less requirements as possible to use @M. To compile our
  * software you need at least:
  *
  * - @c MPI2 implementation (we prefer @c OpenMPI, and @M was tested with it)
@@ -151,12 +160,12 @@
  * ./waf install
  * @endcode
  *
- * The default installation path is set to @c /usr/local, you can change it
- * with @c --prefix flag.
+ * The default installation path is set to @c /usr/local, but you can change
+ * it with @c --prefix flag.
  *
- * Altought @M uses @c MPI, it can be runned in a single-cpu environments
+ * Altought @M requires @c MPI, it can be runned in a single-cpu environments
  * (we call it "fake-MPI"). @M should do its job both on 32 and 64-bits
- * architectures with *nix-like system installed.
+ * architectures with *nix-like system on board.
  */
 
 /* We build a custom tag-system to override and extend some Doxygen
@@ -190,11 +199,15 @@
  * @idoc modules/hello/mechanic_module_hello.c HELLO
  * @idoc core/mechanic_core_setup.c SETUP
  * @idoc core/mechanic_core_hdf5.c STORAGE
+ * @idoc core/mechanic_core_checkpoint.c CHECKPOINT
  *
  * @page advanced Advanced topics
+ * @idoc modules/mechanic_module_module.c CASES
  * @idoc modules/mechanic_module_module.c TEMPLATES
- * @idoc modules/mandelbrot/mechanic_module_mandelbrot.c MANDELBROT
  * @idoc modules/echo/mechanic_module_echo.c ECHO
+ * @idoc modules/mandelbrot/mechanic_module_mandelbrot.c MANDELBROT
+ * @idoc modules/mechanic_module_module.c METHOD6
+ * @idoc core/mechanic_core_hdf5.c DATA
  *
  * @page devel Short Developers guide
  * @idoc core/mechanic_core_tools.c DEVEL

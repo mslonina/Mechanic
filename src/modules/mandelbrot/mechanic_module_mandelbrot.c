@@ -56,9 +56,20 @@
  * functions to your module, since it is a standard C code.
  *
  * In addition, the module returns the number of node that computed the pixel.
+ *
+ * @code
+ * @icode modules/mandelbrot/mechanic_module_mandelbrot.c MANDELCOMPUTE
+ * @endcode
+ *
+ * The header file:
+ * @code
+ * @icode modules/mandelbrot/mechanic_module_mandelbrot.h MANDELHEADER
+ * @endcode
  */
 
 /* [/MANDELBROT] */
+
+/* [MANDELCOMPUTE] */
 
 #include "mechanic.h"
 #include "mechanic_module_mandelbrot.h"
@@ -102,8 +113,8 @@ int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d,
   c = 4.0;
 
   /* Coordinate system */
-  scale_real = (real_max - real_min) / ((double)d->xres - 1.0);
-  scale_imag = (imag_max - imag_min) / ((double)d->yres - 1.0);
+  scale_real = (real_max - real_min) / ((double) d->xres - 1.0);
+  scale_imag = (imag_max - imag_min) / ((double) d->yres - 1.0);
 
   r->res[0] = real_min + r->coords[0] * scale_real;
   r->res[1] = imag_max - r->coords[1] * scale_imag;
@@ -139,4 +150,6 @@ int mandelbrot_generateFractal(double a, double b, double c){
 
   return count;
 }
+
+/* [/MANDELCOMPUTE] */
 

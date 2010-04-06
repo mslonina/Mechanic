@@ -45,15 +45,15 @@
 /* [HELLO] */
 
 /**
- * To fully understand what @M is and what it does, let's write a well-known
- * "Hello World!". We will create small C library, let us call it "hello"
+ * To understand what @M is and what it does, let us write a well-known
+ * "Hello World!". We will create small C library, let us call it @c Hello
  * and save it in @c mechanic_module_hello.c file:
  *
  * @code
  * @icode modules/hello/mechanic_module_hello.c HELLOCODE
  * @endcode
  *
- * We need to compile this example to a shared library. We can do that by
+ * We need to compile the example code to a shared library. We can do that by
  * calling
  *
  * @code
@@ -61,8 +61,9 @@
  * gcc -shared mechanic_module_hello.o -o mechanic_module_hello.so
  * @endcode
  *
- * However, @M need to know, where our module is, so we need to adjust @c
- * LD_LIBRARY_PATH to the place we saved our module.
+ * @M need to know, where our module is, so we need to adjust @c
+ * LD_LIBRARY_PATH (it depends on shell you are using) to the place
+ * we saved our module.
  *
  * We run @M with our module by
  *
@@ -70,16 +71,19 @@
  * mpirun -np 3 mechanic -p hello
  * @endcode
  *
- * This will run @M on three nodes, in task farm mode, with one master
- * node and two slaves.
+ * This will tell @M to run on three nodes, in a task farm mode,
+ * with one master node and two slaves. The master node will send default
+ * initial condition (pixel coordinates) to each slave and receive data
+ * in @c masterData structure (in this case the coordinates of the pixel).
+ *
  * The output should be similar to:
  *
  * @code
  * -> Mechanic
  *    v. 0.12-UNSTABLE-2
- *	  Author: MSlonina, TCfA, NCU
- *	  Bugs: mariusz.slonina@gmail.com
- *	  http://mechanics.astri.umk.pl/projects/mechanic
+ *    Author: MSlonina, TCfA, NCU
+ *    Bugs: mariusz.slonina@gmail.com
+ *    http://mechanics.astri.umk.pl/projects/mechanic
  * !! Config file not specified/doesn't exist. Will use defaults.
  * -> Mechanic will use these startup values:
  * (...)
@@ -89,9 +93,11 @@
  *
  * Two last lines were printed using our simple module. In the working
  * directory you should find also @c mechanic-master.h5 file. It is a data
- * file written by the master node, and each run of Mechanic will produce
+ * file written by the master node, and each run of @M will produce
  * such file. It containes all information about the setup of the simulation
- * and data received from slaves. If you try
+ * and data received from slaves.
+ *
+ * If you try
  *
  * @code
  * h5dump -n mechanic-master.h5
@@ -115,40 +121,47 @@
  *
  * which describes the data storage in master file.
  *
- * The "Hello" module is included in @M distribution as a simple example of
+ * The @c Hello module is included in @M distribution as a simple example of
  * using the software.
  *
- * @section hello-reqfunc The "Hello" module
+ * @section hello-reqfunc The Hello module
  *
- * The @M module must contain the preprocessor directive
+ * Let us go step-by-step throught the @c Hello module. Each @M module must
+ * contain the preprocessor directive
  *
  * @code
  * #include "mechanic.h"
  * @endcode
  *
- * The module specific
+ * The module specific header file
  *
  * @code
  * #include "mechanic_module_hello.h"
  * @endcode
  *
- * is optional. You can also use any other headers and link to any other
- * library during compilation.
+ * is optional. Since each module is a normal C code, you can also use any
+ * other headers and link to any other library during compilation.
  *
- * Every module function is prefixed with the name of
+ * Every function in the module is prefixed with the name of
  * the module -- thus, you should use unique names for your modules. The file
- * name prefix, @c mechanic_module_ is required for proper loading
- * of the module.
+ * name prefix, @c mechanic_module_ is required for proper module loading.
  *
- * The first three functions: @c hello_init(), @c hello_cleanup() and @c
- * hello_pixelCompute() are required for the module to work. @M will abort
- * if any of them is missing. The fourth one, @c hello_slave_out() is optional
- * and belongs to the so-called themeable functions group
- * (see @ref template-system). Functions should return an integer value,
+ * The first three functions:
+ *
+ * - @c hello_init()
+ * - @c hello_cleanup()
+ * - @c hello_pixelCompute()
+ *
+ * are required for the module to work. @M will abort if any of them is
+ * missing. The fourth one, @c hello_slave_out() is optional
+ * and belongs to the templateable functions group
+ * (see @ref template-system).
+ *
+ * Each function should return an integer value,
  * 0 on success and errcode on failure, which is important for proper error
  * handling.
  *
- * - @c hello_init(moduleInfo* md) function is called on module initialization
+ * - @c hello_init(moduleInfo* md) is called on module initialization
  *   and you need to provide some information about the module, especially,
  *   @c md->mrl, which is the length of the results array sended from the
  *   slave node to master node. The @c moduleInfo type contains information
@@ -159,14 +172,14 @@
  *   @icode core/mechanic.h MODULEINFO
  *   @endcode
  *
- * - @c hello_cleanup(moduleInfo* md) function currently does nothing,
+ * - @c hello_cleanup(moduleInfo* md) currently does nothing,
  *   however, it is required for future development.
  *
  * - @c hello_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r)
  *   is the heart of your module. Here you can compute almost any type of
  *   numerical problem or even you can call external application from here.
- *   There are technically no contradictions for including here Fortran based
- *   code, too. In this simple example we just assign coordinates of the
+ *   There are technically no contradictions for including Fortran based
+ *   code. In this simple example we just assign coordinates of the
  *   simulation (see @ref coords) to the result array @c r->res. The array is
  *   defined in @c masterData structure, as follows:
  *
@@ -174,7 +187,8 @@
  *   @icode core/mechanic.h MASTERDATA
  *   @endcode
  *
- *   Thus we need to do proper cast from integer to double. The result array
+ *   Currently, @c MECHANIC_DATATYPE is set to @c double, so we need to do
+ *   proper casting from integer to double. The result array
  *   has the @c md->mrl size, in this case 3. The @c masterData structure is
  *   available for all module functions.
  *
@@ -186,10 +200,11 @@
  *
  * The @M package contains few other modules:
  *
- * - @c module -- the default module with all available functions included
- * - @c echo -- an extended version of @c hello, which includes some advanced
- *   stuff on handling data files
- * - @c mandelbrot -- a benchmark module, which computes
+ * - @c Module -- the default module with all available functions included
+ * - @c Echo -- an extended version of the @c Hello module, which includes
+ *   some advanced stuff on handling data files, and is an example of using
+ *   template system
+ * - @c Mandelbrot -- a benchmark module, which computes
  *   The Mandelbrot fractal.
  *
  */
@@ -234,9 +249,9 @@ int hello_cleanup(moduleInfo* md){
 int hello_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r)
 {
 
-  r->res[0] = (double)r->coords[0];
-  r->res[1] = (double)r->coords[1];
-  r->res[2] = (double)r->coords[2];
+  r->res[0] = (double) r->coords[0];
+  r->res[1] = (double) r->coords[1];
+  r->res[2] = (double) r->coords[2];
 
   return 0;
 }

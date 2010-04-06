@@ -72,7 +72,7 @@ enum Messages{
 	MECHANIC_MESSAGE_DEBUG
 } mechanicMessages;
 
-/* MAIN CONFIG DATA */
+/* [CONFIGDATA] */
 typedef struct {
   char* name;
   char* datafile;
@@ -84,6 +84,7 @@ typedef struct {
   int restartmode;
   int mode;
 } configData;
+/* [/CONFIGDATA] */
 
 /* [MASTERDATA] */
 typedef struct {

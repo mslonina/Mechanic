@@ -45,6 +45,57 @@
 #include "mechanic.h"
 #include "mechanic_module_echo.h"
 
+/* [ECHO] */
+
+/**
+ * @section echo The Echo module
+ *
+ * Here we present possible usage of the template system. We will use
+ * @c node_in() and @c node_out() functions as examples.
+ *
+ * We implement @c node_in() and @c node_out() functions as follows:
+ *
+ * @code
+ * @icode modules/echo/mechanic_module_echo.c ECHO_NODEIN
+ * @endcode
+ *
+ * @code
+ * @icode modules/echo/mechanic_module_echo.c ECHO_NODEOUT
+ * @endcode
+ *
+ * They will be used if no override is present. However, we can create
+ * overrides. For the master node we have:
+ *
+ * @code
+ * @icode modules/echo/mechanic_module_echo.c ECHO_MASTERIN
+ * @endcode
+ *
+ * which will override the output of @c node_in() on the master node. We can
+ * create a much more complicated function, as for the @c node_in() at slave
+ * node:
+ *
+ * @code
+ * @icode modules/echo/mechanic_module_echo.c ECHO_SLAVEIN
+ * @endcode
+ *
+ * This function use advantage of @c HDF storage. Each slave will create its
+ * own data file and print a comment to it.
+ *
+ * Now, after all pixel have been computed, we tell our master node to copy
+ * slave data files to the master data file, as shown below:
+ *
+ * @code
+ * @icode modules/echo/mechanic_module_echo.c ECHO_MASTEROUT
+ * @endcode
+ *
+ * At the end of simulation, the slave node will print customized message:
+ * @code
+ * @icode modules/echo/mechanic_module_echo.c ECHO_SLAVEOUT
+ * @endcode
+ */
+
+/* [/ECHO] */
+
 /**
  * Implementation of module_init()
  */
@@ -162,6 +213,9 @@ int echo_node_afterPixelCompute(int node, moduleInfo* md, configData* d,
 /**
  * Implementation of module_node_in()
  */
+
+/* [ECHO_NODEIN] */
+
 int echo_node_in(int mpi_size, int node, moduleInfo* md, configData* d){
 
   mechanic_message(MECHANIC_MESSAGE_INFO, "NodeIN [%d]\n", node);
@@ -169,9 +223,14 @@ int echo_node_in(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 
+/* [/ECHO_NODEIN] */
+
 /**
  * Implementation of module_node_out()
  */
+
+/* [ECHO_NODEOUT] */
+
 int echo_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
     masterData* r){
 
@@ -179,6 +238,8 @@ int echo_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
 
   return 0;
 }
+
+/* [/ECHO_NODEOUT] */
 
 /**
  * Implementation of module_node_beforeSend()
@@ -219,10 +280,15 @@ int echo_node_afterReceive(int node, moduleInfo* md, configData* d,
 /**
  * Implementation of module_node_in()
  */
-int echo_masterIN(int mpi_size, int node, moduleInfo* md, configData* d){
+
+/* [ECHO_MASTERIN] */
+
+int echo_master_in(int mpi_size, int node, moduleInfo* md, configData* d){
 
   return 0;
 }
+
+/* [/ECHO_MASTERIN] */
 
 /**
  * Implementation of module_node_out()
@@ -230,6 +296,8 @@ int echo_masterIN(int mpi_size, int node, moduleInfo* md, configData* d){
  * Example:
  * Here, we just copy slave data files into one master file.
  */
+
+/* [ECHO_MASTEROUT] */
 int echo_master_out(int nodes, int node, moduleInfo* md, configData* d,
     masterData* r){
 
@@ -268,6 +336,8 @@ int echo_master_out(int nodes, int node, moduleInfo* md, configData* d,
 
   return 0;
 }
+
+/* [/ECHO_MASTEROUT] */
 
 /**
  * Implementation of module_node_beforeSend()
@@ -315,6 +385,8 @@ int echo_master_afterReceive(int node, moduleInfo* md, configData* d,
  * Data group is incorporated in MASTER_OUT function to one master data file.
  *
  */
+
+/* [ECHO_SLAVEIN] */
 int echo_slave_in(int mpi_size, int node, moduleInfo* md, configData* d,
     masterData* r){
 
@@ -373,9 +445,14 @@ int echo_slave_in(int mpi_size, int node, moduleInfo* md, configData* d,
   return 0;
 }
 
+/* [/ECHO_SLAVEIN] */
+
 /**
  * Implementation of module_node_out()
  */
+
+/* [ECHO_SLAVEOUT] */
+
 int echo_slave_out(int mpi_size, int node, moduleInfo* md, configData* d,
     masterData* r){
 
@@ -383,6 +460,8 @@ int echo_slave_out(int mpi_size, int node, moduleInfo* md, configData* d,
 
   return 0;
 }
+
+/* [/ECHO_SLAVEOUT] */
 
 /**
  * Implementation of module_node_beforeSend()

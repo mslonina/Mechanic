@@ -191,30 +191,41 @@ def set_options(opt):
 
 def buildDoc(bld):
 
+  latexcommand = "pdflatex refman.tex"
+  doxycommand = "doxygen mechanic-userguide.doxy"
+  preparecommand = "./prepareDoxy.py > ./mechanic-doxy.ini"
+
   ocwd = os.getcwd()
   print "Preparing Doxygen input file..."
   try:
     os.chdir("doc")
-    os.system("./prepareDoxy.py > ./mechanic-doxy.ini")
+    os.system(preparecommand)
   finally:
     os.chdir(ocwd)
 
   print "Running Doxygen..."
   try:
     os.chdir("doc/doxygen")
-    os.system("doxygen mechanic-userguide.doxy")
+    os.system(doxycommand)
   finally:
     os.chdir(ocwd)
 
   print "Creating User Guide..."
   try:
     os.chdir("doc/doxygen/UserGuide/latex")
-    subprocess.call("pdflatex refman.tex", shell=True)
+    subprocess.call(latexcommand, shell=True)
   finally:
     os.chdir(ocwd)
+
   try:
     os.chdir("doc/doxygen/UserGuide/latex")
-    subprocess.call("pdflatex refman.tex", shell=True)
+    subprocess.call(latexcommand, shell=True)
+  finally:
+    os.chdir(ocwd)
+
+  try:
+    os.chdir("doc/doxygen/UserGuide/latex")
+    os.rename("refman.pdf", "mechanic-userguide.pdf")
   finally:
     os.chdir(ocwd)
 
@@ -242,9 +253,11 @@ def configure(conf):
   if Options.options.builddoc:
     try:
       conf.find_program('doxygen', var='DOXYGEN', mandatory=True)
+      conf.find_program('pdflatex', var='PDFLATEX', mandatory=True)
       BUILDDOC="Yes"
+      conf.env.BUILDDOC = 1
     except:
-      print "You need Doxygen installed to build documentation"
+      print "You need Doxygen and PdfLatex installed to build documentation"
 	
   # Define standard declarations
   conf.define('PACKAGE_NAME', APPNAME)
@@ -257,7 +270,6 @@ def configure(conf):
   conf.env['LINK_CC'] = ['mpicc']
   conf.env['CCFLAGS'] += ['-Wall']
   conf.env['CCFLAGS'] += ['-std=c99']
-  #conf.env['CCFLAGS'] += ['-pedantic']
   conf.env['CCFLAGS'] += ['-fpic']
   conf.env['CCFLAGS'] += ['-Dpic']
   conf.env['CPPFLAGS'] += ['-DHAVE_CONFIG_H']
@@ -271,6 +283,8 @@ def configure(conf):
 #
 def build(bld):
   bld.add_subdirs('src')
+
+  
   bld.install_files('${PREFIX}/include', 'src/core/mechanic.h')
-  pass
+    
 

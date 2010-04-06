@@ -50,30 +50,35 @@
 /**
  * @section setup The setup system
  *
- * @M uses standard configuration path -- we read defaults, config file and
- * commandline options. The latter two are optional, and if not present, the
- * code will use defaults fixed at compilation time.
+ * @M uses standard configuration path -- first, we read defaults, then
+ * the config file and command line options. The latter two are optional,
+ * and if not present, the code will use defaults fixed at compilation time.
  *
- * To find out what commandline options are available, try
+ * To find out what command line options are available, try
  *
  * @code
  * mpirun -np 3 mechanic --help
  * @endcode
  *
- * @subsection cli Commandline options
+ * The configuration data is available to slave nodes by the structure:
+ * @code
+ * @icode core/mechanic.h CONFIGDATA
+ * @endcode
  *
- * The full list of commandline options is included below:
+ * @subsection cli Command line options
  *
- * - @c --help @c --usage @c -? -- prints help message
+ * The full list of command line options is included below:
+ *
+ * - @c --help @c --usage @ct -? @tc -- prints help message
  * - @c --name @c -n  -- the problem name, it will be used to prefix all data
- *   files specific for given run
- * - @c --config @c -c -- config file to use for the run
+ *   files specific in given run
+ * - @c --config @c -c -- config file to use in the run
  * - @c --module @c -p -- module which should be used during the run
- * - @c --method @c -m -- method of pixel mapping (0 -- default,
- *   6 -- user-defined @c [TODO])
+ * - @c --method @c -m -- pixel mapping method (0 -- default,
+ *   6 -- user-defined @c)
  * - @c --xres @c -x -- x resolution of the simulation map
  * - @c --yres @c -y -- y resolution of the simulation map
- * - @c --checkpoint @c -d -- checkpoint write interval
+ * - @c --checkpoint @c -d -- checkpoint file write interval
  *
  * Restart (checkpoints) options are @c [TODO]:
  *
@@ -84,14 +89,14 @@
  * You can switch between them by using:
  *
  * - @c -0 -- masteralone mode
- * - @c -1 -- task farm mode
+ * - @c -1 -- MPI task farm mode
  * - @c -2 -- multi task farm mode @c [TODO]
  *
  * @subsection configfile Config file
  *
- * Mechanic uses @c LRC for handling config files. To load configuration from
- * custom config file use @c -c switch. If this option is set,
- * but the file doesn't exist, Mechanic will abort. Sample config file is
+ * @M uses @c LRC for handling config files. To load configuration from
+ * custom config file use @c -c or @c --config switch. If this option is set,
+ * but the file doesn't exist, @M will abort. Sample config file is
  * given below:
  *
  * @code
@@ -107,13 +112,13 @@
  * checkpoint = 4
  * @endcode
  *
- * The config file options are equivalents of commandline options. Any other
- * option will be silently ommited. If any of variables is missing, Mechanic
- * will use defaults. Namespaces are mandatory and Mechanic will abort
- * if missing.
+ * The config file options are equivalents of command line options. Any other
+ * option will be silently ommited. If any of the variables is missing, @M
+ * will use defaults for each not found variable. Namespaces are mandatory
+ * and @M will abort if missing. The errors are handled by @c LRC in this case.
  *
  * You can include full or inline comments in your file, just after
- * the comment mark @c #. The configuration is stored in master file,
+ * the comment mark @c #. The configuration is stored in the master file,
  * see @ref storage.
  *
  * @subsection setup-examples Examples
@@ -121,56 +126,60 @@
  * The general rule for running @M is to use:
  *
  * @code
- * mpirun -np NUM_OF_CPU mechanic [OPTIONS]
+ * mpirun -np NUMBER_OF_CPUS_TO_USE mechanic [OPTIONS]
  * @endcode
  *
- * Examples:
- * - @ct mpirun -np 4 mechanic -p mandelbrot -x 2000 -y 2000 -n fractal @tc 
+ * Here we provide and explain some simple examples:
+ * - @ct mpirun -np 4 mechanic -p mandelbrot -x 200 -y 200 -n fractal @tc
  *   @M will use 4 nodes in MPI task farm mode (one master and three slaves)
- *   and will compute the Mandelbrot fractal with resolution 2000x2000 pixels.
+ *   and will compute the Mandelbrot fractal with resolution 200x200 pixels.
  *   The name of the run will be "fractal".
- * - @ct mpirun -np 4 mechanic -p mandelbrot -x 2000 -y 2000 -n fractal -0 @tc
+ * - @ct mpirun -np 4 mechanic -p mandelbrot -x 200 -y 200 -n fractal -0 @tc
  *   This is a similar example, in this case @M will compute the fractal in
  *   masteralone mode. Slave nodes will be terminated.
  * - @ct mpirun -np 4 mechanic -p mandelbrot -x 1 -y 1 @tc
- *   Here we can do only one simulation using the "Mandelbrot" module. In this
+ *   Here we can do only one simulation using the @c Mandelbrot module. In this
  *   case, slave nodes 2 and 3 will be terminated (see @ref modes).
  * - @ct mpirun -np 4 mechanic -p application -x 100 -y 1 @tc
  *   We can also create a one-dimensional simulation map, by setting one of
- *   axes to 1.
+ *   the axes to 1. This is especially useful in non-image computations, such
+ *   as observation reduction -- we can call @M to perform tasks i.e.
+ *   on 100 stars.
  * - @ct mpirun -np 1 mechanic [OPTIONS] @tc
  *   @ct mechanic [OPTIONS] @tc
  *   @M will automatically switch to masteralone mode.
  *
- * @section coords Pixel-Coordinate system
+ * @section coords Pixel-coordinate system
  *
  * @M was created for handling simulations related to dynamical maps. Thus, it
  * uses 2D pixel coordinate system (there are plans for extending it to other
- * dimensions). This was the easiest way to show which simulations have been
- * computed and which no. The map is stored in @c /board table in the master
+ * dimensions). This was the simplest way to show which simulations have been
+ * computed and which not. The map is stored in @c /board table in the master
  * file. Each finished simulation is marked with 1, the ongoing or broken --
  * with 0.
  *
- * It is natural to use (x,y)-resolution option (either in the config file or
- * commandline) to describe the map of pixels for an image (like dynamical
- * map or the Mandelbrot fractal). However, one can use slice-based mapping,
- * by using i.e. 100x1 or 1x100 resolution. In either case, the result should
- * be the same. Setting (x,y) = (1,1) is equivalent for doing only one
- * simulation.
+ * It is natural to use @c (x,y)-resolution option (either in the config file
+ * or command line) to describe the map of pixels for an image (like
+ * a dynamical map or the Mandelbrot fractal). However, one can use
+ * slice-based mapping, by using i.e. @c 100x1 or @c 1x100 resolution.
+ * In either case, the result should be the same. Setting @ct (x,y) = (1,1) @tc
+ * is equivalent of doing only one simulation.
  *
  * The mapping should help you in setting initial conditions for the
  * simulation, i.e. we can change some values by using pixel coordinates or
  * the number of the pixel. This information is available during the
- * computation and stored in @c masterData struct.
+ * computation and is stored in @c masterData struct.
  *
- * The number of simulations is counted by multiplying x and y resolution.
- * The simulations are currently done one-by-one, the master node does not
- * participate in computations (except masteralone mode, see @ref modes).
+ * By default, the number of simulations is counted by multiplying x and y
+ * resolution. The simulations are currently done one-by-one, the master node
+ * does not participate in computations (except masteralone mode,
+ * see @ref modes). You can change default behaviour by using @ct method = 6
+ * @tc, see @ref method6.
  *
  * @section modes Modes
  *
  * @M can compute simulations both in single-cpu mode (masteralone) or
- * multi-cpus mode (MPI task farm).
+ * multi-cpu mode (MPI task farm).
  *
  * - Masteralone mode -- This mode is especially useful if you run @M in
  *   single-cpu environment. If the mode is used in multi-cpu environments and

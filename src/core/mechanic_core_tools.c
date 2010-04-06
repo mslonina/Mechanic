@@ -58,7 +58,8 @@
  * - Try not to use globals. Avoid them where possible.
  * - Remember, the code should be readable by humans. For the machines,
  *   it does not matter.
- * - We follow PEAR coding standards. [Add link here]
+ * - We follow @c PEAR coding standards, see
+ *   http://pear.php.net/manual/en/standards.php
  *
  * If you are a lucky vim user, try settings below:
  * @code
@@ -67,10 +68,10 @@
  * :set tabstop=2
  * :set smarttab
  * :set expandtab
- * ":set list
+ * :set list
  * :highlight OverLength ctermbg=red ctermfg=white guibg=#592929
- * :match OverLength /\%80v.\*\/
- * :let c_space_errors = 1 
+ * :match OverLength /\%80v.* /
+ * :let c_space_errors = 1
  * @endcode
  *
  * @section message Message interface
@@ -164,6 +165,7 @@ int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[]){
 }
 
 int checkPixel(int pixel){
+
   return pixel;
 }
 

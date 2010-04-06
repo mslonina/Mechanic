@@ -45,6 +45,16 @@
 #include "mechanic.h"
 #include "mechanic_internals.h"
 
+/* [CHECKPOINT] */
+
+/**
+ * @section checkpoint Checkpoints
+ * Handling checkpoint files should be done in @M @c unstable-3 milestone.
+ *
+ */
+
+/* [/CHECKPOINT] */
+
 int atCheckPoint(int check, int** coordsarr, int** board,
     MECHANIC_DATATYPE** resultarr, moduleInfo* md, configData* d){
 
