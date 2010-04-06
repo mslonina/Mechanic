@@ -60,6 +60,19 @@
  *   it does not matter.
  * - We follow PEAR coding standards. [Add link here]
  *
+ * If you are a lucky vim user, try settings below:
+ * @code
+ * :set textwidth=79
+ * :set shiftwidth=2
+ * :set tabstop=2
+ * :set smarttab
+ * :set expandtab
+ * ":set list
+ * :highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+ * :match OverLength /\%80v.\*\/
+ * :let c_space_errors = 1 
+ * @endcode
+ *
  * @section message Message interface
  *
  * @M provides some functions that should be used instead of standard
@@ -166,11 +179,24 @@ void* load_sym(void* handler, moduleInfo *md, char* function,
   void* ret_handler;
   char* err;
   char* err_o;
-  char func[1024];
-  char func_over[1024];
+  char* func;
+  char* func_over;
   int template = 0;
+  size_t fl, fol, mn;
 
+  /* Reset dlerror() */
   dlerror();
+
+  mn = strlen(md->name);
+  fl = strlen(function);
+  fol = strlen(function_override);
+
+  func = malloc(mn + fl + 2 * sizeof(char*));
+  if (func == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  
+  func_over = malloc(mn + fol + 2 * sizeof(char*));
+  if (func_over == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
   sprintf(func, "%s_%s", md->name, function);
   sprintf(func_over, "%s_%s", md->name, function_override);
 
@@ -220,6 +246,9 @@ void* load_sym(void* handler, moduleInfo *md, char* function,
   } else if (template == 2) {
     ret_handler = handler_fo;
   }
+  
+  free(func);
+  free(func_over);
 
   return ret_handler;
 }
