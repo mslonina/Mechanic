@@ -4,6 +4,7 @@
 # encoding: utf-8
 
 import sys
+import subprocess
 import os
 import Utils
 import Build
@@ -15,6 +16,7 @@ VERSION='0.12.0-UNSTABLE-2'
 APPNAME='mechanic'
 URL='http://mechanics.astri.umk.pl/projects/mechanic'
 BUGS='mariusz.slonina@gmail.com'
+AUTHOR='Mariusz Slonina, NCU'
 
 srcdir = '.'
 blddir = 'build'
@@ -187,6 +189,37 @@ def set_options(opt):
                   dest = 'builddoc'
                   )
 
+def buildDoc(bld):
+
+  ocwd = os.getcwd()
+  print "Preparing Doxygen input file..."
+  try:
+    os.chdir("doc")
+    os.system("./prepareDoxy.py > ./mechanic-doxy.ini")
+  finally:
+    os.chdir(ocwd)
+
+  print "Running Doxygen..."
+  try:
+    os.chdir("doc/doxygen")
+    os.system("doxygen mechanic-userguide.doxy")
+  finally:
+    os.chdir(ocwd)
+
+  print "Creating User Guide..."
+  try:
+    os.chdir("doc/doxygen/UserGuide/latex")
+    subprocess.call("pdflatex refman.tex", shell=True)
+  finally:
+    os.chdir(ocwd)
+  try:
+    os.chdir("doc/doxygen/UserGuide/latex")
+    subprocess.call("pdflatex refman.tex", shell=True)
+  finally:
+    os.chdir(ocwd)
+
+  return
+
 #
 # CONFIGURE
 #
@@ -216,6 +249,7 @@ def configure(conf):
   # Define standard declarations
   conf.define('PACKAGE_NAME', APPNAME)
   conf.define('PACKAGE_VERSION', VERSION)
+  conf.define('PACKAGE_AUTHOR', AUTHOR)
   conf.define('PACKAGE_BUGREPORT', BUGS)
   conf.define('PACKAGE_URL', URL)
 
