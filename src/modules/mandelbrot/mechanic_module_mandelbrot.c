@@ -45,7 +45,7 @@
 /* [MANDELBROT] */
 
 /**
- * @section mandelbrot The Mandelbrot module
+ * @section mandelbrot The Mandelbrot Module
  *
  * This module shows how to use basic api of @M to compute any numerical
  * problem, in that case -- the Mandelbrot fractal.

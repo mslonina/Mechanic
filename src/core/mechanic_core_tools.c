@@ -47,7 +47,7 @@
 /**
  * Some notes for developing the code.
  *
- * @section codingstyle Coding style
+ * @section codingstyle Coding Style
  *
  * - We try to follow ANSI C standard as close as possible, however we use
  *   also some advantages of C99. Thus, you should use ANSI C where possible,
@@ -74,7 +74,7 @@
  * :let c_space_errors = 1
  * @endcode
  *
- * @section message Message interface
+ * @section message Message Interface
  *
  * @M provides some functions that should be used instead of standard
  * @c printf and @c exit:

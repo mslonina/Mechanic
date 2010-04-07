@@ -48,7 +48,7 @@
 /* [ECHO] */
 
 /**
- * @section echo The Echo module
+ * @section echo The Echo Module
  *
  * Here we present possible usage of the template system. We will use
  * @c node_in() and @c node_out() functions as examples.

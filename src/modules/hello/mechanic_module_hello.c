@@ -57,13 +57,18 @@
  * calling
  *
  * @code
- * gcc -fPIC mechanic_module_hello.c -o mechanic_module_hello.o
- * gcc -shared mechanic_module_hello.o -o mechanic_module_hello.so
+ * gcc -fPIC -c mechanic_module_hello.c -o mechanic_module_hello.o
+ * gcc -shared mechanic_module_hello.o -o libmechanic_module_hello.so
  * @endcode
  *
  * @M need to know, where our module is, so we need to adjust @c
  * LD_LIBRARY_PATH (it depends on shell you are using) to the place
- * we saved our module.
+ * we saved our module. If you are a @c Bash user, try the following setting
+ * in your @ct .bashrc @tc file:
+ *
+ * @code
+ * export LD_LIBRARY_PATH=/usr/lib/:/usr/local/lib:.
+ * @endcode
  *
  * We run @M with our module by
  *
@@ -124,7 +129,7 @@
  * The @c Hello module is included in @M distribution as a simple example of
  * using the software.
  *
- * @section hello-reqfunc The Hello module
+ * @section hello-reqfunc The Hello Module
  *
  * Let us go step-by-step throught the @c Hello module. Each @M module must
  * contain the preprocessor directive

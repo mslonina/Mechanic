@@ -42,37 +42,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-/* [CASES] */
-
-/**
- * @section modulecasestudies Case studies
- *
- * There are some basic use cases of @M and its template system:
- *
- *  - @sb Each slave does the same. @bs
- *    This is the simplest case of using @M. The only thing to do is to
- *    define @c pixelCompute() function and return data to the master node
- *    with @c masterData structure. You can also do something more in
- *    @c node_in/out functions, but in that case it is not really necessary.
- *
- *  - @sb Each slave has different config file. @bs
- *    This time you need to read config file for each slave separately.
- *    This can be done with @c LRC in @c slave_in() function and config files
- *    named after slave number, i.e. slave22.
- *
- *  - @sb Each slave has different @c pixelCompute function. @bs
- *    At this point you need to create some subfunctions of @c pixelCompute
- *    and choose them accordingly to number of the slave, i.e.
- *    in the switch routine.
- *
- *  - @sb Each slave has both different config file and different
- *    @c pixelCompute. @bs
- *    Just combining two cases in simple switch routines and it should work.
- *
- */
-
-/* [/CASES] */
-
 #include "mechanic.h"
 #include "mechanic_module_module.h"
 
@@ -370,47 +339,104 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d,
 /* [TEMPLATES] */
 
 /**
- * @section template-system The template system
+ * @section template-system The Template System
  *
  * @M uses some kind of a template system. It allows developer to use
- * different sets of functions at different modes. Below we present list of
- * available template functions and their possible overrides. For sake of
- * clearness, we omitted function's arguments.
+ * different sets of functions at different modes and/or nodes. Below
+ * we present list of available template functions and their possible overrides.
+ * Any modification of data on the master node will have a global effect. Modifications
+ * on slave nodes are only local until data is sended back to the master node.
  *
- * - @ct module_node_in(int mpi_size, int node, moduleInfo* md, configData* d) @tc
+ * @subsection nonmpi Non-MPI based functions (used in all modes)
+ *
+ * - @ct module_node_in(int mpi_size, int node, moduleInfo* md, configData* d) @tc <br>
+ *   This function is called before any operations on data are performed. The possible
+ *   overrides are:
  *   - @c module_master_in()
- *   - @c module_slave_in()
- * - @ct module_node_out(int mpi_size, int node, moduleInfo* md, configData* d) @tc
+ *   - @c module_slave_in() (not in Masteralone mode)
+ *
+ * - @ct module_node_out(int mpi_size, int node, moduleInfo* md, configData* d) @tc <br>
+ *   This function is called after all operations on data are finished. The possible
+ *   overrides are:
  *   - @c module_master_out()
- *   - @c module_slave_out()
+ *   - @c module_slave_out() (not in Masteralone mode)
+ *
+ * - @ct module_node_before_pixelCompute(int node, moduleInfo* md, configData*
+ *   d, <br> masterData* r) @tc <br>
+ *   This function is called before computation of the pixel. The possible overrides are:
+ *   - @c module_master_beforePixelCompute()
+ *   - @c module_slave_beforePixelCompute() (not in Masteralone mode)
+ * 
+ * - @ct module_node_after_pixelCompute(int node, moduleInfo* md, configData*
+ *   d, <br> masterData* r) @tc <br>
+ *   This function is called before computation of the pixel. The possible overrides are:
+ *   - @c module_master_afterPixelCompute()
+ *   - @c module_slave_afterPixelCompute() (not in Masteralone mode)
+ *
+ * @subsection mpibased MPI-based functions (not used in Masteralone mode)
+ *
  * - @ct module_node_beforeSend(int node, moduleInfo* md, configData* d,
- *   masterData* r) @tc
+ *   <br> masterData* r) @tc <br>
+ *   This function is called before any data send operation. In case of
+ *   the master node, this will apply before sending the initial data to slave nodes,
+ *   in case of slave nodes -- before sending the result data to the master node.
+ *   The possible overrides are:
  *   - @c module_master_beforeSend()
  *   - @c module_slave_beforeSend()
+ * 
  * - @ct module_node_afterSend(int node, moduleInfo* md, configData* d,
- *   masterData* r) @tc
+ *   <br> masterData* r) @tc <br>
+ *   This function is called right after any data send operation. In case of
+ *   the master node, this will apply after sending the initial data to slave nodes,
+ *   in case of slave nodes -- after sending the result data to the master node.
+ *   The possible overrides are:
  *   - @c module_master_afterSend()
  *   - @c module_slave_afterSend()
+ * 
  * - @ct module_node_beforeReceive(int node, moduleInfo* md, configData* d,
- *   masterData* r) @tc
+ *   <br> masterData* r) @tc <br>
+ *   This function is called just before the data is received. In case of the master node, 
+ *   this will apply on the result data from the previous computed pixel, in case of
+ *   slave nodes -- on the initial and result data from the previous pixel (only locally).
+ *   The possible overrides are:
  *   - @c module_master_beforeReceive()
  *   - @c module_slave_beforeReceive()
+ * 
  * - @ct module_node_afterReceive(int node, moduleInfo* md, configData* d,
- *   masterData* r) @tc
+ *   <br> masterData* r) @tc <br>
+ *   This function is called right after the data is received. In case of the master node, 
+ *   this will apply on the result data, in case of slave nodes -- on the initial data.
+ *   The possible overrides are:
  *   - @c module_master_afterReceive()
  *   - @c module_slave_afterReceive()
- * - @ct module_node_before_pixelCompute(int node, moduleInfo* md, configData*
- *   d, masterData* r) @tc
- *   - @c module_master_beforePixelCompute()
- *   - @c module_slave_beforePixelCompute()
- * - @ct module_node_after_pixelCompute(int node, moduleInfo* md, configData*
- *   d, masterData* r) @tc
- *   - @c module_master_afterPixelCompute()
- *   - @c module_slave_afterPixelCompute()
- *
+ * 
  * Each template function is optional, so @M will silently skip it if
  * it is missing. Refer to @ref echo for a simple example of using
  * the template system.
+ *
+ * @subsection modulecasestudies Case Studies
+ *
+ * There are some basic use cases of The Template System:
+ *
+ *  - @sb Each slave does the same.@bs
+ *    This is the simplest case of using @M. The only thing to do is to
+ *    define @c pixelCompute() function and return data to the master node
+ *    with @c masterData structure. You can also do something more in
+ *    @c node_in/out functions, but in that case it is not really necessary.
+ *
+ *  - @sb Each slave has different config file.@bs
+ *    This time you need to read config file for each slave separately.
+ *    This can be done with @c LRC in @c slave_in() function and config files
+ *    named after slave number, i.e. slave22.
+ *
+ *  - @sb Each slave has different @c pixelCompute function.@bs
+ *    At this point you need to create some subfunctions of @c pixelCompute
+ *    and choose them accordingly to number of the slave, i.e.
+ *    in the switch routine.
+ *
+ *  - @sb Each slave has both different config file and different
+ *    @c pixelCompute.@bs
+ *    Just combining two cases in simple switch routines and it should work.
  *
  */
 

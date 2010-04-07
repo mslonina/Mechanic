@@ -48,7 +48,7 @@
 /* [SETUP] */
 
 /**
- * @section setup The setup system
+ * @section setup The Setup System
  *
  * @M uses standard configuration path -- first, we read defaults, then
  * the config file and command line options. The latter two are optional,
@@ -65,11 +65,11 @@
  * @icode core/mechanic.h CONFIGDATA
  * @endcode
  *
- * @subsection cli Command line options
+ * @subsection cli Command Line Options
  *
  * The full list of command line options is included below:
  *
- * - @c --help @c --usage @ct -? @tc -- prints help message
+ * - @c --help @c --usage @ct -?@tc -- prints help message
  * - @c --name @c -n  -- the problem name, it will be used to prefix all data
  *   files specific in given run
  * - @c --config @c -c -- config file to use in the run
@@ -80,7 +80,8 @@
  * - @c --yres @c -y -- y resolution of the simulation map
  * - @c --checkpoint @c -d -- checkpoint file write interval
  *
- * Restart (checkpoints) options are @c [TODO]:
+ * @M provides user with a checkpoint system, see @ref checkpoint for 
+ * detailes. In this case the options are:
  *
  * - @c --restart @c -r -- switch to restart mode
  * - @c --rpath @c -b -- checkpoint file path
@@ -90,9 +91,9 @@
  *
  * - @c -0 -- masteralone mode
  * - @c -1 -- MPI task farm mode
- * - @c -2 -- multi task farm mode @c [TODO]
+ * - @c -2 -- multi task farm mode
  *
- * @subsection configfile Config file
+ * @subsection configfile Config File
  *
  * @M uses @c LRC for handling config files. To load configuration from
  * custom config file use @c -c or @c --config switch. If this option is set,
@@ -130,26 +131,26 @@
  * @endcode
  *
  * Here we provide and explain some simple examples:
- * - @ct mpirun -np 4 mechanic -p mandelbrot -x 200 -y 200 -n fractal @tc
+ * - @ct mpirun -np 4 mechanic -p mandelbrot -x 200 -y 200 -n fractal@tc <br>
  *   @M will use 4 nodes in MPI task farm mode (one master and three slaves)
  *   and will compute the Mandelbrot fractal with resolution 200x200 pixels.
  *   The name of the run will be "fractal".
- * - @ct mpirun -np 4 mechanic -p mandelbrot -x 200 -y 200 -n fractal -0 @tc
+ * - @ct mpirun -np 4 mechanic -p mandelbrot -x 200 -y 200 -n fractal -0@tc <br>
  *   This is a similar example, in this case @M will compute the fractal in
  *   masteralone mode. Slave nodes will be terminated.
- * - @ct mpirun -np 4 mechanic -p mandelbrot -x 1 -y 1 @tc
+ * - @ct mpirun -np 4 mechanic -p mandelbrot -x 1 -y 1@tc <br>
  *   Here we can do only one simulation using the @c Mandelbrot module. In this
  *   case, slave nodes 2 and 3 will be terminated (see @ref modes).
- * - @ct mpirun -np 4 mechanic -p application -x 100 -y 1 @tc
+ * - @ct mpirun -np 4 mechanic -p application -x 100 -y 1@tc <br>
  *   We can also create a one-dimensional simulation map, by setting one of
  *   the axes to 1. This is especially useful in non-image computations, such
  *   as observation reduction -- we can call @M to perform tasks i.e.
  *   on 100 stars.
- * - @ct mpirun -np 1 mechanic [OPTIONS] @tc
- *   @ct mechanic [OPTIONS] @tc
+ * - @ct mpirun -np 1 mechanic [OPTIONS]@tc <br>
+ *   @ct mechanic [OPTIONS]@tc <br>
  *   @M will automatically switch to masteralone mode.
  *
- * @section coords Pixel-coordinate system
+ * @section coords Pixel-coordinate System
  *
  * @M was created for handling simulations related to dynamical maps. Thus, it
  * uses 2D pixel coordinate system (there are plans for extending it to other
@@ -162,7 +163,7 @@
  * or command line) to describe the map of pixels for an image (like
  * a dynamical map or the Mandelbrot fractal). However, one can use
  * slice-based mapping, by using i.e. @c 100x1 or @c 1x100 resolution.
- * In either case, the result should be the same. Setting @ct (x,y) = (1,1) @tc
+ * In either case, the result should be the same. Setting @ct (x,y) = (1,1)@tc
  * is equivalent of doing only one simulation.
  *
  * The mapping should help you in setting initial conditions for the
@@ -173,24 +174,29 @@
  * By default, the number of simulations is counted by multiplying x and y
  * resolution. The simulations are currently done one-by-one, the master node
  * does not participate in computations (except masteralone mode,
- * see @ref modes). You can change default behaviour by using @ct method = 6
- * @tc, see @ref method6.
+ * see @ref modes). You can change default behaviour by using @ct method = 6@tc,
+ * see @ref method6.
  *
  * @section modes Modes
  *
  * @M can compute simulations both in single-cpu mode (masteralone) or
  * multi-cpu mode (MPI task farm).
  *
- * - Masteralone mode -- This mode is especially useful if you run @M in
+ * - @sb Masteralone mode@bs -- This mode is especially useful if you run @M in
  *   single-cpu environment. If the mode is used in multi-cpu environments and
  *   the size of MPI group is greater than 1, @M will terminate all nodes but
  *   the master node.
  *
- * - MPI Task farm -- The classical, and default mode for @M. This will use
+ * - @sb MPI Task farm@bs -- The classical, and default mode for @M. This will use
  *   one master node and number of slave nodes to do simulations. The master
  *   node is responsible for sending/receiving data and storing them. If
  *   number of slave nodes is greater than number of simulations to do, all
  *   unused nodes will be terminated.
+ *
+ * - @sb MPI MultiTask farm@bs -- This is an extension of MPI Task farm. Here, we split
+ *   our spool into parts with own sub-master node. The master node sends and
+ *   receives data from sub-master nodes. Then, the scenario is the same as in
+ *   MPI Task farm. Note: this mode will not be done until @c Unstable-4 release.
  *
  */
 

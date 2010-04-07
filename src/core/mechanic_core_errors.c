@@ -48,15 +48,14 @@
 /* [ERRORS] */
 
 /**
- * @section bugs Known bugs and missing features
+ * @section bugs Known Bugs and Missing Features
  *
  * Known bugs and missing features:
  *
  * - restart/checkpoint system
  * - HDF error handling in a better way
- * - extenstion to the template system: overrides specific for given node
  *
- * @section errcodes Error codes
+ * @section errcodes Error Codes
  *
  * In case of emergency @M tries to properly finalize all nodes and returns
  * error codes as described below:

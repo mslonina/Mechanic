@@ -125,8 +125,8 @@
  * appreciated if you refer to this user guide and our project homepage:
  * http://mechanics.astri.umk.pl/project/mechanic.
  *
- * We assume you have some basic knowledge on C-programming and using
- * Unix-shell.
+ * In this userguide, we assume you have some basic knowledge on
+ * C-programming and using Unix-shell.
  */
 
 /**
@@ -195,21 +195,20 @@
  */
 
 /**
- * @page quickstart Getting started
+ * @page quickstart Getting Started
  * @idoc modules/hello/mechanic_module_hello.c HELLO
  * @idoc core/mechanic_core_setup.c SETUP
  * @idoc core/mechanic_core_hdf5.c STORAGE
  * @idoc core/mechanic_core_checkpoint.c CHECKPOINT
  *
- * @page advanced Advanced topics
- * @idoc modules/mechanic_module_module.c CASES
+ * @page advanced Advanced Topics
  * @idoc modules/mechanic_module_module.c TEMPLATES
  * @idoc modules/echo/mechanic_module_echo.c ECHO
  * @idoc modules/mandelbrot/mechanic_module_mandelbrot.c MANDELBROT
  * @idoc modules/mechanic_module_module.c METHOD6
  * @idoc core/mechanic_core_hdf5.c DATA
  *
- * @page devel Short Developers guide
+ * @page devel Short Developer's Guide
  * @idoc core/mechanic_core_tools.c DEVEL
  *
  * @page troubleshooting Troubleshooting

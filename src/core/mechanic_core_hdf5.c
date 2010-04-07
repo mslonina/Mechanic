@@ -48,7 +48,7 @@
 /* [STORAGE] */
 
 /**
- * @section storage Data storage scheme
+ * @section storage Data Storage Scheme
  *
  * @M writes data in the following scheme:
  *
@@ -72,7 +72,7 @@
 /* [DATA] */
 
 /**
- * @section showdata Working with data
+ * @section showdata Working with Data
  *
  * Using h5dump, pytables, hdfview, vitables, vim and sed for first steps of
  * visualization of the date.
