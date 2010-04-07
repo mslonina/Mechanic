@@ -79,28 +79,28 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
 
   if (rawdata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  coordsarr = malloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1));
+  coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
   if (coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  resultarr = malloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) d->checkpoint + 1));
+  resultarr = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
   if (resultarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   for (i = 0; i < d->checkpoint; i++) {
-    coordsarr[i] = malloc(sizeof(uintptr_t) * 3);
+    coordsarr[i] = calloc(sizeof(uintptr_t) * 3, sizeof(uintptr_t));
     if (coordsarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-    resultarr[i] = malloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl));
+    resultarr[i] = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl), sizeof(uintptr_t));
     if (resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   }
 
   /* Allocate memory for board */
   if (d->restartmode == 1) {
-    board = malloc(sizeof(uintptr_t) * ((uintptr_t) d->xres));
+    board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
     if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
     for (i = 0; i < d->xres; i++) {
-      board[i] = malloc(sizeof(uintptr_t)*((uintptr_t)d->yres));
+      board[i] = calloc(sizeof(uintptr_t)*((uintptr_t)d->yres), sizeof(uintptr_t));
       if(board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
     }
   }

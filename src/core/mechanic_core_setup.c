@@ -255,7 +255,7 @@ int assignConfigValues(configData* d){
   nlen = strlen(n);
 
   if (d->name == NULL) {
-    d->name = malloc(nlen + sizeof(char*));
+    d->name = calloc(nlen + sizeof(char*), sizeof(char*));
     if (d->name == NULL) {
       mechanic_error(MECHANIC_ERR_MEM);
     }
@@ -273,7 +273,7 @@ int assignConfigValues(configData* d){
   fmlen = strlen(MECHANIC_MASTER_SUFFIX_DEFAULT) + sizeof(char*);
   flen = nlen + fmlen + 2*sizeof(char*);
 
-  tf = malloc(flen + sizeof(char*));
+  tf = calloc(flen + sizeof(char*), sizeof(char*));
   if (tf == NULL) {
     mechanic_error(MECHANIC_ERR_MEM);
   }
@@ -285,7 +285,7 @@ int assignConfigValues(configData* d){
   tf[flen] = LRC_NULL;
 
   if (d->datafile == NULL) {
-    d->datafile = malloc(flen + sizeof(char*));
+    d->datafile = calloc(flen + sizeof(char*), sizeof(char*));
     if (d->datafile == NULL) {
       mechanic_error(MECHANIC_ERR_MEM);
     }
@@ -304,7 +304,7 @@ int assignConfigValues(configData* d){
   mlen = strlen(m);
 
   if (d->module == NULL) {
-    d->module = malloc(nlen + sizeof(char*));
+    d->module = calloc(nlen + sizeof(char*), sizeof(char*));
     if (d->module == NULL) {
       mechanic_error(MECHANIC_ERR_MEM);
     }

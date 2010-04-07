@@ -485,7 +485,7 @@ int main(int argc, char* argv[]){
       olen = dlen + opreflen + 2*sizeof(char*);
 
       /* Allocate memory for the backup name */
-      oldfile = malloc(olen + sizeof(char*));
+      oldfile = calloc(olen + sizeof(char*), sizeof(char*));
       if (oldfile == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
       strncpy(oldfile, MECHANIC_FILE_OLD_PREFIX, opreflen);
@@ -573,15 +573,15 @@ int main(int argc, char* argv[]){
 
         /* Now we have to allocate memory for cd struct */
         slen = (size_t) lengths[0];
-        cd.name = malloc(slen + sizeof(char*));
+        cd.name = calloc(slen + sizeof(char*), sizeof(char*));
         if (cd.name == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
         slen = (size_t) lengths[1];
-        cd.datafile = malloc(slen + sizeof(char*));
+        cd.datafile = calloc(slen + sizeof(char*), sizeof(char*));
         if (cd.datafile == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
         slen = (size_t) lengths[2];
-        cd.module = malloc(slen + sizeof(char*));
+        cd.module = calloc(slen + sizeof(char*), sizeof(char*));
         if (cd.module == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
       }

@@ -193,10 +193,10 @@ void* load_sym(void* handler, moduleInfo *md, char* function,
   fl = strlen(function);
   fol = strlen(function_override);
 
-  func = malloc(mn + fl + 2 * sizeof(char*));
+  func = calloc(mn + fl + 2 * sizeof(char*), sizeof(char*));
   if (func == NULL) mechanic_error(MECHANIC_ERR_MEM);
   
-  func_over = malloc(mn + fol + 2 * sizeof(char*));
+  func_over = calloc(mn + fol + 2 * sizeof(char*), sizeof(char*));
   if (func_over == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   sprintf(func, "%s_%s", md->name, function);
