@@ -3,9 +3,9 @@
 # Mariusz Slonina, 2010
 # encoding: utf-8
 
-bld.add_subdirs('core engines modes modules')
+bld.add_subdirs('core engines libs modes modules')
 obj = bld.new_task_gen('cc', 'cprogram')
-obj.uselib_local = 'farm masteralone multifarm gpu odex taylor core'
+obj.uselib_local = 'orbit farm masteralone multifarm gpu odex taylor core'
 obj.includes = '. core'
 obj.ccflags = '-rdynamic'
 obj.source = 'mechanic.c'
