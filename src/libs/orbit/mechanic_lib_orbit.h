@@ -99,7 +99,7 @@ double orbit_kepler_iteration(int precision, double e, double m, double E);
 int orbit_el2rv(int orbit_type, double gm, double el[], double rv[]);
 int orbit_rv2el(int orbit_type, double gm, double el[], double rv[]);
 
-int orbit_kepler2cart(int direction);
+int orbit_kepler2cart(int direction, int orbit_type, double gm, double el[], double rv[]);
 int orbit_baryxv2baryrp(int direction);
 int orbit_helio2bary(int direction);
 int orbit_helio2poincare(int direction);
