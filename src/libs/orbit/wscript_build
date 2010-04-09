@@ -9,4 +9,5 @@ obj.includes = ". ../../core"
 obj.uselib_local = "core"
 obj.target = 'mechanic_lib_orbit'
 obj.name = 'orbit'
+obj.uselib = 'M'
 

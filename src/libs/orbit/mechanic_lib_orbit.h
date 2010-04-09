@@ -45,5 +45,63 @@
 #ifndef MECHANIC_LIB_ORBIT_H
 #define MECHANIC_LIB_ORBIT_H
 
+#include <math.h>
+
+#define MECHANIC_ORBIT_ELLIPSE 0
+#define MECHANIC_ORBIT_PARABOLA 1
+#define MECHANIC_ORBIT_HYPERBOLA 2
+
+#define MECHANIC_ORBIT_DANBY 0
+#define MECHANIC_ORBIT_ACCURATE 1
+
+#define MECHANIC_ORBIT_ACCURACY_LEVEL 1.0e-15
+
+/* CONSTANS */
+
+/* Jupiter mass
+ *
+ * Units:
+ * Sun mass AU**3/d**2
+ * length [1AU]
+ * time [1 day]
+ */
+#define MASSJ 0.0009547919384243
+#define MUJ 0.28253421034459263e-6
+#define MUS 0.2959122082855911e-3
+
+#define M_PI 3.14159265358979323846	/* pi */
+#define DEG2RAD M_PI/180.0
+#define RAD2DEG 180.0/M_PI
+#define PIBY2 M_PI_2
+
+#define TINY 2.0e-16
+
+#define YEAR 365.24
+#define DAYINSEC 24.0*3600.0
+
+#define VELC 299792.458
+#define AU 499.00478364*VELC
+#define G 6.67259e-20
+
+#define VELCIN VELC*DAYINSEC/AU
+#define VELCAU3 1.0*AU/DAYINSEC
+
+/* Convergence criteria for Danby */
+#define DANBYAC 1.0e-16
+#define DANBYB 1.0e-15
+
+/* Loop limits in the Laguerre attempts */
+#define NLAG1 50
+#define NLAG2 400
+
+double orbit_kepler(int precision, double e, double m);
+double orbit_kepler_iteration(int precision, double e, double m, double E);
+int orbit_el2rv(int orbit_type, double gm, double el[], double rv[]);
+
+int orbit_kepler2cart(int direction);
+int orbit_baryxv2baryrp(int direction);
+int orbit_helio2bary(int direction);
+int orbit_helio2poincare(int direction);
+
 #endif
 
