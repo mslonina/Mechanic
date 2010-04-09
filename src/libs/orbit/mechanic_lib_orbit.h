@@ -69,9 +69,9 @@
 #define MUJ 0.28253421034459263e-6
 #define MUS 0.2959122082855911e-3
 
-#define M_PI 3.14159265358979323846	/* pi */
-#define DEG2RAD M_PI/180.0
-#define RAD2DEG 180.0/M_PI
+#define PI 3.14159265358979323846	/* pi */
+#define DEG2RAD PI/180.0
+#define RAD2DEG 180.0/PI
 #define PIBY2 M_PI_2
 
 #define TINY 2.0e-16
@@ -97,11 +97,15 @@
 double orbit_kepler(int precision, double e, double m);
 double orbit_kepler_iteration(int precision, double e, double m, double E);
 int orbit_el2rv(int orbit_type, double gm, double el[], double rv[]);
+int orbit_rv2el(int orbit_type, double gm, double el[], double rv[]);
 
 int orbit_kepler2cart(int direction);
 int orbit_baryxv2baryrp(int direction);
 int orbit_helio2bary(int direction);
 int orbit_helio2poincare(int direction);
+
+double deg2rad(double angle);
+double rad2deg(double angle);
 
 #endif
 
