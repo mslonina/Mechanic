@@ -61,8 +61,8 @@
  * gcc -shared mechanic_module_hello.o -o libmechanic_module_hello.so
  * @endcode
  *
- * @M need to know, where our module is, so we need to adjust @c
- * LD_LIBRARY_PATH (it depends on shell you are using) to the place
+ * @M need to know, where our module is, so we need to adjust
+ * @c LD_LIBRARY_PATH (it depends on shell you are using) to the place
  * we saved our module. If you are a @c Bash user, try the following setting
  * in your @ct .bashrc @tc file:
  *

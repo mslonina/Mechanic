@@ -102,9 +102,9 @@ int orbit_el2rv(int precision, double gm, double el[], double rv[]);
 int orbit_rv2el(double gm, double el[], double rv[]);
 int orbit_kepler2cart(int direction, int precision,
     double gm, double el[], double rv[]);
-int orbit_baryxv2baryrp(int direction);
-int orbit_helio2bary(int direction);
-int orbit_helio2poincare(int direction);
+int orbit_baryrv2baryrp(int direction, double mass, double rv[], double rp);
+int orbit_helio2bary(int direction, double mass[], double hrv[], double brv[]);
+int orbit_helio2poincare(int direction, double mass[], double hrv[], double prv[]);
 double deg2rad(double angle);
 double rad2deg(double angle);
 

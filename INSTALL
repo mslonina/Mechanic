@@ -20,7 +20,19 @@ file in /usr/local/include. If you want to change installation prefix, run
 
 To build documentation use
 
-./waf configure --enable-doc
+--with-doc
+
+To build additional modules use (comma separated list):
+
+--with-modules=hello,echo,mandelbrot
+
+To build additional libs use (comma separated list):
+
+--with-libs=orbit
+
+To build additional engines use (comma separated list):
+
+--with-engines=odex,taylor,gpu
 
 For any additional options that come with Waf distribution, see:
 

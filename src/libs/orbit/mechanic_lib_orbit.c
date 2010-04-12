@@ -372,25 +372,49 @@ int orbit_kepler2cart(int direction, int precision,
   return mstat;
 }
 
-int orbit_baryxv2baryrp(int direction){
+/**
+ * mass -- the mass of the body
+ * rv[] -- barycentric rv
+ * rp -- barycentric rp
+ */
+int orbit_baryrv2baryrp(int direction, double mass, double rv[], double rp[]){
 
-  return 0;
+  int mstat = 0, i;
+
+  if (direction == -1) {
+    for (i = 3; i < 6; i++) rv[i] = rp[i] / mass;
+  } else {
+    for (i = 3; i < 6; i++) rp[i] = mass * rv[i];
+  }
+
+  return mstat;
+}
+
+/**
+ * Author: K. Gozdziewski (2001)
+ *
+ * mass[0] -- the central body mass
+ * mass[1] -- sum of the masses
+ * mass[2] -- the mass of the body
+ *
+ * hrv[] -- heliocentric rv
+ * brv[] -- barycentric rv
+ */
+int orbit_helio2bary(int direction, double mass[], double hrv[], double brv[]){
+
+  int mstat = 0;
+
+  return mstat;
 }
 
 /**
  * Author: K. Gozdziewski (2001)
  */
-int orbit_helio2bary(int direction){
+int orbit_helio2poincare(int direction, double mass[], double hrv[], double prv[]){
 
-  return 0;
-}
+  int mstat = 0;
 
-/**
- * Author: K. Gozdziewski (2001)
- */
-int orbit_helio2poincare(int direction){
-
-  return 0;
+  return mstat;
 }
 
 /**
