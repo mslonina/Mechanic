@@ -8,5 +8,13 @@ obj.find_sources_in_dirs(".")
 obj.includes = ". ../../core"
 obj.uselib_local = "core"
 obj.target = 'mechanic_engine_taylor'
-obj.name = 'taylor'
+obj.name = 'taylor-static'
 
+obj = bld.new_task_gen('cc', 'shlib')
+obj.find_sources_in_dirs(".")
+obj.includes = ". ../../core"
+obj.uselib_local = "core"
+obj.target = 'mechanic_engine_taylor'
+obj.name = 'taylor-shared'
+  
+bld.install_files('${PREFIX}/include/mechanic', 'mechanic_engine_taylor.h')

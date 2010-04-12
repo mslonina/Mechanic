@@ -21,115 +21,42 @@ AUTHOR='Mariusz Slonina, NCU'
 srcdir = '.'
 blddir = 'build'
 
+# Sources
+core = ['src', 'src/core', 'src/modes', 'src/modules']
+
+all_modules = ['src/modules/hello',
+               'src/modules/echo',
+               'src/modules/mandelbrot']
+
+all_engines = ['src/engines/odex',
+               'src/engines/taylor',
+               'src/engines/gpu']
+
+all_libs = ['src/libs/orbit']
+
 # Standard headers
 stdheads = ['stdio.h', 'locale.h', 'memory.h', 'stdlib.h', 'stdint.h', 'inttypes.h', 
            'strings.h', 'string.h', 'sys/stat.h', 'sys/types.h', 'unistd.h',
 					 'mpi.h']
 
 # Standard functions
-stdfunc = [['printf','stdio.h',1],
-					 ['memmove','memory.h',1],
-           ['strcspn','string.h',1],
-           ['strspn','string.h',1],
-           ['strstr','string.h',1],
-           ['strtol','stdlib.h',1],
-           ['strtok','string.h',1],
+stdfunc = [['printf', 'stdio.h', 1],
+					 ['memmove', 'memory.h', 1],
+           ['strcspn', 'string.h', 1],
+           ['strspn', 'string.h', 1],
+           ['strstr', 'string.h', 1],
+           ['strtol', 'stdlib.h', 1],
+           ['strtok', 'string.h', 1],
 					 ]
 
 # Standard types
-stdtypes = [['ssize_t','sys/types.h',1],
-            ['int','sys/types.h',1],
-            ['char','sys/types.h',1],
-            ['double','sys/types.h',1]
+stdtypes = [['ssize_t', 'sys/types.h', 1],
+            ['int', 'sys/types.h', 1],
+            ['char', 'sys/types.h', 1],
+            ['double', 'sys/types.h', 1]
             ]
 
-libm_test_code = '''
-#include <stdio.h>
-#include "math.h"
 
-int main(){
-  int i = 2, j = 4, k = 0;
-  k = pow(i,j);
-  return 0;
-}
-'''
-
-popt_test_code = '''
-'''
-
-dl_test_code = '''
-'''
-
-hdf5_test_code = '''
-#include <stdio.h>
-#include "hdf5.h"
-
-int main()
-{
-  hid_t file_id, dataset_id, dataspace_id;
-  hsize_t dims[2];
-  herr_t status;
-
-  H5open();
-
-  file_id = H5Fcreate("waf.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-
-  dims[0] = 2;
-  dims[1] = 2;
-
-  dataspace_id = H5Screate_simple(2, dims, NULL);
-  dataset_id = H5Dcreate(file_id, "/dset", H5T_NATIVE_INT, dataspace_id, 
-      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  
-  status = H5Dclose(dataset_id);
-  status = H5Sclose(dataspace_id);
-  status = H5Fclose(file_id);
-
-  H5close();
-
-	remove("waf.h5");
-
-  return 0;
-}
-'''
-
-lrc_hdf_test_code='''
-#include <stdio.h>
-#include <stdlib.h>
-#include "libreadconfig_hdf5.h"
-#include "hdf5.h"
-
-int main(int argc, char* argv[]){
-
-  hid_t file;
-  
-  LRC_configDefaults ct[] = {
-    {"default", "inidata", "test.dat", LRC_STRING},
-    {"default", "nprocs", "4", LRC_INT},
-    {"default", "bodies", "3", LRC_INT},
-    {"logs", "dump", "100", LRC_INT},
-    {"logs", "period", "23.47", LRC_DOUBLE},
-    {"logs", "epoch", "2003.0", LRC_FLOAT},
-    {"farm", "xres", "222", LRC_INT},
-    {"default", "bodies", "7", LRC_INT},
-    {"farm", "yres", "444", LRC_INT},
-    LRC_OPTIONS_END
-  };
-	
-  LRC_assignDefaults(ct); 
-  
-	file = H5Fcreate("lrc-hdf-test.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-  LRC_HDF5Writer(file);
-  H5Fclose(file);
-
-  remove("lrc-hdf-test.h5");
-
-	LRC_cleanup();
-	
-  return 0;
-}
-
-'''
 #
 # [Helper] Check for standard headers/functions
 #
@@ -149,14 +76,15 @@ def _check_std_headers(conf, heads, funcs, types):
 def _check_lib(conf, l):
   var = l[0].upper()
   try:
-    conf.check_cc(lib=l[0], uselib_store=var, mandatory=l[5], msg="Looking for "+l[0]+" library")
+    conf.check_cc(lib=l[0], uselib_store=var, mandatory=l[5],
+      msg="Checking for "+l[0]+" library")
   except:
-    print l[0] + " library was not found on your system"
+    Utils.pprint('RED', l[0] + " library was not found on your system")
 
   try:
     conf.check_cc(header_name=l[1], uselib=var, mandatory=l[5])
   except:
-    print l[1] + " header was not found on your system :("
+    Utils.pprint('RED', l[1] + " header was not found on your system :(")
  
   if not len(l[3]) == 0:
     try:
@@ -165,9 +93,10 @@ def _check_lib(conf, l):
                     uselib=var + ' ' + l[4], 
                     define_ret=True, 
                     mandatory=l[5], 
-                    msg="Checking if "+l[0]+" is usable")
+                    msg="Checking if " + l[0] + " is usable"
+                    )
     except:
-      print l[0] + " is not usable :("
+      Utils.pprint('RED', l[0] + " is not usable :(")
 
 #
 # [Helper] Check for MPI
@@ -176,88 +105,206 @@ def _check_mpi(conf):
   conf.find_program('mpicc', var='MPI', mandatory=True)
 
 #
+# [Helper] Process optional modules/engines/libs
+#
+def _process_optionals(option, opt, value, parser):
+  vals = value.split(',')
+  if vals == ['']:
+    vals = []
+  if getattr(parser.values, option.dest):
+    vals += getattr(parser.values, option.dest)
+  setattr(parser.values, option.dest, vals)
+
+#
+# [Helper] Check if given optional module/engine/lib exists
+#
+def _check_optional(options, type):
+
+  global all_modules
+  global all_engines
+  global all_libs
+
+  all = []
+  notfound = []
+  to_build = []
+  op = ''
+
+  if type == 'modules':
+    all = all_modules
+  if type == 'engines':
+    all = all_engines
+  if type == 'libs':
+    all = all_libs
+
+  pref = 'src/' + type + '/'
+
+  for op in options:
+    op = pref + op
+    try:
+      all.index(op)
+      to_build.append(op)
+    except:
+      notfound.append(os.path.basename(op))
+
+  if notfound:
+    Utils.pprint('RED', type[:-1].upper() + " not found: " + ", ".join(notfound))
+    raise sys.exit(1)
+
+  return to_build
+
+#
+# [Helper] Configure optional modules/engines/libs
+#
+def _configure_optionals(conf, type):
+
+  var = []
+  
+  if type == 'modules':
+    if Options.options.with_modules != None:
+      var = Options.options.with_modules
+  
+  if type == 'engines':
+    if Options.options.with_engines != None:
+      var = Options.options.with_engines
+    
+  if type == 'libs':
+    if Options.options.with_libs != None:
+      var = Options.options.with_libs
+   
+  to_build = _check_optional(var, type)
+
+  return to_build
+
+#
+# [Helper] List modules/engines/libs when waf --help
+#
+def _list_options(opts):
+  list = []
+  for a in opts:
+    list.append(os.path.basename(a))
+
+  return list
+
+#
+# [Helper] Open test code file and return its contents
+#
+def _test_code(code):
+
+  buffer = ''
+  f = open(code, 'ro');
+  
+  for i in f:
+    buffer = buffer + i
+
+  f.close
+
+  return buffer
+
+def _join_list(list):
+  
+  aa = []
+  for i in list:
+    aa.append(os.path.basename(i))
+
+  buffer = ', '.join(aa)
+  return buffer
+
+def _join_or_say_none(list):
+  buffer = _join_list(list)
+  if not buffer:
+    buffer = 'None'
+  return buffer
+
+def _configure_summary(conf):
+
+  print
+  Utils.pprint('YELLOW', APPNAME.upper() + ' ' + VERSION.upper() + ' setup:')
+  Utils.pprint('YELLOW', '  Installation path: ' + conf.env['PREFIX'])
+  
+  Utils.pprint('YELLOW',
+  '  Additional modules: ' + _join_or_say_none(conf.env['MECHANIC_BUILD_MODULES']))
+  Utils.pprint('YELLOW',
+  '  Additional engines: ' + _join_or_say_none(conf.env['MECHANIC_BUILD_ENGINES']))
+  Utils.pprint('YELLOW',
+  '  Additional libs: ' + _join_or_say_none(conf.env['MECHANIC_BUILD_LIBS']))
+  print
+
+#
 # SET OPTIONS
 #
 def set_options(opt):
+
+  global all_modules, all_libs, all_engines
+  list = []
+
   opt.tool_options('compiler_cc')
-  #opt.tool_options('compiler_mpicc')
 
-  opt.add_option('--build-doc',
-                  action = 'store_true', 
-                  default = False,
-                  help = 'Build documentation',
-                  dest = 'builddoc'
-                  )
+  opt.add_option('--with-doc', action = 'store_true', default = False,
+                  help = 'Build documentation', dest = 'with_doc')
 
-def buildDoc(bld):
+  list = _list_options(all_libs)
+  opt.add_option('--with-libs', action = 'callback', callback = _process_optionals,
+                  type = 'string', default = None,
+                  help = 'Build libs, options: ' + ', '.join(list), dest = 'with_libs')
 
-  latexcommand = "pdflatex refman.tex"
-  doxycommand = "doxygen mechanic-userguide.doxy"
-  preparecommand = "./prepareDoxy.py > ./mechanic-doxy.ini"
+  list = _list_options(all_engines)
+  opt.add_option('--with-engines', action = 'callback', callback = _process_optionals,
+                  type = 'string', default = None,
+                  help = 'Build engines, options: ' + ', '.join(list), dest = 'with_engines')
 
-  ocwd = os.getcwd()
-  print "Preparing Doxygen input file..."
-  try:
-    os.chdir("doc")
-    os.system(preparecommand)
-  finally:
-    os.chdir(ocwd)
-
-  print "Running Doxygen..."
-  try:
-    os.chdir("doc/doxygen")
-    os.system(doxycommand)
-  finally:
-    os.chdir(ocwd)
-
-  print "Creating User Guide..."
-  try:
-    os.chdir("doc/doxygen/UserGuide/latex")
-    subprocess.call(latexcommand, shell=True)
-  finally:
-    os.chdir(ocwd)
-
-  try:
-    os.chdir("doc/doxygen/UserGuide/latex")
-    subprocess.call(latexcommand, shell=True)
-  finally:
-    os.chdir(ocwd)
-
-  try:
-    os.chdir("doc/doxygen/UserGuide/latex")
-    os.rename("refman.pdf", "mechanic-userguide.pdf")
-  finally:
-    os.chdir(ocwd)
-
-  return
+  list = _list_options(all_modules)
+  opt.add_option('--with-modules', action = 'callback', callback = _process_optionals,
+                  type = 'string', default = None,
+                  help = 'Build modules, options: ' + ', '.join(list), dest = 'with_modules')
 
 #
 # CONFIGURE
 #
 def configure(conf):
+
   global stdheads
   global stdfunc
   global stdtypes
   global hdf5_test_code
+  global core
+  
+  conf.env['MECHANIC_BUILD_DOC'] = []
+  conf.env['MECHANIC_CORE'] = []
+  conf.env['MECHANIC_BUILD_MODULES'] = []
+  conf.env['MECHANIC_BUILD_ENGINES'] = []
+  conf.env['MECHANIC_BUILD_LIBS'] = []
+
+  test_code_libm = _test_code('waf-tests/test-m.c')
+  test_code_popt = _test_code('waf-tests/test-popt.c')
+  test_code_dl = _test_code('waf-tests/test-dl.c')
+  test_code_hdf = _test_code('waf-tests/test-hdf.c')
+  test_code_lrc = _test_code('waf-tests/test-lrc.c')
+
   conf.check_tool('compiler_cc')
   _check_mpi(conf)
   _check_std_headers(conf, stdheads, stdfunc, stdtypes)
-  _check_lib(conf,['m','math.h','pow', libm_test_code, '', 1])
-  _check_lib(conf,['hdf5','hdf5.h','H5Dopen2', hdf5_test_code, '', 1])
-  _check_lib(conf,['readconfig','libreadconfig_hdf5.h','LRC_HDF5Writer',lrc_hdf_test_code, 'HDF5', 1])
-  _check_lib(conf,['dl','dlfcn.h','dlopen','','',1])
-  _check_lib(conf,['popt','popt.h','poptGetContext','','',1])
+  _check_lib(conf, ['m', 'math.h', 'pow', test_code_libm, '', 1])
+  _check_lib(conf, ['hdf5', 'hdf5.h', 'H5Dopen2', test_code_hdf, '', 1])
+  _check_lib(conf, ['readconfig', 'libreadconfig_hdf5.h', 'LRC_HDF5Writer',
+                    test_code_lrc, 'HDF5', 1])
+  _check_lib(conf, ['dl', 'dlfcn.h', 'dlopen', test_code_dl, '', 1])
+  _check_lib(conf, ['popt', 'popt.h', 'poptGetContext', test_code_popt, '', 1])
 	
 	# Check for doxygen
-  BUILDDOC="No"
-  if Options.options.builddoc:
+  if Options.options.with_doc:
     try:
       conf.find_program('doxygen', var='DOXYGEN', mandatory=True)
       conf.find_program('pdflatex', var='PDFLATEX', mandatory=True)
-      BUILDDOC="Yes"
       conf.env.BUILDDOC = 1
+      conf.env['MECHANIC_BUILD_DOC'] = ['doc']
     except:
       print "You need Doxygen and PdfLatex installed to build documentation"
+
+  # Subdirs
+  conf.env['MECHANIC_CORE'] = core
+  conf.env['MECHANIC_BUILD_MODULES'] = _configure_optionals(conf, 'modules')
+  conf.env['MECHANIC_BUILD_ENGINES'] = _configure_optionals(conf, 'engines')
+  conf.env['MECHANIC_BUILD_LIBS'] = _configure_optionals(conf, 'libs')
 	
   # Define standard declarations
   conf.define('PACKAGE_NAME', APPNAME)
@@ -266,6 +313,7 @@ def configure(conf):
   conf.define('PACKAGE_BUGREPORT', BUGS)
   conf.define('PACKAGE_URL', URL)
 
+  # Compiler flags
   conf.env['CC'] = ['mpicc']
   conf.env['LINK_CC'] = ['mpicc']
   conf.env['CCFLAGS'] += ['-Wall']
@@ -278,13 +326,16 @@ def configure(conf):
   # Write config.h
   conf.write_config_header('config.h')
 
+  _configure_summary(conf)
+
 #
 # BUILD
 #
 def build(bld):
-  bld.add_subdirs('src')
-
+  bld.add_subdirs(bld.env['MECHANIC_CORE'])
+  bld.add_subdirs(bld.env['MECHANIC_BUILD_MODULES'])
+  bld.add_subdirs(bld.env['MECHANIC_BUILD_ENGINES'])
+  bld.add_subdirs(bld.env['MECHANIC_BUILD_LIBS'])
+  bld.add_subdirs(bld.env['MECHANIC_BUILD_DOC'])
   
-  bld.install_files('${PREFIX}/include', 'src/core/mechanic.h')
-    
-
+  

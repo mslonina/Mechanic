@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+import sys, subprocess, os, Utils
+import TaskGen
+
+@TaskGen.feature('doxygen')
+def buildDoc(self):
+
+  latexcommand = "pdflatex refman.tex >/dev/null"
+  doxycommand = "doxygen mechanic-userguide.doxy >/dev/null"
+  preparecommand = "./prepareDoxy.py > ./mechanic-doxy.ini"
+
+  ocwd = os.getcwd()
+  Utils.pprint('YELLOW', "Preparing Doxygen input file...")
+  try:
+    os.chdir("doc")
+    os.system(preparecommand)
+  finally:
+    os.chdir(ocwd)
+
+  Utils.pprint('YELLOW', "Running Doxygen...")
+  try:
+    os.chdir("doc/doxygen")
+    os.system(doxycommand)
+  finally:
+    os.chdir(ocwd)
+
+  Utils.pprint('YELLOW', "Creating User Guide...")
+  try:
+    os.chdir("doc/doxygen/UserGuide/latex")
+    subprocess.call(latexcommand, shell=True)
+  finally:
+    os.chdir(ocwd)
+
+  try:
+    os.chdir("doc/doxygen/UserGuide/latex")
+    subprocess.call(latexcommand, shell=True)
+  finally:
+    os.chdir(ocwd)
+
+  try:
+    os.chdir("doc/doxygen/UserGuide/latex")
+    os.rename("refman.pdf", "mechanic-userguide.pdf")
+  finally:
+    os.chdir(ocwd)
+
+  return
+
+
+bld(features='doxygen')
+
+bld.install_files('${PREFIX}/share/doc/mechanic',
+    'doxygen/UserGuide/latex/mechanic-userguide.pdf')
+
+bld.install_files('${PREFIX}/share/doc/mechanic/examples',
+'samples/mechanic-config samples/mechanic-pbs.sh')
+
+

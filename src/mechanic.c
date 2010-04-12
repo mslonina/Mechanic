@@ -163,6 +163,30 @@
  * The default installation path is set to @c /usr/local, but you can change
  * it with @c --prefix flag.
  *
+ * By default, @M comes only with core. However, you can consider building
+ * additional modules, engines and libraries, as follows:
+ * @code
+ * --with-modules=list,of,modules
+ * --with-engines=list,of,engines
+ * --with-libs=list,of,libs
+ * @endcode
+ *
+ * Available modules:
+ * - @c hello, see @ref hello
+ * - @c echo, see @ref echo
+ * - @c mandelbrot, see @ref mandelbrot
+ *
+ * Available engines (currently only templates):
+ * - @c odex
+ * - @c taylor
+ * - @c gpu
+ *
+ * Available libs:
+ * - @c orbit -- a library for handling common tasks of celestial mechanics,
+ *   i.e orbital elements conversion, see @ref orbit
+ *
+ * The documentation can will be builded, with @c --with-doc option.
+ *
  * Altought @M requires @c MPI, it can be runned in a single-cpu environments
  * (we call it "fake-MPI"). @M should do its job both on 32 and 64-bits
  * architectures with *nix-like system on board.
@@ -207,6 +231,7 @@
  * @idoc modules/mandelbrot/mechanic_module_mandelbrot.c MANDELBROT
  * @idoc modules/mechanic_module_module.c METHOD6
  * @idoc core/mechanic_core_hdf5.c DATA
+ * @idoc libs/orbit/mechanic_lib_orbit.c ORBIT
  *
  * @page devel Short Developer's Guide
  * @idoc core/mechanic_core_tools.c DEVEL

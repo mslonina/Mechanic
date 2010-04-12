@@ -46,40 +46,65 @@
 #include "mechanic_internals.h"
 #include "mechanic_lib_orbit.h"
 
-/**
- * ORBITAL ELEMENTS CONVERSION
- *
- * The input arrays should have following shape:
- *
- * elements[0] - a
- * elements[1] - e
- * elements[2] - i [radians]
- * elements[3] - capomega [radians]
- * elements[4] - omega [radians]
- * elements[5] - mean anomally [radians]
- *
- * rv[0] - x
- * rv[1] - y
- * rv[2] - z
- * rv[3] - vx
- * rv[4] - vy
- * rv[5] - vz
- *
- * @return
- * 0 on success, errcode otherwise
- *
- */
+/* [ORBIT] */
 
 /**
- * @fn double orbit_kepler(double e, double m)
+ * @section orbit The Orbit Library
+ *
+ * The Orbit Library was created to handle common tasks meet in Celestial
+ * Mechanics, i.e. orbital elements conversion. The library provides following
+ * functions:
+ *
+ * @code
+ * @icode libs/orbit/mechanic_lib_orbit.h ORBIT_API
+ * @endcode
+ *
+ * The parameters are:
+ * - @c el[] -- input/output orbital elements. The array should have following
+ *   shape:
+ *   @code
+ *   el[0] - a
+ *   el[1] - e
+ *   el[2] - i [radians]
+ *   el[3] - capomega [radians]
+ *   el[4] - omega [radians]
+ *   el[5] - mean anomally [radians]
+ *   @endcode
+ *
+ * - @c rv[] -- input/output rv frame. The array should have following shape:
+ *   @code
+ *   rv[0] - x
+ *   rv[1] - y
+ *   rv[2] - z
+ *   rv[3] - vx
+ *   rv[4] - vy
+ *   rv[5] - vz
+ *   @endcode
+ * - @c gm -- mass parameter
+ * - @c e -- eccentricity
+ * - @c m -- mean anomaly
+ * - @c E -- initial solution for Kepler's equation
+ * - @c precision -- the precision used to solve Kepler's equation
+ * - @c direction -- direction of elements conversion, 1: el[] -> rv[], -1 rv[]
+ *   -> el[]
+ * - @c angle -- angle to convert
+ *
+ * The Kepler's equation is solved using Danby's approach, see J.M.A. Danby,
+ * "The Solution of Kepler's Equation, III", Cel. Mech. 40 (1987) pp. 303-312.
+ *
+ * To use @c Orbit, you need to include @c mechanic/mechanic_lib_orbit.h in
+ * your code and link it to @c libmechanic_orbit.so.
+ */
+
+/* [/ORBIT] */
+
+/**
+ * @fn double orbit_kepler(int precision, double e, double m)
  * @brief Solves Kepler's equation with Danby's approach
  *
- * See J.M.A. Danby, "The Solution of Kepler's Equation, III"
- * Cel. Mech. 40 (1987) pp. 303-312
- *
  * To obtain Danby's precision, set precison = MECHANIC_ORBIT_DANBY.
- * To obtain much more accurate solution, set precision =
- * MECHANIC_ORBIT_ACCURATE.
+ * To obtain much more accurate solution, set
+ * precision = MECHANIC_ORBIT_ACCURATE.
  *
  */
 double orbit_kepler(int precision, double e, double m){
@@ -87,10 +112,10 @@ double orbit_kepler(int precision, double e, double m){
   double E;
 
   /* Danby's inital guess */
-  if (m >= 0.1){
+  if (m >= 0.1) {
     E = m + 0.85 * sin(m) * e;
   } else {
-    E = m + (pow(6.0 * m, (1.0/3.0)) - m * pow(e, 2));
+    E = m + (pow(6.0 * m, (1.0/3.0)) - m * pow(e, 2.0));
   }
 
   E = orbit_kepler_iteration(precision, e, m, E);
@@ -115,7 +140,7 @@ double orbit_kepler_iteration(int precision, double e, double m, double E){
 
     dE = - f0 / f1;
     dE = - f0 / (f1 + 0.5 * dE * f2);
-    dE = - f0 / (f1 + 0.5 * dE * f2 + pow(dE, 2) * f3 / 6.0);
+    dE = - f0 / (f1 + 0.5 * dE * f2 + pow(dE, 2.0) * f3 / 6.0);
 
     E = E + dE;
 
@@ -135,13 +160,21 @@ double orbit_kepler_iteration(int precision, double e, double m, double E){
   return E;
 }
 
-/* Converts orbital elements to rv frame */
-int orbit_el2rv(int orbit_type, double gm, double el[], double rv[]){
+/**
+ * @fn int orbit_el2rv(int precision, double gm, double el[], double rv[])
+ *
+ * @brief
+ * Converts orbital elements to cartesian rv frame
+ *
+ * @return
+ * Should return 0 on success, errcode otherwise
+ */
+int orbit_el2rv(int precision, double gm, double el[], double rv[]){
 
-  double matrix[6], r, unit, s2e, s2g;
+  double matrix[6], unit, s2e, s2g;
   double sin_inc, cos_inc, sin_omega, cos_omega, sin_capom, cos_capom;
   double E, r1, r2, v1, v2, divider;
-  int i;
+  int orbit_type;
 
   unit = 1.0;
 
@@ -162,14 +195,22 @@ int orbit_el2rv(int orbit_type, double gm, double el[], double rv[]){
   matrix[4] = - sin_omega * sin_capom + cos_omega * cos_inc * cos_capom;
   matrix[5] = cos_omega * sin_inc;
 
-  for (i = 0; i < 6; i++) printf("matrix[%d] = %.16f\n", i, matrix[i]);
+  if (el[1] < 0.0) {
+    mechanic_message(MECHANIC_MESSAGE_WARN, "Eccentricity less than 0\n");
+    mechanic_message(MECHANIC_MESSAGE_CONT, "Will set to 0.0\n");
+    el[1] = 0.0;
+  }
+
+  if (el[1] < 1.0) orbit_type = MECHANIC_ORBIT_ELLIPSE;
+  if (el[1] == 1.0) orbit_type = MECHANIC_ORBIT_PARABOLA;
+  if (el[1] > 1.0) orbit_type = MECHANIC_ORBIT_HYPERBOLA;
 
   if (orbit_type == MECHANIC_ORBIT_ELLIPSE) {
 
     /* Solve Kepler's equation */
-    E = orbit_kepler(MECHANIC_ORBIT_DANBY, el[1], el[5]);
+    E = orbit_kepler(precision, el[1], el[5]);
 
-    s2e = sqrt(unit - pow(el[1], 2));
+    s2e = sqrt(unit - pow(el[1], 2.0));
     s2g = sqrt(gm * el[0]);
 
     r1 = el[0] * (cos(E) - el[1]);
@@ -198,27 +239,32 @@ int orbit_el2rv(int orbit_type, double gm, double el[], double rv[]){
   return 0;
 }
 
-int orbit_rv2el(int orbit_type, double gm, double el[], double rv[]){
+/**
+ * @fn int orbit_rv2el(double gm, double el[], double rv[])
+ *
+ * @brief
+ * Converts cartesian rv to orbital elements
+ *
+ * @return
+ * Should return 0 on success, errcode otherwise
+ */
+int orbit_rv2el(double gm, double el[], double rv[]){
 
   double h[3], h2, s2h;
   double r2, s2r, v2, s2v, energy;
-  double tan_capom, tan_inc;
-  double unit;
+  double rdotv, rdot, E, sin_E, cos_E, sin_w, cos_w;
+  double unit, divider, u, w, test;
+  int orbit_type;
 
   unit = 1.0;
 
-  /* Compute h */
+  /* Angular momentum vector per unit mass (h) */
   h[0] = rv[1] * rv[5] - rv[2] * rv[4];
   h[1] = rv[2] * rv[3] - rv[0] * rv[5];
   h[2] = rv[0] * rv[4] - rv[1] * rv[3];
 
   h2 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2];
   s2h = sqrt(h2);
-
-  printf("H2 = %.18f\n", h2);
-  printf("H = %.18f\n", s2h);
-  printf("HX = %.18f\n", h[0]);
-  printf("HY = %.18f\n", h[1]);
 
   /* Energy */
   r2 = rv[0] * rv[0] + rv[1] * rv[1] + rv[2] * rv[2];
@@ -228,9 +274,17 @@ int orbit_rv2el(int orbit_type, double gm, double el[], double rv[]){
   s2v = sqrt(v2);
 
   energy = 0.5 * v2 - gm / s2r;
-  printf("\nEnergy: %.16f\n", energy);
 
-  if (energy < 0.0) {
+  /* Choose orbit type according to energy */
+  if (energy < 0.0) orbit_type = MECHANIC_ORBIT_ELLIPSE;
+  if (energy > 0.0) {
+    orbit_type = MECHANIC_ORBIT_HYPERBOLA;
+    test = fabs(energy * s2r / gm);
+    if (test < sqrt(TINY)) orbit_type = MECHANIC_ORBIT_PARABOLA;
+  }
+
+  if (orbit_type == MECHANIC_ORBIT_ELLIPSE) {
+
     /* Semi major axis (a) */
     el[0] = - 0.5 * gm / energy;
 
@@ -240,33 +294,82 @@ int orbit_rv2el(int orbit_type, double gm, double el[], double rv[]){
     /* Inclination (I) */
     el[2] = acos(h[2] / s2h);
 
+    /* Eccentric anomaly (E) */
+    rdotv = rv[0] * rv[3] + rv[1] * rv[4] + rv[2] * rv[5];
+    rdot = rdotv / s2r;
+
+    sin_E = s2r * rdot / (el[1] * sqrt(gm * el[0]));
+    cos_E = (el[0] - s2r) / (el[0] * el[1]);
+
+    E = acos(cos_E);
+    if (rdotv < 0.0) E = 2.0 * PI - E;
+
     /* Right Ascension of the Ascending Node (OMEGA) */
     el[3] = atan2(h[0], -h[1]);
-    if (el[3] >= 0.0) el[3] = 2*PI - el[3];
+    if (el[3] < 0.0) el[3] = 2.0 * PI + el[3];
 
     /* Argument of pergiee (omega) */
-    el[4] = 0.0;
+    divider = unit - el[1] * cos_E;
+    sin_w = sqrt(unit - pow(el[1], 2.0)) * sin_E / divider;
+    cos_w = (cos_E - el[1]) / divider;
+
+    w = atan2(sin_w, cos_w);
+    if (w < 0.0) w = w + 2.0 * PI;
+
+    /* Argument of latitude (u) */
+    u = atan2(rv[2] / sin(el[2]), rv[0] * cos(el[3]) + rv[1] * sin(el[3]));
+    if (u < 0.0) u = u + 2.0 * PI;
+
+    el[4] = u - w;
+    if (el[4] < 0.0) el[4] = el[4] + 2.0 * PI;
 
     /* Mean anomaly (M) */
-    el[5] = 0.0;
+    el[5] = E - el[1] * sin_E;
+  }
+
+  if (orbit_type == MECHANIC_ORBIT_PARABOLA) {
+  }
+
+  if (orbit_type == MECHANIC_ORBIT_HYPERBOLA) {
   }
 
   return 0;
 }
 
-/* COORDINATES CONVERSION */
+int orbit_rv2el_ellipse(double gm, double el[], double rv[]){
+  return 0;
+}
 
-int orbit_kepler2cart(int direction, int ot, double gm, double el[], double rv[]){
+int orbit_rv2el_parabola(double gm, double el[], double rv[]){
+  return 0;
+}
+
+int orbit_rv2el_hyperbola(double gm, double el[], double rv[]){
+  return 0;
+}
+
+/**
+ * @fn in orbit_kepler2cart(int direction, int precision, int ot, double gm,
+ * double el[], double rv[])
+ *
+ * @brief Wrapper function for converting orbital elements to cartesian rv
+ * frame in both directions
+ *
+ * @return
+ * Should return 0 on success, errcode otherwise
+ */
+int orbit_kepler2cart(int direction, int precision,
+    double gm, double el[], double rv[]){
 
   int mstat;
 
   if (direction == -1) {
-    mstat = orbit_rv2el(ot, gm, el, rv);
+    mstat = orbit_rv2el(gm, el, rv);
   } else {
-    mstat = orbit_el2rv(ot, gm, el, rv);
+    mstat = orbit_el2rv(precision, gm, el, rv);
   }
 
-  return 0;
+  return mstat;
 }
 
 int orbit_baryxv2baryrp(int direction){
@@ -290,13 +393,33 @@ int orbit_helio2poincare(int direction){
   return 0;
 }
 
-/* Converts radians to degrees */
+/**
+ * @fn double rad2deg(double angle)
+ *
+ * @brief Converts radians to degress
+ *
+ * @param angle
+ *  An angle in radians
+ *
+ * @return
+ *  An angle in degrees
+ */
 double rad2deg(double angle){
 
   return angle * 180.0 / PI;
 }
 
-/* Converts degrees to radians */
+/**
+ * @fn double deg2rad(double angle)
+ *
+ * @brief Converts degrees to radians
+ *
+ * @param angle
+ *  An angle in degrees
+ *
+ * @return
+ *  An angle in degrees
+ */
 double deg2rad(double angle){
 
   return angle * PI / 180;

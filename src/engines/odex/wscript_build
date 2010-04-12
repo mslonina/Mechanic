@@ -8,5 +8,13 @@ obj.find_sources_in_dirs(".")
 obj.includes = ". ../../core"
 obj.uselib_local = "core"
 obj.target = 'mechanic_engine_odex'
-obj.name = 'odex'
+obj.name = 'odex-static'
 
+obj = bld.new_task_gen('cc', 'shlib')
+obj.find_sources_in_dirs(".")
+obj.includes = ". ../../core"
+obj.uselib_local = "core"
+obj.target = 'mechanic_engine_odex'
+obj.name = 'odex-shared'
+  
+bld.install_files('${PREFIX}/include/mechanic', 'mechanic_engine_odex.h')

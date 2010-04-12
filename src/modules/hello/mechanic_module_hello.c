@@ -129,7 +129,7 @@
  * The @c Hello module is included in @M distribution as a simple example of
  * using the software.
  *
- * @section hello-reqfunc The Hello Module
+ * @section hello The Hello Module
  *
  * Let us go step-by-step throught the @c Hello module. Each @M module must
  * contain the preprocessor directive

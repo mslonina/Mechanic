@@ -75,7 +75,7 @@
  * - @c --config @c -c -- config file to use in the run
  * - @c --module @c -p -- module which should be used during the run
  * - @c --method @c -m -- pixel mapping method (0 -- default,
- *   6 -- user-defined @c)
+ *   6 -- user-defined)
  * - @c --xres @c -x -- x resolution of the simulation map
  * - @c --yres @c -y -- y resolution of the simulation map
  * - @c --checkpoint @c -d -- checkpoint file write interval

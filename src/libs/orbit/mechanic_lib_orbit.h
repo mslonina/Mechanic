@@ -94,18 +94,21 @@
 #define NLAG1 50
 #define NLAG2 400
 
+/* [ORBIT_API] */
+
 double orbit_kepler(int precision, double e, double m);
 double orbit_kepler_iteration(int precision, double e, double m, double E);
-int orbit_el2rv(int orbit_type, double gm, double el[], double rv[]);
-int orbit_rv2el(int orbit_type, double gm, double el[], double rv[]);
-
-int orbit_kepler2cart(int direction, int orbit_type, double gm, double el[], double rv[]);
+int orbit_el2rv(int precision, double gm, double el[], double rv[]);
+int orbit_rv2el(double gm, double el[], double rv[]);
+int orbit_kepler2cart(int direction, int precision,
+    double gm, double el[], double rv[]);
 int orbit_baryxv2baryrp(int direction);
 int orbit_helio2bary(int direction);
 int orbit_helio2poincare(int direction);
-
 double deg2rad(double angle);
 double rad2deg(double angle);
+
+/* [/ORBIT_API] */
 
 #endif
 

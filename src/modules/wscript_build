@@ -4,7 +4,6 @@
 # encoding: utf-8
 
 obj = bld.new_task_gen('cc', 'shlib')
-bld.add_subdirs("echo hello mandelbrot")
 obj.find_sources_in_dirs(".")
 obj.includes = ". ../core"
 obj.uselib_local = "core"

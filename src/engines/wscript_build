@@ -3,5 +3,4 @@
 # Mariusz Slonina, 2010
 # encoding: utf-8
 
-bld.add_subdirs('gpu odex taylor')
 

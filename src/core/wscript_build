@@ -11,3 +11,4 @@ obj.uselib = "READCONFIG"
 obj.target = 'mechanic_core'
 obj.name = 'core'
 
+bld.install_files('${PREFIX}/include', 'mechanic.h')
