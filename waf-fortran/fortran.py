@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # encoding: utf-8
 #
-# Waf playground
+# WAF PLAYGROUND
 #
 import re
 import sys

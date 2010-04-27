@@ -1,6 +1,7 @@
 
 #! /usr/bin/env python
 # encoding: utf-8
+# WAF PLAYGROUND
 
 import ccroot # <- leave this
 import fortran

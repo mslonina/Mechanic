@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
+#
+# WAF PLAYGROUND
 
 import os, sys, imp, types, ccroot
 import optparse
