@@ -20,3 +20,6 @@ src/mpifarm
 src/old/*.*
 *.tar.gz
 *.tgz
+*.mod
+*.so
+*.pyc

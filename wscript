@@ -9,6 +9,7 @@ import os
 import Utils
 import Build
 import Options
+import Environment
 
 import string
 
@@ -23,6 +24,7 @@ blddir = 'build'
 
 # Sources
 core = ['src', 'src/core', 'src/modes', 'src/modules']
+fortran = ['src/fortram']
 
 all_modules = ['src/modules/hello',
                'src/modules/echo',
@@ -238,6 +240,7 @@ def set_options(opt):
   list = []
 
   opt.tool_options('compiler_cc')
+#  opt.tool_options('compiler_fortran', tooldir='waf-fortran')
 
   opt.add_option('--with-doc', action = 'store_true', default = False,
                   help = 'Build documentation', dest = 'with_doc')
@@ -267,6 +270,7 @@ def configure(conf):
   global stdtypes
   global hdf5_test_code
   global core
+  global fortran
   
   conf.env['MECHANIC_BUILD_DOC'] = []
   conf.env['MECHANIC_CORE'] = []
@@ -281,6 +285,7 @@ def configure(conf):
   test_code_lrc = _test_code('waf-tests/test-lrc.c')
 
   conf.check_tool('compiler_cc')
+#  conf.check_tool('compiler_fortran', tooldir='waf-fortran')
   _check_mpi(conf)
   _check_std_headers(conf, stdheads, stdfunc, stdtypes)
   _check_lib(conf, ['m', 'math.h', 'pow', test_code_libm, '', 1])
@@ -302,6 +307,7 @@ def configure(conf):
 
   # Subdirs
   conf.env['MECHANIC_CORE'] = core
+  conf.env['MECHANIC_BUILD_FORTRAN'] = fortran
   conf.env['MECHANIC_BUILD_MODULES'] = _configure_optionals(conf, 'modules')
   conf.env['MECHANIC_BUILD_ENGINES'] = _configure_optionals(conf, 'engines')
   conf.env['MECHANIC_BUILD_LIBS'] = _configure_optionals(conf, 'libs')
@@ -333,6 +339,7 @@ def configure(conf):
 #
 def build(bld):
   bld.add_subdirs(bld.env['MECHANIC_CORE'])
+#  bld.add_subdirs(bld.env['MECHANIC_BUILD_FORTRAN'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_MODULES'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_ENGINES'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_LIBS'])

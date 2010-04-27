@@ -231,10 +231,10 @@
  */
 int hello_init(moduleInfo* md){
 
-  md->name = "hello";
+ /* md->name = "hello";
   md->author = "Mariusz Slonina";
   md->date = "2010";
-  md->version = "1.0";
+  md->version = "1.0";*/
   md->mrl = 3;
 
   return 0;

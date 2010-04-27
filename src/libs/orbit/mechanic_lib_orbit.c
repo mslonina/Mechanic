@@ -174,9 +174,25 @@ int orbit_el2rv(int precision, double gm, double el[], double rv[]){
   double matrix[6], unit, s2e, s2g;
   double sin_inc, cos_inc, sin_omega, cos_omega, sin_capom, cos_capom;
   double E, r1, r2, v1, v2, divider;
-  int orbit_type;
+  int orbit_type, i;
 
   unit = 1.0;
+
+  /* Catch input errors */
+  if (gm <= 0.0) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "EL2RV: GM < 0!\n");
+    return -1;
+  }
+
+  if (el[1] < 0.0) {
+    mechanic_message(MECHANIC_MESSAGE_IERR, "EL2RV: Eccentricity < 0!\n");
+    return -1;
+  }
+
+  for (i = 0; i < 6; i++) {
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "eel[%d] = %.16f\n", i, el[i]);
+  }
 
   /* P, Q matrix */
   sin_inc = sin(el[2]);
@@ -195,12 +211,6 @@ int orbit_el2rv(int precision, double gm, double el[], double rv[]){
   matrix[4] = - sin_omega * sin_capom + cos_omega * cos_inc * cos_capom;
   matrix[5] = cos_omega * sin_inc;
 
-  if (el[1] < 0.0) {
-    mechanic_message(MECHANIC_MESSAGE_WARN, "Eccentricity less than 0\n");
-    mechanic_message(MECHANIC_MESSAGE_CONT, "Will set to 0.0\n");
-    el[1] = 0.0;
-  }
-
   if (el[1] < 1.0) orbit_type = MECHANIC_ORBIT_ELLIPSE;
   if (el[1] == 1.0) orbit_type = MECHANIC_ORBIT_PARABOLA;
   if (el[1] > 1.0) orbit_type = MECHANIC_ORBIT_HYPERBOLA;
@@ -217,6 +227,12 @@ int orbit_el2rv(int precision, double gm, double el[], double rv[]){
     r2 = el[0] * s2e * sin(E);
 
     divider = el[0] * (unit - el[1] * cos(E));
+
+    if (divider == 0.0 || divider < TINY) {
+      mechanic_message(MECHANIC_MESSAGE_IERR, "EL2RV: Division by zero\n");
+      return -1;
+    }
+
     v1 = - sin(E) * s2g / divider;
     v2 = s2g * s2e * cos(E) / divider;
 
@@ -258,6 +274,13 @@ int orbit_rv2el(double gm, double el[], double rv[]){
 
   unit = 1.0;
 
+  /* Catch input errors */
+  if (gm <= 0.0) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "RV2EL: GM < 0!\n");
+    return -1;
+  }
+
   /* Angular momentum vector per unit mass (h) */
   h[0] = rv[1] * rv[5] - rv[2] * rv[4];
   h[1] = rv[2] * rv[3] - rv[0] * rv[5];
@@ -266,9 +289,20 @@ int orbit_rv2el(double gm, double el[], double rv[]){
   h2 = h[0] * h[0] + h[1] * h[1] + h[2] * h[2];
   s2h = sqrt(h2);
 
+  if (s2h == 0.0 || s2h < TINY) {
+    mechanic_message(MECHANIC_MESSAGE_IERR, "RV2EL: Angular momentum = 0\n");
+    return -1;
+  }
+
+
   /* Energy */
   r2 = rv[0] * rv[0] + rv[1] * rv[1] + rv[2] * rv[2];
   s2r = sqrt(r2);
+
+  if (s2r == 0.0 || s2r < TINY) {
+    mechanic_message(MECHANIC_MESSAGE_IERR, "RV2EL: Radius = 0\n");
+    return -1;
+  }
 
   v2 = rv[3] * rv[3] + rv[4] * rv[4] + rv[5] * rv[5];
   s2v = sqrt(v2);
@@ -336,18 +370,6 @@ int orbit_rv2el(double gm, double el[], double rv[]){
   return 0;
 }
 
-int orbit_rv2el_ellipse(double gm, double el[], double rv[]){
-  return 0;
-}
-
-int orbit_rv2el_parabola(double gm, double el[], double rv[]){
-  return 0;
-}
-
-int orbit_rv2el_hyperbola(double gm, double el[], double rv[]){
-  return 0;
-}
-
 /**
  * @fn in orbit_kepler2cart(int direction, int precision, int ot, double gm,
  * double el[], double rv[])
@@ -355,18 +377,73 @@ int orbit_rv2el_hyperbola(double gm, double el[], double rv[]){
  * @brief Wrapper function for converting orbital elements to cartesian rv
  * frame in both directions
  *
+ * Size of el[] and rv[] __should be the same__ and fits number of bodies*6
+ *
+ * @param nb
+ *  Number of bodies
+ *
  * @return
  * Should return 0 on success, errcode otherwise
  */
-int orbit_kepler2cart(int direction, int precision,
+int orbit_kepler2cart(int direction, int precision, int nb,
     double gm, double el[], double rv[]){
 
-  int mstat;
+  int mstat, i, k, j;
+  double tel[6], trv[6];
 
+  /* Catch input errors */
+  if (!(nb > 0)) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "KEPLER2CART: Number of bodies is not > 0!\n");
+    return -1;
+  }
+
+  if (!(direction == -1 || direction == 1)) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "KEPLER2CART: Direction should be set to -1 or 1!\n");
+    return -1;
+  }
+
+  if (gm < 0.0) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "KEPLER2CART: GM < 0!\n");
+    return -1;
+  }
+
+  /* el[] to rv[] conversion */
+  if (direction == 1) {
+    for (k = 0; k < nb; k++) {
+      for (i = 0; i < 6; i++) {
+        j = k * 6 + i;
+        tel[i] = el[j];
+      }
+
+      mstat = orbit_el2rv(precision, gm, tel, trv);
+      if (mstat < 0) return mstat;
+
+      for (i = 0; i < 6; i++) {
+        j = k * 6 + i;
+        rv[j] = trv[i];
+      }
+    }
+  }
+
+  /* rv[] to el[] conversion */
   if (direction == -1) {
-    mstat = orbit_rv2el(gm, el, rv);
-  } else {
-    mstat = orbit_el2rv(precision, gm, el, rv);
+    for (k = 0; k < nb; k++) {
+      for (i = 0; i < 6; i++) {
+        j = k * 6 + i;
+        trv[i] = rv[j];
+      }
+
+      mstat = orbit_rv2el(gm, tel, trv);
+      if (mstat < 0) return mstat;
+
+      for (i = 0; i < 6; i++) {
+        j = k * 6 + i;
+        el[j] = tel[i];
+      }
+    }
   }
 
   return mstat;
@@ -449,3 +526,91 @@ double deg2rad(double angle){
   return angle * PI / 180;
 }
 
+/*
+ * Originally DMVPRD from BLAS F77
+ * Multiplies matrix by a vector
+ *
+ * a[] - input matrix
+ * b[] - input vector
+ * c[] - output vector
+ *
+ * x - number of rows in a[]
+ * y - number of coulns in a[]
+ *
+ * ndim - row dimension of a
+ *
+ */
+int mbv(int x, int y, int ndim, double a[x][y], double b[y], double c[x]){
+
+  double sum;
+  int i, k;
+
+  if (x < 0 || y < 0) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "MBV: Dimensions are less than 0\n");
+    return -1;
+  }
+
+  if (x > ndim) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "MBV: Matrix and vector are not properly aligned\n");
+    return -1;
+  }
+
+  for (i = 0; i < x; i++) {
+    sum = 0.0;
+    for (k = 0; k < y; k++) {
+      sum = sum + a[i][k] * b[k];
+    }
+    c[i] = sum;
+  }
+
+  return 0;
+}
+
+/*
+ * Originally DMPROD from BLAS F77
+ * Multiplies matrix by a matrix
+ *
+ * a[] - input matrix (x,y)
+ * b[] - input matrix (y,z)
+ * c[] - output matrix (x,z)
+ *
+ * x - number of rows in a[]
+ * y - number of columns in a[] and number of rows in b[]
+ * z - number of columns in b[]
+ *
+ * dima - row dimension of a[] => x
+ * dimb - row dimension of b[] => y
+ * dimc - row dimension of c[], the same as column dimension of a[] => x
+ *
+ */
+int mbm(int x, int y, int z, int dima, int dimb, int dimc,
+    double a[x][y], double b[y][z], double c[x][z]){
+
+  int i,j,k;
+  double sum;
+
+  if (x < 0 || y < 0 || z < 0) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "MBM: Dimensions are less than 0\n");
+    return -1;
+  }
+
+  if (x > dima || x > dimc || y > dimb) {
+    mechanic_message(MECHANIC_MESSAGE_IERR,
+        "MBM: Matrixes are not properly aligned\n");
+    return -1;
+  }
+
+  for (k = 0; k < z; k++) {
+    for (i = 0; i < x; i++) {
+      sum = 0.0;
+      for (j = 0; j < y; j++) {
+        sum = sum + a[i][j] * b[j][k];
+      }
+      c[i][k] = sum;
+    }
+  }
+  return 0;
+}

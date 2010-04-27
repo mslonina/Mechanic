@@ -79,10 +79,10 @@
  */
 int mandelbrot_init(moduleInfo *md){
 
-  md->name = "mandelbrot";
+ /* md->name = "mandelbrot";
   md->author = "MSlonina";
   md->date = "2010";
-  md->version = "1.0";
+  md->version = "1.0";*/
   md->mrl = 4;
 
   return 0;

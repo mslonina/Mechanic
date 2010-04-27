@@ -67,6 +67,7 @@
 enum Messages{
   MECHANIC_MESSAGE_INFO,
   MECHANIC_MESSAGE_ERR,
+  MECHANIC_MESSAGE_IERR,
   MECHANIC_MESSAGE_CONT,
   MECHANIC_MESSAGE_WARN,
 	MECHANIC_MESSAGE_DEBUG
@@ -95,10 +96,6 @@ typedef struct {
 
 /* [MODULEINFO] */
 typedef struct {
-  const char *name;
-  const char *author;
-  const char *date;
-  const char *version;
   int mrl;
 } moduleInfo;
 /* [/MODULEINFO] */

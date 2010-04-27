@@ -95,13 +95,13 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
 
   /* Master can do something useful before computations,
    * even in masteralone mode */
-  query = load_sym(handler, md, "node_in", "master_in", MECHANIC_MODULE_SILENT);
+  query = load_sym(handler, d->module, "node_in", "master_in", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d);
 
   /* Align farm resolution for given method. */
   if (d->method == 0) farm_res = d->xres*d->yres;
   if (d->method == 6) {
-    qr = load_sym(handler, md, "farmResolution", "farmResolution",
+    qr = load_sym(handler, d->module, "farmResolution", "farmResolution",
         MECHANIC_MODULE_ERROR);
     if (qr) farm_res = qr(d->xres, d->yres, md);
   }
@@ -118,21 +118,21 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
     }
 
     if (d->method == 6) {
-      qpc = load_sym(handler, md, "pixelCoords", "pixelCoords",
+      qpc = load_sym(handler, d->module, "pixelCoords", "pixelCoords",
           MECHANIC_MODULE_ERROR);
       if (qpc) mstat = qpc(node, tab, md, d, &rawdata);
     }
 
-    qpb = load_sym(handler, md, "node_beforePixelCompute",
+    qpb = load_sym(handler, d->module, "node_beforePixelCompute",
         "master_beforePixelCompute", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &rawdata);
 
     /* PIXEL COMPUTATION */
-    qpx = load_sym(handler, md, "pixelCompute", "pixelCompute",
+    qpx = load_sym(handler, d->module, "pixelCompute", "pixelCompute",
         MECHANIC_MODULE_ERROR);
     if (qpx) mstat = qpx(node, md, d, &rawdata);
 
-    qpb = load_sym(handler, md, "node_afterPixelCompute",
+    qpb = load_sym(handler, d->module, "node_afterPixelCompute",
         "master_afterPixelCompute", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &rawdata);
 
@@ -168,7 +168,7 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
   /* FARM ENDS */
 
   /* Master can do something useful after the computations. */
-  query = load_sym(handler, md, "node_out", "master_out",
+  query = load_sym(handler, d->module, "node_out", "master_out",
       MECHANIC_MODULE_SILENT);
   if (query) mstat = query(1, node, md, d, &rawdata);
 

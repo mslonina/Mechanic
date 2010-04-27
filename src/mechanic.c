@@ -688,7 +688,7 @@ int main(int argc, char* argv[]){
 
   sprintf(module_file, "libmechanic_module_%s.so", cd.module);
 
-  md.name = cd.module;
+  md.mrl = MECHANIC_MRL_DEFAULT;
   handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
   if (!handler) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
@@ -697,11 +697,13 @@ int main(int argc, char* argv[]){
   }
 
   /* Module init */
-  init = load_sym(handler,&md, "init", "init", MECHANIC_MODULE_ERROR);
+  init = load_sym(handler,cd.module, "init", "init", MECHANIC_MODULE_ERROR);
   if (init) mstat = init(&md);
 
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
+
   /* Module query */
-  query = load_sym(handler,&md, "query", "query", MECHANIC_MODULE_SILENT);
+  query = load_sym(handler,cd.module, "query", "query", MECHANIC_MODULE_SILENT);
   if (query) query(&md);
 
   /* There are some special data in module,
@@ -733,7 +735,7 @@ int main(int argc, char* argv[]){
   }
 
   /* Module cleanup */
-  cleanup = load_sym(handler, &md, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
+  cleanup = load_sym(handler, cd.module, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
   if (cleanup) mstat = cleanup(&md);
 
   /* Free POPT */

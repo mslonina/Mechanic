@@ -100,13 +100,18 @@ double orbit_kepler(int precision, double e, double m);
 double orbit_kepler_iteration(int precision, double e, double m, double E);
 int orbit_el2rv(int precision, double gm, double el[], double rv[]);
 int orbit_rv2el(double gm, double el[], double rv[]);
-int orbit_kepler2cart(int direction, int precision,
+int orbit_kepler2cart(int direction, int precision, int nb,
     double gm, double el[], double rv[]);
-int orbit_baryrv2baryrp(int direction, double mass, double rv[], double rp);
+int orbit_baryrv2baryrp(int direction, double mass, double rv[], double rp[]);
 int orbit_helio2bary(int direction, double mass[], double hrv[], double brv[]);
 int orbit_helio2poincare(int direction, double mass[], double hrv[], double prv[]);
+
 double deg2rad(double angle);
 double rad2deg(double angle);
+
+int mbv(int x, int y, int ndim, double a[x][y], double b[y], double c[x]);
+int mbm(int x, int y, int z, int dima, int dimb, int dimc,
+    double a[x][y], double b[y][z], double c[x][z]);
 
 /* [/ORBIT_API] */
 

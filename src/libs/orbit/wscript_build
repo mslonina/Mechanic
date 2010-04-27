@@ -6,17 +6,17 @@
 obj = bld.new_task_gen('cc', 'cstaticlib')
 obj.find_sources_in_dirs(".")
 obj.includes = ". ../../core"
-obj.uselib_local = "core"
 obj.target = 'mechanic_orbit'
 obj.name = 'orbit-static'
+obj.uselib_local = 'core'
 obj.uselib = 'M'
 
 nobj = bld.new_task_gen('cc', 'shlib')
 nobj.find_sources_in_dirs(".")
 nobj.includes = ". ../../core"
-nobj.uselib_local = "core"
 nobj.target = 'mechanic_orbit'
 nobj.name = 'orbit-shared'
+nobj.uselib_local = 'core'
 nobj.uselib = 'M'
   
 bld.install_files('${PREFIX}/include/mechanic', 'mechanic_lib_orbit.h')

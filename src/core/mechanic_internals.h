@@ -89,6 +89,7 @@
 #define MECHANIC_CHECKPOINT_DEFAULT "2000"
 #define MECHANIC_CHECKPOINTS "6"
 #define MECHANIC_MODE_DEFAULT "1"
+#define MECHANIC_MRL_DEFAULT 4
 
 #define MECHANIC_FILE 256
 #define MECHANIC_FILE_OLD_PREFIX "backup-"
@@ -142,7 +143,7 @@ int map2d(int, void* handler, moduleInfo*, configData* d, int ind[]);
 int buildMasterResultsType(int mrl, masterData* md,
     MPI_Datatype* masterResultsType_ptr);
 
-void* load_sym(void* handler, moduleInfo*, char* function,
+void* load_sym(void* handler, char* module_name, char* function,
     char* function_override, int type);
 
 int readDefaultConfig(char* inifile, int flag);

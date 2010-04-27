@@ -153,7 +153,7 @@ int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[]){
 
    /* Method 6: user defined pixel mapping. */
    if (d->method == 6) {
-    qpcm = load_sym(handler, md, "pixelCoordsMap", "pixelCoordsMap",
+    qpcm = load_sym(handler, d->module, "pixelCoordsMap", "pixelCoordsMap",
         MECHANIC_MODULE_ERROR);
     if (qpcm) qpcm(ind, c, x, y, md, d);
    }
@@ -173,7 +173,7 @@ int checkPixel(int pixel){
  * Wrapper to dlsym().
  * Handles error messages and abort if necessary.
  */
-void* load_sym(void* handler, moduleInfo *md, char* function,
+void* load_sym(void* handler, char* md_name, char* function,
     char* function_override, int type){
 
   void* handler_f;
@@ -189,7 +189,7 @@ void* load_sym(void* handler, moduleInfo *md, char* function,
   /* Reset dlerror() */
   dlerror();
 
-  mn = strlen(md->name);
+  mn = strlen(md_name);
   fl = strlen(function);
   fol = strlen(function_override);
 
@@ -199,8 +199,8 @@ void* load_sym(void* handler, moduleInfo *md, char* function,
   func_over = calloc(mn + fol + 2 * sizeof(char*), sizeof(char*));
   if (func_over == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  sprintf(func, "%s_%s", md->name, function);
-  sprintf(func_over, "%s_%s", md->name, function_override);
+  sprintf(func, "%s_%s", md_name, function);
+  sprintf(func_over, "%s_%s", md_name, function_override);
 
   handler_f = dlsym(handler, func);
   err = dlerror();
@@ -282,6 +282,7 @@ void mechanic_message(int type, char *fmt, ...){
 		  if (type == MECHANIC_MESSAGE_DEBUG && debug == 1) printf("   %s", fmt2);
     }
       if (type == MECHANIC_MESSAGE_ERR) perror(fmt2);
+      if (type == MECHANIC_MESSAGE_IERR) printf("!! %s", fmt2);
 		  if (type == MECHANIC_MESSAGE_WARN) printf(".. %s", fmt2);
   va_end(args);
 
