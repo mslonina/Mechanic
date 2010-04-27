@@ -73,9 +73,19 @@
 
 /**
  * @section showdata Working with Data
+ * In this section you will find some tips and tricks of using data stored by @M.
  *
- * Using h5dump, pytables, hdfview, vitables, vim and sed for first steps of
- * visualization of the date.
+ * @subsection gnuplot Gnuplot
+ * There are only three steps to prepare your data for Gnuplot:
+ * 
+ * 1. Dump data from HDF5 file:
+ *  @code h5dump -d /data/master -y -w 100 -o output.dat mechanic-data.h5 @endcode
+ * 2. Remove commas from @c output.dat:
+ *  @code sed -s 's/,/ /g' output.dat @endcode
+ * 3. For @c pm3d maps (200 is just your vertical resolution):
+ *  @code sed "0~200G" output.dat > pm3d_file.dat @endcode
+ *
+ * You can process @c output.dat / @c pm3d_file.dat in the way you like.
  *
  */
 

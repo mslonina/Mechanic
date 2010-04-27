@@ -44,6 +44,17 @@
 ! POSSIBILITY OF SUCH DAMAGE.
 !
 
+! [F2003BIND]
+! @section fortran The Fortran 2003 Bindings
+! You can create Fortran 2003 module for @M using provided Fortran bindings.
+! Below is an example of Fortran module.
+!
+! @code
+! @icode modules/hello-fortran/mechanic_module_ff.f03 F2003MODULE
+! @endcode
+! [/F2003BIND]
+
+! [F2003MODULE]
 module ff
 
   use iso_c_binding
@@ -99,3 +110,4 @@ contains
   end function ff_pixelCompute
 
 end module ff
+! [/F2003MODULE]

@@ -8,8 +8,8 @@ import os, string
 def processDoxyTag(l):
 
   line = l.strip() 
-  doxytag = line.lstrip("/* [")
-  doxytag = doxytag.rstrip("] */")
+  doxytag = line.lstrip("/* [!")
+  doxytag = doxytag.rstrip("!] */")
   return doxytag
 
 # Process single line
@@ -18,7 +18,12 @@ def processDoxyLine(line):
   include = 0
 
   l = line.strip()
-  l = l.lstrip(" *")
+  
+  if l[:1] == "!":
+    l = l.lstrip("!")
+  else:
+    l = l.lstrip(" *")
+  
   spaces = line.strip()
   spaces = spaces.split("@")
   si = ""
@@ -42,7 +47,12 @@ def processDoxyLine(line):
 
   if not line.isspace():
      line = line.lstrip()
-     line = line.lstrip("*")
+     
+     if line[:1] == "!":
+       line = line.lstrip("!")
+     else:
+       line = line.lstrip("*")
+     
      if include == 0:
        print line.rstrip()
 
@@ -61,7 +71,7 @@ def includeDoxyBlock(exfile, tag, type, spacesBefore):
 
     line = l.strip()
 
-    if line[:5] == "/* [/":
+    if line[:5] == "/* [/" or line[:4] == "! [/":
       endBlock = 1
       tagMatch = 0
       closeTag = 1
@@ -69,7 +79,7 @@ def includeDoxyBlock(exfile, tag, type, spacesBefore):
       endBlock = 0
       closeTag = 0
     
-    if line[:4] == "/* [" and closeTag == 0:
+    if (line[:4] == "/* ["  or line[:3] == "! [" ) and closeTag == 0:
       beginBlock = 1
       doxytag = processDoxyTag(line)
       if tag == doxytag:
@@ -83,7 +93,7 @@ def includeDoxyBlock(exfile, tag, type, spacesBefore):
     if tagMatch == 1:
       if not beginBlock:
         if type == 0:
-          if checkIfDoc(line) == -1:
+          if checkIfDoc(line) == -1 or checkIfDoc(line) == 2:
             processDoxyLine(l)
           else:
             print ""
@@ -91,7 +101,7 @@ def includeDoxyBlock(exfile, tag, type, spacesBefore):
           if l.isspace():
             print ""
           else:
-            if not (line[:2] == "/*" or line[:1] == "*"): 
+            if not (line[:2] == "/*" or line[:1] == "*" or line[:1] == "!"): 
               print spacesBefore + l.rstrip()
 
 
@@ -100,7 +110,12 @@ def includeDoxyBlock(exfile, tag, type, spacesBefore):
   return
 
 def checkIfDoc(line):
-  if line[:3] == "/**":
+
+  if line[:1] == "!":
+     type = 2 # we have a fortran code
+     return type
+
+  if line[:3] == "/**" or line[:1] == "!":
     type = 0 # begin of doxy block
   elif line[:2] == "*/":
     type = 1 # end of doxy block
@@ -132,6 +147,10 @@ def processDoxyFile(file):
     if checkIfDoc(line) == 1:
       doxyblock = 0
       doxyend = 1
+
+    if checkIfDoc(line) == 2:
+      doxyblock = 1
+      doxybegin = 0
   
     if doxyblock == 1:
       if doxybegin == 1 or doxyend == 1:

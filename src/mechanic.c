@@ -232,6 +232,7 @@
  * @idoc modules/mechanic_module_module.c METHOD6
  * @idoc core/mechanic_core_hdf5.c DATA
  * @idoc libs/orbit/mechanic_lib_orbit.c ORBIT
+ * @idoc fortran/mechanic_fortran.f03 F2003BIND_REF
  *
  * @page devel Short Developer's Guide
  * @idoc core/mechanic_core_tools.c DEVEL
