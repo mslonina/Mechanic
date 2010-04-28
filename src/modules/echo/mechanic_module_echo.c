@@ -101,10 +101,6 @@
  */
 int echo_init(moduleInfo* md){
 
-  md->name = "echo";
-  md->author = "Mariusz Slonina";
-  md->date = "2010";
-  md->version = "1.0";
   md->mrl = 10;
 
   return 0;

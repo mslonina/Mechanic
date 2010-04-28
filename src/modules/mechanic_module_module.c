@@ -87,10 +87,6 @@
  */
 int module_init(moduleInfo* md){
 
- /* md->name = "module";
-  md->author = "MSlonina";
-  md->date = "2010";
-  md->version = "1.0";*/
   md->mrl = 4;
 
   return 0;
