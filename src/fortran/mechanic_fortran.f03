@@ -83,6 +83,7 @@ module mechanic_fortran
   INTEGER :: MECHANIC_ERR_MODULE_F = 913
   INTEGER :: MECHANIC_ERR_SETUP_F = 914
   INTEGER :: MECHANIC_ERR_MEM_F = 915
+  INTEGER :: MECHANIC_ERR_CHECKPOINT_F = 916
   INTEGER :: MECHANIC_ERR_OTHER_F = 999
   ! [/F2003BIND_ERR]
 
@@ -105,7 +106,7 @@ module mechanic_fortran
   end type moduleInfo
   ! [/F2003BIND_MD]
 
-  ! [F2003_CONFIG]
+  ! [F2003BIND_CONFIG]
   type, bind(c) :: configData
     character(kind = c_char) :: p_name
     character(kind = c_char) :: datafile
@@ -117,7 +118,7 @@ module mechanic_fortran
     integer (c_int) :: restartmode
     integer (c_int) :: mode
   end type configData
-  ! [/F2003_CONFIG]
+  ! [/F2003BIND_CONFIG]
 
   ! [F2003BIND_DATA]
   type, bind(c) :: masterData

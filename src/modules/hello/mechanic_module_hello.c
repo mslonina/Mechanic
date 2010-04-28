@@ -126,7 +126,7 @@
  *
  * which describes the data storage in master file. There are two additional
  * files in the working dir with suffixes 01 and 02 -- these are checkpoint
- * files, see @ref checkpoints for detailes.
+ * files, see @ref checkpoint for detailes.
  *
  * The @c Hello module is included in @M distribution as a simple example of
  * using the software.
