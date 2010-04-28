@@ -266,6 +266,7 @@ void* load_sym(void* handler, char* md_name, char* function,
   return ret_handler;
 }
 
+/* Wrapper to MPI_Finalize() */
 int mechanic_finalize(int node){
 
   MPI_Finalize();
@@ -273,6 +274,7 @@ int mechanic_finalize(int node){
   return 0;
 }
 
+/* Wrapper to MPI_Abort() */
 int mechanic_abort(int errcode){
 
   MPI_Abort(MPI_COMM_WORLD, errcode);
@@ -280,6 +282,7 @@ int mechanic_abort(int errcode){
   return 0;
 }
 
+/* Mechanic message */
 void mechanic_message(int type, char *fmt, ...){
 
   static char fmt2[2048];
@@ -299,6 +302,7 @@ void mechanic_message(int type, char *fmt, ...){
 
 }
 
+/* Equivalent of LRC_printAll() */
 int mechanic_printConfig(configData *cd, int flag){
 
   if (silent == 0) {
@@ -315,6 +319,7 @@ int mechanic_printConfig(configData *cd, int flag){
   return 0;
 }
 
+/* Mechanic welcome message */
 void mechanic_welcome(){
 
   mechanic_message(MECHANIC_MESSAGE_INFO, "%s\n", MECHANIC_NAME);

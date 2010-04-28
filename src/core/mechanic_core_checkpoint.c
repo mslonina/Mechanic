@@ -81,7 +81,7 @@ int atCheckPoint(int check, int** coordsarr, int** board,
   mstat = manageCheckPoints(d);
   mstat = H5writeCheckPoint(md, d, check, coordsarr, resultarr);
 
-  return 0;
+  return mstat;
 }
 
 int manageCheckPoints(configData* d){

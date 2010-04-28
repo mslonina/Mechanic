@@ -50,7 +50,6 @@
  *
  * @todo
  *   - HDF5 error handling with H5E (including file storage)
- *   - restart mode
  *   - multifarm mode
  *   - engines
  *
