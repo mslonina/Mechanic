@@ -247,7 +247,6 @@ int main(int argc, char* argv[]){
   /* POPT Helpers */
   char* module_name;
   char* name;
-  char checkpoint_path[MECHANIC_MAXLENGTH];
   int mode = 0;
   int xres = 0;
   int yres = 0;
@@ -255,8 +254,8 @@ int main(int argc, char* argv[]){
   int checkpoint = 0;
   int poptflags = 0;
   int useConfigFile = 0;
-  int restartmode = 0;
   char optvalue;
+  int restartmode = 0;
   char convstr[MECHANIC_MAXLENGTH];
   void* handler;
   poptContext poptcon;
@@ -275,6 +274,7 @@ int main(int argc, char* argv[]){
   moduleInfo md; /* struct for module info */
   int mstat; /* mechanic internal error value */
   struct stat st; /* stat.h */
+  struct stat ct; /* stat.h */
 
   /* MPI Helpers */
   int mpi_rank;
@@ -318,9 +318,7 @@ int main(int argc, char* argv[]){
   };
 
   struct poptOption mechanic_poptRestart[] = {
-    {"restart", 'r', POPT_ARG_VAL, &restartmode, 0,
-      "Switch to restart mode", NULL},
-    {"rpath", 'b', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &checkpoint_path,
+    {"restart", 'r', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &CheckpointFile,
       0, "Path to checkpoint file", "/path/to/checkpoint/file"},
     POPT_TABLEEND
   };
@@ -424,53 +422,110 @@ int main(int argc, char* argv[]){
 
   if (node == 0) mechanic_welcome();
 
+  /*
+   * @page checkpoint Checkpoints
+   *
+   * 3) read config values from master file, ignore all command line opts etc.
+   * 4) check board status
+   *  - if board is full, abort, because we don't need restart completed
+   *  simulation
+   *  - if board is not full, check for empty pixels and compute them
+   *      (map2d function should check if pixel is computed or not)
+   */
+
+  /* Restartmode */
+  if (CheckpointFile) {
+    if (node == 0) {
+      mechanic_message(MECHANIC_MESSAGE_DEBUG,
+          "Checkpoint file specified: %s\n", CheckpointFile);
+      /* STEP 1: Check the health of the checkpoint file */
+      if (stat(CheckpointFile, &ct) == 0) {
+
+        /* The checkpoint file should be valid HDF5 file */
+        if (H5Fis_hdf5(CheckpointFile) > 0) {
+
+          /* Check if the file is a valid Mechanic file */
+          // mechanic_validate_file(CheckpointFile)
+
+          /* We can say, we can try restart the computations */
+          mechanic_message(MECHANIC_MESSAGE_INFO,
+              "We are in restart mode\n");
+          mechanic_message(MECHANIC_MESSAGE_CONT,
+              "Mechanic will ignore command line options\n");
+          mechanic_message(MECHANIC_MESSAGE_CONT,
+              "and use configuration stored in %s\n", CheckpointFile);
+
+          restartmode = 1;
+        } else {
+          mechanic_message(MECHANIC_MESSAGE_ERR,
+              "We are in restart mode,\n");
+          mechanic_message(MECHANIC_MESSAGE_CONT,
+              "but specified checkpoint file %s\n", CheckpointFile);
+          mechanic_message(MECHANIC_MESSAGE_CONT,
+              "is not valid Mechanic file\n");
+          mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+        }
+      }
+    }
+  }
+
   /* PROCESS CONFIGURATION DATA */
   if (node == 0) {
 
-    /* Config file is set */
+    /* Config file is set and we are not in restart mode */
     if (strcmp(ConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0 && restartmode == 0)
       useConfigFile = 1;
 
     /* STEP 1A: Read config file, if any.
-     * This will override LRC_configDefaults */
-    allopts = readDefaultConfig(ConfigFile, useConfigFile);
+     * This will override LRC_configDefaults
+     * In restart mode we try provided checkpoint file */
+    if (restartmode == 1) {
+      allopts = readCheckpointConfig(CheckpointFile);
+    } else {
+      allopts = readDefaultConfig(ConfigFile, useConfigFile);
+    }
 
     /* STEP 1B: Reset POPT defaults
      * We need to reassign popt defaults in case of config file, if any.
-     * If there was no config file, defaults will be untouched. */
-    name = LRC_getOptionValue("default", "name");
-    module_name = LRC_getOptionValue("default", "module");
-    mode = LRC_option2int("default", "mode");
-    xres = LRC_option2int("default", "xres");
-    yres = LRC_option2int("default", "yres");
-    method = LRC_option2int("default", "method");
-    checkpoint = LRC_option2int("logs", "checkpoint");
+     * If there was no config file, defaults will be untouched.
+     *
+     * Commandline is completely ignored in restartmode */
+    if (restartmode == 0) {
+      name = LRC_getOptionValue("default", "name");
+      module_name = LRC_getOptionValue("default", "module");
+      mode = LRC_option2int("default", "mode");
+      xres = LRC_option2int("default", "xres");
+      yres = LRC_option2int("default", "yres");
+      method = LRC_option2int("default", "method");
+      checkpoint = LRC_option2int("logs", "checkpoint");
 
-    /* STEP 2A: Read commandline options, if any.
-     * This will override popt defaults. */
-    poptResetContext(poptcon);
-    poptcon = poptGetContext(NULL, argc, (const char **) argv, cmdopts, 0);
-    optvalue = poptGetNextOpt(poptcon);
+      /* STEP 2A: Read commandline options, if any.
+       * This will override popt defaults. */
+      poptResetContext(poptcon);
+      poptcon = poptGetContext(NULL, argc, (const char **) argv, cmdopts, 0);
+      optvalue = poptGetNextOpt(poptcon);
 
-    /* STEP 2B: Modify options by commandline
-     * If there was no commandline options, LRC table will be untouched. */
-    LRC_modifyOption("default", "name", name, LRC_STRING);
-    LRC_modifyOption("default", "module", module_name, LRC_STRING);
+      /* STEP 2B: Modify options by commandline
+       * If there was no commandline options, LRC table will be untouched. */
+      LRC_modifyOption("default", "name", name, LRC_STRING);
+      LRC_modifyOption("default", "module", module_name, LRC_STRING);
 
-    LRC_itoa(convstr, xres, LRC_INT);
-    LRC_modifyOption("default", "xres", convstr, LRC_INT);
+      LRC_itoa(convstr, xres, LRC_INT);
+      LRC_modifyOption("default", "xres", convstr, LRC_INT);
 
-    LRC_itoa(convstr, yres, LRC_INT);
-    LRC_modifyOption("default", "yres", convstr, LRC_INT);
+      LRC_itoa(convstr, yres, LRC_INT);
+      LRC_modifyOption("default", "yres", convstr, LRC_INT);
 
-    LRC_itoa(convstr, method, LRC_INT);
-    LRC_modifyOption("default", "method", convstr, LRC_INT);
+      LRC_itoa(convstr, method, LRC_INT);
+      LRC_modifyOption("default", "method", convstr, LRC_INT);
 
-    LRC_itoa(convstr, mode, LRC_INT);
-    LRC_modifyOption("default", "mode", convstr, LRC_INT);
+      LRC_itoa(convstr, mode, LRC_INT);
+      LRC_modifyOption("default", "mode", convstr, LRC_INT);
 
-    LRC_itoa(convstr, checkpoint, LRC_INT);
-    LRC_modifyOption("logs", "checkpoint", convstr, LRC_INT);
+      LRC_itoa(convstr, checkpoint, LRC_INT);
+      LRC_modifyOption("logs", "checkpoint", convstr, LRC_INT);
+
+    }
 
     /* STEP 3: Options are processed, we can now assign config values. */
     mstat = assignConfigValues(&cd);
@@ -500,10 +555,8 @@ int main(int argc, char* argv[]){
       "Mechanic will use these startup values:\n\n");
     mechanic_printConfig(&cd, MECHANIC_MESSAGE_CONT);
 
-    /* Backup master data file.
-     * If simulation was broken, and we are in restart mode
-     * we don't have any master files, only checkpoint files. */
-    if (stat(cd.datafile,&st) == 0 && cd.restartmode == 0) {
+    /* Backup master data file, if exists */
+    if (stat(cd.datafile,&st) == 0) {
 
       opreflen = strlen(MECHANIC_FILE_OLD_PREFIX);
       dlen = strlen(cd.datafile);
@@ -529,6 +582,14 @@ int main(int argc, char* argv[]){
       /* Now we can savely rename files */
       rename(cd.datafile,oldfile);
       free(oldfile);
+    }
+
+    /* At this point we have a backup of master file. In restart mode we have
+     * to start the simulation from the point of the provided checkpoint file.
+     * To save number of additional work, we simply make our checkpoint file
+     * new master file. */
+    if (restartmode == 1) {
+      mechanic_copy(CheckpointFile, cd.datafile);
     }
   }
  /* CONFIGURATION END */
@@ -708,9 +769,10 @@ int main(int argc, char* argv[]){
   if (query) query(&md);
 
   /* There are some special data in module,
-   * thus we can create master data file after module has been successfully
-   * loaded. */
-  if (node == 0) {
+   * thus we have to create master data file after module has been
+   * successfully loaded.
+   */
+  if (node == 0 && restartmode == 0) {
     /* Create master datafile */
     file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     mstat = H5createMasterDataScheme(file_id, &md, &cd);
@@ -768,45 +830,3 @@ int main(int argc, char* argv[]){
   return 0;
 }
 
-/*
- * @page checkpoint Checkpoints
-   *
-   * TODO:
-   * 1) -r should take problem name as an argument -- DONE
-   * 2) check if master file exists
-   *  - if exists, check if it's not corrupted (is hdf5) -- DONE
-   *  - if it's corrupted, check for old copy
-   *  - if the copy exists, check if it's not corrupted
-   *  - if the copy is corrupted or does not exist, abort restart
-   * 3) read config values from master file, ignore all command line opts etc.
-   * 4) check board status
-   *  - if board is full, abort, because we don't need restart completed
-   *  simulation
-   *  - if board is not full, check for empty pixels and compute them
-   *      (map2d function should check if pixel is computed or not)
-   * 5) perform normal operations, i.e. write new restart files
-   */
-/*
-  if (cd.restartmode == 1){
-
-    if(mpi_rank == 0){
-      printf("We are in restart mode... Checking files... ");
-
-      sprintf(restartfile, "%s-master.h5", restartname);
-
-      if(stat(restartfile, &st) == 0){
-
-        if(H5Fis_hdf5(restartfile) > 0)
-          printf("We can restart the simulation\n");
-        else
-          printf("Cannot restart the simulation\n");
-
-      }else{
-        printf("Master file does not exist\n");
-      }
-
-    }
-     MPI_Finalize();
-     return 0;
-  }
-*/

@@ -49,7 +49,25 @@
 
 /**
  * @section checkpoint Checkpoints
- * Handling checkpoint files should be done in @M @c unstable-3 milestone.
+ * @M comes with integrated checkpoint system, which helps with master file
+ * backup and restarting simulations. By default, the checkpoint file write
+ * interval is setuped to 2000, which means, that data will be stored in the
+ * master file after each 2000 pixel have been reached. You can change this
+ * interval by setting @c checkpoint in config file or using @c --checkpoint
+ * @c -d in the command line.
+ *
+ * @M will create up to 3 checkpoint file, in the well-known incremental backup
+ * system. Each file will have a corresponding checkpoint number (starting from
+ * the master file, 00, up to 02).
+ *
+ * You can use any of the checkpoint files to restart your simulation. To use
+ * restart mode, try @c --restart or @c -r command line option and provide the
+ * path to the checkpoint file to use. If the file is not usable, @M will
+ * abort.
+ *
+ * In restart mode @M will do only not previously finished simulations. At this
+ * stage of development, it is not possible to restart partially done
+ * simulations.
  *
  */
 
@@ -68,21 +86,67 @@ int atCheckPoint(int check, int** coordsarr, int** board,
 
 int manageCheckPoints(configData* d){
 
-  /*int i;*/
-  /*char checkpoint[MECHANIC_FILE+6];
-  char checkpoint_old[MECHANIC_FILE+6];
-*/
-  /*sprintf(checkpoint,"%s-cp%03d.h5", d->name, MECHANIC_CHECKPOINTS-1);*/
+  int i, mstat = 0;
+  char *checkpoint;
+  char *checkpoint_old;
+  size_t nam, pre, ext, clen;
 
-  /*for(i = MECHANIC_CHECKPOINTS-2; i >= 0; i--){*/
-    /*sprintf(checkpoint,"%s-cp%03d.h5", d->name, i+1);
-    sprintf(checkpoint_old,"%s-cp%03d.h5", d->name, i);*/
-    /* rename(checkpoint_old, checkpoint); */
-    /*  printf("File %s -> %s\n",checkpoint_old, checkpoint); */
-  /*}*/
+  struct stat ct;
+  struct stat cto;
 
-  /* printf("File %s will be copied to %s and used\n", checkpoint, checkpoint_old); */
-  return 0;
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "At checkpoint\n");
+
+  /* Allocate memory for names of files */
+  nam = strlen(d->name);
+  pre = strlen(MECHANIC_MASTER_PREFIX_DEFAULT);
+  ext = strlen(MECHANIC_FILE_EXT);
+
+  clen = nam + pre + ext + 6*sizeof(char*);
+
+  checkpoint = calloc(clen, sizeof(char*));
+  if (checkpoint == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  checkpoint_old = calloc(clen, sizeof(char*));
+  if (checkpoint_old == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  for (i = MECHANIC_CHECKPOINTS-2; i >= 0; i--) {
+
+    snprintf(checkpoint, clen, "%s-%s-%02d.%s",
+        d->name, MECHANIC_MASTER_PREFIX_DEFAULT, i+1, MECHANIC_FILE_EXT);
+    snprintf(checkpoint_old, clen, "%s-%s-%02d.%s",
+        d->name, MECHANIC_MASTER_PREFIX_DEFAULT, i, MECHANIC_FILE_EXT);
+
+    if (stat(checkpoint_old, &cto) == 0 ) {
+      if (stat(checkpoint, &ct) < 0) {
+
+        /* If the checkpoint file doesn't exist, copy current file */
+        mstat = mechanic_copy(checkpoint_old, checkpoint);
+        if (mstat < 0) mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+
+      } else {
+
+        /* Instead of renaming, if we reach 00 file, we copy it to 01 */
+        if (i == 0) {
+          mstat = mechanic_copy(checkpoint_old, checkpoint);
+          if (mstat < 0) mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+        } else {
+          mstat = rename(checkpoint_old, checkpoint);
+          if (mstat < 0) mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+          mechanic_message(MECHANIC_MESSAGE_DEBUG,
+              "Renamed file size = %d\n", mstat);
+        }
+
+      }
+
+      mechanic_message(MECHANIC_MESSAGE_DEBUG,
+          "File %s -> %s\n",checkpoint_old, checkpoint);
+    }
+  }
+
+  free(checkpoint);
+  free(checkpoint_old);
+
+  return mstat;
 }
 
 /* Write checkpoint file (master file) */
@@ -140,13 +204,13 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check,
   H5Gclose(data_group);
   H5Fclose(file_id);
 
-	mechanic_message(MECHANIC_MESSAGE_DEBUG,"Checkpoint finished\n");
+	mechanic_message(MECHANIC_MESSAGE_DEBUG, "Checkpoint finished\n");
 
   return 0;
 }
 
 /*
- * READ BOARD AT RESTARTMODE
+ * Read simulation board
  *
  * FIX ME!
  * I couldn't manage to do it with single call to H5Dread and malloc,

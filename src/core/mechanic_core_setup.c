@@ -83,8 +83,7 @@
  * @M provides user with a checkpoint system, see @ref checkpoint for 
  * detailes. In this case the options are:
  *
- * - @c --restart @c -r -- switch to restart mode
- * - @c --rpath @c -b -- checkpoint file path
+ * - @c --restart @c -r -- switch to restart mode and use checkpoint file
  *
  * Mechanic can operate in different modes, see @ref modes for detailes.
  * You can switch between them by using:
@@ -244,6 +243,22 @@ int readDefaultConfig(char* inifile, int flag){
 	}
 
   if(opts < 0) mechanic_error(MECHANIC_ERR_SETUP);
+
+  return opts;
+}
+
+/* Read configuration stored in the checkpoint file. */
+int readCheckpointConfig(char* file) {
+
+  int opts = 0;
+  hid_t f;
+  herr_t status;
+
+  f = H5Fopen(file, H5F_ACC_RDONLY, H5P_DEFAULT);
+
+  opts = LRC_HDF5Parser(f);
+
+  status = H5Fclose(f);
 
   return opts;
 }

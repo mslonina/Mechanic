@@ -81,13 +81,15 @@
 #define MECHANIC_CONFIG_FILE_DEFAULT "config"
 #define MECHANIC_NAME_DEFAULT "mechanic"
 #define MECHANIC_MODULE_DEFAULT "module"
+#define MECHANIC_MASTER_PREFIX_DEFAULT "master"
+#define MECHANIC_FILE_EXT "h5"
 #define MECHANIC_MASTER_FILE_DEFAULT "module-master.h5"
-#define MECHANIC_MASTER_SUFFIX_DEFAULT "-master.h5"
+#define MECHANIC_MASTER_SUFFIX_DEFAULT "-master-00.h5"
 #define MECHANIC_XRES_DEFAULT "5"
 #define MECHANIC_YRES_DEFAULT "5"
 #define MECHANIC_METHOD_DEFAULT "0"
 #define MECHANIC_CHECKPOINT_DEFAULT "2000"
-#define MECHANIC_CHECKPOINTS "6"
+#define MECHANIC_CHECKPOINTS 3
 #define MECHANIC_MODE_DEFAULT "1"
 #define MECHANIC_MRL_DEFAULT 4
 
@@ -134,11 +136,12 @@ module_cleanup_f cleanup;
 /* GLOBALS */
 char* ConfigFile;
 char* datafile;
+char* CheckpointFile;
 int allopts, mpi_size;
 int usage, help, debug, silent;
 
 /* FUNCTION PROTOTYPES */
-int map2d(int, void* handler, moduleInfo*, configData* d, int ind[]);
+int map2d(int, void* handler, moduleInfo*, configData* d, int ind[], int** b);
 
 int buildMasterResultsType(int mrl, masterData* md,
     MPI_Datatype* masterResultsType_ptr);
@@ -147,6 +150,7 @@ void* load_sym(void* handler, char* module_name, char* function,
     char* function_override, int type);
 
 int readDefaultConfig(char* inifile, int flag);
+int readCheckpointConfig(char* inifile);
 
 int assignConfigValues(configData* d);
 
@@ -179,6 +183,7 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
     configData* d);
 
 int mechanic_printConfig(configData* cd, int flag);
+int mechanic_copy(char* in, char* out);
 
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE,\
   mechanic_poptHelpOptions, 0, "Help options:", NULL },

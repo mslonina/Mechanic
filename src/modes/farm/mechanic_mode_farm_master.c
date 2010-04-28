@@ -64,7 +64,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
   int** coordsarr;
   MECHANIC_DATATYPE **resultarr;
 
-  /* Restart mode board */
+  /* Simulation board */
   int** board;
 
   MPI_Status mpi_status;
@@ -95,17 +95,17 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
   }
 
   /* Allocate memory for board */
-  if (d->restartmode == 1) {
-    board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
-    if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
+  if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-    for (i = 0; i < d->xres; i++) {
-      board[i] = calloc(sizeof(uintptr_t)*((uintptr_t)d->yres), sizeof(uintptr_t));
-      if(board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-    }
+  for (i = 0; i < d->xres; i++) {
+    board[i] = calloc(sizeof(uintptr_t)*((uintptr_t)d->yres), sizeof(uintptr_t));
+    if(board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
   }
 
-  if(d->restartmode == 1) H5readBoard(d, board);
+  /* For the sake of simplicity we read board everytime,
+   * both in restart and clean simulation mode */
+  H5readBoard(d, board);
 
   /* Build derived type for master result */
   mstat = buildMasterResultsType(md->mrl, &rawdata, &masterResultsType);
@@ -115,12 +115,16 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
   if (query) mstat = query(mpi_size, node, md, d);
 
   /* Align farm resolution for given method. */
-  if (d->method == 0) farm_res = d->xres * d->yres;
-  if (d->method == 6) {
+  if (d->method == 0 || d->method == 6) farm_res = d->xres * d->yres;
+  /*if (d->method == 6) {
     qr = load_sym(handler, d->module, "farmResolution", "farmResolution",
         MECHANIC_MODULE_ERROR);
     if (qr) farm_res = qr(d->xres, d->yres, md);
-  }
+    if (farm_res > (d->xres * d->yres)) {
+      mechanic_message(MECHANIC_MESSAGE_ERR, "Farm resolution should not exceed x*y!\n");
+      mechanic_error(MECHANIC_ERR_SETUP);
+    }
+  }*/
 
   /* FARM STARTS */
 
@@ -134,14 +138,15 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
    * remembering what the farm resolution is.*/
   for (i = 1; i < nodes; i++) {
 
-    qbeforeS = load_sym(handler, d->module, "node_beforeSend", "master_beforeSend",
-        MECHANIC_MODULE_SILENT);
-    if (qbeforeS) mstat = qbeforeS(i, md, d, &rawdata);
-
-    map2d(npxc, handler, md, d, ptab);
+    npxc = map2d(npxc, handler, md, d, ptab, board);
+    count++;
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG,
         "MASTER PTAB[%d, %d, %d\n]", ptab[0], ptab[1], ptab[2]);
+
+    qbeforeS = load_sym(handler, d->module, "node_beforeSend", "master_beforeSend",
+        MECHANIC_MODULE_SILENT);
+    if (qbeforeS) mstat = qbeforeS(i, md, d, &rawdata);
 
     MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
 
@@ -149,8 +154,6 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
         MECHANIC_MODULE_SILENT);
     if (qafterS) mstat = qafterS(i, md, d, &rawdata);
 
-    count++;
-    npxc++;
   }
 
   /* We don't want to have slaves idle, so, if there are some idle slaves
@@ -161,10 +164,8 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
       mechanic_message(MECHANIC_MESSAGE_WARN,
           "Terminating idle slave %d.\n", i);
 
-      map2d(npxc, handler, md, d, ptab);
-
-      mechanic_message(MECHANIC_MESSAGE_DEBUG,
-          "MASTER PTAB[%d, %d, %d\n]", ptab[0], ptab[1], ptab[2]);
+      /* Just dummy assignment */
+      ptab[0] = ptab[1] = ptab[2] = 0;
 
       MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
@@ -217,20 +218,18 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
     /* Send next task to the slave */
     if (npxc < farm_res){
 
+      npxc = map2d(npxc, handler, md, d, ptab, board);
+      count++;
+
       qbeforeS = load_sym(handler, d->module, "node_beforeSend", "master_beforeSend",
           MECHANIC_MODULE_SILENT);
       if (qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, &rawdata);
-
-      map2d(npxc, handler, md, d, ptab);
 
       mechanic_message(MECHANIC_MESSAGE_DEBUG, "MASTER PTAB[%d, %d, %d\n]",
           ptab[0], ptab[1], ptab[2]);
 
       MPI_Send(ptab, 3, MPI_INT, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG,
           MPI_COMM_WORLD);
-
-      npxc++;
-      count++;
 
       qafterS = load_sym(handler, d->module, "node_afterSend", "master_afterSend",
           MECHANIC_MODULE_SILENT);
@@ -277,11 +276,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
   /* Now, terminate the slaves */
   for (i = 1; i < nodes; i++) {
 
-     map2d(npxc, handler, md, d, ptab);
-
-     mechanic_message(MECHANIC_MESSAGE_DEBUG,
-         "MASTER PTAB[%d, %d, %d\n]", ptab[0], ptab[1], ptab[2]);
-
+     ptab[0] = ptab[1] = ptab[2] = 0;
      MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
 
   }
@@ -304,10 +299,8 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
   free(coordsarr);
   free(resultarr);
 
-  if (d->restartmode == 1) {
-    for (i = 0; i < d->xres; i++) free(board[i]);
-    free(board);
-  }
+  for (i = 0; i < d->xres; i++) free(board[i]);
+  free(board);
 
   return 0;
 }

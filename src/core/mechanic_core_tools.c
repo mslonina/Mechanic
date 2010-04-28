@@ -123,10 +123,11 @@ void clearArray(MECHANIC_DATATYPE* array, int no_of_items_in_array){
  * Maps coordinates of the current pixel.
  *
  * @return
- * Array of mapped pixel
+ * Operates on array of mapped pixel
+ * Returns number of next pixel to be mapped, -1 on failure
  *
  */
-int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[]){
+int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[], int** b){
 
    int x, y;
    module_query_void_f qpcm;
@@ -134,39 +135,49 @@ int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[]){
    x = d->xres;
    y = d->yres;
 
-   /* We need number of current pixel to store, too */
-   ind[2] = c;
+   do {
 
-   /* Method 0: one pixel per each slave. */
-   if (d->method == 0) {
+     /* We need number of current pixel to store, too */
+     ind[2] = c;
 
-    if (c < y) {
-      ind[0] = c / y;
-      ind[1] = c;
-    }
+     /* Method 0: one pixel per each slave. */
+     if (d->method == 0) {
 
-    if (c > y - 1) {
-      ind[0] = c / y;
-      ind[1] = c % y;
-    }
-   }
+      if (c < y) {
+        ind[0] = c / y;
+        ind[1] = c;
+      }
 
-   /* Method 6: user defined pixel mapping. */
-   if (d->method == 6) {
-    qpcm = load_sym(handler, d->module, "pixelCoordsMap", "pixelCoordsMap",
-        MECHANIC_MODULE_ERROR);
-    if (qpcm) qpcm(ind, c, x, y, md, d);
-   }
+      if (c > y - 1) {
+        ind[0] = c / y;
+        ind[1] = c % y;
+      }
+     }
+
+     /* Method 6: user defined pixel mapping. */
+     if (d->method == 6) {
+      qpcm = load_sym(handler, d->module, "pixelCoordsMap", "pixelCoordsMap",
+          MECHANIC_MODULE_ERROR);
+      if (qpcm) qpcm(ind, c, x, y, md, d);
+     }
+
+     if (b[ind[0]][ind[1]] == 1) {
+        mechanic_message(MECHANIC_MESSAGE_DEBUG,
+            "Pixel [%d][%d][%03d] will be skipped\n", ind[0], ind[1], ind[2]);
+     } else {
+        mechanic_message(MECHANIC_MESSAGE_DEBUG,
+            "Pixel [%d][%d][%03d] will be computed\n", ind[0], ind[1], ind[2]);
+     }
+
+     c++;
+
+   } while (b[ind[0]][ind[1]] == 1);
 
    mechanic_message(MECHANIC_MESSAGE_DEBUG,
        "Pixel[%d]: %d %d\n", ind[2], ind[0], ind[1]);
 
-   return 0;
-}
-
-int checkPixel(int pixel){
-
-  return pixel;
+   /* Return number of the next pixel to be mapped */
+   return c;
 }
 
 /*
@@ -195,7 +206,7 @@ void* load_sym(void* handler, char* md_name, char* function,
 
   func = calloc(mn + fl + 2 * sizeof(char*), sizeof(char*));
   if (func == NULL) mechanic_error(MECHANIC_ERR_MEM);
-  
+
   func_over = calloc(mn + fol + 2 * sizeof(char*), sizeof(char*));
   if (func_over == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
@@ -248,7 +259,7 @@ void* load_sym(void* handler, char* md_name, char* function,
   } else if (template == 2) {
     ret_handler = handler_fo;
   }
-  
+
   free(func);
   free(func_over);
 
@@ -313,5 +324,65 @@ void mechanic_welcome(){
   mechanic_message(MECHANIC_MESSAGE_CONT, "%s\n", MECHANIC_URL);
   mechanic_message(MECHANIC_MESSAGE_CONT, "\n");
 
+}
+
+/* Mechanic COPY
+ * If there is a better method, please send a patch
+ */
+int mechanic_copy(char* in, char* out){
+
+  int input;
+  int output;
+  int mstat;
+  char *c;
+  struct stat st;
+
+  /* Read and write files in binary mode */
+  input = open(in, O_RDONLY);
+  if (input < 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "Could not open input file %s\n", in);
+    return -1;
+  }
+
+  stat(in, &st);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG,
+      "Input file size: %d\n", (int) st.st_size);
+
+  output = open(out, O_RDWR | O_CREAT | O_TRUNC, 0644);
+  if (output < 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "Could not open output file %s\n", out);
+    return -1;
+  }
+
+  /* CHAR_BIT in limits.h */
+  c = malloc(st.st_size * CHAR_BIT + 1);
+  if (c == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  /* Read and write the whole file, without loops */
+  mstat = read(input, c, st.st_size);
+  if (mstat < 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "Could not read input file %s\n", in);
+    return -1;
+  }
+
+  mstat = write(output, c, st.st_size);
+  if (mstat < 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "Could not write output file %s\n", out);
+    return -1;
+  }
+
+  free(c);
+
+  if (close(input) < 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "Error closing input file\n");
+    return -1;
+  }
+
+  if (close(output) < 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "Error closing output file\n");
+    return -1;
+  }
+
+  return 0;
 }
 

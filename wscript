@@ -240,7 +240,7 @@ def set_options(opt):
   list = []
 
   opt.tool_options('compiler_cc')
-#  opt.tool_options('compiler_fortran')
+#  opt.tool_options('compiler_fortran', tooldir='waf-fortran')
 
   opt.add_option('--with-doc', action = 'store_true', default = False,
                   help = 'Build documentation', dest = 'with_doc')
@@ -285,7 +285,7 @@ def configure(conf):
   test_code_lrc = _test_code('waf-tests/test-lrc.c')
 
   conf.check_tool('compiler_cc')
-  #conf.check_tool('compiler_fortran')
+#  conf.check_tool('compiler_fortran', tooldir='waf-fortran')
   _check_mpi(conf)
   _check_std_headers(conf, stdheads, stdfunc, stdtypes)
   _check_lib(conf, ['m', 'math.h', 'pow', test_code_libm, '', 1])

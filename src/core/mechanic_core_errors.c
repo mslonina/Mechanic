@@ -52,7 +52,6 @@
  *
  * Known bugs and missing features:
  *
- * - restart/checkpoint system
  * - HDF error handling in a better way
  *
  * @section errcodes Error Codes
@@ -62,9 +61,10 @@
  *
  * - @c 911 -- MPI related error
  * - @c 912 -- HDF related error
- * - @c 913 -- Module interface related error
- * - @c 914 -- Setup interface related error
+ * - @c 913 -- Module subsystem related error
+ * - @c 914 -- Setup subsystem related error
  * - @c 915 -- Memory allocation related error
+ * - @c 916 -- Checkpoint subsytem related error
  * - @c 999 -- Any other error
  *
  */

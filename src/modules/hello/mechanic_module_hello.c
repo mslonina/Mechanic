@@ -97,7 +97,7 @@
  * @endcode
  *
  * Two last lines were printed using our simple module. In the working
- * directory you should find also @c mechanic-master.h5 file. It is a data
+ * directory you should find also @c mechanic-master-00.h5 file. It is a data
  * file written by the master node, and each run of @M will produce
  * such file. It containes all information about the setup of the simulation
  * and data received from slaves.
@@ -105,7 +105,7 @@
  * If you try
  *
  * @code
- * h5dump -n mechanic-master.h5
+ * h5dump -n mechanic-master-00.h5
  * @endcode
  *
  * you should see the following output:
@@ -124,7 +124,9 @@
  * }
  * @endcode
  *
- * which describes the data storage in master file.
+ * which describes the data storage in master file. There are two additional
+ * files in the working dir with suffixes 01 and 02 -- these are checkpoint
+ * files, see @ref checkpoints for detailes.
  *
  * The @c Hello module is included in @M distribution as a simple example of
  * using the software.

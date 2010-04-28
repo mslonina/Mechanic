@@ -99,11 +99,8 @@ contains
 
     real (c_double), pointer :: res_array(:)
     
-    ! Important: we need to bind fortran and c pointers
     res_rank = md%mrl
     call c_f_pointer(r%res, res_array, res_rank)
-
-    ! And now, you can play around
 
     res_array(1) = 22.0d0
     res_array(2) = 32.0d0

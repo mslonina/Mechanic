@@ -50,6 +50,7 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
     configData* d){
 
   int i = 0, j = 0, farm_res = 0, mstat = 0, tab[3], check = 0;
+  int npxc = 0;
   masterData rawdata;
 
   /* Checkpoint storage */
@@ -81,17 +82,15 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
   }
 
   /* Allocate memory for board */
-  if (d->restartmode == 1) {
-    board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
-    if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
+  if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-    for (i = 0; i < d->xres; i++) {
-      board[i] = calloc(sizeof(uintptr_t) * ((uintptr_t) d->yres), sizeof(uintptr_t));
-      if (board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-    }
+  for (i = 0; i < d->xres; i++) {
+    board[i] = calloc(sizeof(uintptr_t) * ((uintptr_t) d->yres), sizeof(uintptr_t));
+    if (board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
   }
 
-  if (d->restartmode == 1) H5readBoard(d, board);
+  H5readBoard(d, board);
 
   /* Master can do something useful before computations,
    * even in masteralone mode */
@@ -99,17 +98,17 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
   if (query) mstat = query(mpi_size, node, md, d);
 
   /* Align farm resolution for given method. */
-  if (d->method == 0) farm_res = d->xres*d->yres;
-  if (d->method == 6) {
+  if (d->method == 0 || d->method == 6) farm_res = d->xres*d->yres;
+  /*if (d->method == 6) {
     qr = load_sym(handler, d->module, "farmResolution", "farmResolution",
         MECHANIC_MODULE_ERROR);
     if (qr) farm_res = qr(d->xres, d->yres, md);
-  }
+  }*/
 
   /* Perform farm operations */
-  for (i = 0; i < farm_res; i++) {
+  while (1) {
 
-    map2d(i, handler, md, d, tab);
+    npxc = map2d(npxc, handler, md, d, tab, board);
 
     if (d->method == 0) {
       rawdata.coords[0] = tab[0];
@@ -158,6 +157,7 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
       check = 0;
     }
 
+    if (npxc >= farm_res) break;
   }
 
   /* Write outstanding results */
@@ -182,10 +182,8 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
   free(coordsarr);
   free(resultarr);
 
-  if (d->restartmode == 1) {
-    for (i = 0; i < d->xres; i++) free(board[i]);
-    free(board);
-  }
+  for (i = 0; i < d->xres; i++) free(board[i]);
+  free(board);
 
   return 0;
 }
