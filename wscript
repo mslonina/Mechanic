@@ -13,7 +13,7 @@ import Environment
 
 import string
 
-VERSION='0.12.0-UNSTABLE-2'
+VERSION='0.12.0-UNSTABLE-3'
 APPNAME='mechanic'
 URL='http://mechanics.astri.umk.pl/projects/mechanic'
 BUGS='mariusz.slonina@gmail.com'
