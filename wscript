@@ -10,8 +10,11 @@ import Utils
 import Build
 import Options
 import Environment
+import Scripting
 
 import string
+
+Scripting.g_gz = 'gz'
 
 VERSION='0.12.0-UNSTABLE-3'
 APPNAME='mechanic'
