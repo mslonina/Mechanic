@@ -325,7 +325,7 @@ def configure(conf):
   # Compiler flags
   conf.env['CC'] = ['mpicc']
   conf.env['LINK_CC'] = ['mpicc']
-  conf.env['CCFLAGS'] += ['-Wall']
+  conf.env['CCFLAGS'] += ['-Wall', '-g', '-ggdb']
   conf.env['CCFLAGS'] += ['-std=c99']
   conf.env['CCFLAGS'] += ['-fpic']
   conf.env['CCFLAGS'] += ['-Dpic']

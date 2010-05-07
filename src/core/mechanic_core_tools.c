@@ -391,3 +391,32 @@ int mechanic_copy(char* in, char* out){
   return 0;
 }
 
+/* Allocates integer 2D array */
+void allocate_int_array(mechanic_int_array* p, int x, int y) {
+
+  int i;
+
+  p->x = x;
+  p->y = y;
+
+  p->array = calloc(sizeof(uintptr_t) * ((uintptr_t) p->x + 1), sizeof(uintptr_t));
+  if (p->array == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  for (i = 0; i < x; i++) {
+    p->array[i] = calloc(sizeof(uintptr_t) * p->y, sizeof(uintptr_t));
+    if (p->array[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  }
+
+}
+
+void free_int_array(mechanic_int_array* p) {
+
+  int i;
+  
+  for (i = 0; i < p->x; i++) {
+    free(p->array[i]);
+  }
+  
+  free(p->array);
+
+}

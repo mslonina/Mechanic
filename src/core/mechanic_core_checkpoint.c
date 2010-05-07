@@ -77,9 +77,22 @@ int atCheckPoint(int check, int** coordsarr, int** board,
     MECHANIC_DATATYPE** resultarr, moduleInfo* md, configData* d){
 
   int mstat;
+  int numofpx;
+  int cpoints;
+  int progress;
+
+  numofpx = d->xres * d->yres;
+  cpoints = d->checkpoint - 1;
 
   mstat = manageCheckPoints(d);
   mstat = H5writeCheckPoint(md, d, check, coordsarr, resultarr);
+
+  if (mstat < 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "Checkpoint failed, aborting\n");
+  } else {
+  //  mechanic_message(MECHANIC_MESSAGE_CONT, "Checkpoint done [%10d %10d %10d]\n",
+  //      coordsarr[cpoints][0], coordsarr[cpoints][1], coordsarr[cpoints][2]);
+  }
 
   return mstat;
 }
@@ -94,7 +107,7 @@ int manageCheckPoints(configData* d){
   struct stat ct;
   struct stat cto;
 
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "At checkpoint\n");
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Managing checkpoints\n");
 
   /* Allocate memory for names of files */
   nam = strlen(d->name);

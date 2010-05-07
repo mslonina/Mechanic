@@ -133,6 +133,19 @@ module_query_int_f iquery;
 typedef int (*module_cleanup_f) ();
 module_cleanup_f cleanup;
 
+/* Data types */
+typedef struct {
+  int x;
+  int y;
+  int** array;
+} mechanic_int_array;
+
+typedef struct {
+  int x;
+  int y;
+  double** array;
+} mechanic_double_array;
+
 /* GLOBALS */
 char* ConfigFile;
 char* datafile;
@@ -184,6 +197,9 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
 
 int mechanic_printConfig(configData* cd, int flag);
 int mechanic_copy(char* in, char* out);
+
+void allocate_int_array(mechanic_int_array* p, int x, int y);
+void free_int_array(mechanic_int_array* p);
 
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE,\
   mechanic_poptHelpOptions, 0, "Help options:", NULL },

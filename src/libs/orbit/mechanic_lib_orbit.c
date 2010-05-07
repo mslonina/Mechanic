@@ -180,8 +180,7 @@ int orbit_el2rv(int precision, double gm, double el[], double rv[]){
 
   /* Catch input errors */
   if (gm <= 0.0) {
-    mechanic_message(MECHANIC_MESSAGE_IERR,
-        "EL2RV: GM < 0!\n");
+    mechanic_message(MECHANIC_MESSAGE_IERR, "EL2RV: GM < 0!\n");
     return -1;
   }
 
@@ -239,9 +238,11 @@ int orbit_el2rv(int precision, double gm, double el[], double rv[]){
   }
 
   if (orbit_type == MECHANIC_ORBIT_PARABOLA) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "EL2RV: Not implemented\n");
   }
 
   if (orbit_type == MECHANIC_ORBIT_HYPERBOLA) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "EL2RV: Not implemented\n");
   }
 
   /* Final conversion */
@@ -362,9 +363,11 @@ int orbit_rv2el(double gm, double el[], double rv[]){
   }
 
   if (orbit_type == MECHANIC_ORBIT_PARABOLA) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "RV2EL: Not implemented\n");
   }
 
   if (orbit_type == MECHANIC_ORBIT_HYPERBOLA) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "RV2EL: Not implemented\n");
   }
 
   return 0;
@@ -405,8 +408,7 @@ int orbit_kepler2cart(int direction, int precision, int nb,
   }
 
   if (gm < 0.0) {
-    mechanic_message(MECHANIC_MESSAGE_IERR,
-        "KEPLER2CART: GM < 0!\n");
+    mechanic_message(MECHANIC_MESSAGE_IERR, "KEPLER2CART: GM < 0!\n");
     return -1;
   }
 
