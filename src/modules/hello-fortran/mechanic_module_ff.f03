@@ -86,9 +86,9 @@ contains
 
   end function ff_cleanup
 
-  ! Implementation of module_pixelCompute()
-  integer (c_int) function ff_pixelCompute(node, md, d, r) &
-    bind(c, name = 'ff_pixelCompute') result(errcode)
+  ! Implementation of module_processPixel()
+  integer (c_int) function ff_processPixel(node, md, d, r) &
+    bind(c, name = 'ff_processPixel') result(errcode)
 
     implicit none
     integer(c_int), intent(in) :: node
@@ -107,7 +107,7 @@ contains
     res_array(3) = 42.0d0
 
     errcode = 0
-  end function ff_pixelCompute
+  end function ff_processPixel
 
 end module ff
 ! [/F2003MODULE]

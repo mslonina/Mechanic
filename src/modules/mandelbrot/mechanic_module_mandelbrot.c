@@ -51,7 +51,7 @@
  * problem, in that case -- the Mandelbrot fractal.
  *
  * We use here only 3 functions: @c mandelbrot_init(), @c mandelbrot_cleanup()
- * and @c mandelbrot_pixelCompute(). There is an additional function,
+ * and @c mandelbrot_processPixel(). There is an additional function,
  * @c mandelbrot_generateFractal(), which shows that you can even add external
  * functions to your module, since it is a standard C code.
  *
@@ -93,9 +93,9 @@ int mandelbrot_cleanup(moduleInfo *md){
 }
 
 /**
- * Implementation of module_pixelCompute()
+ * Implementation of module_processPixel()
  */
-int mandelbrot_pixelCompute(int slave, moduleInfo *md, configData* d,
+int mandelbrot_processPixel(int slave, moduleInfo *md, configData* d,
     masterData* r){
 
   double real_min, real_max, imag_min, imag_max;

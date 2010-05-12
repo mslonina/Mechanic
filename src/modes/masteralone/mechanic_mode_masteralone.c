@@ -122,17 +122,17 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
       if (qpc) mstat = qpc(node, tab, md, d, &rawdata);
     }
 
-    qpb = load_sym(handler, d->module, "node_beforePixelCompute",
-        "master_beforePixelCompute", MECHANIC_MODULE_SILENT);
+    qpb = load_sym(handler, d->module, "node_beforeProcessPixel",
+        "master_beforeProcessPixel", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &rawdata);
 
     /* PIXEL COMPUTATION */
-    qpx = load_sym(handler, d->module, "pixelCompute", "pixelCompute",
+    qpx = load_sym(handler, d->module, "processPixel", "processPixel",
         MECHANIC_MODULE_ERROR);
     if (qpx) mstat = qpx(node, md, d, &rawdata);
 
-    qpb = load_sym(handler, d->module, "node_afterPixelCompute",
-        "master_afterPixelCompute", MECHANIC_MODULE_SILENT);
+    qpb = load_sym(handler, d->module, "node_afterProcessPixel",
+        "master_afterProcessPixel", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &rawdata);
 
     /* Copy data to checkpoint arrays */

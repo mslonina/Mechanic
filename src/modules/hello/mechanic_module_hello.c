@@ -157,7 +157,7 @@
  *
  * - @c hello_init()
  * - @c hello_cleanup()
- * - @c hello_pixelCompute()
+ * - @c hello_processPixel()
  *
  * are required for the module to work. @M will abort if any of them is
  * missing. The fourth one, @c hello_slave_out() is optional
@@ -182,7 +182,7 @@
  * - @c hello_cleanup(moduleInfo* md) currently does nothing,
  *   however, it is required for future development.
  *
- * - @c hello_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r)
+ * - @c hello_processPixel(int node, moduleInfo* md, configData* d, masterData* r)
  *   is the heart of your module. Here you can compute almost any type of
  *   numerical problem or even you can call external application from here.
  *   There are technically no contradictions for including Fortran based
@@ -247,9 +247,9 @@ int hello_cleanup(moduleInfo* md){
 }
 
 /**
- * Implementation of module_pixelCompute()
+ * Implementation of module_processPixel()
  */
-int hello_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r)
+int hello_processPixel(int node, moduleInfo* md, configData* d, masterData* r)
 {
 
   r->res[0] = (double) r->coords[0];

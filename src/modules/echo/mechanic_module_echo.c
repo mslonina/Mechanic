@@ -175,9 +175,9 @@ int echo_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
 }
 
 /**
- * Implementation of module_pixelCompute()
+ * Implementation of module_processPixel()
  */
-int echo_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
+int echo_processPixel(int node, moduleInfo* md, configData* d, masterData* r){
 
   int i = 0;
 
@@ -189,18 +189,18 @@ int echo_pixelCompute(int node, moduleInfo* md, configData* d, masterData* r){
 }
 
 /**
- * Implementation of module_node_beforePixelCompute()
+ * Implementation of module_node_beforeProcessPixel()
  */
-int echo_node_beforePixelCompute(int node, moduleInfo* md, configData* d,
+int echo_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
     masterData* r){
 
   return 0;
 }
 
 /**
- * Implementation of module_node_afterPixelCompute()
+ * Implementation of module_node_afterProcessPixel()
  */
-int echo_node_afterPixelCompute(int node, moduleInfo* md, configData* d,
+int echo_node_afterProcessPixel(int node, moduleInfo* md, configData* d,
     masterData* r){
 
   return 0;

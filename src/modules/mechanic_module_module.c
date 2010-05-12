@@ -301,14 +301,14 @@ int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
 
 /**
  * @internal
- * @fn int module_pixelCompute(int node, moduleInfo* md, configData* d,
+ * @fn int module_processPixel(int node, moduleInfo* md, configData* d,
  * masterData* r)
  * @brief Pixel compute routine
  *
  * The heart. Here You can compute your pixels. Possible extentions:
- * - Each node has its own pixelCompute routine. You can use them accordingly
+ * - Each node has its own processPixel routine. You can use them accordingly
  *   to slave number in the switch loop.
- * - Each node has the same pixelCompute routine.
+ * - Each node has the same processPixel routine.
  *
  * @param node
  * The number of current node
@@ -327,7 +327,7 @@ int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
  *
  * @ingroup module_required
  */
-int module_pixelCompute(int node, moduleInfo* md, configData* d,
+int module_processPixel(int node, moduleInfo* md, configData* d,
     masterData* r){
    return 0;
 }
@@ -357,17 +357,17 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d,
  *   - @c module_master_out()
  *   - @c module_slave_out() (not in Masteralone mode)
  *
- * - @ct module_node_before_pixelCompute(int node, moduleInfo* md, configData*
+ * - @ct module_node_before_processPixel(int node, moduleInfo* md, configData*
  *   d, <br> masterData* r) @tc <br>
  *   This function is called before computation of the pixel. The possible overrides are:
- *   - @c module_master_beforePixelCompute()
- *   - @c module_slave_beforePixelCompute() (not in Masteralone mode)
+ *   - @c module_master_beforeProcessPixel()
+ *   - @c module_slave_beforeProcessPixel() (not in Masteralone mode)
  * 
- * - @ct module_node_after_pixelCompute(int node, moduleInfo* md, configData*
+ * - @ct module_node_after_processPixel(int node, moduleInfo* md, configData*
  *   d, <br> masterData* r) @tc <br>
  *   This function is called before computation of the pixel. The possible overrides are:
- *   - @c module_master_afterPixelCompute()
- *   - @c module_slave_afterPixelCompute() (not in Masteralone mode)
+ *   - @c module_master_afterProcessPixel()
+ *   - @c module_slave_afterProcessPixel() (not in Masteralone mode)
  *
  * @subsection mpibased MPI-based functions (not used in Masteralone mode)
  *
@@ -416,7 +416,7 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d,
  *
  *  - @sb Each slave does the same.@bs
  *    This is the simplest case of using @M. The only thing to do is to
- *    define @c pixelCompute() function and return data to the master node
+ *    define @c processPixel() function and return data to the master node
  *    with @c masterData structure. You can also do something more in
  *    @c node_in/out functions, but in that case it is not really necessary.
  *
@@ -425,13 +425,13 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d,
  *    This can be done with @c LRC in @c slave_in() function and config files
  *    named after slave number, i.e. slave22.
  *
- *  - @sb Each slave has different @c pixelCompute function.@bs
- *    At this point you need to create some subfunctions of @c pixelCompute
+ *  - @sb Each slave has different @c processPixel function.@bs
+ *    At this point you need to create some subfunctions of @c processPixel
  *    and choose them accordingly to number of the slave, i.e.
  *    in the switch routine.
  *
  *  - @sb Each slave has both different config file and different
- *    @c pixelCompute.@bs
+ *    @c processPixel.@bs
  *    Just combining two cases in simple switch routines and it should work.
  *
  */
@@ -440,7 +440,7 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d,
 
 /**
  * @internal
- * @fn int module_node_beforePixelCompute(int node, moduleInfo* md,
+ * @fn int module_node_beforeProcessPixel(int node, moduleInfo* md,
  * configData* d, masterData* r)
  * @brief Operates on data before pixel computation
  *
@@ -463,14 +463,14 @@ int module_pixelCompute(int node, moduleInfo* md, configData* d,
  *
  * @ingroup module_themeable
  */
-int module_node_beforePixelCompute(int node, moduleInfo* md, configData* d,
+int module_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
     masterData* r){
   return 0;
 }
 
 /**
  * @internal
- * @fn int module_node_afterPixelCompute(int node, moduleInfo* md,
+ * @fn int module_node_afterProcessPixel(int node, moduleInfo* md,
  * configData* d, masterData* r)
  * @brief Operates on data after pixel computation
  *
@@ -493,7 +493,7 @@ int module_node_beforePixelCompute(int node, moduleInfo* md, configData* d,
  *
  * @ingroup module_themeable
  */
-int module_node_afterPixelCompute(int node, moduleInfo* md, configData* d,
+int module_node_afterProcessPixel(int node, moduleInfo* md, configData* d,
     masterData* r){
   return 0;
 }
