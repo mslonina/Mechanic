@@ -58,7 +58,8 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
   int mstat;
   int ptab[3];
 
-  masterData rawdata;
+  masterData result;
+  masterData inidata;
 
   /* Checkpoint storage */
   int** coordsarr;
@@ -69,15 +70,22 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
 
   MPI_Status mpi_status;
   MPI_Datatype masterResultsType;
+  MPI_Datatype initialConditionsType;
 
   module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR;
   module_query_int_f qr;
 
-  /* Allocate memory for rawdata.res array. */
-  rawdata.res = realloc(NULL,
+  /* Allocate memory for result.res array. */
+  result.res = realloc(NULL,
       ((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE));
 
-  if (rawdata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  if (result.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  /* Allocate memory for inidata.res array. */
+  inidata.res = realloc(NULL,
+      ((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE));
+
+  if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
   if (coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
@@ -108,11 +116,12 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
   H5readBoard(d, board);
 
   /* Build derived type for master result */
-  mstat = buildMasterResultsType(md->mrl, &rawdata, &masterResultsType);
+  mstat = buildMasterResultsType(md->mrl, &result, &masterResultsType);
+  mstat = buildMasterResultsType(md->irl, &inidata, &initialConditionsType);
 
   /* Master can do something useful before computations. */
   query = load_sym(handler, d->module, "node_in", "master_in", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(mpi_size, node, md, d);
+  if (query) mstat = query(mpi_size, node, md, d, &inidata);
 
   /* Align farm resolution for given method. */
   if (d->method == 0 || d->method == 6) farm_res = d->xres * d->yres;
@@ -141,18 +150,26 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
     npxc = map2d(npxc, handler, md, d, ptab, board);
     count++;
 
-    mechanic_message(MECHANIC_MESSAGE_WARN,
+    inidata.coords[0] = ptab[0];
+    inidata.coords[1] = ptab[1];
+    inidata.coords[2] = ptab[2];
+
+    qr = load_sym(handler, d->module, "node_preparePixel",
+          "master_preparePixel", MECHANIC_MODULE_SILENT);
+    if (qr) mstat = qr(node, md, d, &inidata, &result);
+
+    mechanic_message(MECHANIC_MESSAGE_DEBUG,
         "MASTER PTAB[%d, %d, %d]\n", ptab[0], ptab[1], ptab[2]);
 
     qbeforeS = load_sym(handler, d->module, "node_beforeSend", "master_beforeSend",
         MECHANIC_MODULE_SILENT);
-    if (qbeforeS) mstat = qbeforeS(i, md, d, &rawdata);
+    if (qbeforeS) mstat = qbeforeS(i, md, d, &result);
 
-    MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
+    MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
 
     qafterS = load_sym(handler, d->module, "node_afterSend", "master_afterSend",
         MECHANIC_MODULE_SILENT);
-    if (qafterS) mstat = qafterS(i, md, d, &rawdata);
+    if (qafterS) mstat = qafterS(i, md, d, &result);
 
   }
 
@@ -165,9 +182,9 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
           "Terminating idle slave %d.\n", i);
 
       /* Just dummy assignment */
-      ptab[0] = ptab[1] = ptab[2] = 0;
+      inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
 
-      MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+      MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
     }
   }
 
@@ -176,28 +193,28 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
 
     qbeforeR = load_sym(handler, d->module, "node_beforeReceive",
         "master_beforeReceive", MECHANIC_MODULE_SILENT);
-    if (qbeforeR) mstat = qbeforeR(0, md, d, &rawdata);
+    if (qbeforeR) mstat = qbeforeR(0, md, d, &inidata, &result);
 
-    MPI_Recv(&rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
+    MPI_Recv(&result, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
         MPI_COMM_WORLD, &mpi_status);
 
     count--;
 
     qafterR = load_sym(handler, d->module, "node_afterReceive", "master_afterReceive",
         MECHANIC_MODULE_SILENT);
-    if (qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &rawdata);
+    if (qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
 
     /* Copy data to checkpoint arrays */
-    coordsarr[check][0] = rawdata.coords[0];
-    coordsarr[check][1] = rawdata.coords[1];
-    coordsarr[check][2] = rawdata.coords[2];
+    coordsarr[check][0] = result.coords[0];
+    coordsarr[check][1] = result.coords[1];
+    coordsarr[check][2] = result.coords[2];
 
-    mechanic_message(MECHANIC_MESSAGE_WARN, "MASTER RECV[%d, %d, %d]\t",
-        node, rawdata.coords[0], rawdata.coords[1], rawdata.coords[2]);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "MASTER RECV[%d, %d, %d]\t",
+        node, result.coords[0], result.coords[1], result.coords[2]);
 
     for (j = 0; j < md->mrl; j++) {
-      resultarr[check][j] = rawdata.res[j];
-			mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", rawdata.res[j]);
+      resultarr[check][j] = result.res[j];
+			mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", result.res[j]);
     }
 
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "\n");
@@ -217,30 +234,34 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
 
     /* Send next task to the slave */
     if (npxc < farm_res){
-    //printf("npxc/farm %d %d\n", npxc, farm_res);
 
       npxc = map2d(npxc, handler, md, d, ptab, board);
       count++;
 
+      inidata.coords[0] = ptab[0];
+      inidata.coords[1] = ptab[1];
+      inidata.coords[2] = ptab[2];
+
+      qr = load_sym(handler, d->module, "node_preparePixel",
+          "master_preparePixel", MECHANIC_MODULE_SILENT);
+      if (qr) mstat = qr(node, md, d, &inidata, &result);
+
       qbeforeS = load_sym(handler, d->module, "node_beforeSend", "master_beforeSend",
           MECHANIC_MODULE_SILENT);
-      if (qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, &rawdata);
+      if (qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
 
-      mechanic_message(MECHANIC_MESSAGE_WARN, "MASTER PTAB[%d, %d, %d]... ",
-          ptab[0], ptab[1], ptab[2]);
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "MASTER PTAB[%d, %d, %d]... ",
+          inidata.coords[0], inidata.coords[1], inidata.coords[2]);
 
-      MPI_Send(ptab, 3, MPI_INT, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG,
+      MPI_Send(&inidata, 1, initialConditionsType, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG,
           MPI_COMM_WORLD);
-
-      mechanic_message(MECHANIC_MESSAGE_CONT,"sended\n");
 
       qafterS = load_sym(handler, d->module, "node_afterSend", "master_afterSend",
           MECHANIC_MODULE_SILENT);
 
-      if(qafterS) mstat = qafterS(mpi_status.MPI_SOURCE, md, d, &rawdata);
+      if(qafterS) mstat = qafterS(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
 
     } else {
-    //printf("npxc/farm %d %d\n", npxc, farm_res);
       break;
     }
   } /* while(1) ends */
@@ -249,57 +270,55 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
    * No more work to do, receive the outstanding results from the slaves.
    * We've got exactly 'count' messages to receive.
    */
-  printf("\ncount = %d\n", count);
   for (i = 0; i < count; i++){
 
-/*    qbeforeR = load_sym(handler, d->module, "node_beforeReceive",
+    qbeforeR = load_sym(handler, d->module, "node_beforeReceive",
         "master_beforeReceive", MECHANIC_MODULE_SILENT);
-    if (qbeforeR) mstat = qbeforeR(0, md, d, &rawdata);
-*/
-    mechanic_message(MECHANIC_MESSAGE_WARN, "Recv... ");
-    MPI_Recv(&rawdata, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
-        MPI_COMM_WORLD, &mpi_status);
-    mechanic_message(MECHANIC_MESSAGE_WARN, "done\n");
+    if (qbeforeR) mstat = qbeforeR(0, md, d, &inidata, &result);
 
-/*    qafterR = load_sym(handler, d->module, "node_afterReceive", "master_afterReceive",
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Recv... ");
+    MPI_Recv(&result, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
+        MPI_COMM_WORLD, &mpi_status);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "done\n");
+
+    qafterR = load_sym(handler, d->module, "node_afterReceive", "master_afterReceive",
         MECHANIC_MODULE_SILENT);
-    if (qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &rawdata);
-*/
+    if (qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+
     /* Copy data to checkpoint arrays */
-    coordsarr[check][0] = rawdata.coords[0];
-    coordsarr[check][1] = rawdata.coords[1];
-    coordsarr[check][2] = rawdata.coords[2];
+    coordsarr[check][0] = result.coords[0];
+    coordsarr[check][1] = result.coords[1];
+    coordsarr[check][2] = result.coords[2];
 
     for (j = 0; j < md->mrl; j++) {
-      resultarr[check][j] = rawdata.res[j];
+      resultarr[check][j] = result.res[j];
     }
 
     check++;
   }
 
   /* Write outstanding results to file */
-  printf("outs?\n");
   mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
-  printf("Outstanding\n");
 
   /* Now, terminate the slaves */
   for (i = 1; i < nodes; i++) {
 
-     ptab[0] = ptab[1] = ptab[2] = 0;
-     MPI_Send(ptab, 3, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+     inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
+     MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
 
   }
-  printf("Terminated\n");
 
   /* FARM ENDS */
   MPI_Type_free(&masterResultsType);
+  MPI_Type_free(&initialConditionsType);
 
   /* Master can do something useful after the computations. */
   query = load_sym(handler, d->module, "node_out", "master_out",
       MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(nodes, node, md, d, &rawdata);
+  if (query) mstat = query(nodes, node, md, d, &inidata, &result);
 
-  free(rawdata.res);
+  free(result.res);
+  free(inidata.res);
 
   for (i = 0; i < d->checkpoint; i++) {
     free(coordsarr[i]);

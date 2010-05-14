@@ -102,6 +102,7 @@
 int echo_init(moduleInfo* md){
 
   md->mrl = 10;
+  md->irl = 10;
 
   return 0;
 }
@@ -165,7 +166,7 @@ int echo_pixelCoordsMap(int t[], int p, int x, int y, moduleInfo* md,
  *
  */
 int echo_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   r->coords[0] = t[0]; /* x */
   r->coords[1] = t[1]; /* y */
@@ -177,7 +178,8 @@ int echo_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
 /**
  * Implementation of module_processPixel()
  */
-int echo_processPixel(int node, moduleInfo* md, configData* d, masterData* r){
+int echo_processPixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r){
 
   int i = 0;
 
@@ -192,7 +194,7 @@ int echo_processPixel(int node, moduleInfo* md, configData* d, masterData* r){
  * Implementation of module_node_beforeProcessPixel()
  */
 int echo_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -201,7 +203,7 @@ int echo_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_afterProcessPixel()
  */
 int echo_node_afterProcessPixel(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -212,7 +214,8 @@ int echo_node_afterProcessPixel(int node, moduleInfo* md, configData* d,
 
 /* [ECHO_NODEIN] */
 
-int echo_node_in(int mpi_size, int node, moduleInfo* md, configData* d){
+int echo_node_in(int mpi_size, int node, moduleInfo* md, configData* d,
+    masterData* inidata){
 
   mechanic_message(MECHANIC_MESSAGE_INFO, "NodeIN [%d]\n", node);
 
@@ -228,7 +231,7 @@ int echo_node_in(int mpi_size, int node, moduleInfo* md, configData* d){
 /* [ECHO_NODEOUT] */
 
 int echo_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   mechanic_message(MECHANIC_MESSAGE_INFO, "NodeOUT [%d]\n", node);
 
@@ -241,7 +244,7 @@ int echo_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
  * Implementation of module_node_beforeSend()
  */
 int echo_node_beforeSend(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -250,7 +253,7 @@ int echo_node_beforeSend(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_afterSend()
  */
 int echo_node_afterSend(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -259,7 +262,7 @@ int echo_node_afterSend(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_beforeReceive()
  */
 int echo_node_beforeReceive(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -268,7 +271,7 @@ int echo_node_beforeReceive(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_afterReceive()
  */
 int echo_node_afterReceive(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -279,7 +282,8 @@ int echo_node_afterReceive(int node, moduleInfo* md, configData* d,
 
 /* [ECHO_MASTERIN] */
 
-int echo_master_in(int mpi_size, int node, moduleInfo* md, configData* d){
+int echo_master_in(int mpi_size, int node, moduleInfo* md, configData* d,
+    masterData* inidata){
 
   return 0;
 }
@@ -295,7 +299,7 @@ int echo_master_in(int mpi_size, int node, moduleInfo* md, configData* d){
 
 /* [ECHO_MASTEROUT] */
 int echo_master_out(int nodes, int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   int i = 0;
   hid_t fname, masterfile, masterdatagroup;
@@ -339,7 +343,7 @@ int echo_master_out(int nodes, int node, moduleInfo* md, configData* d,
  * Implementation of module_node_beforeSend()
  */
 int echo_master_beforeSend(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -348,7 +352,7 @@ int echo_master_beforeSend(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_afterSend()
  */
 int echo_master_afterSend(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -357,7 +361,7 @@ int echo_master_afterSend(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_beforeReceive()
  */
 int echo_master_beforeReceive(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -366,7 +370,7 @@ int echo_master_beforeReceive(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_afterReceive()
  */
 int echo_master_afterReceive(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -384,7 +388,7 @@ int echo_master_afterReceive(int node, moduleInfo* md, configData* d,
 
 /* [ECHO_SLAVEIN] */
 int echo_slave_in(int mpi_size, int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   hid_t sfile_id, gid, string_type;
   hid_t dataset, dataspace;
@@ -450,7 +454,7 @@ int echo_slave_in(int mpi_size, int node, moduleInfo* md, configData* d,
 /* [ECHO_SLAVEOUT] */
 
 int echo_slave_out(int mpi_size, int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   mechanic_message(MECHANIC_MESSAGE_INFO, "SLAVE[%d] OVER & OUT\n", node);
 
@@ -463,7 +467,7 @@ int echo_slave_out(int mpi_size, int node, moduleInfo* md, configData* d,
  * Implementation of module_node_beforeSend()
  */
 int echo_slave_beforeSend(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -472,7 +476,7 @@ int echo_slave_beforeSend(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_afterSend()
  */
 int echo_slave_afterSend(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -481,7 +485,7 @@ int echo_slave_afterSend(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_beforeReceive()
  */
 int echo_slave_beforeReceive(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }
@@ -490,7 +494,7 @@ int echo_slave_beforeReceive(int node, moduleInfo* md, configData* d,
  * Implementation of module_node_afterReceive()
  */
 int echo_slave_afterReceive(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   return 0;
 }

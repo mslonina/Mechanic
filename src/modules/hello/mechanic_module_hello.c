@@ -233,7 +233,8 @@
  */
 int hello_init(moduleInfo* md){
 
-  md->mrl = 3;
+  md->irl = 3;
+  md->mrl = 6;
 
   return 0;
 }
@@ -246,15 +247,43 @@ int hello_cleanup(moduleInfo* md){
   return 0;
 }
 
+int hello_master_in(int mpi_size, int node, moduleInfo* md, configData* d,
+    masterData* inidata) {
+
+  inidata->res[0] = 99.0;
+
+  return 0;
+}
+
+int hello_master_preparePixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r) {
+
+  inidata->res[1] = (double) d->xres;
+
+  return 0;
+}
+
+int hello_slave_preparePixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r) {
+
+  inidata->res[2] = (double) node;
+
+  return 0;
+}
+
 /**
  * Implementation of module_processPixel()
  */
-int hello_processPixel(int node, moduleInfo* md, configData* d, masterData* r)
+int hello_processPixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r)
 {
 
   r->res[0] = (double) r->coords[0];
   r->res[1] = (double) r->coords[1];
   r->res[2] = (double) r->coords[2];
+  r->res[3] = inidata->res[0];
+  r->res[4] = inidata->res[1];
+  r->res[5] = inidata->res[2];
 
   return 0;
 }
@@ -263,7 +292,7 @@ int hello_processPixel(int node, moduleInfo* md, configData* d, masterData* r)
  * Implementation of module_node_out()
  */
 int hello_slave_out(int nodes, int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   mechanic_message(MECHANIC_MESSAGE_INFO, "Hello from slave[%d]\n", node);
 

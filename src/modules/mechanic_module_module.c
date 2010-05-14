@@ -88,6 +88,7 @@
 int module_init(moduleInfo* md){
 
   md->mrl = 4;
+  md->irl = 4;
 
   return 0;
 }
@@ -288,7 +289,7 @@ int module_pixelCoordsMap(int t[], int numofpx, int xres, int yres, moduleInfo* 
 /* [6PIXELS] */
 
 int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   r->coords[0] = t[0];
   r->coords[1] = t[1];
@@ -328,7 +329,7 @@ int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
  * @ingroup module_required
  */
 int module_processPixel(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* result){
    return 0;
 }
 
@@ -438,6 +439,12 @@ int module_processPixel(int node, moduleInfo* md, configData* d,
 
 /* [/TEMPLATES] */
 
+int module_node_preparePixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* result) {
+
+  return 0;
+}
+
 /**
  * @internal
  * @fn int module_node_beforeProcessPixel(int node, moduleInfo* md,
@@ -523,7 +530,7 @@ int module_node_afterProcessPixel(int node, moduleInfo* md, configData* d,
  *
  * @ingroup module_themeable
  */
-int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d){
+int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d, masterData* inidata){
   return 0;
 }
 
@@ -556,7 +563,7 @@ int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d){
  * @ingroup module_themeable
  */
 int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
   return 0;
 }
 
@@ -584,7 +591,7 @@ int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
  * @ingroup module_themeable
  */
 int module_node_beforeSend(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
   return 0;
 }
 
@@ -613,7 +620,7 @@ int module_node_beforeSend(int node, moduleInfo* md, configData* d,
  */
 
 int module_node_afterSend(int node, moduleInfo* md, configData* d,
-    masterData* r)
+    masterData* inidata, masterData* r)
 {
   return 0;
 }
@@ -643,7 +650,7 @@ int module_node_afterSend(int node, moduleInfo* md, configData* d,
  */
 
 int module_node_beforeReceive(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* result){
   return 0;
 }
 
@@ -672,7 +679,7 @@ int module_node_beforeReceive(int node, moduleInfo* md, configData* d,
  */
 
 int module_node_afterReceive(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* result){
   return 0;
 }
 

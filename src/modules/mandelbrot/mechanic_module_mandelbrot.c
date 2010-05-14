@@ -80,6 +80,7 @@
 int mandelbrot_init(moduleInfo *md){
 
   md->mrl = 4;
+  md->irl = 4;
 
   return 0;
 }
@@ -96,7 +97,7 @@ int mandelbrot_cleanup(moduleInfo *md){
  * Implementation of module_processPixel()
  */
 int mandelbrot_processPixel(int slave, moduleInfo *md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
 
   double real_min, real_max, imag_min, imag_max;
   double scale_real, scale_imag;

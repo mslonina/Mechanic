@@ -97,6 +97,7 @@ typedef struct {
 
 /* [MODULEINFO] */
 typedef struct {
+  int irl;
   int mrl;
 } moduleInfo;
 /* [/MODULEINFO] */
