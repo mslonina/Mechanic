@@ -51,7 +51,9 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
 
   int i = 0, j = 0, farm_res = 0, mstat = 0, tab[3], check = 0;
   int npxc = 0;
-  masterData rawdata;
+
+  masterData result;
+  masterData inidata;
 
   /* Checkpoint storage */
   int** coordsarr;
@@ -64,8 +66,11 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
   module_query_int_f qr;
 
   /* Allocate memory */
-  rawdata.res = realloc(NULL, ((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE));
-  if (rawdata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  result.res = realloc(NULL, ((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE));
+  if (result.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  inidata.res = realloc(NULL, ((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE));
+  if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
   if (coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
@@ -95,7 +100,7 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
   /* Master can do something useful before computations,
    * even in masteralone mode */
   query = load_sym(handler, d->module, "node_in", "master_in", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(mpi_size, node, md, d);
+  if (query) mstat = query(mpi_size, node, md, d, &inidata);
 
   /* Align farm resolution for given method. */
   if (d->method == 0 || d->method == 6) farm_res = d->xres*d->yres;
@@ -110,42 +115,51 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
 
     npxc = map2d(npxc, handler, md, d, tab, board);
 
+    inidata.coords[0] = tab[0];
+    inidata.coords[1] = tab[1];
+    inidata.coords[2] = tab[2];
+
     if (d->method == 0) {
-      rawdata.coords[0] = tab[0];
-      rawdata.coords[1] = tab[1];
-      rawdata.coords[2] = tab[2];
+      result.coords[0] = inidata.coords[0];
+      result.coords[1] = inidata.coords[1];
+      result.coords[2] = inidata.coords[2];
     }
 
     if (d->method == 6) {
+
       qpc = load_sym(handler, d->module, "pixelCoords", "pixelCoords",
           MECHANIC_MODULE_ERROR);
-      if (qpc) mstat = qpc(node, tab, md, d, &rawdata);
+      if (qpc) mstat = qpc(node, tab, md, d, &inidata, &result);
     }
+
+    qpb = load_sym(handler, d->module, "node_preparePixel",
+          "master_preparePixel", MECHANIC_MODULE_SILENT);
+    if (qpb) mstat = qpb(node, md, d, &inidata, &result);
 
     qpb = load_sym(handler, d->module, "node_beforeProcessPixel",
         "master_beforeProcessPixel", MECHANIC_MODULE_SILENT);
-    if (qpb) mstat = qpb(node, md, d, &rawdata);
+    if (qpb) mstat = qpb(node, md, d, &inidata, &result);
 
     /* PIXEL COMPUTATION */
     qpx = load_sym(handler, d->module, "processPixel", "processPixel",
         MECHANIC_MODULE_ERROR);
-    if (qpx) mstat = qpx(node, md, d, &rawdata);
+    if (qpx) mstat = qpx(node, md, d, &inidata, &result);
 
     qpb = load_sym(handler, d->module, "node_afterProcessPixel",
         "master_afterProcessPixel", MECHANIC_MODULE_SILENT);
-    if (qpb) mstat = qpb(node, md, d, &rawdata);
+    if (qpb) mstat = qpb(node, md, d, &inidata, &result);
 
     /* Copy data to checkpoint arrays */
-    coordsarr[check][0] = rawdata.coords[0];
-    coordsarr[check][1] = rawdata.coords[1];
-    coordsarr[check][2] = rawdata.coords[2];
+    coordsarr[check][0] = result.coords[0];
+    coordsarr[check][1] = result.coords[1];
+    coordsarr[check][2] = result.coords[2];
 
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "MASTER [%d, %d, %d]\t",
-        rawdata.coords[0], rawdata.coords[1], rawdata.coords[2]);
+        result.coords[0], result.coords[1], result.coords[2]);
 
     for (j = 0; j < md->mrl; j++) {
-      resultarr[check][j] = rawdata.res[j];
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", rawdata.res[j]);
+      resultarr[check][j] = result.res[j];
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", result.res[j]);
     }
 
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "\n");
@@ -170,9 +184,10 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
   /* Master can do something useful after the computations. */
   query = load_sym(handler, d->module, "node_out", "master_out",
       MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(1, node, md, d, &rawdata);
+  if (query) mstat = query(1, node, md, d, &inidata, &result);
 
-  free(rawdata.res);
+  free(result.res);
+  free(inidata.res);
 
   for (i = 0; i < d->checkpoint; i++) {
     free(coordsarr[i]);
