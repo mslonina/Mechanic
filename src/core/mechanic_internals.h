@@ -150,7 +150,7 @@ typedef struct {
 char* ConfigFile;
 char* datafile;
 char* CheckpointFile;
-int allopts, mpi_size;
+int allopts;
 int usage, help, debug, silent;
 
 /* FUNCTION PROTOTYPES */
@@ -190,11 +190,11 @@ void mechanic_welcome();
 
 void clearArray(MECHANIC_DATATYPE*,int);
 
-int mechanic_mode_multifarm(int node, void* handler, moduleInfo* md,
+int mechanic_mode_multifarm(int mpi_size, int node, void* handler, moduleInfo* md,
     configData* d);
 
-int mechanic_mode_farm(int node, void* handler, moduleInfo* md, configData* d);
-int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
+int mechanic_mode_farm(int mpi_size, int node, void* handler, moduleInfo* md, configData* d);
+int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo* md,
     configData* d);
 
 int mechanic_printConfig(configData* cd, int flag);

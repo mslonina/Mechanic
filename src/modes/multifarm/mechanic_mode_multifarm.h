@@ -44,10 +44,10 @@
 #ifndef MECHANIC_MODE_MULTIFARM_H
 #define MECHANIC_MODE_MULTIFARM_H
 
-int mechanic_mode_multifarm_master(int node, void* handler, moduleInfo* md,
+int mechanic_mode_multifarm_master(int mpi_size, int node, void* handler, moduleInfo* md,
     configData* d);
 
-int mechanic_mode_multifarm_slave(int node, void* handler, moduleInfo* md,
+int mechanic_mode_multifarm_slave(int mpi_size, int node, void* handler, moduleInfo* md,
     configData* d);
 
 #endif

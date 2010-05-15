@@ -47,7 +47,7 @@
 #include "mechanic_mode_farm.h"
 
 /* SLAVE */
-int mechanic_mode_farm_slave(int node, void* handler, moduleInfo* md,
+int mechanic_mode_farm_slave(int mpi_size, int node, void* handler, moduleInfo* md,
     configData* d){
 
   int tab[3];

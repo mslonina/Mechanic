@@ -277,6 +277,7 @@ int main(int argc, char* argv[]){
 
   /* MPI Helpers */
   int mpi_rank;
+  int mpi_size;
   int node = 0;
   MPI_Status mpi_status;
   int lengths[4];
@@ -784,13 +785,13 @@ int main(int argc, char* argv[]){
   /* Now load proper routines */
   switch (cd.mode) {
     case MECHANIC_MODE_MASTERALONE:
-      mstat = mechanic_mode_masteralone(node, handler, &md, &cd);
+      mstat = mechanic_mode_masteralone(mpi_size, node, handler, &md, &cd);
       break;
     case MECHANIC_MODE_FARM:
-      mstat = mechanic_mode_farm(node, handler, &md, &cd);
+      mstat = mechanic_mode_farm(mpi_size, node, handler, &md, &cd);
       break;
     case MECHANIC_MODE_MULTIFARM:
-      mstat = mechanic_mode_multifarm(node, handler, &md, &cd);
+      mstat = mechanic_mode_multifarm(mpi_size, node, handler, &md, &cd);
       break;
     default:
       break;

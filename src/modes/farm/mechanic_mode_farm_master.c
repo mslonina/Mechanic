@@ -47,7 +47,7 @@
 #include "mechanic_mode_farm.h"
 
 /* MASTER */
-int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
+int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo* md,
     configData* d){
 
   int i = 0, j = 0, nodes = 0, farm_res = 0;

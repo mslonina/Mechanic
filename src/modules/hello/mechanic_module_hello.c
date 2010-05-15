@@ -252,6 +252,8 @@ int hello_master_in(int mpi_size, int node, moduleInfo* md, configData* d,
 
   inidata->res[0] = 99.0;
 
+  printf("mpisize is %d", mpi_size);
+
   return 0;
 }
 
@@ -268,6 +270,7 @@ int hello_slave_preparePixel(int node, moduleInfo* md, configData* d,
 
   inidata->res[2] = (double) node;
 
+  printf("Inidata for node %d prepared\n", node);
   return 0;
 }
 
