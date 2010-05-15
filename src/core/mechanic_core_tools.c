@@ -420,3 +420,9 @@ void free_int_array(mechanic_int_array* p) {
   free(p->array);
 
 }
+
+/* Checks ups status */
+int mechanic_ups() {
+
+  return 0;
+}

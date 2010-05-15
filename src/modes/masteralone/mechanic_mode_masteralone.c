@@ -66,10 +66,12 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
   module_query_int_f qr;
 
   /* Allocate memory */
-  result.res = realloc(NULL, ((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE));
+  result.res = calloc(((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE),
+      sizeof(MECHANIC_DATATYPE));
   if (result.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  inidata.res = realloc(NULL, ((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE));
+  inidata.res = calloc(((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE),
+      sizeof(MECHANIC_DATATYPE));
   if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
@@ -166,7 +168,7 @@ int mechanic_mode_masteralone(int node, void* handler, moduleInfo* md,
 
     check++;
 
-    if (check % d->checkpoint == 0) { /* FIX ME: add UPS checks */
+    if (check % d->checkpoint == 0 || mechanic_ups < 0) {
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
       check = 0;
     }

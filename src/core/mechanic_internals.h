@@ -184,6 +184,8 @@ int H5writeCheckPoint(moduleInfo *md, configData* d, int check,
 int atCheckPoint(int check, int** coordsarr, int** board,
     MECHANIC_DATATYPE** resultarr, moduleInfo *md, configData* d);
 
+int mechanic_ups();
+
 void mechanic_welcome();
 
 void clearArray(MECHANIC_DATATYPE*,int);

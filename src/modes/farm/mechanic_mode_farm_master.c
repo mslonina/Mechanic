@@ -76,14 +76,14 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
   module_query_int_f qr;
 
   /* Allocate memory for result.res array. */
-  result.res = realloc(NULL,
-      ((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE));
+  result.res = calloc(((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE),
+      sizeof(MECHANIC_DATATYPE));
 
   if (result.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   /* Allocate memory for inidata.res array. */
-  inidata.res = realloc(NULL,
-      ((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE));
+  inidata.res = calloc(((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE),
+      sizeof(MECHANIC_DATATYPE));
 
   if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
@@ -227,7 +227,7 @@ int mechanic_mode_farm_master(int node, void* handler, moduleInfo* md,
      * very fast, your disks will not be happy
      */
 
-    if (check % d->checkpoint == 0) { /* FIX ME: add UPS checks */
+    if (check % d->checkpoint == 0 || mechanic_ups() < 0) { 
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
       check = 0;
     }
