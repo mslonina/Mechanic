@@ -94,8 +94,8 @@ contains
     bind(c, name = 'map_master_in') result(errcode)
 
     implicit none
-    integer(c_int), intent(in) :: mpi_size
-    integer(c_int), intent(in) :: node
+    integer(c_int), intent(in), value :: mpi_size
+    integer(c_int), intent(in), value :: node
     type(moduleInfo), intent(in) :: md
     type(configData), intent(in) :: d
     type(masterData), intent(inout) :: ic
@@ -128,7 +128,7 @@ contains
     bind(c, name = 'map_slave_preparePixel') result(errcode)
 
     implicit none
-    integer(c_int), intent(in) :: node
+    integer(c_int), intent(in), value :: node
     type(moduleInfo), intent(in) :: md
     type(configData), intent(in) :: d
     type(masterData), intent(inout) :: ic
@@ -166,7 +166,7 @@ contains
     bind(c, name = 'map_processPixel') result(errcode)
 
     implicit none
-    integer(c_int), intent(in) :: node
+    integer(c_int), intent(in), value :: node
     type(moduleInfo), intent(in) :: md
     type(configData), intent(in) :: d
     type(masterData), intent(in) :: ic

@@ -92,7 +92,7 @@ contains
     bind(c, name = 'ff_processPixel') result(errcode)
 
     implicit none
-    integer(c_int), intent(in) :: node
+    integer(c_int), intent(in), value :: node
     type(moduleInfo), intent(in) :: md
     type(configData), intent(in) :: d
     type(masterData), intent(in) :: ic
