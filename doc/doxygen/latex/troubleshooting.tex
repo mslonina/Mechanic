@@ -1,0 +1,10 @@
+\subsection{Known Bugs and Missing Features}\label{troubleshooting_bugs}
+Known bugs and missing features:
+
+\begin{itemize}
+\item HDF error handling in a better way\end{itemize}
+\subsection{Error Codes}\label{troubleshooting_errcodes}
+In case of emergency {\tt Mechanic} tries to properly finalize all nodes and returns error codes as described below:
+
+\begin{itemize}
+\item {\tt 911} -- MPI related error\item {\tt 912} -- HDF related error\item {\tt 913} -- Module subsystem related error\item {\tt 914} -- Setup subsystem related error\item {\tt 915} -- Memory allocation related error\item {\tt 916} -- Checkpoint subsytem related error\item {\tt 999} -- Any other error \end{itemize}
