@@ -44,52 +44,21 @@
 ! POSSIBILITY OF SUCH DAMAGE.
 !
 
-! [F2003BIND_REF]
-!
-! @idoc modules/hello-fortran/mechanic_module_ff.f03 F2003BIND
-!
-! @subsection f2003ref Fortran 2003 bindings reference
-!
-! The Fortran 2003 bindings provide the same API as C headers, as follows:
-! - Error codes
-!   @code
-!   @icode fortran/mechanic_fortran.f03 F2003BIND_ERR
-!   @endcode
-! - ModuleInfo structure
-!   @code
-!   @icode fortran/mechanic_fortran.f03 F2003BIND_MD
-!   @endcode
-! - ConfigData structure
-!   @code
-!   @icode fortran/mechanic_fortran.f03 F2003BIND_CONFIG
-!   @endcode
-! - MasterData structure
-!   @code
-!   @icode fortran/mechanic_fortran.f03 F2003BIND_DATA
-!   @endcode
-! - API functions
-!   @code
-!   @icode fortran/mechanic_fortran.f03 F2003BIND_API
-!   @endcode
-!
-! [/F2003BIND_REF]
 module mechanic_fortran
 
   use iso_c_binding
 
-  ! [F2003BIND_ERR]
+  ! Error codes
   INTEGER :: MECHANIC_ERR_MPI_F = 911
   INTEGER :: MECHANIC_ERR_HDF_F = 912
   INTEGER :: MECHANIC_ERR_MODULE_F = 913
   INTEGER :: MECHANIC_ERR_SETUP_F = 914
   INTEGER :: MECHANIC_ERR_MEM_F = 915
-  INTEGER :: MECHANIC_ERR_CHECKPOINT_F = 916
   INTEGER :: MECHANIC_ERR_OTHER_F = 999
-  ! [/F2003BIND_ERR]
 
   INTEGER :: MECHANIC_HDF_RANK_F = 2
 
-  ! [F2003BIND_MSG]
+  ! Messages
   enum, bind(c) 
     enumerator MECHANIC_MESSAGE_INFO_F
     enumerator MECHANIC_MESSAGE_ERR_F
@@ -98,16 +67,14 @@ module mechanic_fortran
     enumerator MECHANIC_MESSAGE_WARN_F
     enumerator MECHANIC_MESSAGE_DEBUG_F
   end enum 
-  ! [/F2003BIND_MSG]
 
-  ! [F2003BIND_MD]
+  ! ModuleInfo structure
   type, bind(c) :: moduleInfo
     integer (c_int) :: irl
     integer (c_int) :: mrl
   end type moduleInfo
-  ! [/F2003BIND_MD]
 
-  ! [F2003BIND_CONFIG]
+  ! ConfigData structure
   type, bind(c) :: configData
     character(kind = c_char) :: p_name
     character(kind = c_char) :: datafile
@@ -119,24 +86,16 @@ module mechanic_fortran
     integer (c_int) :: restartmode
     integer (c_int) :: mode
   end type configData
-  ! [/F2003BIND_CONFIG]
 
-  ! [F2003BIND_DATA]
+  ! MasterData structure
   type, bind(c) :: masterData
     type (c_ptr) :: res
     integer (c_int) :: coords(3)
   end type masterData
-  ! [/F2003BIND_DATA]
 
   contains
 
   ! API functions
-
-  ! [F2003BIND_API]
-  ! subroutine mechanic_finalize_f(node)
-  ! subroutine mechanic_abort_f(errcode)
-  ! subroutine mechanic_error_f(stat)
-  ! [/F2003BIND_API]
 
   ! Implementation of mechanic_finalize()
   subroutine mechanic_finalize_f(node)

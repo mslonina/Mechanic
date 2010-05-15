@@ -1,0 +1,23 @@
+MNAME=map
+LDFLAGS= -shared
+FFLAGS=-fPIC
+MYFLAGS=-std=f2003 -c
+INSTALL_PREF=/scratch/usr/lib
+
+all: bind module
+	gfortran ${LDFLAGS} mechanic_module_${MNAME}.o -o libmechanic_module_${MNAME}.so
+
+bind:
+	gfortran ${MYFLAGS} mechanic_fortran.f03
+
+module:
+	gfortran ${FFLAGS} ${MYFLAGS} mechanic_module_${MNAME}.f03 -o mechanic_module_${MNAME}.o
+
+clean:
+	rm -rf *.o *.mod
+
+install:
+	cp libmechanic_module_${MNAME}.so ${INSTALL_PREF}
+
+distclean: clean
+	rm -rf *.so

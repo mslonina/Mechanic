@@ -69,6 +69,7 @@ contains
     implicit none
     type(moduleInfo), intent(inout) :: md
 
+    md%irl = 3
     md%mrl = 3
 
     errcode = 0
@@ -87,13 +88,14 @@ contains
   end function ff_cleanup
 
   ! Implementation of module_processPixel()
-  integer (c_int) function ff_processPixel(node, md, d, r) &
+  integer (c_int) function ff_processPixel(node, md, d, ic, r) &
     bind(c, name = 'ff_processPixel') result(errcode)
 
     implicit none
     integer(c_int), intent(in) :: node
     type(moduleInfo), intent(in) :: md
     type(configData), intent(in) :: d
+    type(masterData), intent(in) :: ic
     type(masterData), intent(inout) :: r
     integer :: res_rank(1)
 

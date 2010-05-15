@@ -70,6 +70,7 @@ module mechanic_fortran
 
   ! ModuleInfo structure
   type, bind(c) :: moduleInfo
+    integer (c_int) :: irl
     integer (c_int) :: mrl
   end type moduleInfo
 
