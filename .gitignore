@@ -23,3 +23,15 @@ src/old/*.*
 *.mod
 *.so
 *.pyc
+*.log
+*.aux
+*.toc
+doxygen.css
+doxygen.png
+tab_b.gif
+tab_l.gif
+tab_r.gif
+tabs.css
+FreeSans.ttf
+Makefile
+doxygen.sty
