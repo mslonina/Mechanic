@@ -76,6 +76,8 @@
 module mechanic_fortran
 
   use iso_c_binding
+  use mpi
+  use hdf5
 
   ! [F2003BIND_ERR]
   INTEGER :: MECHANIC_ERR_MPI_F = 911
