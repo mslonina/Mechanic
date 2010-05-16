@@ -16,7 +16,7 @@ import string
 
 Scripting.g_gz = 'gz'
 
-VERSION='0.12.0-UNSTABLE-3'
+VERSION='0.12.0-UNSTABLE-2-2'
 APPNAME='mechanic'
 URL='http://mechanics.astri.umk.pl/projects/mechanic'
 BUGS='mariusz.slonina@gmail.com'
@@ -24,10 +24,11 @@ AUTHOR='Mariusz Slonina, NCU'
 
 srcdir = '.'
 blddir = 'build'
+tooldir = srcdir + '/waf-tools/'
 
 # Sources
 core = ['src', 'src/core', 'src/modes', 'src/modules']
-fortran = ['src/fortram']
+fortran = ['src/fortran']
 
 all_modules = ['src/modules/hello',
                'src/modules/echo',
@@ -102,12 +103,6 @@ def _check_lib(conf, l):
                     )
     except:
       Utils.pprint('RED', l[0] + " is not usable :(")
-
-#
-# [Helper] Check for MPI
-#
-def _check_mpi(conf):
-  conf.find_program('mpicc', var='MPI', mandatory=True)
 
 #
 # [Helper] Process optional modules/engines/libs
@@ -242,7 +237,7 @@ def set_options(opt):
   global all_modules, all_libs, all_engines
   list = []
 
-  opt.tool_options('compiler_cc')
+  opt.tool_options('compiler_mpicc', tooldir=tooldir+'mpi')
 #  opt.tool_options('compiler_fortran', tooldir='waf-fortran')
 
   opt.add_option('--with-doc', action = 'store_true', default = False,
@@ -263,6 +258,9 @@ def set_options(opt):
                   type = 'string', default = None,
                   help = 'Build modules, options: ' + ', '.join(list), dest = 'with_modules')
 
+  opt.add_option('--with-fortran', action = 'store_true', default = False,
+                  help = 'Build Fortran2003 bindings', dest = 'with_f2003')
+
 #
 # CONFIGURE
 #
@@ -275,11 +273,12 @@ def configure(conf):
   global core
   global fortran
   
-  conf.env['MECHANIC_BUILD_DOC'] = []
   conf.env['MECHANIC_CORE'] = []
+  conf.env['MECHANIC_BUILD_FORTRAN'] = []
   conf.env['MECHANIC_BUILD_MODULES'] = []
   conf.env['MECHANIC_BUILD_ENGINES'] = []
   conf.env['MECHANIC_BUILD_LIBS'] = []
+  conf.env['MECHANIC_BUILD_DOC'] = []
 
   test_code_libm = _test_code('waf-tests/test-m.c')
   test_code_popt = _test_code('waf-tests/test-popt.c')
@@ -287,9 +286,8 @@ def configure(conf):
   test_code_hdf = _test_code('waf-tests/test-hdf.c')
   test_code_lrc = _test_code('waf-tests/test-lrc.c')
 
-  conf.check_tool('compiler_cc')
+  conf.check_tool('compiler_mpicc', tooldir=tooldir+'mpi')
 #  conf.check_tool('compiler_fortran', tooldir='waf-fortran')
-  _check_mpi(conf)
   _check_std_headers(conf, stdheads, stdfunc, stdtypes)
   _check_lib(conf, ['m', 'math.h', 'pow', test_code_libm, '', 1])
   _check_lib(conf, ['hdf5', 'hdf5.h', 'H5Dopen2', test_code_hdf, '', 1])
@@ -310,10 +308,12 @@ def configure(conf):
 
   # Subdirs
   conf.env['MECHANIC_CORE'] = core
-  conf.env['MECHANIC_BUILD_FORTRAN'] = fortran
   conf.env['MECHANIC_BUILD_MODULES'] = _configure_optionals(conf, 'modules')
   conf.env['MECHANIC_BUILD_ENGINES'] = _configure_optionals(conf, 'engines')
   conf.env['MECHANIC_BUILD_LIBS'] = _configure_optionals(conf, 'libs')
+  
+  if conf.env.MPIF:
+    conf.env['MECHANIC_BUILD_FORTRAN'] = fortran
 	
   # Define standard declarations
   conf.define('PACKAGE_NAME', APPNAME)
@@ -323,14 +323,21 @@ def configure(conf):
   conf.define('PACKAGE_URL', URL)
 
   # Compiler flags
-  conf.env['CC'] = ['mpicc']
-  conf.env['LINK_CC'] = ['mpicc']
   conf.env['CCFLAGS'] += ['-Wall', '-g', '-ggdb']
   conf.env['CCFLAGS'] += ['-std=c99']
   conf.env['CCFLAGS'] += ['-fpic']
   conf.env['CCFLAGS'] += ['-Dpic']
   conf.env['CPPFLAGS'] += ['-DHAVE_CONFIG_H']
   conf.env['CPPFLAGS'] += ['-I../build/default']
+
+  if conf.env.MPIF:
+    conf.env['F90'] = ['mpif90']
+    conf.env['LINK_F90'] = ['mpif90']
+    conf.env['F90FLAGS'] += ['-Wall', '-g', '-ggdb']
+    conf.env['F90FLAGS'] += ['-std=f2003']
+    conf.env['F90FLAGS'] += ['-fpic']
+    conf.env['F90FLAGS'] += ['-Dpic']
+
 
   # Write config.h
   conf.write_config_header('config.h')
@@ -342,7 +349,7 @@ def configure(conf):
 #
 def build(bld):
   bld.add_subdirs(bld.env['MECHANIC_CORE'])
-#  bld.add_subdirs(bld.env['MECHANIC_BUILD_FORTRAN'])
+  bld.add_subdirs(bld.env['MECHANIC_BUILD_FORTRAN'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_MODULES'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_ENGINES'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_LIBS'])
