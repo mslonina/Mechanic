@@ -471,7 +471,7 @@ int module_node_preparePixel(int node, moduleInfo* md, configData* d,
  * @ingroup module_themeable
  */
 int module_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
   return 0;
 }
 
@@ -501,7 +501,7 @@ int module_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
  * @ingroup module_themeable
  */
 int module_node_afterProcessPixel(int node, moduleInfo* md, configData* d,
-    masterData* r){
+    masterData* inidata, masterData* r){
   return 0;
 }
 
