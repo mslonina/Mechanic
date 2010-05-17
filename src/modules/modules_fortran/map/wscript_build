@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+# wscript for Mechanic
+# Mariusz Slonina, 2010
+# encoding: utf-8
+
+obj = bld.new_task_gen(features='fortran fshlib')
+obj.find_sources_in_dirs(".")
+obj.includes = ". ../../../fortran"
+obj.export_incdirs = "."
+obj.target = 'mechanic_module_map'
+obj.name = 'map'
+obj.after = 'fortran'
+

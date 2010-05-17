@@ -32,7 +32,9 @@ fortran = ['src/fortran']
 
 all_modules = ['src/modules/hello',
                'src/modules/echo',
-               'src/modules/mandelbrot']
+               'src/modules/mandelbrot',
+               ]
+all_fortran_modules = ['src/modules/modules_fortran/map']
 
 all_engines = ['src/engines/odex',
                'src/engines/taylor',
@@ -121,6 +123,7 @@ def _process_optionals(option, opt, value, parser):
 def _check_optional(options, type):
 
   global all_modules
+  global all_fortran_modules
   global all_engines
   global all_libs
 
@@ -128,15 +131,23 @@ def _check_optional(options, type):
   notfound = []
   to_build = []
   op = ''
+  subdir = ''
 
   if type == 'modules':
     all = all_modules
+
+  if type == 'fortran_modules':
+    type = 'modules'
+    subdir = 'modules_fortran/'
+    all = all_fortran_modules
+  
   if type == 'engines':
     all = all_engines
+  
   if type == 'libs':
     all = all_libs
 
-  pref = 'src/' + type + '/'
+  pref = 'src/' + type + '/' + subdir
 
   for op in options:
     op = pref + op
@@ -163,6 +174,10 @@ def _configure_optionals(conf, type):
     if Options.options.with_modules != None:
       var = Options.options.with_modules
   
+  if type == 'fortran_modules':
+    if Options.options.with_fortran_modules != None:
+      var = Options.options.with_fortran_modules
+
   if type == 'engines':
     if Options.options.with_engines != None:
       var = Options.options.with_engines
@@ -215,6 +230,13 @@ def _join_or_say_none(list):
     buffer = 'None'
   return buffer
 
+def _say_yes_or_no(value):
+  if value == 1:
+    return 'Yes'
+  else:
+    return 'No'
+    
+
 def _configure_summary(conf):
 
   print
@@ -227,6 +249,10 @@ def _configure_summary(conf):
   '  Additional engines: ' + _join_or_say_none(conf.env['MECHANIC_BUILD_ENGINES']))
   Utils.pprint('YELLOW',
   '  Additional libs: ' + _join_or_say_none(conf.env['MECHANIC_BUILD_LIBS']))
+  Utils.pprint('YELLOW',
+  '  F2003 bindings: ' + _say_yes_or_no(conf.env['MPIF']))
+  Utils.pprint('YELLOW',
+  '  F2003 modules: ' + _join_or_say_none(conf.env['MECHANIC_BUILD_F2003_MODULES']))
   print
 
 #
@@ -239,6 +265,9 @@ def set_options(opt):
 
   opt.tool_options('compiler_mpicc', tooldir=tooldir)
   opt.tool_options('compiler_mpif90', tooldir=tooldir)
+  
+  opt.add_option('--with-fortran', action = 'store_true', default = False,
+                  help = 'Build Fortran2003 bindings', dest = 'with_f2003')
 
   opt.add_option('--with-doc', action = 'store_true', default = False,
                   help = 'Build documentation', dest = 'with_doc')
@@ -258,9 +287,11 @@ def set_options(opt):
                   type = 'string', default = None,
                   help = 'Build modules, options: ' + ', '.join(list), dest = 'with_modules')
 
-  opt.add_option('--with-fortran', action = 'store_true', default = False,
-                  help = 'Build Fortran2003 bindings', dest = 'with_f2003')
-
+  list = _list_options(all_fortran_modules)
+  opt.add_option('--with-fortran-modules', action = 'callback', callback = _process_optionals,
+                  type = 'string', default = None,
+                  help = 'Build F2003 modules, options: ' + ', '.join(list),
+                  dest = 'with_fortran_modules')
 #
 # CONFIGURE
 #
@@ -276,6 +307,7 @@ def configure(conf):
   conf.env['MECHANIC_CORE'] = []
   conf.env['MECHANIC_BUILD_FORTRAN'] = []
   conf.env['MECHANIC_BUILD_MODULES'] = []
+  conf.env['MECHANIC_BUILD_F2003_MODULES'] = []
   conf.env['MECHANIC_BUILD_ENGINES'] = []
   conf.env['MECHANIC_BUILD_LIBS'] = []
   conf.env['MECHANIC_BUILD_DOC'] = []
@@ -320,6 +352,7 @@ def configure(conf):
   
   if conf.env.MPIF:
     conf.env['MECHANIC_BUILD_FORTRAN'] = fortran
+    conf.env['MECHANIC_BUILD_F2003_MODULES'] = _configure_optionals(conf, 'fortran_modules')
 	
   # Define standard declarations
   conf.define('PACKAGE_NAME', APPNAME)
@@ -355,6 +388,7 @@ def build(bld):
   bld.add_subdirs(bld.env['MECHANIC_CORE'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_FORTRAN'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_MODULES'])
+  bld.add_subdirs(bld.env['MECHANIC_BUILD_F2003_MODULES'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_ENGINES'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_LIBS'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_DOC'])
