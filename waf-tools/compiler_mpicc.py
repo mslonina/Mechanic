@@ -5,6 +5,8 @@ import os,sys,imp,types,ccroot
 import optparse
 import Utils,Configure,Options
 from Logs import debug
+
+tooldir = './waf-tools'
 mpi_c_compiler={'win32':['mpicc'],'cygwin':['mpicc'],'darwin':['mpicc'],'aix':['mpicc'],'linux':['mpicc'],'sunos':['mpicc'],'irix':['mpicc'],'hpux':['mpicc'],'default':['mpicc']}
 def __list_possible_compiler(platform):
 	try:
@@ -18,7 +20,7 @@ def detect(conf):
 	for compiler in test_for_compiler.split():
 		conf.env=orig.copy()
 		try:
-			conf.check_tool(compiler, tooldir='./waf-tools/mpi')
+			conf.check_tool(compiler, tooldir=tooldir)
 		except Configure.ConfigurationError,e:
 			debug('compiler_mpicc: %r'%e)
 		else:
@@ -39,6 +41,5 @@ def set_options(opt):
   mpi_cc_compiler_opts=opt.add_option_group("MPICC Compiler Options")
   mpi_cc_compiler_opts.add_option('--check-mpicc-compiler',default="%s"%test_for_compiler,help='On this platform (%s) the following MPI C-Compiler will be checked by default: "%s"'%(build_platform,test_for_compiler),dest="check_mpi_c_compiler")
   for mpi_c_compiler in test_for_compiler.split():
-    opt.tool_options('%s'%mpi_c_compiler,option_group=mpi_cc_compiler_opts,
-    tooldir='./waf-tools/mpi')
+    opt.tool_options('%s'%mpi_c_compiler,option_group=mpi_cc_compiler_opts, tooldir=tooldir)
 

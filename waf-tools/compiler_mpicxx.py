@@ -5,6 +5,8 @@ import os,sys,imp,types,ccroot
 import optparse
 import Utils,Configure,Options
 from Logs import debug
+
+tooldir = './waf-tools'
 mpicxx_list = ['mpic++', 'mpicxx', 'mpiCC']
 mpicxx_compiler={'win32':mpicxx_list,'cygwin':mpicxx_list,'darwin':mpicxx_list,'aix':mpicxx_list,'linux':mpicxx_list,'sunos':mpicxx_list,'irix':mpicxx_list,'hpux':mpicxx_list,'default':['mpic++']}
 def __list_possible_compiler(platform):
@@ -19,7 +21,7 @@ def detect(conf):
 	for compiler in test_for_compiler.split():
 		try:
 			conf.env=orig.copy()
-			conf.check_tool(compiler, tooldir='./waf-tools/mpi')
+			conf.check_tool(compiler, tooldir=tooldir)
 		except Configure.ConfigurationError,e:
 			debug('compiler_mpicxx: %r'%e)
 		else:
@@ -40,5 +42,5 @@ def set_options(opt):
 	mpicxx_compiler_opts=opt.add_option_group('MPIC++ Compiler Options')
 	mpicxx_compiler_opts.add_option('--check-mpicxx-compiler',default="%s"%test_for_compiler,help='On this platform (%s) the following C++ Compiler will be checked by default: "%s"'%(build_platform,test_for_compiler),dest="check_mpicxx_compiler")
 	for mpicxx_compiler in test_for_compiler.split():
-		opt.tool_options('%s'%mpicxx_compiler,option_group=mpicxx_compiler_opts,tooldir='./waf-tools/mpi')
+		opt.tool_options('%s'%mpicxx_compiler,option_group=mpicxx_compiler_opts,tooldir=tooldir)
 

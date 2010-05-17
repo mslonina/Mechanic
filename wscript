@@ -237,8 +237,8 @@ def set_options(opt):
   global all_modules, all_libs, all_engines
   list = []
 
-  opt.tool_options('compiler_mpicc', tooldir=tooldir+'mpi')
-#  opt.tool_options('compiler_fortran', tooldir='waf-fortran')
+  opt.tool_options('compiler_mpicc', tooldir=tooldir)
+  opt.tool_options('compiler_mpif90', tooldir=tooldir)
 
   opt.add_option('--with-doc', action = 'store_true', default = False,
                   help = 'Build documentation', dest = 'with_doc')
@@ -286,8 +286,14 @@ def configure(conf):
   test_code_hdf = _test_code('waf-tests/test-hdf.c')
   test_code_lrc = _test_code('waf-tests/test-lrc.c')
 
-  conf.check_tool('compiler_mpicc', tooldir=tooldir+'mpi')
-#  conf.check_tool('compiler_fortran', tooldir='waf-fortran')
+  if Options.options.with_f2003:
+    conf.env.MPIF = 1
+
+  conf.check_tool('compiler_mpicc', tooldir=tooldir)
+  
+  if conf.env.MPIF:
+    conf.check_tool('compiler_mpif90', tooldir=tooldir)
+
   _check_std_headers(conf, stdheads, stdfunc, stdtypes)
   _check_lib(conf, ['m', 'math.h', 'pow', test_code_libm, '', 1])
   _check_lib(conf, ['hdf5', 'hdf5.h', 'H5Dopen2', test_code_hdf, '', 1])
@@ -331,12 +337,10 @@ def configure(conf):
   conf.env['CPPFLAGS'] += ['-I../build/default']
 
   if conf.env.MPIF:
-    conf.env['F90'] = ['mpif90']
-    conf.env['LINK_F90'] = ['mpif90']
-    conf.env['F90FLAGS'] += ['-Wall', '-g', '-ggdb']
-    conf.env['F90FLAGS'] += ['-std=f2003']
-    conf.env['F90FLAGS'] += ['-fpic']
-    conf.env['F90FLAGS'] += ['-Dpic']
+    conf.env['FCFLAGS'] += ['-Wall', '-g', '-ggdb']
+    conf.env['FCFLAGS'] += ['-std=f2003']
+    conf.env['FCFLAGS'] += ['-fpic']
+    conf.env['FCFLAGS'] += ['-Dpic']
 
 
   # Write config.h

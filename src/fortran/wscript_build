@@ -3,7 +3,9 @@
 # Mariusz Slonina, 2010
 # encoding: utf-8
 
-obj = bld.new_task_gen('fortran', 'fmodule')
+import fortran
+
+obj = bld.new_task_gen(features='fortran fstaticlib')
 obj.find_sources_in_dirs(".")
 obj.includes = "."
 obj.export_incdirs = "."
