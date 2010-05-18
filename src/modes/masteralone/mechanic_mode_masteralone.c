@@ -106,11 +106,11 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
 
   /* Align farm resolution for given method. */
   if (d->method == 0 || d->method == 6) farm_res = d->xres*d->yres;
-  /*if (d->method == 6) {
+  if (d->method == 6) {
     qr = load_sym(handler, d->module, "farmResolution", "farmResolution",
         MECHANIC_MODULE_ERROR);
     if (qr) farm_res = qr(d->xres, d->yres, md);
-  }*/
+  }
 
   /* Perform farm operations */
   while (1) {

@@ -412,11 +412,11 @@ void allocate_int_array(mechanic_int_array* p, int x, int y) {
 void free_int_array(mechanic_int_array* p) {
 
   int i;
-  
+
   for (i = 0; i < p->x; i++) {
     free(p->array[i]);
   }
-  
+
   free(p->array);
 
 }

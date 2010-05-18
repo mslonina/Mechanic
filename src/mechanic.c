@@ -422,17 +422,6 @@ int main(int argc, char* argv[]){
 
   if (node == 0) mechanic_welcome();
 
-  /*
-   * @page checkpoint Checkpoints
-   *
-   * 3) read config values from master file, ignore all command line opts etc.
-   * 4) check board status
-   *  - if board is full, abort, because we don't need restart completed
-   *  simulation
-   *  - if board is not full, check for empty pixels and compute them
-   *      (map2d function should check if pixel is computed or not)
-   */
-
   /* Restartmode */
   if (CheckpointFile) {
     if (node == 0) {
@@ -599,7 +588,7 @@ int main(int argc, char* argv[]){
    * node send the configuration with bcast. Without this part, code will
    * raise some segfaults and endless-loops. The standby message containes
    * the mode in which we are working.
-   * */
+   */
   if (mpi_size > 1) {
     if (node == 0) {
       for (i = 1; i < mpi_size; i++) {
