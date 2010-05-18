@@ -34,7 +34,9 @@ all_modules = ['src/modules/hello',
                'src/modules/echo',
                'src/modules/mandelbrot',
                ]
-all_fortran_modules = ['src/modules/modules_fortran/map']
+all_fortran_modules = ['src/modules/modules_fortran/map',
+                       'src/modules/modules_fortran/fhello'
+                       ]
 
 all_engines = ['src/engines/odex',
                'src/engines/taylor',
@@ -370,7 +372,8 @@ def configure(conf):
   conf.env['CPPFLAGS'] += ['-I../build/default']
 
   if conf.env.MPIF:
-    conf.env['FCFLAGS'] += ['-Wall', '-g', '-ggdb']
+    #conf.env['FCFLAGS'] += ['-Wall']
+    conf.env['FCFLAGS'] += ['-g', '-ggdb']
     conf.env['FCFLAGS'] += ['-std=f2003']
     conf.env['FCFLAGS'] += ['-fpic']
     conf.env['FCFLAGS'] += ['-Dpic']
@@ -385,6 +388,7 @@ def configure(conf):
 # BUILD
 #
 def build(bld):
+  bld.use_the_magic()
   bld.add_subdirs(bld.env['MECHANIC_CORE'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_FORTRAN'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_MODULES'])

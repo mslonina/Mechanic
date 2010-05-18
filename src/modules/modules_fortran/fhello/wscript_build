@@ -7,8 +7,8 @@ obj = bld.new_task_gen(features='fortran fshlib')
 obj.find_sources_in_dirs(".")
 obj.includes = ". ../../../fortran"
 obj.export_incdirs = "."
-obj.target = 'mechanic_module_map'
-obj.name = 'map'
+obj.target = 'mechanic_module_fhello'
+obj.name = 'fhello'
 obj.after = 'fortran'
 
-bld.install_files('${PREFIX}/lib', 'libmechanic_module_map.so')
+bld.install_files('${PREFIX}/lib', 'libmechanic_module_fhello.so')

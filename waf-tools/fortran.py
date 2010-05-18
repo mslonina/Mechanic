@@ -187,7 +187,7 @@ def fortran_hook(self, node):
     
   task.inputs = [node]
   task.outputs = [node.change_ext(obj_ext)]
-#  self.compiled_tasks.append(task)
+  self.compiled_tasks.append(task)
   return task
 
 @extension(EXT_FCPP)
@@ -267,7 +267,7 @@ def apply_fortran_type_vars(self):
   # app('_FCINCFLAGS', self.env['FCPATH_ST'] % self.bld.bdir)
 
 @feature('fprogram', 'fshlib', 'fstaticlib')
-@after('apply_core', 'fmodule')
+@after('apply_core')
 @before('apply_link', 'apply_lib_vars')
 def apply_fortran_link(self):
   # override the normal apply_link with c or c++ - just in case cprogram is given too
@@ -278,16 +278,11 @@ def apply_fortran_link(self):
   if 'fstaticlib' in self.features:
     link = 'ar_link_static'
 
-  #if 'fmodule' in self.features:
-  #  link = 'fortran_module'
-
   def get_name():
     if 'fprogram' in self.features:
       return '%s'
     elif 'fshlib' in self.features:
       return 'lib%s.so'
-  #  elif 'fmodule' in self.features:
-  #    return '%s.mod'
     else:
       return 'lib%s.a'
 
