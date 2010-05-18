@@ -382,6 +382,8 @@ def configure(conf):
     conf.env['FCFLAGS'] += ['-std=f2003']
     conf.env['FCFLAGS'] += ['-fpic']
     conf.env['FCFLAGS'] += ['-Dpic']
+    # necessary to put the module in right place after compilation
+    conf.env['FCFLAGS'] += ['-Jdefault/src/fortran'] 
 
 
   # Write config.h

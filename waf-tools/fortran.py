@@ -151,12 +151,32 @@ fcompiler = Task.task_type_from_func('fortran',
 fcompiler.scan = scan
 
 # Module compiler
+def fortran_module_compile(task):
+  env = task.env
+  def tolist(xx):
+    if isinstance(xx, str):
+      return [xx]
+    return xx
+  cmd = []
+  cmd.extend(tolist(env["FC"]))
+  cmd.extend(tolist(env["FCFLAGS"]))
+  cmd.extend(tolist(env["_FCINCFLAGS"]))
+  cmd.extend(tolist(env["_FCMODOUTFLAGS"]))
+  for a in task.outputs:
+    cmd.extend(tolist('-c')) # F modules cannot be build with -o
+  for a in task.inputs:
+    cmd.extend(tolist(env["FC_SRC_F"]) + tolist(a.srcpath(env)))
+  cmd = [x for x in cmd if x]
+  cmd = [cmd]
+
+  ret = task.exec_command(*cmd)
+  return ret
+
 fcompiler_module = Task.task_type_from_func('fmodule',
-  vars=["FC", "FCFLAGS", "_FCINCFLAGS", "FC_TGT_F", "FC_SRC_F",
+  vars=["FC", "FCFLAGS", "_FCINCFLAGS", "FC_SRC_F", "FC_TGT_F"
     "FORTRANMODPATHFLAG"],
-  func=fortran_compile,
+  func=fortran_module_compile,
   color='GREEN',
-  ext_out=EXT_MOD,
   ext_in=EXT_FC)
 fcompiler_module.scan = scan
 

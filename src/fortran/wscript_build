@@ -5,8 +5,8 @@
 
 obj = bld.new_task_gen(features='fortran fmodule')
 obj.find_sources_in_dirs(".")
-obj.includes = "."
-obj.export_incdirs = "."
+#obj.includes = "."
+#obj.export_incdirs = "."
 obj.target = 'mechanic_fortran'
 obj.name = 'fortran'
 obj.after = 'core'
