@@ -306,6 +306,7 @@ def configure(conf):
   global core
   global fortran
   
+  conf.env['TOOLDIR'] = srcdir + '/waf-tools/'
   conf.env['MECHANIC_CORE'] = []
   conf.env['MECHANIC_BUILD_FORTRAN'] = []
   conf.env['MECHANIC_BUILD_MODULES'] = []
@@ -323,6 +324,11 @@ def configure(conf):
   if Options.options.with_f2003:
     conf.env.MPIF = 1
 
+  if Options.options.with_fortran_modules and not Options.options.with_f2003:
+    Utils.pprint('YELLOW','Fortran modules used, adding F2003 bindings support')
+    conf.env.MPIF = 1
+
+  # Standard checks
   conf.check_tool('compiler_mpicc', tooldir=tooldir)
   
   if conf.env.MPIF:
@@ -372,7 +378,6 @@ def configure(conf):
   conf.env['CPPFLAGS'] += ['-I../build/default']
 
   if conf.env.MPIF:
-    #conf.env['FCFLAGS'] += ['-Wall']
     conf.env['FCFLAGS'] += ['-g', '-ggdb']
     conf.env['FCFLAGS'] += ['-std=f2003']
     conf.env['FCFLAGS'] += ['-fpic']
@@ -382,13 +387,14 @@ def configure(conf):
   # Write config.h
   conf.write_config_header('config.h')
 
+  # Print summary
   _configure_summary(conf)
 
 #
 # BUILD
 #
 def build(bld):
-  bld.use_the_magic()
+  bld.use_the_magic() # <- use this so that we have proper chain in F2003
   bld.add_subdirs(bld.env['MECHANIC_CORE'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_FORTRAN'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_MODULES'])
