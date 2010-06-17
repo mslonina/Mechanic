@@ -269,23 +269,10 @@ int assignConfigValues(configData* d){
 
   char* n = NULL; char* tf = NULL; char* m = NULL;
   size_t nlen, flen, fmlen, mlen;
-  char* tempaddr = NULL;
 
   /* Prepare the name of the problem */
   n = LRC_getOptionValue("default", "name");
   nlen = strlen(n);
-
-  if (d->name == NULL) {
-    d->name = calloc(nlen + sizeof(char*), sizeof(char*));
-    if (d->name == NULL) {
-      mechanic_error(MECHANIC_ERR_MEM);
-    }
-  } else {
-    tempaddr = realloc(d->name, nlen + sizeof(char*));
-    if (d->name == NULL) {
-      mechanic_error(MECHANIC_ERR_MEM);
-    }
-  }
 
   strncpy(d->name, n, nlen);
   d->name[nlen] = LRC_NULL;
@@ -305,36 +292,12 @@ int assignConfigValues(configData* d){
   strncat(tf, MECHANIC_MASTER_SUFFIX_DEFAULT, fmlen);
   tf[flen] = LRC_NULL;
 
-  if (d->datafile == NULL) {
-    d->datafile = calloc(flen + sizeof(char*), sizeof(char*));
-    if (d->datafile == NULL) {
-      mechanic_error(MECHANIC_ERR_MEM);
-    }
-  } else {
-    tempaddr = realloc(d->datafile, flen + sizeof(char*));
-    if (d->datafile == NULL) {
-      mechanic_error(MECHANIC_ERR_MEM);
-    }
-  }
-
   strncpy(d->datafile, tf, flen);
   d->datafile[flen] = LRC_NULL;
 
   /* Prepare the module name */
   m = LRC_getOptionValue("default", "module");
   mlen = strlen(m);
-
-  if (d->module == NULL) {
-    d->module = calloc(nlen + sizeof(char*), sizeof(char*));
-    if (d->module == NULL) {
-      mechanic_error(MECHANIC_ERR_MEM);
-    }
-  } else {
-    tempaddr = realloc(d->module, nlen + sizeof(char*));
-    if (d->module == NULL) {
-      mechanic_error(MECHANIC_ERR_MEM);
-    }
-  }
 
   strncpy(d->module, m, mlen);
   d->module[mlen] = LRC_NULL;

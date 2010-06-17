@@ -73,24 +73,26 @@
 !   @endcode
 !
 ! [/F2003BIND_REF]
+
+! [F2003BIND_ERR]
+#define MECHANIC_ERR_MPI_F 911
+#define MECHANIC_ERR_HDF_F 912
+#define MECHANIC_ERR_MODULE_F 913
+#define MECHANIC_ERR_SETUP_F 914
+#define MECHANIC_ERR_MEM_F 915
+#define MECHANIC_ERR_CHECKPOINT_F 916
+#define MECHANIC_ERR_OTHER_F 999
+! [/F2003BIND_ERR]
+
+#define MECHANIC_HDF_RANK_F 2
+#define MECHANIC_STRLEN_F 256
+
 module mechanic_fortran
 
   use iso_c_binding
   use mpi
   use hdf5
-
-  ! [F2003BIND_ERR]
-  INTEGER :: MECHANIC_ERR_MPI_F = 911
-  INTEGER :: MECHANIC_ERR_HDF_F = 912
-  INTEGER :: MECHANIC_ERR_MODULE_F = 913
-  INTEGER :: MECHANIC_ERR_SETUP_F = 914
-  INTEGER :: MECHANIC_ERR_MEM_F = 915
-  INTEGER :: MECHANIC_ERR_CHECKPOINT_F = 916
-  INTEGER :: MECHANIC_ERR_OTHER_F = 999
-  ! [/F2003BIND_ERR]
-
-  INTEGER :: MECHANIC_HDF_RANK_F = 2
-
+  
   ! [F2003BIND_MSG]
   enum, bind(c) 
     enumerator MECHANIC_MESSAGE_INFO_F
@@ -111,9 +113,9 @@ module mechanic_fortran
 
   ! [F2003BIND_CONFIG]
   type, bind(c) :: configData
-    character(kind = c_char) :: p_name
-    character(kind = c_char) :: datafile
-    character(kind = c_char) :: u_module
+    character(kind = c_char, len=MECHANIC_STRLEN_F) :: p_name
+    character(kind = c_char, len=MECHANIC_STRLEN_F) :: datafile
+    character(kind = c_char, len=MECHANIC_STRLEN_F) :: u_module
     integer (c_int) :: xres
     integer (c_int) :: yres
     integer (c_int) :: method

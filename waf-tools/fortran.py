@@ -15,7 +15,7 @@ INCLUDE_REGEX = """(?:^|['">]\s*;)\s*INCLUDE\s+(?:\w+_)?[<"'](.+?)(?=["'>])"""
 USE_REGEX = """(?:^|;)\s*USE(?:\s+|(?:(?:\s*,\s*(?:NON_)?INTRINSIC)?\s*::))\s*(\w+)"""
 
 EXT_MOD = ".mod"
-EXT_FC = ".f03"
+EXT_FC = ".F03"
 EXT_FCPP = ".F"
 EXT_OBJ = ".o"
 

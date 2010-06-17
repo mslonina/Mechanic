@@ -57,6 +57,8 @@
 
 #define MECHANIC_HDF_RANK 2
 
+#define MECHANIC_STRLEN 256
+
 #undef MECHANIC_DATATYPE
 #define MECHANIC_DATATYPE double
 
@@ -76,9 +78,9 @@ enum Messages{
 
 /* [CONFIGDATA] */
 typedef struct {
-  char* name;
-  char* datafile;
-  char* module;
+  char name[MECHANIC_STRLEN];
+  char datafile[MECHANIC_STRLEN];
+  char module[MECHANIC_STRLEN];
   int xres;
   int yres;
   int method;

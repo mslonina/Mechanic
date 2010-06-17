@@ -345,8 +345,9 @@ def configure(conf):
 	# Check for doxygen
   if Options.options.with_doc:
     try:
-      conf.find_program('doxygen', var='DOXYGEN', mandatory=True)
-      conf.find_program('pdflatex', var='PDFLATEX', mandatory=True)
+      conf.check_tool('doxygen', var='DOXYGEN', tooldir=tooldir)
+      #conf.find_program('doxygen', var='DOXYGEN', mandatory=True)
+      #conf.find_program('pdflatex', var='PDFLATEX', mandatory=True)
       conf.env.BUILDDOC = 1
       conf.env['MECHANIC_BUILD_DOC'] = ['doc']
     except:

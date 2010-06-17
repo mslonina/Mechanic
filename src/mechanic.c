@@ -184,6 +184,14 @@
  * - @c orbit -- a library for handling common tasks of celestial mechanics,
  *   i.e orbital elements conversion, see @ref orbit
  *
+ * To build Fortran 2003 bindings, use @c --with-fortran option. There are also
+ * F2003 sample modules available (@c --with-fortran-modules):
+ * - @c fhello
+ * - @c map
+ *
+ * You will find detailed instruction of using Fortran bindings in
+ * @ref f2003bind.
+ *
  * The documentation can will be builded, with @c --with-doc option.
  *
  * Altought @M requires @c MPI, it can be runned in a single-cpu environments
@@ -282,7 +290,6 @@ int main(int argc, char* argv[]){
   MPI_Status mpi_status;
   int lengths[4];
   int i = 0;
-  size_t slen;
   char pack_buffer[MECHANIC_MAXLENGTH];
   int pack_position;
 
@@ -568,7 +575,7 @@ int main(int argc, char* argv[]){
       mechanic_message(MECHANIC_MESSAGE_WARN,
         "Backuped file: %s\n",oldfile);
 
-      /* Now we can savely rename files */
+      /* Now we can safely rename files */
       rename(cd.datafile,oldfile);
       free(oldfile);
     }
@@ -645,19 +652,6 @@ int main(int argc, char* argv[]){
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
             "Node[%d] lengths[%d, %d, %d]\n",
             node, lengths[0], lengths[1], lengths[2]);
-
-        /* Now we have to allocate memory for cd struct */
-        slen = (size_t) lengths[0];
-        cd.name = calloc(slen + sizeof(char*), sizeof(char*));
-        if (cd.name == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-        slen = (size_t) lengths[1];
-        cd.datafile = calloc(slen + sizeof(char*), sizeof(char*));
-        if (cd.datafile == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-        slen = (size_t) lengths[2];
-        cd.module = calloc(slen + sizeof(char*), sizeof(char*));
-        if (cd.module == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
       }
 
@@ -792,12 +786,6 @@ int main(int argc, char* argv[]){
 
   /* Free POPT */
   poptFreeContext(poptcon);
-
-  /* Mechanic cleanup */
-
-  free(cd.name);
-  free(cd.datafile);
-  free(cd.module);
 
   /* Module unload */
   dlclose(handler);

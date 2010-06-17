@@ -252,7 +252,11 @@ int hello_master_in(int mpi_size, int node, moduleInfo* md, configData* d,
 
   inidata->res[0] = 99.0;
 
-  printf("mpisize is %d", mpi_size);
+  printf("Configuration test:\n");
+  printf("name: %s\n", d->name);
+  printf("file: %s\n", d->datafile);
+  printf("module: %s\n", d->module);
+
 
   return 0;
 }
