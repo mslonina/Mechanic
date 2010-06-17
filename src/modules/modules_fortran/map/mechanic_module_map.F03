@@ -113,6 +113,9 @@ contains
     ic_array(2) = 2.0d0
     ic_array(3) = 3.0d0
 
+    write(*,*) "xres =", d%xres
+    write(*,*) "yres =", d%yres
+
     errcode = 0
   end function map_master_in
 
