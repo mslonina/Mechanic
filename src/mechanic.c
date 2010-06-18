@@ -742,7 +742,13 @@ int main(int argc, char* argv[]){
   }
 
   /* Module init */
-  init = load_sym(handler,cd.module, "init", "init", MECHANIC_MODULE_ERROR);
+  if (node == 0) {
+    init = load_sym(handler,cd.module, "init", "master_init", MECHANIC_MODULE_ERROR);
+  } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != 0)) {
+    init = load_sym(handler,cd.module, "init", "slave_init", MECHANIC_MODULE_ERROR);
+  } else {
+    init = load_sym(handler,cd.module, "init", "init", MECHANIC_MODULE_ERROR);
+  }
   if (init) mstat = init(&md);
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
@@ -781,7 +787,13 @@ int main(int argc, char* argv[]){
   }
 
   /* Module cleanup */
-  cleanup = load_sym(handler, cd.module, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
+  if (node == 0) {
+    cleanup = load_sym(handler, cd.module, "cleanup", "master_cleanup", MECHANIC_MODULE_ERROR);
+  } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != 0)) {
+    cleanup = load_sym(handler, cd.module, "cleanup", "slave_cleanup", MECHANIC_MODULE_ERROR);
+  } else {
+    cleanup = load_sym(handler, cd.module, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
+  }
   if (cleanup) mstat = cleanup(&md);
 
   /* Free POPT */
