@@ -231,7 +231,7 @@
 /**
  * Implementation of module_init()
  */
-int hello_init(moduleInfo* md){
+int hello_init(int mpi_size, int node, moduleInfo* md, configData* d){
 
   md->irl = 3;
   md->mrl = 6;
@@ -242,7 +242,7 @@ int hello_init(moduleInfo* md){
 /**
  * Implementation of module_cleanup()
  */
-int hello_cleanup(moduleInfo* md){
+int hello_cleanup(int mpi_size, int node, moduleInfo* md, configData* d){
 
   return 0;
 }

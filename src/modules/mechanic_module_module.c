@@ -85,7 +85,7 @@
  *
  * @ingroup module_required
  */
-int module_init(moduleInfo* md){
+int module_init(int mpi_size, int node, moduleInfo* md, configData* d){
 
   md->mrl = 4;
   md->irl = 4;
@@ -106,7 +106,7 @@ int module_init(moduleInfo* md){
  *
  * @ingroup module_optional
  */
-int module_query(moduleInfo* md){
+int module_query(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 
@@ -123,7 +123,7 @@ int module_query(moduleInfo* md){
  *
  * @ingroup module_required
  */
-int module_cleanup(moduleInfo* md){
+int module_cleanup(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 

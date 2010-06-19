@@ -63,11 +63,13 @@ module ff
 contains
 
   ! Implementation of module_init()
-  integer (c_int) function ff_init(md) &
+  integer (c_int) function ff_init(mpi_size, node, md, d) &
     bind(c, name = 'ff_init') result(errcode)
 
     implicit none
     type(moduleInfo), intent(inout) :: md
+    type(configData), intent(in) :: d
+    integer(c_int), intent(in), value :: node, mpi_size
 
     md%irl = 3
     md%mrl = 3
@@ -76,11 +78,13 @@ contains
   end function ff_init 
 
   ! Implementation of module_cleanup()
-  integer (c_int) function ff_cleanup(md) &
+  integer (c_int) function ff_cleanup(mpi_size, node, md, d) &
     bind(c, name = 'ff_cleanup') result(errcode)
 
     implicit none
     type(moduleInfo), intent(in) :: md
+    type(configData), intent(in) :: d
+    integer(c_int), intent(in), value :: node, mpi_size
 
     write(*,*) "End module fortran:)"
     errcode = 0

@@ -52,11 +52,13 @@ module f2003
 contains
 
   ! Implementation of module_init()
-  integer (c_int) function f2003_init(md) &
+  integer (c_int) function f2003_init(mpi_size, node, md, d) &
     bind(c, name = 'f2003_init') result(errcode)
 
     implicit none
     type(moduleInfo), intent(inout) :: md
+    type(configData), intent(in) :: d
+    integer(c_int), intent(in), value :: node, mpi_size
 
     md%irl = 3 ! Initial condition length
     md%mrl = 6 ! Result length
@@ -65,11 +67,13 @@ contains
   end function f2003_init 
 
   ! Implementation of module_cleanup()
-  integer (c_int) function f2003_cleanup(md) &
+  integer (c_int) function f2003_cleanup(mpi_size, node, md, d) &
     bind(c, name = 'f2003_cleanup') result(errcode)
 
     implicit none
     type(moduleInfo), intent(in) :: md
+    type(configData), intent(in) :: d
+    integer(c_int), intent(in), value :: node, mpi_size
 
     ! Do nothing
     errcode = 0
@@ -77,11 +81,13 @@ contains
   end function f2003_cleanup
 
   ! Implementation of module_query()
-  integer (c_int) function f2003_query(md) &
+  integer (c_int) function f2003_query(mpi_size, node, md, d) &
     bind(c, name = 'f2003_query') result(errcode)
 
     implicit none
     type(moduleInfo), intent(in) :: md
+    type(configData), intent(in) :: d
+    integer(c_int), intent(in), value :: node, mpi_size
 
     errcode = 0
 

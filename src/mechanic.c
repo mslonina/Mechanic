@@ -749,13 +749,13 @@ int main(int argc, char* argv[]){
   } else {
     init = load_sym(handler,cd.module, "init", "init", MECHANIC_MODULE_ERROR);
   }
-  if (init) mstat = init(&md);
+  if (init) mstat = init(mpi_size, node, &md, &cd);
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
 
   /* Module query */
   query = load_sym(handler,cd.module, "query", "query", MECHANIC_MODULE_SILENT);
-  if (query) query(&md);
+  if (query) query(mpi_size, node, &md, &cd);
 
   /* There are some special data in module,
    * thus we have to create master data file after module has been
@@ -794,7 +794,7 @@ int main(int argc, char* argv[]){
   } else {
     cleanup = load_sym(handler, cd.module, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
   }
-  if (cleanup) mstat = cleanup(&md);
+  if (cleanup) mstat = cleanup(mpi_size, node, &md, &cd);
 
   /* Free POPT */
   poptFreeContext(poptcon);

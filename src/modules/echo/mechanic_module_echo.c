@@ -99,7 +99,7 @@
 /**
  * Implementation of module_init()
  */
-int echo_init(moduleInfo* md){
+int echo_init(int mpi_size, int node, moduleInfo* md, configData* d){
 
   md->mrl = 10;
   md->irl = 10;
@@ -110,7 +110,7 @@ int echo_init(moduleInfo* md){
 /**
  * Implementation of module_query()
  */
-int echo_query(moduleInfo* md){
+int echo_query(int mpi_size, int node, moduleInfo* md, configData* d){
 
   return 0;
 }
@@ -118,7 +118,7 @@ int echo_query(moduleInfo* md){
 /**
  * Implementation od module_cleanup()
  */
-int echo_cleanup(moduleInfo* md){
+int echo_cleanup(int mpi_size, int node, moduleInfo* md, configData* d){
 
   return 0;
 }

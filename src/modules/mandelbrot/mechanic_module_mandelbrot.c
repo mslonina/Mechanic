@@ -77,7 +77,7 @@
 /**
  * Implementation of module_init()
  */
-int mandelbrot_init(moduleInfo *md){
+int mandelbrot_init(int mpi_size, int node, moduleInfo* md, configData* d){
 
   md->mrl = 4;
   md->irl = 4;
@@ -88,7 +88,7 @@ int mandelbrot_init(moduleInfo *md){
 /**
  * Implementation of module_cleanup()
  */
-int mandelbrot_cleanup(moduleInfo *md){
+int mandelbrot_cleanup(int mpi_size, int node, moduleInfo* md, configData* d){
 
   return 0;
 }
