@@ -35,3 +35,4 @@ tabs.css
 FreeSans.ttf
 Makefile
 doxygen.sty
+!config_fortran*
