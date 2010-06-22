@@ -219,17 +219,17 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
 
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "\n");
 
-    check++;
-
     /* We write data only on checkpoint:
      * it is more healthier for disk, but remember --
      * if you set up checkpoints very often and your simulations are
      * very fast, your disks will not be happy
      */
 
-    if (check % d->checkpoint == 0 || mechanic_ups() < 0) { 
-      mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+    if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) { 
+      mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       check = 0;
+    } else {
+      check++;
     }
 
     /* Send next task to the slave */
@@ -270,6 +270,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
    * No more work to do, receive the outstanding results from the slaves.
    * We've got exactly 'count' messages to receive.
    */
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "count is %d, check is %d\n", count, check);
   for (i = 0; i < count; i++){
 
     qbeforeR = load_sym(handler, d->module, "node_beforeReceive",
@@ -294,7 +295,15 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
       resultarr[check][j] = result.res[j];
     }
 
-    check++;
+    /* There is a possibility that count > check, and then we have to perform
+     * another checkpoint write */
+    if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
+      mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
+      check = 0;
+    } else {
+      check++;
+    }
+
   }
 
   /* Write outstanding results to file */
