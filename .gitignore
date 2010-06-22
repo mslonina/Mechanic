@@ -36,3 +36,4 @@ FreeSans.ttf
 Makefile
 doxygen.sty
 !config_fortran*
+gitlog2changelog.py

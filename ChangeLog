@@ -1,21 +1,1001 @@
-For up-to-date changelog, see git logs:
-http://git.astri.umk.pl/projects/mechanic
+2010-06-22  mariusz <mariusz@dyzio.(none)>
 
-Branch 'master' is quite stable, but quite boring:)
-Branch 'experimental' with new features is more interesting;)
+  * src/modes/farm/mechanic_mode_farm_master.c: Solved #16, segmentation fault
+  on checkpoints  This specific error appears when you have number of
+  outstanding receives greater than size of the checkpoint, and the loop tries
+  to save data outside the array. Just a little change to counters and
+  additional check for the checkpoint in outstanding results shouls solve this
+  problem. The Masteralone mode is not affected.
 
-Unstable 2
-* Dynamic module architecture -- the functionality of the farm can be easily
-extended.
-* Almost no global variables in use.
-* Libreadconfig updated. 
-* Full commandline arg handling (popt library).
-* New data storage scheme. Master node writes config files, map of pixels and
-special vector to master data file. Any other data can be stored, too -- just
-code it in your module.
+2010-06-21  mariusz <mariusz@dyzio.(none)>
 
-Unstable 1
-* Initial release.
-* HDF5 storage.
-* MPI2 task farm.
-* Using libreadconfig for config files.
+  * .gitignore, waf-tools/compiler_fortran.py, waf-tools/config_fortran.py,
+  waf-tools/doxygen.py, waf-tools/gfortran.py, waf-tools/ifort.py,
+  waf-tools/myconfig.py: Added missing waf-tools files
+
+2010-06-19  mariusz <mariusz@dyzio.(none)>
+
+  * src/mechanic.c, src/modules/echo/mechanic_module_echo.c,
+  src/modules/hello/mechanic_module_hello.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  src/modules/mechanic_module_module.c, .../f2003/mechanic_module_f2003.F03,
+  .../fhello/mechanic_module_fhello.F03,
+  .../modules_fortran/map/mechanic_module_map.F03, wscript: Bumping version to
+  unstable-2-4  Modules are uses new _init() templates
+
+2010-06-18  mariusz <mariusz@dyzio.(none)>
+
+  * src/mechanic.c: init() and cleanup() templatable  Any real implementation
+  of Mechanic will need module_init() and module_cleanup() to be overriden on
+  master and slave nodes, i.e. to setup master result and initial condition
+  lengths according to the user configuration (as like in many N-body problems
+  with changing number of bodies)
+
+2010-06-17  mariusz <mariusz@dyzio.(none)>
+
+  * .../modules_fortran/map/mechanic_module_map.F03: Code cleanup
+
+  * ChangeLog, doc/wscript_build, src/core/mechanic.h,
+  src/core/mechanic_core_setup.c, src/fortran/mechanic_fortran.F03,
+  src/fortran/mechanic_fortran.f03, src/mechanic.c,
+  src/modules/hello/mechanic_module_hello.c,
+  .../f2003/mechanic_module_f2003.F03, .../f2003/mechanic_module_f2003.f03,
+  .../fhello/mechanic_module_fhello.F03, .../fhello/mechanic_module_fhello.f03,
+  .../modules_fortran/map/mechanic_module_map.F03,
+  .../modules_fortran/map/mechanic_module_map.f03, waf-tools/fortran.py,
+  wscript: Fixed bug #15  Config Data character arrays are no more allocatable,
+  this is because F2003 C-bindings cannot use allocatable arrays. Thus, if we
+  have C structure containig such arrays with other important data, i.e.
+  resolution, the data stored in the structure is not accessible.
+
+2010-05-18  mariusz <mariusz@dyzio.(none)>
+
+  * src/fortran/wscript_build, waf-tools/fortran.py, wscript: Fixed critical
+  F2003 bindings issue (see bug #14)  This was a problem with build system and
+  that fortran modules cannot be builded with -o flag. So that, we need to use
+  -Jdefault/src/fortran as a workaround and override compilation command
+  creation.
+
+  * src/core/mechanic_core_tools.c, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c, wscript: Bumping version
+  to unstable-2-3
+
+  * wscript: Some small wscript cleanup
+
+  * src/modules/modules_fortran/fhello/Sample-Makefile,
+  .../fhello/mechanic_module_fhello.f03,
+  src/modules/modules_fortran/fhello/wscript_build,
+  .../modules_fortran/hello-fortran/Sample-Makefile,
+  .../hello-fortran/mechanic_module_ff.f03,
+  src/modules/modules_fortran/map/wscript_build, waf-tools/fortran.py, wscript:
+  F2003 Waf support done  Our build system now support F2003 bindings and
+  modules. To compile F2003 bindings use --with-fortran, to compile fortran
+  modules use --with-fortran-modules. There is huge place for code cleanup and
+  improvements, but at this stage it seems to work.
+
+  * src/fortran/wscript_build, src/modules/contrib/f2003/mechanic_fortran.f03,
+  .../contrib/f2003/mechanic_module_f2003.f03,
+  src/modules/contrib/hello-fortran/Sample-Makefile,
+  .../contrib/hello-fortran/mechanic_fortran.f03,
+  .../contrib/hello-fortran/mechanic_module_ff.f03,
+  src/modules/contrib/map/Sample-Makefile,
+  src/modules/contrib/map/mechanic_fortran.f03,
+  src/modules/contrib/map/mechanic_module_map.f03,
+  .../f2003/mechanic_module_f2003.f03,
+  .../modules_fortran/hello-fortran/Sample-Makefile,
+  .../hello-fortran/mechanic_module_ff.f03,
+  src/modules/modules_fortran/map/Sample-Makefile,
+  .../modules_fortran/map/mechanic_module_map.f03,
+  src/modules/modules_fortran/map/wscript_build, waf-tools/fortran.py, wscript:
+  F2003 Waf support partially done  We reuse Waf playground code for Fortran
+  and add some adjustments. The only thing left is to change order of executing
+  Fortran tasks so that first we create bindings and then modules. And code
+  cleanup.
+
+2010-05-17  mariusz <mariusz@dyzio.(none)>
+
+  * .../contrib/hello-fortran/mechanic_fortran.f03,
+  src/modules/contrib/map/mechanic_fortran.f03: Updates to Fortran modules
+
+  * src/fortran/wscript_build, waf-tools/compiler_mpicc.py,
+  waf-tools/compiler_mpicxx.py, waf-tools/compiler_mpif90.py,
+  waf-tools/mpi/compiler_mpicc.py, waf-tools/mpi/compiler_mpicxx.py,
+  waf-tools/mpi/mpicc.py, waf-tools/mpi/mpixx.py, waf-tools/mpicc.py,
+  waf-tools/mpif90.py, waf-tools/mpixx.py, wscript: Some code cleanup
+
+2010-05-16  mariusz <mariusz@dyzio.(none)>
+
+  * waf-tools/mpi/compiler_mpicc.py, waf-tools/mpi/compiler_mpicxx.py,
+  waf-tools/mpi/mpicc.py, waf-tools/mpi/mpixx.py, wscript: MPICC Waf support 
+  Since MPI compilers are wrappers to the compiler which they were compiled
+  with, we only need to override CC and LINK_CC variables.
+
+2010-05-15  mariusz <mariusz@dyzio.(none)>
+
+  * src/fortran/mechanic_fortran.f03: MPI and HDF5 support in F2003 bindings
+
+  * .../contrib/hello-fortran/mechanic_module_ff.f03,
+  src/modules/contrib/map/mechanic_module_map.f03: Fixes segmentation fault and
+  _gfortran_transfer_integer  Trying to operate on integers passed to fortran
+  module caused segfaults and _gfortran_transfer_integer error. The solution
+  was to add "value" to declaration of the variable.
+
+  * src/core/mechanic_internals.h, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm.c, src/modes/farm/mechanic_mode_farm.h,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c,
+  src/modes/multifarm/mechanic_mode_multifarm.c,
+  src/modes/multifarm/mechanic_mode_multifarm.h,
+  .../multifarm/mechanic_mode_multifarm_master.c,
+  .../multifarm/mechanic_mode_multifarm_slave.c,
+  src/modules/hello/mechanic_module_hello.c: MPI_SIZE global removed  Yep,
+  there is one more global variable less!
+
+  * src/fortran/mechanic_fortran.f03,
+  src/modules/contrib/hello-fortran/Sample-Makefile,
+  .../contrib/hello-fortran/mechanic_fortran.f03,
+  .../contrib/hello-fortran/mechanic_module_ff.f03,
+  src/modules/contrib/map/Sample-Makefile,
+  src/modules/contrib/map/mechanic_fortran.f03,
+  src/modules/contrib/map/mechanic_module_map.f03,
+  src/modules/hello-fortran/Makefile,
+  src/modules/hello-fortran/mechanic_fortran.f03,
+  src/modules/hello-fortran/mechanic_module_ff.f03: New F2003 sample module:
+  dynamical map template
+
+  * src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c: Some small code cleanup
+
+  * .gitignore, doc/doxygen/UserGuide/latex/mechanic-userguide.pdf,
+  doc/doxygen/html/advanced.html, doc/doxygen/html/devel.html,
+  doc/doxygen/html/index.html, doc/doxygen/html/install.html,
+  doc/doxygen/html/intro.html, doc/doxygen/html/pages.html,
+  doc/doxygen/html/quickstart.html, doc/doxygen/html/troubleshooting.html,
+  doc/doxygen/mechanic-userguide-html.doxy,
+  doc/doxygen/mechanic-userguide.doxy, doc/doxygen/mechanic.doxy,
+  doc/images/mechanic-scheme.svg: UserGuide dir removed from tree
+
+  * doc/doxygen/mechanic-footer.html, doc/doxygen/mechanic-header.html:
+  Initials for custom header/footer in html doc
+
+  * doc/doxygen/html/advanced.html, doc/doxygen/html/devel.html,
+  doc/doxygen/html/index.html, doc/doxygen/html/install.html,
+  doc/doxygen/html/intro.html, doc/doxygen/html/pages.html,
+  doc/doxygen/html/quickstart.html, doc/doxygen/html/troubleshooting.html,
+  doc/doxygen/latex/advanced.tex, doc/doxygen/latex/devel.tex,
+  doc/doxygen/latex/install.tex, doc/doxygen/latex/intro.tex,
+  doc/doxygen/latex/mechanic-userguide.pdf, doc/doxygen/latex/quickstart.tex,
+  doc/doxygen/latex/refman.tex, doc/doxygen/latex/troubleshooting.tex,
+  doc/doxygen/mechanic-userguide-html.doxy,
+  doc/doxygen/mechanic-userguide-latex.doxy: Updates in documentation directory
+  scheme
+
+2010-05-14  mariusz <mariusz@dyzio.(none)>
+
+  * src/modes/masteralone/mechanic_mode_masteralone.c: PreparePixel for
+  Masteralone mode  Small update to masteralone mode, so that we have also
+  possibility of preparing pixels as for the farm mode.
+
+  * src/core/mechanic.h, src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modules/echo/mechanic_module_echo.c,
+  src/modules/hello/mechanic_module_hello.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  src/modules/mechanic_module_module.c: Master sends initial conditions to
+  slaves  There is an initial solution for bug #9 (Master node does not send
+  initial condition). There is now node_preparePixel() function provided and
+  node_in() can also setup initial condition (depends on design of the module).
+  The lenght of initial condition can be adjusted with md->irl in
+  module_init(). The initial condition has the same type as result struct, and
+  is sended to each slave at each pixel, so it is possible to modify the
+  initials during computations. Depending on setup, the master node can read
+  config file or each slave own. There is of course need for improvements and
+  clean-up.
+
+2010-05-12  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c,
+  src/modules/echo/mechanic_module_echo.c,
+  src/modules/hello-fortran/mechanic_module_ff.f03,
+  src/modules/hello/mechanic_module_hello.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  src/modules/mechanic_module_module.c: PixelCompute to ProcessPixel  Only
+  small change in name, it is much more better now
+
+2010-05-07  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/core/mechanic_core_checkpoint.c, src/core/mechanic_core_tools.c,
+  src/core/mechanic_internals.h, src/libs/orbit/mechanic_lib_orbit.c,
+  src/modes/farm/mechanic_mode_farm_master.c, wscript: Create allocating
+  functions
+
+2010-04-29  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * wscript: Bz2 -> gz in wscript
+
+2010-04-28  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * wscript: Marking Unstable-3 release
+
+  * README, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_tools.c, src/mechanic.c: Unstable-2 release
+
+  * doc/doxygen/UserGuide/latex/mechanic-userguide.pdf,
+  src/fortran/mechanic_fortran.f03, src/modules/hello/mechanic_module_hello.c:
+  Documentation updates
+
+  * src/core/mechanic.h, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_errors.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c,
+  src/modules/hello-fortran/Makefile,
+  src/modules/hello-fortran/mechanic_module_ff.f03,
+  src/modules/hello/mechanic_module_hello.c, wscript: Restart mode  Mechanic is
+  now able to restart broken simulations. Yay!
+
+  * src/modules/echo/mechanic_module_echo.c,
+  src/modules/hello-fortran/Makefile,
+  src/modules/hello-fortran/mechanic_module_ff.f03,
+  src/modules/hello/mechanic_module_hello.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  src/modules/mechanic_module_module.c, waf-fortran/compiler_fortran.py,
+  waf-fortran/fortran.py, waf-fortran/gfortran.py, waf-fortran/ifort.py,
+  waf-fortran/myconfig.py, wscript: Some small fixes
+
+2010-04-27  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * doc/prepareDoxy.py, src/core/mechanic_core_hdf5.c,
+  src/fortran/mechanic_fortran.f03, src/mechanic.c,
+  src/modules/hello-fortran/mechanic_module_ff.f03: F2003 bindings
+  documentation updates
+
+  * src/modules/hello-fortran/mechanic_module_ff.f03,
+  waf-fortran/compiler_fortran.py, waf-fortran/fortran.py,
+  waf-fortran/gfortran.py, waf-fortran/ifort.py, waf-fortran/myconfig.py:
+  License information updated
+
+  * .gitignore, src/core/mechanic.h, src/core/mechanic_core_tools.c,
+  src/core/mechanic_internals.h, src/fortran/mechanic_fortran.f03,
+  src/fortran/wscript_build, src/libs/orbit/mechanic_lib_orbit.c,
+  src/libs/orbit/mechanic_lib_orbit.h, src/libs/orbit/wscript_build,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c,
+  src/modules/hello-fortran/Makefile,
+  src/modules/hello-fortran/mechanic_fortran.f03,
+  src/modules/hello-fortran/mechanic_module_ff.f03,
+  src/modules/hello/mechanic_module_hello.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  src/modules/mechanic_module_module.c, waf-fortran/compiler_fortran.py,
+  waf-fortran/fortran.py, waf-fortran/gfortran.py, waf-fortran/ifort.py,
+  waf-fortran/myconfig.py, wscript: Fortran 2003 bindings  Mechanic speaks in
+  two languages right now, Fortran2003 initial bindings has been added. There
+  is no support of build system yet, however, you can build sample fortran
+  module by hand using provided Makefile. Have fun!  The module API has been
+  updated too, there is no need to provide author/date etc. at the begginning
+  of the module. The only required information is mrl. This change was due to
+  C-Fortran interoperability.
+
+2010-04-12  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * ChangeLog, INSTALL, NEWS, doc/doxygen/mechanic-userguide.doxy,
+  src/libs/orbit/mechanic_lib_orbit.c, src/libs/orbit/mechanic_lib_orbit.h,
+  src/modules/hello/mechanic_module_hello.c: Updates in Orbit
+
+  * waf-tests/test-popt.c: Popt test code updated
+
+  * doc/doxygen/UserGuide/latex/mechanic-userguide.pdf, doc/wscript_build,
+  src/core/mechanic_core_setup.c, src/core/wscript_build,
+  src/engines/gpu/wscript_build, src/engines/odex/wscript_build,
+  src/engines/taylor/wscript_build, src/engines/wscript_build,
+  src/libs/orbit/mechanic_lib_orbit.c, src/libs/orbit/mechanic_lib_orbit.h,
+  src/libs/orbit/wscript_build, src/libs/wscript_build, src/mechanic.c,
+  src/modules/hello/mechanic_module_hello.c, src/modules/wscript_build,
+  src/wscript_build, waf-tests/test-dl.c, waf-tests/test-hdf.c,
+  waf-tests/test-lrc.c, waf-tests/test-m.c, wscript: Build subsystem and Orbit
+  updated  From now on, default installation of Mechanic will include core
+  only. Engines, modules and libs can be compiled as shared libraries if
+  necessary -- the installation will also include proper headers. To build
+  them, try --with-libs{modules,engines} switch. For the build subsystem
+  waf-tests codes have been added to improve readability of the main wscript.
+  There are also small documentation updates and improvements in lib Orbit.
+
+2010-04-09  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/libs/orbit/mechanic_lib_orbit.h: Orbit header small update  Just missed
+  one function
+
+  * src/libs/orbit/mechanic_lib_orbit.c, src/libs/orbit/mechanic_lib_orbit.h,
+  src/libs/orbit/wscript_build: LIB/Orbit: added orbit_el2xv and E solver  An
+  initial versions of Kepler's equation solver and orbital elements to rv frame
+  converter have been added. The library will use math.h capabilities, so there
+  are differences with Fortran77 old codes at 6-7 significant numbers level in
+  standard double precision (i.e. with the Swift code by H. Levison and M.
+  Duncan).
+
+2010-04-08  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/libs/orbit/mechanic_lib_orbit.c, src/libs/orbit/mechanic_lib_orbit.h,
+  src/libs/orbit/wscript_build, src/libs/wscript_build, src/wscript_build:
+  Libs/Orbit template  Orbit will be a library for handling celestial mechanics
+  computations. It will include functions for orbital elements conversions
+  etc., so that they can be reused in different modules.
+
+2010-04-07  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * doc/doxygen/UserGuide/latex/mechanic-userguide.pdf,
+  doc/doxygen/mechanic-template.tex, src/core/mechanic_core_errors.c,
+  src/core/mechanic_core_hdf5.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/mechanic.c,
+  src/modules/echo/mechanic_module_echo.c,
+  src/modules/hello/mechanic_module_hello.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  src/modules/mechanic_module_module.c: Documentation updates  The Template
+  System section has been rewritten, some small improvements here and there.
+
+  * src/core/mechanic_core_setup.c, src/core/mechanic_core_tools.c,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c: Switched from malloc to
+  calloc  Only small change, this should clear allocated blocks of memory
+  before usage
+
+2010-04-06  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * doc/doxygen/UserGuide/latex/mechanic-userguide.pdf,
+  doc/doxygen/mechanic-template.tex, doc/doxygen/mechanic-userguide.doxy,
+  doc/mechanic-config, doc/qfarm.sh, doc/samples/mechanic-config,
+  doc/samples/mechanic-pbs.sh, src/core/mechanic.h,
+  src/core/mechanic_core_checkpoint.c, src/core/mechanic_core_errors.c,
+  src/core/mechanic_core_hdf5.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/mechanic.c,
+  src/modules/echo/mechanic_module_echo.c,
+  src/modules/hello/mechanic_module_hello.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  .../mandelbrot/mechanic_module_mandelbrot.h,
+  src/modules/mechanic_module_module.c, wscript: Early user guide  The user
+  guide is generated with Doxygen, and because the install system is not yet
+  updated for docs, we include it in git repository. There are many things to
+  improve, but at this point it should give you the basic knowledge on using
+  Mechanic.
+
+  * src/core/mechanic_core_tools.c: Small update to library loading subsystem 
+  Just switched from fixed size arrays to mallocs.
+
+  * doc/doxygen/mechanic-template.tex, doc/doxygen/mechanic-userguide.doxy,
+  doc/prepareDoxy.py, src/core/mechanic.h, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_derived.c, src/core/mechanic_core_errors.c,
+  src/core/mechanic_core_hdf5.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/engines/gpu/mechanic_engine_gpu.c, src/engines/gpu/mechanic_engine_gpu.h,
+  src/engines/odex/mechanic_engine_odex.c,
+  src/engines/odex/mechanic_engine_odex.h,
+  src/engines/taylor/mechanic_engine_taylor.c,
+  src/engines/taylor/mechanic_engine_taylor.h, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm.c, src/modes/farm/mechanic_mode_farm.h,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c,
+  src/modes/masteralone/mechanic_mode_masteralone.h,
+  src/modes/multifarm/mechanic_mode_multifarm.c,
+  src/modes/multifarm/mechanic_mode_multifarm.h,
+  .../multifarm/mechanic_mode_multifarm_master.c,
+  .../multifarm/mechanic_mode_multifarm_slave.c,
+  src/modules/echo/mechanic_module_echo.c,
+  src/modules/echo/mechanic_module_echo.h,
+  src/modules/hello/mechanic_module_hello.c,
+  src/modules/hello/mechanic_module_hello.h,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  .../mandelbrot/mechanic_module_mandelbrot.h,
+  src/modules/mechanic_module_module.c, src/modules/mechanic_module_module.h,
+  wscript: Documentation updates, code clean-up  We try to follow PEAR coding
+  standards -- huge code and documentation cleanup has been done, but there is
+  still much work left. Some unused functions have been removed, and
+  documentation was updated. Because of Doxygen lacks in including specific
+  blocks of documentation, we created additional tags system and a special
+  python parser which prepares input file for Doxygen. Now, it is much easier
+  to generate user guide and developer's guide reference from the same source.
+
+2010-03-31  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * TODO, src/core/mechanic_core_derived.c, src/core/mechanic_core_tools.c,
+  src/core/mechanic_internals.h, src/mechanic.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c: Code cleanup.
+  LRC_printAll() removed  Well, not only LRC_printAll() was removed from the
+  code (it was replaced by similar function consistent with rest of Mechanic
+  output). Some unused functions are no more in code, too.  Also, the new TODO
+  file should describe our plans for future development of Mechanic, but not
+  before stable 0.12 branch.
+
+2010-03-30  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * Makefile, src/core/mechanic.h, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_derived.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/mechanic.c, src/modes/masteralone/mechanic_mode_masteralone.c,
+  src/wscript_build, waf, wscript: Mechanic 0.12 UNSTABLE-2 almost done 
+  Mechanic has been upgraded to new LRC API, and bugs with configuration system
+  should be resolved now (deeper testing needed). Major updates to MPI
+  subsystem, configuration is now bcasted with MPI Pack datatype -- that was
+  much easier than with derived type, and worked almost out-of-the-box.
+
+2010-03-12  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * .gitignore, Makefile, src/core/mechanic.h,
+  src/core/mechanic_core_derived.c, src/mechanic.c: Makefile and fake-configure
+   This is for those of you who automatically type ./configure make make
+  install;p
+
+  * src/core/mechanic_core_checkpoint.c, src/core/mechanic_core_tools.c,
+  src/core/mechanic_internals.h, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modules/echo/mechanic_module_echo.c,
+  src/modules/hello/mechanic_module_hello.c: Config files handling broken. Any
+  ideas?  However, commandline options work fine, hm
+
+  * src/core/mechanic.h, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_derived.c, src/core/mechanic_core_errors.c,
+  src/core/mechanic_core_hdf5.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm.c,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c,
+  src/modules/echo/mechanic_module_echo.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  .../mandelbrot/mechanic_module_mandelbrot.h, wscript: Fixed critical bugs
+  with MPI send/recv
+
+  * INSTALL, Makefile.am, configure.ac, doc/Makefile.am, examples/Makefile.am,
+  examples/hello/Makefile.am, m4/ax_mpi.m4, src/Makefile.am,
+  src/core/Makefile.am, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_errors.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/core/wscript_build, src/engines/Makefile.am, src/engines/gpu/Makefile.am,
+  src/engines/gpu/wscript_build, src/engines/odex/Makefile.am,
+  src/engines/odex/wscript_build, src/engines/taylor/Makefile.am,
+  src/engines/taylor/wscript_build, src/engines/wscript,
+  src/engines/wscript_build, src/mechanic, src/mechanic.c,
+  src/modes/Makefile.am, src/modes/farm/Makefile.am,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c, src/modes/farm/wscript_build,
+  src/modes/masteralone/Makefile.am, src/modes/masteralone/wscript_build,
+  src/modes/multifarm/Makefile.am,
+  src/modes/multifarm/mechanic_mode_multifarm.c,
+  src/modes/multifarm/mechanic_mode_multifarm.h,
+  src/modes/multifarm/wscript_build, src/modules/Makefile.am,
+  src/modules/echo/Makefile.am, src/modules/echo/mechanic_module_echo.c,
+  src/modules/echo/wscript_build, src/modules/hello/Makefile.am,
+  src/modules/hello/wscript_build, src/modules/mandelbrot/Makefile.am,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  src/modules/mandelbrot/wscript_build, src/modules/wscript_build,
+  src/wscript_build, wscript: Autotools no more  MECHANIC uses WAF build
+  system. It was no so easy to switch, but it was worth that time:) Maybe it is
+  not still ideal, but it is on the right way. Many small bugs have been also
+  fixed. MECHANIC is now full BSD-Licensed.
+
+2010-03-11  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/core/mechanic_internals.h, src/core/wscript_build, src/engines/wscript,
+  src/mechanic, src/modes/farm/wscript_build,
+  src/modes/masteralone/wscript_build, src/modes/multifarm/wscript_build,
+  src/modes/wscript_build, src/modules/echo/wscript_build,
+  src/modules/hello/wscript_build, src/modules/mandelbrot/wscript_build,
+  src/modules/wscript_build, src/wscript_build, waf, wscript: First attempt to
+  WAF  The reasons are the same as for LibreadConfig: 1) I like Python much and
+  I speak in Python, 2) licensing problems with Autotools (especially the GPL
+  part of MPI check) and 3) the hell of autotools...
+
+  * src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/mechanic.c, src/modes/masteralone/mechanic_mode_masteralone.c: MPI as a
+  hard dependency  I decided to leave MPI as a hard requirement to run
+  Mechanic, since even in single-cpu environments it is easy to simulate MPI
+  nodes (I called it fake-MPI) -- I tested it on a x86 machine and it worked
+  quite well. Running Mechanic only on one node will cause to use Masteralone
+  mode automatically, despite of any commandline or config options. And it will
+  be much easier to handle for the build system.
+
+  * doc/doxygen/mechanic-template.tex, doc/doxygen/mechanic-userguide.doxy,
+  src/core/mechanic_core_hdf5.c, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modules/hello/mechanic_module_hello.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  src/modules/mechanic_module_module.c: Early version of the user guide 
+  Finally I managed to overwrite default Doxygen behaviour. Thus, it should not
+  be so difficult to create a user guide inside the code and then generate it
+  using Doxygen. The mechanic-template.tex file is used instead doxygen class,
+  so that generated document looks much more like standard LaTeX article.
+
+2010-03-10  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/core/mechanic.h, src/core/mechanic_core_derived.c,
+  src/core/mechanic_core_tools.c: Further 32/64bits enhancements
+
+  * configure.ac, src/core/mechanic.h, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm.c,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c: 32/64 bits enhancements  Mechanic
+  should now run both on 32 and 64 bit machines, either in real multi-cpus
+  environments or single-cpu scenarios (both running by MPI control). Please
+  check the code especially on 32 single-cpu machines.
+
+2010-03-09  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * doc/doxygen/mechanic-userguide.doxy, src/mechanic.c: Documentation updates
+
+  * configure.ac, examples/hello/mechanic_module_hello.c,
+  examples/hello/mechanic_module_hello.h, src/core/mechanic_internals.h,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c, src/modules/Makefile.am,
+  src/modules/echo/mechanic_module_echo.c, src/modules/hello/Makefile.am,
+  src/modules/hello/mechanic_module_hello.c,
+  src/modules/hello/mechanic_module_hello.h,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  .../mandelbrot/mechanic_module_mandelbrot.h,
+  src/modules/mechanic_module_module.c, src/modules/mechanic_module_module.h:
+  New default module "module" and "hello" module included in core  The "echo"
+  module is no longer default -- it will be our advanced example of using
+  Mechanic. The "module" module is now the default module used by Mechanic. The
+  "hello" module has been included in core for two reasons: 1) we need simple
+  working example 2) is will be much more easier to synchronize code examples
+  with current API, since the "hello" module is also distributed with the
+  package. The template system has also been updated, before/afterpixelCompute
+  functions can be now overridden.
+
+2010-03-08  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c,
+  .../multifarm/mechanic_mode_multifarm_master.c,
+  .../multifarm/mechanic_mode_multifarm_slave.c,
+  src/modules/echo/mechanic_module_echo.c: Themeable system included  UserAPI
+  has been improved by some kind of a themeable system -- there are now
+  template functions like nodeIN/OUT, node_beforeSend/afterSend etc. that can
+  bee overriden by master/slaveIN/OUT, master_beforeSend/afterSend. This opens
+  new possibilites of creating modules and using them within modes. One can use
+  only node template functions, and one can use any of overrides to do module
+  operations. If you used Drupal you know how it is powerful. If not, believe
+  me, the template system is a very useful and powerfull thing. Enjoy!
+
+  * src/core/mechanic_core_errors.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modules/echo/mechanic_module_echo.c: Updates in error handling interface
+
+2010-03-07  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * configure.ac, doc/doxygen/mechanic-userguide.doxy, src/core/Makefile.am,
+  src/core/mechanic.h, src/core/mechanic_core_errors.c,
+  src/core/mechanic_core_hdf5.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/core/mechanic_internals.h,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modules/echo/mechanic_module_echo.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c: Error handling. Mechanic_message
+   Mechanic now uses mechanic_message for printing any messages on the screen.
+  All malloc routines are now checked for any NULL, which is much safer. A new,
+  mechanic-userguide.doxy has been added to handle user guide without function
+  reference.
+
+2010-03-04  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * doc/doxygen/mechanic.doxy, examples/hello/mechanic_module_hello.c,
+  src/core/mechanic.h, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_derived.c, src/core/mechanic_core_hdf5.c,
+  src/core/mechanic_core_setup.c, src/core/mechanic_core_tools.c,
+  src/core/mechanic_internals.h, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modules/echo/mechanic_module_echo.c,
+  src/modules/echo/mechanic_module_echo.h,
+  .../mandelbrot/mechanic_module_mandelbrot.c: Documentation updates, minor
+  changes to comments  Doxygen configuration has been added.
+
+  * src/modules/echo/mechanic_module_echo.c: Minor documentation updates
+
+  * src/core/mechanic_core_tools.c, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modules/echo/mechanic_module_echo.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c: USER API updated (moduleInfo
+  included)  All module functions have now moduleInfo *md as one of arguments.
+  This will be quite usefull, since we do not have to create any additional
+  variables -- just rewrite moduleInfo struct, i.e. when we will be adding
+  custom data scheme, the scheme will be defined in moduleInfo. Thus, the USER
+  APi is almost feature complete and done.
+
+2010-03-03  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * doc/mechanic-config: Example config updated.
+
+  * .../mandelbrot/mechanic_module_mandelbrot.c: Mandelbrot module updated. 
+  Some information has been added and the module returns also the number of
+  node which computed given pixel.
+
+  * src/mechanic.c, src/modules/echo/mechanic_module_echo.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c: Fix bugs with setup system 
+  There were some uncovered bugs in setup system -- commandline args handlign
+  and config files. They should have been fixed now.
+
+  * src/core/mechanic.h, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_derived.c, src/core/mechanic_core_hdf5.c,
+  src/core/mechanic_core_setup.c, src/core/mechanic_core_tools.c,
+  src/core/mechanic_internals.h, src/engines/gpu/mechanic_engine_gpu.c,
+  src/engines/gpu/mechanic_engine_gpu.h,
+  src/engines/odex/mechanic_engine_odex.c,
+  src/engines/odex/mechanic_engine_odex.h,
+  src/engines/taylor/mechanic_engine_taylor.c,
+  src/engines/taylor/mechanic_engine_taylor.h, src/mechanic.c,
+  src/modes/farm/mechanic_mode_farm.c, src/modes/farm/mechanic_mode_farm.h,
+  src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modes/masteralone/mechanic_mode_masteralone.c,
+  src/modes/masteralone/mechanic_mode_masteralone.h,
+  src/modes/multifarm/mechanic_mode_multifarm.c,
+  src/modes/multifarm/mechanic_mode_multifarm.h,
+  .../multifarm/mechanic_mode_multifarm_master.c,
+  .../multifarm/mechanic_mode_multifarm_slave.c,
+  src/modules/echo/mechanic_module_echo.c,
+  src/modules/echo/mechanic_module_echo.h,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  .../mandelbrot/mechanic_module_mandelbrot.h: Licence information updated  All
+  source files have now licence information at the very beginning.
+
+  * configure.ac: Some minor changes to output.
+
+  * configure.ac: Build system upgraded.  Autotools should now check for
+  HDF1.8, LibReadConfig, Popt etc. and exit on failure. The MPi part is still
+  hard coded, however, in the near future MPI support will be optional.
+
+  * src/core/mechanic.h, src/core/mechanic_core_checkpoint.c,
+  src/core/mechanic_core_derived.c, src/core/mechanic_core_hdf5.c,
+  src/core/mechanic_core_setup.c, src/core/mechanic_internals.h,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm_master.c,
+  src/modes/farm/mechanic_mode_farm_slave.c,
+  src/modules/echo/mechanic_module_echo.c,
+  .../mandelbrot/mechanic_module_mandelbrot.c: MRL removed from user
+  configuration  The MRL variable has been removed from user configuration.
+  From now on, the module author should include md->mrl in module_init(). The
+  value will be used as old-fashioned d->mrl.
+
+2010-02-25  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * configure.ac, src/Makefile.am, src/core/Makefile.am, src/core/mechanic.h,
+  src/core/mechanic_core_checkpoint.c, src/core/mechanic_core_derived.c,
+  src/core/mechanic_core_hdf5.c, src/core/mechanic_core_setup.c,
+  src/core/mechanic_core_tools.c, src/core/mechanic_internals.h, src/mechanic,
+  src/mechanic.c, src/modes/farm/mechanic_mode_farm_master.c,
+  src/modules/Makefile.am, src/modules/mandelbrot/Makefile.am,
+  .../mandelbrot/mechanic_module_mandelbrot.c,
+  .../mandelbrot/mechanic_module_mandelbrot.h: Mandelbrot benchmark module
+  added  New module, Mandelbrot, which produces the Mandelbrot fractal has been
+  added to core. I will call it a benchmark module, since generating such
+  fractals can be useful for testing purpose.  However, there is a small
+  regression in code, d->mrl should be removed from user configuration and
+  handled by the module itself.
+
+2010-02-05  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * examples/hello/Makefile.am, examples/hello/README, examples/hello/Readme,
+  examples/hello/mechanic_module_hello.c,
+  examples/hello/mechanic_module_hello.h,
+  examples/hello/mpifarm_module_hello.c, examples/hello/mpifarm_module_hello.h,
+  src/derived.c, src/hdf5.c, src/main.c, src/master.c, src/mechanic,
+  src/mechanic-internals.h, src/modules/default/mechanic_module_default.c,
+  src/setup.c, src/slave.c: Void functions are now int functions  Handling any
+  error message will be easier after that change -- it will be even possible to
+  integrate HDF error reporting to Mechanic error reporting (which is still to
+  be build). Modules can now returns integer value to show if everything works
+  ok or not.  Some documentation enhancements in the default module.
+
+2010-02-04  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * doc/mechanic-config, src/main.c, src/mechanic-internals.h,
+  src/modules/default/mechanic_module_default.c, src/tools.c: Some minor
+  changes.
+
+  * LICENSE, NEWS, README, configure.ac, doc/Makefile.am, doc/mpifarm-config,
+  doc/qfarm.sh, src/Makefile.am, src/derived.c, src/hdf5.c, src/main.c,
+  src/master.c, src/mechanic-internals.h, src/mechanic.h,
+  src/modules/default/Makefile.am,
+  src/modules/default/mechanic_module_default.c,
+  src/modules/default/mechanic_module_default.h,
+  src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h, src/mpifarm-internals.h,
+  src/mpifarm.h, src/setup.c, src/slave.c, src/tools.c: Project renamed to
+  MECHANIC  From now on we will call MECHANIC for MpiFarm. We did name change
+  because of planned features of the software, in which task farm model will be
+  one of the modes.  Public and internal headers has been cleanuped.
+
+  * configure.ac, src/Makefile.am, src/hdf5.c, src/main.c, src/master.c,
+  src/modules/default/Makefile.am,
+  src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h, src/mpifarm-internals.h,
+  src/mpifarm.h, src/setup.c, src/slave.c, src/tools.c: Upgrade to
+  LibReadConfig 0.12  Some minor changes in the build system, prepare for the
+  name change: MECHANIK. Integration with LRC 0.12 makes restart mode easier to
+  implement.
+
+2010-01-13  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * LICENSE: Add license information.
+
+  * src/Makefile.am, src/derived.c, src/hdf5.c, src/main.c, src/master.c,
+  src/modules/default/mpifarm_module_default.c, src/mpifarm-internals.h,
+  src/mpifarm.h, src/setup.c, src/slave.c, src/tools.c: Prepared for
+  restartmode modifications. From now on, master file is written only at the
+  checkpoint, either it will be user set, ups warning etc.  Internal functions
+  prototypes removed from global header. No global variables at all, yay!
+
+2010-01-05  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * configure.ac, src/Makefile.am, src/main.c, src/mpifarm.h,
+  src/readconfig/Makefile.am, src/readconfig/libreadconfig.c,
+  src/readconfig/libreadconfig.h, src/setup.c: Libreadconfig is no longer
+  distributed with mpifarm. You need to install it before compiling mpifarm.
+
+  * src/derived.c, src/main.c, src/mpifarm.h: Restartmode var is now
+  distributed with bcast.
+
+  * .gitignore, mpifarm-1.0-UNSTABLE-2.tar.gz: Removed the package.
+
+  * ChangeLog, Makefile.am, configure.ac, doc/Makefile.am, doc/hello.tgz,
+  examples/Makefile.am, examples/hello/Makefile.am, examples/hello/Readme,
+  examples/hello/Sample-Makefile, examples/hello/mpifarm_module_hello.c,
+  examples/hello/mpifarm_module_hello.h, mpifarm-1.0-UNSTABLE-2.tar.gz,
+  src/Makefile.am, src/readconfig/Makefile.am: Fixed critical issue with
+  Makefile (uninstall hook): uninstall hook had been removing all prefix dir!
+  uff... Add proper data (examples) dir and updated Changelog.
+
+2010-01-03  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * README: Readme updated.
+
+  * src/modules/default/mpifarm_module_default.c: Add check file support for
+  default module.
+
+  * src/main.c: Add early file check support. If master file exists, back it
+  up!
+
+  * README, configure.ac, mpifarm-1.0-UNSTABLE-2.tar.gz, src/main.c,
+  src/master.c, src/modules/default/mpifarm_module_default.c, src/mpifarm.h,
+  src/readconfig/libreadconfig.c, src/readconfig/libreadconfig.h, src/setup.c,
+  src/slave.c, src/tools.c: Minor changes, updated load_sym. From now on,
+  userdefined prefix is no more! Yay! You need to prefix functions with your
+  module's name.
+
+  * doc/hello.tgz, mpifarm-1.0-UNSTABLE-2.tar.gz: Added some files.
+
+  * Makefile.am, README, src/modules/Makefile.am,
+  src/modules/mytest/Makefile.am, src/modules/mytest/mpifarm_module_mytest.c,
+  src/modules/mytest/mpifarm_module_mytest.h, src/modules/skel/Makefile.am,
+  src/modules/skel/mpifarm_module_skel.c,
+  src/modules/skel/mpifarm_module_skel.h: Some minor changes and cleanup. Added
+  example to Readme file.
+
+  * README, configure.ac: Readme updated.
+
+  * src/old/tools.h: Minor changes
+
+  * .gitignore, src/Makefile.am, src/main.c, src/master.c, src/mpifarm.h,
+  src/old/tools.h, src/readconfig/Makefile.am, src/readconfig/libreadconfig.c,
+  src/readconfig/libreadconfig.h, src/readconfig/readconfig.c,
+  src/readconfig/readconfig.h, src/setup.c, src/tools.c, src/tools.h: Handling
+  of command line args and interaction with config file done. Libreadconfig
+  updated. The main config struct is no longer global!
+
+2010-01-02  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/derived.c, src/main.c, src/master.c,
+  src/modules/default/mpifarm_module_default.c, src/mpifarm.h, src/setup.c,
+  src/slave.c, src/tools.c: Minor changes. Moved HDF5 master storage to helper
+  functions.
+
+  * configure.ac, src/Makefile.am, src/derived.c, src/main.c, src/master.c,
+  src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h, src/mpifarm.c, src/mpifarm.h,
+  src/setup.c, src/slave.c, src/tools.c, src/tools.h: Code split and clean.
+  Error handling for dlsym. From now on, the module need to provide only five
+  critical functions: init/cleanup, pixelCompute, and, in case of method 6,
+  pixelCoordsMap and farmResolution.  Idle slaves should terminate if farm
+  resolution < mpi size.
+
+2009-12-31  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/modules/default/mpifarm_module_default.c: Ha! Hdf5 storage in default
+  plugin works again:)
+
+  * src/modules/default/mpifarm_module_default.c, src/mpifarm.c: Ok, finally,
+  pixelCoords segfaults resolved! Only one more hdf5 error to go...
+
+  * src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h, src/mpifarm.c, src/mpifarm.h:
+  Allright, the problem is almost resolved. The pixelCompute function depends
+  on masterData struct which is dynamically allocated. See lines 230 and 557.
+  This struct is defined in mpifarm.h.
+
+  * doc/mpifarm-config: small changes
+
+  * src/Makefile.am, src/module.h,
+  src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h, src/mpifarm.c, src/mpifarm.h:
+  prepare for segfaults...
+
+2009-12-30  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/Makefile.am, src/module.c, src/module.h,
+  src/modules/default/Makefile.am,
+  src/modules/default/mpifarm_module_default.c, src/mpifarm.c, src/mpifarm.h,
+  src/mpifarm_skel.c, src/mpifarm_user.h: Only small reorganization of the
+  code. Still segfauls on exit and loading user data.
+
+  * src/module.c, src/modules/default/Makefile.am,
+  src/modules/default/mpifarm_module_default.c, src/mpifarm_skel.c,
+  src/mpifarm_user.h: Bcast works again. From now, mpifarm has its own config
+  file. Segfault on master out:/
+
+  * configure.ac, src/Makefile.am, src/modules/default/Makefile.am,
+  src/modules/default/mpifarm_module_default.c, src/mpifarm.h,
+  src/mpifarm_skel.c: Segfaults almost resolved. MPIBcast is not working.
+
+  * configure.ac, src/Makefile.am, src/module.h,
+  src/modules/default/Makefile.am,
+  src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h,
+  src/modules/mytest/mpifarm_module_mytest.c, src/mpifarm.h,
+  src/mpifarm_skel.c, src/mpifarm_user.h: Some small bugs resolved. Still
+  segfault on exit. Any ideas?
+
+2009-12-29  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * src/Makefile.am, src/module.c, src/module.h,
+  src/modules/default/Makefile.am,
+  src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h, src/mpifarm.h,
+  src/mpifarm_skel.c, src/mpifarm_user.c, src/plugin.h: One segfault resolved.
+  One segfault added.
+
+  * src/Makefile.am, src/modules/default/Makefile.am,
+  src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h,
+  src/modules/mytest/mpifarm_module_mytest.c, src/mpifarm.h,
+  src/mpifarm_skel.c, src/mpifarm_skel.h, src/mpifarm_user.c,
+  src/readconfig/Makefile.am: Nightly build. Plugin architecture mostly done.
+  Hidden segfault:/
+
+2009-12-28  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * configure.ac, src/modules/Makefile.am, src/modules/default/Makefile.am,
+  src/modules/default/mpifarm_module_default.c,
+  src/modules/default/mpifarm_module_default.h, src/modules/mytest/Makefile.am,
+  src/modules/mytest/mpifarm_module_mytest.c,
+  src/modules/mytest/mpifarm_module_mytest.h,
+  src/modules/mytest/mpifarm_module_test.c,
+  src/modules/mytest/mpifarm_module_test.h, src/modules/ttt/Makefile.am,
+  src/modules/ttt/mpifarm_module_ttt.c, src/modules/ttt/mpifarm_module_ttt.h,
+  src/mpifarm_skel.c, src/mpifarm_skel.h: Plugin architecture basically works.
+  Minor renames and cleanups. Commandline args handling works again.
+
+  * configure.ac, src/Makefile.am, src/modules/Makefile.am,
+  src/modules/mytest/Makefile.am, src/modules/mytest/mpifarm_module_test.c,
+  src/modules/mytest/mpifarm_module_test.h, src/modules/ttt/Makefile.am,
+  src/modules/ttt/mpifarm_module_ttt.c, src/modules/ttt/mpifarm_module_ttt.h,
+  src/mpifarm_skel.c, src/mpifarm_skel.h, src/mpifarm_user.c,
+  src/mpifarm_user.h, src/plugin.h: Should compile, but may not work. Moving
+  functions here and there for plugin architecture. Don't know why plugins does
+  not anything in mpifarm_module_init. We have now two test plugins: mytest and
+  ttt. Switch to them with -m option.
+
+2009-12-28  xarth <xarthisius.kk@gmail.com>
+
+  * configure.ac: adding missing libdl check
+
+  * AUTHORS: Minor change
+
+2009-12-28  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * README, configure.ac, src/Makefile.am, src/modules/Makefile.am,
+  src/modules/mytest/Makefile.am, src/modules/mytest/mpifarm_module_test.c,
+  src/modules/mytest/mpifarm_module_test.h, src/modules/skel/Makefile.am,
+  src/modules/skel/mpifarm_module_skel.c,
+  src/modules/skel/mpifarm_module_skel.h, src/mpifarm_skel.c,
+  src/mpifarm_skel.h, src/mpifarm_user.c, src/plugins/Makefile.am,
+  src/plugins/mytest/Makefile.am, src/plugins/mytest/mpifarm_plugin_test.c,
+  src/plugins/mytest/mpifarm_plugin_test.h, src/plugins/skel/Makefile.am,
+  src/plugins/skel/mpifarm_plugin_skel.c,
+  src/plugins/skel/mpifarm_plugin_skel.h: Renamed "plugin" to "module".
+
+  * AUTHORS: Authors file updated.
+
+  * README: Readme file updated.
+
+  * Makefile.am, configure.ac, doc/config, doc/mpifarm-config, src/Makefile.am,
+  src/mpifarm_skel.c, src/mpifarm_skel.h, src/mpifarm_user.c,
+  src/plugins/Makefile.am, src/plugins/mytest/Makefile.am,
+  src/plugins/mytest/mpifarm_plugin_test.c,
+  src/plugins/mytest/mpifarm_plugin_test.h, src/plugins/skel/Makefile.am,
+  src/plugins/skel/mpifarm_plugin_skel.c,
+  src/plugins/skel/mpifarm_plugin_skel.h: Initial plugin architecture and
+  commandline options with popt.h
+
+2009-12-27  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * doc/config: Add missing template config file.
+
+  * AUTHORS, ChangeLog, INSTALL, Makefile.am, README, config, doc/qfarm.sh:
+  Some small enhancements to Makefile, qfarm.sh and config file moved to doc
+  dir.
+
+2009-12-27  xarth <xarthisius.kk@gmail.com>
+
+  * .gitignore, Makefile.am, configure.ac, src/Makefile.am,
+  src/readconfig/Makefile.am: Changing behaviour of autotools
+
+2009-12-27  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * README: TODO tasks
+
+2009-12-27  xarth <xarthisius.kk@gmail.com>
+
+  * : Adding necessary files. Linking mpifarm to staticaly.
+
+2009-12-27  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * mpifarm_skel.h, mpifarm_user.c, mpimaps.sh: Before autotools
+
+2009-12-27  xarth <xarthisius.kk@gmail.com>
+
+  * INSTALL: adding INSTALL info
+
+  * .gitignore, Makefile.am, configure.ac, m4/ax_mpi.m4, src/Makefile.am,
+  src/mpifarm_skel.h, src/mpifarm_user.c, src/readconfig/Makefile.am: Adding
+  autotools
+
+  * .gitignore: adding empty .gitignore
+
+  * libreadconfig.c, libreadconfig.h, makefile, mpifarm_skel.c, mpifarm_skel.h,
+  mpifarm_user.c, mpifarm_user.h, src/mpifarm_skel.c, src/mpifarm_skel.h,
+  src/mpifarm_user.c, src/mpifarm_user.h, src/readconfig/readconfig.c,
+  src/readconfig/readconfig.h: Moving files around
+
+2009-12-26  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * mpifarm_skel.c, mpifarm_user.c: Trivial comment changes.
+
+  * config, mpifarm_skel.c, mpifarm_user.c: Some first security checks: map
+  resolution and mpi comm size.
+
+  * mpifarm_user.c: Only comments changes.
+
+  * makefile: Makefile updated.
+
+  * README, mpifarm_skel.c, mpifarm_skel.h, mpifarm_user.c: HDF5 storage
+  repaired. Now, You can allow each slave to write own data file and copy it to
+  master data file. I don't know why, but parallel HDF5 seems to be broken for
+  master-slave configuration.  README file updated.
+
+  * config, makefile, mpifarm.h, mpifarm_skel.c, mpifarm_skel.h,
+  mpifarm_user.c, mpifarm_user.h, readconfig.h: user API stabilize
+
+  * libreadconfig.c, libreadconfig.h, mpifarm_skel.h: Better support of
+  libreadconfig, hdf5 groups, prepared for master-slave hdf5 storage, hdf5
+  storage partially broken:/
+
+2009-12-23  xarth <xarthisius.kk@gmail.com>
+
+  * mpifarm_skel.c: Only master reads config file and bcasts it
+
+2009-12-22  Mariusz Slonina <mariusz.slonina@gmail.com>
+
+  * README, config, makefile, mpifarm.h, mpifarm_skel.c, mpifarm_user.c,
+  mpifarm_user.h, mpimaps.sh, readconfig.h: Unstable 1
