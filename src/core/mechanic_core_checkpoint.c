@@ -238,6 +238,7 @@ int H5readBoard(configData* d, int** board){
 
   int rdata[1][1];
   int i = 0, j = 0;
+  int computed = 0;
 
   /* Open checkpoint file */
   file_id = H5Fopen(d->datafile, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -275,6 +276,7 @@ int H5readBoard(configData* d, int** board){
 
       /* Copy temporary data array to board array */
       board[i][j] = rdata[0][0];
+      if (board[i][j] == 1) computed++;
 
     }
   }
@@ -285,6 +287,6 @@ int H5readBoard(configData* d, int** board){
   H5Dclose(dataset_id);
   H5Fclose(file_id);
 
-  return 0;
+  return computed;
 }
 

@@ -67,6 +67,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
 
   /* Simulation board */
   int** board;
+  int computed = 0; /* How many pixels have been computed */
+  int pixeldiff = 0; /* Difference between farm resolution and number of computed pixels*/
 
   MPI_Status mpi_status;
   MPI_Datatype masterResultsType;
@@ -113,7 +115,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
 
   /* For the sake of simplicity we read board everytime,
    * both in restart and clean simulation mode */
-  H5readBoard(d, board);
+  computed = H5readBoard(d, board);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Num of computed pixels = %d", computed);
 
   /* Build derived type for master result */
   mstat = buildMasterResultsType(md->mrl, &result, &masterResultsType);
@@ -139,9 +142,11 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
 
   /* Security check -- if farm resolution is greater than number of slaves.
    * Needed when we have i.e. 3 slaves and only one pixel to compute. */
-  if (farm_res > mpi_size) nodes = mpi_size;
-  if (farm_res == mpi_size) nodes = mpi_size;
-  if (farm_res < mpi_size) nodes = farm_res + 1;
+  pixeldiff = farm_res - computed;
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "farm_res - computed = %d\n", pixeldiff);
+  if (pixeldiff > mpi_size) nodes = mpi_size;
+  if (pixeldiff == mpi_size) nodes = mpi_size;
+  if (pixeldiff < mpi_size) nodes = pixeldiff + 1;
 
   /* Send tasks to all slaves,
    * remembering what the farm resolution is.*/
@@ -175,7 +180,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
 
   /* We don't want to have slaves idle, so, if there are some idle slaves
    * terminate them (when farm resolution < mpi size). */
-  if (farm_res < mpi_size) {
+  if ((farm_res - computed) < mpi_size) {
     for (i = nodes; i < mpi_size; i++) {
 
       mechanic_message(MECHANIC_MESSAGE_WARN,
@@ -184,7 +189,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
       /* Just dummy assignment */
       inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
 
-      MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
+      MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
   }
 
