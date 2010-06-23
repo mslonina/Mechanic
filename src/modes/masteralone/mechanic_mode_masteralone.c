@@ -61,6 +61,9 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
 
   /* Restart mode board */
   int** board;
+  int computed = 0;
+  int pixeldiff = 0;
+  int totalnumofpx = 0;
 
   module_query_void_f qpc, qpx, qpb;
   module_query_int_f qr;
@@ -97,7 +100,7 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
     if (board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
   }
 
-  H5readBoard(d, board);
+  computed = H5readBoard(d, board);
 
   /* Master can do something useful before computations,
    * even in masteralone mode */
@@ -112,10 +115,13 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
     if (qr) farm_res = qr(d->xres, d->yres, md);
   }
 
+  pixeldiff = farm_res - computed;
+
   /* Perform farm operations */
   while (1) {
 
     npxc = map2d(npxc, handler, md, d, tab, board);
+    totalnumofpx++;
 
     inidata.coords[0] = tab[0];
     inidata.coords[1] = tab[1];
@@ -172,6 +178,10 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
       check = 0;
     }
+
+    mechanic_message(MECHANIC_MESSAGE_CONT,
+        "[%04d / %04d] Pixel [%04d, %04d, %04d] computed\n",
+        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1], result.coords[2]);
 
     if (npxc >= farm_res) break;
   }

@@ -69,6 +69,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
   int** board;
   int computed = 0; /* How many pixels have been computed */
   int pixeldiff = 0; /* Difference between farm resolution and number of computed pixels*/
+  int totalnumofpx = 0; /* Total number of pixels received */
 
   MPI_Status mpi_status;
   MPI_Datatype masterResultsType;
@@ -163,8 +164,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
           "master_preparePixel", MECHANIC_MODULE_SILENT);
     if (qr) mstat = qr(node, md, d, &inidata, &result);
 
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,
-        "MASTER PTAB[%d, %d, %d]\n", ptab[0], ptab[1], ptab[2]);
+    mechanic_message(MECHANIC_MESSAGE_CONT,
+        "Pixel [%04d, %04d, %04d] sended to node %04d\n", ptab[0], ptab[1], ptab[2], i);
 
     qbeforeS = load_sym(handler, d->module, "node_beforeSend", "master_beforeSend",
         MECHANIC_MODULE_SILENT);
@@ -203,6 +204,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
     MPI_Recv(&result, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
         MPI_COMM_WORLD, &mpi_status);
 
+    totalnumofpx++;
     count--;
 
     qafterR = load_sym(handler, d->module, "node_afterReceive", "master_afterReceive",
@@ -214,8 +216,9 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
     coordsarr[check][1] = result.coords[1];
     coordsarr[check][2] = result.coords[2];
 
-    mechanic_message(MECHANIC_MESSAGE_DEBUG, "MASTER RECV[%d, %d, %d]\t",
-        node, result.coords[0], result.coords[1], result.coords[2]);
+    mechanic_message(MECHANIC_MESSAGE_CONT,
+        "[%04d / %04d] Pixel [%04d, %04d, %04d] received from node %d\n",
+        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1], result.coords[2], mpi_status.MPI_SOURCE);
 
     for (j = 0; j < md->mrl; j++) {
       resultarr[check][j] = result.res[j];
@@ -255,8 +258,9 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
           MECHANIC_MODULE_SILENT);
       if (qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
 
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "MASTER PTAB[%d, %d, %d]... ",
-          inidata.coords[0], inidata.coords[1], inidata.coords[2]);
+      mechanic_message(MECHANIC_MESSAGE_CONT2,
+        "Pixel [%04d, %04d, %04d] sended to node %d\n",
+          inidata.coords[0], inidata.coords[1], inidata.coords[2], mpi_status.MPI_SOURCE);
 
       MPI_Send(&inidata, 1, initialConditionsType, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG,
           MPI_COMM_WORLD);
@@ -286,6 +290,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
     MPI_Recv(&result, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
         MPI_COMM_WORLD, &mpi_status);
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "done\n");
+    totalnumofpx++;
 
     qafterR = load_sym(handler, d->module, "node_afterReceive", "master_afterReceive",
         MECHANIC_MODULE_SILENT);
@@ -300,6 +305,9 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
       resultarr[check][j] = result.res[j];
     }
 
+    mechanic_message(MECHANIC_MESSAGE_CONT,
+        "[%04d / %04d] Pixel [%04d, %04d, %04d] received from node %d\n",
+        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1], result.coords[2], mpi_status.MPI_SOURCE);
     /* There is a possibility that count > check, and then we have to perform
      * another checkpoint write */
     if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
