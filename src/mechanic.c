@@ -269,8 +269,9 @@ int main(int argc, char* argv[]){
   help = 0;
   usage = 0;
 
-  char module_file[MECHANIC_MAXLENGTH];
+  char* module_file;
   char* oldfile;
+  int module_len;
   size_t olen, opreflen, dlen;
 
   /* HDF Helpers */
@@ -731,7 +732,12 @@ int main(int argc, char* argv[]){
 
    }
 
-  sprintf(module_file, "libmechanic_module_%s.so", cd.module);
+  /* Create module file name */
+  module_len = snprintf(NULL, 0, "libmechanic_module_%s.so", cd.module);
+  module_file = calloc(module_len + 1, sizeof(char));
+  if (module_file == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  module_len = snprintf(module_file, module_len+1, "libmechanic_module_%s.so", cd.module);
+
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Module file: %s\n", module_file);
 
   md.mrl = MECHANIC_MRL_DEFAULT;
@@ -808,6 +814,9 @@ int main(int argc, char* argv[]){
 
   /* Cleanup LRC */
   if (node == 0) LRC_cleanup();
+
+  /* Mechanic cleanup */
+  free(module_file);
 
   /* Finalize */
   mechanic_finalize(node);

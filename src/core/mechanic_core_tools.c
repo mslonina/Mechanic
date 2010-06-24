@@ -203,13 +203,13 @@ void* load_sym(void* handler, char* md_name, char* function,
   mn = strlen(md_name);
   fl = strlen(function);
   fol = strlen(function_override);
-  lenl = mn + fl + 2;
-  leno = mn + fol + 2;
+  lenl = mn + fl + 3;
+  leno = mn + fol + 3;
 
-  func = calloc(lenl * sizeof(char*), sizeof(char*));
+  func = calloc(lenl * sizeof(char), sizeof(char));
   if (func == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  func_over = calloc(leno * sizeof(char*), sizeof(char*));
+  func_over = calloc(leno * sizeof(char), sizeof(char));
   if (func_over == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   /* Create function names */
