@@ -195,7 +195,7 @@ void* load_sym(void* handler, char* md_name, char* function,
   char* func;
   char* func_over;
   int template = 0;
-  size_t fl, fol, mn;
+  size_t fl, fol, mn, lenl, leno;
 
   /* Reset dlerror() */
   dlerror();
@@ -203,16 +203,35 @@ void* load_sym(void* handler, char* md_name, char* function,
   mn = strlen(md_name);
   fl = strlen(function);
   fol = strlen(function_override);
+  lenl = mn + fl + 2;
+  leno = mn + fol + 2;
 
-  func = calloc(mn + fl + 2 * sizeof(char*), sizeof(char*));
+  func = calloc(lenl * sizeof(char*), sizeof(char*));
   if (func == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  func_over = calloc(mn + fol + 2 * sizeof(char*), sizeof(char*));
+  func_over = calloc(leno * sizeof(char*), sizeof(char*));
   if (func_over == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  sprintf(func, "%s_%s", md_name, function);
-  sprintf(func_over, "%s_%s", md_name, function_override);
+  /* Create function names */
+  strncpy(func, md_name, mn);
+  func[mn] = LRC_NULL;
 
+  strncat(func, "_", 1);
+  func[mn+1] = LRC_NULL;
+
+  strncat(func, function, fl);
+  func[lenl] = LRC_NULL;
+
+  strncpy(func_over, md_name, mn);
+  func_over[mn] = LRC_NULL;
+
+  strncat(func_over, "_", 1);
+  func_over[mn+1] = LRC_NULL;
+
+  strncat(func_over, function_override, fol);
+  func_over[leno] = LRC_NULL;
+
+  /* Load functions */
   handler_f = dlsym(handler, func);
   err = dlerror();
 

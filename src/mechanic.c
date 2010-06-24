@@ -331,7 +331,7 @@ int main(int argc, char* argv[]){
   };
 
   struct poptOption mechanic_poptDebug[] = {
-    {"debug", 'z', POPT_ARG_VAL, &debug, 1, "Debug mode", NULL},
+    {"debug", 'g', POPT_ARG_VAL, &debug, 1, "Debug mode", NULL},
     {"silent", 's', POPT_ARG_VAL, &silent, 1, "Silent mode", NULL},
     POPT_TABLEEND
   };
@@ -732,6 +732,7 @@ int main(int argc, char* argv[]){
    }
 
   sprintf(module_file, "libmechanic_module_%s.so", cd.module);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Module file: %s\n", module_file);
 
   md.mrl = MECHANIC_MRL_DEFAULT;
   handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
@@ -757,7 +758,7 @@ int main(int argc, char* argv[]){
   query = load_sym(handler,cd.module, "query", "query", MECHANIC_MODULE_SILENT);
   if (query) query(mpi_size, node, &md, &cd);
 
-  /* There are some special data in module,
+  /* There are some special data in the module,
    * thus we have to create master data file after module has been
    * successfully loaded.
    */
