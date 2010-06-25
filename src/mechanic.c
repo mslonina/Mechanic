@@ -734,7 +734,7 @@ int main(int argc, char* argv[]){
 
   /* Create module file name */
   module_len = snprintf(NULL, 0, "libmechanic_module_%s.so", cd.module);
-  module_file = calloc(module_len + 1, sizeof(char));
+  module_file = calloc((module_len + 1)*sizeof(char*), sizeof(char*));
   if (module_file == NULL) mechanic_error(MECHANIC_ERR_MEM);
   module_len = snprintf(module_file, module_len+1, "libmechanic_module_%s.so", cd.module);
 

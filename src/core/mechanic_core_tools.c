@@ -206,10 +206,10 @@ void* load_sym(void* handler, char* md_name, char* function,
   lenl = mn + fl + 3;
   leno = mn + fol + 3;
 
-  func = calloc(lenl * sizeof(char), sizeof(char));
+  func = calloc(lenl * sizeof(char*), sizeof(char*));
   if (func == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  func_over = calloc(leno * sizeof(char), sizeof(char));
+  func_over = calloc(leno * sizeof(char*), sizeof(char*));
   if (func_over == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   /* Create function names */
