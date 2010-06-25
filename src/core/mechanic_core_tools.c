@@ -411,25 +411,7 @@ int mechanic_copy(char* in, char* out){
   return 0;
 }
 
-/* Allocates integer 2D array */
-void allocate_int_array(mechanic_int_array* p, int x, int y) {
-
-  int i;
-
-  p->x = x;
-  p->y = y;
-
-  p->array = calloc(sizeof(uintptr_t) * ((uintptr_t) p->x + 1), sizeof(uintptr_t));
-  if (p->array == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  for (i = 0; i < x; i++) {
-    p->array[i] = calloc(sizeof(uintptr_t) * p->y, sizeof(uintptr_t));
-    if (p->array[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-  }
-
-}
-
-void free_int_array(mechanic_int_array* p) {
+/*void free_int_array(mechanic_int_array* p) {
 
   int i;
 
@@ -440,7 +422,27 @@ void free_int_array(mechanic_int_array* p) {
   free(p->array);
 
 }
+*/
+/* Allocate 2D int array */
+/*int** allocate2Dint(int x, int y) {
 
+  int** pointer;
+  int i;
+  pointer = calloc(sizeof(uintptr_t)* (x+1), sizeof(uintptr_t));
+  if (pointer == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  for (i = 0; i < x; i++) {
+    pointer[i] = calloc(sizeof(uintptr_t) * y, sizeof(uintptr_t));
+    if (pointer[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  }
+
+  return pointer;
+}*/
+
+/*void free2Dint(int** pointer) {
+
+}
+*/
 /* Checks ups status */
 int mechanic_ups() {
 
