@@ -315,12 +315,16 @@ int main(int argc, char* argv[]){
     };
 
   struct poptOption mechanic_poptModes[] = {
-    {"masteralone", '0', POPT_ARG_VAL, &mode, 0,
+    {"masteralone", MECHANIC_MODE_MASTERALONE, POPT_ARG_VAL, &mode, MECHANIC_MODE_MASTERALONE,
       "Masteralone", NULL},
-    {"farm", '1', POPT_ARG_VAL, &mode, 1,
+    {"farm", MECHANIC_MODE_FARM, POPT_ARG_VAL, &mode, MECHANIC_MODE_FARM,
       "MPI task farm", NULL},
-    {"multifarm", '2', POPT_ARG_VAL, &mode, 2,
-      "MPI multi task farm", NULL},
+    /*{"multifarm", MECHANIC_MODE_MULTIFARM, POPT_ARG_VAL, &mode, MECHANIC_MODE_MULTIFARM,
+      "MPI multi task farm", NULL},*/
+#ifdef MECHANIC_GPU
+    {"gpu", MECHANIC_MODE_GPU, POPT_ARG_VAL, &mode, MECHANIC_MODE_GPU,
+      "GPU based farm", NULL},
+#endif
     POPT_TABLEEND
   };
 
@@ -814,9 +818,14 @@ int main(int argc, char* argv[]){
     case MECHANIC_MODE_FARM:
       mstat = mechanic_mode_farm(mpi_size, node, handler, &md, &cd);
       break;
-    case MECHANIC_MODE_MULTIFARM:
-      mstat = mechanic_mode_multifarm(mpi_size, node, handler, &md, &cd);
+#ifdef MECHANIC_GPU
+    case MECHANIC_MODE_GPU:
+      mstat = mechanic_mode_gpu(mpi_size, node, handler, &md, &cd);
       break;
+#endif
+    /*case MECHANIC_MODE_MULTIFARM:
+      mstat = mechanic_mode_multifarm(mpi_size, node, handler, &md, &cd);
+      break;*/
     default:
       break;
   }
