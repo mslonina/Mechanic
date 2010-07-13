@@ -92,6 +92,7 @@
 #define MECHANIC_CHECKPOINTS 3
 #define MECHANIC_MODE_DEFAULT "1"
 #define MECHANIC_MRL_DEFAULT 4
+#define MECHANIC_MODULE_PREFIX "libmechanic_module_"
 
 #define MECHANIC_FILE 256
 #define MECHANIC_FILE_OLD_PREFIX "backup-"

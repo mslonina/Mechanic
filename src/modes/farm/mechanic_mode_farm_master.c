@@ -75,7 +75,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
   MPI_Datatype masterResultsType;
   MPI_Datatype initialConditionsType;
 
-  module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR;
+  module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qac, qbc;
   module_query_int_f qr;
 
   /* Allocate memory for result.res array. */
@@ -234,8 +234,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
      */
 
     if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) { 
+      qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
+        MECHANIC_MODULE_SILENT);
+      if (qbc) mstat = qbc(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+      
       mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       check = 0;
+      
+      qac = load_sym(handler, d->module, "node_afterCheckpoint", "master_afterCheckpoint",
+        MECHANIC_MODULE_SILENT);
+      if (qac) mstat = qac(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
     } else {
       check++;
     }
@@ -311,8 +319,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
     /* There is a possibility that count > check, and then we have to perform
      * another checkpoint write */
     if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
+      qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
+        MECHANIC_MODULE_SILENT);
+      if (qbc) mstat = qbc(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+      
       mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       check = 0;
+      
+      qac = load_sym(handler, d->module, "node_afterCheckpoint", "master_afterCheckpoint",
+        MECHANIC_MODULE_SILENT);
+      if (qac) mstat = qac(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
     } else {
       check++;
     }

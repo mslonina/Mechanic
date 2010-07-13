@@ -271,8 +271,7 @@ int main(int argc, char* argv[]){
 
   char* module_file;
   char* oldfile;
-  int module_len;
-  size_t olen, opreflen, dlen;
+  size_t olen, opreflen, dlen, module_len, module_pref, module_file_len;
 
   /* HDF Helpers */
   hid_t file_id;
@@ -524,6 +523,16 @@ int main(int argc, char* argv[]){
 
     }
 
+    /* We allow to override checkpoint file interval in the restartmode */
+    if (restartmode == 1) {
+      checkpoint = LRC_option2int("logs", "checkpoint");
+      poptResetContext(poptcon);
+      poptcon = poptGetContext(NULL, argc, (const char **) argv, cmdopts, 0);
+      optvalue = poptGetNextOpt(poptcon);
+      LRC_itoa(convstr, checkpoint, LRC_INT);
+      LRC_modifyOption("logs", "checkpoint", convstr, LRC_INT);
+    }
+
     /* STEP 3: Options are processed, we can now assign config values. */
     mstat = assignConfigValues(&cd);
 
@@ -724,6 +733,10 @@ int main(int argc, char* argv[]){
         MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
           &cd.mode, 1, MPI_INT, MPI_COMM_WORLD);
 
+        cd.name[lengths[0]] = LRC_NULL;
+        cd.datafile[lengths[1]] = LRC_NULL;
+        cd.module[lengths[2]] = LRC_NULL;
+
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
           "Node [%d] received following configuration:\n\n", node);
         mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
@@ -733,10 +746,21 @@ int main(int argc, char* argv[]){
    }
 
   /* Create module file name */
-  module_len = snprintf(NULL, 0, "libmechanic_module_%s.so", cd.module);
-  module_file = calloc((module_len + 1)*sizeof(char*), sizeof(char*));
+  module_pref = strlen(MECHANIC_MODULE_PREFIX);
+  module_len = strlen(cd.module);
+  module_file_len = module_pref + module_len + 4;
+
+  module_file = calloc((module_file_len)*sizeof(char*), sizeof(char*));
   if (module_file == NULL) mechanic_error(MECHANIC_ERR_MEM);
-  module_len = snprintf(module_file, module_len+1, "libmechanic_module_%s.so", cd.module);
+
+  strncpy(module_file, "libmechanic_module_", module_pref);
+  module_file[module_pref] = LRC_NULL;
+
+  strncat(module_file, cd.module, module_len);
+  module_file[module_pref+module_len] = LRC_NULL;
+
+  strncat(module_file, ".so", 3);
+  module_file[module_file_len] = LRC_NULL;
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Module file: %s\n", module_file);
 
@@ -749,6 +773,7 @@ int main(int argc, char* argv[]){
   }
 
   /* Module init */
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
   if (node == 0) {
     init = load_sym(handler,cd.module, "init", "master_init", MECHANIC_MODULE_ERROR);
   } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != 0)) {
@@ -761,6 +786,7 @@ int main(int argc, char* argv[]){
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
 
   /* Module query */
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
   query = load_sym(handler,cd.module, "query", "query", MECHANIC_MODULE_SILENT);
   if (query) query(mpi_size, node, &md, &cd);
 
@@ -769,6 +795,7 @@ int main(int argc, char* argv[]){
    * successfully loaded.
    */
   if (node == 0 && restartmode == 0) {
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Create master data file\n");
     /* Create master datafile */
     file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     mstat = H5createMasterDataScheme(file_id, &md, &cd);
@@ -779,6 +806,7 @@ int main(int argc, char* argv[]){
   }
 
   /* Now load proper routines */
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Loading mode\n");
   switch (cd.mode) {
     case MECHANIC_MODE_MASTERALONE:
       mstat = mechanic_mode_masteralone(mpi_size, node, handler, &md, &cd);
@@ -794,6 +822,7 @@ int main(int argc, char* argv[]){
   }
 
   /* Module cleanup */
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
   if (node == 0) {
     cleanup = load_sym(handler, cd.module, "cleanup", "master_cleanup", MECHANIC_MODULE_ERROR);
   } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != 0)) {

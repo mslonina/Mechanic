@@ -4,7 +4,7 @@
 # encoding: utf-8
 
 obj = bld.new_task_gen(features='fortran fshlib')
-obj.find_sources_in_dirs(".")
+obj.source = bld.glob('*.F03')
 obj.includes = ". ../../../fortran"
 obj.export_incdirs = "."
 obj.target = 'mechanic_module_map'

@@ -4,14 +4,14 @@
 # encoding: utf-8
 
 obj = bld.new_task_gen('cc', 'cstaticlib')
-obj.find_sources_in_dirs(".")
+obj.source = bld.glob('*.c')
 obj.includes = ". ../../core"
 obj.uselib_local = "core"
 obj.target = 'mechanic_engine_gpu'
 obj.name = 'gpu-static'
 
 obj = bld.new_task_gen('cc', 'shlib')
-obj.find_sources_in_dirs(".")
+obj.source = bld.glob('*.c')
 obj.includes = ". ../../core"
 obj.uselib_local = "core"
 obj.target = 'mechanic_engine_gpu'

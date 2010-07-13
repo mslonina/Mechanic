@@ -65,7 +65,7 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
   int pixeldiff = 0;
   int totalnumofpx = 0;
 
-  module_query_void_f qpc, qpx, qpb;
+  module_query_void_f qpc, qpx, qpb, qac, qbc;
   module_query_int_f qr;
 
   /* Allocate memory */
@@ -175,8 +175,16 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
     check++;
 
     if (check % d->checkpoint == 0 || mechanic_ups < 0) {
+      qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
+        MECHANIC_MODULE_SILENT);
+      if (qbc) mstat = qbc(node, md, d, &inidata, &result);
+      
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
       check = 0;
+      
+      qac = load_sym(handler, d->module, "node_afterCheckpoint", "master_afterCheckpoint",
+        MECHANIC_MODULE_SILENT);
+      if (qac) mstat = qac(node, md, d, &inidata, &result);
     }
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
@@ -188,7 +196,13 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
 
   /* Write outstanding results */
   if (check > 0) {
+      qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
+        MECHANIC_MODULE_SILENT);
+      if (qbc) mstat = qbc(node, md, d, &inidata, &result);
     mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+      qac = load_sym(handler, d->module, "node_afterCheckpoint", "master_afterCheckpoint",
+        MECHANIC_MODULE_SILENT);
+      if (qac) mstat = qac(node, md, d, &inidata, &result);
   }
 
   /* FARM ENDS */
