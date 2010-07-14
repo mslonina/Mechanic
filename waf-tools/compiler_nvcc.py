@@ -24,16 +24,16 @@ def detect(conf):
 		except Configure.ConfigurationError,e:
 			debug('compiler_nvcc: %r'%e)
 		else:
-			if conf.env['CC']:
+			if conf.env['NVCC']:
 				orig.table=conf.env.get_merged_dict()
 				conf.env=orig
 				conf.check_message(compiler,'',True)
-				conf.env['COMPILER_CC']=compiler
+				conf.env['COMPILER_NVCC']=compiler
 				break
 			conf.check_message(compiler,'',False)
 			break
 	else:
-		conf.fatal('could not configure a mpi compiler!')
+		conf.fatal('could not configure a CUDA compiler!')
 def set_options(opt):
   build_platform=Utils.unversioned_sys_platform()
   possible_compiler_list=__list_possible_compiler(build_platform)

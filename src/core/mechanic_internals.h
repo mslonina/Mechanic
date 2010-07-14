@@ -115,8 +115,8 @@
 #define MECHANIC_DATASETMASTER "master"
 
 enum Modes {
-#ifdef MECHANIC_GPU
-  MECHANIC_MODE_GPU,
+#ifdef HAVE_CUDA_H
+  MECHANIC_MODE_CUDA,
 #endif
   MECHANIC_MODE_MASTERALONE,
   MECHANIC_MODE_FARM,
@@ -201,6 +201,10 @@ int mechanic_mode_multifarm(int mpi_size, int node, void* handler, moduleInfo* m
 int mechanic_mode_farm(int mpi_size, int node, void* handler, moduleInfo* md, configData* d);
 int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo* md,
     configData* d);
+
+#ifdef HAVE_CUDA_H
+int mechanic_mode_cuda(int mpi_size, int node, void* handler, moduleInfo* md, configData* d);
+#endif
 
 int mechanic_printConfig(configData* cd, int flag);
 int mechanic_copy(char* in, char* out);

@@ -6,39 +6,39 @@ import Configure,Options,Utils
 import ccroot,ar
 from Configure import conftest
 def find_nvcc(conf):
-	cc=conf.find_program(['nvcc'],var='CC',mandatory=True)
+	cc=conf.find_program(['nvcc'],var='NVCC',mandatory=True)
 	cc=conf.cmd_to_list(cc)
-	ccroot.get_cc_version(conf,cc,gcc=True)
-	conf.env.CC_NAME='nvcc'
-	conf.env.CC=cc
+	#ccroot.get_cc_version(conf,cc,gcc=True)
+	conf.env['NVCC_NAME']='nvcc'
+	conf.env['NVCC']=cc
 def nvcc_common_flags(conf):
 	v=conf.env
-	v['CCFLAGS_DEBUG']=['-g']
-	v['CCFLAGS_RELEASE']=['-O2']
-	v['CC_SRC_F']=''
-	v['CC_TGT_F']=['-c','-o','']
+	v['NVCCFLAGS_DEBUG']=['-g']
+	v['NVCCFLAGS_RELEASE']=['-O2']
+	v['NVCC_SRC_F']=''
+	v['NVCC_TGT_F']=['-c','-o','']
 	v['CPPPATH_ST']='-I%s'
-	if not v['LINK_CC']:v['LINK_CC']=v['CC']
-	v['CCLNK_SRC_F']=''
-	v['CCLNK_TGT_F']=['-o','']
+	if not v['LINK_NVCC']:v['LINK_NVCC']=v['NVCC']
+	v['NVCCLNK_SRC_F']=''
+	v['NVCCLNK_TGT_F']=['-o','']
 	v['LIB_ST']='-l%s'
 	v['LIBPATH_ST']='-L%s'
 	v['STATICLIB_ST']='-l%s'
 	v['STATICLIBPATH_ST']='-L%s'
 	v['RPATH_ST']='-Wl,-rpath,%s'
-	v['CCDEFINES_ST']='-D%s'
+	v['NVCCDEFINES_ST']='-D%s'
 	v['SONAME_ST']='-Wl,-h,%s'
 	v['SHLIB_MARKER']='-Wl,-Bdynamic'
 	v['STATICLIB_MARKER']='-Wl,-Bstatic'
 	v['FULLSTATIC_MARKER']='-static'
 	v['program_PATTERN']='%s'
-	v['shlib_CCFLAGS']=['-fPIC','-DPIC']
+	v['shlib_NVCCFLAGS']=['-fPIC','-DPIC']
 	v['shlib_LINKFLAGS']=['-shared']
 	v['shlib_PATTERN']='lib%s.so'
 	v['staticlib_LINKFLAGS']=['-Wl,-Bstatic']
 	v['staticlib_PATTERN']='lib%s.a'
 	v['LINKFLAGS_MACBUNDLE']=['-bundle','-undefined','dynamic_lookup']
-	v['CCFLAGS_MACBUNDLE']=['-fPIC']
+	v['NVCCFLAGS_MACBUNDLE']=['-fPIC']
 	v['macbundle_PATTERN']='%s.bundle'
 def nvcc_modifier_win32(conf):
 	v=conf.env
@@ -48,8 +48,8 @@ def nvcc_modifier_win32(conf):
 	v['IMPLIB_ST']='-Wl,--out-implib,%s'
 	dest_arch=v['DEST_CPU']
 	if dest_arch=='x86':
-		v['shlib_CCFLAGS']=['-DPIC']
-	v.append_value('shlib_CCFLAGS','-DDLL_EXPORT')
+		v['shlib_NVCCFLAGS']=['-DPIC']
+	v.append_value('shlib_NVCCFLAGS','-DDLL_EXPORT')
 	v.append_value('LINKFLAGS','-Wl,--enable-auto-import')
 def nvcc_modifier_cygwin(conf):
 	nvcc_modifier_win32(conf)
@@ -58,7 +58,7 @@ def nvcc_modifier_cygwin(conf):
 	v.append_value('shlib_LINKFLAGS','-Wl,--enable-auto-image-base')
 def nvcc_modifier_darwin(conf):
 	v=conf.env
-	v['shlib_CCFLAGS']=['-fPIC','-compatibility_version','1','-current_version','1']
+	v['shlib_NVCCFLAGS']=['-fPIC','-compatibility_version','1','-current_version','1']
 	v['shlib_LINKFLAGS']=['-dynamiclib']
 	v['shlib_PATTERN']='lib%s.dylib'
 	v['staticlib_LINKFLAGS']=[]

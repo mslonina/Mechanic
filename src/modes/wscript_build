@@ -4,4 +4,7 @@
 # encoding: utf-8
 
 bld.add_subdirs('farm masteralone multifarm')
+if bld.env.CUDA:
+  bld.add_subdirs('cuda')
+  
 

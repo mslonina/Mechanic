@@ -1,0 +1,14 @@
+#!/usr/bin/env python
+# wscript for Mechanic
+# Mariusz Slonina, 2010
+# encoding: utf-8
+
+obj = bld.new_task_gen('cc', 'cstaticlib')
+obj.source = 'mechanic_mode_cuda.c mechanic_mode_cuda_kernel.cu'
+obj.includes = ". ../../core"
+obj.uselib = 'core'
+obj.target = 'mechanic_mode_cuda'
+obj.name = 'cuda'
+obj.env['CUDAFLAGS'] += ['-deviceemu']
+# '--device-compilation c', '--host-compilation c']
+

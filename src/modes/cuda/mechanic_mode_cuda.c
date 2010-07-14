@@ -44,32 +44,32 @@
 
 #include "mechanic.h"
 #include "mechanic_internals.h"
-#include "mechanic_mode_gpu.h"
+#include "mechanic_mode_cuda.h"
 
-int mechanic_mode_gpu(int mpi_size, int node, void* handler, moduleInfo* md,
+int mechanic_mode_cuda(int mpi_size, int node, void* handler, moduleInfo* md,
     configData* d){
 
-  int i = 0, j = 0, farm_res = 0, mstat = 0, tab[3], check = 0;
+  /*int i = 0, j = 0, farm_res = 0, mstat = 0, tab[3], check = 0;
   int npxc = 0;
 
   masterData result;
   masterData inidata;
-
+*/
   /* Checkpoint storage */
-  int** coordsarr;
+  /*int** coordsarr;
   MECHANIC_DATATYPE **resultarr;
-
+*/
   /* Restart mode board */
-  int** board;
+  /*int** board;
   int computed = 0;
   int pixeldiff = 0;
   int totalnumofpx = 0;
 
   module_query_void_f qpc, qpx, qpb, qac, qbc;
   module_query_int_f qr;
-
+*/
   /* Allocate memory */
-  result.res = calloc(((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE),
+  /*result.res = calloc(((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE),
       sizeof(MECHANIC_DATATYPE));
   if (result.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
@@ -90,9 +90,9 @@ int mechanic_mode_gpu(int mpi_size, int node, void* handler, moduleInfo* md,
     resultarr[i] = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl), sizeof(uintptr_t));
     if (resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
   }
-
+*/
   /* Allocate memory for board */
-  board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
+  /*board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
   if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   for (i = 0; i < d->xres; i++) {
@@ -101,14 +101,14 @@ int mechanic_mode_gpu(int mpi_size, int node, void* handler, moduleInfo* md,
   }
 
   computed = H5readBoard(d, board);
-
+*/
   /* Master can do something useful before computations,
    * even in masteralone mode */
-  query = load_sym(handler, d->module, "node_in", "master_in", MECHANIC_MODULE_SILENT);
+/*  query = load_sym(handler, d->module, "node_in", "master_in", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
-
+*/
   /* Align farm resolution for given method. */
-  if (d->method == 0 || d->method == 6) farm_res = d->xres*d->yres;
+/*  if (d->method == 0 || d->method == 6) farm_res = d->xres*d->yres;
   if (d->method == 6) {
     qr = load_sym(handler, d->module, "farmResolution", "farmResolution",
         MECHANIC_MODULE_ERROR);
@@ -116,9 +116,9 @@ int mechanic_mode_gpu(int mpi_size, int node, void* handler, moduleInfo* md,
   }
 
   pixeldiff = farm_res - computed;
-
+*/
   /* Perform farm operations */
-  while (1) {
+/*  while (1) {
 
     npxc = map2d(npxc, handler, md, d, tab, board);
     totalnumofpx++;
@@ -147,18 +147,18 @@ int mechanic_mode_gpu(int mpi_size, int node, void* handler, moduleInfo* md,
     qpb = load_sym(handler, d->module, "node_beforeProcessPixel",
         "master_beforeProcessPixel", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &inidata, &result);
-
+*/
     /* PIXEL COMPUTATION */
-    qpx = load_sym(handler, d->module, "processPixel", "processPixel",
+/*    qpx = load_sym(handler, d->module, "processPixel", "processPixel",
         MECHANIC_MODULE_ERROR);
     if (qpx) mstat = qpx(node, md, d, &inidata, &result);
 
     qpb = load_sym(handler, d->module, "node_afterProcessPixel",
         "master_afterProcessPixel", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &inidata, &result);
-
+*/
     /* Copy data to checkpoint arrays */
-    coordsarr[check][0] = result.coords[0];
+  /*  coordsarr[check][0] = result.coords[0];
     coordsarr[check][1] = result.coords[1];
     coordsarr[check][2] = result.coords[2];
 
@@ -193,9 +193,9 @@ int mechanic_mode_gpu(int mpi_size, int node, void* handler, moduleInfo* md,
 
     if (npxc >= farm_res) break;
   }
-
+*/
   /* Write outstanding results */
-  if (check > 0) {
+  /*if (check > 0) {
       qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
         MECHANIC_MODULE_SILENT);
       if (qbc) mstat = qbc(node, md, d, &inidata, &result);
@@ -204,15 +204,15 @@ int mechanic_mode_gpu(int mpi_size, int node, void* handler, moduleInfo* md,
         MECHANIC_MODULE_SILENT);
       if (qac) mstat = qac(node, md, d, &inidata, &result);
   }
-
+*/
   /* FARM ENDS */
 
   /* Master can do something useful after the computations. */
-  query = load_sym(handler, d->module, "node_out", "master_out",
+  /*query = load_sym(handler, d->module, "node_out", "master_out",
       MECHANIC_MODULE_SILENT);
   if (query) mstat = query(1, node, md, d, &inidata, &result);
-
-  free(result.res);
+*/
+  /*free(result.res);
   free(inidata.res);
 
   for (i = 0; i < d->checkpoint; i++) {
@@ -225,7 +225,7 @@ int mechanic_mode_gpu(int mpi_size, int node, void* handler, moduleInfo* md,
 
   for (i = 0; i < d->xres; i++) free(board[i]);
   free(board);
-
+*/
   return 0;
 }
 

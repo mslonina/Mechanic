@@ -321,9 +321,9 @@ int main(int argc, char* argv[]){
       "MPI task farm", NULL},
     /*{"multifarm", MECHANIC_MODE_MULTIFARM, POPT_ARG_VAL, &mode, MECHANIC_MODE_MULTIFARM,
       "MPI multi task farm", NULL},*/
-#ifdef MECHANIC_GPU
-    {"gpu", MECHANIC_MODE_GPU, POPT_ARG_VAL, &mode, MECHANIC_MODE_GPU,
-      "GPU based farm", NULL},
+#ifdef HAVE_CUDA_H
+    {"cuda", MECHANIC_MODE_CUDA, POPT_ARG_VAL, &mode, MECHANIC_MODE_CUDA,
+      "CUDA based farm", NULL},
 #endif
     POPT_TABLEEND
   };
@@ -818,9 +818,9 @@ int main(int argc, char* argv[]){
     case MECHANIC_MODE_FARM:
       mstat = mechanic_mode_farm(mpi_size, node, handler, &md, &cd);
       break;
-#ifdef MECHANIC_GPU
-    case MECHANIC_MODE_GPU:
-      mstat = mechanic_mode_gpu(mpi_size, node, handler, &md, &cd);
+#ifdef HAVE_CUDA_H
+    case MECHANIC_MODE_CUDA:
+      mstat = mechanic_mode_cuda(mpi_size, node, handler, &md, &cd);
       break;
 #endif
     /*case MECHANIC_MODE_MULTIFARM:

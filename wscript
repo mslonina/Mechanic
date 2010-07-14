@@ -29,6 +29,7 @@ tooldir = srcdir + '/waf-tools/'
 # Sources
 core = ['src', 'src/core', 'src/modes', 'src/modules']
 fortran = ['src/fortran']
+cudamode = ['src/modes/cuda']
 
 all_modules = ['src/modules/hello',
                'src/modules/echo',
@@ -267,9 +268,13 @@ def set_options(opt):
 
   opt.tool_options('compiler_mpicc', tooldir=tooldir)
   opt.tool_options('compiler_mpif90', tooldir=tooldir)
+  opt.tool_options('compiler_nvcc', tooldir=tooldir)
   
   opt.add_option('--with-fortran', action = 'store_true', default = False,
                   help = 'Build Fortran2003 bindings', dest = 'with_f2003')
+
+  opt.add_option('--with-cuda', action = 'store_true', default = False,
+                  help = 'Build CUDA mode', dest = 'with_cuda')
 
   opt.add_option('--with-doc', action = 'store_true', default = False,
                   help = 'Build documentation', dest = 'with_doc')
@@ -305,9 +310,11 @@ def configure(conf):
   global hdf5_test_code
   global core
   global fortran
+  global cudamode
   
   conf.env['TOOLDIR'] = srcdir + '/waf-tools/'
   conf.env['MECHANIC_CORE'] = []
+  conf.env['MECHANIC_BUILD_CUDA'] = []
   conf.env['MECHANIC_BUILD_FORTRAN'] = []
   conf.env['MECHANIC_BUILD_MODULES'] = []
   conf.env['MECHANIC_BUILD_F2003_MODULES'] = []
@@ -320,9 +327,13 @@ def configure(conf):
   test_code_dl = _test_code('waf-tests/test-dl.c')
   test_code_hdf = _test_code('waf-tests/test-hdf.c')
   test_code_lrc = _test_code('waf-tests/test-lrc.c')
+  test_code_cuda = _test_code('waf-tests/test-cuda.cu')
 
   if Options.options.with_f2003:
     conf.env.MPIF = 1
+  
+  if Options.options.with_cuda:
+    conf.env.CUDA = 1
 
   if Options.options.with_fortran_modules and not Options.options.with_f2003:
     Utils.pprint('YELLOW','Fortran modules used, adding F2003 bindings support')
@@ -334,6 +345,9 @@ def configure(conf):
   if conf.env.MPIF:
     conf.check_tool('compiler_mpif90', tooldir=tooldir)
 
+  if conf.env.CUDA:
+    conf.check_tool('cuda', tooldir=tooldir)
+
   _check_std_headers(conf, stdheads, stdfunc, stdtypes)
   _check_lib(conf, ['m', 'math.h', 'pow', test_code_libm, '', 1])
   _check_lib(conf, ['hdf5', 'hdf5.h', 'H5Dopen2', test_code_hdf, '', 1])
@@ -341,6 +355,12 @@ def configure(conf):
                     test_code_lrc, 'HDF5', 1])
   _check_lib(conf, ['dl', 'dlfcn.h', 'dlopen', test_code_dl, '', 1])
   _check_lib(conf, ['popt', 'popt.h', 'poptGetContext', test_code_popt, '', 1])
+  
+  if conf.env.CUDA:
+    oldcc = conf.env['CC']
+    conf.env['CC'] = conf.env['NVCC']
+    _check_lib(conf, ['cudart', 'cuda.h', '', test_code_cuda, '', 1])
+    conf.env['CC'] = oldcc
 	
 	# Check for doxygen
   if Options.options.with_doc:
@@ -362,6 +382,9 @@ def configure(conf):
   if conf.env.MPIF:
     conf.env['MECHANIC_BUILD_FORTRAN'] = fortran
     conf.env['MECHANIC_BUILD_F2003_MODULES'] = _configure_optionals(conf, 'fortran_modules')
+
+  if conf.env.CUDA:
+    conf.env['MECHANIC_BUILD_CUDA'] = cudamode
 	
   # Define standard declarations
   conf.define('PACKAGE_NAME', APPNAME)
@@ -386,6 +409,10 @@ def configure(conf):
     # necessary to put the module in right place after compilation
     conf.env['FCFLAGS'] += ['-Jdefault/src/fortran'] 
 
+  #if conf.env.CUDA:
+    #conf.env['CUDAFLAGS'] += ['-deviceemu']
+    #conf.env['CUDAFLAGS'] += ['-deviceemu', '--device-compilation c','--host-compilation c']
+
 
   # Write config.h
   conf.write_config_header('config.h')
@@ -399,6 +426,7 @@ def configure(conf):
 def build(bld):
   bld.use_the_magic() # <- use this so that we have proper chain in F2003
   bld.add_subdirs(bld.env['MECHANIC_CORE'])
+  bld.add_subdirs(bld.env['MECHANIC_BUILD_CUDA'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_FORTRAN'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_MODULES'])
   bld.add_subdirs(bld.env['MECHANIC_BUILD_F2003_MODULES'])

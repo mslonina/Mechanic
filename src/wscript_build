@@ -5,6 +5,8 @@
 
 obj = bld.new_task_gen('cc', 'cprogram')
 obj.uselib_local = 'farm masteralone multifarm core'
+if bld.env.CUDA:
+  obj.uselib_local += ' cuda'
 obj.includes = '. core'
 obj.ccflags = '-rdynamic'
 obj.source = 'mechanic.c'
