@@ -171,7 +171,15 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
         MECHANIC_MODULE_SILENT);
     if (qbeforeS) mstat = qbeforeS(i, md, d, &result);
 
+#ifdef IPM
+    MPI_Pcontrol(1, "master_ini_send");
+#endif
+
     MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
+
+#ifdef IPM
+    MPI_Pcontrol(-1, "master_ini_send");
+#endif
 
     qafterS = load_sym(handler, d->module, "node_afterSend", "master_afterSend",
         MECHANIC_MODULE_SILENT);
@@ -201,8 +209,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
         "master_beforeReceive", MECHANIC_MODULE_SILENT);
     if (qbeforeR) mstat = qbeforeR(0, md, d, &inidata, &result);
 
+#ifdef IPM
+    MPI_Pcontrol(1,"master_result_recv");
+#endif
+
     MPI_Recv(&result, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
         MPI_COMM_WORLD, &mpi_status);
+
+#ifdef IPM
+    MPI_Pcontrol(-1,"master_result_recv");
+#endif
 
     totalnumofpx++;
     count--;
@@ -270,8 +286,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
         "Pixel [%04d, %04d, %04d] sended to node %d\n",
           inidata.coords[0], inidata.coords[1], inidata.coords[2], mpi_status.MPI_SOURCE);
 
+#ifdef IPM
+      MPI_Pcontrol(1,"master_pixel_send");
+#endif
+
       MPI_Send(&inidata, 1, initialConditionsType, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG,
           MPI_COMM_WORLD);
+
+#ifdef IPM
+      MPI_Pcontrol(-1,"master_pixel_send");
+#endif
 
       qafterS = load_sym(handler, d->module, "node_afterSend", "master_afterSend",
           MECHANIC_MODULE_SILENT);
@@ -295,8 +319,18 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
     if (qbeforeR) mstat = qbeforeR(0, md, d, &inidata, &result);
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Recv... ");
+
+#ifdef IPM
+    MPI_Pcontrol(1,"master_final_recv");
+#endif
+
     MPI_Recv(&result, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
         MPI_COMM_WORLD, &mpi_status);
+
+#ifdef IPM
+    MPI_Pcontrol(-1,"master_final_recv");
+#endif
+
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "done\n");
     totalnumofpx++;
 

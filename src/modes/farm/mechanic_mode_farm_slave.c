@@ -141,8 +141,16 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
           MECHANIC_MODULE_SILENT);
       if (qbeforeS) mstat = qbeforeS(node, md, d, &inidata, &result);
 
+#ifdef IPM
+      MPI_Pcontrol(1,"slave_send_result");
+#endif
+
       MPI_Send(&result, 1, masterResultsType, MECHANIC_MPI_DEST,
           MECHANIC_MPI_RESULT_TAG, MPI_COMM_WORLD);
+
+#ifdef IPM
+      MPI_Pcontrol(-1,"slave_send_result");
+#endif
 
       qafterS = load_sym(handler, d->module, "node_afterSend", "slave_afterSend",
           MECHANIC_MODULE_SILENT);
@@ -152,8 +160,16 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
           "slave_beforeReceive", MECHANIC_MODULE_SILENT);
       if (qbeforeR) mstat = qbeforeR(node, md, d, &inidata, &result);
 
+#ifdef IPM
+      MPI_Pcontrol(1,"slave_recv_pixel");
+#endif
+
       MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST, MPI_ANY_TAG,
           MPI_COMM_WORLD, &mpi_status);
+
+#ifdef IPM
+      MPI_Pcontrol(-1,"slave_recv_pixel");
+#endif
 
       qafterR = load_sym(handler, d->module, "node_afterReceive",
           "slave_afterReceive", MECHANIC_MODULE_SILENT);
