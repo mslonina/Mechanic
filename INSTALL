@@ -26,6 +26,14 @@ To build additional modules use (comma separated list):
 
 --with-modules=hello,echo,mandelbrot
 
+To build Fortran2003 bindings use:
+
+--with-fortran
+
+To build Fortran2003 modules use (comma separated list):
+
+--with-fortran-modules=f2003,map
+
 To build additional libs use (comma separated list):
 
 --with-libs=orbit
