@@ -590,16 +590,18 @@ int main(int argc, char* argv[]){
         "Backuped file: %s\n",oldfile);
 
       /* Now we can safely rename files */
-      rename(cd.datafile,oldfile);
-      free(oldfile);
-    }
+      if (restartmode == 1) {
+        mechanic_copy(cd.datafile, oldfile);
+        /* At this point we have a backup of master file. In restart mode we have
+         * to start the simulation from the point of the provided checkpoint file.
+         * To save number of additional work, we simply make our checkpoint file
+         * new master file. */
+        mechanic_copy(CheckpointFile, cd.datafile);
+      } else {
+        rename(cd.datafile,oldfile);
+      }
 
-    /* At this point we have a backup of master file. In restart mode we have
-     * to start the simulation from the point of the provided checkpoint file.
-     * To save number of additional work, we simply make our checkpoint file
-     * new master file. */
-    if (restartmode == 1) {
-      mechanic_copy(CheckpointFile, cd.datafile);
+      free(oldfile);
     }
   }
  /* CONFIGURATION END */

@@ -97,8 +97,8 @@
 int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 
  hsize_t dimsf[2], dimsr[2];
- hid_t boardspace, dataspace;
- hid_t dset_board, data_group, dset_data;
+ hid_t boardspace, dataspace, statsspace;
+ hid_t dset_board, data_group, dset_data, dset_stats;
 
  /* Control board space */
  dimsf[0] = d->xres;
@@ -121,6 +121,10 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
  dset_data = H5Dcreate(data_group, MECHANIC_DATASETMASTER, H5T_NATIVE_DOUBLE,
      dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
+ /* Create stats dataset */
+/* dset_stats = H5Dcreate(stats_group, MECHANIC_STATSMASTER, H5T_NATIVE_DOUBLE,
+     dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+*/
  H5Dclose(dset_board);
  H5Dclose(dset_data);
  H5Sclose(boardspace);

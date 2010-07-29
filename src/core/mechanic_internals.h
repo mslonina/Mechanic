@@ -112,6 +112,7 @@
 #define MECHANIC_DATASETCONFIG "/config"
 #define MECHANIC_DATABOARD "/board"
 #define MECHANIC_DATAGROUP "/data"
+#define MECHANIC_STATSGROUP "/stats"
 #define MECHANIC_DATASETMASTER "master"
 
 enum Modes {
