@@ -408,6 +408,7 @@ def configure(conf):
     conf.env['FCFLAGS'] += ['-Dpic']
     # necessary to put the module in right place after compilation
     conf.env['FCFLAGS'] += ['-Jdefault/src/fortran'] 
+    conf.env['FCFLAGS'] += ['-lhdf5_fortran', '-lhdf5']
 
   #if conf.env.CUDA:
     #conf.env['CUDAFLAGS'] += ['-deviceemu']

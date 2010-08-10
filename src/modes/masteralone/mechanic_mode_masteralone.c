@@ -46,8 +46,8 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_masteralone.h"
 
-int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo* md,
-    configData* d){
+int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
+    moduleInfo* md, configData* d){
 
   int i = 0, j = 0, farm_res = 0, mstat = 0, tab[3], check = 0;
   int npxc = 0;
@@ -77,26 +77,31 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
       sizeof(MECHANIC_DATATYPE));
   if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
+  coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1),
+      sizeof(uintptr_t));
   if (coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  resultarr = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
+  resultarr = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) d->checkpoint + 1),
+      sizeof(uintptr_t));
   if (resultarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   for (i = 0; i < d->checkpoint; i++) {
     coordsarr[i] = calloc(sizeof(uintptr_t) * 3, sizeof(uintptr_t));
     if (coordsarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-    resultarr[i] = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl), sizeof(uintptr_t));
+    resultarr[i] = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl),
+        sizeof(uintptr_t));
     if (resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
   }
 
   /* Allocate memory for board */
-  board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
+  board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres),
+      sizeof(uintptr_t));
   if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   for (i = 0; i < d->xres; i++) {
-    board[i] = calloc(sizeof(uintptr_t) * ((uintptr_t) d->yres), sizeof(uintptr_t));
+    board[i] = calloc(sizeof(uintptr_t) * ((uintptr_t) d->yres),
+        sizeof(uintptr_t));
     if (board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
   }
 
@@ -104,7 +109,8 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
 
   /* Master can do something useful before computations,
    * even in masteralone mode */
-  query = load_sym(handler, d->module, "node_in", "master_in", MECHANIC_MODULE_SILENT);
+  query = load_sym(handler, d->module, "node_in", "master_in",
+      MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
 
   /* Align farm resolution for given method. */
@@ -175,33 +181,34 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo*
     check++;
 
     if (check % d->checkpoint == 0 || mechanic_ups < 0) {
-      qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
-        MECHANIC_MODULE_SILENT);
+      qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
+          "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
       if (qbc) mstat = qbc(node, md, d, &inidata, &result);
-      
+
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
       check = 0;
-      
-      qac = load_sym(handler, d->module, "node_afterCheckpoint", "master_afterCheckpoint",
-        MECHANIC_MODULE_SILENT);
+
+      qac = load_sym(handler, d->module, "node_afterCheckpoint",
+          "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (qac) mstat = qac(node, md, d, &inidata, &result);
     }
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "[%04d / %04d] Pixel [%04d, %04d, %04d] computed\n",
-        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1], result.coords[2]);
+        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
+        result.coords[2]);
 
     if (npxc >= farm_res) break;
   }
 
   /* Write outstanding results */
   if (check > 0) {
-      qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
-        MECHANIC_MODULE_SILENT);
+      qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
+          "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
       if (qbc) mstat = qbc(node, md, d, &inidata, &result);
     mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
-      qac = load_sym(handler, d->module, "node_afterCheckpoint", "master_afterCheckpoint",
-        MECHANIC_MODULE_SILENT);
+      qac = load_sym(handler, d->module, "node_afterCheckpoint",
+          "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (qac) mstat = qac(node, md, d, &inidata, &result);
   }
 

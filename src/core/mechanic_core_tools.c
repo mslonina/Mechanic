@@ -127,7 +127,8 @@ void clearArray(MECHANIC_DATATYPE* array, int no_of_items_in_array){
  * Returns number of next pixel to be mapped, -1 on failure
  *
  */
-int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[], int** b){
+int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[],
+    int** b){
 
    int x, y;
    module_query_void_f qpcm;

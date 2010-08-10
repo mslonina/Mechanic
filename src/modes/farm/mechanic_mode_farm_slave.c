@@ -77,18 +77,19 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
   mstat = buildMasterResultsType(md->irl, &inidata, &initialConditionsType);
 
   /* Slave can do something useful before __all__ computations */
-  query = load_sym(handler, d->module, "node_in", "slave_in", MECHANIC_MODULE_SILENT);
+  query = load_sym(handler, d->module, "node_in", "slave_in",
+      MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
 
-  qbeforeR = load_sym(handler, d->module, "node_beforeReceive", "slave_beforeReceive",
-      MECHANIC_MODULE_SILENT);
+  qbeforeR = load_sym(handler, d->module, "node_beforeReceive",
+      "slave_beforeReceive", MECHANIC_MODULE_SILENT);
   if (qbeforeR) mstat = qbeforeR(node, md, d, &inidata, &result);
 
-  MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST, MPI_ANY_TAG, MPI_COMM_WORLD,
-      &mpi_status);
+  MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST, MPI_ANY_TAG,
+      MPI_COMM_WORLD, &mpi_status);
 
-  qafterR = load_sym(handler, d->module, "node_afterReceive", "slave_afterReceive",
-      MECHANIC_MODULE_SILENT);
+  qafterR = load_sym(handler, d->module, "node_afterReceive",
+      "slave_afterReceive", MECHANIC_MODULE_SILENT);
   if (qafterR) mstat = qafterR(node, md, d, &inidata, &result);
 
   while (1) {
@@ -137,8 +138,8 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
           "slave_afterProcessPixel", MECHANIC_MODULE_SILENT);
       if (qpb) mstat = qpb(node, md, d, &inidata, &result);
 
-      qbeforeS = load_sym(handler, d->module, "node_beforeSend", "slave_beforeSend",
-          MECHANIC_MODULE_SILENT);
+      qbeforeS = load_sym(handler, d->module, "node_beforeSend",
+          "slave_beforeSend", MECHANIC_MODULE_SILENT);
       if (qbeforeS) mstat = qbeforeS(node, md, d, &inidata, &result);
 
 #ifdef IPM
@@ -152,8 +153,8 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
       MPI_Pcontrol(-1,"slave_send_result");
 #endif
 
-      qafterS = load_sym(handler, d->module, "node_afterSend", "slave_afterSend",
-          MECHANIC_MODULE_SILENT);
+      qafterS = load_sym(handler, d->module, "node_afterSend",
+          "slave_afterSend", MECHANIC_MODULE_SILENT);
       if (qafterS) mstat = qafterS(node, md, d, &inidata, &result);
 
       qbeforeR = load_sym(handler, d->module, "node_beforeReceive",
@@ -164,8 +165,8 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
       MPI_Pcontrol(1,"slave_recv_pixel");
 #endif
 
-      MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST, MPI_ANY_TAG,
-          MPI_COMM_WORLD, &mpi_status);
+      MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST,
+          MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
 
 #ifdef IPM
       MPI_Pcontrol(-1,"slave_recv_pixel");

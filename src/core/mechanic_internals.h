@@ -196,15 +196,17 @@ void mechanic_welcome();
 
 void clearArray(MECHANIC_DATATYPE*,int);
 
-int mechanic_mode_multifarm(int mpi_size, int node, void* handler, moduleInfo* md,
-    configData* d);
+int mechanic_mode_multifarm(int mpi_size, int node, void* handler,
+    moduleInfo* md, configData* d);
 
-int mechanic_mode_farm(int mpi_size, int node, void* handler, moduleInfo* md, configData* d);
-int mechanic_mode_masteralone(int mpi_size, int node, void* handler, moduleInfo* md,
-    configData* d);
+int mechanic_mode_farm(int mpi_size, int node, void* handler,
+    moduleInfo* md, configData* d);
+int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
+    moduleInfo* md, configData* d);
 
 #ifdef HAVE_CUDA_H
-int mechanic_mode_cuda(int mpi_size, int node, void* handler, moduleInfo* md, configData* d);
+int mechanic_mode_cuda(int mpi_size, int node, void* handler,
+    moduleInfo* md, configData* d);
 #endif
 
 int mechanic_printConfig(configData* cd, int flag);

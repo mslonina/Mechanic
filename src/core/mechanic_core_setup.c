@@ -80,7 +80,7 @@
  * - @c --yres @c -y -- y resolution of the simulation map
  * - @c --checkpoint @c -d -- checkpoint file write interval
  *
- * @M provides user with a checkpoint system, see @ref checkpoint for 
+ * @M provides user with a checkpoint system, see @ref checkpoint for
  * detailes. In this case the options are:
  *
  * - @c --restart @c -r -- switch to restart mode and use checkpoint file
@@ -186,16 +186,17 @@
  *   the size of MPI group is greater than 1, @M will terminate all nodes but
  *   the master node.
  *
- * - @sb MPI Task farm@bs -- The classical, and default mode for @M. This will use
- *   one master node and number of slave nodes to do simulations. The master
+ * - @sb MPI Task farm@bs -- The classical, and default mode for @M. This will
+ *   use one master node and number of slave nodes to do simulations. The master
  *   node is responsible for sending/receiving data and storing them. If
  *   number of slave nodes is greater than number of simulations to do, all
  *   unused nodes will be terminated.
  *
- * - @sb MPI MultiTask farm@bs -- This is an extension of MPI Task farm. Here, we split
- *   our spool into parts with own sub-master node. The master node sends and
- *   receives data from sub-master nodes. Then, the scenario is the same as in
- *   MPI Task farm. Note: this mode will not be done until @c Unstable-4 release.
+ * - @sb MPI MultiTask farm@bs -- This is an extension of MPI Task farm. Here,
+ *   we split our spool into parts with own sub-master node. The master node
+ *   sends and receives data from sub-master nodes. Then, the scenario is the
+ *   same as in MPI Task farm. Note: this mode will not be done until
+ *   @c Unstable-4 release.
  *
  */
 

@@ -50,12 +50,12 @@
 ! Below is an example of Fortran module.
 !
 ! @code
-! @icode modules/hello-fortran/mechanic_module_ff.f03 F2003MODULE
+! @icode modules/hello-fortran/mechanic_module_fhello.f03 F2003MODULE
 ! @endcode
 ! [/F2003BIND]
 
 ! [F2003MODULE]
-module ff
+module fhello
 
   use iso_c_binding
   use mechanic_fortran
@@ -63,8 +63,8 @@ module ff
 contains
 
   ! Implementation of module_init()
-  integer (c_int) function ff_init(mpi_size, node, md, d) &
-    bind(c, name = 'ff_init') result(errcode)
+  integer (c_int) function fhello_init(mpi_size, node, md, d) &
+    bind(c, name = 'fhello_init') result(errcode)
 
     implicit none
     type(moduleInfo), intent(inout) :: md
@@ -75,11 +75,11 @@ contains
     md%mrl = 3
 
     errcode = 0
-  end function ff_init 
+  end function fhello_init 
 
   ! Implementation of module_cleanup()
-  integer (c_int) function ff_cleanup(mpi_size, node, md, d) &
-    bind(c, name = 'ff_cleanup') result(errcode)
+  integer (c_int) function fhello_cleanup(mpi_size, node, md, d) &
+    bind(c, name = 'fhello_cleanup') result(errcode)
 
     implicit none
     type(moduleInfo), intent(in) :: md
@@ -89,11 +89,11 @@ contains
     write(*,*) "End module fortran:)"
     errcode = 0
 
-  end function ff_cleanup
+  end function fhello_cleanup
 
   ! Implementation of module_processPixel()
-  integer (c_int) function ff_processPixel(node, md, d, ic, r) &
-    bind(c, name = 'ff_processPixel') result(errcode)
+  integer (c_int) function fhello_processPixel(node, md, d, ic, r) &
+    bind(c, name = 'fhello_processPixel') result(errcode)
 
     implicit none
     integer(c_int), intent(in), value :: node
@@ -113,7 +113,7 @@ contains
     res_array(3) = 42.0d0
 
     errcode = 0
-  end function ff_processPixel
+  end function fhello_processPixel
 
-end module ff
+end module fhello
 ! [/F2003MODULE]

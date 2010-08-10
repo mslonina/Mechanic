@@ -122,7 +122,7 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
      dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
  /* Create stats dataset */
-/* dset_stats = H5Dcreate(stats_group, MECHANIC_STATSMASTER, H5T_NATIVE_DOUBLE,
+  /*dset_stats = H5Dcreate(stats_group, MECHANIC_STATSMASTER, H5T_NATIVE_DOUBLE,
      dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 */
  H5Dclose(dset_board);

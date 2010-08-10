@@ -82,31 +82,34 @@ typedef struct {
   char name[MECHANIC_STRLEN];
   char datafile[MECHANIC_STRLEN];
   char module[MECHANIC_STRLEN];
-  int xres;
-  int yres;
-  int method;
-  int checkpoint;
-  int restartmode;
-  int mode;
+  int name_len; /* Fortran requirement: length of the name string */
+  int datafile_len; /* Fortran requirement: length of the datafile string */
+  int module_len; /* Fortran requirement: length of the module string */
+  /*unsigned long*/ int xres;
+  /*unsigned long*/ int yres;
+  /*unsigned short*/ int method;
+  /*unsigned long*/ int checkpoint;
+  /*unsigned short*/ int restartmode;
+  /*unsigned short*/ int mode;
 } configData;
 /* [/CONFIGDATA] */
 
 /* [MASTERDATA] */
 typedef struct {
   MECHANIC_DATATYPE *res;
-  int coords[3]; /* 0 - x 1 - y 2 - number of the pixel */
+  /*unsigned long*/ int coords[3]; /* 0 - x 1 - y 2 - number of the pixel */
 } masterData;
 /* [/MASTERDATA] */
 
 /* [MODULEINFO] */
 typedef struct {
-  int irl;
-  int mrl;
+  /*unsigned long*/ int irl;
+  /*unsigned long*/ int mrl;
 } moduleInfo;
 /* [/MODULEINFO] */
 
 void mechanic_message(int type, char* fmt, ...);
-int mechanic_finalize(int node);
+int mechanic_finalize(/*unsigned long*/ int node);
 int mechanic_abort(int errcode);
 void mechanic_error(int stat);
 

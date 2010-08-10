@@ -47,8 +47,8 @@
 #include "mechanic_mode_farm.h"
 
 /* MASTER */
-int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo* md,
-    configData* d){
+int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
+    moduleInfo* md, configData* d){
 
   int i = 0, j = 0, nodes = 0, farm_res = 0;
   int npxc = 0; /* number of all sent pixels */
@@ -90,17 +90,20 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
 
   if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
+  coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1),
+      sizeof(uintptr_t));
   if (coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  resultarr = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) d->checkpoint + 1), sizeof(uintptr_t));
+  resultarr = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) d->checkpoint + 1),
+      sizeof(uintptr_t));
   if (resultarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   for (i = 0; i < d->checkpoint; i++) {
     coordsarr[i] = calloc(sizeof(uintptr_t) * 3, sizeof(uintptr_t));
     if (coordsarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-    resultarr[i] = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl), sizeof(MECHANIC_DATATYPE));
+    resultarr[i] = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl),
+        sizeof(MECHANIC_DATATYPE));
     if (resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   }
@@ -175,7 +178,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
     MPI_Pcontrol(1, "master_ini_send");
 #endif
 
-    MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
+    MPI_Send(&inidata, 1, initialConditionsType, i,
+        MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
 
 #ifdef IPM
     MPI_Pcontrol(-1, "master_ini_send");
@@ -198,7 +202,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
       /* Just dummy assignment */
       inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
 
-      MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+      MPI_Send(&inidata, 1, initialConditionsType, i,
+          MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
     }
   }
 
@@ -223,8 +228,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
     totalnumofpx++;
     count--;
 
-    qafterR = load_sym(handler, d->module, "node_afterReceive", "master_afterReceive",
-        MECHANIC_MODULE_SILENT);
+    qafterR = load_sym(handler, d->module, "node_afterReceive",
+        "master_afterReceive", MECHANIC_MODULE_SILENT);
     if (qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
 
     /* Copy data to checkpoint arrays */
@@ -234,7 +239,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "[%04d / %04d] Pixel [%04d, %04d, %04d] received from node %d\n",
-        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1], result.coords[2], mpi_status.MPI_SOURCE);
+        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
+        result.coords[2], mpi_status.MPI_SOURCE);
 
     for (j = 0; j < md->mrl; j++) {
       resultarr[check][j] = result.res[j];
@@ -249,16 +255,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
      * very fast, your disks will not be happy
      */
 
-    if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) { 
-      qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
-        MECHANIC_MODULE_SILENT);
+    if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
+      qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
+          "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
       if (qbc) mstat = qbc(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
-      
+
       mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       check = 0;
-      
-      qac = load_sym(handler, d->module, "node_afterCheckpoint", "master_afterCheckpoint",
-        MECHANIC_MODULE_SILENT);
+
+      qac = load_sym(handler, d->module, "node_afterCheckpoint",
+          "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (qac) mstat = qac(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
     } else {
       check++;
@@ -278,8 +284,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
           "master_preparePixel", MECHANIC_MODULE_SILENT);
       if (qr) mstat = qr(node, md, d, &inidata, &result);
 
-      qbeforeS = load_sym(handler, d->module, "node_beforeSend", "master_beforeSend",
-          MECHANIC_MODULE_SILENT);
+      qbeforeS = load_sym(handler, d->module, "node_beforeSend",
+          "master_beforeSend", MECHANIC_MODULE_SILENT);
       if (qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
 
       mechanic_message(MECHANIC_MESSAGE_CONT2,
@@ -290,8 +296,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
       MPI_Pcontrol(1,"master_pixel_send");
 #endif
 
-      MPI_Send(&inidata, 1, initialConditionsType, mpi_status.MPI_SOURCE, MECHANIC_MPI_DATA_TAG,
-          MPI_COMM_WORLD);
+      MPI_Send(&inidata, 1, initialConditionsType, mpi_status.MPI_SOURCE,
+          MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
 
 #ifdef IPM
       MPI_Pcontrol(-1,"master_pixel_send");
@@ -349,19 +355,20 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "[%04d / %04d] Pixel [%04d, %04d, %04d] received from node %d\n",
-        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1], result.coords[2], mpi_status.MPI_SOURCE);
+        totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
+        result.coords[2], mpi_status.MPI_SOURCE);
     /* There is a possibility that count > check, and then we have to perform
      * another checkpoint write */
     if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
-      qbc = load_sym(handler, d->module, "node_beforeCheckpoint", "master_beforeCheckpoint",
-        MECHANIC_MODULE_SILENT);
+      qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
+          "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
       if (qbc) mstat = qbc(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
-      
+
       mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       check = 0;
-      
-      qac = load_sym(handler, d->module, "node_afterCheckpoint", "master_afterCheckpoint",
-        MECHANIC_MODULE_SILENT);
+
+      qac = load_sym(handler, d->module, "node_afterCheckpoint",
+          "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (qac) mstat = qac(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
     } else {
       check++;
@@ -376,7 +383,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler, moduleInfo*
   for (i = 1; i < nodes; i++) {
 
      inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
-     MPI_Send(&inidata, 1, initialConditionsType, i, MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+     MPI_Send(&inidata, 1, initialConditionsType, i,
+         MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
 
   }
 

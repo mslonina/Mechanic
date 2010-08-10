@@ -255,10 +255,10 @@ int main(int argc, char* argv[]){
   char* module_name;
   char* name;
   int mode = 0;
-  int xres = 0;
-  int yres = 0;
-  int method = 0;
-  int checkpoint = 0;
+  /*unsigned long*/ int xres = 0;
+  /*unsigned long*/ int yres = 0;
+  /*unsigned short*/ int method = 0;
+  /*unsigned long*/ int checkpoint = 0;
   int poptflags = 0;
   int useConfigFile = 0;
   char optvalue;
@@ -315,15 +315,15 @@ int main(int argc, char* argv[]){
     };
 
   struct poptOption mechanic_poptModes[] = {
-    {"masteralone", MECHANIC_MODE_MASTERALONE, POPT_ARG_VAL, &mode, MECHANIC_MODE_MASTERALONE,
-      "Masteralone", NULL},
-    {"farm", MECHANIC_MODE_FARM, POPT_ARG_VAL, &mode, MECHANIC_MODE_FARM,
-      "MPI task farm", NULL},
-    /*{"multifarm", MECHANIC_MODE_MULTIFARM, POPT_ARG_VAL, &mode, MECHANIC_MODE_MULTIFARM,
-      "MPI multi task farm", NULL},*/
+    {"masteralone", MECHANIC_MODE_MASTERALONE, POPT_ARG_VAL, &mode,
+      MECHANIC_MODE_MASTERALONE, "Masteralone", NULL},
+    {"farm", MECHANIC_MODE_FARM, POPT_ARG_VAL, &mode,
+      MECHANIC_MODE_FARM, "MPI task farm", NULL},
+    /*{"multifarm", MECHANIC_MODE_MULTIFARM, POPT_ARG_VAL, &mode,
+      MECHANIC_MODE_MULTIFARM, "MPI multi task farm", NULL},*/
 #ifdef HAVE_CUDA_H
-    {"cuda", MECHANIC_MODE_CUDA, POPT_ARG_VAL, &mode, MECHANIC_MODE_CUDA,
-      "CUDA based farm", NULL},
+    {"cuda", MECHANIC_MODE_CUDA, POPT_ARG_VAL, &mode,
+      MECHANIC_MODE_CUDA, "CUDA based farm", NULL},
 #endif
     POPT_TABLEEND
   };
@@ -473,8 +473,10 @@ int main(int argc, char* argv[]){
   if (node == 0) {
 
     /* Config file is set and we are not in restart mode */
-    if (strcmp(ConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0 && restartmode == 0)
+    if (strcmp(ConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0
+       && restartmode == 0) {
       useConfigFile = 1;
+    }
 
     /* STEP 1A: Read config file, if any.
      * This will override LRC_configDefaults
@@ -592,10 +594,10 @@ int main(int argc, char* argv[]){
       /* Now we can safely rename files */
       if (restartmode == 1) {
         mechanic_copy(cd.datafile, oldfile);
-        /* At this point we have a backup of master file. In restart mode we have
-         * to start the simulation from the point of the provided checkpoint file.
-         * To save number of additional work, we simply make our checkpoint file
-         * new master file. */
+        /* At this point we have a backup of master file. In restart mode we
+         * have to start the simulation from the point of the provided
+         * checkpoint file. To save number of additional work, we simply make
+         * our checkpoint file new master file.*/
         mechanic_copy(CheckpointFile, cd.datafile);
       } else {
         rename(cd.datafile,oldfile);
@@ -740,8 +742,15 @@ int main(int argc, char* argv[]){
           &cd.mode, 1, MPI_INT, MPI_COMM_WORLD);
 
         cd.name[lengths[0]] = LRC_NULL;
+        cd.name_len = lengths[0];
         cd.datafile[lengths[1]] = LRC_NULL;
+        cd.datafile_len = lengths[1];
         cd.module[lengths[2]] = LRC_NULL;
+        cd.module_len = lengths[2];
+
+        mechanic_message(MECHANIC_MESSAGE_DEBUG,
+            "Node[%d] lengths[%d, %d, %d]\n",
+            node, cd.name_len, cd.datafile_len, cd.module_len);
 
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
           "Node [%d] received following configuration:\n\n", node);
@@ -781,15 +790,19 @@ int main(int argc, char* argv[]){
   /* Module init */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
   if (node == 0) {
-    init = load_sym(handler,cd.module, "init", "master_init", MECHANIC_MODULE_ERROR);
+    init = load_sym(handler,cd.module, "init", "master_init",
+        MECHANIC_MODULE_ERROR);
   } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != 0)) {
-    init = load_sym(handler,cd.module, "init", "slave_init", MECHANIC_MODULE_ERROR);
+    init = load_sym(handler,cd.module, "init", "slave_init",
+        MECHANIC_MODULE_ERROR);
   } else {
-    init = load_sym(handler,cd.module, "init", "init", MECHANIC_MODULE_ERROR);
+    init = load_sym(handler,cd.module, "init", "init",
+        MECHANIC_MODULE_ERROR);
   }
   if (init) mstat = init(mpi_size, node, &md, &cd);
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "irl = %d\n", md.irl);
 
   /* Module query */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
@@ -835,11 +848,14 @@ int main(int argc, char* argv[]){
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
   if (node == 0) {
-    cleanup = load_sym(handler, cd.module, "cleanup", "master_cleanup", MECHANIC_MODULE_ERROR);
+    cleanup = load_sym(handler, cd.module, "cleanup", "master_cleanup",
+        MECHANIC_MODULE_ERROR);
   } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != 0)) {
-    cleanup = load_sym(handler, cd.module, "cleanup", "slave_cleanup", MECHANIC_MODULE_ERROR);
+    cleanup = load_sym(handler, cd.module, "cleanup", "slave_cleanup",
+        MECHANIC_MODULE_ERROR);
   } else {
-    cleanup = load_sym(handler, cd.module, "cleanup", "cleanup", MECHANIC_MODULE_ERROR);
+    cleanup = load_sym(handler, cd.module, "cleanup", "cleanup",
+        MECHANIC_MODULE_ERROR);
   }
   if (cleanup) mstat = cleanup(mpi_size, node, &md, &cd);
 
@@ -866,6 +882,6 @@ int main(int argc, char* argv[]){
     mechanic_message(MECHANIC_MESSAGE_CONT, "Have a nice day!\n\n");
   }
 
-  return 0;
+  exit(EXIT_SUCCESS);
 }
 

@@ -113,9 +113,12 @@ module mechanic_fortran
 
   ! [F2003BIND_CONFIG]
   type, bind(c) :: configData
-    character(kind = c_char, len=MECHANIC_STRLEN_F) :: p_name
-    character(kind = c_char, len=MECHANIC_STRLEN_F) :: datafile
+    character(kind = c_char, len=MECHANIC_STRLEN_F) :: p_name 
+    character(kind = c_char, len=MECHANIC_STRLEN_F) :: datafile 
     character(kind = c_char, len=MECHANIC_STRLEN_F) :: u_module
+    integer (c_int) :: p_name_len
+    integer (c_int) :: datafile_len
+    integer (c_int) :: u_module_len
     integer (c_int) :: xres
     integer (c_int) :: yres
     integer (c_int) :: method
