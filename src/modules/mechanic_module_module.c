@@ -683,3 +683,12 @@ int module_node_afterReceive(int node, moduleInfo* md, configData* d,
   return 0;
 }
 
+int module_node_beforeCheckpoint(int node, moduleInfo* md, configData* d,
+    int** coordsarr, MECHANIC_DATATYPE** resultarr) {
+  return 0;
+}
+
+int module_node_afterCheckpoint(int node, moduleInfo* md, configData* d,
+    int** coordsarr, MECHANIC_DATATYPE** resultarr) {
+  return 0;
+}

@@ -649,6 +649,10 @@ int main(int argc, char* argv[]){
         lengths[1] = (int) strlen(cd.datafile);
         lengths[2] = (int) strlen(cd.module);
 
+        cd.name_len = lengths[0];
+        cd.datafile_len = lengths[1];
+        cd.module_len = lengths[2];
+
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
             "Node[%d] lengths[%d, %d, %d]\n",
             node, lengths[0], lengths[1], lengths[2]);
@@ -671,6 +675,9 @@ int main(int argc, char* argv[]){
             "Node[%d] lengths[%d, %d, %d]\n",
             node, lengths[0], lengths[1], lengths[2]);
 
+        cd.name_len = lengths[0];
+        cd.datafile_len = lengths[1];
+        cd.module_len = lengths[2];
       }
 
       if (node == 0) {
@@ -742,11 +749,8 @@ int main(int argc, char* argv[]){
           &cd.mode, 1, MPI_INT, MPI_COMM_WORLD);
 
         cd.name[lengths[0]] = LRC_NULL;
-        cd.name_len = lengths[0];
         cd.datafile[lengths[1]] = LRC_NULL;
-        cd.datafile_len = lengths[1];
         cd.module[lengths[2]] = LRC_NULL;
-        cd.module_len = lengths[2];
 
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
             "Node[%d] lengths[%d, %d, %d]\n",
