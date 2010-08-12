@@ -62,7 +62,10 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
   masterData inidata;
 
   /* Checkpoint storage */
+  int vecsize;
+  int* coordsvec;
   int** coordsarr;
+  MECHANIC_DATATYPE *resultsvec;
   MECHANIC_DATATYPE **resultarr;
 
   /* Simulation board */
@@ -107,6 +110,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
     if (resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   }
+
+  vecsize = 3;
 
   /* Allocate memory for board */
   board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
@@ -256,16 +261,23 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
      */
 
     if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
+
+      /* Fortran interoperability:
+       * Convert 2D coordinates array to 1D vector, as well as
+       * results array */
+      coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
+      resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
+
       qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
           "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qbc) mstat = qbc(mpi_status.MPI_SOURCE, md, d, coordsarr, resultarr);
+      if (qbc) mstat = qbc(nodes, md, d, coordsvec, resultsvec);
 
       mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       check = 0;
 
       qac = load_sym(handler, d->module, "node_afterCheckpoint",
           "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qac) mstat = qac(mpi_status.MPI_SOURCE, md, d, coordsarr, resultarr);
+      if (qac) mstat = qac(nodes, md, d, coordsvec, resultsvec);
     } else {
       check++;
     }
@@ -360,16 +372,23 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
     /* There is a possibility that count > check, and then we have to perform
      * another checkpoint write */
     if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
+
+      /* Fortran interoperability:
+       * Convert 2D coordinates array to 1D vector, as well as
+       * results array */
+      coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
+      resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
+
       qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
           "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qbc) mstat = qbc(mpi_status.MPI_SOURCE, md, d, coordsarr, resultarr);
+      if (qbc) mstat = qbc(nodes, md, d, coordsvec, resultsvec);
 
       mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       check = 0;
 
       qac = load_sym(handler, d->module, "node_afterCheckpoint",
           "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qac) mstat = qac(mpi_status.MPI_SOURCE, md, d, coordsarr, resultarr);
+      if (qac) mstat = qac(nodes, md, d, coordsvec, resultsvec);
     } else {
       check++;
     }
@@ -407,6 +426,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
 
   free(coordsarr);
   free(resultarr);
+  FreeIntVec(coordsvec);
+  FreeDoubleVec(resultsvec);
 
   for (i = 0; i < d->xres; i++) free(board[i]);
   free(board);

@@ -183,14 +183,14 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
     if (check % d->checkpoint == 0 || mechanic_ups < 0) {
       qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
           "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qbc) mstat = qbc(node, md, d, coordsarr, resultarr);
+      if (qbc) mstat = qbc(mpi_size, md, d, coordsarr, resultarr);
 
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
       check = 0;
 
       qac = load_sym(handler, d->module, "node_afterCheckpoint",
           "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qac) mstat = qac(node, md, d, coordsarr, resultarr);
+      if (qac) mstat = qac(mpi_size, md, d, coordsarr, resultarr);
     }
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
@@ -205,11 +205,11 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
   if (check > 0) {
       qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
           "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qbc) mstat = qbc(node, md, d, coordsarr, resultarr);
+      if (qbc) mstat = qbc(mpi_size, md, d, coordsarr, resultarr);
     mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
       qac = load_sym(handler, d->module, "node_afterCheckpoint",
           "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qac) mstat = qac(node, md, d, coordsarr, resultarr);
+      if (qac) mstat = qac(mpi_size, md, d, coordsarr, resultarr);
   }
 
   /* FARM ENDS */

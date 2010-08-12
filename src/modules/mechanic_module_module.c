@@ -683,12 +683,18 @@ int module_node_afterReceive(int node, moduleInfo* md, configData* d,
   return 0;
 }
 
-int module_node_beforeCheckpoint(int node, moduleInfo* md, configData* d,
-    int** coordsarr, MECHANIC_DATATYPE** resultarr) {
+int module_node_beforeCheckpoint(int nodes, moduleInfo* md, configData* d,
+    int* coordsvec, MECHANIC_DATATYPE* resultvec) {
   return 0;
 }
 
-int module_node_afterCheckpoint(int node, moduleInfo* md, configData* d,
-    int** coordsarr, MECHANIC_DATATYPE** resultarr) {
+int module_node_afterCheckpoint(int nodes, moduleInfo* md, configData* d,
+    int* coordsvec, MECHANIC_DATATYPE* resultvec) {
+  printf("cv[%d, %d, %d]\n", coordsvec[0], coordsvec[1], coordsvec[2]);
+  printf("cv[%d, %d, %d]\n", coordsvec[3], coordsvec[4], coordsvec[5]);
+  printf("cv[%d, %d, %d]\n", coordsvec[6], coordsvec[7], coordsvec[8]);
+  printf("cv[%d, %d, %d]\n", coordsvec[9], coordsvec[10], coordsvec[11]);
+  printf("cv[%d, %d, %d]\n", coordsvec[12], coordsvec[13], coordsvec[14]);
+  printf("cv[%f, %f, %f, %f]\n", resultvec[12], resultvec[13], resultvec[14], resultvec[15]);
   return 0;
 }

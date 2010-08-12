@@ -412,6 +412,71 @@ int mechanic_copy(char* in, char* out){
   return 0;
 }
 
+/* Convert 2D integer array to 1D integer vector */
+int* IntArrayToVec(int** array, int x, int y) {
+
+  int* vec;
+  int i, j, k, size;
+
+  size = x * y;
+  vec = AllocateIntVec(size);
+
+  for(i = 0; i < x; i++) {
+    k = i * y;
+    for(j = 0; j < y; j++) {
+      vec[j+k] = array[i][j];
+    }
+  }
+
+  return vec;
+}
+
+int* AllocateIntVec(int x) {
+
+  int* vec;
+
+  vec = calloc(sizeof(uintptr_t) * x, sizeof(uintptr_t));
+  if(vec == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  return vec;
+}
+
+void FreeIntVec(int* vec) {
+  if(vec) free(vec);
+}
+
+/* Convert 2D double array to 1D vector */
+double* DoubleArrayToVec(double** array, int x, int y) {
+
+  double* vec;
+  int i, j, k, size;
+
+  size = x * y;
+  vec = AllocateDoubleVec(size);
+
+  for(i = 0; i < x; i++) {
+    k = i * y;
+    for(j = 0; j < y; j++) {
+      vec[j+k] = array[i][j];
+    }
+  }
+
+  return vec;
+}
+
+double* AllocateDoubleVec(int x) {
+  double* vec;
+
+  vec = calloc(sizeof(double) * x, sizeof(double));
+  if (vec == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  return vec;
+}
+
+void FreeDoubleVec(double* vec) {
+  if(vec) free(vec);
+}
+
 /*void free_int_array(mechanic_int_array* p) {
 
   int i;

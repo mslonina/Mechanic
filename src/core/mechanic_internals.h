@@ -215,6 +215,14 @@ int mechanic_copy(char* in, char* out);
 void allocate_int_array(mechanic_int_array* p, int x, int y);
 void free_int_array(mechanic_int_array* p);
 
+int* AllocateIntVec(int x);
+void FreeIntVec(int* vec);
+int* IntArrayToVec(int** array, int x, int y);
+
+double* AllocateDoubleVec(int x);
+void FreeDoubleVec(double* vec);
+double* DoubleArrayToVec(double** array, int x, int y);
+
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE,\
   mechanic_poptHelpOptions, 0, "Help options:", NULL },
 
