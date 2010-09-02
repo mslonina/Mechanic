@@ -223,6 +223,10 @@ double* AllocateDoubleVec(int x);
 void FreeDoubleVec(double* vec);
 double* DoubleArrayToVec(double** array, int x, int y);
 
+int** AllocateInt2D(int x, int y);
+double** AllocateDouble2D(int x, int y);
+
+
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE,\
   mechanic_poptHelpOptions, 0, "Help options:", NULL },
 

@@ -490,12 +490,12 @@ void FreeDoubleVec(double* vec) {
 }
 */
 /* Allocate 2D int array */
-/*int** allocate2Dint(int x, int y) {
+/*int** AllocateInt2D(int x, int y) {
 
   int** pointer;
   int i;
-  pointer = calloc(sizeof(uintptr_t)* (x+1), sizeof(uintptr_t));
-  if (pointer == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  pointer = AllocateIntVec(x);
 
   for (i = 0; i < x; i++) {
     pointer[i] = calloc(sizeof(uintptr_t) * y, sizeof(uintptr_t));
@@ -503,9 +503,38 @@ void FreeDoubleVec(double* vec) {
   }
 
   return pointer;
-}*/
+}
+*/
+double** AllocateDouble2D(int x, int y) {
+  double** pointer;
+  int i;
 
-/*void free2Dint(int** pointer) {
+  pointer = calloc(sizeof(double) * (x+1), sizeof(double));
+  if (pointer == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  for(i = 0; i < x; i++) {
+    pointer[i] = calloc(sizeof(double) * y, sizeof(double));
+    if(pointer[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  }
+
+  return pointer;
+}
+
+/*
+ * Free array
+ *
+ * struct array {
+ *  int dim;
+ *  int elem;
+ *  int array
+ * }
+ */
+
+/*void mechanic_free(void *p) {
+
+  if (dim = 2) {
+
+  }
 
 }
 */

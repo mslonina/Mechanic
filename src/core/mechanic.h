@@ -55,8 +55,15 @@
 #define MECHANIC_ERR_CHECKPOINT 916
 #define MECHANIC_ERR_OTHER 999
 
-#define MECHANIC_HDF_RANK 2
+#define MECHANIC_MODULE_ERR_MPI 811
+#define MECHANIC_MODULE_ERR_HDF 812
+#define MECHANIC_MODULE_ERR_MODULE 813
+#define MECHANIC_MODULE_ERR_SETUP 814
+#define MECHANIC_MODULE_ERR_MEM 815
+#define MECHANIC_MODULE_ERR_CHECKPOINT 816
+#define MECHANIC_MODULE_ERR_OTHER 888
 
+#define MECHANIC_HDF_RANK 2
 #define MECHANIC_STRLEN 256
 
 #undef MECHANIC_DATATYPE
@@ -112,6 +119,7 @@ void mechanic_message(int type, char* fmt, ...);
 int mechanic_finalize(/*unsigned long*/ int node);
 int mechanic_abort(int errcode);
 void mechanic_error(int stat);
+void mechanic_check_mstat(int stat);
 
 #endif
 

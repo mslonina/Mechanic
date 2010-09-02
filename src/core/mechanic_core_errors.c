@@ -67,6 +67,17 @@
  * - @c 916 -- Checkpoint subsytem related error
  * - @c 999 -- Any other error
  *
+ * You can pass module errors in a similar way, by using proper errcodes as a returned
+ * value from a function:
+ *
+ * - @c 811 -- MPI related error
+ * - @c 812 -- HDF related error
+ * - @c 813 -- Module subsystem related error
+ * - @c 814 -- Setup subsystem related error
+ * - @c 815 -- Memory allocation related error
+ * - @c 816 -- Checkpoint subsytem related error
+ * - @c 888 -- Any other error
+ *
  */
 
 /* [/ERRORS] */
@@ -81,6 +92,7 @@ void mechanic_error(int errcode){
 
   /* We abort on any memory-type error, i.e. wrong mallocs */
   if (errcode == MECHANIC_ERR_MEM) mechanic_abort(MECHANIC_ERR_MEM);
+  if (errcode == MECHANIC_MODULE_ERR_MEM) mechanic_abort(MECHANIC_MODULE_ERR_MEM);
 
   /* Abort on any setup error,
    * i.e. config file was not found and option -c is set */
@@ -88,12 +100,22 @@ void mechanic_error(int errcode){
 		mechanic_message(MECHANIC_MESSAGE_ERR,"Error opening config file:");
     mechanic_abort(MECHANIC_ERR_SETUP);
   }
+  if (errcode == MECHANIC_MODULE_ERR_SETUP) {
+		mechanic_message(MECHANIC_MESSAGE_ERR,"Module setup error");
+    mechanic_abort(MECHANIC_MODULE_ERR_SETUP);
+  }
 
   /* We abort on any hdf-related error, i.e. error during data writing */
   if (errcode == MECHANIC_ERR_HDF) mechanic_abort(MECHANIC_ERR_HDF);
+  if (errcode == MECHANIC_MODULE_ERR_HDF) mechanic_abort(MECHANIC_MODULE_ERR_HDF);
 
   /* We abort on any module-related error, i.e. module was not found */
   if (errcode == MECHANIC_ERR_MODULE) mechanic_abort(MECHANIC_ERR_MODULE);
+  if (errcode == MECHANIC_MODULE_ERR_MODULE) mechanic_abort(MECHANIC_MODULE_ERR_MODULE);
 
   return;
+}
+
+void mechanic_check_mstat(int errcode) {
+  mechanic_error(errcode);
 }

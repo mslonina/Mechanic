@@ -74,16 +74,20 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
 
   /* Build derived type for master result and initial condition */
   mstat = buildMasterResultsType(md->mrl, &result, &masterResultsType);
+  mechanic_check_mstat(mstat);
   mstat = buildMasterResultsType(md->irl, &inidata, &initialConditionsType);
+  mechanic_check_mstat(mstat);
 
   /* Slave can do something useful before __all__ computations */
   query = load_sym(handler, d->module, "node_in", "slave_in",
       MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
+  mechanic_check_mstat(mstat);
 
   qbeforeR = load_sym(handler, d->module, "node_beforeReceive",
       "slave_beforeReceive", MECHANIC_MODULE_SILENT);
   if (qbeforeR) mstat = qbeforeR(node, md, d, &inidata, &result);
+  mechanic_check_mstat(mstat);
 
   MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST, MPI_ANY_TAG,
       MPI_COMM_WORLD, &mpi_status);
@@ -91,6 +95,7 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
   qafterR = load_sym(handler, d->module, "node_afterReceive",
       "slave_afterReceive", MECHANIC_MODULE_SILENT);
   if (qafterR) mstat = qafterR(node, md, d, &inidata, &result);
+  mechanic_check_mstat(mstat);
 
   while (1) {
 
@@ -119,28 +124,34 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
          qpc = load_sym(handler, d->module, "pixelCoords", "pixelCoords",
              MECHANIC_MODULE_ERROR);
          if (qpc) mstat = qpc(node, tab, md, d, &inidata, &result);
+         mechanic_check_mstat(mstat);
       }
 
       qpb = load_sym(handler, d->module, "node_preparePixel",
           "slave_preparePixel", MECHANIC_MODULE_SILENT);
       if (qpb) mstat = qpb(node, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
       qpb = load_sym(handler, d->module, "node_beforeProcessPixel",
           "slave_beforeProcessPixel", MECHANIC_MODULE_SILENT);
       if (qpb) mstat = qpb(node, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
       /* PIXEL COMPUTATION */
       qpx = load_sym(handler, d->module, "processPixel", "processPixel",
           MECHANIC_MODULE_ERROR);
       if(qpx) mstat = qpx(node, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
       qpb = load_sym(handler, d->module, "node_afterProcessPixel",
           "slave_afterProcessPixel", MECHANIC_MODULE_SILENT);
       if (qpb) mstat = qpb(node, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
       qbeforeS = load_sym(handler, d->module, "node_beforeSend",
           "slave_beforeSend", MECHANIC_MODULE_SILENT);
       if (qbeforeS) mstat = qbeforeS(node, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
 #ifdef IPM
       MPI_Pcontrol(1,"slave_send_result");
@@ -156,10 +167,12 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
       qafterS = load_sym(handler, d->module, "node_afterSend",
           "slave_afterSend", MECHANIC_MODULE_SILENT);
       if (qafterS) mstat = qafterS(node, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
       qbeforeR = load_sym(handler, d->module, "node_beforeReceive",
           "slave_beforeReceive", MECHANIC_MODULE_SILENT);
       if (qbeforeR) mstat = qbeforeR(node, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
 #ifdef IPM
       MPI_Pcontrol(1,"slave_recv_pixel");
@@ -175,6 +188,7 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
       qafterR = load_sym(handler, d->module, "node_afterReceive",
           "slave_afterReceive", MECHANIC_MODULE_SILENT);
       if (qafterR) mstat = qafterR(node, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
     }
   } /* while (1) */
@@ -183,6 +197,7 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
     query = load_sym(handler, d->module, "node_out", "slave_out",
         MECHANIC_MODULE_SILENT);
     if (query) mstat = query(mpi_size, node, md, d, &inidata, &result);
+    mechanic_check_mstat(mstat);
 
     MPI_Type_free(&masterResultsType);
     MPI_Type_free(&initialConditionsType);
@@ -190,6 +205,6 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
     free(result.res);
     free(inidata.res);
 
-    return 0;
+    return mstat;
 }
 

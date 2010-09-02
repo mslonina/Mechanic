@@ -74,25 +74,35 @@
 !
 ! [/F2003BIND_REF]
 
-! [F2003BIND_ERR]
-#define MECHANIC_ERR_MPI_F 911
-#define MECHANIC_ERR_HDF_F 912
-#define MECHANIC_ERR_MODULE_F 913
-#define MECHANIC_ERR_SETUP_F 914
-#define MECHANIC_ERR_MEM_F 915
-#define MECHANIC_ERR_CHECKPOINT_F 916
-#define MECHANIC_ERR_OTHER_F 999
-! [/F2003BIND_ERR]
-
-#define MECHANIC_HDF_RANK_F 2
-#define MECHANIC_STRLEN_F 256
-
 module mechanic_fortran
 
   use iso_c_binding
   use mpi
   use hdf5
-  
+ 
+  ! [F2003BIND_ERR]
+  integer, parameter :: MECHANIC_ERR_MPI_F = 911
+  integer, parameter :: MECHANIC_ERR_HDF_F = 912
+  integer, parameter :: MECHANIC_ERR_MODULE_F = 913
+  integer, parameter :: MECHANIC_ERR_SETUP_F = 914
+  integer, parameter :: MECHANIC_ERR_MEM_F = 915
+  integer, parameter :: MECHANIC_ERR_CHECKPOINT_F = 916
+  integer, parameter :: MECHANIC_ERR_OTHER_F = 999
+  ! [/F2003BIND_ERR]
+
+  ! [F2003BIND_MODERR]
+  integer, parameter :: MECHANIC_MODULE_ERR_MPI_F = 811
+  integer, parameter :: MECHANIC_MODULE_ERR_HDF_F = 812
+  integer, parameter :: MECHANIC_MODULE_ERR_MODULE_F = 813
+  integer, parameter :: MECHANIC_MODULE_ERR_SETUP_F = 814
+  integer, parameter :: MECHANIC_MODULE_ERR_MEM_F = 815
+  integer, parameter :: MECHANIC_MODULE_ERR_CHECKPOINT_F = 816
+  integer, parameter :: MECHANIC_MODULE_ERR_OTHER_F = 888
+  ! [/F2003BIND_MODERR]
+
+  integer, parameter :: MECHANIC_HDF_RANK_F = 2
+  integer, parameter :: MECHANIC_STRLEN_F = 256
+   
   ! [F2003BIND_MSG]
   enum, bind(c) 
     enumerator MECHANIC_MESSAGE_INFO_F
@@ -113,9 +123,9 @@ module mechanic_fortran
 
   ! [F2003BIND_CONFIG]
   type, bind(c) :: configData
-    character(kind = c_char, len=MECHANIC_STRLEN_F) :: p_name 
-    character(kind = c_char, len=MECHANIC_STRLEN_F) :: datafile 
-    character(kind = c_char, len=MECHANIC_STRLEN_F) :: u_module
+    character(kind = c_char, len = MECHANIC_STRLEN_F) :: p_name 
+    character(kind = c_char, len = MECHANIC_STRLEN_F) :: datafile 
+    character(kind = c_char, len = MECHANIC_STRLEN_F) :: u_module
     integer (c_int) :: p_name_len
     integer (c_int) :: datafile_len
     integer (c_int) :: u_module_len

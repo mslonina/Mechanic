@@ -804,6 +804,7 @@ int main(int argc, char* argv[]){
         MECHANIC_MODULE_ERROR);
   }
   if (init) mstat = init(mpi_size, node, &md, &cd);
+  mechanic_check_mstat(mstat);
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "irl = %d\n", md.irl);
@@ -811,7 +812,8 @@ int main(int argc, char* argv[]){
   /* Module query */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
   query = load_sym(handler,cd.module, "query", "query", MECHANIC_MODULE_SILENT);
-  if (query) query(mpi_size, node, &md, &cd);
+  if (query) mstat = query(mpi_size, node, &md, &cd);
+  mechanic_check_mstat(mstat);
 
   /* There are some special data in the module,
    * thus we have to create master data file after module has been
@@ -822,6 +824,7 @@ int main(int argc, char* argv[]){
     /* Create master datafile */
     file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     mstat = H5createMasterDataScheme(file_id, &md, &cd);
+    mechanic_check_mstat(mstat);
 
     /* First of all, save configuration */
     LRC_HDF5Writer(file_id);
@@ -833,13 +836,16 @@ int main(int argc, char* argv[]){
   switch (cd.mode) {
     case MECHANIC_MODE_MASTERALONE:
       mstat = mechanic_mode_masteralone(mpi_size, node, handler, &md, &cd);
+      mechanic_check_mstat(mstat);
       break;
     case MECHANIC_MODE_FARM:
       mstat = mechanic_mode_farm(mpi_size, node, handler, &md, &cd);
+      mechanic_check_mstat(mstat);
       break;
 #ifdef HAVE_CUDA_H
     case MECHANIC_MODE_CUDA:
       mstat = mechanic_mode_cuda(mpi_size, node, handler, &md, &cd);
+      mechanic_check_mstat(mstat);
       break;
 #endif
     /*case MECHANIC_MODE_MULTIFARM:
@@ -862,6 +868,7 @@ int main(int argc, char* argv[]){
         MECHANIC_MODULE_ERROR);
   }
   if (cleanup) mstat = cleanup(mpi_size, node, &md, &cd);
+  mechanic_check_mstat(mstat);
 
   /* Free POPT */
   poptFreeContext(poptcon);
