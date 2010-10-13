@@ -325,6 +325,8 @@ def configure(conf):
   test_code_libm = _test_code('waf-tests/test-m.c')
   test_code_popt = _test_code('waf-tests/test-popt.c')
   test_code_dl = _test_code('waf-tests/test-dl.c')
+  if cmp(Options.platform, 'darwin') == 0:
+    test_code_dl = _test_code('waf-tests/test-dl-osx.c')
   test_code_hdf = _test_code('waf-tests/test-hdf.c')
   test_code_lrc = _test_code('waf-tests/test-lrc.c')
   test_code_cuda = _test_code('waf-tests/test-cuda.cu')
@@ -385,6 +387,12 @@ def configure(conf):
 
   if conf.env.CUDA:
     conf.env['MECHANIC_BUILD_CUDA'] = cudamode
+
+  # Platform
+  if cmp(Options.platform,'darwin') == 0:
+    conf.define('PLATFORM_DARWIN', 1)
+  if cmp(Options.platform,'linux') == 0:
+    conf.define('PLATFORM_LINUX', 1)
 	
   # Define standard declarations
   conf.define('PACKAGE_NAME', APPNAME)

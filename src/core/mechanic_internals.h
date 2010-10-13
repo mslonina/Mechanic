@@ -72,6 +72,18 @@
 #include "libreadconfig.h"
 #include "libreadconfig_hdf5.h"
 
+#ifdef PLATFORM_DARWIN
+  #define WE_ARE_ON_DARWIN 1
+  #define LIB_EXT ".dylib"
+  #define LIB_ESZ 6
+#endif
+
+#ifdef PLATFORM_LINUX
+  #define WE_ARE_ON_LINUX 1
+  #define LIB_EXT ".so"
+  #define LIB_ESZ 3
+#endif
+
 #define MECHANIC_NAME PACKAGE_NAME
 #define MECHANIC_VERSION PACKAGE_VERSION
 #define MECHANIC_AUTHOR PACKAGE_AUTHOR

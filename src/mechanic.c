@@ -368,6 +368,15 @@ int main(int argc, char* argv[]){
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   node = mpi_rank;
 
+#ifdef WE_ARE_ON_DARWIN
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "We are running on DARWIN platform\n");
+#endif
+
+#ifdef WE_ARE_ON_LINUX
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "We are running on LINUX platform\n");
+#endif
+
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "MPI started\n");
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "MPI started\n");
 
   /* HDF5 INIT */
@@ -767,7 +776,7 @@ int main(int argc, char* argv[]){
   /* Create module file name */
   module_pref = strlen(MECHANIC_MODULE_PREFIX);
   module_len = strlen(cd.module);
-  module_file_len = module_pref + module_len + 4;
+  module_file_len = module_pref + module_len + LIB_ESZ + 1;
 
   module_file = calloc((module_file_len)*sizeof(char*), sizeof(char*));
   if (module_file == NULL) mechanic_error(MECHANIC_ERR_MEM);
@@ -778,7 +787,7 @@ int main(int argc, char* argv[]){
   strncat(module_file, cd.module, module_len);
   module_file[module_pref+module_len] = LRC_NULL;
 
-  strncat(module_file, ".so", 3);
+  strncat(module_file, LIB_EXT, LIB_ESZ);
   module_file[module_file_len] = LRC_NULL;
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Module file: %s\n", module_file);
