@@ -136,7 +136,7 @@
  *
  * To download the latest snapshot of @M try
  * @code
- * http://git.astri.umk.pl/?p=Mechanic.git
+ * http://git.astri.umk.pl/project/mechanic
  * @endcode
  *
  * We try to keep as less requirements as possible to use @M. To compile our
@@ -150,6 +150,9 @@
  *   flag
  * - @c Popt library (should be already installed on your system)
  * - C compiler (@c gcc 4.3 should do the job)
+ *
+ * If you are going to use Fortran code, you need to install/compile proper 
+ * @c gcc and @c MPI2 extensions.
  *
  * Compilation is similar to standard @c Autotools path:
  *
@@ -315,14 +318,14 @@ int main(int argc, char* argv[]){
     };
 
   struct poptOption mechanic_poptModes[] = {
-    {"masteralone", MECHANIC_MODE_MASTERALONE, POPT_ARG_VAL, &mode,
+    {"masteralone", MECHANIC_MODE_MASTERALONE_P, POPT_ARG_VAL, &mode,
       MECHANIC_MODE_MASTERALONE, "Masteralone", NULL},
-    {"farm", MECHANIC_MODE_FARM, POPT_ARG_VAL, &mode,
+    {"farm", MECHANIC_MODE_FARM_P, POPT_ARG_VAL, &mode,
       MECHANIC_MODE_FARM, "MPI task farm", NULL},
-    /*{"multifarm", MECHANIC_MODE_MULTIFARM, POPT_ARG_VAL, &mode,
+    /*{"multifarm", MECHANIC_MODE_MULTIFARM_P, POPT_ARG_VAL, &mode,
       MECHANIC_MODE_MULTIFARM, "MPI multi task farm", NULL},*/
 #ifdef HAVE_CUDA_H
-    {"cuda", MECHANIC_MODE_CUDA, POPT_ARG_VAL, &mode,
+    {"cuda", MECHANIC_MODE_CUDA_P, POPT_ARG_VAL, &mode,
       MECHANIC_MODE_CUDA, "CUDA based farm", NULL},
 #endif
     POPT_TABLEEND
@@ -817,6 +820,18 @@ int main(int argc, char* argv[]){
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "irl = %d\n", md.irl);
+
+  if (md.mrl <= 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR,
+      "Master result length must be greater than 0\n");
+    mechanic_error(MECHANIC_ERR_SETUP);
+  }
+
+  if (md.irl <= 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR,
+      "Initial condition length must be greater than 0\n");
+    mechanic_error(MECHANIC_ERR_SETUP);
+  }
 
   /* Module query */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");

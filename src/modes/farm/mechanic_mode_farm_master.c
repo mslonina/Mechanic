@@ -81,46 +81,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
   module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qac, qbc;
   module_query_int_f qr;
 
-  /* Allocate memory for result.res array. */
-  result.res = calloc(((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE),
-      sizeof(MECHANIC_DATATYPE));
+  /* Allocate memory */
+  result.res = AllocateDoubleVec(md->mrl);
+  inidata.res = AllocateDoubleVec(md->irl);
 
-  if (result.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  coordsarr = AllocateInt2D(d->checkpoint,3);
+  resultarr = AllocateDouble2D(d->checkpoint,md->mrl);
 
-  /* Allocate memory for inidata.res array. */
-  inidata.res = calloc(((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE),
-      sizeof(MECHANIC_DATATYPE));
-
-  if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1),
-      sizeof(uintptr_t));
-  if (coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  resultarr = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) d->checkpoint + 1),
-      sizeof(uintptr_t));
-  if (resultarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  for (i = 0; i < d->checkpoint; i++) {
-    coordsarr[i] = calloc(sizeof(uintptr_t) * 3, sizeof(uintptr_t));
-    if (coordsarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-    resultarr[i] = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl),
-        sizeof(MECHANIC_DATATYPE));
-    if (resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  }
+  board = AllocateInt2D(d->xres,d->yres);
 
   vecsize = 3;
-
-  /* Allocate memory for board */
-  board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres), sizeof(uintptr_t));
-  if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  for (i = 0; i < d->xres; i++) {
-    board[i] = calloc(sizeof(uintptr_t)*((uintptr_t)d->yres), sizeof(uintptr_t));
-    if(board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-  }
 
   /* For the sake of simplicity we read board everytime,
    * both in restart and clean simulation mode */
@@ -134,7 +104,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
   mechanic_check_mstat(mstat);
 
   /* Master can do something useful before computations. */
-  query = load_sym(handler, d->module, "node_in", "master_in", MECHANIC_MODULE_SILENT);
+  query = load_sym(handler, d->module, "node_in", "master_in",
+    MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
   mechanic_check_mstat(mstat);
 
@@ -145,7 +116,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
         MECHANIC_MODULE_ERROR);
     if (qr) farm_res = qr(d->xres, d->yres, md);
     if (farm_res > (d->xres * d->yres)) {
-      mechanic_message(MECHANIC_MESSAGE_ERR, "Farm resolution should not exceed x*y!\n");
+      mechanic_message(MECHANIC_MESSAGE_ERR,
+        "Farm resolution should not exceed x*y!\n");
       mechanic_error(MECHANIC_ERR_SETUP);
     }
   }
@@ -155,7 +127,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
   /* Security check -- if farm resolution is greater than number of slaves.
    * Needed when we have i.e. 3 slaves and only one pixel to compute. */
   pixeldiff = farm_res - computed;
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "farm_res - computed = %d\n", pixeldiff);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "farm_res - computed = %d\n",
+    pixeldiff);
   if (pixeldiff > mpi_size) nodes = mpi_size;
   if (pixeldiff == mpi_size) nodes = mpi_size;
   if (pixeldiff < mpi_size) nodes = pixeldiff + 1;
@@ -177,10 +150,11 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
     mechanic_check_mstat(mstat);
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
-        "Pixel [%04d, %04d, %04d] sended to node %04d\n", ptab[0], ptab[1], ptab[2], i);
+        "Pixel [%04d, %04d, %04d] sended to node %04d\n",
+        ptab[0], ptab[1], ptab[2], i);
 
-    qbeforeS = load_sym(handler, d->module, "node_beforeSend", "master_beforeSend",
-        MECHANIC_MODULE_SILENT);
+    qbeforeS = load_sym(handler, d->module, "node_beforeSend",
+        "master_beforeSend", MECHANIC_MODULE_SILENT);
     if (qbeforeS) mstat = qbeforeS(i, md, d, &result);
     mechanic_check_mstat(mstat);
 
@@ -289,8 +263,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
       if (qac) mstat = qac(nodes, md, d, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
-      if(coordsvec) free(coordsvec);
-      if(resultsvec) free(resultsvec);
+      FreeIntVec(coordsvec);
+      FreeDoubleVec(resultsvec);
 
     } else {
       check++;
@@ -466,19 +440,11 @@ int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
   mechanic_check_mstat(mstat);
 
   /* Release resources */
-  free(result.res);
-  free(inidata.res);
-
-  for (i = 0; i < d->checkpoint; i++) {
-    free(coordsarr[i]);
-    free(resultarr[i]);
-  }
-
-  free(coordsarr);
-  free(resultarr);
-
-  for (i = 0; i < d->xres; i++) free(board[i]);
-  free(board);
+  FreeDoubleVec(result.res);
+  FreeDoubleVec(inidata.res);
+  FreeInt2D(coordsarr,d->checkpoint);
+  FreeDouble2D(resultarr,d->checkpoint);
+  FreeInt2D(board,d->xres);
 
   return mstat;
 }

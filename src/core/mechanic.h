@@ -110,8 +110,8 @@ typedef struct {
 
 /* [MODULEINFO] */
 typedef struct {
-  /*unsigned long*/ int irl;
-  /*unsigned long*/ int mrl;
+  int irl;
+  int mrl;
 } moduleInfo;
 /* [/MODULEINFO] */
 

@@ -62,15 +62,9 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
   MPI_Datatype initialConditionsType;
   MPI_Status mpi_status;
 
-  /* Allocate memory for result.res array */
-  result.res = calloc(((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE),
-      sizeof(MECHANIC_DATATYPE));
-  if (result.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  /* Allocate memory for initial condition */
-  inidata.res = calloc(((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE),
-      sizeof(MECHANIC_DATATYPE));
-  if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  /* Allocate memory */
+  result.res = AllocateDoubleVec(md->mrl);
+  inidata.res = AllocateDoubleVec(md->irl);
 
   /* Build derived type for master result and initial condition */
   mstat = buildMasterResultsType(md->mrl, &result, &masterResultsType);
@@ -202,8 +196,8 @@ int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
     MPI_Type_free(&masterResultsType);
     MPI_Type_free(&initialConditionsType);
 
-    free(result.res);
-    free(inidata.res);
+    FreeDoubleVec(result.res);
+    FreeDoubleVec(inidata.res);
 
     return mstat;
 }

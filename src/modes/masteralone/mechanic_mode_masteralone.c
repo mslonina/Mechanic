@@ -69,41 +69,14 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
   module_query_int_f qr;
 
   /* Allocate memory */
-  result.res = calloc(((uintptr_t) md->mrl) * sizeof(MECHANIC_DATATYPE),
-      sizeof(MECHANIC_DATATYPE));
-  if (result.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  result.res = AllocateDoubleVec(md->mrl);
+  inidata.res = AllocateDoubleVec(md->irl);
 
-  inidata.res = calloc(((uintptr_t) md->irl) * sizeof(MECHANIC_DATATYPE),
-      sizeof(MECHANIC_DATATYPE));
-  if (inidata.res == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  coordsarr = calloc(sizeof(uintptr_t) * ((uintptr_t) d->checkpoint + 1),
-      sizeof(uintptr_t));
-  if (coordsarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  resultarr = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) d->checkpoint + 1),
-      sizeof(uintptr_t));
-  if (resultarr == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  for (i = 0; i < d->checkpoint; i++) {
-    coordsarr[i] = calloc(sizeof(uintptr_t) * 3, sizeof(uintptr_t));
-    if (coordsarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-    resultarr[i] = calloc(sizeof(MECHANIC_DATATYPE) * ((uintptr_t) md->mrl),
-        sizeof(uintptr_t));
-    if (resultarr[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-  }
+  coordsarr = AllocateInt2D(d->checkpoint,3);
+  resultarr = AllocateDouble2D(d->checkpoint,md->mrl);
 
   /* Allocate memory for board */
-  board = calloc(sizeof(uintptr_t) * ((uintptr_t) d->xres),
-      sizeof(uintptr_t));
-  if (board == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  for (i = 0; i < d->xres; i++) {
-    board[i] = calloc(sizeof(uintptr_t) * ((uintptr_t) d->yres),
-        sizeof(uintptr_t));
-    if (board[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
-  }
+  board = AllocateInt2D(d->xres,d->yres);
 
   computed = H5readBoard(d, board);
 
@@ -219,19 +192,11 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
       MECHANIC_MODULE_SILENT);
   if (query) mstat = query(1, node, md, d, &inidata, &result);
 
-  free(result.res);
-  free(inidata.res);
-
-  for (i = 0; i < d->checkpoint; i++) {
-    free(coordsarr[i]);
-    free(resultarr[i]);
-  }
-
-  free(coordsarr);
-  free(resultarr);
-
-  for (i = 0; i < d->xres; i++) free(board[i]);
-  free(board);
+  FreeDoubleVec(result.res);
+  FreeDoubleVec(inidata.res);
+  FreeInt2D(coordsarr,d->checkpoint);
+  FreeDouble2D(resultarr,d->checkpoint);
+  FreeInt2D(board,d->xres);
 
   return 0;
 }

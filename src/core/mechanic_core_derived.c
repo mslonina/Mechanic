@@ -59,7 +59,7 @@ int buildMasterResultsType(int mrl, masterData* md,
   typelist[0] = MPI_DOUBLE;
   typelist[1] = MPI_INT;
 
-  block_lengths[0] = mrl;
+  block_lengths[0] = mrl; 
   block_lengths[1] = 3;
 
   MPI_Address(md, &addresses[0]);

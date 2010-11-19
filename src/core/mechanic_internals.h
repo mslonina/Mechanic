@@ -128,15 +128,25 @@
 #define MECHANIC_DATASETMASTER "master"
 
 enum Modes {
-#ifdef HAVE_CUDA_H
-  MECHANIC_MODE_CUDA,
-#endif
   MECHANIC_MODE_MASTERALONE,
   MECHANIC_MODE_FARM,
   MECHANIC_MODE_FARM2,
   MECHANIC_MODE_GRID,
   MECHANIC_MODE_MULTIFARM
+#ifdef HAVE_CUDA_H
+  MECHANIC_MODE_CUDA,
+#endif
 } mechanicModes;
+
+/* Popt modes */
+#define MECHANIC_MODE_MASTERALONE_P '0'
+#define MECHANIC_MODE_FARM_P '1'
+#define MECHANIC_MODE_FARM2_P '2'
+#define MECHANIC_MODE_GRID_P '3'
+#define MECHANIC_MODE_MULTIFARM_P '4'
+#ifdef HAVE_CUDA_H
+  #define MECHANIC_MODE_CUDA_P '5'
+#endif
 
 /* MODULE ARCHITECTURE FUNCTION HANDLERS */
 typedef int (*module_init_f) ();
@@ -224,20 +234,19 @@ int mechanic_mode_cuda(int mpi_size, int node, void* handler,
 int mechanic_printConfig(configData* cd, int flag);
 int mechanic_copy(char* in, char* out);
 
-void allocate_int_array(mechanic_int_array* p, int x, int y);
-void free_int_array(mechanic_int_array* p);
-
 int* AllocateIntVec(int x);
-void FreeIntVec(int* vec);
-int* IntArrayToVec(int** array, int x, int y);
-
 double* AllocateDoubleVec(int x);
-void FreeDoubleVec(double* vec);
-double* DoubleArrayToVec(double** array, int x, int y);
 
 int** AllocateInt2D(int x, int y);
 double** AllocateDouble2D(int x, int y);
 
+int* IntArrayToVec(int** array, int x, int y);
+double* DoubleArrayToVec(double** array, int x, int y);
+
+void FreeIntVec(int* vec);
+void FreeInt2D(int** pointer, int elems);
+void FreeDoubleVec(double* vec);
+void FreeDouble2D(double** pointer, int elems);
 
 #define MECHANIC_POPT_AUTOHELP { NULL, '\0', POPT_ARG_INCLUDE_TABLE,\
   mechanic_poptHelpOptions, 0, "Help options:", NULL },
