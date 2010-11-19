@@ -140,12 +140,10 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md,
     configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
 
-  MECHANIC_DATATYPE** rdata;
+  MECHANIC_DATATYPE rdata[md->mrl][1]; /* And this is the place where C99 helps... */
   hsize_t co[2], off[2];
   herr_t hdf_status;
   int j = 0;
-
-  rdata = AllocateDouble2D(md->mrl,1);
 
   co[0] = 1;
   co[1] = md->mrl;
@@ -155,15 +153,12 @@ int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md,
 
   for (j = 0; j < md->mrl; j++){
     rdata[j][0] = resultarr[j];
-    printf("%f ",rdata[j][0]);
   }
-  printf("\n");
 
   H5Sselect_hyperslab(space, H5S_SELECT_SET, off, NULL, co, NULL);
   hdf_status = H5Dwrite(dset, H5T_NATIVE_DOUBLE, memspace, space,
       H5P_DEFAULT, rdata);
 
-  FreeDouble2D(rdata,1);
   return 0;
 }
 
