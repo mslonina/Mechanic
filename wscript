@@ -19,7 +19,7 @@ Scripting.g_gz = 'gz'
 VERSION='0.12.0-UNSTABLE-2-6'
 APPNAME='mechanic'
 URL='http://mechanics.astri.umk.pl/projects/mechanic'
-BUGS='mariusz.slonina@gmail.com'
+BUGS='slonina@astri.umk.pl'
 AUTHOR='Mariusz Slonina, NCU'
 
 srcdir = '.'

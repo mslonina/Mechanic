@@ -32,7 +32,7 @@ To build Fortran2003 bindings use:
 
 To build Fortran2003 modules use (comma separated list):
 
---with-fortran-modules=f2003,map
+--with-fortran-modules=f2003,map,fhello
 
 To build additional libs use (comma separated list):
 
@@ -45,3 +45,7 @@ To build additional engines use (comma separated list):
 For any additional options that come with Waf distribution, see:
 
 ./waf help
+
+Notes:
+- Custom mpicc scripts (in waf-tools directory) 
+- Due to problems with Fortran modules compilations, parallel build (-j option) is disabled.

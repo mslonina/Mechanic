@@ -35,5 +35,6 @@ tabs.css
 FreeSans.ttf
 Makefile
 doxygen.sty
-!config_fortran*
+!config_fortran.py
 gitlog2changelog.py
+*.h5
