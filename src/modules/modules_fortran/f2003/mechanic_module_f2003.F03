@@ -95,7 +95,7 @@ contains
 
   ! Implementation of module_farmResolution() (method 6)
   integer (c_int) function f2003_farmResolution(x, y, md, d) &
-    bind(c, name = 'f2003_farmResolution' result(resolution)
+    bind(c, name = 'f2003_farmResolution') result(resolution)
 
     implicit none
     integer (c_int), intent(in), value :: x
@@ -107,21 +107,62 @@ contains
 
   end function f2003_farmResolution
 
-  ! Implementation of module_pixelCoordsMap() (method 6) [TODO]
+  ! Implementation of module_pixelCoordsMap() (method 6) 
   integer (c_int) function f2003_pixelCoordsMap(t, numofpx, xres, yres, md, d) &
     bind(c, name = 'f2003_pixelCoordsMap') result(errcode)
 
     implicit none
+    integer (c_int), dimension(3) :: t
     integer (c_int), intent(in), value :: numofpx
     integer (c_int), intent(in), value :: xres
     integer (c_int), intent(in), value :: yres
     type(moduleInfo), intent(in) :: md
     type(configData), intent(in) :: d
 
+    if (numofpx .lt. yres) then
+      t(1) = numofpx / yres
+      t(2) = numofpx
+    end if
+
+    if (numofpx .gt. (yres - 1)) then
+      t(1) = numofpx / yres
+      t(2) = mod(numofpx,yres)
+    end if
+
     errcode = 0
   end function f2003_pixelCoordsMap
 
-  ! Implementation of module_pixelCoords() [TODO]
+  ! Implementation of module_pixelCoords() 
+  integer (c_int) function f2003_pixelCoords(node, t, md, d, ic, r) &
+    bind(c, name = 'f2003_node_pixelCoords') result(errcode)
+  
+    implicit none
+    integer(c_int), intent(in), value :: node
+    integer(c_int), dimension(3) :: t
+    type(moduleInfo), intent(in) :: md
+    type(configData), intent(in) :: d
+    type(masterData), intent(inout) :: ic
+    type(masterData), intent(inout) :: r
+
+    integer :: res_rank(1)
+    integer :: ic_rank(1)
+    real (c_double), pointer :: ic_array(:)
+    real (c_double), pointer :: res_array(:)
+    
+    ic_rank = md%irl
+    res_rank = md%mrl
+
+    ! Bind C arrays
+    call c_f_pointer(ic%res, ic_array, ic_rank)
+    call c_f_pointer(r%res, res_array, res_rank)
+
+    r%coords(1) = t(1)
+    r%coords(2) = t(2)
+    r%coords(3) = t(3)
+
+    errcode = 0
+
+  end function f2003_pixelCoords
 
   ! Implementation of module_node_preparePixel() 
   integer (c_int) function f2003_node_preparePixel(node, md, d, ic, r) &
@@ -134,17 +175,16 @@ contains
     type(masterData), intent(inout) :: ic
     type(masterData), intent(inout) :: r
 
-    ! Bind C arrays
     integer :: res_rank(1)
     integer :: ic_rank(1)
 
-    integer (c_int) :: ic_coords(3)
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: res_array(:)
     
     ic_rank = md%irl
     res_rank = md%mrl
 
+    ! Bind C arrays
     call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, res_array, res_rank)
 
@@ -162,17 +202,16 @@ contains
     type(masterData), intent(inout) :: ic
     type(masterData), intent(inout) :: r
 
-    ! Bind C arrays
     integer :: res_rank(1)
     integer :: ic_rank(1)
 
-    integer (c_int) :: ic_coords(3)
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: res_array(:)
     
     ic_rank = md%irl
     res_rank = md%mrl
 
+    ! Bind C arrays
     call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, res_array, res_rank)
 
@@ -191,7 +230,6 @@ contains
     type(masterData), intent(inout) :: ic
     type(masterData), intent(inout) :: r
 
-    ! Bind C arrays
     integer :: res_rank(1)
     integer :: ic_rank(1)
 
@@ -202,6 +240,7 @@ contains
     ic_rank = md%irl
     res_rank = md%mrl
 
+    ! Bind C arrays
     call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, res_array, res_rank)
 
@@ -219,15 +258,17 @@ contains
     type(moduleInfo), intent(in) :: md
     type(configData), intent(in) :: d
     type(masterData), intent(inout) :: ic
+    
     integer :: ic_rank(1)
     real (c_double), pointer :: ic_array(:)
 
-    ! Bind C arrays
     ic_rank = md%irl
+    
+    ! Bind C arrays
     call c_f_pointer(ic%res, ic_array, ic_rank)
     
     errcode = 0
-  end function f2003_master_in
+  end function f2003_node_in
 
   ! Implementation of module_node_out()
   integer (c_int) function f2003_node_out(mpi_size, node, md, d, ic, r) &
@@ -240,16 +281,17 @@ contains
     type(configData), intent(in) :: d
     type(masterData), intent(inout) :: ic
     type(masterData), intent(inout) :: r
+   
     integer :: ic_rank(1)
     integer :: r_rank(1)
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: r_array(:)
 
-    ! Bind C arrays
     ic_rank = md%irl
-    call c_f_pointer(ic%res, ic_array, ic_rank)
-
     r_rank = md%mrl
+    
+    ! Bind C arrays
+    call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, r_array, r_rank)
 
     errcode = 0
@@ -265,16 +307,17 @@ contains
     type(configData), intent(in) :: d
     type(masterData), intent(inout) :: ic
     type(masterData), intent(inout) :: r
+    
     integer :: ic_rank(1)
     integer :: r_rank(1)
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: r_array(:)
 
-    ! Bind C arrays
     ic_rank = md%irl
-    call c_f_pointer(ic%res, ic_array, ic_rank)
-
     r_rank = md%mrl
+    
+    ! Bind C arrays
+    call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, r_array, r_rank)
 
     errcode = 0
@@ -296,11 +339,11 @@ contains
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: r_array(:)
 
-    ! Bind C arrays
     ic_rank = md%irl
-    call c_f_pointer(ic%res, ic_array, ic_rank)
-
     r_rank = md%mrl
+
+    ! Bind C arrays
+    call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, r_array, r_rank)
 
     errcode = 0
@@ -317,16 +360,17 @@ contains
     type(configData), intent(in) :: d
     type(masterData), intent(inout) :: ic
     type(masterData), intent(inout) :: r
+    
     integer :: ic_rank(1)
     integer :: r_rank(1)
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: r_array(:)
 
-    ! Bind C arrays
     ic_rank = md%irl
-    call c_f_pointer(ic%res, ic_array, ic_rank)
-
     r_rank = md%mrl
+
+    ! Bind C arrays
+    call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, r_array, r_rank)
 
     errcode = 0
@@ -343,16 +387,17 @@ contains
     type(configData), intent(in) :: d
     type(masterData), intent(inout) :: ic
     type(masterData), intent(inout) :: r
+   
     integer :: ic_rank(1)
     integer :: r_rank(1)
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: r_array(:)
 
-    ! Bind C arrays
     ic_rank = md%irl
-    call c_f_pointer(ic%res, ic_array, ic_rank)
-
     r_rank = md%mrl
+    
+    ! Bind C arrays
+    call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, r_array, r_rank)
 
     errcode = 0
@@ -369,11 +414,13 @@ contains
     type(moduleInfo), intent(in) :: md
     type(configData), intent(in) :: d
     type(masterData), intent(inout) :: ic
+    
     integer :: ic_rank(1)
     real (c_double), pointer :: ic_array(:)
 
-    ! Bind C arrays
     ic_rank = md%irl
+    
+    ! Bind C arrays
     call c_f_pointer(ic%res, ic_array, ic_rank)
 
     ! Initial condition
@@ -397,22 +444,20 @@ contains
     type(masterData), intent(inout) :: ic
     type(masterData), intent(inout) :: r
 
-    ! Bind C arrays
     integer :: res_rank(1)
     integer :: ic_rank(1)
 
-    integer (c_int) :: ic_coords(3)
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: res_array(:)
     
     ic_rank = md%irl
     res_rank = md%mrl
 
+    ! Bind C arrays
     call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, res_array, res_rank)
 
     ! Do something here or leave empty and go to processPixel()
-
     ic_array(1) = ic_array(1) + ic%coords(1) 
     ic_array(2) = ic_array(2) + ic%coords(2) 
     ic_array(3) = ic_array(3) + ic%coords(3) 
@@ -431,17 +476,16 @@ contains
     type(masterData), intent(in) :: ic
     type(masterData), intent(inout) :: r
 
-    ! Bind C arrays
     integer :: res_rank(1)
     integer :: ic_rank(1)
 
-    integer (c_int) :: ic_coords(3)
     real (c_double), pointer :: ic_array(:)
     real (c_double), pointer :: res_array(:)
     
     ic_rank = md%irl
     res_rank = md%mrl
 
+    ! Bind C arrays
     call c_f_pointer(ic%res, ic_array, ic_rank)
     call c_f_pointer(r%res, res_array, res_rank)
 
@@ -457,5 +501,33 @@ contains
 
     errcode = 0
   end function f2003_processPixel
+
+  ! Implementation of module_beforeCheckpoint()
+  integer (c_int) function f2003_node_beforeCheckpoint(nodes, md, d, cvec, rvec) &
+    bind(c, name = 'f2003_node_beforeCheckpoint') result(errcode)
+
+    implicit none
+    integer(c_int), intent(in), value :: nodes
+    type(moduleInfo), intent(in) :: md
+    type(configData), intent(in) :: d
+    integer(c_int) :: cvec(*)
+    real(c_double) :: rvec(*)
+
+    errcode = 0
+  end function f2003_node_beforeCheckpoint
+
+  ! Implementation of module_afterCheckpoint()
+  integer (c_int) function f2003_node_afterCheckpoint(nodes, md, d, cvec, rvec) &
+    bind(c, name = 'f2003_node_afterCheckpoint') result(errcode)
+
+    implicit none
+    integer(c_int), intent(in), value :: nodes
+    type(moduleInfo), intent(in) :: md
+    type(configData), intent(in) :: d
+    integer(c_int) :: cvec(*)
+    real(c_double) :: rvec(*)
+
+    errcode = 0
+  end function f2003_node_afterCheckpoint
 
 end module f2003

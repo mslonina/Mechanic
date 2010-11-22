@@ -796,6 +796,8 @@ int main(int argc, char* argv[]){
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Module file: %s\n", module_file);
 
   md.mrl = MECHANIC_MRL_DEFAULT;
+  md.irl = MECHANIC_IRL_DEFAULT;
+  md.api = MECHANIC_MODULE_API;
   handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
   if (!handler) {
     mechanic_message(MECHANIC_MESSAGE_ERR,

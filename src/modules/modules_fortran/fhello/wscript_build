@@ -11,4 +11,4 @@ obj.target = 'mechanic_module_fhello'
 obj.name = 'fhello'
 obj.after = 'fortran'
 
-bld.install_files('${PREFIX}/lib', 'libmechanic_module_fhello.so')
+bld.install_files('${PREFIX}/lib', 'libmechanic_module_fhello.'+bld.env['MECHANIC_LIBEXT'])

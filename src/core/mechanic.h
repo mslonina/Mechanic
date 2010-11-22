@@ -112,6 +112,7 @@ typedef struct {
 typedef struct {
   int irl;
   int mrl;
+  int api;
 } moduleInfo;
 /* [/MODULEINFO] */
 

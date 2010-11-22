@@ -36,7 +36,8 @@ all_modules = ['src/modules/hello',
                'src/modules/mandelbrot',
                ]
 all_fortran_modules = ['src/modules/modules_fortran/map',
-                       'src/modules/modules_fortran/fhello'
+                       'src/modules/modules_fortran/fhello',
+                       'src/modules/modules_fortran/f2003'
                        ]
 
 all_engines = ['src/engines/odex',
@@ -311,6 +312,10 @@ def configure(conf):
   global core
   global fortran
   global cudamode
+
+  # Force jobs = 1, it is slower, but we are sure,
+  # the compilation of fortran modules is ok
+  Options.options.jobs = 1
   
   conf.env['TOOLDIR'] = srcdir + '/waf-tools/'
   conf.env['MECHANIC_CORE'] = []
@@ -321,6 +326,7 @@ def configure(conf):
   conf.env['MECHANIC_BUILD_ENGINES'] = []
   conf.env['MECHANIC_BUILD_LIBS'] = []
   conf.env['MECHANIC_BUILD_DOC'] = []
+  conf.env['MECHANIC_LIBEXT'] = ''
 
   test_code_libm = _test_code('waf-tests/test-m.c')
   test_code_popt = _test_code('waf-tests/test-popt.c')
@@ -391,8 +397,10 @@ def configure(conf):
   # Platform
   if cmp(Options.platform,'darwin') == 0:
     conf.define('PLATFORM_DARWIN', 1)
+    conf.env['MECHANIC_LIBEXT'] = 'dylib'
   if cmp(Options.platform,'linux') == 0:
     conf.define('PLATFORM_LINUX', 1)
+    conf.env['MECHANIC_LIBEXT'] = 'so'
 	
   # Define standard declarations
   conf.define('PACKAGE_NAME', APPNAME)
@@ -416,6 +424,7 @@ def configure(conf):
     conf.env['FCFLAGS'] += ['-Dpic']
     # necessary to put the module in right place after compilation
     conf.env['FCFLAGS'] += ['-Jdefault/src/fortran'] 
+    #conf.env['FCFLAGS'] += ['-Mdefault/src/fortran'] 
     conf.env['FCFLAGS'] += ['-lhdf5_fortran', '-lhdf5']
 
   #if conf.env.CUDA:

@@ -118,6 +118,7 @@ module mechanic_fortran
   type, bind(c) :: moduleInfo
     integer (c_int) :: irl
     integer (c_int) :: mrl
+    integer (c_int) :: api
   end type moduleInfo
   ! [/F2003BIND_MD]
 

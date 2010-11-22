@@ -9,6 +9,7 @@ import config_fortran # <- leave this
 from TaskGen import feature, before, after, extension
 from Configure import conftest, conf
 import Build
+import Options
 
     
 INCLUDE_REGEX = """(?:^|['">]\s*;)\s*INCLUDE\s+(?:\w+_)?[<"'](.+?)(?=["'>])"""
@@ -302,7 +303,10 @@ def apply_fortran_link(self):
     if 'fprogram' in self.features:
       return '%s'
     elif 'fshlib' in self.features:
-      return 'lib%s.so'
+      if cmp(Options.platform, 'darwin') == 0:
+        return 'lib%s.dylib'
+      if cmp(Options.platform, 'linux') == 0:
+        return 'lib%s.so'
     else:
       return 'lib%s.a'
 
