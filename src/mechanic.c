@@ -260,7 +260,7 @@ int main(int argc, char* argv[]){
   int mode = 0;
   /*unsigned long*/ int xres = 0;
   /*unsigned long*/ int yres = 0;
-  /*unsigned short*/ int method = 0;
+  int method = 0;
   /*unsigned long*/ int checkpoint = 0;
   int poptflags = 0;
   int useConfigFile = 0;
@@ -379,7 +379,6 @@ int main(int argc, char* argv[]){
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "We are running on LINUX platform\n");
 #endif
 
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "MPI started\n");
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "MPI started\n");
 
   /* HDF5 INIT */

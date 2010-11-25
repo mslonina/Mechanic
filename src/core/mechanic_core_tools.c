@@ -409,7 +409,7 @@ int mechanic_copy(char* in, char* out){
     return -1;
   }
 
-  return 0;
+  return mstat;
 }
 
 /* Convert 2D integer array to 1D integer vector */

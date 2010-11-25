@@ -164,19 +164,6 @@ module_query_int_f iquery;
 typedef int (*module_cleanup_f) ();
 module_cleanup_f cleanup;
 
-/* Data types */
-typedef struct {
-  int x;
-  int y;
-  int** array;
-} mechanic_int_array;
-
-typedef struct {
-  int x;
-  int y;
-  double** array;
-} mechanic_double_array;
-
 /* GLOBALS */
 char* ConfigFile;
 char* datafile;
