@@ -16,7 +16,7 @@ import string
 
 Scripting.g_gz = 'gz'
 
-VERSION='0.12.0-UNSTABLE-2-6'
+VERSION='0.12.0-UNSTABLE-3'
 APPNAME='mechanic'
 URL='http://mechanics.astri.umk.pl/projects/mechanic'
 BUGS='slonina@astri.umk.pl'
