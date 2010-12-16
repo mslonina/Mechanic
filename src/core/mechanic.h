@@ -94,7 +94,6 @@ typedef struct {
   int module_len; /* Fortran requirement: length of the module string */
   /*unsigned long*/ int xres;
   /*unsigned long*/ int yres;
-  /*unsigned short*/ int method;
   /*unsigned long*/ int checkpoint;
   /*unsigned short*/ int restartmode;
   /*unsigned short*/ int mode;

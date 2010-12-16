@@ -111,16 +111,13 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
   mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
-  if (d->method == 0 || d->method == 6) farm_res = d->xres * d->yres;
-  if (d->method == 6) {
-    qr = mechanic_load_sym(handler, d->module, "farmResolution", "farmResolution",
-        MECHANIC_MODULE_ERROR);
-    if (qr) farm_res = qr(d->xres, d->yres, md);
-    if (farm_res > (d->xres * d->yres)) {
-      mechanic_message(MECHANIC_MESSAGE_ERR,
-        "Farm resolution should not exceed x*y!\n");
-      mechanic_error(MECHANIC_ERR_SETUP);
-    }
+  qr = mechanic_load_sym(handler, d->module, "farmResolution", "farmResolution",
+      MECHANIC_MODULE_ERROR);
+  if (qr) farm_res = qr(d->xres, d->yres, md, d);
+  if (farm_res > (d->xres * d->yres)) {
+    mechanic_message(MECHANIC_MESSAGE_ERR,
+      "Farm resolution should not exceed x*y!\n");
+    mechanic_error(MECHANIC_ERR_SETUP);
   }
 
   /* FARM STARTS */

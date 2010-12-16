@@ -141,26 +141,9 @@ int map2d(int c, module_handler handler, moduleInfo* md, configData* d, int ind[
      /* We need number of current pixel to store, too */
      ind[2] = c;
 
-     /* Method 0: one pixel per each slave. */
-     if (d->method == 0) {
-
-      if (c < y) {
-        ind[0] = c / y;
-        ind[1] = c;
-      }
-
-      if (c > y - 1) {
-        ind[0] = c / y;
-        ind[1] = c % y;
-      }
-     }
-
-     /* Method 6: user defined pixel mapping. */
-     if (d->method == 6) {
-      qpcm = mechanic_load_sym(handler, d->module, "pixelCoordsMap", "pixelCoordsMap",
-          MECHANIC_MODULE_ERROR);
-      if (qpcm) qpcm(ind, c, x, y, md, d);
-     }
+     qpcm = mechanic_load_sym(handler, d->module, "pixelCoordsMap", "pixelCoordsMap",
+       MECHANIC_MODULE_ERROR);
+     if (qpcm) qpcm(ind, c, x, y, md, d);
 
      if (b[ind[0]][ind[1]] == 1) {
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
@@ -413,7 +396,6 @@ int mechanic_printConfig(configData *cd, int flag){
     mechanic_message(flag, "module: %s\n", cd->module);
     mechanic_message(flag, "res: [%d, %d]\n", cd->xres, cd->yres);
     mechanic_message(flag, "mode: %d\n", cd->mode);
-    mechanic_message(flag, "method: %d\n", cd->method);
     mechanic_message(flag, "checkpoint: %d\n", cd->checkpoint);
     mechanic_message(flag, "\n");
   }

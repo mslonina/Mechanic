@@ -87,12 +87,9 @@ int mechanic_mode_masteralone(int mpi_size, int node, module_handler handler,
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
 
   /* Align farm resolution for given method. */
-  if (d->method == 0 || d->method == 6) farm_res = d->xres*d->yres;
-  if (d->method == 6) {
-    qr = mechanic_load_sym(handler, d->module, "farmResolution", "farmResolution",
-        MECHANIC_MODULE_ERROR);
-    if (qr) farm_res = qr(d->xres, d->yres, md);
-  }
+  qr = mechanic_load_sym(handler, d->module, "farmResolution", "farmResolution",
+      MECHANIC_MODULE_ERROR);
+  if (qr) farm_res = qr(d->xres, d->yres, md, d);
 
   pixeldiff = farm_res - computed;
 
@@ -106,18 +103,9 @@ int mechanic_mode_masteralone(int mpi_size, int node, module_handler handler,
     inidata.coords[1] = tab[1];
     inidata.coords[2] = tab[2];
 
-    if (d->method == 0) {
-      result.coords[0] = inidata.coords[0];
-      result.coords[1] = inidata.coords[1];
-      result.coords[2] = inidata.coords[2];
-    }
-
-    if (d->method == 6) {
-
-      qpc = mechanic_load_sym(handler, d->module, "pixelCoords", "pixelCoords",
-          MECHANIC_MODULE_ERROR);
-      if (qpc) mstat = qpc(node, tab, md, d, &inidata, &result);
-    }
+    qpc = mechanic_load_sym(handler, d->module, "pixelCoords", "pixelCoords",
+        MECHANIC_MODULE_ERROR);
+    if (qpc) mstat = qpc(node, tab, md, d, &inidata, &result);
 
     qpb = mechanic_load_sym(handler, d->module, "node_preparePixel",
           "master_preparePixel", MECHANIC_MODULE_SILENT);

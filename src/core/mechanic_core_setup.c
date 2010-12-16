@@ -74,8 +74,6 @@
  *   files specific in given run
  * - @c --config @c -c -- config file to use in the run
  * - @c --module @c -p -- module which should be used during the run
- * - @c --method @c -m -- pixel mapping method (0 -- default,
- *   6 -- user-defined)
  * - @c --xres @c -x -- x resolution of the simulation map
  * - @c --yres @c -y -- y resolution of the simulation map
  * - @c --checkpoint @c -d -- checkpoint file write interval
@@ -104,7 +102,6 @@
  * name = hello
  * xres = 4 #must be greater than 0
  * yres = 4 #must be greater than 0
- * method = 0 #single pixel -- 0, userdefined -- 6
  * module = hello # modules: hello, echo, mandelbrot, module
  * mode = 1 # masteralone -- 0, task farm -- 1, multi task farm -- 2
  *
@@ -306,7 +303,6 @@ int assignConfigValues(configData* d){
   /* Other options */
 	d->xres = LRC_option2int("default", "xres");
 	d->yres = LRC_option2int("default", "yres");
-	d->method = LRC_option2int("default", "method");
 	d->checkpoint = LRC_option2int("logs", "checkpoint");
 	d->restartmode = 0;
 	d->mode = LRC_option2int("default", "mode");

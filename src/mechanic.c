@@ -260,7 +260,6 @@ int main(int argc, char* argv[]){
   int mode = 0;
   /*unsigned long*/ int xres = 0;
   /*unsigned long*/ int yres = 0;
-  int method = 0;
   /*unsigned long*/ int checkpoint = 0;
   int poptflags = 0;
   int useConfigFile = 0;
@@ -302,7 +301,6 @@ int main(int argc, char* argv[]){
     {"default", "name", MECHANIC_NAME_DEFAULT, LRC_STRING},
     {"default", "xres", MECHANIC_XRES_DEFAULT, LRC_INT},
     {"default", "yres", MECHANIC_YRES_DEFAULT, LRC_INT},
-    {"default", "method", MECHANIC_METHOD_DEFAULT, LRC_INT},
     {"default", "module", MECHANIC_MODULE_DEFAULT, LRC_STRING},
     {"default", "mode", MECHANIC_MODE_DEFAULT, LRC_INT},
     {"logs", "checkpoint", MECHANIC_CHECKPOINT_DEFAULT, LRC_INT},
@@ -351,8 +349,6 @@ int main(int argc, char* argv[]){
       &ConfigFile, 0, "Config file", "/path/to/config/file"},
     {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
       &module_name, 0, "Module", "MODULE"},
-    {"method", 'm', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
-      &method, 0, "Pixel map method", "METHOD"},
     {"xres", 'x', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
       &xres, 0, "X resolution", "XRES"},
     {"yres", 'y', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
@@ -398,7 +394,6 @@ int main(int argc, char* argv[]){
     ConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
     xres = atoi(MECHANIC_XRES_DEFAULT);
     yres = atoi(MECHANIC_YRES_DEFAULT);
-    method = atoi(MECHANIC_METHOD_DEFAULT);
     checkpoint = atoi(MECHANIC_CHECKPOINT_DEFAULT);
     mode = atoi(MECHANIC_MODE_DEFAULT);
 
@@ -510,7 +505,6 @@ int main(int argc, char* argv[]){
       mode = LRC_option2int("default", "mode");
       xres = LRC_option2int("default", "xres");
       yres = LRC_option2int("default", "yres");
-      method = LRC_option2int("default", "method");
       checkpoint = LRC_option2int("logs", "checkpoint");
 
       /* STEP 2A: Read commandline options, if any.
@@ -529,9 +523,6 @@ int main(int argc, char* argv[]){
 
       LRC_itoa(convstr, yres, LRC_INT);
       LRC_modifyOption("default", "yres", convstr, LRC_INT);
-
-      LRC_itoa(convstr, method, LRC_INT);
-      LRC_modifyOption("default", "method", convstr, LRC_INT);
 
       LRC_itoa(convstr, mode, LRC_INT);
       LRC_modifyOption("default", "mode", convstr, LRC_INT);
@@ -711,9 +702,6 @@ int main(int argc, char* argv[]){
         MPI_Pack(&cd.yres, 1, MPI_INT, pack_buffer,
           MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
 
-        MPI_Pack(&cd.method, 1, MPI_INT, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
-
         MPI_Pack(&cd.checkpoint, 1, MPI_INT, pack_buffer,
           MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
 
@@ -747,9 +735,6 @@ int main(int argc, char* argv[]){
 
         MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
           &cd.yres, 1, MPI_INT, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          &cd.method, 1, MPI_INT, MPI_COMM_WORLD);
 
         MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
           &cd.checkpoint, 1, MPI_INT, MPI_COMM_WORLD);

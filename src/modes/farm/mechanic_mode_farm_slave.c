@@ -96,30 +96,19 @@ int mechanic_mode_farm_slave(int mpi_size, int node, module_handler handler,
     if (mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG) break;
     if (mpi_status.MPI_TAG == MECHANIC_MPI_DATA_TAG) {
 
-      /* One pixel per each slave. */
-      if (d->method == 0) {
-         result.coords[0] = inidata.coords[0];
-         result.coords[1] = inidata.coords[1];
-         result.coords[2] = inidata.coords[2];
-      }
+      tab[0] = inidata.coords[0];
+      tab[1] = inidata.coords[1];
+      tab[2] = inidata.coords[2];
+
+      qpc = mechanic_load_sym(handler, d->module, "pixelCoords", "pixelCoords",
+        MECHANIC_MODULE_ERROR);
+      if (qpc) mstat = qpc(node, tab, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
       mechanic_message(MECHANIC_MESSAGE_DEBUG, "SLAVE[%d]: PTAB[%d, %d, %d]\n",
           node, inidata.coords[0], inidata.coords[1], inidata.coords[2]);
       mechanic_message(MECHANIC_MESSAGE_DEBUG, "SLAVE[%d]: RTAB[%d, %d, %d]\n",
           node, result.coords[0], result.coords[1], result.coords[2]);
-
-      /* Use userdefined pixelCoords method. */
-      if (d->method == 6) {
-
-         tab[0] = inidata.coords[0];
-         tab[1] = inidata.coords[1];
-         tab[2] = inidata.coords[2];
-
-         qpc = mechanic_load_sym(handler, d->module, "pixelCoords", "pixelCoords",
-             MECHANIC_MODULE_ERROR);
-         if (qpc) mstat = qpc(node, tab, md, d, &inidata, &result);
-         mechanic_check_mstat(mstat);
-      }
 
       qpb = mechanic_load_sym(handler, d->module, "node_preparePixel",
           "slave_preparePixel", MECHANIC_MODULE_SILENT);
