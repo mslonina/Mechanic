@@ -222,6 +222,12 @@ module_handler mechanic_module_open(char* modulename) {
   defaultname = mechanic_module_filename(MECHANIC_MODULE_DEFAULT);
 
   modhand.module = dlopen(defaultname, RTLD_NOW|RTLD_GLOBAL);
+  if (!modhand.module) {
+    mechanic_message(MECHANIC_MESSAGE_ERR,
+      "Cannot load module '%s': %s\n", MECHANIC_MODULE_DEFAULT, dlerror());
+    mechanic_error(MECHANIC_ERR_MODULE);
+  }
+
   modhand.handler = dlopen(modulename, RTLD_NOW|RTLD_GLOBAL);
   if (!modhand.handler) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
@@ -238,47 +244,26 @@ module_handler mechanic_module_open(char* modulename) {
  * Wrapper to dlclose()
  *
  */
-void mechanic_module_close(module_handler handler) {
-  dlclose(handler.handler);
-  dlclose(handler.module);
+void mechanic_module_close(module_handler modhand) {
+  dlclose(modhand.handler);
+  dlclose(modhand.module);
 }
 
 /*
- * Wrapper to dlsym().
- * Handles error messages and abort if necessary.
+ * Creates function name
  */
-void* mechanic_load_sym(module_handler modhand, char* md_name, char* function,
-    char* function_override, int type){
+char* mechanic_module_function(char* md_name, char* function) {
 
-  void* handler_f;
-  void* handler_fo;
-  void* ret_handler;
-  char* err;
-  char* err_o;
   char* func;
-  char* func_over;
-  int template = 0;
-  size_t fl, fol, mn, lenl, leno;
-
-  void* handler;
-  handler = modhand.handler;
-
-  /* Reset dlerror() */
-  dlerror();
+  size_t fl, mn, lenl;
 
   mn = strlen(md_name);
   fl = strlen(function);
-  fol = strlen(function_override);
   lenl = mn + fl + 3;
-  leno = mn + fol + 3;
 
   func = calloc(lenl * sizeof(char*), sizeof(char*));
   if (func == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
-  func_over = calloc(leno * sizeof(char*), sizeof(char*));
-  if (func_over == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  /* Create function names */
   strncpy(func, md_name, mn);
   func[mn] = LRC_NULL;
 
@@ -288,47 +273,75 @@ void* mechanic_load_sym(module_handler modhand, char* md_name, char* function,
   strncat(func, function, fl);
   func[lenl] = LRC_NULL;
 
-  strncpy(func_over, md_name, mn);
-  func_over[mn] = LRC_NULL;
+  return func;
+}
 
-  strncat(func_over, "_", 1);
-  func_over[mn+1] = LRC_NULL;
+/*
+ * Wrapper to dlsym().
+ * Handles error messages and abort if necessary.
+ */
+void* mechanic_load_sym(module_handler modhand, char* md_name, char* function,
+    char* function_override, int type){
 
-  strncat(func_over, function_override, fol);
-  func_over[leno] = LRC_NULL;
+  void *handler_f, *handler_o, *handler_d;
+  void *handler_r;
+  char *err_f, *err_o, *err_d;
+  char *func_f, *func_o, *func_d;
+  int template = 0;
+
+  /* Reset dlerror() */
+  dlerror();
+
+  /* Function names */
+  func_f = mechanic_module_function(md_name, function);
+  func_o = mechanic_module_function(md_name, function);
+  func_d = mechanic_module_function(MECHANIC_MODULE_DEFAULT, function);
 
   /* Load functions */
-  handler_f = dlsym(handler, func);
-  err = dlerror();
+  handler_f = dlsym(modhand.handler, func_f);
+  err_f = dlerror();
 
-  handler_fo = dlsym(handler, func_over);
+  handler_o = dlsym(modhand.handler, func_o);
   err_o = dlerror();
 
-  /* Template not found, override not found -- error check */
-  if (err != NULL && err_o != NULL) template = 0;
+  handler_d = dlsym(modhand.module, func_d);
+  err_d = dlerror();
+
+  /* Template not found, override not found -- check default */
+  if (err_f != NULL && err_o != NULL) {
+    template = 0;
+
+    /* Default callback
+     *
+     * Even in case of empty contrib module, we call default module to do the job
+     * The Template = -1 should never happen, but for the sake of self-test we check
+     * if the default function is present in the module 
+     */
+    if (err_d != NULL) template = -1;
+  }
 
   /* Template found, override not -- will use template */
-  if (err == NULL && err_o != NULL) template = 1;
+  if (err_f == NULL && err_o != NULL) template = 1;
 
   /* Template found, override found -- will use override */
-  if (err == NULL && err_o == NULL) template = 2;
+  if (err_f == NULL && err_o == NULL) template = 2;
 
   /* Template not found, override found -- will use override */
-  if (err != NULL && err_o == NULL) template = 2;
+  if (err_f != NULL && err_o == NULL) template = 2;
 
-  if (template == 0) {
+  if (template == -1) {
     switch (type) {
       case MECHANIC_MODULE_SILENT:
         break;
       case MECHANIC_MODULE_WARN:
         mechanic_message(MECHANIC_MESSAGE_WARN,
             "Module warning: Cannot load function '%s' nor its template: %s\n",
-            func, err);
+            func_f, err_f);
         break;
       case MECHANIC_MODULE_ERROR:
         mechanic_message(MECHANIC_MESSAGE_ERR,
             "Module error: Cannot load function '%s' nor its template: %s\n",
-            func, err);
+            func_f, err_f);
         break;
       default:
         break;
@@ -340,15 +353,18 @@ void* mechanic_load_sym(module_handler modhand, char* md_name, char* function,
       return NULL;
 
   } else if (template == 1) {
-    ret_handler = handler_f;
+    handler_r = handler_f;
   } else if (template == 2) {
-    ret_handler = handler_fo;
+    handler_r = handler_o;
+  } else if (template == 0) {
+    handler_r = handler_d;
   }
 
-  free(func);
-  free(func_over);
+  free(func_f);
+  free(func_o);
+  free(func_d);
 
-  return ret_handler;
+  return handler_r;
 }
 
 /* Wrapper to MPI_Finalize() */
