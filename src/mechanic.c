@@ -267,14 +267,15 @@ int main(int argc, char* argv[]){
   char optvalue;
   int restartmode = 0;
   char convstr[MECHANIC_MAXLENGTH];
-  void* handler;
   poptContext poptcon;
   help = 0;
   usage = 0;
 
+  module_handler modhand;
+
   char* module_file;
   char* oldfile;
-  size_t olen, opreflen, dlen, module_len, module_pref, module_file_len;
+  size_t olen, opreflen, dlen;
 
   /* HDF Helpers */
   hid_t file_id;
@@ -385,7 +386,7 @@ int main(int argc, char* argv[]){
   H5open();
 
   /* CONFIGURATION START */
-  if (node == 0) {
+  if (node == MECHANIC_MPI_MASTER_NODE) {
 
     /* Assign LRC defaults */
     LRC_assignDefaults(cs);
@@ -411,7 +412,7 @@ int main(int argc, char* argv[]){
 
   /* Bad option handling */
   if (optvalue < -1) {
-    if (node == 0) {
+    if (node == MECHANIC_MPI_MASTER_NODE) {
       mechanic_message(MECHANIC_MESSAGE_WARN, "%s: %s\n",
         poptBadOption(poptcon, POPT_BADOPTION_NOALIAS),
         poptStrerror(optvalue));
@@ -424,7 +425,7 @@ int main(int argc, char* argv[]){
 
   /* Long help message set */
   if (help == 1) {
-    if (node == 0) {
+    if (node == MECHANIC_MPI_MASTER_NODE) {
       poptPrintHelp(poptcon, stdout, 0);
     }
     poptFreeContext(poptcon);
@@ -434,7 +435,7 @@ int main(int argc, char* argv[]){
 
   /* Brief help message set */
   if (usage == 1) {
-    if (node == 0) {
+    if (node == MECHANIC_MPI_MASTER_NODE) {
       poptPrintUsage(poptcon, stdout, 0);
     }
     poptFreeContext(poptcon);
@@ -442,11 +443,11 @@ int main(int argc, char* argv[]){
     return 0;
   }
 
-  if (node == 0) mechanic_welcome();
+  if (node == MECHANIC_MPI_MASTER_NODE) mechanic_welcome();
 
   /* Restartmode */
   if (CheckpointFile) {
-    if (node == 0) {
+    if (node == MECHANIC_MPI_MASTER_NODE) {
       mechanic_message(MECHANIC_MESSAGE_DEBUG,
           "Checkpoint file specified: %s\n", CheckpointFile);
       /* STEP 1: Check the health of the checkpoint file */
@@ -481,7 +482,7 @@ int main(int argc, char* argv[]){
   }
 
   /* PROCESS CONFIGURATION DATA */
-  if (node == 0) {
+  if (node == MECHANIC_MPI_MASTER_NODE) {
 
     /* Config file is set and we are not in restart mode */
     if (strcmp(ConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0
@@ -626,7 +627,7 @@ int main(int argc, char* argv[]){
    * the mode in which we are working.
    */
   if (mpi_size > 1) {
-    if (node == 0) {
+    if (node == MECHANIC_MPI_MASTER_NODE) {
       for (i = 1; i < mpi_size; i++) {
         if (cd.mode == MECHANIC_MODE_MASTERALONE) {
           mechanic_message(MECHANIC_MESSAGE_WARN,
@@ -654,7 +655,7 @@ int main(int argc, char* argv[]){
    if (cd.mode != MECHANIC_MODE_MASTERALONE) {
 
      /* Send to slaves information about lengths of important strings */
-      if (node == 0) {
+      if (node == MECHANIC_MPI_MASTER_NODE) {
 
         lengths[0] = (int) strlen(cd.name);
         lengths[1] = (int) strlen(cd.datafile);
@@ -691,7 +692,7 @@ int main(int argc, char* argv[]){
         cd.module_len = lengths[2];
       }
 
-      if (node == 0) {
+      if (node == MECHANIC_MPI_MASTER_NODE) {
 
         pack_position = 0;
 
@@ -776,44 +777,26 @@ int main(int argc, char* argv[]){
    }
 
   /* Create module file name */
-  module_pref = strlen(MECHANIC_MODULE_PREFIX);
-  module_len = strlen(cd.module);
-  module_file_len = module_pref + module_len + LIB_ESZ + 1;
+  module_file = mechanic_module_filename(cd.module);
 
-  module_file = calloc((module_file_len)*sizeof(char*), sizeof(char*));
-  if (module_file == NULL) mechanic_error(MECHANIC_ERR_MEM);
-
-  strncpy(module_file, "libmechanic_module_", module_pref);
-  module_file[module_pref] = LRC_NULL;
-
-  strncat(module_file, cd.module, module_len);
-  module_file[module_pref+module_len] = LRC_NULL;
-
-  strncat(module_file, LIB_EXT, LIB_ESZ);
-  module_file[module_file_len] = LRC_NULL;
-
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Module file: %s\n", module_file);
-
+  /* Assign some fair defaults */
   md.mrl = MECHANIC_MRL_DEFAULT;
   md.irl = MECHANIC_IRL_DEFAULT;
   md.api = MECHANIC_MODULE_API;
-  handler = dlopen(module_file, RTLD_NOW|RTLD_GLOBAL);
-  if (!handler) {
-    mechanic_message(MECHANIC_MESSAGE_ERR,
-      "Cannot load module '%s': %s\n", cd.module, dlerror());
-    mechanic_error(MECHANIC_ERR_MODULE);
-  }
+
+  /* Load module */
+  modhand = mechanic_module_open(module_file);
 
   /* Module init */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
-  if (node == 0) {
-    init = load_sym(handler,cd.module, "init", "master_init",
+  if (node == MECHANIC_MPI_MASTER_NODE) {
+    init = mechanic_load_sym(modhand,cd.module, "init", "master_init",
         MECHANIC_MODULE_ERROR);
-  } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != 0)) {
-    init = load_sym(handler,cd.module, "init", "slave_init",
+  } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != MECHANIC_MPI_MASTER_NODE)) {
+    init = mechanic_load_sym(modhand,cd.module, "init", "slave_init",
         MECHANIC_MODULE_ERROR);
   } else {
-    init = load_sym(handler,cd.module, "init", "init",
+    init = mechanic_load_sym(modhand,cd.module, "init", "init",
         MECHANIC_MODULE_ERROR);
   }
   if (init) mstat = init(mpi_size, node, &md, &cd);
@@ -836,7 +819,7 @@ int main(int argc, char* argv[]){
 
   /* Module query */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
-  query = load_sym(handler,cd.module, "query", "query", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(modhand,cd.module, "query", "query", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
 
@@ -844,7 +827,7 @@ int main(int argc, char* argv[]){
    * thus we have to create master data file after module has been
    * successfully loaded.
    */
-  if (node == 0 && restartmode == 0) {
+  if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 0) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Create master data file\n");
     /* Create master datafile */
     file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -860,21 +843,21 @@ int main(int argc, char* argv[]){
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Loading mode\n");
   switch (cd.mode) {
     case MECHANIC_MODE_MASTERALONE:
-      mstat = mechanic_mode_masteralone(mpi_size, node, handler, &md, &cd);
+      mstat = mechanic_mode_masteralone(mpi_size, node, modhand, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
     case MECHANIC_MODE_FARM:
-      mstat = mechanic_mode_farm(mpi_size, node, handler, &md, &cd);
+      mstat = mechanic_mode_farm(mpi_size, node, modhand, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
 #ifdef HAVE_CUDA_H
     case MECHANIC_MODE_CUDA:
-      mstat = mechanic_mode_cuda(mpi_size, node, handler, &md, &cd);
+      mstat = mechanic_mode_cuda(mpi_size, node, modhand, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
 #endif
     /*case MECHANIC_MODE_MULTIFARM:
-      mstat = mechanic_mode_multifarm(mpi_size, node, handler, &md, &cd);
+      mstat = mechanic_mode_multifarm(mpi_size, node, modhand, &md, &cd);
       break;*/
     default:
       break;
@@ -882,14 +865,14 @@ int main(int argc, char* argv[]){
 
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
-  if (node == 0) {
-    cleanup = load_sym(handler, cd.module, "cleanup", "master_cleanup",
+  if (node == MECHANIC_MPI_MASTER_NODE) {
+    cleanup = mechanic_load_sym(modhand, cd.module, "cleanup", "master_cleanup",
         MECHANIC_MODULE_ERROR);
-  } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != 0)) {
-    cleanup = load_sym(handler, cd.module, "cleanup", "slave_cleanup",
+  } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != MECHANIC_MPI_MASTER_NODE)) {
+    cleanup = mechanic_load_sym(modhand, cd.module, "cleanup", "slave_cleanup",
         MECHANIC_MODULE_ERROR);
   } else {
-    cleanup = load_sym(handler, cd.module, "cleanup", "cleanup",
+    cleanup = mechanic_load_sym(modhand, cd.module, "cleanup", "cleanup",
         MECHANIC_MODULE_ERROR);
   }
   if (cleanup) mstat = cleanup(mpi_size, node, &md, &cd);
@@ -899,13 +882,13 @@ int main(int argc, char* argv[]){
   poptFreeContext(poptcon);
 
   /* Module unload */
-  dlclose(handler);
+  mechanic_module_close(modhand);
 
   /* HDF5 finalize */
   H5close();
 
   /* Cleanup LRC */
-  if (node == 0) LRC_cleanup();
+  if (node == MECHANIC_MPI_MASTER_NODE) LRC_cleanup();
 
   /* Mechanic cleanup */
   free(module_file);
@@ -913,7 +896,7 @@ int main(int argc, char* argv[]){
   /* Finalize */
   mechanic_finalize(node);
 
-  if (node == 0) {
+  if (node == MECHANIC_MPI_MASTER_NODE) {
     mechanic_message(MECHANIC_MESSAGE_INFO, "Mechanic finished his job\n");
     mechanic_message(MECHANIC_MESSAGE_CONT, "Have a nice day!\n\n");
   }

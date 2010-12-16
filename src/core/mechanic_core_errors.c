@@ -82,9 +82,13 @@
 
 /* [/ERRORS] */
 
-/* H5 logs */
-void H5log(){
-  return;
+/* HDF error handler */
+int mechanic_error_hdf(herr_t errcode) {
+  if (errcode < 0) {
+    H5Eprint(H5E_DEFAULT, stderr);
+    return MECHANIC_ERR_HDF;
+  }
+  return 0;
 }
 
 /* Mechanic error handler */
@@ -113,9 +117,9 @@ void mechanic_error(int errcode){
   if (errcode == MECHANIC_ERR_MODULE) mechanic_abort(MECHANIC_ERR_MODULE);
   if (errcode == MECHANIC_MODULE_ERR_MODULE) mechanic_abort(MECHANIC_MODULE_ERR_MODULE);
 
-  return;
 }
 
+/* Wrapper for error messages */
 void mechanic_check_mstat(int errcode) {
   mechanic_error(errcode);
 }

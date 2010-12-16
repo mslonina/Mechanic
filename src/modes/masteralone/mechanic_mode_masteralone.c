@@ -46,7 +46,7 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_masteralone.h"
 
-int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
+int mechanic_mode_masteralone(int mpi_size, int node, module_handler handler,
     moduleInfo* md, configData* d){
 
   int i = 0, j = 0, farm_res = 0, mstat = 0, tab[3], check = 0;
@@ -82,14 +82,14 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
 
   /* Master can do something useful before computations,
    * even in masteralone mode */
-  query = load_sym(handler, d->module, "node_in", "master_in",
+  query = mechanic_load_sym(handler, d->module, "node_in", "master_in",
       MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
 
   /* Align farm resolution for given method. */
   if (d->method == 0 || d->method == 6) farm_res = d->xres*d->yres;
   if (d->method == 6) {
-    qr = load_sym(handler, d->module, "farmResolution", "farmResolution",
+    qr = mechanic_load_sym(handler, d->module, "farmResolution", "farmResolution",
         MECHANIC_MODULE_ERROR);
     if (qr) farm_res = qr(d->xres, d->yres, md);
   }
@@ -114,25 +114,25 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
 
     if (d->method == 6) {
 
-      qpc = load_sym(handler, d->module, "pixelCoords", "pixelCoords",
+      qpc = mechanic_load_sym(handler, d->module, "pixelCoords", "pixelCoords",
           MECHANIC_MODULE_ERROR);
       if (qpc) mstat = qpc(node, tab, md, d, &inidata, &result);
     }
 
-    qpb = load_sym(handler, d->module, "node_preparePixel",
+    qpb = mechanic_load_sym(handler, d->module, "node_preparePixel",
           "master_preparePixel", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &inidata, &result);
 
-    qpb = load_sym(handler, d->module, "node_beforeProcessPixel",
+    qpb = mechanic_load_sym(handler, d->module, "node_beforeProcessPixel",
         "master_beforeProcessPixel", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &inidata, &result);
 
     /* PIXEL COMPUTATION */
-    qpx = load_sym(handler, d->module, "processPixel", "processPixel",
+    qpx = mechanic_load_sym(handler, d->module, "processPixel", "processPixel",
         MECHANIC_MODULE_ERROR);
     if (qpx) mstat = qpx(node, md, d, &inidata, &result);
 
-    qpb = load_sym(handler, d->module, "node_afterProcessPixel",
+    qpb = mechanic_load_sym(handler, d->module, "node_afterProcessPixel",
         "master_afterProcessPixel", MECHANIC_MODULE_SILENT);
     if (qpb) mstat = qpb(node, md, d, &inidata, &result);
 
@@ -154,14 +154,14 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
     check++;
 
     if (check % d->checkpoint == 0 || mechanic_ups < 0) {
-      qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
+      qbc = mechanic_load_sym(handler, d->module, "node_beforeCheckpoint",
           "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
       if (qbc) mstat = qbc(mpi_size, md, d, coordsarr, resultarr);
 
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
       check = 0;
 
-      qac = load_sym(handler, d->module, "node_afterCheckpoint",
+      qac = mechanic_load_sym(handler, d->module, "node_afterCheckpoint",
           "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (qac) mstat = qac(mpi_size, md, d, coordsarr, resultarr);
     }
@@ -176,11 +176,11 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
 
   /* Write outstanding results */
   if (check > 0) {
-      qbc = load_sym(handler, d->module, "node_beforeCheckpoint",
+      qbc = mechanic_load_sym(handler, d->module, "node_beforeCheckpoint",
           "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
       if (qbc) mstat = qbc(mpi_size, md, d, coordsarr, resultarr);
     mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
-      qac = load_sym(handler, d->module, "node_afterCheckpoint",
+      qac = mechanic_load_sym(handler, d->module, "node_afterCheckpoint",
           "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (qac) mstat = qac(mpi_size, md, d, coordsarr, resultarr);
   }
@@ -188,7 +188,7 @@ int mechanic_mode_masteralone(int mpi_size, int node, void* handler,
   /* FARM ENDS */
 
   /* Master can do something useful after the computations. */
-  query = load_sym(handler, d->module, "node_out", "master_out",
+  query = mechanic_load_sym(handler, d->module, "node_out", "master_out",
       MECHANIC_MODULE_SILENT);
   if (query) mstat = query(1, node, md, d, &inidata, &result);
 

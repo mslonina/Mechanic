@@ -46,7 +46,7 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_multifarm.h"
 
-int mechanic_mode_multifarm_master(int mpi_size, int node, void* handler, moduleInfo* md,
+int mechanic_mode_multifarm_master(int mpi_size, int node, module_handler handler, moduleInfo* md,
     configData* d){
 
   mechanic_message(MECHANIC_MESSAGE_INFO, "Multifarm MASTER\n");

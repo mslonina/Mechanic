@@ -46,7 +46,7 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_cuda.h"
 
-int mechanic_mode_cuda(int mpi_size, int node, void* handler, moduleInfo* md,
+int mechanic_mode_cuda(int mpi_size, int node, module_handler handler, moduleInfo* md,
     configData* d){
 
   /*int i = 0, j = 0, farm_res = 0, mstat = 0, tab[3], check = 0;

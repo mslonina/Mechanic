@@ -44,10 +44,10 @@
 #ifndef MECHANIC_MODE_FARM_H
 #define MECHANIC_MODE_FARM_H
 
-int mechanic_mode_farm_master(int mpi_size, int node, void* handler,
+int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
     moduleInfo* md, configData* d);
 
-int mechanic_mode_farm_slave(int mpi_size, int node, void* handler,
+int mechanic_mode_farm_slave(int mpi_size, int node, module_handler handler,
     moduleInfo* md, configData* d);
 
 #endif

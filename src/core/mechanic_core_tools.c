@@ -127,7 +127,7 @@ void clearArray(MECHANIC_DATATYPE* array, int no_of_items_in_array){
  * Returns number of next pixel to be mapped, -1 on failure
  *
  */
-int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[],
+int map2d(int c, module_handler handler, moduleInfo* md, configData* d, int ind[],
     int** b){
 
    int x, y;
@@ -157,7 +157,7 @@ int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[],
 
      /* Method 6: user defined pixel mapping. */
      if (d->method == 6) {
-      qpcm = load_sym(handler, d->module, "pixelCoordsMap", "pixelCoordsMap",
+      qpcm = mechanic_load_sym(handler, d->module, "pixelCoordsMap", "pixelCoordsMap",
           MECHANIC_MODULE_ERROR);
       if (qpcm) qpcm(ind, c, x, y, md, d);
      }
@@ -182,10 +182,72 @@ int map2d(int c, void* handler, moduleInfo* md, configData* d, int ind[],
 }
 
 /*
+ * Returns filename of the module
+ */
+char* mechanic_module_filename(char* name){
+
+  char* module_file;
+  size_t module_len, module_pref, module_file_len;
+
+  module_pref = strlen(MECHANIC_MODULE_PREFIX);
+  module_len = strlen(name);
+  module_file_len = module_pref + module_len + LIB_ESZ + 1;
+
+  module_file = calloc((module_file_len)*sizeof(char*), sizeof(char*));
+  if (module_file == NULL) mechanic_error(MECHANIC_ERR_MEM);
+
+  strncpy(module_file, MECHANIC_MODULE_PREFIX, module_pref);
+  module_file[module_pref] = LRC_NULL;
+
+  strncat(module_file, name, module_len);
+  module_file[module_pref+module_len] = LRC_NULL;
+
+  strncat(module_file, LIB_EXT, LIB_ESZ);
+  module_file[module_file_len] = LRC_NULL;
+
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Module file: %s\n", module_file);
+
+  return module_file;
+}
+
+/*
+ * Wrapper to dlopen()
+ *
+ */
+module_handler mechanic_module_open(char* modulename) {
+
+  module_handler modhand;
+  char* defaultname;
+
+  defaultname = mechanic_module_filename(MECHANIC_MODULE_DEFAULT);
+
+  modhand.module = dlopen(defaultname, RTLD_NOW|RTLD_GLOBAL);
+  modhand.handler = dlopen(modulename, RTLD_NOW|RTLD_GLOBAL);
+  if (!modhand.handler) {
+    mechanic_message(MECHANIC_MESSAGE_ERR,
+      "Cannot load module '%s': %s\n", modulename, dlerror());
+    mechanic_error(MECHANIC_ERR_MODULE);
+  }
+
+  free(defaultname);
+
+  return modhand;
+}
+
+/*
+ * Wrapper to dlclose()
+ *
+ */
+void mechanic_module_close(module_handler handler) {
+  dlclose(handler.handler);
+  dlclose(handler.module);
+}
+
+/*
  * Wrapper to dlsym().
  * Handles error messages and abort if necessary.
  */
-void* load_sym(void* handler, char* md_name, char* function,
+void* mechanic_load_sym(module_handler modhand, char* md_name, char* function,
     char* function_override, int type){
 
   void* handler_f;
@@ -197,6 +259,9 @@ void* load_sym(void* handler, char* md_name, char* function,
   char* func_over;
   int template = 0;
   size_t fl, fol, mn, lenl, leno;
+
+  void* handler;
+  handler = modhand.handler;
 
   /* Reset dlerror() */
   dlerror();
