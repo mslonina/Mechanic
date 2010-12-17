@@ -132,7 +132,6 @@ module mechanic_fortran
     integer (c_int) :: u_module_len
     integer (c_int) :: xres
     integer (c_int) :: yres
-    integer (c_int) :: method
     integer (c_int) :: checkpoint
     integer (c_int) :: restartmode
     integer (c_int) :: mode
