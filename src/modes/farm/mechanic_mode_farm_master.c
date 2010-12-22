@@ -47,7 +47,7 @@
 #include "mechanic_mode_farm.h"
 
 /* MASTER */
-int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
+int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler,
     moduleInfo* md, configData* d){
 
   int i = 0, j = 0, nodes = 0, farm_res = 0;
@@ -78,8 +78,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
   MPI_Datatype masterResultsType;
   MPI_Datatype initialConditionsType;
 
-  module_query_void_f qbeforeS, qafterS, qbeforeR, qafterR, qac, qbc;
-  module_query_int_f qr;
+  module_query_int_f query;
 
   /* Allocate memory */
   result.res = AllocateDoubleVec(md->mrl);
@@ -105,15 +104,13 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
   mechanic_check_mstat(mstat);
 
   /* Master can do something useful before computations. */
-  query = mechanic_load_sym(handler, d->module, "node_in", "master_in",
-    MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
   mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
-  qr = mechanic_load_sym(handler, d->module, "farmResolution", "farmResolution",
-      MECHANIC_MODULE_ERROR);
-  if (qr) farm_res = qr(d->xres, d->yres, md, d);
+  query = mechanic_load_sym(handler, "farmResolution", MECHANIC_MODULE_ERROR);
+  if (query) farm_res = query(d->xres, d->yres, md, d);
   if (farm_res > (d->xres * d->yres)) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Farm resolution should not exceed x*y!\n");
@@ -142,18 +139,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
     inidata.coords[1] = ptab[1];
     inidata.coords[2] = ptab[2];
 
-    qr = mechanic_load_sym(handler, d->module, "node_preparePixel",
-          "master_preparePixel", MECHANIC_MODULE_SILENT);
-    if (qr) mstat = qr(node, md, d, &inidata, &result);
+    query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
+    if (query) mstat = query(node, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "Pixel [%04d, %04d, %04d] sended to node %04d\n",
         ptab[0], ptab[1], ptab[2], i);
 
-    qbeforeS = mechanic_load_sym(handler, d->module, "node_beforeSend",
-        "master_beforeSend", MECHANIC_MODULE_SILENT);
-    if (qbeforeS) mstat = qbeforeS(i, md, d, &result);
+    query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
+    if (query) mstat = query(i, md, d, &result);
     mechanic_check_mstat(mstat);
 
 #ifdef IPM
@@ -167,9 +162,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
     MPI_Pcontrol(-1, "master_ini_send");
 #endif
 
-    qafterS = mechanic_load_sym(handler, d->module, "node_afterSend", "master_afterSend",
-        MECHANIC_MODULE_SILENT);
-    if (qafterS) mstat = qafterS(i, md, d, &result);
+    query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
+    if (query) mstat = query(i, md, d, &result);
     mechanic_check_mstat(mstat);
 
   }
@@ -193,9 +187,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
   /* Receive data and send tasks. */
   while (1) {
 
-    qbeforeR = mechanic_load_sym(handler, d->module, "node_beforeReceive",
-        "master_beforeReceive", MECHANIC_MODULE_SILENT);
-    if (qbeforeR) mstat = qbeforeR(0, md, d, &inidata, &result);
+    query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
+    if (query) mstat = query(0, md, d, &inidata, &result);
 
 #ifdef IPM
     MPI_Pcontrol(1,"master_result_recv");
@@ -211,9 +204,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
     totalnumofpx++;
     count--;
 
-    qafterR = mechanic_load_sym(handler, d->module, "node_afterReceive",
-        "master_afterReceive", MECHANIC_MODULE_SILENT);
-    if (qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+    query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
+    if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     /* Copy data to checkpoint arrays */
@@ -247,18 +239,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
       coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
       resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
 
-      qbc = mechanic_load_sym(handler, d->module, "node_beforeCheckpoint",
-          "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qbc) mstat = qbc(nodes, md, d, coordsvec, resultsvec);
+      query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
       mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       mechanic_check_mstat(mstat);
       check = 0;
 
-      qac = mechanic_load_sym(handler, d->module, "node_afterCheckpoint",
-          "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qac) mstat = qac(nodes, md, d, coordsvec, resultsvec);
+      query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
       FreeIntVec(coordsvec);
@@ -278,14 +268,12 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
       inidata.coords[1] = ptab[1];
       inidata.coords[2] = ptab[2];
 
-      qr = mechanic_load_sym(handler, d->module, "node_preparePixel",
-          "master_preparePixel", MECHANIC_MODULE_SILENT);
-      if (qr) mstat = qr(node, md, d, &inidata, &result);
+      query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(node, md, d, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      qbeforeS = mechanic_load_sym(handler, d->module, "node_beforeSend",
-          "master_beforeSend", MECHANIC_MODULE_SILENT);
-      if (qbeforeS) mstat = qbeforeS(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+      query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
 
       mechanic_message(MECHANIC_MESSAGE_CONT2,
         "Pixel [%04d, %04d, %04d] sended to node %d\n",
@@ -302,10 +290,9 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
       MPI_Pcontrol(-1,"master_pixel_send");
 #endif
 
-      qafterS = mechanic_load_sym(handler, d->module, "node_afterSend", "master_afterSend",
-          MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
 
-      if(qafterS) mstat = qafterS(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+      if(query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
       mechanic_check_mstat(mstat);
 
     } else {
@@ -320,9 +307,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Count is %d, Check is %d\n", count, check);
   for (i = 0; i < count; i++){
 
-    qbeforeR = mechanic_load_sym(handler, d->module, "node_beforeReceive",
-        "master_beforeReceive", MECHANIC_MODULE_SILENT);
-    if (qbeforeR) mstat = qbeforeR(0, md, d, &inidata, &result);
+    query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
+    if (query) mstat = query(0, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Recv... ");
@@ -341,9 +327,8 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "done\n");
     totalnumofpx++;
 
-    qafterR = mechanic_load_sym(handler, d->module, "node_afterReceive", "master_afterReceive",
-        MECHANIC_MODULE_SILENT);
-    if (qafterR) mstat = qafterR(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+    query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
+    if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     /* Copy data to checkpoint arrays */
@@ -369,18 +354,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
       coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
       resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
 
-      qbc = mechanic_load_sym(handler, d->module, "node_beforeCheckpoint",
-          "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qbc) mstat = qbc(nodes, md, d, coordsvec, resultsvec);
+      query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
       mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
       mechanic_check_mstat(mstat);
       check = 0;
 
-      qac = mechanic_load_sym(handler, d->module, "node_afterCheckpoint",
-          "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (qac) mstat = qac(nodes, md, d, coordsvec, resultsvec);
+      query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
       if(coordsvec) free(coordsvec);
@@ -404,16 +387,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
   //coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
   //resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
 
-  //qbc = mechanic_load_sym(handler, d->module, "node_beforeCheckpoint",
+  //query = mechanic_load_sym(handler, "node_beforeCheckpoint",
   //  "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
-  //if (qbc) mstat = qbc(nodes, md, d, coordsvec, resultsvec);
+  //if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
 
   mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
   mechanic_check_mstat(mstat);
 
-  //qac = mechanic_load_sym(handler, d->module, "node_afterCheckpoint",
+  //query = mechanic_load_sym(handler, "node_afterCheckpoint",
   //    "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
-  //if (qac) mstat = qac(nodes, md, d, coordsvec, resultsvec);
+  //if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
 
   //if(coordsvec) free(coordsvec);
   //if(resultsvec) free(resultsvec);
@@ -432,8 +415,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, module_handler handler,
   MPI_Type_free(&initialConditionsType);
 
   /* Master can do something useful after the computations. */
-  query = mechanic_load_sym(handler, d->module, "node_out", "master_out",
-      MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(nodes, node, md, d, &inidata, &result);
   mechanic_check_mstat(mstat);
 

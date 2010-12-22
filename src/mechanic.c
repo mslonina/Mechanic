@@ -245,7 +245,7 @@
  * @idoc fortran/mechanic_fortran.f03 F2003BIND_REF
  *
  * @page devel Short Developer's Guide
- * @idoc core/mechanic_core_tools.c DEVEL
+ * @idoc core/mechanic_core_devel.c DEVEL
  *
  * @page troubleshooting Troubleshooting
  * @idoc core/mechanic_core_errors.c ERRORS
@@ -270,11 +270,13 @@ int main(int argc, char* argv[]){
   help = 0;
   usage = 0;
 
-  module_handler modhand;
+  mechanic_internals internals;
 
-  char* module_file;
   char* oldfile;
   size_t olen, opreflen, dlen;
+
+  /* Module functions */
+  module_query_int_f init, query, cleanup;
 
   /* HDF Helpers */
   hid_t file_id;
@@ -757,35 +759,35 @@ int main(int argc, char* argv[]){
           "Node [%d] received following configuration:\n\n", node);
         mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
-      }
-
-   }
-
-  /* Create module file name */
-  module_file = mechanic_module_filename(cd.module);
+     }
+  }
 
   /* Assign some fair defaults */
   md.mrl = MECHANIC_MRL_DEFAULT;
   md.irl = MECHANIC_IRL_DEFAULT;
   md.api = MECHANIC_MODULE_API;
 
-  /* Load module */
-  modhand = mechanic_module_open(module_file);
+  /* Initialize internals and load modules  */
+  internals = mechanic_internals_init(node, &md, &cd);
 
   /* Module init */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
   if (node == MECHANIC_MPI_MASTER_NODE) {
-    init = mechanic_load_sym(modhand,cd.module, "init", "master_init",
-        MECHANIC_MODULE_ERROR);
+    init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
   } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != MECHANIC_MPI_MASTER_NODE)) {
-    init = mechanic_load_sym(modhand,cd.module, "init", "slave_init",
-        MECHANIC_MODULE_ERROR);
+    init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
   } else {
-    init = mechanic_load_sym(modhand,cd.module, "init", "init",
-        MECHANIC_MODULE_ERROR);
+    init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
   }
   if (init) mstat = init(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
+
+  /* The module overrides ModuleInfo defaults */
+  internals.info = &md;
+
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.mrl = %d\n", internals.info->mrl);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.irl = %d\n", internals.info->irl);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.api = %d\n", internals.info->api);
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "irl = %d\n", md.irl);
@@ -804,7 +806,7 @@ int main(int argc, char* argv[]){
 
   /* Module query */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
-  query = mechanic_load_sym(modhand,cd.module, "query", "query", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(internals, "query", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
 
@@ -828,21 +830,21 @@ int main(int argc, char* argv[]){
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Loading mode\n");
   switch (cd.mode) {
     case MECHANIC_MODE_MASTERALONE:
-      mstat = mechanic_mode_masteralone(mpi_size, node, modhand, &md, &cd);
+      mstat = mechanic_mode_masteralone(mpi_size, node, internals, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
     case MECHANIC_MODE_FARM:
-      mstat = mechanic_mode_farm(mpi_size, node, modhand, &md, &cd);
+      mstat = mechanic_mode_farm(mpi_size, node, internals, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
 #ifdef HAVE_CUDA_H
     case MECHANIC_MODE_CUDA:
-      mstat = mechanic_mode_cuda(mpi_size, node, modhand, &md, &cd);
+      mstat = mechanic_mode_cuda(mpi_size, node, internals, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
 #endif
     /*case MECHANIC_MODE_MULTIFARM:
-      mstat = mechanic_mode_multifarm(mpi_size, node, modhand, &md, &cd);
+      mstat = mechanic_mode_multifarm(mpi_size, node, internals, &md, &cd);
       break;*/
     default:
       break;
@@ -851,14 +853,11 @@ int main(int argc, char* argv[]){
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
   if (node == MECHANIC_MPI_MASTER_NODE) {
-    cleanup = mechanic_load_sym(modhand, cd.module, "cleanup", "master_cleanup",
-        MECHANIC_MODULE_ERROR);
+    cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR);
   } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != MECHANIC_MPI_MASTER_NODE)) {
-    cleanup = mechanic_load_sym(modhand, cd.module, "cleanup", "slave_cleanup",
-        MECHANIC_MODULE_ERROR);
+    cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR);
   } else {
-    cleanup = mechanic_load_sym(modhand, cd.module, "cleanup", "cleanup",
-        MECHANIC_MODULE_ERROR);
+    cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR);
   }
   if (cleanup) mstat = cleanup(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
@@ -866,17 +865,14 @@ int main(int argc, char* argv[]){
   /* Free POPT */
   poptFreeContext(poptcon);
 
-  /* Module unload */
-  mechanic_module_close(modhand);
+  /* Mechanic cleanup */
+  mechanic_internals_close(internals);
 
   /* HDF5 finalize */
   H5close();
 
   /* Cleanup LRC */
   if (node == MECHANIC_MPI_MASTER_NODE) LRC_cleanup();
-
-  /* Mechanic cleanup */
-  free(module_file);
 
   /* Finalize */
   mechanic_finalize(node);

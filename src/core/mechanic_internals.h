@@ -142,7 +142,7 @@ enum Modes {
 #endif
 } mechanicModes;
 
-/* Popt modes */
+/* POPT MODES */
 #define MECHANIC_MODE_MASTERALONE_P '0'
 #define MECHANIC_MODE_FARM_P '1'
 #define MECHANIC_MODE_FARM2_P '2'
@@ -153,28 +153,24 @@ enum Modes {
 #endif
 
 /* MODULE ARCHITECTURE FUNCTION HANDLERS */
-typedef int (*module_init_f) ();
-module_init_f init;
-
 typedef int (*module_query_void_f) ();
-module_query_void_f query;
-
 typedef int (*module_query_int_f) ();
-module_query_int_f iquery;
 
-typedef int (*module_cleanup_f) ();
-module_cleanup_f cleanup;
-
-/* DLOPEN WRAPPERS */
+/* MECHANIC INTERNALS STRUCT */
 typedef struct {
+  int node;
+  int comm;
   void* module;
   void* handler;
-} module_handler;
-
-module_handler mechanic_module_open(char* module);
-void mechanic_module_close(module_handler module);
+  configData* config;
+  moduleInfo* info;
+} mechanic_internals;
 
 char* mechanic_module_filename(char* name);
+mechanic_internals mechanic_module_open(char* module);
+void mechanic_module_close(mechanic_internals module);
+mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* d);
+void mechanic_internals_close(mechanic_internals handler);
 
 /* GLOBALS */
 char* ConfigFile;
@@ -184,13 +180,14 @@ int allopts;
 int usage, help, debug, silent;
 
 /* FUNCTION PROTOTYPES */
-int map2d(int, module_handler handler, moduleInfo*, configData* d, int ind[], int** b);
+int map2d(int c, mechanic_internals handler, moduleInfo*, configData* d, int ind[], int** b);
 
 int buildMasterResultsType(int mrl, masterData* md,
     MPI_Datatype* masterResultsType_ptr);
 
-void* mechanic_load_sym(module_handler handler, char* module_name, char* function,
-    char* function_override, int type);
+char* mechanic_module_sym_prefix(char* prefix, char* function);
+void* mechanic_load_sym(mechanic_internals handler, char* function, int type);
+void* mechanic_sym_lookup(void* modhand, char* md_name, char* function);
 
 int readDefaultConfig(char* inifile, int flag);
 int readCheckpointConfig(char* inifile);
@@ -220,16 +217,16 @@ void mechanic_welcome();
 
 void clearArray(MECHANIC_DATATYPE*,int);
 
-int mechanic_mode_multifarm(int mpi_size, int node, module_handler handler,
+int mechanic_mode_multifarm(int mpi_size, int node, mechanic_internals handler,
     moduleInfo* md, configData* d);
 
-int mechanic_mode_farm(int mpi_size, int node, module_handler handler,
+int mechanic_mode_farm(int mpi_size, int node, mechanic_internals handler,
     moduleInfo* md, configData* d);
-int mechanic_mode_masteralone(int mpi_size, int node, module_handler handler,
+int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler,
     moduleInfo* md, configData* d);
 
 #ifdef HAVE_CUDA_H
-int mechanic_mode_cuda(int mpi_size, int node, module_handler handler,
+int mechanic_mode_cuda(int mpi_size, int node, mechanic_internals handler,
     moduleInfo* md, configData* d);
 #endif
 

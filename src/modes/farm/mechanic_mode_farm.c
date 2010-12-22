@@ -46,7 +46,7 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_farm.h"
 
-int mechanic_mode_farm(int mpi_size, int node, module_handler handler, moduleInfo* md,
+int mechanic_mode_farm(int mpi_size, int node, mechanic_internals handler, moduleInfo* md,
     configData* d){
 
   int mstat;

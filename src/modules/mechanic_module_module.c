@@ -564,6 +564,12 @@ int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d, master
  */
 int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
+  printf("Node %d out.\n", node);
+  return 0;
+}
+int module_slave_out(int mpi_size, int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r){
+  printf("Slave %d out.\n", node);
   return 0;
 }
 
