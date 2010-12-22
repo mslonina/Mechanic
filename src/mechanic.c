@@ -772,13 +772,7 @@ int main(int argc, char* argv[]){
 
   /* Module init */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
-  if (node == MECHANIC_MPI_MASTER_NODE) {
-    init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
-  } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != MECHANIC_MPI_MASTER_NODE)) {
-    init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
-  } else {
-    init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
-  }
+  init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
   if (init) mstat = init(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
 
@@ -852,13 +846,7 @@ int main(int argc, char* argv[]){
 
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
-  if (node == MECHANIC_MPI_MASTER_NODE) {
-    cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR);
-  } else if ((cd.mode != MECHANIC_MODE_MASTERALONE) && (node != MECHANIC_MPI_MASTER_NODE)) {
-    cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR);
-  } else {
-    cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR);
-  }
+  cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR);
   if (cleanup) mstat = cleanup(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
 
