@@ -46,7 +46,7 @@
 
 ! [F2003BIND_REF]
 !
-! @idoc modules/hello-fortran/mechanic_module_ff.f03 F2003BIND
+! @idoc modules/modules_fortran/fhello/mechanic_module_fhello.f03 F2003BIND
 !
 ! @subsection f2003ref Fortran 2003 bindings reference
 !

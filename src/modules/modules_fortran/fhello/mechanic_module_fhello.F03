@@ -50,7 +50,7 @@
 ! Below is an example of Fortran module.
 !
 ! @code
-! @icode modules/hello-fortran/mechanic_module_fhello.f03 F2003MODULE
+! @icode modules/modules_fortran/fhello/mechanic_module_fhello.f03 F2003MODULE
 ! @endcode
 ! [/F2003BIND]
 
