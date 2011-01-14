@@ -96,44 +96,49 @@
 /* Master data scheme */
 int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 
- hsize_t dimsf[2], dimsr[2];
- hid_t boardspace, dataspace;
- /*hid_t statsspace;*/
- hid_t dset_board, data_group, dset_data;
- /*hid_t dset_stats;*/
+  hsize_t dimsf[2], dimsr[2];
+  hid_t boardspace, dataspace;
+  /*hid_t statsspace;*/
+  hid_t dset_board, data_group, dset_data;
+  /*hid_t dset_stats;*/
+  herr_t hdf_status;
 
- /* Control board space */
- dimsf[0] = d->xres;
- dimsf[1] = d->yres;
- boardspace = H5Screate_simple(MECHANIC_HDF_RANK, dimsf, NULL);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Schema is: %d %d %d\n", 
+    md->schema.rank, md->schema.dimsize[0], md->schema.dimsize[1]);
 
- dset_board = H5Dcreate(file_id, MECHANIC_DATABOARD, H5T_NATIVE_INT,
-     boardspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  /* Control board space */
+  dimsf[0] = d->xres;
+  dimsf[1] = d->yres;
+  boardspace = H5Screate_simple(MECHANIC_HDF_RANK, dimsf, NULL);
 
- /* Master data group */
- data_group = H5Gcreate(file_id, MECHANIC_DATAGROUP,
-     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  dset_board = H5Dcreate(file_id, MECHANIC_DATABOARD, H5T_NATIVE_INT,
+    boardspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
- /* Result data space */
- dimsr[0] = d->xres*d->yres;
- dimsr[1] = md->mrl;
- dataspace = H5Screate_simple(MECHANIC_HDF_RANK, dimsr, NULL);
+  /* Master data group */
+  data_group = H5Gcreate(file_id, MECHANIC_DATAGROUP,
+    H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
- /* Create master dataset */
- dset_data = H5Dcreate(data_group, MECHANIC_DATASETMASTER, H5T_NATIVE_DOUBLE,
-     dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  /* Result data space */
+  dataspace = H5Screate(md->schema.type);
+  if (md->schema.type == H5S_SIMPLE) {
+    hdf_status = H5Sset_extent_simple(dataspace, md->schema.rank, md->schema.dimsize, NULL);
+  }
+ 
+  /* Create master dataset */
+  dset_data = H5Dcreate(data_group, MECHANIC_DATASETMASTER, H5T_NATIVE_DOUBLE,
+    dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
- /* Create stats dataset */
+  /* Create stats dataset */
   /*dset_stats = H5Dcreate(stats_group, MECHANIC_STATSMASTER, H5T_NATIVE_DOUBLE,
      dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-*/
- H5Dclose(dset_board);
- H5Dclose(dset_data);
- H5Sclose(boardspace);
- H5Sclose(dataspace);
- H5Gclose(data_group);
+  */
+  H5Dclose(dset_board);
+  H5Dclose(dset_data);
+  H5Sclose(boardspace);
+  H5Sclose(dataspace);
+  H5Gclose(data_group);
 
- return 0;
+  return 0;
 }
 
 /* Write data to master file */
@@ -175,7 +180,7 @@ int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr){
   off[0] = coordsarr[0];
   off[1] = coordsarr[1];
 
-  rdata[0][0] = 1;
+  rdata[0][0] = MECHANIC_TASK_FINISHED;
 
   H5Sselect_hyperslab(space, H5S_SELECT_SET, off, NULL, co, NULL);
   hdf_status = H5Dwrite(dset, H5T_NATIVE_INT, memspace, space,

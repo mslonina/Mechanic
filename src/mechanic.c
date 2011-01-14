@@ -276,7 +276,7 @@ int main(int argc, char* argv[]){
   size_t olen, opreflen, dlen;
 
   /* Module functions */
-  module_query_int_f init, query, cleanup;
+  module_query_int_f init, schema, query, cleanup;
 
   /* HDF Helpers */
   hid_t file_id;
@@ -809,9 +809,17 @@ int main(int argc, char* argv[]){
    * successfully loaded.
    */
   if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 0) {
-    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Create master data file\n");
+
     /* Create master datafile */
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Create master data file\n");
     file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+  
+    /* Data schema */
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module schema\n");
+    schema = mechanic_load_sym(internals, "schema", MECHANIC_MODULE_ERROR);
+    if (schema) mstat = schema(mpi_size, node, &md, &cd);
+    mechanic_check_mstat(mstat);
+    
     mstat = H5createMasterDataScheme(file_id, &md, &cd);
     mechanic_check_mstat(mstat);
 

@@ -46,6 +46,7 @@
 #define MECHANIC_H
 
 #include "libreadconfig.h"
+#include "hdf5.h"
 
 #define MECHANIC_ERR_MPI 911
 #define MECHANIC_ERR_HDF 912
@@ -107,14 +108,23 @@ typedef struct {
 } masterData;
 /* [/MASTERDATA] */
 
+/* [SCHEMA] */
+typedef struct {
+  hid_t type;
+  unsigned int rank;
+  hsize_t dimsize[];
+} mechanicSchema;
+/* [/SCHEMA] */
+
 /* [MODULEINFO] */
 typedef struct {
   int irl;
   int mrl;
   int api;
+  mechanicSchema schema;
 } moduleInfo;
-/* [/MODULEINFO] */
 
+/* [/MODULEINFO] */
 void mechanic_message(int type, char* fmt, ...);
 int mechanic_finalize(/*unsigned long*/ int node);
 int mechanic_abort(int errcode);

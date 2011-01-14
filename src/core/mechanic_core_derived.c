@@ -62,9 +62,9 @@ int buildMasterResultsType(int mrl, masterData* md,
   block_lengths[0] = mrl; 
   block_lengths[1] = 3;
 
-  MPI_Address(md, &addresses[0]);
-  MPI_Address(md->res, &addresses[1]);
-  MPI_Address(md->coords, &addresses[2]);
+  MPI_Get_address(md, &addresses[0]);
+  MPI_Get_address(md->res, &addresses[1]);
+  MPI_Get_address(md->coords, &addresses[2]);
 
   displacements[0] = addresses[1] - addresses[0];
   displacements[1] = addresses[2] - addresses[0];

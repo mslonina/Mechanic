@@ -94,6 +94,17 @@ int module_init(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 
+int module_schema(int mpi_size, int node, moduleInfo* md, configData* d) {
+
+  /* Schema */
+  md->schema.type = H5S_SIMPLE;
+  md->schema.rank = 2;
+  md->schema.dimsize[0] = d->xres * d->yres;
+  md->schema.dimsize[1] = md->mrl;
+
+  return 0;
+}
+
 /**
  * @internal
  * @fn int module_query(moduleInfo* md)
