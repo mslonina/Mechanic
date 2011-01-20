@@ -6,6 +6,6 @@
 obj = bld.new_task_gen('cc', 'shlib')
 obj.source = bld.glob('*.c')
 obj.includes = ". ../core"
-obj.uselib_local = "core"
+obj.uselib_local = "core corelib"
 obj.target = 'mechanic_module_module'
 obj.name = 'module'

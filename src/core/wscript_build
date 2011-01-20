@@ -11,4 +11,12 @@ obj.uselib = "READCONFIG"
 obj.target = 'mechanic_core'
 obj.name = 'core'
 
+libm = bld.new_task_gen('cc', 'shlib')
+libm.source = 'mechanic_core_internals.c mechanic_core_devel.c mechanic_core_errors.c mechanic_core_tools.c'
+libm.includes = "."
+libm.export_incdirs = "."
+libm.uselib = "HDF5"
+libm.target = "mechanic"
+libm.name = "corelib"
+
 bld.install_files('${PREFIX}/include', 'mechanic.h')
