@@ -245,18 +245,23 @@ int readDefaultConfig(char* inifile, int flag){
   return opts;
 }
 
-/* Read configuration stored in the checkpoint file. */
+/* Read configuration stored in the checkpoint file.
+ *
+ * @todo
+ * return mstat, opts in function argument
+ */
 int readCheckpointConfig(char* file) {
 
   int opts = 0;
   hid_t f;
-  herr_t status;
+  //herr_t status;
 
   f = H5Fopen(file, H5F_ACC_RDONLY, H5P_DEFAULT);
 
   opts = LRC_HDF5Parser(f);
 
-  status = H5Fclose(f);
+  //status = H5Fclose(f);
+  H5Fclose(f);
 
   return opts;
 }

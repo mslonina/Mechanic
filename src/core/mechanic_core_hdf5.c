@@ -96,12 +96,13 @@
 /* Master data scheme */
 int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 
-  hsize_t dimsf[2], dimsr[2];
+  hsize_t dimsf[2]; //dimsr[2];
   hid_t boardspace, dataspace;
   /*hid_t statsspace;*/
   hid_t dset_board, data_group, dset_data;
   /*hid_t dset_stats;*/
   herr_t hdf_status;
+  int mstat = 0;
 
   mechanic_message(MECHANIC_MESSAGE_INFO, "Schema is: %d %d %d\n", 
     md->schema[0].rank, md->schema[0].dimsize[0], md->schema[0].dimsize[1]);
@@ -144,7 +145,8 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
   H5Sclose(dataspace);
   H5Gclose(data_group);
 
-  return 0;
+  if (hdf_status < 0) mstat = MECHANIC_ERR_HDF;
+  return mstat;
 }
 
 /* Write data to master file */
@@ -154,6 +156,7 @@ int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md,
   MECHANIC_DATATYPE rdata[md->mrl][1]; /* And this is the place where C99 helps... */
   hsize_t co[2], off[2];
   herr_t hdf_status;
+  int mstat = 0;
   int j = 0;
 
   co[0] = 1;
@@ -170,7 +173,8 @@ int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md,
   hdf_status = H5Dwrite(dset, H5T_NATIVE_DOUBLE, memspace, space,
       H5P_DEFAULT, rdata);
 
-  return 0;
+  if (hdf_status < 0) mstat = MECHANIC_ERR_HDF;
+  return mstat;
 }
 
 /* Mark computed pixels on board */
@@ -179,6 +183,7 @@ int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr){
   int rdata[1][1];
   hsize_t co[2], off[2];
   herr_t hdf_status;
+  int mstat = 0;
 
   co[0] = 1;
   co[1] = 1;
@@ -192,6 +197,7 @@ int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr){
   hdf_status = H5Dwrite(dset, H5T_NATIVE_INT, memspace, space,
       H5P_DEFAULT, rdata);
 
-  return 0;
+  if (hdf_status < 0) mstat = MECHANIC_ERR_HDF;
+  return mstat;
 }
 

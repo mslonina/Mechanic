@@ -76,7 +76,7 @@
 int atCheckPoint(int check, int** coordsarr, int** board,
     MECHANIC_DATATYPE** resultarr, moduleInfo* md, configData* d){
 
-  int mstat;
+  int mstat = 0;
 
   mstat = manageCheckPoints(d);
   mstat = H5writeCheckPoint(md, d, check, coordsarr, resultarr);
@@ -158,7 +158,7 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check,
     int** coordsarr, MECHANIC_DATATYPE** resultarr){
 
   int i = 0;
-  int mstat;
+  int mstat = 0;
 
   /* HDF */
   hid_t file_id, dset_board, dset_data, data_group;
@@ -210,7 +210,7 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check,
 
 	mechanic_message(MECHANIC_MESSAGE_DEBUG, "Checkpoint finished\n");
 
-  return 0;
+  return mstat;
 }
 
 /*
@@ -219,6 +219,8 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check,
  * FIX ME!
  * I couldn't manage to do it with single call to H5Dread and malloc,
  * so I select pixels one by one and read them to board array
+ *
+ * @todo return mstat instead of pixel. Return pixel in function arg
  */
 int H5readBoard(configData* d, int** board){
 
@@ -226,6 +228,7 @@ int H5readBoard(configData* d, int** board){
   hid_t dataspace_id, memspace_id;
   hsize_t co[2], offset[2], stride[2], block[2], dims[2];
   herr_t hdf_status;
+  int mstat = 0;
 
   int rdata[1][1];
   int i = 0, j = 0;

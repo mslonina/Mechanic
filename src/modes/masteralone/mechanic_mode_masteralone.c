@@ -173,6 +173,6 @@ int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler
   FreeDouble2D(resultarr,d->checkpoint);
   FreeInt2D(board,d->xres);
 
-  return 0;
+  return mstat;
 }
 
