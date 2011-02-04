@@ -110,7 +110,9 @@ typedef struct {
 
 /* [SCHEMA] */
 typedef struct {
+  char *path;
   hid_t type;
+  hid_t datatype;
   unsigned int rank;
   hsize_t dimsize[];
 } mechanicSchema;
@@ -121,7 +123,8 @@ typedef struct {
   int irl;
   int mrl;
   int api;
-  mechanicSchema schema;
+  int schemasize;
+  mechanicSchema *schema;
 } moduleInfo;
 
 /* [/MODULEINFO] */

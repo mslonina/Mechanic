@@ -72,13 +72,13 @@
 #include "libreadconfig.h"
 #include "libreadconfig_hdf5.h"
 
-#ifdef PLATFORM_DARWIN
+#if PLATFORM_DARWIN == 1
   #define WE_ARE_ON_DARWIN 1
   #define LIB_EXT ".dylib"
   #define LIB_ESZ 6
 #endif
 
-#ifdef PLATFORM_LINUX
+#if PLATFORM_LINUX == 1
   #define WE_ARE_ON_LINUX 1
   #define LIB_EXT ".so"
   #define LIB_ESZ 3

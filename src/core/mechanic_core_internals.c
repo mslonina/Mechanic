@@ -256,6 +256,9 @@ mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* 
   /* Load modules */
   internals = mechanic_module_open(module_filename);
 
+  /* Allocate schema */
+  m->schema = calloc(sizeof(mechanicSchema) * m->schemasize, sizeof(mechanicSchema));
+
   /* Fill the rest of the structure */
   internals.node = node;
   internals.config = d;
@@ -271,4 +274,5 @@ mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* 
  */
 void mechanic_internals_close(mechanic_internals modhand) {
   mechanic_module_close(modhand);
+  free(modhand.info->schema);
 }

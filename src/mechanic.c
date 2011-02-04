@@ -766,6 +766,7 @@ int main(int argc, char* argv[]){
   md.mrl = MECHANIC_MRL_DEFAULT;
   md.irl = MECHANIC_IRL_DEFAULT;
   md.api = MECHANIC_MODULE_API;
+  md.schemasize = 1;
 
   /* Initialize internals and load modules  */
   internals = mechanic_internals_init(node, &md, &cd);

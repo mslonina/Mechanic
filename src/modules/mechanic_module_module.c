@@ -90,6 +90,7 @@ int module_init(int mpi_size, int node, moduleInfo* md, configData* d){
 
   md->mrl = 3;
   md->irl = 3;
+  md->schemasize = 3;
 
   return 0;
 }
@@ -97,11 +98,27 @@ int module_init(int mpi_size, int node, moduleInfo* md, configData* d){
 int module_schema(int mpi_size, int node, moduleInfo* md, configData* d) {
 
   /* Schema */
-  md->schema.type = H5S_SIMPLE;
-  md->schema.rank = 2;
-  md->schema.dimsize[0] = d->xres * d->yres;
-  md->schema.dimsize[1] = md->mrl;
 
+  md->schema[0].path = "/data/master";
+  md->schema[0].type = H5S_SIMPLE;
+  md->schema[0].datatype = H5T_NATIVE_DOUBLE;
+  md->schema[0].rank = 2;
+  md->schema[0].dimsize[0] = d->xres * d->yres;
+  md->schema[0].dimsize[1] = md->mrl;
+/*
+  md->schema[1].path = "/data/mydata";
+  md->schema[1].type = H5S_SIMPLE;
+  md->schema[1].datatype = H5T_NATIVE_DOUBLE;
+  md->schema[1].rank = 2;
+  md->schema[1].dimsize[0] = 5;
+  md->schema[1].dimsize[1] = 5;
+
+  md->schema[2].path = "/data/supadata";
+  md->schema[2].type = H5S_SIMPLE;
+  md->schema[2].rank = 2;
+  md->schema[2].dimsize[0] = 5;
+  md->schema[2].dimsize[1] = 5;
+*/
   return 0;
 }
 

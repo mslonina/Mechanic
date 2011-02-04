@@ -103,8 +103,10 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
   /*hid_t dset_stats;*/
   herr_t hdf_status;
 
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Schema is: %d %d %d\n", 
-    md->schema.rank, md->schema.dimsize[0], md->schema.dimsize[1]);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Schema is: %d %d %d\n", 
+    md->schema[0].rank, md->schema[0].dimsize[0], md->schema[0].dimsize[1]);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Schema is: %d %d %d\n", 
+    md->schema[1].rank, md->schema[1].dimsize[0], md->schema[1].dimsize[1]);
 
   /* Control board space */
   dimsf[0] = d->xres;
@@ -119,14 +121,18 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
   /* Result data space */
-  dataspace = H5Screate(md->schema.type);
-  if (md->schema.type == H5S_SIMPLE) {
-    hdf_status = H5Sset_extent_simple(dataspace, md->schema.rank, md->schema.dimsize, NULL);
+  dataspace = H5Screate(md->schema[0].type);
+  if (md->schema[0].type == H5S_SIMPLE) {
+    hdf_status = H5Sset_extent_simple(dataspace, md->schema[0].rank, md->schema[0].dimsize, NULL);
   }
- 
+
   /* Create master dataset */
-  dset_data = H5Dcreate(data_group, MECHANIC_DATASETMASTER, H5T_NATIVE_DOUBLE,
+  dset_data = H5Dcreate(data_group, md->schema[0].path, md->schema[0].datatype,
     dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  //dset_data = H5Dcreate(data_group, MECHANIC_DATASETMASTER, H5T_NATIVE_DOUBLE,
+  //  dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  //dset_data = H5Dcreate(data_group, md->schema[1].path, H5T_NATIVE_DOUBLE,
+  //  dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
   /* Create stats dataset */
   /*dset_stats = H5Dcreate(stats_group, MECHANIC_STATSMASTER, H5T_NATIVE_DOUBLE,
