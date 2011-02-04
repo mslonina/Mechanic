@@ -28,7 +28,8 @@ option (BUILD_DOCS "Build documentation" off)
 
 if (BUILD_FORTRAN)
   enable_language (Fortran)
-  set (CMAKE_Fortran_FLAGS "-std=f2003 -fbounds-check -fbacktrace -ffpe-trap=zero,overflow -fdefault-real-8")
+  set (CMAKE_Fortran_FLAGS 
+    "-I. -I/usr/include -I/usr/lib -I/usr/local/include -I/usr/local/lib -std=f2003 -fbounds-check -fbacktrace -ffpe-trap=zero,overflow -fdefault-real-8")
 endif (BUILD_FORTRAN)
 
 include (CheckIncludeFiles)
@@ -53,7 +54,8 @@ CONFIGURE_FILE (
   ${CMAKE_CURRENT_BINARY_DIR}/src/config.h
 )
 
-add_definitions (-Wall -std=c99 -DHAVE_CONFIG_H)
+add_definitions (-DHAVE_CONFIG_H)
+set (CMAKE_C_FLAGS "-Wall -std=c99")
 
 add_subdirectory(src)
 add_subdirectory(src/core)

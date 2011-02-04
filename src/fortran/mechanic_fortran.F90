@@ -161,7 +161,7 @@ module mechanic_fortran
     interface
       integer (c_int) function mechanic_finalize(node) bind(c) result(mstat)
         use iso_c_binding
-        integer (c_int) :: node
+        integer (c_int), value :: node
       end function mechanic_finalize
     end interface
 
@@ -175,7 +175,7 @@ module mechanic_fortran
     interface
       integer (c_int) function mechanic_abort(errcode) bind(c) result(mstat)
         use iso_c_binding
-        integer (c_int) :: errcode
+        integer (c_int), value :: errcode
       end function mechanic_abort
     end interface
 
@@ -189,7 +189,7 @@ module mechanic_fortran
     interface
       subroutine mechanic_error(stat) bind(c)
         use iso_c_binding
-        integer (c_int) :: stat
+        integer (c_int), value :: stat
       end subroutine mechanic_error
     end interface
 

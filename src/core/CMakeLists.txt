@@ -15,10 +15,10 @@ set (sharedsources
     )
 
 add_library(core ${coresources} ${sharedsources})
-target_link_libraries(core hdf5 m readconfig)
+target_link_libraries(core hdf5 m mpi readconfig)
 
 add_library(mechanic_t SHARED ${sharedsources})
-target_link_libraries(mechanic_t hdf5 m readconfig)
+target_link_libraries(mechanic_t hdf5 m mpi readconfig)
 
 install (TARGETS mechanic_t DESTINATION lib)
 install (FILES mechanic.h DESTINATION include)
