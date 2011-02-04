@@ -23,7 +23,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set (platform_linux 1)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-option (BUILD_FORTRAN "Build Fortran bindings" off)
+option (BUILD_FORTRAN "Build Fortran bindings" on)
 option (BUILD_DOCS "Build documentation" off)
 
 if (BUILD_FORTRAN)
@@ -48,6 +48,18 @@ CHECK_INCLUDE_FILES (string.h HAVE_STRING_H)
 CHECK_INCLUDE_FILES (sys/stat.h HAVE_STAT_H)
 CHECK_INCLUDE_FILES (sys/types.h HAVE_TYPES_H)
 CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
+CHECK_INCLUDE_FILES (popt.h HAVE_POPT_H)
+CHECK_INCLUDE_FILES (math.h HAVE_MATH_H)
+CHECK_INCLUDE_FILES (hdf5.h HAVE_HDF5_H)
+CHECK_INCLUDE_FILES (libreadconfig.h HAVE_LRC_H)
+CHECK_INCLUDE_FILES (libreadconfig_hdf5.h HAVE_LRC_HDF5_H)
+
+CHECK_LIBRARY_EXISTS(dl dlopen "" HAVE_DLFCN_LIB)
+CHECK_LIBRARY_EXISTS(hdf5 H5Dopen2 "" HAVE_HDF5_LIB)
+CHECK_LIBRARY_EXISTS(m pow "" HAVE_M_LIB)
+CHECK_LIBRARY_EXISTS(popt poptGetContext "" HAVE_POPT_LIB)
+
+CHECK_LIBRARY_EXISTS(readconfig LRC_HDF5Writer "" HAVE_LRC_HDF5_LIB)
 
 CONFIGURE_FILE (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in 
@@ -55,7 +67,7 @@ CONFIGURE_FILE (
 )
 
 add_definitions (-DHAVE_CONFIG_H)
-set (CMAKE_C_FLAGS "-Wall -std=c99")
+set (CMAKE_C_FLAGS "-Wall -std=c99 -g -ggdb")
 
 add_subdirectory(src)
 add_subdirectory(src/core)

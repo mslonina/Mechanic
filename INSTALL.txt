@@ -1,51 +1,32 @@
-MECHANIC uses Waf,
-see http://code.google.com/p/waf/ for details
+Mechanic uses CMake
 
-Configure:
+Requirements
+------------
 
-./waf configure
+- MPI2 implementation (optional: Fortran support)
+- HDF5 >= 1.8
+- popt library
+- libreadconfig with HDF5 support
+- cmake >= 2.8
 
-Build:
+Compilation
+-----------
 
-./waf build
+export CC=mpicc
+export FC=mpif90
 
-Install:
+> mkdir build
+> cd build
+> cmake ..
+or if you want to disable Fortran support
+> cmake .. -DBUILD_FORTRAN:BOOL=OFF
+make
+make install
 
-./waf install
+By default, Cmake installs to /usr/local
 
-By default Waf will try to install Mechanic in /usr/local/lib and the header
-file in /usr/local/include. If you want to change installation prefix, run
+Additional modules
+------------------
 
-./waf configure --prefix=YOUR/PATH
-
-To build documentation use
-
---with-doc
-
-To build additional modules use (comma separated list):
-
---with-modules=hello,echo,mandelbrot
-
-To build Fortran2003 bindings use:
-
---with-fortran
-
-To build Fortran2003 modules use (comma separated list):
-
---with-fortran-modules=f2003,map,fhello
-
-To build additional libs use (comma separated list):
-
---with-libs=orbit
-
-To build additional engines use (comma separated list):
-
---with-engines=odex,taylor,gpu
-
-For any additional options that come with Waf distribution, see:
-
-./waf help
-
-Notes:
-- Custom mpicc scripts (in waf-tools directory) 
-- Due to problems with Fortran modules compilations, parallel build (-j option) is disabled.
+All but core module have been moved to separate project.
+See http://git.astri.umk.pl/projects/mechanic_modules
