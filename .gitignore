@@ -38,3 +38,4 @@ doxygen.sty
 !config_fortran.py
 gitlog2changelog.py
 *.h5
+!config.h.in
