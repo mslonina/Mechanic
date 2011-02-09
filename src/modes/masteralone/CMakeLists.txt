@@ -4,3 +4,4 @@ set (mastersources
     )
 
 add_library(masteralone ${mastersources})
+target_link_libraries(masteralone core)

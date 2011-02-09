@@ -6,3 +6,4 @@ set (farmsources
     )
 
 add_library(farm ${farmsources})
+target_link_libraries(farm core)

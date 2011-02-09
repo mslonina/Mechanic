@@ -1,29 +1,37 @@
-Mechanic uses CMake
 
 Requirements
 ------------
 
+Mechanic should run on Unix-like platforms (Linux and MacOSX actively
+maintained), if following requirements are met:
+
 - MPI2 implementation (optional: Fortran support)
 - HDF5 >= 1.8
-- popt library
-- libreadconfig with HDF5 support
-- cmake >= 2.8
+- Popt library
+- Libreadconfig with HDF5 support (see http://git.astri.umk.pl/projects/lrc)
+- CMake >= 2.8
 
 Compilation
 -----------
 
-export CC=mpicc
-export FC=mpif90
+    tar -xvvf mechanic-VERSION.tar.gz
+    cd mechanic-VERSION
+    mkdir build
+    cd build
+    CC=mpicc FC=mpif90 cmake ..
+    make
+    make install
 
-> mkdir build
-> cd build
-> cmake ..
-or if you want to disable Fortran support
-> cmake .. -DBUILD_FORTRAN:BOOL=OFF
-make
-make install
+If you want to disable Fortran support run
 
-By default, Cmake installs to /usr/local
+    CC=mpicc cmake .. -DBUILD_FORTRAN:BOOL=OFF
+
+
+By default, Cmake installs to /usr/local. You can change this by setting
+-DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
+
+There is also universal binary for Mac/Intel provided on the project's
+website: http://git.astri.umk.pl/projects/mechanic
 
 Additional modules
 ------------------
