@@ -12,18 +12,16 @@ Requirements
 Compilation
 -----------
 
-export CC=mpicc
-export FC=mpif90
-
 > mkdir build
 > cd build
-> cmake ..
+> CC=mpicc FC=mpif90 cmake ..
 or if you want to disable Fortran support
 > cmake .. -DBUILD_FORTRAN:BOOL=OFF
 make
 make install
 
-By default, Cmake installs to /usr/local
+By default, Cmake installs to /usr/local. You can change it by setting
+-DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
 
 Additional modules
 ------------------
