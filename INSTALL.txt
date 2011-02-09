@@ -28,7 +28,8 @@ If you want to disable Fortran support run
 
 
 By default, Cmake installs to /usr/local. You can change this by setting
--DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
+    
+    -DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
 
 There is also universal binary for Mac/Intel provided on the project's
 website: http://git.astri.umk.pl/projects/mechanic
