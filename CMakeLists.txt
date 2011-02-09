@@ -35,7 +35,6 @@ endif (BUILD_FORTRAN)
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckCSourceCompiles)
-include (CPack)
 
 CHECK_INCLUDE_FILES (stdio.h HAVE_STDIO_H)
 CHECK_INCLUDE_FILES (dlfcn.h HAVE_DLFCN_H)
@@ -91,6 +90,8 @@ SET (CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CMAKE_PROJECT_NAME}-${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}-src")
 SET (CPACK_SOURCE_IGNORE_FILES
   "/build/;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
+
+include (CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
