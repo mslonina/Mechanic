@@ -2,7 +2,8 @@
 ! FORTRAN 2003 BINDINGS FOR MECHANIC
 !
 ! MECHANIC
-! Copyright (c) 2010, Mariusz Slonina (Nicolaus Copernicus University)
+!
+! Copyright (c) 2010-2011, Mariusz Slonina (Nicolaus Copernicus University)
 ! All rights reserved.
 !
 ! This file is part of MECHANIC code.
@@ -13,10 +14,7 @@
 ! its parts, please consider referring to the authors either by the website
 ! or the user guide reference.
 !
-! http://mechanics.astri.umk.pl/projects/mechanic
-!
-! User guide should be provided with the package or
-! http://mechanics.astri.umk.pl/projects/mechanic/mechanic_userguide.pdf
+! http://git.astri.umk.pl/projects/mechanic
 !
 ! Redistribution and use in source and binary forms,
 ! with or without modification, are permitted provided

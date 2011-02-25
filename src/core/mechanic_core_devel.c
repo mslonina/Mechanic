@@ -1,6 +1,7 @@
 /*
  * MECHANIC
- * Copyright (c) 2010, Mariusz Slonina (Nicolaus Copernicus University)
+ *
+ * Copyright (c) 2010-2011, Mariusz Slonina (Nicolaus Copernicus University)
  * All rights reserved.
  *
  * This file is part of MECHANIC code.
@@ -11,10 +12,7 @@
  * its parts, please consider referring to the authors either by the website
  * or the user guide reference.
  *
- * http://mechanics.astri.umk.pl/projects/mechanic
- *
- * User guide should be provided with the package or
- * http://mechanics.astri.umk.pl/projects/mechanic/mechanic_userguide.pdf
+ * http://git.astri.umk.pl/projects/mechanic
  *
  * Redistribution and use in source and binary forms,
  * with or without modification, are permitted provided
@@ -141,34 +139,6 @@ void mechanic_message(int type, char *fmt, ...){
       if (type == MECHANIC_MESSAGE_IERR) printf("!! %s", fmt2);
 		  if (type == MECHANIC_MESSAGE_WARN) printf(".. %s", fmt2);
   va_end(args);
-
-}
-
-/* Equivalent of LRC_printAll() */
-int mechanic_printConfig(configData *cd, int flag){
-
-  if (silent == 0) {
-    mechanic_message(flag, "name: %s\n", cd->name);
-    mechanic_message(flag, "datafile: %s\n", cd->datafile);
-    mechanic_message(flag, "module: %s\n", cd->module);
-    mechanic_message(flag, "res: [%d, %d]\n", cd->xres, cd->yres);
-    mechanic_message(flag, "mode: %d\n", cd->mode);
-    mechanic_message(flag, "checkpoint: %d\n", cd->checkpoint);
-    mechanic_message(flag, "\n");
-  }
-
-  return 0;
-}
-
-/* Mechanic welcome message */
-void mechanic_welcome(){
-
-  mechanic_message(MECHANIC_MESSAGE_INFO, "%s\n", MECHANIC_NAME);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "v. %s\n", MECHANIC_VERSION);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "Author: %s\n", MECHANIC_AUTHOR);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "Bugs: %s\n", MECHANIC_BUGREPORT);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "%s\n", MECHANIC_URL);
-  mechanic_message(MECHANIC_MESSAGE_CONT, "\n");
 
 }
 
