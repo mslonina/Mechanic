@@ -147,7 +147,7 @@ void mechanic_message(int type, char *fmt, ...){
 /* Equivalent of LRC_printAll() */
 int mechanic_printConfig(configData *cd, int flag){
 
-  if (silent != 0) {
+  if (silent == 0) {
     mechanic_message(flag, "name: %s\n", cd->name);
     mechanic_message(flag, "datafile: %s\n", cd->datafile);
     mechanic_message(flag, "module: %s\n", cd->module);
