@@ -3,7 +3,7 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 0)
 set (Mechanic_VERSION_MINOR 12)
-set (Mechanic_VERSION_PATCH 0-UNSTABLE-3-2)
+set (Mechanic_VERSION_PATCH 0-UNSTABLE-3-3)
 
 set (package_version
   "\"${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}\"")
@@ -91,7 +91,7 @@ SET (CPACK_SOURCE_PACKAGE_FILE_NAME
 SET (CPACK_SOURCE_IGNORE_FILES
   "/build/;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 
-include (CPack)
+include (cpack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
