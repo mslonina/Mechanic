@@ -145,17 +145,17 @@ char* mechanic_module_sym_prefix(char* md_name, char* function) {
 /*
  * Helper for mechanic_load_sym()
  */
-void* mechanic_module_sym_lookup(void* modhandler, char* md_name, char* function) {
+module_query_int_f mechanic_module_sym_lookup(void* modhandler, char* md_name, char* function) {
   char* func;
   char* err;
-  void* handler;
+  module_query_int_f handler;
 
   /* Reset dlerror() */
   dlerror();
 
   /* Prepare symbol name */
   func = mechanic_module_sym_prefix(md_name, function);
-  handler = dlsym(modhandler, func);
+  handler = (module_query_int_f) dlsym(modhandler, func);
   err = dlerror();
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Loading function '%s'\n", function);
@@ -177,9 +177,9 @@ void* mechanic_module_sym_lookup(void* modhandler, char* md_name, char* function
  * default_node_function
  * default_function
  */
-void* mechanic_load_sym(mechanic_internals modhand, char* function, int type) {
+module_query_int_f mechanic_load_sym(mechanic_internals modhand, char* function, int type) {
 
-  void *handler;
+  module_query_int_f handler;
   char *override;
 
   /* Master/Slave override */

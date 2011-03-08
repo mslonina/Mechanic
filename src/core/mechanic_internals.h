@@ -188,13 +188,13 @@ int buildMasterResultsType(int mrl, masterData* md,
     MPI_Datatype* masterResultsType_ptr);
 
 char* mechanic_module_sym_prefix(char* prefix, char* function);
-void* mechanic_load_sym(mechanic_internals handler, char* function, int type);
-void* mechanic_sym_lookup(void* modhand, char* md_name, char* function);
+module_query_int_f mechanic_load_sym(mechanic_internals handler, char* function, int type);
+module_query_int_f mechanic_sym_lookup(void* modhand, char* md_name, char* function);
 
-int readDefaultConfig(char* inifile, int flag);
-int readCheckpointConfig(char* inifile);
+int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head);
+int readCheckpointConfig(char* inifile, LRC_configNamespace* head);
 
-int assignConfigValues(configData* d);
+int assignConfigValues(configData* d, LRC_configNamespace* head);
 
 int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md,
     configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);

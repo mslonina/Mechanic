@@ -226,7 +226,7 @@ int H5readBoard(configData* d, int** board){
   hid_t dataspace_id, memspace_id;
   hsize_t co[2], offset[2], stride[2], block[2], dims[2];
   herr_t hdf_status;
-  int mstat = 0;
+  //int mstat = 0;
 
   int rdata[1][1];
   int i = 0, j = 0;

@@ -67,7 +67,7 @@ int map2d(int c, mechanic_internals handler, moduleInfo* md, configData* d, int 
     int** b){
 
    int x, y;
-   module_query_void_f qpcm;
+   module_query_int_f qpcm;
 
    x = d->xres;
    y = d->yres;

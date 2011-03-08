@@ -102,10 +102,8 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
   herr_t hdf_status;
   int mstat = 0;
 
-  mechanic_message(MECHANIC_MESSAGE_INFO, "Schema is: %d %d %d\n", 
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Schema is: %d %d %d\n", 
     md->schema[0].rank, md->schema[0].dimsize[0], md->schema[0].dimsize[1]);
-  mechanic_message(MECHANIC_MESSAGE_INFO, "Schema is: %d %d %d\n", 
-    md->schema[1].rank, md->schema[1].dimsize[0], md->schema[1].dimsize[1]);
 
   /* Control board space */
   dimsf[0] = d->xres;

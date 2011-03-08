@@ -297,6 +297,7 @@ int main(int argc, char* argv[]){
   int pack_position;
 
   /* LRC defaults */
+  LRC_configNamespace* head;
   LRC_configDefaults cs[] = {
     {"default", "name", MECHANIC_NAME_DEFAULT, LRC_STRING},
     {"default", "xres", MECHANIC_XRES_DEFAULT, LRC_INT},
@@ -385,7 +386,7 @@ int main(int argc, char* argv[]){
   if (node == MECHANIC_MPI_MASTER_NODE) {
 
     /* Assign LRC defaults */
-    LRC_assignDefaults(cs);
+    head = LRC_assignDefaults(cs);
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "LRC defaults assigned\n");
 
     /* Assign POPT defaults */
@@ -489,9 +490,9 @@ int main(int argc, char* argv[]){
      * This will override LRC_configDefaults
      * In restart mode we try provided checkpoint file */
     if (restartmode == 1) {
-      allopts = readCheckpointConfig(CheckpointFile);
+      allopts = readCheckpointConfig(CheckpointFile, head);
     } else {
-      allopts = readDefaultConfig(ConfigFile, useConfigFile);
+      allopts = readDefaultConfig(ConfigFile, useConfigFile, head);
     }
 
     /* STEP 1B: Reset POPT defaults
@@ -500,12 +501,12 @@ int main(int argc, char* argv[]){
      *
      * Commandline is completely ignored in restartmode */
     if (restartmode == 0) {
-      name = LRC_getOptionValue("default", "name");
-      module_name = LRC_getOptionValue("default", "module");
-      mode = LRC_option2int("default", "mode");
-      xres = LRC_option2int("default", "xres");
-      yres = LRC_option2int("default", "yres");
-      checkpoint = LRC_option2int("logs", "checkpoint");
+      name = LRC_getOptionValue("default", "name", head);
+      module_name = LRC_getOptionValue("default", "module", head);
+      mode = LRC_option2int("default", "mode", head);
+      xres = LRC_option2int("default", "xres", head);
+      yres = LRC_option2int("default", "yres", head);
+      checkpoint = LRC_option2int("logs", "checkpoint", head);
 
       /* STEP 2A: Read commandline options, if any.
        * This will override popt defaults. */
@@ -515,35 +516,35 @@ int main(int argc, char* argv[]){
 
       /* STEP 2B: Modify options by commandline
        * If there was no commandline options, LRC table will be untouched. */
-      LRC_modifyOption("default", "name", name, LRC_STRING);
-      LRC_modifyOption("default", "module", module_name, LRC_STRING);
+      LRC_modifyOption("default", "name", name, LRC_STRING, head);
+      LRC_modifyOption("default", "module", module_name, LRC_STRING, head);
 
       LRC_itoa(convstr, xres, LRC_INT);
-      LRC_modifyOption("default", "xres", convstr, LRC_INT);
+      LRC_modifyOption("default", "xres", convstr, LRC_INT, head);
 
       LRC_itoa(convstr, yres, LRC_INT);
-      LRC_modifyOption("default", "yres", convstr, LRC_INT);
+      LRC_modifyOption("default", "yres", convstr, LRC_INT, head);
 
       LRC_itoa(convstr, mode, LRC_INT);
-      LRC_modifyOption("default", "mode", convstr, LRC_INT);
+      LRC_modifyOption("default", "mode", convstr, LRC_INT, head);
 
       LRC_itoa(convstr, checkpoint, LRC_INT);
-      LRC_modifyOption("logs", "checkpoint", convstr, LRC_INT);
+      LRC_modifyOption("logs", "checkpoint", convstr, LRC_INT, head);
 
     }
 
     /* We allow to override checkpoint file interval in the restartmode */
     if (restartmode == 1) {
-      checkpoint = LRC_option2int("logs", "checkpoint");
+      checkpoint = LRC_option2int("logs", "checkpoint", head);
       poptResetContext(poptcon);
       poptcon = poptGetContext(NULL, argc, (const char **) argv, cmdopts, 0);
       optvalue = poptGetNextOpt(poptcon);
       LRC_itoa(convstr, checkpoint, LRC_INT);
-      LRC_modifyOption("logs", "checkpoint", convstr, LRC_INT);
+      LRC_modifyOption("logs", "checkpoint", convstr, LRC_INT, head);
     }
 
     /* STEP 3: Options are processed, we can now assign config values. */
-    mstat = assignConfigValues(&cd);
+    mstat = assignConfigValues(&cd, head);
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG,"Config file contents:\n\n");
     mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
@@ -823,7 +824,7 @@ int main(int argc, char* argv[]){
     mechanic_check_mstat(mstat);
 
     /* First of all, save configuration */
-    LRC_HDF5Writer(file_id);
+    LRC_HDF5Writer(file_id, head);
     H5Fclose(file_id);
   }
 
@@ -867,7 +868,7 @@ int main(int argc, char* argv[]){
   H5close();
 
   /* Cleanup LRC */
-  if (node == MECHANIC_MPI_MASTER_NODE) LRC_cleanup();
+  if (node == MECHANIC_MPI_MASTER_NODE) LRC_cleanup(head);
 
   /* Finalize */
   mechanic_finalize(node);

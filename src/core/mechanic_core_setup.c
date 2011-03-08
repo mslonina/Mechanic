@@ -200,7 +200,7 @@
 /* SETUP TOOLS */
 
 /* Default config file parser */
-int readDefaultConfig(char* inifile, int flag){
+int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head){
 
   int opts = 0;
   char* sep = "=";
@@ -214,7 +214,7 @@ int readDefaultConfig(char* inifile, int flag){
   if (read != NULL) {
    mechanic_message(MECHANIC_MESSAGE_INFO,
        "Parsing config file \"%s\"... ", inifile);
-   opts = LRC_ASCIIParser(read, sep, comm);
+   opts = LRC_ASCIIParser(read, sep, comm, head);
 
    if (opts >= 0) mechanic_message(MECHANIC_MESSAGE_CONT, " done.\n");
    fclose(read);
@@ -248,7 +248,7 @@ int readDefaultConfig(char* inifile, int flag){
  * @todo
  * return mstat, opts in function argument
  */
-int readCheckpointConfig(char* file) {
+int readCheckpointConfig(char* file, LRC_configNamespace* head) {
 
   int opts = 0;
   hid_t f;
@@ -256,7 +256,7 @@ int readCheckpointConfig(char* file) {
 
   f = H5Fopen(file, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-  opts = LRC_HDF5Parser(f);
+  opts = LRC_HDF5Parser(f, head);
 
   //status = H5Fclose(f);
   H5Fclose(f);
@@ -266,13 +266,13 @@ int readCheckpointConfig(char* file) {
 
 /* Assign config values, one by one.
  * Final struct contains config values of the run */
-int assignConfigValues(configData* d){
+int assignConfigValues(configData* d, LRC_configNamespace* head){
 
   char* n = NULL; char* tf = NULL; char* m = NULL;
   size_t nlen, flen, fmlen, mlen;
 
   /* Prepare the name of the problem */
-  n = LRC_getOptionValue("default", "name");
+  n = LRC_getOptionValue("default", "name", head);
   nlen = strlen(n);
 
   strncpy(d->name, n, nlen);
@@ -297,18 +297,18 @@ int assignConfigValues(configData* d){
   d->datafile[flen] = LRC_NULL;
 
   /* Prepare the module name */
-  m = LRC_getOptionValue("default", "module");
+  m = LRC_getOptionValue("default", "module", head);
   mlen = strlen(m);
 
   strncpy(d->module, m, mlen);
   d->module[mlen] = LRC_NULL;
 
   /* Other options */
-	d->xres = LRC_option2int("default", "xres");
-	d->yres = LRC_option2int("default", "yres");
-	d->checkpoint = LRC_option2int("logs", "checkpoint");
+	d->xres = LRC_option2int("default", "xres", head);
+	d->yres = LRC_option2int("default", "yres", head);
+	d->checkpoint = LRC_option2int("logs", "checkpoint", head);
 	d->restartmode = 0;
-	d->mode = LRC_option2int("default", "mode");
+	d->mode = LRC_option2int("default", "mode", head);
 
   /* Free resources */
   free(tf);

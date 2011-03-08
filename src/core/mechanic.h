@@ -109,7 +109,7 @@ typedef struct {
 /* [SCHEMA] */
 typedef struct {
   char *path;
-  hid_t type;
+  H5S_class_t type;
   hid_t datatype;
   unsigned int rank;
   hsize_t dimsize[];
