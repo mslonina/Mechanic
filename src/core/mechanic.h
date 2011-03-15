@@ -63,6 +63,7 @@
 #define MECHANIC_MODULE_ERR_OTHER 888
 
 #define MECHANIC_HDF_RANK 2
+#define MECHANIC_MAX_HDF_RANK 7
 #define MECHANIC_STRLEN 256
 
 #undef MECHANIC_DATATYPE
@@ -112,7 +113,7 @@ typedef struct {
   H5S_class_t type;
   hid_t datatype;
   unsigned int rank;
-  hsize_t dimsize[];
+  hsize_t dimsize[MECHANIC_MAX_HDF_RANK]; /* Fortran max dims */
 } mechanicSchema;
 /* [/SCHEMA] */
 

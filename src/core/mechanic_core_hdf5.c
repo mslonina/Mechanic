@@ -96,14 +96,10 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 
   hsize_t dimsf[2]; //dimsr[2];
   hid_t boardspace, dataspace;
-  /*hid_t statsspace;*/
   hid_t dset_board, data_group, dset_data;
-  /*hid_t dset_stats;*/
   herr_t hdf_status;
   int mstat = 0;
-
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Schema is: %d %d %d\n", 
-    md->schema[0].rank, md->schema[0].dimsize[0], md->schema[0].dimsize[1]);
+  int i;
 
   /* Control board space */
   dimsf[0] = d->xres;
@@ -117,24 +113,23 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
   data_group = H5Gcreate(file_id, MECHANIC_DATAGROUP,
     H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-  /* Result data space */
-  dataspace = H5Screate(md->schema[0].type);
-  if (md->schema[0].type == H5S_SIMPLE) {
-    hdf_status = H5Sset_extent_simple(dataspace, md->schema[0].rank, md->schema[0].dimsize, NULL);
+  /* Create data schema */
+  for (i = 0; i < md->schemasize; i++) {
+
+    //if (!md->schema[i]) break;
+
+    mechanic_message(MECHANIC_MESSAGE_INFO, "Schema for %s is: %d %d %d\n", 
+      md->schema[i].path, md->schema[i].rank, md->schema[i].dimsize[0], md->schema[i].dimsize[1]);
+ 
+    dataspace = H5Screate(md->schema[i].type);
+    if (md->schema[i].type == H5S_SIMPLE) {
+      hdf_status = H5Sset_extent_simple(dataspace, md->schema[i].rank, md->schema[i].dimsize, NULL);
+    }
+
+    dset_data = H5Dcreate(data_group, md->schema[i].path, md->schema[i].datatype,
+      dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   }
-
-  /* Create master dataset */
-  dset_data = H5Dcreate(data_group, md->schema[0].path, md->schema[0].datatype,
-    dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  //dset_data = H5Dcreate(data_group, MECHANIC_DATASETMASTER, H5T_NATIVE_DOUBLE,
-  //  dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  //dset_data = H5Dcreate(data_group, md->schema[1].path, H5T_NATIVE_DOUBLE,
-  //  dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-  /* Create stats dataset */
-  /*dset_stats = H5Dcreate(stats_group, MECHANIC_STATSMASTER, H5T_NATIVE_DOUBLE,
-     dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  */
+  
   H5Dclose(dset_board);
   H5Dclose(dset_data);
   H5Sclose(boardspace);

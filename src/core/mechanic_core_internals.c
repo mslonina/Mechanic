@@ -254,9 +254,6 @@ mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* 
   /* Load modules */
   internals = mechanic_module_open(module_filename);
 
-  /* Allocate schema */
-  m->schema = calloc(sizeof(mechanicSchema) * m->schemasize, sizeof(mechanicSchema));
-
   /* Fill the rest of the structure */
   internals.node = node;
   internals.config = d;
@@ -265,6 +262,23 @@ mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* 
   free(module_filename);
 
   return internals;
+}
+
+/*
+ * Allocate memory for schema
+ */
+void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals* internals) {
+
+  /* Allocate schema */
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Schemasize is %d\n", m->schemasize);
+  if (m->schemasize > MECHANIC_MAX_HDF_RANK) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "HDF5 MAX RANK exceeded.\n");
+    mechanic_abort(MECHANIC_ERR_SETUP);
+  }
+
+  m->schema = calloc(sizeof(mechanicSchema) * m->schemasize, sizeof(mechanicSchema));
+  internals->info = m;
+
 }
 
 /*

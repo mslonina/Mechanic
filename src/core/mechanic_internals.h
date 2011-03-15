@@ -172,6 +172,7 @@ char* mechanic_module_filename(char* name);
 mechanic_internals mechanic_module_open(char* module);
 void mechanic_module_close(mechanic_internals module);
 mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* d);
+void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals* internals);
 void mechanic_internals_close(mechanic_internals handler);
 
 /* GLOBALS */

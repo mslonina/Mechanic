@@ -778,9 +778,12 @@ int main(int argc, char* argv[]){
   init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
   if (init) mstat = init(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
+  
+  /* This will override defaults */
+  internals = mechanic_internals_init(node, &md, &cd);
 
-  /* The module overrides ModuleInfo defaults */
-  internals.info = &md;
+  /* Initialize schema */
+  mechanic_internals_schema_init(node, &md, &internals);
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.mrl = %d\n", internals.info->mrl);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.irl = %d\n", internals.info->irl);
