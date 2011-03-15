@@ -545,6 +545,7 @@ int main(int argc, char* argv[]){
 
     /* STEP 3: Options are processed, we can now assign config values. */
     mstat = assignConfigValues(&cd, head);
+    mechanic_check_mstat(mstat);
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG,"Config file contents:\n\n");
     mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
@@ -597,12 +598,14 @@ int main(int argc, char* argv[]){
 
       /* Now we can safely rename files */
       if (restartmode == 1) {
-        mechanic_copy(cd.datafile, oldfile);
+        mstat = mechanic_copy(cd.datafile, oldfile);
+        mechanic_check_mstat(mstat);
         /* At this point we have a backup of master file. In restart mode we
          * have to start the simulation from the point of the provided
          * checkpoint file. To save number of additional work, we simply make
          * our checkpoint file new master file.*/
-        mechanic_copy(CheckpointFile, cd.datafile);
+        mstat = mechanic_copy(CheckpointFile, cd.datafile);
+        mechanic_check_mstat(mstat);
       } else {
         rename(cd.datafile,oldfile);
       }

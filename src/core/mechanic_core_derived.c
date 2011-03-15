@@ -49,6 +49,7 @@
 int buildMasterResultsType(int mrl, masterData* md,
     MPI_Datatype* masterResultsType_ptr){
 
+  int mstat;
   int block_lengths[2];
   MPI_Aint displacements[2];
   MPI_Datatype typelist[2];
@@ -67,10 +68,10 @@ int buildMasterResultsType(int mrl, masterData* md,
   displacements[0] = addresses[1] - addresses[0];
   displacements[1] = addresses[2] - addresses[0];
 
-  MPI_Type_struct(2, block_lengths, displacements, typelist,
-      masterResultsType_ptr);
-  MPI_Type_commit(masterResultsType_ptr);
+  mstat = MPI_Type_struct(2, block_lengths, displacements, typelist,
+    masterResultsType_ptr);
+  mstat = MPI_Type_commit(masterResultsType_ptr);
 
-  return 0;
+  return mstat;
 }
 

@@ -53,8 +53,10 @@ int mechanic_mode_farm(int mpi_size, int node, mechanic_internals handler, modul
 
   if (node == MECHANIC_MPI_MASTER_NODE) {
     mstat = mechanic_mode_farm_master(mpi_size, node, handler, md, d);
+    mechanic_check_mstat(mstat);
   } else {
     mstat = mechanic_mode_farm_slave(mpi_size, node, handler, md, d);
+    mechanic_check_mstat(mstat);
   }
 
   return mstat;

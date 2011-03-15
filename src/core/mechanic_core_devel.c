@@ -157,7 +157,7 @@ int mechanic_copy(char* in, char* out){
   input = open(in, O_RDONLY);
   if (input < 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR, "Could not open input file %s\n", in);
-    return -1;
+    return MECHANIC_ERR_HDF;
   }
 
   stat(in, &st);
@@ -167,7 +167,7 @@ int mechanic_copy(char* in, char* out){
   output = open(out, O_RDWR | O_CREAT | O_TRUNC, 0644);
   if (output < 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR, "Could not open output file %s\n", out);
-    return -1;
+    return MECHANIC_ERR_HDF;
   }
 
   /* CHAR_BIT in limits.h */
@@ -178,25 +178,25 @@ int mechanic_copy(char* in, char* out){
   mstat = read(input, c, st.st_size);
   if (mstat < 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR, "Could not read input file %s\n", in);
-    return -1;
+    return MECHANIC_ERR_HDF;
   }
 
   mstat = write(output, c, st.st_size);
   if (mstat < 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR, "Could not write output file %s\n", out);
-    return -1;
+    return MECHANIC_ERR_HDF;
   }
 
   free(c);
 
   if (close(input) < 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR, "Error closing input file\n");
-    return -1;
+    return MECHANIC_ERR_HDF;
   }
 
   if (close(output) < 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR, "Error closing output file\n");
-    return -1;
+    return MECHANIC_ERR_HDF;
   }
 
   return mstat;

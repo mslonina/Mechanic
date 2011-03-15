@@ -115,6 +115,9 @@ void mechanic_error(int errcode){
   if (errcode == MECHANIC_ERR_MODULE) mechanic_abort(MECHANIC_ERR_MODULE);
   if (errcode == MECHANIC_MODULE_ERR_MODULE) mechanic_abort(MECHANIC_MODULE_ERR_MODULE);
 
+  /* We abort on any other less than zero err */
+  if (errcode < 0) mechanic_abort(MECHANIC_ERR_OTHER);
+
 }
 
 /* Wrapper for error messages */

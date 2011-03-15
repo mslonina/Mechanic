@@ -88,7 +88,7 @@ int module_init(int mpi_size, int node, moduleInfo* md, configData* d){
 
   md->mrl = 3;
   md->irl = 3;
-  md->schemasize = 3;
+  md->schemasize = 1;
 
   return 0;
 }

@@ -81,6 +81,7 @@ int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler
    * even in masteralone mode */
   query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(mpi_size, node, md, d, &inidata);
+  mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
   query = mechanic_load_sym(handler, "farmResolution", MECHANIC_MODULE_ERROR);
@@ -100,19 +101,24 @@ int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler
 
     query = mechanic_load_sym(handler, "pixelCoords", MECHANIC_MODULE_ERROR);
     if (query) mstat = query(node, tab, md, d, &inidata, &result);
+    mechanic_check_mstat(mstat);
 
     query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(node, md, d, &inidata, &result);
+    mechanic_check_mstat(mstat);
 
     query = mechanic_load_sym(handler, "beforeProcessPixel", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(node, md, d, &inidata, &result);
+    mechanic_check_mstat(mstat);
 
     /* PIXEL COMPUTATION */
     query = mechanic_load_sym(handler, "processPixel", MECHANIC_MODULE_ERROR);
     if (query) mstat = query(node, md, d, &inidata, &result);
+    mechanic_check_mstat(mstat);
 
     query = mechanic_load_sym(handler, "afterProcessPixel", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(node, md, d, &inidata, &result);
+    mechanic_check_mstat(mstat);
 
     /* Copy data to checkpoint arrays */
     coordsarr[check][0] = result.coords[0];
@@ -134,12 +140,15 @@ int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler
     if (check % d->checkpoint == 0 || mechanic_ups() < 0) {
       query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(mpi_size, md, d, coordsarr, resultarr);
+      mechanic_check_mstat(mstat);
 
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+      mechanic_check_mstat(mstat);
       check = 0;
 
       query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(mpi_size, md, d, coordsarr, resultarr);
+      mechanic_check_mstat(mstat);
     }
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
@@ -155,8 +164,11 @@ int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler
       query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(mpi_size, md, d, coordsarr, resultarr);
       mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+      mechanic_check_mstat(mstat);
+
       query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(mpi_size, md, d, coordsarr, resultarr);
+      mechanic_check_mstat(mstat);
   }
 
   /* FARM ENDS */
@@ -164,6 +176,7 @@ int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler
   /* Master can do something useful after the computations. */
   query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(1, node, md, d, &inidata, &result);
+  mechanic_check_mstat(mstat);
 
   FreeDoubleVec(result.res);
   FreeDoubleVec(inidata.res);

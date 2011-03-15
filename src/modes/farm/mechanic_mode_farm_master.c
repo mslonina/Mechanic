@@ -272,6 +272,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
 
       query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+      mechanic_check_mstat(mstat);
 
       mechanic_message(MECHANIC_MESSAGE_CONT2,
         "Pixel [%04d, %04d, %04d] sended to node %d\n",
@@ -289,8 +290,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
 #endif
 
       query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
-
-      if(query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+      if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
       mechanic_check_mstat(mstat);
 
     } else {
