@@ -129,9 +129,9 @@
 #define MECHANIC_MODULE_API 1
 #define MECHANIC_MPI_MASTER_NODE 0
 
-#define MECHANIC_TASK_NOTSTARTED 0
-//#define MECHANIC_TASK_STARTED -1
 #define MECHANIC_TASK_FINISHED 1
+#define MECHANIC_TASK_NOTSTARTED 0
+#define MECHANIC_TASK_STARTED -1
 
 enum Modes {
   MECHANIC_MODE_MASTERALONE,
@@ -160,6 +160,7 @@ typedef int (*module_query_int_f) ();
 
 /* MECHANIC INTERNALS STRUCT */
 typedef struct {
+  int mpi_size;
   int node;
   int comm;
   void* module;

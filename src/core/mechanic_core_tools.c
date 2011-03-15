@@ -90,7 +90,7 @@ int map2d(int c, mechanic_internals handler, moduleInfo* md, configData* d, int 
 
      c++;
 
-   } while (b[ind[0]][ind[1]] == 1);
+   } while (b[ind[0]][ind[1]] == MECHANIC_TASK_FINISHED);
 
    mechanic_message(MECHANIC_MESSAGE_DEBUG,
        "Pixel[%d]: %d %d\n", ind[2], ind[0], ind[1]);
