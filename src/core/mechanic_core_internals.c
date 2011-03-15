@@ -271,7 +271,7 @@ mechanic_internals mechanic_internals_init(int mpi_size, int node, moduleInfo* m
 void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals* internals) {
 
   /* Allocate schema */
-  mechanic_message(MECHANIC_MESSAGE_INFO, "Schemasize is %d\n", m->schemasize);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Schemasize is %d\n", m->schemasize);
   if (m->schemasize > MECHANIC_MAX_HDF_RANK) {
     mechanic_message(MECHANIC_MESSAGE_ERR, "HDF5 MAX RANK exceeded.\n");
     mechanic_abort(MECHANIC_ERR_SETUP);

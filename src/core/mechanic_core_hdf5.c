@@ -116,7 +116,7 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
   /* Create data schema */
   for (i = 0; i < md->schemasize; i++) {
 
-    mechanic_message(MECHANIC_MESSAGE_INFO, "Schema for %s is: %d %d %d\n", 
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Schema for %s is: %d %d %d\n", 
       md->schema[i].path, md->schema[i].rank, md->schema[i].dimsize[0], md->schema[i].dimsize[1]);
  
     dataspace = H5Screate(md->schema[i].type);

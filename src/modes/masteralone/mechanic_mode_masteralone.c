@@ -53,7 +53,10 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
   masterData inidata;
 
   /* Checkpoint storage */
+  int vecsize;
+  int* coordsvec;
   int** coordsarr;
+  MECHANIC_DATATYPE *resultsvec;
   MECHANIC_DATATYPE **resultarr;
 
   /* Restart mode board */
@@ -73,6 +76,8 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 
   /* Allocate memory for board */
   board = AllocateInt2D(handler->config->xres,handler->config->yres);
+
+  vecsize = 3;
 
   computed = H5readBoard(handler->config, board);
 
@@ -97,6 +102,13 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
     inidata.coords[0] = tab[0];
     inidata.coords[1] = tab[1];
     inidata.coords[2] = tab[2];
+		
+    result.coords[0] = tab[0];
+    result.coords[1] = tab[1];
+    result.coords[2] = tab[2];
+    
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "TAB [%d, %d, %d]\t",
+      tab[0], tab[1], tab[2]);
 
     query = mechanic_load_sym(handler, "pixelCoords", MECHANIC_MODULE_ERROR);
     if (query) mstat = query(handler, &inidata, &result);
@@ -137,17 +149,27 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
     check++;
 
     if (check % handler->config->checkpoint == 0 || mechanic_ups() < 0) {
+      
+      /* Fortran interoperability:
+       * Convert 2D coordinates array to 1D vector, as well as
+       * results array */
+      coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
+      resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
+      
       query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(handler, coordsarr, resultarr);
+      if (query) mstat = query(handler, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
-      mstat = atCheckPoint(handler, check, coordsarr, board, resultarr);
+      mstat = atCheckPoint(handler, check+1, coordsarr, board, resultarr);
       mechanic_check_mstat(mstat);
       check = 0;
 
       query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(handler, coordsarr, resultarr);
+      if (query) mstat = query(handler, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
+      
+      FreeIntVec(coordsvec);
+      FreeDoubleVec(resultsvec);
     }
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
@@ -160,14 +182,25 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 
   /* Write outstanding results */
   if (check > 0) {
+      
+      /* Fortran interoperability:
+       * Convert 2D coordinates array to 1D vector, as well as
+       * results array */
+      coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
+      resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
+    
       query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(handler, coordsarr, resultarr);
-      mstat = atCheckPoint(handler, check, coordsarr, board, resultarr);
+      if (query) mstat = query(handler, coordsvec, resultsvec);
+
+      mstat = atCheckPoint(handler, check+1, coordsarr, board, resultarr);
       mechanic_check_mstat(mstat);
 
       query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(handler, coordsarr, resultarr);
+      if (query) mstat = query(handler, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
+      
+      FreeIntVec(coordsvec);
+      FreeDoubleVec(resultsvec);
   }
 
   /* FARM ENDS */

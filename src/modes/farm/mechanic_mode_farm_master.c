@@ -373,8 +373,8 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       if (query) mstat = query(handler, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
-      if(coordsvec) free(coordsvec);
-      if(resultsvec) free(resultsvec);
+      FreeIntVec(coordsvec);
+      FreeDoubleVec(resultsvec);
 
     } else {
       check++;
