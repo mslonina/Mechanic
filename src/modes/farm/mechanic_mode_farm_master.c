@@ -45,10 +45,9 @@
 #include "mechanic_mode_farm.h"
 
 /* MASTER */
-int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler,
-    moduleInfo* md, configData* d){
+int mechanic_mode_farm_master(mechanic_internals *handler) {
 
-  int i = 0, j = 0, nodes = 0, farm_res = 0;
+  int i = 0, j = 0, farm_res = 0;
   int npxc = 0; /* number of all sent pixels */
   int count = 0; /* number of pixels to receive */
   int check = 0; /* current number of received data */
@@ -77,39 +76,39 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
   MPI_Datatype initialConditionsType;
 
   module_query_int_f query;
-
+  
   /* Allocate memory */
-  result.res = AllocateDoubleVec(md->mrl);
-  inidata.res = AllocateDoubleVec(md->irl);
+  result.res = AllocateDoubleVec(handler->info->mrl);
+  inidata.res = AllocateDoubleVec(handler->info->irl);
 
-  coordsarr = AllocateInt2D(d->checkpoint,3);
-  resultarr = AllocateDouble2D(d->checkpoint,md->mrl);
+  coordsarr = AllocateInt2D(handler->config->checkpoint,3);
+  resultarr = AllocateDouble2D(handler->config->checkpoint,handler->info->mrl);
 
-  board = AllocateInt2D(d->xres,d->yres);
+  board = AllocateInt2D(handler->config->xres,handler->config->yres);
 
   vecsize = 3;
 
   /* For the sake of simplicity we read board everytime,
    * both in restart and clean simulation mode */
-  computed = H5readBoard(d, board);
+  computed = H5readBoard(handler->config, board);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Num of computed pixels = %d", computed);
 
   /* Build derived type for master result */
-  mstat = buildMasterResultsType(md->mrl, &result, &masterResultsType);
+  mstat = buildMasterResultsType(handler->info->mrl, &result, &masterResultsType);
   mechanic_check_mstat(mstat);
 
-  mstat = buildMasterResultsType(md->irl, &inidata, &initialConditionsType);
+  mstat = buildMasterResultsType(handler->info->irl, &inidata, &initialConditionsType);
   mechanic_check_mstat(mstat);
 
   /* Master can do something useful before computations. */
   query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(mpi_size, node, md, d, &inidata);
+  if (query) mstat = query(handler, &inidata);
   mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
   query = mechanic_load_sym(handler, "farmResolution", MECHANIC_MODULE_ERROR);
-  if (query) farm_res = query(d->xres, d->yres, md, d);
-  if (farm_res > (d->xres * d->yres)) {
+  if (query) farm_res = query(handler);
+  if (farm_res > (handler->config->xres * handler->config->yres)) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Farm resolution should not exceed x*y!\n");
     mechanic_error(MECHANIC_ERR_SETUP);
@@ -122,15 +121,16 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
   pixeldiff = farm_res - computed;
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "farm_res - computed = %d\n",
     pixeldiff);
-  if (pixeldiff > mpi_size) nodes = mpi_size;
-  if (pixeldiff == mpi_size) nodes = mpi_size;
-  if (pixeldiff < mpi_size) nodes = pixeldiff + 1;
+  if (pixeldiff > handler->mpi_size) handler->nodes = handler->mpi_size;
+  if (pixeldiff == handler->mpi_size) handler->nodes = handler->mpi_size;
+  if (pixeldiff < handler->mpi_size) handler->nodes = pixeldiff + 1;
 
   /* Send tasks to all slaves,
    * remembering what the farm resolution is.*/
-  for (i = 1; i < nodes; i++) {
+  for (i = 1; i < handler->nodes; i++) {
 
-    npxc = map2d(npxc, handler, md, d, ptab, board);
+    handler->sendnode = i;
+    npxc = map2d(npxc, handler, ptab, board);
     count++;
 
     inidata.coords[0] = ptab[0];
@@ -138,22 +138,22 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
     inidata.coords[2] = ptab[2];
 
     query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(node, md, d, &inidata, &result);
+    if (query) mstat = query(handler, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "Pixel [%04d, %04d, %04d] sended to node %04d\n",
-        ptab[0], ptab[1], ptab[2], i);
+        ptab[0], ptab[1], ptab[2], handler->sendnode);
 
     query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(i, md, d, &result);
+    if (query) mstat = query(handler, &result);
     mechanic_check_mstat(mstat);
 
 #ifdef IPM
     MPI_Pcontrol(1, "master_ini_send");
 #endif
 
-    MPI_Send(&inidata, 1, initialConditionsType, i,
+    MPI_Send(&inidata, 1, initialConditionsType, handler->sendnode,
         MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
 
 #ifdef IPM
@@ -161,15 +161,15 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
 #endif
 
     query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(i, md, d, &result);
+    if (query) mstat = query(handler, &result);
     mechanic_check_mstat(mstat);
 
   }
 
   /* We don't want to have slaves idle, so, if there are some idle slaves
    * terminate them (when farm resolution < mpi size). */
-  if ((farm_res - computed) < mpi_size) {
-    for (i = nodes; i < mpi_size; i++) {
+  if ((farm_res - computed) < handler->mpi_size) {
+    for (i = handler->nodes; i < handler->mpi_size; i++) {
 
       mechanic_message(MECHANIC_MESSAGE_WARN,
           "Terminating idle slave %d.\n", i);
@@ -183,10 +183,12 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
   }
 
   /* Receive data and send tasks. */
+  
+  
   while (1) {
 
     query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(0, md, d, &inidata, &result);
+    if (query) mstat = query(handler, &inidata, &result);
 
 #ifdef IPM
     MPI_Pcontrol(1,"master_result_recv");
@@ -199,11 +201,13 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
     MPI_Pcontrol(-1,"master_result_recv");
 #endif
 
+    handler->recvnode = mpi_status.MPI_SOURCE;
+
     totalnumofpx++;
     count--;
 
     query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+    if (query) mstat = query(handler, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     /* Copy data to checkpoint arrays */
@@ -214,9 +218,9 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "[%04d / %04d] Pixel [%04d, %04d, %04d] received from node %d\n",
         totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
-        result.coords[2], mpi_status.MPI_SOURCE);
+        result.coords[2], handler->recvnode);
 
-    for (j = 0; j < md->mrl; j++) {
+    for (j = 0; j < handler->info->mrl; j++) {
       resultarr[check][j] = result.res[j];
 			mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", result.res[j]);
     }
@@ -229,24 +233,24 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
      * very fast, your disks will not be happy
      */
 
-    if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
+    if ((((check+1) % handler->config->checkpoint) == 0) || mechanic_ups() < 0) {
 
       /* Fortran interoperability:
        * Convert 2D coordinates array to 1D vector, as well as
        * results array */
-      coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
-      resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
+      coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
+      resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
 
       query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
+      if (query) mstat = query(handler, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
-      mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
+      mstat = atCheckPoint(handler, check+1, coordsarr, board, resultarr);
       mechanic_check_mstat(mstat);
       check = 0;
 
       query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
+      if (query) mstat = query(handler, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
       FreeIntVec(coordsvec);
@@ -259,7 +263,9 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
     /* Send next task to the slave */
     if (npxc < farm_res){
 
-      npxc = map2d(npxc, handler, md, d, ptab, board);
+      handler->sendnode = handler->recvnode;
+
+      npxc = map2d(npxc, handler, ptab, board);
       count++;
 
       inidata.coords[0] = ptab[0];
@@ -267,22 +273,22 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
       inidata.coords[2] = ptab[2];
 
       query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       mechanic_message(MECHANIC_MESSAGE_CONT2,
         "Pixel [%04d, %04d, %04d] sended to node %d\n",
-          inidata.coords[0], inidata.coords[1], inidata.coords[2], mpi_status.MPI_SOURCE);
+          inidata.coords[0], inidata.coords[1], inidata.coords[2], handler->sendnode);
 
 #ifdef IPM
       MPI_Pcontrol(1,"master_pixel_send");
 #endif
 
-      MPI_Send(&inidata, 1, initialConditionsType, mpi_status.MPI_SOURCE,
+      MPI_Send(&inidata, 1, initialConditionsType, handler->sendnode,
           MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
 
 #ifdef IPM
@@ -290,7 +296,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
 #endif
 
       query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
     } else {
@@ -303,10 +309,11 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
    * We've got exactly 'count' messages to receive.
    */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Count is %d, Check is %d\n", count, check);
+
   for (i = 0; i < count; i++){
 
     query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(0, md, d, &inidata, &result);
+    if (query) mstat = query(handler, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Recv... ");
@@ -321,12 +328,14 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
 #ifdef IPM
     MPI_Pcontrol(-1,"master_final_recv");
 #endif
+    
+    handler->recvnode = mpi_status.MPI_SOURCE;
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "done\n");
     totalnumofpx++;
 
     query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(mpi_status.MPI_SOURCE, md, d, &inidata, &result);
+    if (query) mstat = query(handler, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     /* Copy data to checkpoint arrays */
@@ -334,34 +343,34 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
     coordsarr[check][1] = result.coords[1];
     coordsarr[check][2] = result.coords[2];
 
-    for (j = 0; j < md->mrl; j++) {
+    for (j = 0; j < handler->info->mrl; j++) {
       resultarr[check][j] = result.res[j];
     }
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "[%04d / %04d] Pixel [%04d, %04d, %04d] received from node %d\n",
         totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
-        result.coords[2], mpi_status.MPI_SOURCE);
+        result.coords[2], handler->recvnode);
     /* There is a possibility that count > check, and then we have to perform
      * another checkpoint write */
-    if ((((check+1) % d->checkpoint) == 0) || mechanic_ups() < 0) {
+    if ((((check+1) % handler->config->checkpoint) == 0) || mechanic_ups() < 0) {
 
       /* Fortran interoperability:
        * Convert 2D coordinates array to 1D vector, as well as
        * results array */
-      coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
-      resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
+      coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
+      resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
 
       query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
+      if (query) mstat = query(handler, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
-      mstat = atCheckPoint(check+1, coordsarr, board, resultarr, md, d);
+      mstat = atCheckPoint(handler, check+1, coordsarr, board, resultarr);
       mechanic_check_mstat(mstat);
       check = 0;
 
       query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
+      if (query) mstat = query(handler, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
       if(coordsvec) free(coordsvec);
@@ -389,7 +398,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
   //  "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
   //if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
 
-  mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+  mstat = atCheckPoint(handler, check, coordsarr, board, resultarr);
   mechanic_check_mstat(mstat);
 
   //query = mechanic_load_sym(handler, "node_afterCheckpoint",
@@ -400,7 +409,7 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
   //if(resultsvec) free(resultsvec);
 
   /* Now, terminate the slaves */
-  for (i = 1; i < nodes; i++) {
+  for (i = 1; i < handler->nodes; i++) {
 
      inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
      MPI_Send(&inidata, 1, initialConditionsType, i,
@@ -414,15 +423,15 @@ int mechanic_mode_farm_master(int mpi_size, int node, mechanic_internals handler
 
   /* Master can do something useful after the computations. */
   query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(nodes, node, md, d, &inidata, &result);
+  if (query) mstat = query(handler, &inidata, &result);
   mechanic_check_mstat(mstat);
 
   /* Release resources */
   FreeDoubleVec(result.res);
   FreeDoubleVec(inidata.res);
-  FreeInt2D(coordsarr,d->checkpoint);
-  FreeDouble2D(resultarr,d->checkpoint);
-  FreeInt2D(board,d->xres);
+  FreeInt2D(coordsarr,handler->config->checkpoint);
+  FreeDouble2D(resultarr,handler->config->checkpoint);
+  FreeInt2D(board,handler->config->xres);
 
   return mstat;
 }

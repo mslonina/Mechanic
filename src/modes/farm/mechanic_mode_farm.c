@@ -44,18 +44,15 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_farm.h"
 
-int mechanic_mode_farm(int mpi_size, int node, mechanic_internals handler, moduleInfo* md,
-    configData* d){
+int mechanic_mode_farm(mechanic_internals *handler) {
 
   int mstat;
 
-	mechanic_message(MECHANIC_MESSAGE_DEBUG, "d = %d", d->checkpoint);
-
-  if (node == MECHANIC_MPI_MASTER_NODE) {
-    mstat = mechanic_mode_farm_master(mpi_size, node, handler, md, d);
+  if (handler->node == MECHANIC_MPI_MASTER_NODE) {
+    mstat = mechanic_mode_farm_master(handler);
     mechanic_check_mstat(mstat);
   } else {
-    mstat = mechanic_mode_farm_slave(mpi_size, node, handler, md, d);
+    mstat = mechanic_mode_farm_slave(handler);
     mechanic_check_mstat(mstat);
   }
 

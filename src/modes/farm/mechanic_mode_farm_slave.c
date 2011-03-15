@@ -45,8 +45,7 @@
 #include "mechanic_mode_farm.h"
 
 /* SLAVE */
-int mechanic_mode_farm_slave(int mpi_size, int node, mechanic_internals handler,
-    moduleInfo* md, configData* d){
+int mechanic_mode_farm_slave(mechanic_internals *handler) {
 
   int tab[3];
   int mstat;
@@ -61,29 +60,29 @@ int mechanic_mode_farm_slave(int mpi_size, int node, mechanic_internals handler,
   MPI_Status mpi_status;
 
   /* Allocate memory */
-  result.res = AllocateDoubleVec(md->mrl);
-  inidata.res = AllocateDoubleVec(md->irl);
+  result.res = AllocateDoubleVec(handler->info->mrl);
+  inidata.res = AllocateDoubleVec(handler->info->irl);
 
   /* Build derived type for master result and initial condition */
-  mstat = buildMasterResultsType(md->mrl, &result, &masterResultsType);
+  mstat = buildMasterResultsType(handler->info->mrl, &result, &masterResultsType);
   mechanic_check_mstat(mstat);
-  mstat = buildMasterResultsType(md->irl, &inidata, &initialConditionsType);
+  mstat = buildMasterResultsType(handler->info->irl, &inidata, &initialConditionsType);
   mechanic_check_mstat(mstat);
 
   /* Slave can do something useful before __all__ computations */
   query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(mpi_size, node, md, d, &inidata);
+  if (query) mstat = query(handler, &inidata);
   mechanic_check_mstat(mstat);
 
   query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(node, md, d, &inidata, &result);
+  if (query) mstat = query(handler, &inidata, &result);
   mechanic_check_mstat(mstat);
 
   MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST, MPI_ANY_TAG,
       MPI_COMM_WORLD, &mpi_status);
 
   query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(node, md, d, &inidata, &result);
+  if (query) mstat = query(handler, &inidata, &result);
   mechanic_check_mstat(mstat);
 
   while (1) {
@@ -96,33 +95,33 @@ int mechanic_mode_farm_slave(int mpi_size, int node, mechanic_internals handler,
       tab[2] = inidata.coords[2];
 
       query = mechanic_load_sym(handler, "pixelCoords", MECHANIC_MODULE_ERROR);
-      if (query) mstat = query(node, tab, md, d, &inidata, &result);
+      if (query) mstat = query(handler, tab, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       mechanic_message(MECHANIC_MESSAGE_DEBUG, "SLAVE[%d]: PTAB[%d, %d, %d]\n",
-          node, inidata.coords[0], inidata.coords[1], inidata.coords[2]);
+          handler->node, inidata.coords[0], inidata.coords[1], inidata.coords[2]);
       mechanic_message(MECHANIC_MESSAGE_DEBUG, "SLAVE[%d]: RTAB[%d, %d, %d]\n",
-          node, result.coords[0], result.coords[1], result.coords[2]);
+          handler->node, result.coords[0], result.coords[1], result.coords[2]);
 
       query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       query = mechanic_load_sym(handler, "beforeProcessPixel", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       /* PIXEL COMPUTATION */
       query = mechanic_load_sym(handler, "processPixel", MECHANIC_MODULE_ERROR);
-      if(query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       query = mechanic_load_sym(handler, "afterProcessPixel", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
 #ifdef IPM
@@ -137,11 +136,11 @@ int mechanic_mode_farm_slave(int mpi_size, int node, mechanic_internals handler,
 #endif
 
       query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
 #ifdef IPM
@@ -156,7 +155,7 @@ int mechanic_mode_farm_slave(int mpi_size, int node, mechanic_internals handler,
 #endif
 
       query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(node, md, d, &inidata, &result);
+      if (query) mstat = query(handler, &inidata, &result);
       mechanic_check_mstat(mstat);
 
     }
@@ -164,7 +163,7 @@ int mechanic_mode_farm_slave(int mpi_size, int node, mechanic_internals handler,
 
     /* Slave can do something useful after computations. */
     query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(mpi_size, node, md, d, &inidata, &result);
+    if (query) mstat = query(handler, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     MPI_Type_free(&masterResultsType);

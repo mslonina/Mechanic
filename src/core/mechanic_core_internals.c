@@ -110,9 +110,9 @@ mechanic_internals mechanic_module_open(char* modulename) {
  * Wrapper to dlclose()
  *
  */
-void mechanic_module_close(mechanic_internals modhand) {
-  dlclose(modhand.handler);
-  dlclose(modhand.module);
+void mechanic_module_close(mechanic_internals* modhand) {
+  dlclose(modhand->handler);
+  dlclose(modhand->module);
 }
 
 /*
@@ -177,41 +177,41 @@ module_query_int_f mechanic_module_sym_lookup(void* modhandler, char* md_name, c
  * default_node_function
  * default_function
  */
-module_query_int_f mechanic_load_sym(mechanic_internals modhand, char* function, int type) {
+module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function, int type) {
 
   module_query_int_f handler;
   char *override;
 
   /* Master/Slave override */
-  if (modhand.node == MECHANIC_MPI_MASTER_NODE) {
+  if (modhand->node == MECHANIC_MPI_MASTER_NODE) {
     override = mechanic_module_sym_prefix("master", function);
   } else {
     override = mechanic_module_sym_prefix("slave", function);
   }
 
-  handler = mechanic_module_sym_lookup(modhand.handler, modhand.config->module, override);
+  handler = mechanic_module_sym_lookup(modhand->handler, modhand->config->module, override);
   free(override);
 
   if (handler != NULL) return handler;
 
   /* Node override */
   override = mechanic_module_sym_prefix("node", function);
-  handler = mechanic_module_sym_lookup(modhand.handler, modhand.config->module, override);
+  handler = mechanic_module_sym_lookup(modhand->handler, modhand->config->module, override);
   free(override);
   if (handler != NULL) return handler;
 
   /* Module: Function */
-  handler = mechanic_module_sym_lookup(modhand.handler, modhand.config->module, function);
+  handler = mechanic_module_sym_lookup(modhand->handler, modhand->config->module, function);
   if (handler != NULL) return handler;
 
   /* Default: Node override */
   override = mechanic_module_sym_prefix("node", function);
-  handler = mechanic_module_sym_lookup(modhand.module, MECHANIC_MODULE_DEFAULT, override);
+  handler = mechanic_module_sym_lookup(modhand->module, MECHANIC_MODULE_DEFAULT, override);
   free(override);
   if (handler != NULL) return handler;
 
   /* Default: Function */
-  handler = mechanic_module_sym_lookup(modhand.module, MECHANIC_MODULE_DEFAULT, function);
+  handler = mechanic_module_sym_lookup(modhand->module, MECHANIC_MODULE_DEFAULT, function);
   if (handler != NULL) return handler;
 
   /* Emergency callback: handler not found.
@@ -244,7 +244,7 @@ module_query_int_f mechanic_load_sym(mechanic_internals modhand, char* function,
 /*
  * Initialize internal data structure
  */
-mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* d) {
+mechanic_internals mechanic_internals_init(int mpi_size, int node, moduleInfo* m, configData* d) {
 
   mechanic_internals internals;
   char* module_filename;
@@ -256,6 +256,7 @@ mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* 
 
   /* Fill the rest of the structure */
   internals.node = node;
+  internals.mpi_size = mpi_size;
   internals.config = d;
   internals.info = m;
 
@@ -284,7 +285,7 @@ void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals*
 /*
  * Finalize any internal data
  */
-void mechanic_internals_close(mechanic_internals modhand) {
+void mechanic_internals_close(mechanic_internals* modhand) {
   mechanic_module_close(modhand);
-  free(modhand.info->schema);
+  free(modhand->info->schema);
 }

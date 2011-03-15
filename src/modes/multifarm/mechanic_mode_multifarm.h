@@ -42,11 +42,8 @@
 #ifndef MECHANIC_MODE_MULTIFARM_H
 #define MECHANIC_MODE_MULTIFARM_H
 
-int mechanic_mode_multifarm_master(int mpi_size, int node, mechanic_internals handler, moduleInfo* md,
-    configData* d);
-
-int mechanic_mode_multifarm_slave(int mpi_size, int node, mechanic_internals handler, moduleInfo* md,
-    configData* d);
+int mechanic_mode_multifarm_master(mechanic_internals* handler);
+int mechanic_mode_multifarm_slave(mechanic_internals* handler);
 
 #endif
 
