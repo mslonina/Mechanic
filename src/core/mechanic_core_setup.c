@@ -344,3 +344,13 @@ void mechanic_welcome(){
   mechanic_message(MECHANIC_MESSAGE_CONT, "\n");
 
 }
+
+/* Check if cli argument is valid */
+int validate_arg(char carg[]) {
+  if (carg[0] == '-' || carg[0] == '\0') {
+    mechanic_message(MECHANIC_MESSAGE_WARN, "Argument '%s' in not valid.\n", carg);
+    return -1;
+  }
+
+  return 0;
+}

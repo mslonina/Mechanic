@@ -333,7 +333,7 @@ int main(int argc, char** argv){
 
   struct poptOption mechanic_poptRestart[] = {
     {"restart", 'r', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &CheckpointFile,
-      1, "Path to checkpoint file", "/path/to/checkpoint/file"},
+      0, "Path to checkpoint file", "/path/to/checkpoint/file"},
     POPT_TABLEEND
   };
 
@@ -345,7 +345,7 @@ int main(int argc, char** argv){
 
   struct poptOption cmdopts[] = {
     {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-      &name, 0, "Problem name", "NAME"},
+      &name, 1, "Problem name", "NAME"},
     {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
       &ConfigFile, 0, "Config file", "/path/to/config/file"},
     {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
@@ -396,23 +396,21 @@ int main(int argc, char** argv){
   }
 
   /* CONFIGURATION START */
+
+  /* Assign LRC defaults */
+  head = LRC_assignDefaults(cs);
   if (node == MECHANIC_MPI_MASTER_NODE) {
-
-    /* Assign LRC defaults */
-    head = LRC_assignDefaults(cs);
     mechanic_message(MECHANIC_MESSAGE_INFO, "LRC is ready\n");
-
-    /* Assign POPT defaults */
-    name = MECHANIC_NAME_DEFAULT;
-    module_name = MECHANIC_MODULE_DEFAULT;
-    ConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
-    //CheckpointFile = MECHANIC_CHECKPOINT_FILE_DEFAULT;
-    xres = atoi(MECHANIC_XRES_DEFAULT);
-    yres = atoi(MECHANIC_YRES_DEFAULT);
-    checkpoint = atoi(MECHANIC_CHECKPOINT_DEFAULT);
-    mode = atoi(MECHANIC_MODE_DEFAULT);
-
   }
+  
+  /* Assign POPT defaults */
+  name = MECHANIC_NAME_DEFAULT;
+  module_name = MECHANIC_MODULE_DEFAULT;
+  ConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
+  xres = atoi(MECHANIC_XRES_DEFAULT);
+  yres = atoi(MECHANIC_YRES_DEFAULT);
+  checkpoint = atoi(MECHANIC_CHECKPOINT_DEFAULT);
+  mode = atoi(MECHANIC_MODE_DEFAULT);
 
   /* COMMAND LINE PARSING
    * All nodes read commandline options, because of problems of finishing MPI
@@ -420,7 +418,20 @@ int main(int argc, char** argv){
   poptcon = poptGetContext(NULL, argc, (const char **) argv, cmdopts, 0);
   optvalue = poptGetNextOpt(poptcon);
 
-  /* Bad option handling */
+  /* This is specific for command line arguments handling 
+   * We need to check if name, module, checkpoint file are not 
+   * cli options 
+   *
+   * FOR FUTURE ME:
+   * I couldn't do it better with popt or getopt_long,
+   * so I need to check it by self.
+   * */
+  if ((name != NULL) && (validate_arg(name) < 0)) goto setupfinalize;
+  if ((module_name != NULL) && (validate_arg(module_name) < 0)) goto setupfinalize;
+  if ((ConfigFile != NULL) && (validate_arg(ConfigFile) < 0)) goto setupfinalize;
+  if ((CheckpointFile != NULL) && (validate_arg(CheckpointFile) < 0)) goto setupfinalize;
+
+  /* POPT error detection */
   if (optvalue < -1) {
     if (node == MECHANIC_MPI_MASTER_NODE) {
       mechanic_message(MECHANIC_MESSAGE_WARN, "%s: %s\n",
@@ -447,11 +458,13 @@ int main(int argc, char** argv){
     goto setupfinalize;
   }
 
-  /* Iterate through all options to detect restart flag
-   * if it is present check for its argument and abort if missing
+  /* Restartmode 
+   *
+   * NOTE:
+   * Restartmode is handled according to the present of the CheckpointFile.
+   * By default, CheckpointFile is NULL, you can override it by specifing
+   * -r file or --restart=file in the commandline.
    */
-
-  /* Restartmode */
   if (CheckpointFile) {
     if (node == MECHANIC_MPI_MASTER_NODE) {
       mechanic_message(MECHANIC_MESSAGE_INFO,
@@ -462,28 +475,22 @@ int main(int argc, char** argv){
         /* The checkpoint file should be valid HDF5 file */
         if (H5Fis_hdf5(CheckpointFile) > 0) {
 
-          /* Check if the file is a valid Mechanic file */
+          /* @todo Check if the file is a valid Mechanic file */
           // mechanic_validate_file(CheckpointFile)
 
           /* We can say, we can try restart the computations */
-          mechanic_message(MECHANIC_MESSAGE_INFO,
-              "We are in restart mode\n");
           mechanic_message(MECHANIC_MESSAGE_CONT,
-              "Mechanic will ignore command line options\n");
-          mechanic_message(MECHANIC_MESSAGE_CONT,
-              "and use configuration stored in %s\n", CheckpointFile);
-
+              "Restartmode, trying to checkpoint file %s\n", CheckpointFile);
           restartmode = 1;
         } else {
           mechanic_message(MECHANIC_MESSAGE_ERR,
-              "We are in restart mode,\n");
-          mechanic_message(MECHANIC_MESSAGE_CONT,
-              "but specified checkpoint file %s\n", CheckpointFile);
-          mechanic_message(MECHANIC_MESSAGE_CONT,
-              "is not valid Mechanic file\n");
+              "Specified checkpoint file %s is not a valid Mechanic file\n", CheckpointFile);
           goto checkpointabort;
-          //mechanic_abort(MECHANIC_ERR_CHECKPOINT);
         }
+      } else {
+        mechanic_message(MECHANIC_MESSAGE_ERR,
+            "Specified checkpoint file %s is not valid\n", CheckpointFile);
+        goto checkpointabort;
       }
     }
   }

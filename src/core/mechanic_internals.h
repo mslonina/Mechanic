@@ -220,6 +220,7 @@ int mechanic_mode_cuda(int mpi_size, int node, mechanic_internals* handler,
     moduleInfo* md, configData* d);
 #endif
 
+int validate_arg(char* arg);
 int mechanic_printConfig(configData* cd, int flag);
 int mechanic_copy(char* in, char* out);
 
