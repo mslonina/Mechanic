@@ -282,3 +282,28 @@ int H5readBoard(configData* d, int** board){
   return computed;
 }
 
+/* Validate checkpoint file */
+int mechanic_validate_file(char* CheckpointFile) {
+  int mstat = 0;
+  hid_t file_id, dataset_id, datagroup_id;
+  
+  file_id = H5Fopen(CheckpointFile, H5F_ACC_RDONLY, H5P_DEFAULT);
+  
+  /* Check for Mechanic-specific datasets */
+  
+  // Board
+  dataset_id = H5Dopen(file_id, MECHANIC_DATABOARD, H5P_DEFAULT);
+  H5Dclose(dataset_id);
+
+  // Master data group
+  datagroup_id = H5Gopen(file_id, MECHANIC_DATAGROUP, H5P_DEFAULT);
+  
+  // Master dataset
+  dataset_id = H5Dopen(datagroup_id, MECHANIC_DATASETMASTER, H5P_DEFAULT);
+  H5Dclose(dataset_id);
+  
+  H5Gclose(datagroup_id);
+  H5Fclose(file_id);
+
+  return mstat;
+}

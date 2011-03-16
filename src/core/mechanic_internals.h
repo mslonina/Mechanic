@@ -205,6 +205,8 @@ int H5writeCheckPoint(moduleInfo *md, configData* d, int check,
 int atCheckPoint(mechanic_internals *handler, int check, int** coordsarr, int** board,
     MECHANIC_DATATYPE** resultarr);
 
+int mechanic_validate_file(char* filename);
+
 int mechanic_ups();
 
 void mechanic_welcome();

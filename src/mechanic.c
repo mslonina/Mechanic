@@ -44,7 +44,7 @@
  * @mainpage
  * @author Mariusz Slonina <mariusz.slonina@gmail.com>
  * @version 0.12
- * @date 2010
+ * @date 2011
  *
  * @todo
  *   - HDF5 error handling with H5E (including file storage)
@@ -345,7 +345,7 @@ int main(int argc, char** argv){
 
   struct poptOption cmdopts[] = {
     {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-      &name, 1, "Problem name", "NAME"},
+      &name, 0, "Problem name", "NAME"},
     {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
       &ConfigFile, 0, "Config file", "/path/to/config/file"},
     {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
@@ -425,6 +425,8 @@ int main(int argc, char** argv){
    * FOR FUTURE ME:
    * I couldn't do it better with popt or getopt_long,
    * so I need to check it by self.
+   *
+   * Btw. How to check if the specific arg is provided?
    * */
   if ((name != NULL) && (validate_arg(name) < 0)) goto setupfinalize;
   if ((module_name != NULL) && (validate_arg(module_name) < 0)) goto setupfinalize;
@@ -475,10 +477,10 @@ int main(int argc, char** argv){
         /* The checkpoint file should be valid HDF5 file */
         if (H5Fis_hdf5(CheckpointFile) > 0) {
 
-          /* @todo Check if the file is a valid Mechanic file */
-          // mechanic_validate_file(CheckpointFile)
+          /* Check if the file is a valid Mechanic file */
+          mechanic_validate_file(CheckpointFile);
 
-          /* We can say, we can try restart the computations */
+          /* At this point we can try restart the computations */
           mechanic_message(MECHANIC_MESSAGE_CONT,
               "Restartmode, trying to checkpoint file %s\n", CheckpointFile);
           restartmode = 1;
