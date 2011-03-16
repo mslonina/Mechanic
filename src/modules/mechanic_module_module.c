@@ -84,25 +84,39 @@
  *
  * @ingroup module_required
  */
-int module_init(mechanic_internals *internals){
+int module_init(int mpi_size, int node, moduleInfo* md, configData* d){
 
-  internals->info->mrl = 3;
-  internals->info->irl = 3;
-  internals->info->schemasize = 1;
+  md->mrl = 3;
+  md->irl = 3;
+  md->schemasize = 3;
 
   return 0;
 }
 
-int module_schema(mechanic_internals *internals) {
+int module_schema(int mpi_size, int node, moduleInfo* md, configData* d) {
 
   /* Schema */
 
-  internals->info->schema[0].path = "/data/master";
-  internals->info->schema[0].type = H5S_SIMPLE;
-  internals->info->schema[0].datatype = H5T_NATIVE_DOUBLE;
-  internals->info->schema[0].rank = 2;
-  internals->info->schema[0].dimsize[0] = internals->config->xres * internals->config->yres;
-  internals->info->schema[0].dimsize[1] = internals->info->mrl;
+  md->schema[0].path = "/data/master";
+  md->schema[0].type = H5S_SIMPLE;
+  md->schema[0].datatype = H5T_NATIVE_DOUBLE;
+  md->schema[0].rank = 2;
+  md->schema[0].dimsize[0] = d->xres * d->yres;
+  md->schema[0].dimsize[1] = md->mrl;
+
+  md->schema[1].path = "/data/mydata";
+  md->schema[1].type = H5S_SIMPLE;
+  md->schema[1].datatype = H5T_NATIVE_DOUBLE;
+  md->schema[1].rank = 2;
+  md->schema[1].dimsize[0] = 5;
+  md->schema[1].dimsize[1] = 5;
+
+  md->schema[2].path = "/data/supadata";
+  md->schema[2].type = H5S_SIMPLE;
+  md->schema[2].datatype = H5T_NATIVE_DOUBLE;
+  md->schema[2].rank = 2;
+  md->schema[2].dimsize[0] = 3;
+  md->schema[2].dimsize[1] = 4;
 
   return 0;
 }
@@ -120,7 +134,7 @@ int module_schema(mechanic_internals *internals) {
  *
  * @ingroup module_optional
  */
-int module_query(mechanic_internals *internals){
+int module_query(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 
@@ -137,7 +151,7 @@ int module_query(mechanic_internals *internals){
  *
  * @ingroup module_required
  */
-int module_cleanup(mechanic_internals *internals){
+int module_cleanup(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 
@@ -201,9 +215,9 @@ int module_cleanup(mechanic_internals *internals){
 
 /* [6FARM] */
 
-int module_farmResolution(mechanic_internals *internals){
+int module_farmResolution(int x, int y, moduleInfo* md, configData* d){
 
-  return internals->config->xres * internals->config->yres;
+  return x*y;
 }
 
 /* [/6FARM] */
@@ -244,16 +258,17 @@ int module_farmResolution(mechanic_internals *internals){
 
 /* [6COORDS] */
 
-int module_pixelCoordsMap(mechanic_internals *internals, int t[], int numofpx) {
+int module_pixelCoordsMap(int t[], int numofpx, int xres, int yres, moduleInfo* md,
+    configData* d){
 
-  if (numofpx < internals->config->yres) {
-    t[0] = numofpx / internals->config->yres;
+  if (numofpx < yres) {
+    t[0] = numofpx / yres;
     t[1] = numofpx;
   }
 
-  if (numofpx > internals->config->yres - 1) {
-    t[0] = numofpx / internals->config->yres;
-    t[1] = numofpx % internals->config->yres;
+  if (numofpx > yres - 1) {
+    t[0] = numofpx / yres;
+    t[1] = numofpx % yres;
   }
 
   return 0;
@@ -301,7 +316,8 @@ int module_pixelCoordsMap(mechanic_internals *internals, int t[], int numofpx) {
 
 /* [6PIXELS] */
 
-int module_pixelCoords(mechanic_internals *internals, int t[], masterData* inidata, masterData* r) {
+int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r){
 
   r->coords[0] = t[0];
   r->coords[1] = t[1];
@@ -340,7 +356,8 @@ int module_pixelCoords(mechanic_internals *internals, int t[], masterData* inida
  *
  * @ingroup module_required
  */
-int module_processPixel(mechanic_internals *internals, masterData* inidata, masterData* result) {
+int module_processPixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* result){
    return 0;
 }
 
@@ -450,7 +467,8 @@ int module_processPixel(mechanic_internals *internals, masterData* inidata, mast
 
 /* [/TEMPLATES] */
 
-int module_node_preparePixel(mechanic_internals *internals, masterData* inidata, masterData* result) {
+int module_node_preparePixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* result) {
 
   return 0;
 }
@@ -480,8 +498,8 @@ int module_node_preparePixel(mechanic_internals *internals, masterData* inidata,
  *
  * @ingroup module_themeable
  */
-int module_node_beforeProcessPixel(mechanic_internals *internals,
-    masterData* inidata, masterData* r) {
+int module_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r){
   return 0;
 }
 
@@ -510,8 +528,8 @@ int module_node_beforeProcessPixel(mechanic_internals *internals,
  *
  * @ingroup module_themeable
  */
-int module_node_afterProcessPixel(mechanic_internals *internals,
-    masterData* inidata, masterData* r) {
+int module_node_afterProcessPixel(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r){
   return 0;
 }
 
@@ -540,7 +558,7 @@ int module_node_afterProcessPixel(mechanic_internals *internals,
  *
  * @ingroup module_themeable
  */
-int module_node_in(mechanic_internals *internals, masterData* inidata) {
+int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d, masterData* inidata){
   return 0;
 }
 
@@ -572,8 +590,8 @@ int module_node_in(mechanic_internals *internals, masterData* inidata) {
  *
  * @ingroup module_themeable
  */
-int module_node_out(mechanic_internals *internals,
-    masterData* inidata, masterData* r) {
+int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r){
   return 0;
 }
 
@@ -600,8 +618,8 @@ int module_node_out(mechanic_internals *internals,
  *
  * @ingroup module_themeable
  */
-int module_node_beforeSend(mechanic_internals *internals,
-    masterData* inidata, masterData* r) {
+int module_node_beforeSend(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* r){
   return 0;
 }
 
@@ -629,7 +647,7 @@ int module_node_beforeSend(mechanic_internals *internals,
  * @ingroup module_themeable
  */
 
-int module_node_afterSend(mechanic_internals *internals,
+int module_node_afterSend(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r)
 {
   return 0;
@@ -659,8 +677,8 @@ int module_node_afterSend(mechanic_internals *internals,
  * @ingroup module_themeable
  */
 
-int module_node_beforeReceive(mechanic_internals *internals,
-    masterData* inidata, masterData* result) {
+int module_node_beforeReceive(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* result){
   return 0;
 }
 
@@ -688,17 +706,17 @@ int module_node_beforeReceive(mechanic_internals *internals,
  * @ingroup module_themeable
  */
 
-int module_node_afterReceive(mechanic_internals *internals,
-    masterData* inidata, masterData* result) {
+int module_node_afterReceive(int node, moduleInfo* md, configData* d,
+    masterData* inidata, masterData* result){
   return 0;
 }
 
-int module_node_beforeCheckpoint(mechanic_internals *internals,
+int module_node_beforeCheckpoint(int nodes, moduleInfo* md, configData* d,
     int* coordsvec, MECHANIC_DATATYPE* resultvec) {
   return 0;
 }
 
-int module_node_afterCheckpoint(mechanic_internals *internals,
+int module_node_afterCheckpoint(int nodes, moduleInfo* md, configData* d,
     int* coordsvec, MECHANIC_DATATYPE* resultvec) {
   return 0;
 }

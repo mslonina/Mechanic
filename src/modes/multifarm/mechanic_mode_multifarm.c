@@ -44,18 +44,12 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_multifarm.h"
 
-int mechanic_mode_multifarm(mechanic_internals* handler) {
+int mechanic_mode_multifarm(int mpi_size, int node, mechanic_internals handler, moduleInfo* md,
+    configData* d){
 
-  int mstat;
+  if (node == 0) mechanic_mode_multifarm_master(mpi_size, node, handler, md, d);
+  if (node != 0) mechanic_mode_multifarm_slave(mpi_size, node, handler, md, d);
 
-  if (handler->node == MECHANIC_MPI_MASTER_NODE) {
-    mstat = mechanic_mode_multifarm_master(handler);
-    mechanic_check_mstat(mstat);
-  } else {
-    mstat = mechanic_mode_multifarm_slave(handler);
-    mechanic_check_mstat(mstat);
-  }
-
-  return mstat;
+  return 0;
 }
 

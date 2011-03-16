@@ -127,21 +127,6 @@ typedef struct {
 } moduleInfo;
 
 /* [/MODULEINFO] */
-
-/* MECHANIC INTERNALS STRUCT */
-typedef struct {
-  int mpi_size;
-  int node;
-  int sendnode;
-  int recvnode;
-  int nodes;
-  int comm;
-  void* module;
-  void* handler;
-  configData* config;
-  moduleInfo* info;
-} mechanic_internals;
-
 void mechanic_message(int type, char* fmt, ...);
 int mechanic_finalize(/*unsigned long*/ int node);
 int mechanic_abort(int errcode);
