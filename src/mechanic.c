@@ -296,6 +296,12 @@ int main(int argc, char** argv) {
   char pack_buffer[MECHANIC_MAXLENGTH];
   int pack_position;
 
+  /* MPI INIT */
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  node = mpi_rank;
+
   /* LRC defaults */
   LRC_configNamespace* head;
   LRC_configDefaults cs[] = {
@@ -362,14 +368,6 @@ int main(int argc, char** argv) {
     MECHANIC_POPT_AUTOHELP
     POPT_TABLEEND
   };
-
-
-  /* MPI INIT */
-  mechanic_message(MECHANIC_MESSAGE_INFO, "Invoking MPI environment\n");
-  MPI_Init(&argc, &argv);
-  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
-  node = mpi_rank;
 
   if (node == MECHANIC_MPI_MASTER_NODE) mechanic_welcome();
 
