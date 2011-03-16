@@ -159,23 +159,12 @@ enum Modes {
 typedef int (*module_query_void_f) ();
 typedef int (*module_query_int_f) ();
 
-/* MECHANIC INTERNALS STRUCT */
-typedef struct {
-  int mpi_size;
-  int node;
-  int comm;
-  void* module;
-  void* handler;
-  configData* config;
-  moduleInfo* info;
-} mechanic_internals;
-
 char* mechanic_module_filename(char* name);
 mechanic_internals mechanic_module_open(char* module);
-void mechanic_module_close(mechanic_internals module);
-mechanic_internals mechanic_internals_init(int node, moduleInfo* m, configData* d);
+void mechanic_module_close(mechanic_internals* module);
+mechanic_internals mechanic_internals_init(int mpi_size, int node, moduleInfo* m, configData* d);
 void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals* internals);
-void mechanic_internals_close(mechanic_internals handler);
+void mechanic_internals_close(mechanic_internals* handler);
 
 /* GLOBALS */
 char* ConfigFile;
@@ -185,13 +174,13 @@ int allopts;
 int usage, help, debug, silent;
 
 /* FUNCTION PROTOTYPES */
-int map2d(int c, mechanic_internals handler, moduleInfo*, configData* d, int ind[], int** b);
+int map2d(int c, mechanic_internals *handler, int ind[], int** b);
 
 int buildMasterResultsType(int mrl, masterData* md,
     MPI_Datatype* masterResultsType_ptr);
 
 char* mechanic_module_sym_prefix(char* prefix, char* function);
-module_query_int_f mechanic_load_sym(mechanic_internals handler, char* function, int type);
+module_query_int_f mechanic_load_sym(mechanic_internals *handler, char* function, int type);
 module_query_int_f mechanic_sym_lookup(void* modhand, char* md_name, char* function);
 
 int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head);
@@ -213,8 +202,8 @@ int H5readBoard(configData* d, int** board);
 int H5writeCheckPoint(moduleInfo *md, configData* d, int check,
     int** coordsarr, MECHANIC_DATATYPE** resultarr);
 
-int atCheckPoint(int check, int** coordsarr, int** board,
-    MECHANIC_DATATYPE** resultarr, moduleInfo *md, configData* d);
+int atCheckPoint(mechanic_internals *handler, int check, int** coordsarr, int** board,
+    MECHANIC_DATATYPE** resultarr);
 
 int mechanic_validate_file(char* filename);
 
@@ -224,16 +213,12 @@ void mechanic_welcome();
 
 void clearArray(MECHANIC_DATATYPE*,int);
 
-int mechanic_mode_multifarm(int mpi_size, int node, mechanic_internals handler,
-    moduleInfo* md, configData* d);
-
-int mechanic_mode_farm(int mpi_size, int node, mechanic_internals handler,
-    moduleInfo* md, configData* d);
-int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler,
-    moduleInfo* md, configData* d);
+int mechanic_mode_multifarm(mechanic_internals* handler);
+int mechanic_mode_farm(mechanic_internals* handler);
+int mechanic_mode_masteralone(mechanic_internals* handler);
 
 #ifdef HAVE_CUDA_H
-int mechanic_mode_cuda(int mpi_size, int node, mechanic_internals handler,
+int mechanic_mode_cuda(int mpi_size, int node, mechanic_internals* handler,
     moduleInfo* md, configData* d);
 #endif
 

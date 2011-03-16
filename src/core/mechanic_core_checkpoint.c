@@ -71,13 +71,13 @@
 
 /* [/CHECKPOINT] */
 
-int atCheckPoint(int check, int** coordsarr, int** board,
-    MECHANIC_DATATYPE** resultarr, moduleInfo* md, configData* d){
+int atCheckPoint(mechanic_internals *handler, int check, int** coordsarr, int** board,
+    MECHANIC_DATATYPE** resultarr) {
 
   int mstat = 0;
 
-  mstat = manageCheckPoints(d);
-  mstat = H5writeCheckPoint(md, d, check, coordsarr, resultarr);
+  mstat = manageCheckPoints(handler->config);
+  mstat = H5writeCheckPoint(handler->info, handler->config, check, coordsarr, resultarr);
 
   if (mstat < 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR, "Checkpoint failed, aborting\n");

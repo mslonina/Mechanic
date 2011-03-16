@@ -63,14 +63,9 @@ void clearArray(MECHANIC_DATATYPE* array, int no_of_items_in_array){
  * Returns number of next pixel to be mapped, -1 on failure
  *
  */
-int map2d(int c, mechanic_internals handler, moduleInfo* md, configData* d, int ind[],
-    int** b){
+int map2d(int c, mechanic_internals *handler, int ind[], int** b) {
 
-   int x, y;
    module_query_int_f qpcm;
-
-   x = d->xres;
-   y = d->yres;
 
    do {
 
@@ -78,7 +73,7 @@ int map2d(int c, mechanic_internals handler, moduleInfo* md, configData* d, int 
      ind[2] = c;
 
      qpcm = mechanic_load_sym(handler, "pixelCoordsMap", MECHANIC_MODULE_ERROR);
-     if (qpcm) qpcm(ind, c, x, y, md, d);
+     if (qpcm) qpcm(ind, c, handler->config->xres, handler->config->yres, handler->info, handler->config);
 
      if (b[ind[0]][ind[1]] == 1) {
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
