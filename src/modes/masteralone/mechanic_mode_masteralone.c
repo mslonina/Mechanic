@@ -79,7 +79,10 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 
   vecsize = 3;
 
+  /* For the sake of simplicity we read board everytime,
+   * both in restart and clean simulation mode */
   computed = H5readBoard(handler->config, board);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Num of computed pixels = %d\n", computed);
 
   /* Master can do something useful before computations,
    * even in masteralone mode */
@@ -90,8 +93,15 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
   /* Align farm resolution for given method. */
   query = mechanic_load_sym(handler, "farmResolution", MECHANIC_MODULE_ERROR);
   if (query) farm_res = query(handler);
+  if (farm_res > (handler->config->xres * handler->config->yres)) {
+    mechanic_message(MECHANIC_MESSAGE_ERR,
+      "Farm resolution should not exceed x*y!\n");
+    mechanic_error(MECHANIC_ERR_SETUP);
+  }
 
   pixeldiff = farm_res - computed;
+
+  if (pixeldiff == 0) goto finalize;
 
   /* Perform farm operations */
   while (1) {
@@ -146,9 +156,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "\n");
 
-    check++;
-
-    if (check % handler->config->checkpoint == 0 || mechanic_ups() < 0) {
+    if (((check+1) % handler->config->checkpoint) == 0 || mechanic_ups() < 0) {
       
       /* Fortran interoperability:
        * Convert 2D coordinates array to 1D vector, as well as
@@ -171,6 +179,8 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
       FreeIntVec(coordsvec);
       FreeDoubleVec(resultsvec);
     }
+
+    check++;
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "[%04d / %04d] Pixel [%04d, %04d, %04d] computed\n",
@@ -204,6 +214,8 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
   }
 
   /* FARM ENDS */
+
+finalize:
 
   /* Master can do something useful after the computations. */
   query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
