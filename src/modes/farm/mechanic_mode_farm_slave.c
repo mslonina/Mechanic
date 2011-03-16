@@ -81,6 +81,8 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
   MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST, MPI_ANY_TAG,
       MPI_COMM_WORLD, &mpi_status);
 
+  if (mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG) goto finalize;
+
   query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(handler, &inidata, &result);
   mechanic_check_mstat(mstat);
@@ -160,6 +162,8 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
 
     }
   } /* while (1) */
+
+finalize:
 
     /* Slave can do something useful after computations. */
     query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);

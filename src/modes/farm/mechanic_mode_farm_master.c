@@ -91,7 +91,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   /* For the sake of simplicity we read board everytime,
    * both in restart and clean simulation mode */
   computed = H5readBoard(handler->config, board);
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Num of computed pixels = %d", computed);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Num of computed pixels = %d\n", computed);
 
   /* Build derived type for master result */
   mstat = buildMasterResultsType(handler->info->mrl, &result, &masterResultsType);
@@ -119,71 +119,85 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   /* Security check -- if farm resolution is greater than number of slaves.
    * Needed when we have i.e. 3 slaves and only one pixel to compute. */
   pixeldiff = farm_res - computed;
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "farm_res - computed = %d\n",
+  mechanic_message(MECHANIC_MESSAGE_INFO, "farm_res - computed = %d\n",
     pixeldiff);
-  if (pixeldiff > handler->mpi_size) handler->nodes = handler->mpi_size;
-  if (pixeldiff == handler->mpi_size) handler->nodes = handler->mpi_size;
+  if (pixeldiff >= handler->mpi_size) handler->nodes = handler->mpi_size;
   if (pixeldiff < handler->mpi_size) handler->nodes = pixeldiff + 1;
 
   /* Send tasks to all slaves,
    * remembering what the farm resolution is.*/
-  for (i = 1; i < handler->nodes; i++) {
+  for (i = 1; i < handler->mpi_size; i++) {
 
-    handler->sendnode = i;
-    npxc = map2d(npxc, handler, ptab, board);
-    count++;
-
-    inidata.coords[0] = ptab[0];
-    inidata.coords[1] = ptab[1];
-    inidata.coords[2] = ptab[2];
-
-    query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(handler, &inidata, &result);
-    mechanic_check_mstat(mstat);
-
-    mechanic_message(MECHANIC_MESSAGE_CONT,
-        "Pixel [%04d, %04d, %04d] sended to node %04d\n",
-        ptab[0], ptab[1], ptab[2], handler->sendnode);
-
-    query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(handler, &result);
-    mechanic_check_mstat(mstat);
-
-#ifdef IPM
-    MPI_Pcontrol(1, "master_ini_send");
-#endif
-
-    MPI_Send(&inidata, 1, initialConditionsType, handler->sendnode,
-        MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
-
-#ifdef IPM
-    MPI_Pcontrol(-1, "master_ini_send");
-#endif
-
-    query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(handler, &result);
-    mechanic_check_mstat(mstat);
-
-  }
-
-  /* We don't want to have slaves idle, so, if there are some idle slaves
-   * terminate them (when farm resolution < mpi size). */
-  if ((farm_res - computed) < handler->mpi_size) {
-    for (i = handler->nodes; i < handler->mpi_size; i++) {
-
+    if (pixeldiff == 0) {
+    /* No tasks left, terminate all slaves. */
       mechanic_message(MECHANIC_MESSAGE_WARN,
-          "Terminating idle slave %d.\n", i);
+        "No tasks left, terminating slave %d.\n",i);
 
       /* Just dummy assignment */
       inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
 
       MPI_Send(&inidata, 1, initialConditionsType, i,
+        MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+
+
+    } else if(pixeldiff < handler->mpi_size) {
+      /* We don't want to have slaves idle, so, if there are some idle slaves
+       * terminate them (when farm resolution < mpi size). */
+      if (i >= handler->nodes) {
+        mechanic_message(MECHANIC_MESSAGE_WARN,
+          "Terminating idle slave %d.\n", i);
+
+        /* Just dummy assignment */
+        inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
+
+        MPI_Send(&inidata, 1, initialConditionsType, i,
           MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
+      }
+    } else {
+
+      handler->sendnode = i;
+      npxc = map2d(npxc, handler, ptab, board);
+      count++;
+
+      inidata.coords[0] = ptab[0];
+      inidata.coords[1] = ptab[1];
+      inidata.coords[2] = ptab[2];
+
+      query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(handler, &inidata, &result);
+      mechanic_check_mstat(mstat);
+
+      mechanic_message(MECHANIC_MESSAGE_CONT,
+          "Pixel [%04d, %04d, %04d] sended to node %04d\n",
+          ptab[0], ptab[1], ptab[2], handler->sendnode);
+
+      query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(handler, &result);
+      mechanic_check_mstat(mstat);
+
+#ifdef IPM
+      MPI_Pcontrol(1, "master_ini_send");
+#endif
+
+      MPI_Send(&inidata, 1, initialConditionsType, handler->sendnode,
+          MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
+
+#ifdef IPM
+      MPI_Pcontrol(-1, "master_ini_send");
+#endif
+
+      query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(handler, &result);
+      mechanic_check_mstat(mstat);
     }
   }
 
+
+  /* If there are no tasks left, we already terminated slaves,
+   * and now we have to terminate master node */
+  if (pixeldiff == 0) goto finalize;
+
   /* Receive data and send tasks. */
-  
   
   while (1) {
 
@@ -416,6 +430,8 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
          MECHANIC_MPI_TERMINATE_TAG, MPI_COMM_WORLD);
 
   }
+
+finalize:
 
   /* FARM ENDS */
   MPI_Type_free(&masterResultsType);

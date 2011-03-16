@@ -335,6 +335,7 @@ int mechanic_printConfig(configData *cd, int flag){
 /* Mechanic welcome message */
 void mechanic_welcome(){
 
+  mechanic_message(MECHANIC_MESSAGE_CONT, "\n");
   mechanic_message(MECHANIC_MESSAGE_INFO, "%s\n", MECHANIC_NAME);
   mechanic_message(MECHANIC_MESSAGE_CONT, "v. %s\n", MECHANIC_VERSION);
   mechanic_message(MECHANIC_MESSAGE_CONT, "Author: %s\n", MECHANIC_AUTHOR);

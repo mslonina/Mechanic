@@ -250,7 +250,7 @@
  *
  */
 
-int main(int argc, char* argv[]){
+int main(int argc, char** argv){
 
   /* POPT Helpers */
   char* module_name;
@@ -333,7 +333,7 @@ int main(int argc, char* argv[]){
 
   struct poptOption mechanic_poptRestart[] = {
     {"restart", 'r', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT, &CheckpointFile,
-      0, "Path to checkpoint file", "/path/to/checkpoint/file"},
+      1, "Path to checkpoint file", "/path/to/checkpoint/file"},
     POPT_TABLEEND
   };
 
@@ -363,36 +363,50 @@ int main(int argc, char* argv[]){
     POPT_TABLEEND
   };
 
+
   /* MPI INIT */
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Invoking MPI environment\n");
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   node = mpi_rank;
 
+  if (node == MECHANIC_MPI_MASTER_NODE) mechanic_welcome();
+
 #ifdef WE_ARE_ON_DARWIN
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "We are running on DARWIN platform\n");
+  if (node == MECHANIC_MPI_MASTER_NODE) {
+    mechanic_message(MECHANIC_MESSAGE_INFO, "We are running on DARWIN platform\n");
+  }
 #endif
 
 #ifdef WE_ARE_ON_LINUX
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "We are running on LINUX platform\n");
+  if (node == MECHANIC_MPI_MASTER_NODE) {
+    mechanic_message(MECHANIC_MESSAGE_INFO, "We are running on LINUX platform\n");
+  }
 #endif
 
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "MPI started\n");
+  if (node == MECHANIC_MPI_MASTER_NODE) {
+    mechanic_message(MECHANIC_MESSAGE_INFO, "MPI is ready\n");
+  }
 
   /* HDF5 INIT */
   H5open();
+  if (node == MECHANIC_MPI_MASTER_NODE) {
+    mechanic_message(MECHANIC_MESSAGE_INFO, "HDF is ready\n");
+  }
 
   /* CONFIGURATION START */
   if (node == MECHANIC_MPI_MASTER_NODE) {
 
     /* Assign LRC defaults */
     head = LRC_assignDefaults(cs);
-    mechanic_message(MECHANIC_MESSAGE_DEBUG, "LRC defaults assigned\n");
+    mechanic_message(MECHANIC_MESSAGE_INFO, "LRC is ready\n");
 
     /* Assign POPT defaults */
     name = MECHANIC_NAME_DEFAULT;
     module_name = MECHANIC_MODULE_DEFAULT;
     ConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
+    //CheckpointFile = MECHANIC_CHECKPOINT_FILE_DEFAULT;
     xres = atoi(MECHANIC_XRES_DEFAULT);
     yres = atoi(MECHANIC_YRES_DEFAULT);
     checkpoint = atoi(MECHANIC_CHECKPOINT_DEFAULT);
@@ -439,12 +453,14 @@ int main(int argc, char* argv[]){
     return 0;
   }
 
-  if (node == MECHANIC_MPI_MASTER_NODE) mechanic_welcome();
+  /* Iterate through all options to detect restart flag
+   * if it is present check for its argument and abort if missing
+   */
 
   /* Restartmode */
   if (CheckpointFile) {
     if (node == MECHANIC_MPI_MASTER_NODE) {
-      mechanic_message(MECHANIC_MESSAGE_DEBUG,
+      mechanic_message(MECHANIC_MESSAGE_INFO,
           "Checkpoint file specified: %s\n", CheckpointFile);
       /* STEP 1: Check the health of the checkpoint file */
       if (stat(CheckpointFile, &ct) == 0) {
