@@ -428,9 +428,7 @@ int main(int argc, char** argv){
         poptStrerror(optvalue));
       poptPrintHelp(poptcon, stdout, poptflags);
     }
-    poptFreeContext(poptcon);
-    mechanic_finalize(node);
-    return 0;
+    goto setupfinalize;
   }
 
   /* Long help message set */
@@ -438,9 +436,7 @@ int main(int argc, char** argv){
     if (node == MECHANIC_MPI_MASTER_NODE) {
       poptPrintHelp(poptcon, stdout, 0);
     }
-    poptFreeContext(poptcon);
-    mechanic_finalize(node);
-    return 0;
+    goto setupfinalize;
   }
 
   /* Brief help message set */
@@ -448,9 +444,7 @@ int main(int argc, char** argv){
     if (node == MECHANIC_MPI_MASTER_NODE) {
       poptPrintUsage(poptcon, stdout, 0);
     }
-    poptFreeContext(poptcon);
-    mechanic_finalize(node);
-    return 0;
+    goto setupfinalize;
   }
 
   /* Iterate through all options to detect restart flag
@@ -487,7 +481,8 @@ int main(int argc, char** argv){
               "but specified checkpoint file %s\n", CheckpointFile);
           mechanic_message(MECHANIC_MESSAGE_CONT,
               "is not valid Mechanic file\n");
-          mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+          goto checkpointabort;
+          //mechanic_abort(MECHANIC_ERR_CHECKPOINT);
         }
       }
     }
@@ -874,20 +869,24 @@ int main(int argc, char** argv){
       break;
   }
 
+finalize:
+
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
   cleanup = mechanic_load_sym(&internals, "cleanup", MECHANIC_MODULE_ERROR);
   if (cleanup) mstat = cleanup(&internals);
   mechanic_check_mstat(mstat);
 
-  /* Free POPT */
-  poptFreeContext(poptcon);
-
   /* Mechanic cleanup */
   mechanic_internals_close(&internals);
 
+setupfinalize:
+
   /* HDF5 finalize */
   H5close();
+
+  /* Free POPT */
+  poptFreeContext(poptcon);
 
   /* Cleanup LRC */
   if (node == MECHANIC_MPI_MASTER_NODE) LRC_cleanup(head);
@@ -901,5 +900,10 @@ int main(int argc, char** argv){
   }
 
   exit(EXIT_SUCCESS);
+
+checkpointabort:
+  if (node == MECHANIC_MPI_MASTER_NODE) {
+    mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+  }
 }
 
