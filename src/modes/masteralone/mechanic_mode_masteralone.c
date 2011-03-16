@@ -44,7 +44,8 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_masteralone.h"
 
-int mechanic_mode_masteralone(mechanic_internals* handler) {
+int mechanic_mode_masteralone(int mpi_size, int node, mechanic_internals handler,
+    moduleInfo* md, configData* d){
 
   int j = 0, farm_res = 0, mstat = 0, tab[3], check = 0;
   int npxc = 0;
@@ -68,36 +69,44 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
   module_query_int_f query;
 
   /* Allocate memory */
-  result.res = AllocateDoubleVec(handler->info->mrl);
-  inidata.res = AllocateDoubleVec(handler->info->irl);
+  result.res = AllocateDoubleVec(md->mrl);
+  inidata.res = AllocateDoubleVec(md->irl);
 
-  coordsarr = AllocateInt2D(handler->config->checkpoint,3);
-  resultarr = AllocateDouble2D(handler->config->checkpoint,handler->info->mrl);
+  coordsarr = AllocateInt2D(d->checkpoint,3);
+  resultarr = AllocateDouble2D(d->checkpoint,md->mrl);
 
   /* Allocate memory for board */
-  board = AllocateInt2D(handler->config->xres,handler->config->yres);
+  board = AllocateInt2D(d->xres,d->yres);
 
+<<<<<<< HEAD
   vecsize = 3;
 
   /* For the sake of simplicity we read board everytime,
    * both in restart and clean simulation mode */
   computed = H5readBoard(handler->config, board);
   mechanic_message(MECHANIC_MESSAGE_INFO, "Num of computed pixels = %d\n", computed);
+=======
+  computed = H5readBoard(d, board);
+>>>>>>> parent of 7783d3f... API change: ModuleInfo and ConfigData merged. Masteralone broken.
 
   /* Master can do something useful before computations,
    * even in masteralone mode */
   query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(handler, &inidata);
+  if (query) mstat = query(mpi_size, node, md, d, &inidata);
   mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
   query = mechanic_load_sym(handler, "farmResolution", MECHANIC_MODULE_ERROR);
+<<<<<<< HEAD
   if (query) farm_res = query(handler);
   if (farm_res > (handler->config->xres * handler->config->yres)) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Farm resolution should not exceed x*y!\n");
     mechanic_error(MECHANIC_ERR_SETUP);
   }
+=======
+  if (query) farm_res = query(d->xres, d->yres, md, d);
+>>>>>>> parent of 7783d3f... API change: ModuleInfo and ConfigData merged. Masteralone broken.
 
   pixeldiff = farm_res - computed;
 
@@ -106,7 +115,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
   /* Perform farm operations */
   while (1) {
 
-    npxc = map2d(npxc, handler, tab, board);
+    npxc = map2d(npxc, handler, md, d, tab, board);
     totalnumofpx++;
 
     inidata.coords[0] = tab[0];
@@ -121,24 +130,24 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
       tab[0], tab[1], tab[2]);
 
     query = mechanic_load_sym(handler, "pixelCoords", MECHANIC_MODULE_ERROR);
-    if (query) mstat = query(handler, &inidata, &result);
+    if (query) mstat = query(node, tab, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(handler, &inidata, &result);
+    if (query) mstat = query(node, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     query = mechanic_load_sym(handler, "beforeProcessPixel", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(handler, &inidata, &result);
+    if (query) mstat = query(node, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     /* PIXEL COMPUTATION */
     query = mechanic_load_sym(handler, "processPixel", MECHANIC_MODULE_ERROR);
-    if (query) mstat = query(handler, &inidata, &result);
+    if (query) mstat = query(node, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     query = mechanic_load_sym(handler, "afterProcessPixel", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(handler, &inidata, &result);
+    if (query) mstat = query(node, md, d, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     /* Copy data to checkpoint arrays */
@@ -149,13 +158,14 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "MASTER [%d, %d, %d]\t",
         result.coords[0], result.coords[1], result.coords[2]);
 
-    for (j = 0; j < handler->info->mrl; j++) {
+    for (j = 0; j < md->mrl; j++) {
       resultarr[check][j] = result.res[j];
       mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", result.res[j]);
     }
 
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "\n");
 
+<<<<<<< HEAD
     if (((check+1) % handler->config->checkpoint) == 0 || mechanic_ups() < 0) {
       
       /* Fortran interoperability:
@@ -169,11 +179,25 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
       mechanic_check_mstat(mstat);
 
       mstat = atCheckPoint(handler, check+1, coordsarr, board, resultarr);
+=======
+    check++;
+
+    if (check % d->checkpoint == 0 || mechanic_ups() < 0) {
+      query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(mpi_size, md, d, coordsarr, resultarr);
+      mechanic_check_mstat(mstat);
+
+      mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+>>>>>>> parent of 7783d3f... API change: ModuleInfo and ConfigData merged. Masteralone broken.
       mechanic_check_mstat(mstat);
       check = 0;
 
       query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
+<<<<<<< HEAD
       if (query) mstat = query(handler, coordsvec, resultsvec);
+=======
+      if (query) mstat = query(mpi_size, md, d, coordsarr, resultarr);
+>>>>>>> parent of 7783d3f... API change: ModuleInfo and ConfigData merged. Masteralone broken.
       mechanic_check_mstat(mstat);
       
       FreeIntVec(coordsvec);
@@ -200,6 +224,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
       resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
     
       query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
+<<<<<<< HEAD
       if (query) mstat = query(handler, coordsvec, resultsvec);
 
       mstat = atCheckPoint(handler, check+1, coordsarr, board, resultarr);
@@ -207,6 +232,14 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 
       query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler, coordsvec, resultsvec);
+=======
+      if (query) mstat = query(mpi_size, md, d, coordsarr, resultarr);
+      mstat = atCheckPoint(check, coordsarr, board, resultarr, md, d);
+      mechanic_check_mstat(mstat);
+
+      query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
+      if (query) mstat = query(mpi_size, md, d, coordsarr, resultarr);
+>>>>>>> parent of 7783d3f... API change: ModuleInfo and ConfigData merged. Masteralone broken.
       mechanic_check_mstat(mstat);
       
       FreeIntVec(coordsvec);
@@ -219,14 +252,14 @@ finalize:
 
   /* Master can do something useful after the computations. */
   query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(handler, &inidata, &result);
+  if (query) mstat = query(1, node, md, d, &inidata, &result);
   mechanic_check_mstat(mstat);
 
   FreeDoubleVec(result.res);
   FreeDoubleVec(inidata.res);
-  FreeInt2D(coordsarr,handler->config->checkpoint);
-  FreeDouble2D(resultarr,handler->config->checkpoint);
-  FreeInt2D(board,handler->config->xres);
+  FreeInt2D(coordsarr,d->checkpoint);
+  FreeDouble2D(resultarr,d->checkpoint);
+  FreeInt2D(board,d->xres);
 
   return mstat;
 }

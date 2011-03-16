@@ -791,16 +791,16 @@ int main(int argc, char** argv){
   md.schemasize = 1;
 
   /* Initialize internals and load modules  */
-  internals = mechanic_internals_init(mpi_size, node, &md, &cd);
+  internals = mechanic_internals_init(node, &md, &cd);
 
   /* Module init */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
-  init = mechanic_load_sym(&internals, "init", MECHANIC_MODULE_ERROR);
-  if (init) mstat = init(&internals);
+  init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR);
+  if (init) mstat = init(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
   
   /* This will override defaults */
-  internals = mechanic_internals_init(mpi_size, node, &md, &cd);
+  internals = mechanic_internals_init(node, &md, &cd);
 
   /* Initialize schema */
   mechanic_internals_schema_init(node, &md, &internals);
@@ -812,13 +812,13 @@ int main(int argc, char** argv){
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "irl = %d\n", md.irl);
 
-  if (internals.info->mrl <= 0) {
+  if (md.mrl <= 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Master result length must be greater than 0\n");
     mechanic_error(MECHANIC_ERR_SETUP);
   }
 
-  if (internals.info->irl <= 0) {
+  if (md.irl <= 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Initial condition length must be greater than 0\n");
     mechanic_error(MECHANIC_ERR_SETUP);
@@ -826,8 +826,8 @@ int main(int argc, char** argv){
 
   /* Module query */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
-  query = mechanic_load_sym(&internals, "query", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(&internals);
+  query = mechanic_load_sym(internals, "query", MECHANIC_MODULE_SILENT);
+  if (query) mstat = query(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
 
   /* There are some special data in the module,
@@ -842,8 +842,8 @@ int main(int argc, char** argv){
   
     /* Data schema */
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module schema\n");
-    schema = mechanic_load_sym(&internals, "schema", MECHANIC_MODULE_ERROR);
-    if (schema) mstat = schema(&internals);
+    schema = mechanic_load_sym(internals, "schema", MECHANIC_MODULE_ERROR);
+    if (schema) mstat = schema(mpi_size, node, &md, &cd);
     mechanic_check_mstat(mstat);
     
     mstat = H5createMasterDataScheme(file_id, &md, &cd);
@@ -858,21 +858,21 @@ int main(int argc, char** argv){
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Loading mode\n");
   switch (cd.mode) {
     case MECHANIC_MODE_MASTERALONE:
-      mstat = mechanic_mode_masteralone(&internals);
+      mstat = mechanic_mode_masteralone(mpi_size, node, internals, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
     case MECHANIC_MODE_FARM:
-      mstat = mechanic_mode_farm(&internals);
+      mstat = mechanic_mode_farm(mpi_size, node, internals, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
-/*#ifdef HAVE_CUDA_H
+#ifdef HAVE_CUDA_H
     case MECHANIC_MODE_CUDA:
-      mstat = mechanic_mode_cuda(&internals);
+      mstat = mechanic_mode_cuda(mpi_size, node, internals, &md, &cd);
       mechanic_check_mstat(mstat);
       break;
-#endif*/
+#endif
     /*case MECHANIC_MODE_MULTIFARM:
-      mstat = mechanic_mode_multifarm(&internals);
+      mstat = mechanic_mode_multifarm(mpi_size, node, internals, &md, &cd);
       break;*/
     default:
       break;
@@ -882,12 +882,12 @@ finalize:
 
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
-  cleanup = mechanic_load_sym(&internals, "cleanup", MECHANIC_MODULE_ERROR);
-  if (cleanup) mstat = cleanup(&internals);
+  cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR);
+  if (cleanup) mstat = cleanup(mpi_size, node, &md, &cd);
   mechanic_check_mstat(mstat);
 
   /* Mechanic cleanup */
-  mechanic_internals_close(&internals);
+  mechanic_internals_close(internals);
 
 setupfinalize:
 
