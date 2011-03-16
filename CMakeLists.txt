@@ -91,7 +91,7 @@ SET (CPACK_SOURCE_PACKAGE_FILE_NAME
 SET (CPACK_SOURCE_IGNORE_FILES
   "/build/;/.DS_Store;/.gitignore;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 
-include (cpack)
+include (CPack)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
