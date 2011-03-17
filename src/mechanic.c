@@ -876,6 +876,9 @@ int main(int argc, char** argv) {
       break;
   }
 
+  /* To be sure all nodes reach here at the same time */
+  MPI_Barrier(MPI_COMM_WORLD);
+
 finalize:
 
   /* Module cleanup */
@@ -886,20 +889,25 @@ finalize:
 
   /* Mechanic cleanup */
   mechanic_internals_close(&internals);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] Internals closed.\n", node);
 
 setupfinalize:
 
   /* HDF5 finalize */
   H5close();
+  mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] HDF5 closed.\n", node);
 
   /* Free POPT */
   poptFreeContext(poptcon);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] POPT closed.\n", node);
 
   /* Cleanup LRC */
-  if (node == MECHANIC_MPI_MASTER_NODE) LRC_cleanup(head);
+  LRC_cleanup(head);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] LRC closed.\n", node);
 
   /* Finalize */
   mechanic_finalize(node);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] MPI closed.\n", node);
 
   if (node == MECHANIC_MPI_MASTER_NODE) {
     mechanic_message(MECHANIC_MESSAGE_INFO, "Mechanic finished his job\n");

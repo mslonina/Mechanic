@@ -81,7 +81,10 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
   MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST, MPI_ANY_TAG,
       MPI_COMM_WORLD, &mpi_status);
 
-  if (mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG) goto finalize;
+  if (mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG) {
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node %d recevied tag %d\n", handler->node, mpi_status.MPI_TAG);
+    goto finalize;
+  }
 
   query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
@@ -176,6 +179,7 @@ finalize:
     FreeDoubleVec(result.res);
     FreeDoubleVec(inidata.res);
 
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node %d terminated\n", handler->node);
     return mstat;
 }
 
