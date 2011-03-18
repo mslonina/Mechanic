@@ -149,7 +149,7 @@ int mechanic_copy(char* in, char* out){
 
   int input;
   int output;
-  int mstat;
+  int mstat = 0;
   char *c;
   struct stat st;
 
@@ -172,7 +172,7 @@ int mechanic_copy(char* in, char* out){
 
   /* CHAR_BIT in limits.h */
   c = malloc(st.st_size * CHAR_BIT + 1);
-  if (c == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  if (c == NULL) return MECHANIC_ERR_MEM;
 
   /* Read and write the whole file, without loops */
   mstat = read(input, c, st.st_size);

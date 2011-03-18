@@ -879,8 +879,6 @@ int main(int argc, char** argv) {
   /* To be sure all nodes reach here at the same time */
   MPI_Barrier(MPI_COMM_WORLD);
 
-finalize:
-
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
   cleanup = mechanic_load_sym(&internals, "cleanup", MECHANIC_MODULE_ERROR);

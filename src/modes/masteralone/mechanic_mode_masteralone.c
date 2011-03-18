@@ -83,7 +83,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
    * both in restart and clean simulation mode */
 
   computed = H5readBoard(handler->config, board);
-  mechanic_message(MECHANIC_MESSAGE_INFO, "Num of computed pixels = %d\n", computed);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Num of computed pixels = %d\n", computed);
 
   /* Master can do something useful before computations,
    * even in masteralone mode */

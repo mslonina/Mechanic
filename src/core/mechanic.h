@@ -142,6 +142,47 @@ typedef struct {
   moduleInfo* info;
 } mechanic_internals;
 
+typedef struct {
+  int api;
+  char name[MECHANIC_STRLEN];
+  char datafile[MECHANIC_STRLEN];
+  char module[MECHANIC_STRLEN];
+  int name_len; /* Fortran requirement: length of the name string */
+  int datafile_len; /* Fortran requirement: length of the datafile string */
+  int module_len; /* Fortran requirement: length of the module string */
+  int schemasize;
+  int irl;
+  int mrl;
+  struct {
+    int comm;
+    int mpisize;
+    int node;
+    int nodes;
+    int sendnode;
+    int recvnode;
+  } mpi;
+  struct {
+    char *path;
+    H5S_class_t type;
+    hid_t datatype;
+    unsigned int rank;
+    hsize_t dimsize[MECHANIC_MAX_HDF_RANK];
+  } schema;
+  struct {
+    /*unsigned long*/ int xres;
+    /*unsigned long*/ int yres;
+    /*unsigned long*/ int checkpoint;
+    /*unsigned short*/ int restartmode;
+    /*unsigned short*/ int mode;
+  } config;
+} mechanic_info_t;
+
+typedef struct {
+  void *handler;
+  void *module;
+  mechanic_info_t info;
+} mechanic_internals_t;
+
 void mechanic_message(int type, char* fmt, ...);
 int mechanic_finalize(/*unsigned long*/ int node);
 int mechanic_abort(int errcode);

@@ -76,12 +76,17 @@ int atCheckPoint(mechanic_internals *handler, int check, int** coordsarr, int** 
 
   int mstat = 0;
 
+  /* Create incremental set of checkpoint file */
   mstat = manageCheckPoints(handler->config);
-  mstat = H5writeCheckPoint(handler->info, handler->config, check, coordsarr, resultarr);
+  mechanic_check_mstat(mstat);
 
-  if (mstat < 0) {
-    mechanic_message(MECHANIC_MESSAGE_ERR, "Checkpoint failed, aborting\n");
-  }
+  /* Validate current checkpoint file */
+  mstat = mechanic_validate_file(handler->config->datafile);
+  mechanic_check_mstat(mstat);
+
+  /* Write data to checkpoint file */
+  mstat = H5writeCheckPoint(handler->info, handler->config, check, coordsarr, resultarr);
+  mechanic_check_mstat(mstat);
 
   return mstat;
 }
@@ -106,10 +111,10 @@ int manageCheckPoints(configData* d){
   clen = nam + pre + ext + 6*sizeof(char*);
 
   checkpoint = calloc(clen, sizeof(char*));
-  if (checkpoint == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  if (checkpoint == NULL) return MECHANIC_ERR_MEM;
 
   checkpoint_old = calloc(clen, sizeof(char*));
-  if (checkpoint_old == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  if (checkpoint_old == NULL) return MECHANIC_ERR_MEM;
 
   for (i = MECHANIC_CHECKPOINTS-2; i >= 0; i--) {
 
@@ -123,17 +128,17 @@ int manageCheckPoints(configData* d){
 
         /* If the checkpoint file doesn't exist, copy current file */
         mstat = mechanic_copy(checkpoint_old, checkpoint);
-        if (mstat < 0) mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+        if (mstat < 0) return MECHANIC_ERR_CHECKPOINT;
 
       } else {
 
         /* Instead of renaming, if we reach 00 file, we copy it to 01 */
         if (i == 0) {
           mstat = mechanic_copy(checkpoint_old, checkpoint);
-          if (mstat < 0) mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+          if (mstat != 0) return MECHANIC_ERR_CHECKPOINT;
         } else {
           mstat = rename(checkpoint_old, checkpoint);
-          if (mstat < 0) mechanic_abort(MECHANIC_ERR_CHECKPOINT);
+          if (mstat < 0) return MECHANIC_ERR_CHECKPOINT;
           mechanic_message(MECHANIC_MESSAGE_DEBUG,
               "Renamed file size = %d\n", mstat);
         }
@@ -209,6 +214,7 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check,
 	mechanic_message(MECHANIC_MESSAGE_DEBUG, "Checkpoint finished\n");
 
   return mstat;
+
 }
 
 /*
@@ -288,6 +294,7 @@ int mechanic_validate_file(char* CheckpointFile) {
   hid_t file_id, dataset_id, datagroup_id;
   
   file_id = H5Fopen(CheckpointFile, H5F_ACC_RDONLY, H5P_DEFAULT);
+  if (file_id < 0) return MECHANIC_ERR_CHECKPOINT;
   
   /* Check for Mechanic-specific datasets */
   
