@@ -90,8 +90,9 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
 
   /* For the sake of simplicity we read board everytime,
    * both in restart and clean simulation mode */
-  computed = H5readBoard(handler->config, board);
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Num of computed pixels = %d\n", computed);
+  mstat = H5readBoard(handler->config, board, &computed);
+  mechanic_check_mstat(mstat);
+  mechanic_message(MECHANIC_MESSAGE_INFO, "Num of computed pixels = %d\n", computed);
 
   /* Build derived type for master result */
   mstat = buildMasterResultsType(handler->info->mrl, &result, &masterResultsType);

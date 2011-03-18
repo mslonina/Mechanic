@@ -197,7 +197,7 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d);
 
 int manageCheckPoints(configData *d);
 
-int H5readBoard(configData* d, int** board);
+int H5readBoard(configData* d, int** board, int *computed);
 
 int H5writeCheckPoint(moduleInfo *md, configData* d, int check,
     int** coordsarr, MECHANIC_DATATYPE** resultarr);

@@ -252,6 +252,19 @@
 
 int main(int argc, char** argv) {
 
+  /* MECHANIC Helpers */
+  configData cd; /* struct for command line args */
+  moduleInfo md; /* struct for module info */
+  int mstat; /* mechanic internal error value */
+  struct stat st; /* stat.h */
+  struct stat ct; /* stat.h */
+  mechanic_internals internals;
+  char* oldfile;
+  size_t olen, opreflen, dlen;
+
+  /* LRC Helpers */
+  LRC_configNamespace* head;
+
   /* POPT Helpers */
   char* module_name;
   char* name;
@@ -268,23 +281,11 @@ int main(int argc, char** argv) {
   help = 0;
   usage = 0;
 
-  mechanic_internals internals;
-
-  char* oldfile;
-  size_t olen, opreflen, dlen;
-
   /* Module functions */
   module_query_int_f init, schema, query, cleanup;
 
   /* HDF Helpers */
   hid_t file_id;
-
-  /* MECHANIC Helpers */
-  configData cd; /* struct for command line args */
-  moduleInfo md; /* struct for module info */
-  int mstat; /* mechanic internal error value */
-  struct stat st; /* stat.h */
-  struct stat ct; /* stat.h */
 
   /* MPI Helpers */
   int mpi_rank;
@@ -303,7 +304,6 @@ int main(int argc, char** argv) {
   node = mpi_rank;
 
   /* LRC defaults */
-  LRC_configNamespace* head;
   LRC_configDefaults cs[] = {
     {"default", "name", MECHANIC_NAME_DEFAULT, LRC_STRING},
     {"default", "xres", MECHANIC_XRES_DEFAULT, LRC_INT},
@@ -388,7 +388,13 @@ int main(int argc, char** argv) {
   }
 
   /* HDF5 INIT */
-  H5open();
+  mstat = H5open();
+  if (mstat < 0) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "HDF5 OPEN failed on node %d\n", node);
+    mechanic_abort(MECHANIC_ERR_HDF);
+    exit(EXIT_FAILURE);
+  }
+
   if (node == MECHANIC_MPI_MASTER_NODE) {
     mechanic_message(MECHANIC_MESSAGE_INFO, "HDF is ready\n");
   }
@@ -397,6 +403,12 @@ int main(int argc, char** argv) {
 
   /* Assign LRC defaults */
   head = LRC_assignDefaults(cs);
+  if (head == NULL) {
+    mechanic_message(MECHANIC_MESSAGE_ERR, "LRC failed on node %d\n", node);
+    mechanic_abort(MECHANIC_ERR_SETUP);
+    exit(EXIT_FAILURE);
+  }
+
   if (node == MECHANIC_MPI_MASTER_NODE) {
     mechanic_message(MECHANIC_MESSAGE_INFO, "LRC is ready\n");
   }

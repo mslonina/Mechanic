@@ -226,27 +226,32 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check,
  *
  * @todo return mstat instead of pixel. Return pixel in function arg
  */
-int H5readBoard(configData* d, int** board){
+int H5readBoard(configData* d, int** board, int *computed){
 
   hid_t file_id, dataset_id;
   hid_t dataspace_id, memspace_id;
   hsize_t co[2], offset[2], stride[2], block[2], dims[2];
-  herr_t hdf_status;
-  //int mstat = 0;
+  herr_t hdf_status = 0;
+  int mstat = 0;
 
   int rdata[1][1];
   int i = 0, j = 0;
-  int computed = 0;
-
+  
   /* Open checkpoint file */
   file_id = H5Fopen(d->datafile, H5F_ACC_RDONLY, H5P_DEFAULT);
+  if (file_id < 0) return MECHANIC_ERR_HDF;
+
   dataset_id = H5Dopen(file_id, MECHANIC_DATABOARD, H5P_DEFAULT);
+  if (dataset_id < 0) return MECHANIC_ERR_HDF;
+  
   dataspace_id = H5Dget_space(dataset_id);
+  if (dataspace_id < 0) return MECHANIC_ERR_HDF;
 
   /* Create memory space for one by one pixel read */
   dims[0] = 1;
   dims[1] = 1;
   memspace_id = H5Screate_simple(MECHANIC_HDF_RANK, dims, NULL);
+  if (memspace_id < 0) return MECHANIC_ERR_HDF;
 
   /* Read board pixels one by one */
   for (i = 0; i < d->xres; i++) {
@@ -268,13 +273,15 @@ int H5readBoard(configData* d, int** board){
 
       hdf_status = H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, offset,
           stride, co, block);
+      if (hdf_status < 0) return MECHANIC_ERR_HDF;
 
       hdf_status = H5Dread(dataset_id, H5T_NATIVE_INT, memspace_id,
           dataspace_id, H5P_DEFAULT, rdata);
+      if (hdf_status < 0) return MECHANIC_ERR_HDF;
 
       /* Copy temporary data array to board array */
       board[i][j] = rdata[0][0];
-      if (board[i][j] == 1) computed++;
+      if (board[i][j] == MECHANIC_TASK_FINISHED) computed++;
 
     }
   }
@@ -285,7 +292,7 @@ int H5readBoard(configData* d, int** board){
   H5Dclose(dataset_id);
   H5Fclose(file_id);
 
-  return computed;
+  return mstat;
 }
 
 /* Validate checkpoint file */
