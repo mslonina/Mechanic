@@ -281,7 +281,7 @@ int H5readBoard(configData* d, int** board, int *computed){
 
       /* Copy temporary data array to board array */
       board[i][j] = rdata[0][0];
-      if (board[i][j] == MECHANIC_TASK_FINISHED) computed++;
+      if (board[i][j] == MECHANIC_TASK_FINISHED) *computed = *computed + 1;
 
     }
   }
