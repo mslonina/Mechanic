@@ -201,7 +201,7 @@ int module_cleanup(int mpi_size, int node, moduleInfo* md, configData* d){
 
 /* [6FARM] */
 
-int module_farmResolution(int x, int y, moduleInfo* md, configData* d){
+int module_farm_resolution(int x, int y, moduleInfo* md, configData* d){
 
   return x*y;
 }
@@ -244,7 +244,7 @@ int module_farmResolution(int x, int y, moduleInfo* md, configData* d){
 
 /* [6COORDS] */
 
-int module_pixelCoordsMap(int t[], int numofpx, int xres, int yres, moduleInfo* md,
+int module_task_coordinates_mapping(int t[], int numofpx, int xres, int yres, moduleInfo* md,
     configData* d){
 
   if (numofpx < yres) {
@@ -302,7 +302,7 @@ int module_pixelCoordsMap(int t[], int numofpx, int xres, int yres, moduleInfo* 
 
 /* [6PIXELS] */
 
-int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
+int module_task_coordinates_assign(int node, int t[], moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
 
   r->coords[0] = t[0];
@@ -342,7 +342,7 @@ int module_pixelCoords(int node, int t[], moduleInfo* md, configData* d,
  *
  * @ingroup module_required
  */
-int module_processPixel(int node, moduleInfo* md, configData* d,
+int module_task_process(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* result){
    return 0;
 }
@@ -453,7 +453,7 @@ int module_processPixel(int node, moduleInfo* md, configData* d,
 
 /* [/TEMPLATES] */
 
-int module_node_preparePixel(int node, moduleInfo* md, configData* d,
+int module_node_task_prepare(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* result) {
 
   return 0;
@@ -484,7 +484,7 @@ int module_node_preparePixel(int node, moduleInfo* md, configData* d,
  *
  * @ingroup module_themeable
  */
-int module_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
+int module_node_task_before_process(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
   return 0;
 }
@@ -514,7 +514,7 @@ int module_node_beforeProcessPixel(int node, moduleInfo* md, configData* d,
  *
  * @ingroup module_themeable
  */
-int module_node_afterProcessPixel(int node, moduleInfo* md, configData* d,
+int module_node_task_after_process(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
   return 0;
 }
@@ -604,7 +604,7 @@ int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
  *
  * @ingroup module_themeable
  */
-int module_node_beforeSend(int node, moduleInfo* md, configData* d,
+int module_node_task_before_data_send(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
   return 0;
 }
@@ -633,7 +633,7 @@ int module_node_beforeSend(int node, moduleInfo* md, configData* d,
  * @ingroup module_themeable
  */
 
-int module_node_afterSend(int node, moduleInfo* md, configData* d,
+int module_node_task_after_data_send(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r)
 {
   return 0;
@@ -663,7 +663,7 @@ int module_node_afterSend(int node, moduleInfo* md, configData* d,
  * @ingroup module_themeable
  */
 
-int module_node_beforeReceive(int node, moduleInfo* md, configData* d,
+int module_node_task_before_data_receive(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* result){
   return 0;
 }
@@ -692,17 +692,17 @@ int module_node_beforeReceive(int node, moduleInfo* md, configData* d,
  * @ingroup module_themeable
  */
 
-int module_node_afterReceive(int node, moduleInfo* md, configData* d,
+int module_node_task_after_data_receive(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* result){
   return 0;
 }
 
-int module_node_beforeCheckpoint(int nodes, moduleInfo* md, configData* d,
+int module_node_task_before_checkpoint(int nodes, moduleInfo* md, configData* d,
     int* coordsvec, MECHANIC_DATATYPE* resultvec) {
   return 0;
 }
 
-int module_node_afterCheckpoint(int nodes, moduleInfo* md, configData* d,
+int module_node_task_after_checkpoint(int nodes, moduleInfo* md, configData* d,
     int* coordsvec, MECHANIC_DATATYPE* resultvec) {
   return 0;
 }

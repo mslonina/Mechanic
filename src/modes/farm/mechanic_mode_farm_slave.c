@@ -74,7 +74,7 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
   if (query) mstat = query(handler->mpi_size, handler->node, handler->info, handler->config, &inidata);
   mechanic_check_mstat(mstat);
 
-  query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
   mechanic_check_mstat(mstat);
 
@@ -86,7 +86,7 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
     goto finalize;
   }
 
-  query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);
   if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
   mechanic_check_mstat(mstat);
 
@@ -99,7 +99,7 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
       tab[1] = inidata.coords[1];
       tab[2] = inidata.coords[2];
 
-      query = mechanic_load_sym(handler, "pixelCoords", MECHANIC_MODULE_ERROR);
+      query = mechanic_load_sym(handler, "task_coordinates_assign", MECHANIC_MODULE_ERROR);
       if (query) mstat = query(handler->node, tab, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -108,24 +108,24 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
       mechanic_message(MECHANIC_MESSAGE_DEBUG, "SLAVE[%d]: RTAB[%d, %d, %d]\n",
           handler->node, result.coords[0], result.coords[1], result.coords[2]);
 
-      query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "beforeProcessPixel", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_process", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       /* PIXEL COMPUTATION */
-      query = mechanic_load_sym(handler, "processPixel", MECHANIC_MODULE_ERROR);
+      query = mechanic_load_sym(handler, "task_process", MECHANIC_MODULE_ERROR);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "afterProcessPixel", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_process", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -140,11 +140,11 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
       MPI_Pcontrol(-1,"slave_send_result");
 #endif
 
-      query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -159,7 +159,7 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
       MPI_Pcontrol(-1,"slave_recv_pixel");
 #endif
 
-      query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 

@@ -92,7 +92,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
    * both in restart and clean simulation mode */
   mstat = H5readBoard(handler->config, board, &computed);
   mechanic_check_mstat(mstat);
-  mechanic_message(MECHANIC_MESSAGE_INFO, "Num of computed pixels = %d\n", computed);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Num of computed pixels = %d\n", computed);
 
   /* Build derived type for master result */
   mstat = buildMasterResultsType(handler->info->mrl, &result, &masterResultsType);
@@ -107,7 +107,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
-  query = mechanic_load_sym(handler, "farmResolution", MECHANIC_MODULE_ERROR);
+  query = mechanic_load_sym(handler, "farm_resolution", MECHANIC_MODULE_ERROR);
   if (query) farm_res = query(handler->config->xres, handler->config->yres, handler->info, handler->config);
   if (farm_res > (handler->config->xres * handler->config->yres)) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
@@ -171,7 +171,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     inidata.coords[1] = ptab[1];
     inidata.coords[2] = ptab[2];
 
-    query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
@@ -179,7 +179,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
         "Pixel [%04d, %04d, %04d] sended to node %04d\n",
         ptab[0], ptab[1], ptab[2], handler->sendnode);
 
-    query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(handler->sendnode, handler->info, handler->config, &result);
     mechanic_check_mstat(mstat);
 
@@ -194,7 +194,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     MPI_Pcontrol(-1, "master_ini_send");
 #endif
 
-    query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(handler->sendnode, handler->info, handler->config, &result);
     mechanic_check_mstat(mstat);
   }
@@ -203,7 +203,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   
   while (1) {
 
-    query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
 
 #ifdef IPM
@@ -222,7 +222,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     totalnumofpx++;
     count--;
 
-    query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(handler->recvnode, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
@@ -257,7 +257,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
       resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
 
-      query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
@@ -265,7 +265,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       mechanic_check_mstat(mstat);
       check = 0;
 
-      query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
@@ -288,11 +288,11 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       inidata.coords[1] = ptab[1];
       inidata.coords[2] = ptab[2];
 
-      query = mechanic_load_sym(handler, "preparePixel", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "beforeSend", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->sendnode, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -311,7 +311,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       MPI_Pcontrol(-1,"master_pixel_send");
 #endif
 
-      query = mechanic_load_sym(handler, "afterSend", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->sendnode, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -328,7 +328,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
 
   for (i = 0; i < count; i++){
 
-    query = mechanic_load_sym(handler, "beforeReceive", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
@@ -350,7 +350,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "done\n");
     totalnumofpx++;
 
-    query = mechanic_load_sym(handler, "afterReceive", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);
     if (query) mstat = query(handler->recvnode, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
@@ -377,7 +377,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
       resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
 
-      query = mechanic_load_sym(handler, "beforeCheckpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
@@ -385,7 +385,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       mechanic_check_mstat(mstat);
       check = 0;
 
-      query = mechanic_load_sym(handler, "afterCheckpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
@@ -400,7 +400,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
 
   /* Write outstanding results to file
    * If farm_res is smaller than checkpoint interval, it means, we write
-   * all data at once, and we have to handle before/afterCheckpoint here
+   * all data at once, and we have to handle before/task_after_checkpoint here
    * as well
    */
 
@@ -410,15 +410,15 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   //coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
   //resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
 
-  //query = mechanic_load_sym(handler, "node_beforeCheckpoint",
-  //  "master_beforeCheckpoint", MECHANIC_MODULE_SILENT);
+  //query = mechanic_load_sym(handler, "node_task_before_checkpoint",
+  //  "master_task_before_checkpoint", MECHANIC_MODULE_SILENT);
   //if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
 
   mstat = atCheckPoint(handler, check, coordsarr, board, resultarr);
   mechanic_check_mstat(mstat);
 
-  //query = mechanic_load_sym(handler, "node_afterCheckpoint",
-  //    "master_afterCheckpoint", MECHANIC_MODULE_SILENT);
+  //query = mechanic_load_sym(handler, "node_task_after_checkpoint",
+  //    "master_task_after_checkpoint", MECHANIC_MODULE_SILENT);
   //if (query) mstat = query(nodes, md, d, coordsvec, resultsvec);
 
   //if(coordsvec) free(coordsvec);
