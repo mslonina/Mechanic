@@ -310,6 +310,7 @@ int main(int argc, char** argv) {
     {"default", "xres", MECHANIC_XRES_DEFAULT, LRC_INT},
     {"default", "yres", MECHANIC_YRES_DEFAULT, LRC_INT},
     {"default", "module", MECHANIC_MODULE_DEFAULT, LRC_STRING},
+    {"default", "mconfig", MECHANIC_CONFIG_FILE_DEFAULT, LRC_STRING},
     {"default", "mode", MECHANIC_MODE_DEFAULT, LRC_INT},
     {"logs", "checkpoint", MECHANIC_CHECKPOINT_DEFAULT, LRC_INT},
     LRC_OPTIONS_END
@@ -357,6 +358,8 @@ int main(int argc, char** argv) {
       &ConfigFile, 0, "Config file", "/path/to/config/file"},
     {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
       &module_name, 0, "Module", "MODULE"},
+    {"mconfig", 'm', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
+      &ModuleConfigFile, 0, "Module Config file", "/path/to/module/config/file"},
     {"xres", 'x', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
       &xres, 0, "X resolution", "XRES"},
     {"yres", 'y', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
@@ -418,6 +421,7 @@ int main(int argc, char** argv) {
   name = MECHANIC_NAME_DEFAULT;
   module_name = MECHANIC_MODULE_DEFAULT;
   ConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
+  ModuleConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
   xres = atoi(MECHANIC_XRES_DEFAULT);
   yres = atoi(MECHANIC_YRES_DEFAULT);
   checkpoint = atoi(MECHANIC_CHECKPOINT_DEFAULT);
@@ -442,6 +446,7 @@ int main(int argc, char** argv) {
   if ((name != NULL) && (validate_arg(name) < 0)) goto setupfinalize;
   if ((module_name != NULL) && (validate_arg(module_name) < 0)) goto setupfinalize;
   if ((ConfigFile != NULL) && (validate_arg(ConfigFile) < 0)) goto setupfinalize;
+  if ((ModuleConfigFile != NULL) && (validate_arg(ModuleConfigFile) < 0)) goto setupfinalize;
   if ((CheckpointFile != NULL) && (validate_arg(CheckpointFile) < 0)) goto setupfinalize;
 
   /* POPT error detection */
@@ -534,6 +539,7 @@ int main(int argc, char** argv) {
     if (restartmode == 0) {
       name = LRC_getOptionValue("default", "name", head);
       module_name = LRC_getOptionValue("default", "module", head);
+      ModuleConfigFile = LRC_getOptionValue("default", "mconfig", head);
       mode = LRC_option2int("default", "mode", head);
       xres = LRC_option2int("default", "xres", head);
       yres = LRC_option2int("default", "yres", head);
@@ -549,6 +555,7 @@ int main(int argc, char** argv) {
        * If there was no commandline options, LRC table will be untouched. */
       LRC_modifyOption("default", "name", name, LRC_STRING, head);
       LRC_modifyOption("default", "module", module_name, LRC_STRING, head);
+      LRC_modifyOption("default", "mconfig", ModuleConfigFile, LRC_STRING, head);
 
       LRC_itoa(convstr, xres, LRC_INT);
       LRC_modifyOption("default", "xres", convstr, LRC_INT, head);
@@ -688,6 +695,7 @@ int main(int argc, char** argv) {
         lengths[0] = (int) strlen(cd.name);
         lengths[1] = (int) strlen(cd.datafile);
         lengths[2] = (int) strlen(cd.module);
+        lengths[3] = (int) strlen(cd.mconfig);
 
       }
         
@@ -695,13 +703,10 @@ int main(int argc, char** argv) {
         
       MPI_Bcast(lengths, 4, MPI_INT, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
 
-      mechanic_message(MECHANIC_MESSAGE_DEBUG,
-          "Node[%d] lengths[%d, %d, %d]\n",
-          node, lengths[0], lengths[1], lengths[2]);
-        
       cd.name_len = lengths[0];
       cd.datafile_len = lengths[1];
       cd.module_len = lengths[2];
+      cd.mconfig_len = lengths[3];
 
       mstat = buildConfigDataType(lengths, cd, &configDataType);
       if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType commiting failed.\n");
@@ -711,10 +716,11 @@ int main(int argc, char** argv) {
       cd.name[lengths[0]] = LRC_NULL;
       cd.datafile[lengths[1]] = LRC_NULL;
       cd.module[lengths[2]] = LRC_NULL;
+      cd.mconfig[lengths[3]] = LRC_NULL;
 
       mechanic_message(MECHANIC_MESSAGE_DEBUG,
-        "Node[%d] lengths[%d, %d, %d]\n",
-         node, cd.name_len, cd.datafile_len, cd.module_len);
+        "Node[%d] lengths[%d, %d, %d, %d]\n",
+         node, cd.name_len, cd.datafile_len, cd.module_len, cd.mconfig_len);
 
       mechanic_message(MECHANIC_MESSAGE_DEBUG,
         "Node [%d] received following configuration:\n\n", node);

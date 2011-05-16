@@ -89,9 +89,11 @@ typedef struct {
   char name[MECHANIC_STRLEN];
   char datafile[MECHANIC_STRLEN];
   char module[MECHANIC_STRLEN];
+  char mconfig[MECHANIC_STRLEN];
   int name_len; /* Fortran requirement: length of the name string */
   int datafile_len; /* Fortran requirement: length of the datafile string */
   int module_len; /* Fortran requirement: length of the module string */
+  int mconfig_len; /* Fortran requirement: length of the module string */
   /*unsigned long*/ int xres;
   /*unsigned long*/ int yres;
   /*unsigned long*/ int checkpoint;

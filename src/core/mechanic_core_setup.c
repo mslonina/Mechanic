@@ -268,8 +268,8 @@ int readCheckpointConfig(char* file, LRC_configNamespace* head) {
  * Final struct contains config values of the run */
 int assignConfigValues(configData* d, LRC_configNamespace* head){
 
-  char* n = NULL; char* tf = NULL; char* m = NULL;
-  size_t nlen, flen, fmlen, mlen;
+  char* n = NULL; char* tf = NULL; char* m = NULL; char* cm = NULL;
+  size_t nlen, flen, fmlen, mlen, cmlen;
 
   /* Prepare the name of the problem */
   n = LRC_getOptionValue("default", "name", head);
@@ -303,6 +303,13 @@ int assignConfigValues(configData* d, LRC_configNamespace* head){
   strncpy(d->module, m, mlen);
   d->module[mlen] = LRC_NULL;
 
+  /* Prepare the module config file */
+  cm = LRC_getOptionValue("default", "mconfig", head);
+  cmlen = strlen(cm);
+
+  strncpy(d->mconfig, cm, cmlen);
+  d->mconfig[cmlen] = LRC_NULL;
+
   /* Other options */
 	d->xres = LRC_option2int("default", "xres", head);
 	d->yres = LRC_option2int("default", "yres", head);
@@ -323,6 +330,7 @@ int mechanic_printConfig(configData *cd, int flag){
     mechanic_message(flag, "name: %s\n", cd->name);
     mechanic_message(flag, "datafile: %s\n", cd->datafile);
     mechanic_message(flag, "module: %s\n", cd->module);
+    mechanic_message(flag, "module config: %s\n", cd->mconfig);
     mechanic_message(flag, "res: [%d, %d]\n", cd->xres, cd->yres);
     mechanic_message(flag, "mode: %d\n", cd->mode);
     mechanic_message(flag, "checkpoint: %d\n", cd->checkpoint);

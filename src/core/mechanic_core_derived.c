@@ -80,17 +80,17 @@ int buildConfigDataType(int lengths[4], configData d, MPI_Datatype* configDataTy
 
   int mstat;
   int i;
-  int block_lengths[11];
-  MPI_Aint displacements[11];
-  MPI_Datatype typelist[11];
-  MPI_Aint addresses[12];
+  int block_lengths[13];
+  MPI_Aint displacements[13];
+  MPI_Datatype typelist[13];
+  MPI_Aint addresses[14];
 
   mstat = 0;
 
   block_lengths[0] = MECHANIC_STRLEN; typelist[0] = MPI_CHAR;
   block_lengths[1] = MECHANIC_STRLEN; typelist[1] = MPI_CHAR;
   block_lengths[2] = MECHANIC_STRLEN; typelist[2] = MPI_CHAR;
-  block_lengths[3] = 1; typelist[3] = MPI_INT;
+  block_lengths[3] = MECHANIC_STRLEN; typelist[3] = MPI_CHAR;
   block_lengths[4] = 1; typelist[4] = MPI_INT;
   block_lengths[5] = 1; typelist[5] = MPI_INT;
   block_lengths[6] = 1; typelist[6] = MPI_INT;
@@ -98,25 +98,29 @@ int buildConfigDataType(int lengths[4], configData d, MPI_Datatype* configDataTy
   block_lengths[8] = 1; typelist[8] = MPI_INT;
   block_lengths[9] = 1; typelist[9] = MPI_INT;
   block_lengths[10] = 1; typelist[10] = MPI_INT;
+  block_lengths[11] = 1; typelist[11] = MPI_INT;
+  block_lengths[12] = 1; typelist[12] = MPI_INT;
 
   MPI_Get_address(&d, &addresses[0]);
   MPI_Get_address(&d.name, &addresses[1]);
   MPI_Get_address(&d.datafile, &addresses[2]);
   MPI_Get_address(&d.module, &addresses[3]);
-  MPI_Get_address(&d.name_len, &addresses[4]);
-  MPI_Get_address(&d.datafile_len, &addresses[5]);
-  MPI_Get_address(&d.module_len, &addresses[6]);
-  MPI_Get_address(&d.xres, &addresses[7]);
-  MPI_Get_address(&d.yres, &addresses[8]);
-  MPI_Get_address(&d.checkpoint, &addresses[9]);
-  MPI_Get_address(&d.restartmode, &addresses[10]);
-  MPI_Get_address(&d.mode, &addresses[11]);
+  MPI_Get_address(&d.mconfig, &addresses[4]);
+  MPI_Get_address(&d.name_len, &addresses[5]);
+  MPI_Get_address(&d.datafile_len, &addresses[6]);
+  MPI_Get_address(&d.module_len, &addresses[7]);
+  MPI_Get_address(&d.mconfig_len, &addresses[8]);
+  MPI_Get_address(&d.xres, &addresses[9]);
+  MPI_Get_address(&d.yres, &addresses[10]);
+  MPI_Get_address(&d.checkpoint, &addresses[11]);
+  MPI_Get_address(&d.restartmode, &addresses[12]);
+  MPI_Get_address(&d.mode, &addresses[13]);
 
-  for (i = 0; i < 11; i++) {
+  for (i = 0; i < 13; i++) {
     displacements[i] = addresses[i+1] - addresses[0];
   }
 
-  mstat = MPI_Type_struct(11, block_lengths, displacements, typelist,
+  mstat = MPI_Type_struct(13, block_lengths, displacements, typelist,
     configDataType_ptr);
   mstat = MPI_Type_commit(configDataType_ptr);
 

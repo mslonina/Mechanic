@@ -168,6 +168,7 @@ void mechanic_internals_close(mechanic_internals* handler);
 
 /* GLOBALS */
 char* ConfigFile;
+char* ModuleConfigFile;
 char* datafile;
 char* CheckpointFile;
 int allopts;
