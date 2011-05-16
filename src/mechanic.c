@@ -296,6 +296,7 @@ int main(int argc, char** argv) {
   int i = 0;
   char pack_buffer[MECHANIC_MAXLENGTH];
   int pack_position;
+  MPI_Datatype configDataType;
 
   /* MPI INIT */
   MPI_Init(&argc, &argv);
@@ -590,7 +591,7 @@ int main(int argc, char** argv) {
     /* Security check: resolution */
     if (cd.xres == 0 || cd.yres == 0) {
        mechanic_message(MECHANIC_MESSAGE_ERR,
-         "X/Y map resolution should not be set to 0!\n");
+         "X/Y task pool resolution should not be set to 0!\n");
 
        mechanic_message(MECHANIC_MESSAGE_ERR,
          "If You want to do only one simulation, please set xres = 1, yres = 1\n");
@@ -680,118 +681,45 @@ int main(int argc, char** argv) {
    if (cd.mode != MECHANIC_MODE_MASTERALONE) {
 
      /* Send to slaves information about lengths of important strings */
+      lengths[0] = 0; lengths[1] = 0; lengths[2] = 0; lengths[3] = 0;
+
       if (node == MECHANIC_MPI_MASTER_NODE) {
 
         lengths[0] = (int) strlen(cd.name);
         lengths[1] = (int) strlen(cd.datafile);
         lengths[2] = (int) strlen(cd.module);
 
-        cd.name_len = lengths[0];
-        cd.datafile_len = lengths[1];
-        cd.module_len = lengths[2];
-
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,
-            "Node[%d] lengths[%d, %d, %d]\n",
-            node, lengths[0], lengths[1], lengths[2]);
-
-        for (i = 1; i < mpi_size; i++) {
-          MPI_Send(&lengths, 3, MPI_INT, i, MECHANIC_MPI_STANDBY_TAG,
-            MPI_COMM_WORLD);
-        }
-
-      } else {
-
-        mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node[%d] ready\n", node);
-
-        /* Slave node doesn't read config file, so we need to receive first
-         * information about lengths of string data */
-
-        MPI_Recv(&lengths, 3, MPI_INT, MECHANIC_MPI_DEST, MPI_ANY_TAG,
-          MPI_COMM_WORLD, &mpi_status);
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,
-            "Node[%d] lengths[%d, %d, %d]\n",
-            node, lengths[0], lengths[1], lengths[2]);
-
-        cd.name_len = lengths[0];
-        cd.datafile_len = lengths[1];
-        cd.module_len = lengths[2];
       }
+        
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node[%d] ready\n", node);
+        
+      MPI_Bcast(lengths, 4, MPI_INT, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
 
-      if (node == MECHANIC_MPI_MASTER_NODE) {
+      mechanic_message(MECHANIC_MESSAGE_DEBUG,
+          "Node[%d] lengths[%d, %d, %d]\n",
+          node, lengths[0], lengths[1], lengths[2]);
+        
+      cd.name_len = lengths[0];
+      cd.datafile_len = lengths[1];
+      cd.module_len = lengths[2];
 
-        pack_position = 0;
+      mstat = buildConfigDataType(lengths, cd, &configDataType);
+      if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType commiting failed.\n");
+      MPI_Bcast(&cd, 1, configDataType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+      MPI_Type_free(&configDataType);
 
-        MPI_Pack(cd.name, lengths[0], MPI_CHAR, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
+      cd.name[lengths[0]] = LRC_NULL;
+      cd.datafile[lengths[1]] = LRC_NULL;
+      cd.module[lengths[2]] = LRC_NULL;
 
-        MPI_Pack(cd.datafile, lengths[1], MPI_CHAR, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
+      mechanic_message(MECHANIC_MESSAGE_DEBUG,
+        "Node[%d] lengths[%d, %d, %d]\n",
+         node, cd.name_len, cd.datafile_len, cd.module_len);
 
-        MPI_Pack(cd.module, lengths[2], MPI_CHAR, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
+      mechanic_message(MECHANIC_MESSAGE_DEBUG,
+        "Node [%d] received following configuration:\n\n", node);
+      mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
-        MPI_Pack(&cd.xres, 1, MPI_INT, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
-
-        MPI_Pack(&cd.yres, 1, MPI_INT, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
-
-        MPI_Pack(&cd.checkpoint, 1, MPI_INT, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
-
-        MPI_Pack(&cd.restartmode, 1, MPI_INT, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
-
-        MPI_Pack(&cd.mode, 1, MPI_INT, pack_buffer,
-          MECHANIC_MAXLENGTH, &pack_position, MPI_COMM_WORLD);
-
-        MPI_Bcast(pack_buffer, MECHANIC_MAXLENGTH, MPI_PACKED,
-          MECHANIC_MPI_DEST, MPI_COMM_WORLD);
-
-      } else {
-
-        /* Receive data from master node */
-        pack_position = 0;
-        MPI_Bcast(pack_buffer, MECHANIC_MAXLENGTH, MPI_PACKED,
-          MECHANIC_MPI_DEST, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          cd.name, lengths[0], MPI_CHAR, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          cd.datafile, lengths[1], MPI_CHAR, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          cd.module, lengths[2], MPI_CHAR, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          &cd.xres, 1, MPI_INT, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          &cd.yres, 1, MPI_INT, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          &cd.checkpoint, 1, MPI_INT, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          &cd.restartmode, 1, MPI_INT, MPI_COMM_WORLD);
-
-        MPI_Unpack(pack_buffer, MECHANIC_MAXLENGTH, &pack_position,
-          &cd.mode, 1, MPI_INT, MPI_COMM_WORLD);
-
-        cd.name[lengths[0]] = LRC_NULL;
-        cd.datafile[lengths[1]] = LRC_NULL;
-        cd.module[lengths[2]] = LRC_NULL;
-
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,
-            "Node[%d] lengths[%d, %d, %d]\n",
-            node, cd.name_len, cd.datafile_len, cd.module_len);
-
-        mechanic_message(MECHANIC_MESSAGE_DEBUG,
-          "Node [%d] received following configuration:\n\n", node);
-        mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
-
-     }
   }
 
   /* Assign some fair defaults */

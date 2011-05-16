@@ -178,6 +178,8 @@ int map2d(int c, mechanic_internals *handler, int ind[], int** b);
 
 int buildMasterResultsType(int mrl, masterData* md,
     MPI_Datatype* masterResultsType_ptr);
+int buildConfigDataType(int lengths[4], configData d,
+    MPI_Datatype* configDataType_ptr);
 
 char* mechanic_module_sym_prefix(char* prefix, char* function);
 module_query_int_f mechanic_load_sym(mechanic_internals *handler, char* function, int type);
