@@ -201,7 +201,7 @@ int module_cleanup(int mpi_size, int node, moduleInfo* md, configData* d){
 
 /* [6FARM] */
 
-int module_farm_resolution(int x, int y, moduleInfo* md, configData* d){
+int module_taskpool_resolution(int x, int y, moduleInfo* md, configData* d){
 
   return x*y;
 }

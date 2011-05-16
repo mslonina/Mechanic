@@ -107,7 +107,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
-  query = mechanic_load_sym(handler, "farm_resolution", MECHANIC_MODULE_ERROR);
+  query = mechanic_load_sym(handler, "taskpool_resolution", MECHANIC_MODULE_ERROR);
   if (query) farm_res = query(handler->config->xres, handler->config->yres, handler->info, handler->config);
   if (farm_res > (handler->config->xres * handler->config->yres)) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
