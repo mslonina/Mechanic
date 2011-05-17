@@ -45,7 +45,7 @@
 #include "mechanic_mode_farm.h"
 
 /* SLAVE */
-int mechanic_mode_farm_slave(mechanic_internals *handler) {
+int mechanic_mode_farm_worker(mechanic_internals *handler) {
 
   int tab[3];
   int mstat;
@@ -130,14 +130,14 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
       mechanic_check_mstat(mstat);
 
 #ifdef IPM
-      MPI_Pcontrol(1,"slave_send_result");
+      MPI_Pcontrol(1,"worker_send_result");
 #endif
 
       MPI_Send(&result, 1, masterResultsType, MECHANIC_MPI_DEST,
           MECHANIC_MPI_RESULT_TAG, MPI_COMM_WORLD);
 
 #ifdef IPM
-      MPI_Pcontrol(-1,"slave_send_result");
+      MPI_Pcontrol(-1,"worker_send_result");
 #endif
 
       query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT);
@@ -149,14 +149,14 @@ int mechanic_mode_farm_slave(mechanic_internals *handler) {
       mechanic_check_mstat(mstat);
 
 #ifdef IPM
-      MPI_Pcontrol(1,"slave_recv_pixel");
+      MPI_Pcontrol(1,"worker_recv_pixel");
 #endif
 
       MPI_Recv(&inidata, 1, initialConditionsType, MECHANIC_MPI_DEST,
           MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
 
 #ifdef IPM
-      MPI_Pcontrol(-1,"slave_recv_pixel");
+      MPI_Pcontrol(-1,"worker_recv_pixel");
 #endif
 
       query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);

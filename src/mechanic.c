@@ -294,8 +294,6 @@ int main(int argc, char** argv) {
   MPI_Status mpi_status;
   int lengths[4];
   int i = 0;
-  char pack_buffer[MECHANIC_MAXLENGTH];
-  int pack_position;
   MPI_Datatype configDataType;
 
   /* MPI INIT */

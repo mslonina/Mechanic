@@ -2,7 +2,7 @@ include_directories(. .. ../../core ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/
 set (farmsources
     mechanic_mode_farm.c
     mechanic_mode_farm_master.c
-    mechanic_mode_farm_slave.c
+    mechanic_mode_farm_worker.c
     )
 
 add_library(farm ${farmsources})

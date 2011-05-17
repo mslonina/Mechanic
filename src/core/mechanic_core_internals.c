@@ -171,7 +171,7 @@ module_query_int_f mechanic_module_sym_lookup(void* modhandler, char* md_name, c
  * Handles error messages and abort if necessary.
  *
  * module_master_function
- * module_slave_function
+ * module_worker_function
  * todo: module_nodeXX_function
  * module_node_function
  * default_node_function
@@ -186,7 +186,7 @@ module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function
   if (modhand->node == MECHANIC_MPI_MASTER_NODE) {
     override = mechanic_module_sym_prefix("master", function);
   } else {
-    override = mechanic_module_sym_prefix("slave", function);
+    override = mechanic_module_sym_prefix("worker", function);
   }
 
   handler = mechanic_module_sym_lookup(modhand->handler, modhand->config->module, override);

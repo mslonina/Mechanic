@@ -52,7 +52,7 @@ int mechanic_mode_farm(mechanic_internals *handler) {
     mstat = mechanic_mode_farm_master(handler);
     mechanic_check_mstat(mstat);
   } else {
-    mstat = mechanic_mode_farm_slave(handler);
+    mstat = mechanic_mode_farm_worker(handler);
     mechanic_check_mstat(mstat);
   }
 
