@@ -326,12 +326,6 @@ int main(int argc, char** argv) {
       MECHANIC_MODE_MASTERALONE, "Masteralone", NULL},
     {"farm", MECHANIC_MODE_FARM_P, POPT_ARG_VAL, &mode,
       MECHANIC_MODE_FARM, "MPI task farm", NULL},
-    /*{"multifarm", MECHANIC_MODE_MULTIFARM_P, POPT_ARG_VAL, &mode,
-      MECHANIC_MODE_MULTIFARM, "MPI multi task farm", NULL},*/
-#ifdef HAVE_CUDA_H
-    {"cuda", MECHANIC_MODE_CUDA_P, POPT_ARG_VAL, &mode,
-      MECHANIC_MODE_CUDA, "CUDA based farm", NULL},
-#endif
     POPT_TABLEEND
   };
 
@@ -778,15 +772,6 @@ int main(int argc, char** argv) {
       mstat = mechanic_mode_farm(&internals);
       mechanic_check_mstat(mstat);
       break;
-/*#ifdef HAVE_CUDA_H
-    case MECHANIC_MODE_CUDA:
-      mstat = mechanic_mode_cuda(&internals);
-      mechanic_check_mstat(mstat);
-      break;
-#endif*/
-    /*case MECHANIC_MODE_MULTIFARM:
-      mstat = mechanic_mode_multifarm(&internals);
-      break;*/
     default:
       break;
   }

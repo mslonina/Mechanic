@@ -44,6 +44,7 @@
 #define MECHANIC_H
 
 #include "libreadconfig.h"
+#include "libreadconfig_hdf5.h"
 #include "hdf5.h"
 
 #define MECHANIC_ERR_MPI 911
