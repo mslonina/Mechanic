@@ -176,7 +176,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     mechanic_check_mstat(mstat);
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
-        "Pixel [%04d, %04d, %04d] sended to node %04d\n",
+        "Task [%04d, %04d, %04d] sended to node %04d\n",
         ptab[0], ptab[1], ptab[2], handler->sendnode);
 
     query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT);
@@ -232,7 +232,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     coordsarr[check][2] = result.coords[2];
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
-        "[%04d / %04d] Pixel [%04d, %04d, %04d] received from node %d\n",
+        "[%04d / %04d] Task [%04d, %04d, %04d] received from node %d\n",
         totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
         result.coords[2], handler->recvnode);
 
@@ -297,7 +297,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       mechanic_check_mstat(mstat);
 
       mechanic_message(MECHANIC_MESSAGE_CONT2,
-        "Pixel [%04d, %04d, %04d] sended to node %d\n",
+        "Task [%04d, %04d, %04d] sended to node %d\n",
           inidata.coords[0], inidata.coords[1], inidata.coords[2], handler->sendnode);
 
 #ifdef IPM
@@ -364,7 +364,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     }
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
-        "[%04d / %04d] Pixel [%04d, %04d, %04d] received from node %d\n",
+        "[%04d / %04d] Task [%04d, %04d, %04d] received from node %d\n",
         totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
         result.coords[2], handler->recvnode);
     /* There is a possibility that count > check, and then we have to perform

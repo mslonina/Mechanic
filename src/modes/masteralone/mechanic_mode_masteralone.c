@@ -185,7 +185,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
     check++;
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
-        "[%04d / %04d] Pixel [%04d, %04d, %04d] computed\n",
+        "[%04d / %04d] Task [%04d, %04d, %04d] computed\n",
         totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
         result.coords[2]);
 

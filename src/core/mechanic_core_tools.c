@@ -77,10 +77,10 @@ int map2d(int c, mechanic_internals *handler, int ind[], int** b) {
 
      if (b[ind[0]][ind[1]] == 1) {
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
-            "Pixel [%d][%d][%03d] will be skipped\n", ind[0], ind[1], ind[2]);
+            "Task [%d][%d][%03d] will be skipped\n", ind[0], ind[1], ind[2]);
      } else {
         mechanic_message(MECHANIC_MESSAGE_DEBUG,
-            "Pixel [%d][%d][%03d] will be computed\n", ind[0], ind[1], ind[2]);
+            "Task [%d][%d][%03d] will be computed\n", ind[0], ind[1], ind[2]);
      }
 
      c++;
@@ -88,7 +88,7 @@ int map2d(int c, mechanic_internals *handler, int ind[], int** b) {
    } while (b[ind[0]][ind[1]] == MECHANIC_TASK_FINISHED);
 
    mechanic_message(MECHANIC_MESSAGE_DEBUG,
-       "Pixel[%d]: %d %d\n", ind[2], ind[0], ind[1]);
+       "Task[%d]: %d %d\n", ind[2], ind[0], ind[1]);
 
    /* Return number of the next pixel to be mapped */
    return c;

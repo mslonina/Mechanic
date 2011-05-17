@@ -108,6 +108,7 @@
 /* Wrapper to MPI_Finalize() */
 int mechanic_finalize(int node){
 
+  mechanic_message(MECHANIC_MESSAGE_WARN, "Finalizing node [%d]\n", node);
   MPI_Finalize();
 
   return 0;

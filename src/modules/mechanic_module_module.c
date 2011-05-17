@@ -266,7 +266,7 @@ int module_task_coordinates_mapping(int t[], int numofpx, int xres, int yres, mo
  * @internal
  * @fn int module_pixelCoords(int node, int t[], moduleInfo* md,
  * configData* d, masterData* r)
- * @brief Pixel coords mapping
+ * @brief Task coords mapping
  *
  * Each slave takes the pixel coordinates and then do its work.
  * Here You can change pixel assignment to output masterData r.
@@ -316,14 +316,14 @@ int module_task_coordinates_assign(int node, int t[], moduleInfo* md, configData
 
 /**
  * @internal
- * @fn int module_processPixel(int node, moduleInfo* md, configData* d,
+ * @fn int module_processTask(int node, moduleInfo* md, configData* d,
  * masterData* r)
- * @brief Pixel compute routine
+ * @brief Task compute routine
  *
  * The heart. Here You can compute your pixels. Possible extentions:
- * - Each node has its own processPixel routine. You can use them accordingly
+ * - Each node has its own processTask routine. You can use them accordingly
  *   to slave number in the switch loop.
- * - Each node has the same processPixel routine.
+ * - Each node has the same processTask routine.
  *
  * @param node
  * The number of current node
@@ -372,17 +372,17 @@ int module_task_process(int node, moduleInfo* md, configData* d,
  *   - @c module_master_out()
  *   - @c module_slave_out() (not in Masteralone mode)
  *
- * - @ct module_node_before_processPixel(int node, moduleInfo* md, configData*
+ * - @ct module_node_before_processTask(int node, moduleInfo* md, configData*
  *   d, <br> masterData* r) @tc <br>
  *   This function is called before computation of the pixel. The possible overrides are:
- *   - @c module_master_beforeProcessPixel()
- *   - @c module_slave_beforeProcessPixel() (not in Masteralone mode)
+ *   - @c module_master_beforeProcessTask()
+ *   - @c module_slave_beforeProcessTask() (not in Masteralone mode)
  * 
- * - @ct module_node_after_processPixel(int node, moduleInfo* md, configData*
+ * - @ct module_node_after_processTask(int node, moduleInfo* md, configData*
  *   d, <br> masterData* r) @tc <br>
  *   This function is called before computation of the pixel. The possible overrides are:
- *   - @c module_master_afterProcessPixel()
- *   - @c module_slave_afterProcessPixel() (not in Masteralone mode)
+ *   - @c module_master_afterProcessTask()
+ *   - @c module_slave_afterProcessTask() (not in Masteralone mode)
  *
  * @subsection mpibased MPI-based functions (not used in Masteralone mode)
  *
@@ -431,7 +431,7 @@ int module_task_process(int node, moduleInfo* md, configData* d,
  *
  *  - @sb Each slave does the same.@bs
  *    This is the simplest case of using @M. The only thing to do is to
- *    define @c processPixel() function and return data to the master node
+ *    define @c processTask() function and return data to the master node
  *    with @c masterData structure. You can also do something more in
  *    @c node_in/out functions, but in that case it is not really necessary.
  *
@@ -440,13 +440,13 @@ int module_task_process(int node, moduleInfo* md, configData* d,
  *    This can be done with @c LRC in @c slave_in() function and config files
  *    named after slave number, i.e. slave22.
  *
- *  - @sb Each slave has different @c processPixel function.@bs
- *    At this point you need to create some subfunctions of @c processPixel
+ *  - @sb Each slave has different @c processTask function.@bs
+ *    At this point you need to create some subfunctions of @c processTask
  *    and choose them accordingly to number of the slave, i.e.
  *    in the switch routine.
  *
  *  - @sb Each slave has both different config file and different
- *    @c processPixel.@bs
+ *    @c processTask.@bs
  *    Just combining two cases in simple switch routines and it should work.
  *
  */
@@ -461,7 +461,7 @@ int module_node_task_prepare(int node, moduleInfo* md, configData* d,
 
 /**
  * @internal
- * @fn int module_node_beforeProcessPixel(int node, moduleInfo* md,
+ * @fn int module_node_beforeProcessTask(int node, moduleInfo* md,
  * configData* d, masterData* r)
  * @brief Operates on data before pixel computation
  *
@@ -491,7 +491,7 @@ int module_node_task_before_process(int node, moduleInfo* md, configData* d,
 
 /**
  * @internal
- * @fn int module_node_afterProcessPixel(int node, moduleInfo* md,
+ * @fn int module_node_afterProcessTask(int node, moduleInfo* md,
  * configData* d, masterData* r)
  * @brief Operates on data after pixel computation
  *

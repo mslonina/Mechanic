@@ -291,9 +291,7 @@ int main(int argc, char** argv) {
   int mpi_rank;
   int mpi_size;
   int node = 0;
-  MPI_Status mpi_status;
   int lengths[4];
-  int i = 0;
   MPI_Datatype configDataType;
 
   /* MPI INIT */
@@ -651,41 +649,11 @@ int main(int argc, char** argv) {
   }
  /* CONFIGURATION END */
 
-  /* Send standby message to slaves
-   * This is because slaves don't know anything about the run until master
-   * node send the configuration with bcast. Without this part, code will
-   * raise some segfaults and endless-loops. The standby message containes
-   * the mode in which we are working.
-   */
-  if (mpi_size > 1) {
-    if (node == MECHANIC_MPI_MASTER_NODE) {
-      for (i = 1; i < mpi_size; i++) {
-        if (cd.mode == MECHANIC_MODE_MASTERALONE) {
-          mechanic_message(MECHANIC_MESSAGE_WARN,
-            "Terminating SLAVE[%d]\n", i);
-
-          MPI_Send(&cd.mode, 1, MPI_INT, i, MECHANIC_MPI_TERMINATE_TAG,
-            MPI_COMM_WORLD);
-        } else {
-          MPI_Send(&cd.mode, 1, MPI_INT, i, MECHANIC_MPI_STANDBY_TAG,
-            MPI_COMM_WORLD);
-        }
-      }
-    } else {
-      MPI_Recv(&cd.mode, 1, MPI_INT, MECHANIC_MPI_DEST, MPI_ANY_TAG,
-        MPI_COMM_WORLD, &mpi_status);
-      if (mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG) {
-        mechanic_finalize(node);
-        return 0;
-      }
-    }
-  }
-
  /* MPI CONFIGURATION BCAST
-  * Inform slaves what it is all about. */
-   if (cd.mode != MECHANIC_MODE_MASTERALONE) {
+  * Inform workers what it is all about. */
+   if (mpi_size > 1) {
 
-     /* Send to slaves information about lengths of important strings */
+     /* Send to workers information about lengths of important strings */
       lengths[0] = 0; lengths[1] = 0; lengths[2] = 0; lengths[3] = 0;
 
       if (node == MECHANIC_MPI_MASTER_NODE) {
@@ -724,6 +692,9 @@ int main(int argc, char** argv) {
         "Node [%d] received following configuration:\n\n", node);
       mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
+      /* If we are in masteralone mode, finalize workers */
+      if (node != MECHANIC_MPI_MASTER_NODE && cd.mode == MECHANIC_MODE_MASTERALONE) 
+        goto setupfinalize;
   }
 
   /* Assign some fair defaults */
@@ -819,9 +790,14 @@ int main(int argc, char** argv) {
     default:
       break;
   }
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Mode finished\n");
 
   /* To be sure all nodes reach here at the same time */
-  MPI_Barrier(MPI_COMM_WORLD);
+  if (cd.mode != MECHANIC_MODE_MASTERALONE) {
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "MPI Barrier reached\n");
+    MPI_Barrier(MPI_COMM_WORLD);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "MPI Barrier crossed\n");
+  }
 
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
