@@ -72,6 +72,7 @@
  *   files specific in given run
  * - @c --config @c -c -- config file to use in the run
  * - @c --module @c -p -- module which should be used during the run
+ * - @c --mconfig @c -m -- module config file to use in the run
  * - @c --xres @c -x -- x resolution of the simulation map
  * - @c --yres @c -y -- y resolution of the simulation map
  * - @c --checkpoint @c -d -- checkpoint file write interval
@@ -86,7 +87,6 @@
  *
  * - @c -0 -- masteralone mode
  * - @c -1 -- MPI task farm mode
- * - @c -2 -- multi task farm mode
  *
  * @subsection configfile Config File
  *
@@ -100,8 +100,8 @@
  * name = hello
  * xres = 4 #must be greater than 0
  * yres = 4 #must be greater than 0
- * module = hello # modules: hello, echo, mandelbrot, module
- * mode = 1 # masteralone -- 0, task farm -- 1, multi task farm -- 2
+ * module = hello 
+ * mode = 1 # masteralone -- 0, task farm -- 1
  *
  * [logs]
  * checkpoint = 4
@@ -144,7 +144,7 @@
  *   @ct mechanic [OPTIONS]@tc <br>
  *   @M will automatically switch to masteralone mode.
  *
- * @section coords Pixel-coordinate System
+ * @section coords Task-coordinate System
  *
  * @M was created for handling simulations related to dynamical maps. Thus, it
  * uses 2D pixel coordinate system (there are plans for extending it to other
@@ -168,8 +168,7 @@
  * By default, the number of simulations is counted by multiplying x and y
  * resolution. The simulations are currently done one-by-one, the master node
  * does not participate in computations (except masteralone mode,
- * see @ref modes). You can change default behaviour by using @ct method = 6@tc,
- * see @ref method6.
+ * see @ref modes). 
  *
  * @section modes Modes
  *
@@ -186,12 +185,6 @@
  *   node is responsible for sending/receiving data and storing them. If
  *   number of slave nodes is greater than number of simulations to do, all
  *   unused nodes will be terminated.
- *
- * - @sb MPI MultiTask farm@bs -- This is an extension of MPI Task farm. Here,
- *   we split our spool into parts with own sub-master node. The master node
- *   sends and receives data from sub-master nodes. Then, the scenario is the
- *   same as in MPI Task farm. Note: this mode will not be done until
- *   @c Unstable-4 release.
  *
  */
 
@@ -248,7 +241,7 @@ int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head){
  * @todo
  * return mstat, opts in function argument
  */
-int readCheckpointConfig(char* file, LRC_configNamespace* head) {
+int readCheckpointConfig(char* file, char* group, LRC_configNamespace* head) {
 
   int opts = 0;
   hid_t f;
@@ -256,7 +249,7 @@ int readCheckpointConfig(char* file, LRC_configNamespace* head) {
 
   f = H5Fopen(file, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-  opts = LRC_HDF5Parser(f, head);
+  opts = LRC_HDF5Parser(f, group, head);
 
   //status = H5Fclose(f);
   H5Fclose(f);

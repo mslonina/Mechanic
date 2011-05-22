@@ -126,3 +126,38 @@ int buildConfigDataType(int lengths[4], configData d, MPI_Datatype* configDataTy
 
   return mstat;
 }
+
+/* LRC datatype */
+int LRC_datatype(LRC_MPIStruct cc, MPI_Datatype* lrc_mpi_t) {
+
+  int mstat = 0;
+  int block_lengths[4];
+  MPI_Aint displacements[4];
+  MPI_Datatype typelist[4];
+  MPI_Aint addresses[5];
+  int i;
+
+  block_lengths[0] = LRC_CONFIG_LEN;
+  block_lengths[1] = LRC_CONFIG_LEN;
+  block_lengths[2] = LRC_CONFIG_LEN;
+  block_lengths[3] = 1;
+  typelist[0] = MPI_CHAR;
+  typelist[1] = MPI_CHAR;
+  typelist[2] = MPI_CHAR;
+  typelist[3] = MPI_INT;
+
+  MPI_Get_address(&cc, &addresses[0]);
+  MPI_Get_address(&cc.space, &addresses[1]);
+  MPI_Get_address(&cc.name, &addresses[2]);
+  MPI_Get_address(&cc.value, &addresses[3]);
+  MPI_Get_address(&cc.type, &addresses[4]);
+  
+  for (i = 0; i < 4; i++) {
+    displacements[i] = addresses[i+1] - addresses[0];
+  }
+
+  mstat = MPI_Type_struct(4, block_lengths, displacements, typelist, lrc_mpi_t);
+  mstat = MPI_Type_commit(lrc_mpi_t);
+
+  return mstat;
+}

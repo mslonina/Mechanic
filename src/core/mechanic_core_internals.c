@@ -278,6 +278,17 @@ void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals*
   }
 
   m->schema = calloc(sizeof(mechanicSchema) * m->schemasize, sizeof(mechanicSchema));
+  if (!m->schema) {
+    mechanic_abort(MECHANIC_ERR_MEM);
+  }
+  
+  /* Allocate module setup */
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Setupsize is %d\n", m->options);
+  m->mconfig = realloc(m->mconfig, sizeof(LRC_configDefaults) * (m->options + 1));
+  if (!m->mconfig) {
+    mechanic_abort(MECHANIC_ERR_MEM);
+  }
+
   internals->info = m;
 
 }
@@ -288,4 +299,58 @@ void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals*
 void mechanic_internals_close(mechanic_internals* modhand) {
   mechanic_module_close(modhand);
   free(modhand->info->schema);
+  free(modhand->info->mconfig);
+}
+
+/*
+ * Helper for MPI LRC derived type
+ */
+LRC_MPIStruct* allocateLRCMPIStruct(int options) {
+  LRC_MPIStruct* cc;
+
+  cc = (LRC_MPIStruct*)malloc(sizeof(LRC_MPIStruct) * options);
+  if (!cc) {
+    mechanic_abort(MECHANIC_ERR_MEM);
+  }
+
+  return cc;
+}
+
+int LRC2MPI(LRC_MPIStruct* cc, LRC_configNamespace* head) {
+
+  int mstat = 0, i = 0;
+  size_t clen;
+  LRC_configOptions* currentOP = NULL;
+  LRC_configOptions* nextOP = NULL;
+  LRC_configNamespace* nextNM = NULL;
+  LRC_configNamespace* current = NULL;
+
+  if (head) {
+    current = head;
+
+    do { 
+      if (current) {
+        nextNM = current->next;
+        currentOP = current->options;
+        do { 
+          if (currentOP) {
+            clen = strlen(current->space) + 1; 
+            strncpy(cc[i].space, current->space, clen);
+            clen = strlen(currentOP->name) + 1; 
+            strncpy(cc[i].name, currentOP->name, clen);
+            clen = strlen(currentOP->value) + 1; 
+            strncpy(cc[i].value, currentOP->value, clen);
+            cc[i].type = currentOP->type;
+            mechanic_message(MECHANIC_MESSAGE_DEBUG, "[%d] %s %s %s %d\n", i, cc[i].space, cc[i].name, cc[i].value, cc[i].type);
+            i++; 
+            nextOP = currentOP->next;
+            currentOP = nextOP;
+          }    
+        } while(currentOP);
+        current=nextNM;
+      }    
+    } while(current);
+  }
+
+  return mstat;
 }

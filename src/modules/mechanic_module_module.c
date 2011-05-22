@@ -89,11 +89,16 @@ int module_init(int mpi_size, int node, moduleInfo* md, configData* d){
   md->mrl = 3;
   md->irl = 3;
   md->schemasize = 1;
+  md->options = 0;
 
   return 0;
 }
 
-int module_schema(int mpi_size, int node, moduleInfo* md, configData* d) {
+int module_setup_schema(moduleInfo* md) {
+  return 0;
+}
+
+int module_storage_schema(int mpi_size, int node, moduleInfo* md, configData* d) {
 
   /* Schema */
 
@@ -109,7 +114,7 @@ int module_schema(int mpi_size, int node, moduleInfo* md, configData* d) {
 
 /**
  * @internal
- * @fn int module_query(moduleInfo* md)
+ * @fn int module_comm_prepare(moduleInfo* md)
  * @brief The custom query of the module.
  *
  * @param *md
@@ -120,7 +125,7 @@ int module_schema(int mpi_size, int node, moduleInfo* md, configData* d) {
  *
  * @ingroup module_optional
  */
-int module_query(int mpi_size, int node, moduleInfo* md, configData* d){
+int module_comm_prepare(int mpi_size, int node, moduleInfo* md, configData* d){
   return 0;
 }
 

@@ -126,7 +126,10 @@ typedef struct {
   int mrl;
   int api;
   int schemasize;
+  int options;
   mechanicSchema *schema;
+  LRC_configDefaults *mconfig;
+  LRC_configNamespace *moptions;
 } moduleInfo;
 
 /* [/MODULEINFO] */

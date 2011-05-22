@@ -89,6 +89,7 @@
 #define MECHANIC_URL PACKAGE_URL
 
 #define MECHANIC_CONFIG_FILE_DEFAULT "config"
+#define MECHANIC_CONFIG_GROUP "mechanic"
 #define MECHANIC_NAME_DEFAULT "mechanic"
 #define MECHANIC_MODULE_DEFAULT "module"
 #define MECHANIC_MASTER_PREFIX_DEFAULT "master"
@@ -147,6 +148,16 @@ enum Modes {
 typedef int (*module_query_void_f) ();
 typedef int (*module_query_int_f) ();
 
+/* LRC-MPI */
+typedef struct {
+  char space[LRC_CONFIG_LEN];
+  char name[LRC_CONFIG_LEN];
+  char value[LRC_CONFIG_LEN];
+  int type;
+} LRC_MPIStruct;
+
+LRC_MPIStruct* allocateLRCMPIStruct(int options);
+int LRC2MPI(LRC_MPIStruct*, LRC_configNamespace* head);
 char* mechanic_module_filename(char* name);
 mechanic_internals mechanic_module_open(char* module);
 void mechanic_module_close(mechanic_internals* module);
@@ -169,13 +180,14 @@ int buildMasterResultsType(int mrl, masterData* md,
     MPI_Datatype* masterResultsType_ptr);
 int buildConfigDataType(int lengths[4], configData d,
     MPI_Datatype* configDataType_ptr);
+int LRC_datatype(LRC_MPIStruct cc, MPI_Datatype* lrc_mpi_t);
 
 char* mechanic_module_sym_prefix(char* prefix, char* function);
 module_query_int_f mechanic_load_sym(mechanic_internals *handler, char* function, int type);
 module_query_int_f mechanic_sym_lookup(void* modhand, char* md_name, char* function);
 
 int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head);
-int readCheckpointConfig(char* inifile, LRC_configNamespace* head);
+int readCheckpointConfig(char* inifile, char* group, LRC_configNamespace* head);
 
 int assignConfigValues(configData* d, LRC_configNamespace* head);
 

@@ -128,72 +128,38 @@
 
 /**
  * @page install Installation
- * @M uses @c Waf build system, see http://code.google.com/p/waf for detailes.
- * @c Waf is build in Python, you should have at least Python 2.3 installed
- * on your system.
+ * 
+ * @section requirements Requirements
+ * Following requirements have to be met to compile the @M:
+ *
+ * - @c MPI2 implementation (we prefer @c OpenMPI, and @M was tested with it)
+ * - @c HDF5, at least 1.8
+ * - @c LibReadConfig with @c HDF5 support -- @c LRC can be downloaded from
+ *   our git repository, since it is a helper tool builded especially for @M,
+ *   but can be used independly. By default it comes with HDF5 support. 
+ * - @c Popt library (may be already installed on your system)
+ * - C compiler (@c gcc 4.5 should do the job)
+ * - CMake, at least 2.8
  *
  * To download the latest snapshot of @M try
  * @code
  * http://git.astri.umk.pl/project/mechanic
  * @endcode
  *
- * We try to keep as less requirements as possible to use @M. To compile our
- * software you need at least:
- *
- * - @c MPI2 implementation (we prefer @c OpenMPI, and @M was tested with it)
- * - @c HDF5, at least 1.8
- * - @c LibReadConfig with @c HDF5 support -- @c LRC can be downloaded from
- *   our git repository, since it is a helper tool builded especially for @M,
- *   but can be used independly. You need to compile it with @c --enable-hdf
- *   flag
- * - @c Popt library (should be already installed on your system)
- * - C compiler (@c gcc 4.3 should do the job)
- *
- * If you are going to use Fortran code, you need to install/compile proper 
- * @c gcc and @c MPI2 extensions.
- *
- * Compilation is similar to standard @c Autotools path:
+ * @section compilation Compilation 
  *
  * @code
- * ./waf configure
- * ./waf build
- * ./waf install
+ * tar -xvvf mechanic-VERSION.tar.gz
+ * cd mechanic-VERSION
+ * mkdir build
+ * CC=mpicc FC=mpif90 cmake ..
+ * make
+ * sudo make install
  * @endcode
  *
- * The default installation path is set to @c /usr/local, but you can change
- * it with @c --prefix flag.
- *
- * By default, @M comes only with core. However, you can consider building
- * additional modules, engines and libraries, as follows:
- * @code
- * --with-modules=list,of,modules
- * --with-engines=list,of,engines
- * --with-libs=list,of,libs
- * @endcode
- *
- * Available modules:
- * - @c hello, see @ref hello
- * - @c echo, see @ref echo
- * - @c mandelbrot, see @ref mandelbrot
- *
- * Available engines (currently only templates):
- * - @c odex
- * - @c taylor
- * - @c gpu
- *
- * Available libs:
- * - @c orbit -- a library for handling common tasks of celestial mechanics,
- *   i.e orbital elements conversion, see @ref orbit
- *
- * To build Fortran 2003 bindings, use @c --with-fortran option. There are also
- * F2003 sample modules available (@c --with-fortran-modules):
- * - @c fhello
- * - @c map
- *
- * You will find detailed instruction of using Fortran bindings in
- * @ref f2003bind.
- *
- * The documentation can will be builded, with @c --with-doc option.
+ * By default @M comes with Fortran support. To disable it, pass @c
+ * -DBUILD_FORTRAN:BOOL=OFF to cmake. Default installation path points to @c /usr/local .
+ *  You can change this setting with @c -DCMAKE_INSTALL_PREFIX=/your/custom/path . 
  *
  * Altought @M requires @c MPI, it can be runned in a single-cpu environments
  * (we call it "fake-MPI"). @M should do its job both on 32 and 64-bits
@@ -255,7 +221,7 @@ int main(int argc, char** argv) {
   /* MECHANIC Helpers */
   configData cd; /* struct for command line args */
   moduleInfo md; /* struct for module info */
-  int mstat; /* mechanic internal error value */
+  int i, n, mstat; /* mechanic internal error value */
   struct stat st; /* stat.h */
   struct stat ct; /* stat.h */
   mechanic_internals internals;
@@ -264,6 +230,9 @@ int main(int argc, char** argv) {
 
   /* LRC Helpers */
   LRC_configNamespace* head;
+  LRC_configNamespace* module_head;
+  LRC_MPIStruct* ccc = NULL;
+  LRC_MPIStruct cch[7];
 
   /* POPT Helpers */
   char* module_name;
@@ -274,6 +243,7 @@ int main(int argc, char** argv) {
   /*unsigned long*/ int checkpoint = 0;
   int poptflags = 0;
   int useConfigFile = 0;
+  int useModuleConfigFile = 0;
   char optvalue;
   int restartmode = 0;
   char convstr[MECHANIC_MAXLENGTH];
@@ -292,7 +262,8 @@ int main(int argc, char** argv) {
   int mpi_size;
   int node = 0;
   int lengths[4];
-  MPI_Datatype configDataType;
+  MPI_Datatype configDataType, lrc_mpi_t;
+  MPI_Status mpi_status;
 
   /* MPI INIT */
   MPI_Init(&argc, &argv);
@@ -511,12 +482,17 @@ int main(int argc, char** argv) {
        && restartmode == 0) {
       useConfigFile = 1;
     }
+    /* Module config file is set and we are not in restart mode */
+    if (strcmp(ModuleConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0
+       && restartmode == 0) {
+      useModuleConfigFile = 1;
+    }
 
     /* STEP 1A: Read config file, if any.
      * This will override LRC_configDefaults
      * In restart mode we try provided checkpoint file */
     if (restartmode == 1) {
-      allopts = readCheckpointConfig(CheckpointFile, head);
+      allopts = readCheckpointConfig(CheckpointFile, MECHANIC_CONFIG_GROUP, head);
     } else {
       allopts = readDefaultConfig(ConfigFile, useConfigFile, head);
     }
@@ -669,7 +645,7 @@ int main(int argc, char** argv) {
       cd.mconfig_len = lengths[3];
 
       mstat = buildConfigDataType(lengths, cd, &configDataType);
-      if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType commiting failed.\n");
+      if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType committing failed.\n");
       MPI_Bcast(&cd, 1, configDataType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
       MPI_Type_free(&configDataType);
 
@@ -696,6 +672,8 @@ int main(int argc, char** argv) {
   md.irl = MECHANIC_IRL_DEFAULT;
   md.api = MECHANIC_MODULE_API;
   md.schemasize = 1;
+  md.options = 0;
+  md.mconfig = NULL;
 
   /* Initialize internals and load modules  */
   internals = mechanic_internals_init(mpi_size, node, &md, &cd);
@@ -709,12 +687,13 @@ int main(int argc, char** argv) {
   /* This will override defaults */
   internals = mechanic_internals_init(mpi_size, node, &md, &cd);
 
-  /* Initialize schema */
+  /* Initialize schema (module storage and setup) */
   mechanic_internals_schema_init(node, &md, &internals);
-
+  
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.mrl = %d\n", internals.info->mrl);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.irl = %d\n", internals.info->irl);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.api = %d\n", internals.info->api);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.options = %d\n", internals.info->options);
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "irl = %d\n", md.irl);
@@ -730,12 +709,66 @@ int main(int argc, char** argv) {
       "Initial condition length must be greater than 0\n");
     mechanic_error(MECHANIC_ERR_SETUP);
   }
+  
+  /* Module setup schema */
+  if (internals.info->options > 0) {
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module setup schema\n");
+    query = mechanic_load_sym(&internals, "setup_schema", MECHANIC_MODULE_SILENT);
+    if (query) mstat = query(internals.info);
+    mechanic_check_mstat(mstat);
 
-  /* Module query */
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
-  query = mechanic_load_sym(&internals, "query", MECHANIC_MODULE_SILENT);
-  if (query) mstat = query(internals.mpi_size, internals.node, internals.info, internals.config);
-  mechanic_check_mstat(mstat);
+    /* LRC module configuration */
+    module_head = LRC_assignDefaults(internals.info->mconfig);
+    mechanic_message(MECHANIC_MESSAGE_WARN, "[%d] options = %d\n", node, internals.info->options);
+    ccc = allocateLRCMPIStruct(internals.info->options);
+
+    /* Read module setup file on the master node only */
+    if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 0) {
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "UseModuleConfigFile = %d\n", useModuleConfigFile);
+      readDefaultConfig(ModuleConfigFile, useModuleConfigFile, module_head);
+    }
+    if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 1) {
+      readCheckpointConfig(CheckpointFile, internals.config->module, module_head);
+    }
+    
+    /* 
+     * Important: put something into LRC-MPI structure. It will be defaults on worker
+     * nodes and eventually overrides on the master.
+     */
+    LRC2MPI(ccc, module_head);
+    
+    /* Broadcast LRC module configuration */
+    mstat = LRC_datatype(ccc[0], &lrc_mpi_t);
+    if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "LRC_Datatype committing failed.\n");
+
+    /*
+     * For some reason BCAST crashes here, in Fortran such thing works, here,
+     * unfortunately no.
+     */
+ //   MPI_Bcast(&ccc, internals.info->options, lrc_mpi_t, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+
+    for (i = 0; i < internals.info->options; i++) {
+      if (node == MECHANIC_MPI_MASTER_NODE) {
+        for (n = 1; n < mpi_size; n++) {
+          MPI_Send(&ccc[i], 1, lrc_mpi_t, n, MECHANIC_MPI_STANDBY_TAG, MPI_COMM_WORLD);
+        }
+      } else {
+        MPI_Recv(&ccc[i], 1, lrc_mpi_t, 0, MECHANIC_MPI_STANDBY_TAG, MPI_COMM_WORLD, &mpi_status);
+      }
+    }
+
+    MPI_Type_free(&lrc_mpi_t);
+
+    /* Modify module configuration */
+    for (i = 0; i < internals.info->options; i++) {
+      LRC_modifyOption(cch[i].space, cch[i].name, cch[i].value, cch[i].type, module_head);
+    }
+
+    /* Assign current configuration so that it could be passed to API */
+    internals.info->moptions = module_head;
+
+    free(ccc);
+  }
 
   /* There are some special data in the module,
    * thus we have to create master data file after module has been
@@ -745,11 +778,12 @@ int main(int argc, char** argv) {
 
     /* Create master datafile */
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Create master data file\n");
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Filename is %s\n", cd.datafile);
     file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
   
-    /* Data schema */
-    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module schema\n");
-    schema = mechanic_load_sym(&internals, "schema", MECHANIC_MODULE_ERROR);
+    /* Storage schema */
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module storage schema\n");
+    schema = mechanic_load_sym(&internals, "storage_schema", MECHANIC_MODULE_ERROR);
     if (schema) mstat = schema(internals.mpi_size, internals.node, internals.info, internals.config);
     mechanic_check_mstat(mstat);
     
@@ -757,9 +791,19 @@ int main(int argc, char** argv) {
     mechanic_check_mstat(mstat);
 
     /* First of all, save configuration */
-    LRC_HDF5Writer(file_id, head);
+    LRC_HDF5Writer(file_id, MECHANIC_CONFIG_GROUP, head);
+    
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Config group: %s\n", internals.config->module);
+    LRC_HDF5Writer(file_id, internals.config->module, module_head);
+
     H5Fclose(file_id);
   }
+
+  /* Module query */
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
+  query = mechanic_load_sym(&internals, "comm_prepare", MECHANIC_MODULE_SILENT);
+  if (query) mstat = query(internals.mpi_size, internals.node, internals.info, internals.config);
+  mechanic_check_mstat(mstat);
 
   /* Now load proper routines */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Loading mode\n");
@@ -806,6 +850,7 @@ setupfinalize:
 
   /* Cleanup LRC */
   LRC_cleanup(head);
+  LRC_cleanup(module_head);
   mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] LRC closed.\n", node);
 
   /* Finalize */
