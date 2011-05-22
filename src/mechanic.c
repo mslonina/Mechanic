@@ -229,10 +229,9 @@ int main(int argc, char** argv) {
   size_t olen, opreflen, dlen;
 
   /* LRC Helpers */
-  LRC_configNamespace* head;
-  LRC_configNamespace* module_head;
+  LRC_configNamespace* head = NULL;
+  LRC_configNamespace* module_head = NULL;
   LRC_MPIStruct* ccc = NULL;
-  LRC_MPIStruct cch[7];
 
   /* POPT Helpers */
   char* module_name;
@@ -719,7 +718,7 @@ int main(int argc, char** argv) {
 
     /* LRC module configuration */
     module_head = LRC_assignDefaults(internals.info->mconfig);
-    mechanic_message(MECHANIC_MESSAGE_WARN, "[%d] options = %d\n", node, internals.info->options);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node [%d] options = %d\n", node, internals.info->options);
     ccc = allocateLRCMPIStruct(internals.info->options);
 
     /* Read module setup file on the master node only */
@@ -761,7 +760,7 @@ int main(int argc, char** argv) {
 
     /* Modify module configuration */
     for (i = 0; i < internals.info->options; i++) {
-      LRC_modifyOption(cch[i].space, cch[i].name, cch[i].value, cch[i].type, module_head);
+      LRC_modifyOption(ccc[i].space, ccc[i].name, ccc[i].value, ccc[i].type, module_head);
     }
 
     /* Assign current configuration so that it could be passed to API */

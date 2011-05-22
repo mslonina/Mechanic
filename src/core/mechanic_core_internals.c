@@ -316,6 +316,9 @@ LRC_MPIStruct* allocateLRCMPIStruct(int options) {
   return cc;
 }
 
+/*
+ * Converts LRC linked list to MPI structure
+ */
 int LRC2MPI(LRC_MPIStruct* cc, LRC_configNamespace* head) {
 
   int mstat = 0, i = 0;
