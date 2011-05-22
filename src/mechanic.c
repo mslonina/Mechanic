@@ -679,7 +679,7 @@ int main(int argc, char** argv) {
 
   /* Module init */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
-  init = mechanic_load_sym(&internals, "init", MECHANIC_MODULE_ERROR);
+  init = mechanic_load_sym(&internals, "init", MECHANIC_MODULE_ERROR, MECHANIC_TEMPLATE);
   if (init) mstat = init(internals.mpi_size, internals.node, internals.info, internals.config);
   mechanic_check_mstat(mstat);
   
@@ -712,7 +712,7 @@ int main(int argc, char** argv) {
   /* Module setup schema */
   if (internals.info->options > 0) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module setup schema\n");
-    query = mechanic_load_sym(&internals, "setup_schema", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(&internals, "setup_schema", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
     if (query) mstat = query(internals.info);
     mechanic_check_mstat(mstat);
 
@@ -782,7 +782,7 @@ int main(int argc, char** argv) {
   
     /* Storage schema */
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module storage schema\n");
-    schema = mechanic_load_sym(&internals, "storage_schema", MECHANIC_MODULE_ERROR);
+    schema = mechanic_load_sym(&internals, "storage_schema", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
     if (schema) mstat = schema(internals.mpi_size, internals.node, internals.info, internals.config);
     mechanic_check_mstat(mstat);
     
@@ -800,7 +800,7 @@ int main(int argc, char** argv) {
 
   /* Module query */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
-  query = mechanic_load_sym(&internals, "comm_prepare", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(&internals, "comm_prepare", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
   if (query) mstat = query(internals.mpi_size, internals.node, internals.info, internals.config);
   mechanic_check_mstat(mstat);
 
@@ -829,7 +829,7 @@ int main(int argc, char** argv) {
 
   /* Module cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
-  cleanup = mechanic_load_sym(&internals, "cleanup", MECHANIC_MODULE_ERROR);
+  cleanup = mechanic_load_sym(&internals, "cleanup", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
   if (cleanup) mstat = cleanup(internals.mpi_size, internals.node, internals.info, internals.config);
   mechanic_check_mstat(mstat);
 

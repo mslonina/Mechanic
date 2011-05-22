@@ -102,12 +102,12 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   mechanic_check_mstat(mstat);
 
   /* Master can do something useful before computations. */
-  query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
   if (query) mstat = query(handler->mpi_size, handler->node, handler->info, handler->config, &inidata);
   mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
-  query = mechanic_load_sym(handler, "taskpool_resolution", MECHANIC_MODULE_ERROR);
+  query = mechanic_load_sym(handler, "taskpool_resolution", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
   if (query) farm_res = query(handler->config->xres, handler->config->yres, handler->info, handler->config);
   if (farm_res > (handler->config->xres * handler->config->yres)) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
@@ -117,23 +117,23 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
 
   /* FARM STARTS */
 
-  /* Security check -- if farm resolution is greater than number of slaves.
-   * Needed when we have i.e. 3 slaves and only one pixel to compute. */
+  /* Security check -- if farm resolution is greater than number of workers.
+   * Needed when we have i.e. 3 workers and only one pixel to compute. */
   pixeldiff = farm_res - computed;
   if (pixeldiff >= handler->mpi_size) handler->nodes = handler->mpi_size;
   if (pixeldiff < handler->mpi_size) handler->nodes = pixeldiff+1;
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "mpi_size = %d, pixeldiff = %d, nodes = %d\n",
     handler->mpi_size, pixeldiff, handler->nodes);
 
-  /* Send tasks to all slaves,
+  /* Send tasks to all workers,
    * remembering what the farm resolution is.*/
 
-  /* No tasks left, terminate all slaves. */
+  /* No tasks left, terminate all workers. */
   if (pixeldiff == 0) {
     for (i = 1; i < handler->mpi_size; i++) {
 
       mechanic_message(MECHANIC_MESSAGE_WARN,
-        "No tasks left, terminating slave %d.\n",i);
+        "No tasks left, terminating worker %d.\n",i);
 
       /* Just dummy assignment */
       inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
@@ -146,12 +146,12 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     goto finalize;
   }
     
-  /* We don't want to have slaves idle, so, if there are some idle slaves
+  /* We don't want to have workers idle, so, if there are some idle workers
    * terminate them (when farm resolution < mpi size). */
  if (pixeldiff < handler->mpi_size) {
    for (i = handler->nodes; i < handler->mpi_size; i++) {
      mechanic_message(MECHANIC_MESSAGE_WARN,
-       "Terminating not needed slave %d.\n", i);
+       "Terminating not needed worker %d.\n", i);
 
      /* Just dummy assignment */
      inidata.coords[0] = inidata.coords[1] = inidata.coords[2] = 0;
@@ -171,15 +171,11 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     inidata.coords[1] = ptab[1];
     inidata.coords[2] = ptab[2];
 
-    query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT);
-    if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
-    mechanic_check_mstat(mstat);
-
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "Task [%04d, %04d, %04d] sended to node %04d\n",
         ptab[0], ptab[1], ptab[2], handler->sendnode);
 
-    query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->sendnode, handler->info, handler->config, &result);
     mechanic_check_mstat(mstat);
 
@@ -194,7 +190,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     MPI_Pcontrol(-1, "master_ini_send");
 #endif
 
-    query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->sendnode, handler->info, handler->config, &result);
     mechanic_check_mstat(mstat);
   }
@@ -203,7 +199,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   
   while (1) {
 
-    query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
 
 #ifdef IPM
@@ -222,7 +218,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     totalnumofpx++;
     count--;
 
-    query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->recvnode, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
@@ -257,7 +253,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
       resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
 
-      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
@@ -265,7 +261,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       mechanic_check_mstat(mstat);
       check = 0;
 
-      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
@@ -276,7 +272,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       check++;
     }
 
-    /* Send next task to the slave */
+    /* Send next task to the worker */
     if (npxc < farm_res){
 
       handler->sendnode = handler->recvnode;
@@ -288,11 +284,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       inidata.coords[1] = ptab[1];
       inidata.coords[2] = ptab[2];
 
-      query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT);
-      if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
-      mechanic_check_mstat(mstat);
-
-      query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->sendnode, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -311,7 +303,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       MPI_Pcontrol(-1,"master_pixel_send");
 #endif
 
-      query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->sendnode, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -321,14 +313,14 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   } /* while(1) ends */
 
   /*
-   * No more work to do, receive the outstanding results from the slaves.
+   * No more work to do, receive the outstanding results from the workers.
    * We've got exactly 'count' messages to receive.
    */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Count is %d, Check is %d\n", count, check);
 
   for (i = 0; i < count; i++){
 
-    query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
@@ -350,7 +342,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "done\n");
     totalnumofpx++;
 
-    query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->recvnode, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
@@ -377,7 +369,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
       resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
 
-      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
@@ -385,7 +377,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       mechanic_check_mstat(mstat);
       check = 0;
 
-      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
       mechanic_check_mstat(mstat);
 
@@ -424,7 +416,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   //if(coordsvec) free(coordsvec);
   //if(resultsvec) free(resultsvec);
 
-  /* Now, terminate the slaves */
+  /* Now, terminate the workers */
   for (i = 1; i < handler->nodes; i++) {
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Terminating node %d\n", i); 
@@ -441,7 +433,7 @@ finalize:
   MPI_Type_free(&initialConditionsType);
 
   /* Master can do something useful after the computations. */
-  query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
   if (query) mstat = query(handler->nodes, handler->node, handler->info, handler->config, &inidata, &result);
   mechanic_check_mstat(mstat);
 

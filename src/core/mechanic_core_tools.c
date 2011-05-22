@@ -72,7 +72,7 @@ int map2d(int c, mechanic_internals *handler, int ind[], int** b) {
      /* We need number of current pixel to store, too */
      ind[2] = c;
 
-     qpcm = mechanic_load_sym(handler, "task_coordinates_mapping", MECHANIC_MODULE_ERROR);
+     qpcm = mechanic_load_sym(handler, "task_coordinates_mapping", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
      if (qpcm) qpcm(ind, c, handler->config->xres, handler->config->yres, handler->info, handler->config);
 
      if (b[ind[0]][ind[1]] == 1) {

@@ -3,7 +3,7 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 0)
 set (Mechanic_VERSION_MINOR 12)
-set (Mechanic_VERSION_PATCH 0-UNSTABLE-3-6-1)
+set (Mechanic_VERSION_PATCH 0-UNSTABLE-3-6-2)
 
 set (package_version
   "\"${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}\"")

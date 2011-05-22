@@ -44,7 +44,7 @@
 #include "mechanic_internals.h"
 #include "mechanic_mode_farm.h"
 
-/* SLAVE */
+/* WORKER */
 int mechanic_mode_farm_worker(mechanic_internals *handler) {
 
   int tab[3];
@@ -69,12 +69,12 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
   mstat = buildMasterResultsType(handler->info->irl, &inidata, &initialConditionsType);
   mechanic_check_mstat(mstat);
 
-  /* Slave can do something useful before __all__ computations */
-  query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT);
+  /* Worker can do something useful before __all__ computations */
+  query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
   if (query) mstat = query(handler->mpi_size, handler->node, handler->info, handler->config, &inidata);
   mechanic_check_mstat(mstat);
 
-  query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
   if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
   mechanic_check_mstat(mstat);
 
@@ -86,7 +86,7 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
     goto finalize;
   }
 
-  query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
   if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
   mechanic_check_mstat(mstat);
 
@@ -99,33 +99,33 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
       tab[1] = inidata.coords[1];
       tab[2] = inidata.coords[2];
 
-      query = mechanic_load_sym(handler, "task_coordinates_assign", MECHANIC_MODULE_ERROR);
+      query = mechanic_load_sym(handler, "task_coordinates_assign", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
       if (query) mstat = query(handler->node, tab, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "SLAVE[%d]: PTAB[%d, %d, %d]\n",
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "WORKER[%d]: PTAB[%d, %d, %d]\n",
           handler->node, inidata.coords[0], inidata.coords[1], inidata.coords[2]);
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "SLAVE[%d]: RTAB[%d, %d, %d]\n",
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "WORKER[%d]: RTAB[%d, %d, %d]\n",
           handler->node, result.coords[0], result.coords[1], result.coords[2]);
 
-      query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "task_before_process", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_process", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       /* PIXEL COMPUTATION */
-      query = mechanic_load_sym(handler, "task_process", MECHANIC_MODULE_ERROR);
+      query = mechanic_load_sym(handler, "task_process", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "task_after_process", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_process", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_data_send", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -140,11 +140,11 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
       MPI_Pcontrol(-1,"worker_send_result");
 #endif
 
-      query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -159,7 +159,7 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
       MPI_Pcontrol(-1,"worker_recv_pixel");
 #endif
 
-      query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -168,8 +168,8 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
 
 finalize:
 
-    /* Slave can do something useful after computations. */
-    query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
+    /* Worker can do something useful after computations. */
+    query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->mpi_size, handler->node, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 

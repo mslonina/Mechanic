@@ -135,6 +135,9 @@
 #define MECHANIC_TASK_NOTSTARTED 0
 #define MECHANIC_TASK_STARTED -1
 
+#define MECHANIC_TEMPLATE 1
+#define MECHANIC_NO_TEMPLATE 0
+
 enum Modes {
   MECHANIC_MODE_MASTERALONE,
   MECHANIC_MODE_FARM,
@@ -183,7 +186,7 @@ int buildConfigDataType(int lengths[4], configData d,
 int LRC_datatype(LRC_MPIStruct cc, MPI_Datatype* lrc_mpi_t);
 
 char* mechanic_module_sym_prefix(char* prefix, char* function);
-module_query_int_f mechanic_load_sym(mechanic_internals *handler, char* function, int type);
+module_query_int_f mechanic_load_sym(mechanic_internals *handler, char* function, int type, int tp);
 module_query_int_f mechanic_sym_lookup(void* modhand, char* md_name, char* function);
 
 int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head);

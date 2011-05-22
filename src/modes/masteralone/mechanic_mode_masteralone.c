@@ -88,12 +88,12 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 
   /* Master can do something useful before computations,
    * even in masteralone mode */
-  query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "in", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
   if (query) mstat = query(handler->mpi_size, handler->node, handler->info, handler->config, &inidata);
   mechanic_check_mstat(mstat);
 
   /* Align farm resolution for given method. */
-  query = mechanic_load_sym(handler, "taskpool_resolution", MECHANIC_MODULE_ERROR);
+  query = mechanic_load_sym(handler, "taskpool_resolution", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
   if (query) farm_res = query(handler->config->xres, handler->config->yres, handler->info, handler->config);
   if (farm_res > (handler->config->xres * handler->config->yres)) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
@@ -122,24 +122,24 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "TAB [%d, %d, %d]\t",
       tab[0], tab[1], tab[2]);
 
-    query = mechanic_load_sym(handler, "task_coordinates_assign", MECHANIC_MODULE_ERROR);
+    query = mechanic_load_sym(handler, "task_coordinates_assign", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
     if (query) mstat = query(handler->node, tab, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
-    query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_prepare", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
-    query = mechanic_load_sym(handler, "task_before_process", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_before_process", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
     /* PIXEL COMPUTATION */
-    query = mechanic_load_sym(handler, "task_process", MECHANIC_MODULE_ERROR);
+    query = mechanic_load_sym(handler, "task_process", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
-    query = mechanic_load_sym(handler, "task_after_process", MECHANIC_MODULE_SILENT);
+    query = mechanic_load_sym(handler, "task_after_process", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
     mechanic_check_mstat(mstat);
 
@@ -166,7 +166,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
       coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
       resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
       
-      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->mpi_size, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -174,7 +174,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
       mechanic_check_mstat(mstat);
       check = 0;
 
-      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->mpi_size, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
@@ -201,14 +201,14 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
       coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
       resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
     
-      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->mpi_size, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
 
       mstat = atCheckPoint(handler, check+1, coordsarr, board, resultarr);
       mechanic_check_mstat(mstat);
 
-      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT);
+      query = mechanic_load_sym(handler, "task_after_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->mpi_size, handler->info, handler->config, &inidata, &result);
       mechanic_check_mstat(mstat);
       
@@ -221,7 +221,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 finalize:
 
   /* Master can do something useful after the computations. */
-  query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT);
+  query = mechanic_load_sym(handler, "out", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
   if (query) mstat = query(handler->mpi_size, handler->info, handler->config, &inidata, &result);
   mechanic_check_mstat(mstat);
 
