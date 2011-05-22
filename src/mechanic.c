@@ -263,12 +263,16 @@ int main(int argc, char** argv) {
   int lengths[4];
   MPI_Datatype configDataType, lrc_mpi_t;
   MPI_Status mpi_status;
+  char processor_name[MPI_MAX_PROCESSOR_NAME];
+  int processor_len;
 
   /* MPI INIT */
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   node = mpi_rank;
+
+  MPI_Get_processor_name(processor_name, &processor_len);
 
   /* LRC defaults */
   LRC_configDefaults cs[] = {
@@ -348,7 +352,7 @@ int main(int argc, char** argv) {
 #endif
 
   if (node == MECHANIC_MPI_MASTER_NODE) {
-    mechanic_message(MECHANIC_MESSAGE_INFO, "MPI is ready\n");
+    mechanic_message(MECHANIC_MESSAGE_INFO, "MPI is ready on node %s\n", processor_name);
   }
 
   /* HDF5 INIT */
@@ -446,7 +450,7 @@ int main(int argc, char** argv) {
   if (CheckpointFile) {
     if (node == MECHANIC_MPI_MASTER_NODE) {
       mechanic_message(MECHANIC_MESSAGE_INFO,
-          "Checkpoint file specified: %s\n", CheckpointFile);
+        "Checkpoint file specified: %s\n", CheckpointFile);
       /* STEP 1: Check the health of the checkpoint file */
       if (stat(CheckpointFile, &ct) == 0) {
 
@@ -458,16 +462,16 @@ int main(int argc, char** argv) {
 
           /* At this point we can try restart the computations */
           mechanic_message(MECHANIC_MESSAGE_CONT,
-              "Restartmode, trying to checkpoint file %s\n", CheckpointFile);
+            "Restartmode, trying to checkpoint file %s\n", CheckpointFile);
           restartmode = 1;
         } else {
           mechanic_message(MECHANIC_MESSAGE_ERR,
-              "Specified checkpoint file %s is not a valid Mechanic file\n", CheckpointFile);
+            "Specified checkpoint file %s is not a valid Mechanic file\n", CheckpointFile);
           goto checkpointabort;
         }
       } else {
         mechanic_message(MECHANIC_MESSAGE_ERR,
-            "Specified checkpoint file %s is not valid\n", CheckpointFile);
+          "Specified checkpoint file %s is not valid\n", CheckpointFile);
         goto checkpointabort;
       }
     }
@@ -655,7 +659,7 @@ int main(int argc, char** argv) {
 
       mechanic_message(MECHANIC_MESSAGE_DEBUG,
         "Node[%d] lengths[%d, %d, %d, %d]\n",
-         node, cd.name_len, cd.datafile_len, cd.module_len, cd.mconfig_len);
+        node, cd.name_len, cd.datafile_len, cd.module_len, cd.mconfig_len);
 
       mechanic_message(MECHANIC_MESSAGE_DEBUG,
         "Node [%d] received following configuration:\n\n", node);
@@ -798,13 +802,15 @@ int main(int argc, char** argv) {
     H5Fclose(file_id);
   }
 
-  /* Module query */
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module query\n");
+  /* At this point all nodes know everything about the run, and
+   * the master file has been prepared, configuration stored. We can call
+   * additional query on all nodes here, if needed. */
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module comm_prepare\n");
   query = mechanic_load_sym(&internals, "comm_prepare", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
   if (query) mstat = query(internals.mpi_size, internals.node, internals.info, internals.config);
   mechanic_check_mstat(mstat);
 
-  /* Now load proper routines */
+  /* Bootstrap done, call modes */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Loading mode\n");
   switch (cd.mode) {
     case MECHANIC_MODE_MASTERALONE:

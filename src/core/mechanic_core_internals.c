@@ -216,6 +216,7 @@ module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function
     /* Default: Function */
     handler = mechanic_module_sym_lookup(modhand->module, MECHANIC_MODULE_DEFAULT, function);
     if (handler != NULL) return handler;
+
   } else {
     /* Module: Function */
     handler = mechanic_module_sym_lookup(modhand->handler, modhand->config->module, function);
