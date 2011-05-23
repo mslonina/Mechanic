@@ -796,8 +796,11 @@ int main(int argc, char** argv) {
     /* First of all, save configuration */
     LRC_HDF5Writer(file_id, MECHANIC_CONFIG_GROUP, head);
     
-    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Config group: %s\n", internals.config->module);
-    LRC_HDF5Writer(file_id, internals.config->module, module_head);
+    /* Module configuration if any */
+    if (internals.info->options > 0) {
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "Config group: %s\n", internals.config->module);
+      LRC_HDF5Writer(file_id, internals.config->module, module_head);
+    }
 
     H5Fclose(file_id);
   }
