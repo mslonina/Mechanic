@@ -214,6 +214,8 @@ int atCheckPoint(mechanic_internals *handler, int check, int** coordsarr, int** 
 int mechanic_validate_file(char* filename);
 
 int mechanic_ups();
+int prepare_ice(mechanic_internals* internals);
+int mechanic_ice(mechanic_internals* handler);
 
 void mechanic_welcome();
 
@@ -222,11 +224,6 @@ void clearArray(MECHANIC_DATATYPE*,int);
 int mechanic_mode_multifarm(mechanic_internals* handler);
 int mechanic_mode_farm(mechanic_internals* handler);
 int mechanic_mode_masteralone(mechanic_internals* handler);
-
-#ifdef HAVE_CUDA_H
-int mechanic_mode_cuda(int mpi_size, int node, mechanic_internals* handler,
-    moduleInfo* md, configData* d);
-#endif
 
 int validate_arg(char* arg);
 int mechanic_printConfig(configData* cd, int flag);

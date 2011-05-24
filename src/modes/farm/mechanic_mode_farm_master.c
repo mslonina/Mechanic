@@ -179,16 +179,8 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     if (query) mstat = query(handler->sendnode, handler->info, handler->config, &result);
     mechanic_check_mstat(mstat);
 
-#ifdef IPM
-    MPI_Pcontrol(1, "master_ini_send");
-#endif
-
     MPI_Send(&inidata, 1, initialConditionsType, handler->sendnode,
         MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
-
-#ifdef IPM
-    MPI_Pcontrol(-1, "master_ini_send");
-#endif
 
     query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->sendnode, handler->info, handler->config, &result);
@@ -202,16 +194,8 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     query = mechanic_load_sym(handler, "task_before_data_receive", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
     if (query) mstat = query(handler->node, handler->info, handler->config, &inidata, &result);
 
-#ifdef IPM
-    MPI_Pcontrol(1,"master_result_recv");
-#endif
-
     MPI_Recv(&result, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
         MPI_COMM_WORLD, &mpi_status);
-
-#ifdef IPM
-    MPI_Pcontrol(-1,"master_result_recv");
-#endif
 
     handler->recvnode = mpi_status.MPI_SOURCE;
 
@@ -245,7 +229,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
      * very fast, your disks will not be happy
      */
 
-    if ((((check+1) % handler->config->checkpoint) == 0) || mechanic_ups() < 0) {
+    if ((((check+1) % handler->config->checkpoint) == 0) || (mechanic_ice(handler) == MECHANIC_ICE)) {
 
       /* Fortran interoperability:
        * Convert 2D coordinates array to 1D vector, as well as
@@ -272,6 +256,9 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
       check++;
     }
 
+    /* Abort if ICE signal has been received */
+    if (mechanic_ice(handler) == MECHANIC_ICE) mechanic_abort(MECHANIC_ICE);
+
     /* Send next task to the worker */
     if (npxc < farm_res){
 
@@ -292,16 +279,8 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
         "Task [%04d, %04d, %04d] sended to node %d\n",
           inidata.coords[0], inidata.coords[1], inidata.coords[2], handler->sendnode);
 
-#ifdef IPM
-      MPI_Pcontrol(1,"master_pixel_send");
-#endif
-
       MPI_Send(&inidata, 1, initialConditionsType, handler->sendnode,
           MECHANIC_MPI_DATA_TAG, MPI_COMM_WORLD);
-
-#ifdef IPM
-      MPI_Pcontrol(-1,"master_pixel_send");
-#endif
 
       query = mechanic_load_sym(handler, "task_after_data_send", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->sendnode, handler->info, handler->config, &inidata, &result);
@@ -326,17 +305,9 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Recv... ");
 
-#ifdef IPM
-    MPI_Pcontrol(1,"master_final_recv");
-#endif
-
     MPI_Recv(&result, 1, masterResultsType, MPI_ANY_SOURCE, MPI_ANY_TAG,
         MPI_COMM_WORLD, &mpi_status);
 
-#ifdef IPM
-    MPI_Pcontrol(-1,"master_final_recv");
-#endif
-    
     handler->recvnode = mpi_status.MPI_SOURCE;
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "done\n");
@@ -361,7 +332,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
         result.coords[2], handler->recvnode);
     /* There is a possibility that count > check, and then we have to perform
      * another checkpoint write */
-    if ((((check+1) % handler->config->checkpoint) == 0) || mechanic_ups() < 0) {
+    if ((((check+1) % handler->config->checkpoint) == 0) || (mechanic_ice(handler) == MECHANIC_ICE)) {
 
       /* Fortran interoperability:
        * Convert 2D coordinates array to 1D vector, as well as
@@ -387,6 +358,9 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     } else {
       check++;
     }
+
+    /* Abort if ICE signal has been received */
+    if (mechanic_ice(handler) == MECHANIC_ICE) mechanic_abort(MECHANIC_ICE);
 
   }
 

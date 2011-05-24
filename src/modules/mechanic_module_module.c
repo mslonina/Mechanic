@@ -349,7 +349,12 @@ int module_task_coordinates_assign(int node, int t[], moduleInfo* md, configData
  */
 int module_task_process(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* result){
-   return 0;
+  
+  sleep(2);
+  result->res[0] = 0.12;
+  result->res[1] = 0.13;
+  result->res[2] = 0.14;
+  return 0;
 }
 
 /* [TEMPLATES] */

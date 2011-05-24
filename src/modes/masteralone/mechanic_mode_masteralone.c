@@ -158,7 +158,7 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
 
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "\n");
 
-    if (((check+1) % handler->config->checkpoint) == 0 || mechanic_ups() < 0) {
+    if (((check+1) % handler->config->checkpoint) == 0 || (mechanic_ice(handler) == MECHANIC_ICE)) {
       
       /* Fortran interoperability:
        * Convert 2D coordinates array to 1D vector, as well as
@@ -183,6 +183,9 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
     }
 
     check++;
+    
+    /* Abort if ICE signal has been received */
+    if (mechanic_ice(handler) == MECHANIC_ICE) mechanic_abort(MECHANIC_ICE);
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
         "[%04d / %04d] Task [%04d, %04d, %04d] computed\n",
@@ -215,8 +218,9 @@ int mechanic_mode_masteralone(mechanic_internals* handler) {
       FreeIntVec(coordsvec);
       FreeDoubleVec(resultsvec);
   }
-
-  /* FARM ENDS */
+    
+  /* Abort if ICE signal has been received */
+  if (mechanic_ice(handler) == MECHANIC_ICE) mechanic_abort(MECHANIC_ICE);
 
 finalize:
 

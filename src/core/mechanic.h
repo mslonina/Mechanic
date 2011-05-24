@@ -54,6 +54,7 @@
 #define MECHANIC_ERR_MEM 915
 #define MECHANIC_ERR_CHECKPOINT 916
 #define MECHANIC_ERR_OTHER 999
+#define MECHANIC_ICE 31337
 
 #define MECHANIC_MODULE_ERR_MPI 811
 #define MECHANIC_MODULE_ERR_HDF 812
@@ -146,6 +147,7 @@ typedef struct {
   void* handler;
   configData* config;
   moduleInfo* info;
+  char ice[MECHANIC_STRLEN+4];
 } mechanic_internals;
 
 typedef struct {

@@ -624,50 +624,50 @@ int main(int argc, char** argv) {
 
  /* MPI CONFIGURATION BCAST
   * Inform workers what it is all about. */
-   if (mpi_size > 1) {
+ if (mpi_size > 1) {
 
-     /* Send to workers information about lengths of important strings */
-      lengths[0] = 0; lengths[1] = 0; lengths[2] = 0; lengths[3] = 0;
+   /* Send to workers information about lengths of important strings */
+    lengths[0] = 0; lengths[1] = 0; lengths[2] = 0; lengths[3] = 0;
 
-      if (node == MECHANIC_MPI_MASTER_NODE) {
+    if (node == MECHANIC_MPI_MASTER_NODE) {
 
-        lengths[0] = (int) strlen(cd.name);
-        lengths[1] = (int) strlen(cd.datafile);
-        lengths[2] = (int) strlen(cd.module);
-        lengths[3] = (int) strlen(cd.mconfig);
+      lengths[0] = (int) strlen(cd.name);
+      lengths[1] = (int) strlen(cd.datafile);
+      lengths[2] = (int) strlen(cd.module);
+      lengths[3] = (int) strlen(cd.mconfig);
 
-      }
-        
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node[%d] ready\n", node);
-        
-      MPI_Bcast(lengths, 4, MPI_INT, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+    }
+      
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node[%d] ready\n", node);
+      
+    MPI_Bcast(lengths, 4, MPI_INT, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
 
-      cd.name_len = lengths[0];
-      cd.datafile_len = lengths[1];
-      cd.module_len = lengths[2];
-      cd.mconfig_len = lengths[3];
+    cd.name_len = lengths[0];
+    cd.datafile_len = lengths[1];
+    cd.module_len = lengths[2];
+    cd.mconfig_len = lengths[3];
 
-      mstat = buildConfigDataType(lengths, cd, &configDataType);
-      if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType committing failed.\n");
-      MPI_Bcast(&cd, 1, configDataType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
-      MPI_Type_free(&configDataType);
+    mstat = buildConfigDataType(lengths, cd, &configDataType);
+    if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType committing failed.\n");
+    MPI_Bcast(&cd, 1, configDataType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+    MPI_Type_free(&configDataType);
 
-      cd.name[lengths[0]] = LRC_NULL;
-      cd.datafile[lengths[1]] = LRC_NULL;
-      cd.module[lengths[2]] = LRC_NULL;
-      cd.mconfig[lengths[3]] = LRC_NULL;
+    cd.name[lengths[0]] = LRC_NULL;
+    cd.datafile[lengths[1]] = LRC_NULL;
+    cd.module[lengths[2]] = LRC_NULL;
+    cd.mconfig[lengths[3]] = LRC_NULL;
 
-      mechanic_message(MECHANIC_MESSAGE_DEBUG,
-        "Node[%d] lengths[%d, %d, %d, %d]\n",
-        node, cd.name_len, cd.datafile_len, cd.module_len, cd.mconfig_len);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG,
+      "Node[%d] lengths[%d, %d, %d, %d]\n",
+      node, cd.name_len, cd.datafile_len, cd.module_len, cd.mconfig_len);
 
-      mechanic_message(MECHANIC_MESSAGE_DEBUG,
-        "Node [%d] received following configuration:\n\n", node);
-      mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG,
+      "Node [%d] received following configuration:\n\n", node);
+    mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
-      /* If we are in masteralone mode, finalize workers */
-      if (node != MECHANIC_MPI_MASTER_NODE && cd.mode == MECHANIC_MODE_MASTERALONE) 
-        goto setupfinalize;
+    /* If we are in masteralone mode, finalize workers */
+    if (node != MECHANIC_MPI_MASTER_NODE && cd.mode == MECHANIC_MODE_MASTERALONE) 
+      goto setupfinalize;
   }
 
   /* Assign some fair defaults */
@@ -689,6 +689,15 @@ int main(int argc, char** argv) {
   
   /* This will override defaults */
   internals = mechanic_internals_init(mpi_size, node, &md, &cd);
+
+  /* ICE file name */
+  prepare_ice(&internals);
+
+  /* ICE file presence check */
+  if ((node == MECHANIC_MPI_MASTER_NODE) && (mechanic_ice(&internals) == MECHANIC_ICE)) {
+      mechanic_message(MECHANIC_MESSAGE_WARN, "ICE file is present, will abort now\n");
+      mechanic_abort(MECHANIC_ICE);
+  }
 
   /* Initialize schema (module storage and setup) */
   mechanic_internals_schema_init(node, &md, &internals);
@@ -858,7 +867,7 @@ setupfinalize:
 
   /* Cleanup LRC */
   LRC_cleanup(head);
-  LRC_cleanup(module_head);
+  if (internals.info->options > 0) LRC_cleanup(module_head);
   mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] LRC closed.\n", node);
 
   /* Finalize */

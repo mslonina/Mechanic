@@ -227,13 +227,13 @@ int* AllocateIntVec(int x) {
   int* vec;
 
   vec = calloc(sizeof(uintptr_t) * x, sizeof(uintptr_t));
-  if(vec == NULL) mechanic_error(MECHANIC_ERR_MEM);
+  if (vec == NULL) mechanic_error(MECHANIC_ERR_MEM);
 
   return vec;
 }
 
 void FreeIntVec(int* vec) {
-  if(vec) free(vec);
+  if (vec) free(vec);
 }
 
 /* Convert 2D double array to 1D vector */
@@ -245,7 +245,7 @@ double* DoubleArrayToVec(double** array, int x, int y) {
   size = x * y;
   vec = AllocateDoubleVec(size);
 
-  for(i = 0; i < x; i++) {
+  for (i = 0; i < x; i++) {
     k = i * y;
     for(j = 0; j < y; j++) {
       vec[j+k] = array[i][j];
@@ -265,7 +265,7 @@ double* AllocateDoubleVec(int x) {
 }
 
 void FreeDoubleVec(double* vec) {
-  if(vec) free(vec);
+  if (vec) free(vec);
 }
 
 /* Allocate 2D int array */
@@ -296,7 +296,7 @@ double** AllocateDouble2D(int x, int y) {
   if (pointer) {
     for(i = 0; i < x; i++) {
       pointer[i] = calloc(sizeof(double) * y, sizeof(double));
-      if(pointer[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
+      if (pointer[i] == NULL) mechanic_error(MECHANIC_ERR_MEM);
     }
   }
 
@@ -306,9 +306,9 @@ double** AllocateDouble2D(int x, int y) {
 void FreeDouble2D(double** pointer, int elems) {
   int i = 0;
   for (i = 0; i < elems; i++) {
-    if(pointer[i]) free(pointer[i]);
+    if (pointer[i]) free(pointer[i]);
   }
-  if(pointer) free(pointer);
+  if (pointer) free(pointer);
 }
 
 void FreeInt2D(int** pointer, int elems) {
@@ -316,9 +316,25 @@ void FreeInt2D(int** pointer, int elems) {
   for (i = 0; i < elems; i++) {
     if (pointer[i]) free(pointer[i]);
   }
-  if(pointer) free(pointer);
+  if (pointer) free(pointer);
 }
 
 int mechanic_ups() {
-  return 0;
+  int mstat = 0;
+  return mstat;
+}
+
+int mechanic_ice(mechanic_internals* modhand) {
+  int mstat = 0;
+  struct stat buffer;
+
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "ICE FILE: '%s'\n", modhand->ice);
+
+  mstat = stat((const char *restrict)modhand->ice, &buffer);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "stat = %d\n", mstat);
+  if (mstat == 0) {
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "MECHANIC ICE FILE DETECTED\n"); 
+    return MECHANIC_ICE;
+  }
+  return mstat;
 }

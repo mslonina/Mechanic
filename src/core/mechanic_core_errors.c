@@ -118,6 +118,9 @@ void mechanic_error(int errcode){
   /* We abort on any other less than zero err */
   if (errcode < 0) mechanic_abort(MECHANIC_ERR_OTHER);
 
+  /* We abort on MECHANIC_ICE signal */
+  if (errcode == MECHANIC_ICE) mechanic_abort(MECHANIC_ICE);
+
 }
 
 /* Wrapper for error messages */
