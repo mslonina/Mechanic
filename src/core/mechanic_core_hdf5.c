@@ -94,7 +94,7 @@
 /* Master data scheme */
 int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 
-  hsize_t dimsf[2]; //dimsr[2];
+  hsize_t dimsf[2];
   hid_t boardspace, dataspace;
   hid_t dset_board, data_group, dset_data;
   herr_t hdf_status;
@@ -108,6 +108,8 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
 
   dset_board = H5Dcreate(file_id, MECHANIC_DATABOARD, H5T_NATIVE_INT,
     boardspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+  mstat = H5createMasterAttributes(file_id);
 
   /* Master data group */
   data_group = H5Gcreate(file_id, MECHANIC_DATAGROUP,
@@ -135,6 +137,71 @@ int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
   H5Gclose(data_group);
 
   if (hdf_status < 0) mstat = MECHANIC_ERR_HDF;
+  return mstat;
+}
+
+int H5createMasterAttributes(hid_t loc_id) {
+
+  int mstat = 0;
+  hid_t aspace_id;
+  hsize_t attr_dims;
+  hid_t attr_software_id, attr_majorv_id, attr_minorv_id, attr_patchv_id, attr_sapiv_id, attr_mapiv_id;
+  hid_t attr_software_t, attr_majorv_t, attr_minorv_t, attr_patchv_t, attr_sapiv_t, attr_mapiv_t;
+  hid_t attr_software_mt, attr_majorv_mt, attr_minorv_mt, attr_patchv_mt, attr_sapiv_mt, attr_mapiv_mt;
+  size_t len;
+
+  /* Attach global attributes */
+  attr_dims = 1;
+
+  len = strlen(MECHANIC_NAME)+1;
+  attr_software_t = H5Tcopy(H5T_C_S1); H5Tset_size(attr_software_t, len);
+  attr_software_mt = H5Tcopy(H5T_C_S1); H5Tset_size(attr_software_mt, len);
+  
+  len = strlen(MECHANIC_VERSION_MAJOR)+1;
+  attr_majorv_t = H5Tcopy(H5T_C_S1); H5Tset_size(attr_majorv_t, len);
+  attr_majorv_mt = H5Tcopy(H5T_C_S1); H5Tset_size(attr_majorv_mt, len);
+
+  len = strlen(MECHANIC_VERSION_MINOR)+1;
+  attr_minorv_t = H5Tcopy(H5T_C_S1); H5Tset_size(attr_minorv_t, len);
+  attr_minorv_mt = H5Tcopy(H5T_C_S1); H5Tset_size(attr_minorv_mt, len);
+
+  len = strlen(MECHANIC_VERSION_PATCH)+1;
+  attr_patchv_t = H5Tcopy(H5T_C_S1); H5Tset_size(attr_patchv_t, len);
+  attr_patchv_mt = H5Tcopy(H5T_C_S1); H5Tset_size(attr_patchv_mt, len);
+
+  len = strlen(MECHANIC_STORAGE_API)+1;
+  attr_sapiv_t = H5Tcopy(H5T_C_S1); H5Tset_size(attr_sapiv_t, len);
+  attr_sapiv_mt = H5Tcopy(H5T_C_S1); H5Tset_size(attr_sapiv_mt, len);
+  
+  len = strlen(MECHANIC_MODULE_API_C)+1;
+  attr_mapiv_t = H5Tcopy(H5T_C_S1); H5Tset_size(attr_mapiv_t, len);
+  attr_mapiv_mt = H5Tcopy(H5T_C_S1); H5Tset_size(attr_mapiv_mt, len);
+
+  aspace_id = H5Screate_simple(1,&attr_dims,NULL);
+
+  attr_software_id = H5Acreate(loc_id, "Software", attr_software_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
+  attr_majorv_id = H5Acreate(loc_id, "Major Version", attr_majorv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
+  attr_minorv_id = H5Acreate(loc_id, "Minor Version", attr_minorv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
+  attr_patchv_id = H5Acreate(loc_id, "Patch Version", attr_patchv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
+  attr_sapiv_id = H5Acreate(loc_id, "Storage API Version", attr_sapiv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
+  attr_mapiv_id = H5Acreate(loc_id, "Module API Version", attr_mapiv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
+  
+  H5Awrite(attr_software_id, attr_software_mt, MECHANIC_NAME);
+  H5Awrite(attr_majorv_id, attr_majorv_mt, MECHANIC_VERSION_MAJOR);
+  H5Awrite(attr_minorv_id, attr_minorv_mt, MECHANIC_VERSION_MINOR);
+  H5Awrite(attr_patchv_id, attr_patchv_mt, MECHANIC_VERSION_PATCH);
+  H5Awrite(attr_sapiv_id, attr_sapiv_mt, MECHANIC_STORAGE_API);
+  H5Awrite(attr_mapiv_id, attr_mapiv_mt, MECHANIC_MODULE_API_C);
+  
+  H5Aclose(attr_software_id); H5Tclose(attr_software_mt); H5Tclose(attr_software_t);
+  H5Aclose(attr_majorv_id); H5Tclose(attr_majorv_mt); H5Tclose(attr_majorv_t);
+  H5Aclose(attr_minorv_id); H5Tclose(attr_minorv_mt); H5Tclose(attr_minorv_t);
+  H5Aclose(attr_patchv_id); H5Tclose(attr_patchv_mt); H5Tclose(attr_patchv_t);
+  H5Aclose(attr_sapiv_id); H5Tclose(attr_sapiv_mt); H5Tclose(attr_sapiv_t);
+  H5Aclose(attr_mapiv_id); H5Tclose(attr_mapiv_mt); H5Tclose(attr_mapiv_t);
+
+  H5Sclose(aspace_id);
+
   return mstat;
 }
 

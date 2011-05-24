@@ -1,5 +1,9 @@
 #define PACKAGE_NAME @package_name@
 #define PACKAGE_VERSION @package_version@
+#define PACKAGE_VERSION_MAJOR @package_version_major@
+#define PACKAGE_VERSION_MINOR @package_version_minor@
+#define PACKAGE_VERSION_PATCH @package_version_patch@
+#define PACKAGE_VERSION_API @package_version_api@
 #define PACKAGE_AUTHOR @package_author@
 #define PACKAGE_BUGREPORT @package_bugs@
 #define PACKAGE_URL @package_url@

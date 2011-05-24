@@ -84,6 +84,9 @@
 
 #define MECHANIC_NAME PACKAGE_NAME
 #define MECHANIC_VERSION PACKAGE_VERSION
+#define MECHANIC_VERSION_MAJOR PACKAGE_VERSION_MAJOR
+#define MECHANIC_VERSION_MINOR PACKAGE_VERSION_MINOR
+#define MECHANIC_VERSION_PATCH PACKAGE_VERSION_PATCH
 #define MECHANIC_AUTHOR PACKAGE_AUTHOR
 #define MECHANIC_BUGREPORT PACKAGE_BUGREPORT
 #define MECHANIC_URL PACKAGE_URL
@@ -128,7 +131,9 @@
 #define MECHANIC_STATSGROUP "/stats"
 #define MECHANIC_DATASETMASTER "master"
 
+#define MECHANIC_STORAGE_API PACKAGE_VERSION_API
 #define MECHANIC_MODULE_API 1
+#define MECHANIC_MODULE_API_C "1"
 #define MECHANIC_MPI_MASTER_NODE 0
 
 #define MECHANIC_TASK_FINISHED 1
@@ -200,6 +205,7 @@ int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md,
 int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
 
 int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d);
+int H5createMasterAttributes(hid_t loc_id);
 
 int manageCheckPoints(configData *d);
 

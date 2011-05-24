@@ -4,6 +4,7 @@ project (mechanic)
 set (Mechanic_VERSION_MAJOR 0)
 set (Mechanic_VERSION_MINOR 12)
 set (Mechanic_VERSION_PATCH 0-UNSTABLE-3-6-2)
+set (Mechanic_VERSION_API 0120362)
 
 set (package_version
   "\"${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}\"")
@@ -12,6 +13,10 @@ set (package_name "\"${CMAKE_PROJECT_NAME}\"")
 set (package_author "\"Mariusz Slonina (NCU)\"")
 set (package_bugs "\"slonina@astri.umk.pl\"")
 set (package_url "\"http://git.astri.umk.pl/projects/mechanic\"")
+set (package_version_major "\"${Mechanic_VERSION_MAJOR}\"")
+set (package_version_minor "\"${Mechanic_VERSION_MINOR}\"")
+set (package_version_patch "\"${Mechanic_VERSION_PATCH}\"")
+set (package_version_api "\"${Mechanic_VERSION_API}\"")
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set (platform_darwin 1)
