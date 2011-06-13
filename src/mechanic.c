@@ -49,7 +49,6 @@
  * @todo
  *   - HDF5 error handling with H5E (including file storage)
  *   - multifarm mode
- *   - engines
  *
  */
 
@@ -112,8 +111,7 @@
  * However, we try to keep the @c Master branch as stable and useful as
  * possible. Feel free to participate in the development, test the software
  * and send bugs. The latest snapshot can be grabbed from
- * http://git.astri.umk.pl. The @c Experimental branch containes
- * all bleeding-edge stuff.
+ * http://git.astri.umk.pl. 
  *
  * @M is distributed under terms od BSD license. This means you can use our
  * software both for personal and commercial stuff. We released the code
@@ -138,7 +136,7 @@
  *   our git repository, since it is a helper tool builded especially for @M,
  *   but can be used independly. By default it comes with HDF5 support. 
  * - @c Popt library (may be already installed on your system)
- * - C compiler (@c gcc 4.5 should do the job)
+ * - C compiler (we recommend at least @c gcc 4.6)
  * - CMake, at least 2.8
  *
  * To download the latest snapshot of @M try

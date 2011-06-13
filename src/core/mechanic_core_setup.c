@@ -58,7 +58,7 @@
  * mpirun -np 3 mechanic --help
  * @endcode
  *
- * The configuration data is available to slave nodes by the structure:
+ * The configuration data is available to worker nodes by the structure:
  * @code
  * @icode core/mechanic.h CONFIGDATA
  * @endcode
@@ -77,8 +77,8 @@
  * - @c --yres @c -y -- y resolution of the simulation map
  * - @c --checkpoint @c -d -- checkpoint file write interval
  *
- * @M provides user with a checkpoint system, see @ref checkpoint for
- * detailes. In this case the options are:
+ * @M provides a checkpoint system, see @ref checkpoint for
+ * details. In this case the options are:
  *
  * - @c --restart @c -r -- switch to restart mode and use checkpoint file
  *
@@ -126,15 +126,15 @@
  *
  * Here we provide and explain some simple examples:
  * - @ct mpirun -np 4 mechanic -p mandelbrot -x 200 -y 200 -n fractal@tc <br>
- *   @M will use 4 nodes in MPI task farm mode (one master and three slaves)
- *   and will compute the Mandelbrot fractal with resolution 200x200 pixels.
+ *   @M will use 4 nodes in MPI task farm mode (one master and three workers)
+ *   and will compute the Mandelbrot set with resolution 200x200 pixels.
  *   The name of the run will be "fractal".
  * - @ct mpirun -np 4 mechanic -p mandelbrot -x 200 -y 200 -n fractal -0@tc <br>
  *   This is a similar example, in this case @M will compute the fractal in
- *   masteralone mode. Slave nodes will be terminated.
+ *   masteralone mode. Worker nodes will be terminated.
  * - @ct mpirun -np 4 mechanic -p mandelbrot -x 1 -y 1@tc <br>
- *   Here we can do only one simulation using the @c Mandelbrot module. In this
- *   case, slave nodes 2 and 3 will be terminated (see @ref modes).
+ *   Here we can do only one simulation using the custom @c Mandelbrot module. In this
+ *   case, worker nodes 2 and 3 will be terminated (see @ref modes).
  * - @ct mpirun -np 4 mechanic -p application -x 100 -y 1@tc <br>
  *   We can also create a one-dimensional simulation map, by setting one of
  *   the axes to 1. This is especially useful in non-image computations, such
@@ -147,7 +147,7 @@
  * @section coords Task-coordinate System
  *
  * @M was created for handling simulations related to dynamical maps. Thus, it
- * uses 2D pixel coordinate system (there are plans for extending it to other
+ * uses 2D task coordinate system (there are plans for extending it to other
  * dimensions). This was the simplest way to show which simulations have been
  * computed and which not. The map is stored in @c /board table in the master
  * file. Each finished simulation is marked with 1, the ongoing or broken --
@@ -155,7 +155,7 @@
  *
  * It is natural to use @c (x,y)-resolution option (either in the config file
  * or command line) to describe the map of pixels for an image (like
- * a dynamical map or the Mandelbrot fractal). However, one can use
+ * a dynamical map or the Mandelbrot set). However, one can use
  * slice-based mapping, by using i.e. @c 100x1 or @c 1x100 resolution.
  * In either case, the result should be the same. Setting @ct (x,y) = (1,1)@tc
  * is equivalent of doing only one simulation.
