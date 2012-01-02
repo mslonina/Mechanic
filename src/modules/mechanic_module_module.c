@@ -91,11 +91,11 @@ int module_init(int mpi_size, int node, moduleInfo* md, configData* d){
   md->schemasize = 1;
   md->options = 0;
 
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 int module_setup_schema(moduleInfo* md) {
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 int module_storage_schema(int mpi_size, int node, moduleInfo* md, configData* d) {
@@ -109,7 +109,7 @@ int module_storage_schema(int mpi_size, int node, moduleInfo* md, configData* d)
   md->schema[0].dimsize[0] = d->xres * d->yres;
   md->schema[0].dimsize[1] = md->mrl;
 
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -126,7 +126,7 @@ int module_storage_schema(int mpi_size, int node, moduleInfo* md, configData* d)
  * @ingroup module_optional
  */
 int module_comm_prepare(int mpi_size, int node, moduleInfo* md, configData* d){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -143,7 +143,7 @@ int module_comm_prepare(int mpi_size, int node, moduleInfo* md, configData* d){
  * @ingroup module_required
  */
 int module_cleanup(int mpi_size, int node, moduleInfo* md, configData* d){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /* [METHOD6] */
@@ -262,7 +262,7 @@ int module_task_coordinates_mapping(int t[], int numofpx, int xres, int yres, mo
     t[1] = numofpx % yres;
   }
 
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /* [/6COORDS] */
@@ -314,7 +314,7 @@ int module_task_coordinates_assign(int node, int t[], moduleInfo* md, configData
   r->coords[1] = t[1];
   r->coords[2] = t[2];
 
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /* [/6PIXELS] */
@@ -354,7 +354,7 @@ int module_task_process(int node, moduleInfo* md, configData* d,
   result->res[0] = 0.12;
   result->res[1] = 0.13;
   result->res[2] = 0.14;
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /* [TEMPLATES] */
@@ -466,7 +466,7 @@ int module_task_process(int node, moduleInfo* md, configData* d,
 int module_node_task_prepare(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* result) {
 
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -496,7 +496,7 @@ int module_node_task_prepare(int node, moduleInfo* md, configData* d,
  */
 int module_node_task_before_process(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -526,7 +526,7 @@ int module_node_task_before_process(int node, moduleInfo* md, configData* d,
  */
 int module_node_task_after_process(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -555,7 +555,7 @@ int module_node_task_after_process(int node, moduleInfo* md, configData* d,
  * @ingroup module_themeable
  */
 int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d, masterData* inidata){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -588,7 +588,7 @@ int module_node_in(int mpi_size, int node, moduleInfo* md, configData* d, master
  */
 int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -616,7 +616,7 @@ int module_node_out(int mpi_size, int node, moduleInfo* md, configData* d,
  */
 int module_node_task_before_data_send(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -646,7 +646,7 @@ int module_node_task_before_data_send(int node, moduleInfo* md, configData* d,
 int module_node_task_after_data_send(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* r)
 {
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -675,7 +675,7 @@ int module_node_task_after_data_send(int node, moduleInfo* md, configData* d,
 
 int module_node_task_before_data_receive(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* result){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 /**
@@ -704,15 +704,15 @@ int module_node_task_before_data_receive(int node, moduleInfo* md, configData* d
 
 int module_node_task_after_data_receive(int node, moduleInfo* md, configData* d,
     masterData* inidata, masterData* result){
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 int module_node_task_before_checkpoint(int nodes, moduleInfo* md, configData* d,
     int* coordsvec, MECHANIC_DATATYPE* resultvec) {
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }
 
 int module_node_task_after_checkpoint(int nodes, moduleInfo* md, configData* d,
     int* coordsvec, MECHANIC_DATATYPE* resultvec) {
-  return 0;
+  return MECHANIC_TASK_SUCCESS;
 }

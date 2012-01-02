@@ -2,14 +2,15 @@
 Requirements
 ------------
 
-Mechanic should run on Unix-like platforms (Linux and MacOSX actively
+Mechanic should run on Unix-like platforms (Linux and MacOSX are actively
 maintained), if following requirements are met:
 
-- MPI2 implementation (optional: Fortran support)
+- gcc >= 4.6 or ifort >= 11.0
+- CMake >= 2.8
+- MPI2 implementation (optional: Fortran support) (we favour OpenMPI)
 - HDF5 >= 1.8
 - Popt library
 - Libreadconfig with HDF5 support (see http://git.astri.umk.pl/projects/lrc)
-- CMake >= 2.8
 
 Compilation
 -----------
@@ -30,9 +31,6 @@ If you want to disable Fortran support run
 By default, Cmake installs to /usr/local. You can change this by setting
     
     -DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
-
-There is also universal binary for Mac/Intel provided on the project's
-website: http://git.astri.umk.pl/projects/mechanic
 
 Additional modules
 ------------------

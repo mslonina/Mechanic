@@ -1,9 +1,0 @@
-4-step build instructions
-
-1) Rename Sample-Makefile -> Makefile,
-2) Edit sources
-3) Call make
-4) Enjoy!
-
-Load the module with -p switch:
-mpirun -np 3 mechanic -p hello

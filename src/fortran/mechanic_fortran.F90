@@ -79,6 +79,7 @@ module mechanic_fortran
   use hdf5
  
   ! [F2003BIND_ERR]
+  integer, parameter :: MECHANIC_TASK_SUCCESS_F = 0
   integer, parameter :: MECHANIC_ERR_MPI_F = 911
   integer, parameter :: MECHANIC_ERR_HDF_F = 912
   integer, parameter :: MECHANIC_ERR_MODULE_F = 913
