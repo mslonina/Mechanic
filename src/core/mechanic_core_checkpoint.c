@@ -91,7 +91,7 @@ int atCheckPoint(mechanic_internals *handler, int check, int** coordsarr, int** 
   return mstat;
 }
 
-int manageCheckPoints(configData* d){
+int manageCheckPoints(Config* d){
 
   int i, mstat = 0;
   char *checkpoint;
@@ -157,7 +157,7 @@ int manageCheckPoints(configData* d){
 }
 
 /* Write checkpoint file (master file) */
-int H5writeCheckPoint(moduleInfo *md, configData *d, int check,
+int H5writeCheckPoint(Module *md, Config *d, int check,
     int** coordsarr, MECHANIC_DATATYPE** resultarr){
 
   int i = 0;
@@ -226,7 +226,7 @@ int H5writeCheckPoint(moduleInfo *md, configData *d, int check,
  *
  * @todo return mstat instead of pixel. Return pixel in function arg
  */
-int H5readBoard(configData* d, int** board, int *computed){
+int H5readBoard(Config* d, int** board, int *computed){
 
   hid_t file_id, dataset_id;
   hid_t dataspace_id, memspace_id;

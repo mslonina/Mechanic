@@ -46,7 +46,7 @@
 /* MPI DERIVED DATATYPES */
 
 /* Master result Send/Recv */
-int buildMasterResultsType(int mrl, masterData* md,
+int buildMasterResultsType(int mrl, TaskData* md,
     MPI_Datatype* masterResultsType_ptr){
 
   int mstat;
@@ -62,7 +62,7 @@ int buildMasterResultsType(int mrl, masterData* md,
   block_lengths[1] = 3;
 
   MPI_Get_address(md, &addresses[0]);
-  MPI_Get_address(md->res, &addresses[1]);
+  MPI_Get_address(md->data, &addresses[1]);
   MPI_Get_address(md->coords, &addresses[2]);
 
   displacements[0] = addresses[1] - addresses[0];
@@ -76,7 +76,7 @@ int buildMasterResultsType(int mrl, masterData* md,
 }
 
 /* Configuration datatype */
-int buildConfigDataType(int lengths[4], configData d, MPI_Datatype* configDataType_ptr) {
+int buildConfigDataType(int lengths[4], Config d, MPI_Datatype* ConfigType_ptr) {
 
   int mstat;
   int i;
@@ -121,8 +121,8 @@ int buildConfigDataType(int lengths[4], configData d, MPI_Datatype* configDataTy
   }
 
   mstat = MPI_Type_struct(13, block_lengths, displacements, typelist,
-    configDataType_ptr);
-  mstat = MPI_Type_commit(configDataType_ptr);
+    ConfigType_ptr);
+  mstat = MPI_Type_commit(ConfigType_ptr);
 
   return mstat;
 }

@@ -217,8 +217,8 @@
 int main(int argc, char** argv) {
 
   /* MECHANIC Helpers */
-  configData cd; /* struct for command line args */
-  moduleInfo md; /* struct for module info */
+  Config cd; /* struct for command line args */
+  Module md; /* struct for module info */
   int i, n, mstat; /* mechanic internal error value */
   struct stat st; /* stat.h */
   struct stat ct; /* stat.h */
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
   int mpi_size;
   int node = 0;
   int lengths[4];
-  MPI_Datatype configDataType, lrc_mpi_t;
+  MPI_Datatype ConfigType, lrc_mpi_t;
   MPI_Status mpi_status;
   char processor_name[MPI_MAX_PROCESSOR_NAME];
   int processor_len;
@@ -645,10 +645,10 @@ int main(int argc, char** argv) {
     cd.module_len = lengths[2];
     cd.mconfig_len = lengths[3];
 
-    mstat = buildConfigDataType(lengths, cd, &configDataType);
+    mstat = buildConfigDataType(lengths, cd, &ConfigType);
     if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType committing failed.\n");
-    MPI_Bcast(&cd, 1, configDataType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
-    MPI_Type_free(&configDataType);
+    MPI_Bcast(&cd, 1, ConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+    MPI_Type_free(&ConfigType);
 
     cd.name[lengths[0]] = LRC_NULL;
     cd.datafile[lengths[1]] = LRC_NULL;

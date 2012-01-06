@@ -55,8 +55,8 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   int mstat;
   int ptab[3];
 
-  masterData result;
-  masterData inidata;
+  TaskData result;
+  TaskData inidata;
 
   /* Checkpoint storage */
   int vecsize;
@@ -78,8 +78,8 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   module_query_int_f query;
   
   /* Allocate memory */
-  result.res = AllocateDoubleVec(handler->info->mrl);
-  inidata.res = AllocateDoubleVec(handler->info->irl);
+  result.data = AllocateDoubleVec(handler->info->mrl);
+  inidata.data = AllocateDoubleVec(handler->info->irl);
 
   coordsarr = AllocateInt2D(handler->config->checkpoint,3);
   resultarr = AllocateDouble2D(handler->config->checkpoint,handler->info->mrl);
@@ -217,8 +217,8 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
         result.coords[2], handler->recvnode);
 
     for (j = 0; j < handler->info->mrl; j++) {
-      resultarr[check][j] = result.res[j];
-			mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", result.res[j]);
+      resultarr[check][j] = result.data[j];
+			mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", result.data[j]);
     }
 
 		mechanic_message(MECHANIC_MESSAGE_DEBUG, "\n");
@@ -323,7 +323,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     coordsarr[check][2] = result.coords[2];
 
     for (j = 0; j < handler->info->mrl; j++) {
-      resultarr[check][j] = result.res[j];
+      resultarr[check][j] = result.data[j];
     }
 
     mechanic_message(MECHANIC_MESSAGE_CONT,
@@ -412,8 +412,8 @@ finalize:
   mechanic_check_mstat(mstat);
 
   /* Release resources */
-  FreeDoubleVec(result.res);
-  FreeDoubleVec(inidata.res);
+  FreeDoubleVec(result.data);
+  FreeDoubleVec(inidata.data);
   FreeInt2D(coordsarr,handler->config->checkpoint);
   FreeDouble2D(resultarr,handler->config->checkpoint);
   FreeInt2D(board,handler->config->xres);

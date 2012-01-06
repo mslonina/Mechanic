@@ -47,6 +47,8 @@
 #include "libreadconfig_hdf5.h"
 #include "hdf5.h"
 
+#include "mechanic_core_task.h"
+
 #define MECHANIC_ERR_MPI 911
 #define MECHANIC_ERR_HDF 912
 #define MECHANIC_ERR_MODULE 913
@@ -66,7 +68,6 @@
 #define MECHANIC_MODULE_ERR_OTHER 888
 
 #define MECHANIC_HDF_RANK 2
-#define MECHANIC_MAX_HDF_RANK 7
 #define MECHANIC_STRLEN 256
 
 #undef MECHANIC_DATATYPE
@@ -102,15 +103,22 @@ typedef struct {
   /*unsigned long*/ int checkpoint;
   /*unsigned short*/ int restartmode;
   /*unsigned short*/ int mode;
-} configData;
+} Config;
 /* [/CONFIGDATA] */
 
 /* [MASTERDATA] */
 typedef struct {
-  MECHANIC_DATATYPE *res;
+  MECHANIC_DATATYPE *data;
   /*unsigned long*/ int coords[3]; /* 0 - x 1 - y 2 - number of the pixel */
-} masterData;
+  int size;
+} TaskData;
 /* [/MASTERDATA] */
+
+typedef struct {
+  int coordinates[3];
+  TaskData *input;
+  TaskData *output;
+} Task;
 
 /* [SCHEMA] */
 typedef struct {
@@ -132,9 +140,10 @@ typedef struct {
   mechanicSchema *schema;
   LRC_configDefaults *mconfig;
   LRC_configNamespace *moptions;
-} moduleInfo;
+} Module;
 
 /* [/MODULEINFO] */
+
 
 /* MECHANIC INTERNALS STRUCT */
 typedef struct {
@@ -146,8 +155,8 @@ typedef struct {
   int comm;
   void* module;
   void* handler;
-  configData* config;
-  moduleInfo* info;
+  Config* config;
+  Module* info;
   char ice[MECHANIC_STRLEN+4];
 } mechanic_internals;
 

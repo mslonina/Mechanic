@@ -169,8 +169,8 @@ int LRC2MPI(LRC_MPIStruct*, LRC_configNamespace* head);
 char* mechanic_module_filename(char* name);
 mechanic_internals mechanic_module_open(char* module);
 void mechanic_module_close(mechanic_internals* module);
-mechanic_internals mechanic_internals_init(int mpi_size, int node, moduleInfo* m, configData* d);
-void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals* internals);
+mechanic_internals mechanic_internals_init(int mpi_size, int node, Module* m, Config* d);
+void mechanic_internals_schema_init(int node, Module* m, mechanic_internals* internals);
 void mechanic_internals_close(mechanic_internals* handler);
 
 /* GLOBALS */
@@ -184,10 +184,10 @@ int usage, help, debug, silent;
 /* FUNCTION PROTOTYPES */
 int map2d(int c, mechanic_internals *handler, int ind[], int** b);
 
-int buildMasterResultsType(int mrl, masterData* md,
+int buildMasterResultsType(int mrl, TaskData* md,
     MPI_Datatype* masterResultsType_ptr);
-int buildConfigDataType(int lengths[4], configData d,
-    MPI_Datatype* configDataType_ptr);
+int buildConfigDataType(int lengths[4], Config d,
+    MPI_Datatype* ConfigType_ptr);
 int LRC_datatype(LRC_MPIStruct cc, MPI_Datatype* lrc_mpi_t);
 
 char* mechanic_module_sym_prefix(char* prefix, char* function);
@@ -197,21 +197,21 @@ module_query_int_f mechanic_sym_lookup(void* modhand, char* md_name, char* funct
 int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head);
 int readCheckpointConfig(char* inifile, char* group, LRC_configNamespace* head);
 
-int assignConfigValues(configData* d, LRC_configNamespace* head);
+int assignConfigValues(Config* d, LRC_configNamespace* head);
 
-int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md,
-    configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
+int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, Module *md,
+    Config* d, int* coordsarr, MECHANIC_DATATYPE* resultarr);
 
 int H5writeBoard(hid_t dset, hid_t memspace, hid_t space, int* coordsarr);
 
-int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d);
+int H5createMasterDataScheme(hid_t file_id, Module *md, Config* d);
 int H5createMasterAttributes(hid_t loc_id);
 
-int manageCheckPoints(configData *d);
+int manageCheckPoints(Config *d);
 
-int H5readBoard(configData* d, int** board, int *computed);
+int H5readBoard(Config* d, int** board, int *computed);
 
-int H5writeCheckPoint(moduleInfo *md, configData* d, int check,
+int H5writeCheckPoint(Module *md, Config* d, int check,
     int** coordsarr, MECHANIC_DATATYPE** resultarr);
 
 int atCheckPoint(mechanic_internals *handler, int check, int** coordsarr, int** board,
@@ -232,7 +232,7 @@ int mechanic_mode_farm(mechanic_internals* handler);
 int mechanic_mode_masteralone(mechanic_internals* handler);
 
 int validate_arg(char* arg);
-int mechanic_printConfig(configData* cd, int flag);
+int mechanic_printConfig(Config* cd, int flag);
 int mechanic_copy(char* in, char* out);
 
 int* AllocateIntVec(int x);

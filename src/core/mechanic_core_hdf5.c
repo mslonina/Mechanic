@@ -92,7 +92,7 @@
 /* HDF5 FUNCTIONS */
 
 /* Master data scheme */
-int H5createMasterDataScheme(hid_t file_id, moduleInfo *md, configData* d){
+int H5createMasterDataScheme(hid_t file_id, Module *md, Config* d){
 
   hsize_t dimsf[2];
   hid_t boardspace, dataspace;
@@ -206,8 +206,8 @@ int H5createMasterAttributes(hid_t loc_id) {
 }
 
 /* Write data to master file */
-int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, moduleInfo *md,
-    configData* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
+int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, Module *md,
+    Config* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
 
   //MECHANIC_DATATYPE rdata[md->mrl][1]; /* And this is the place where C99 helps... */
   //MECHANIC_DATATYPE **rdata;

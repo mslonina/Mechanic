@@ -257,7 +257,7 @@ module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function
 /*
  * Initialize internal data structure
  */
-mechanic_internals mechanic_internals_init(int mpi_size, int node, moduleInfo* m, configData* d) {
+mechanic_internals mechanic_internals_init(int mpi_size, int node, Module* m, Config* d) {
 
   mechanic_internals internals;
   char* module_filename;
@@ -306,7 +306,7 @@ int prepare_ice(mechanic_internals *internals) {
 /*
  * Allocate memory for schema
  */
-void mechanic_internals_schema_init(int node, moduleInfo* m, mechanic_internals* internals) {
+void mechanic_internals_schema_init(int node, Module* m, mechanic_internals* internals) {
 
   /* Allocate schema */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Schemasize is %d\n", m->schemasize);

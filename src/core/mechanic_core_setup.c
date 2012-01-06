@@ -163,7 +163,7 @@
  * The mapping should help you in setting initial conditions for the
  * simulation, i.e. we can change some values by using pixel coordinates or
  * the number of the pixel. This information is available during the
- * computation and is stored in @c masterData struct.
+ * computation and is stored in @c TaskData struct.
  *
  * By default, the number of simulations is counted by multiplying x and y
  * resolution. The simulations are currently done one-by-one, the master node
@@ -259,7 +259,7 @@ int readCheckpointConfig(char* file, char* group, LRC_configNamespace* head) {
 
 /* Assign config values, one by one.
  * Final struct contains config values of the run */
-int assignConfigValues(configData* d, LRC_configNamespace* head){
+int assignConfigValues(Config* d, LRC_configNamespace* head){
 
   char* n = NULL; char* tf = NULL; char* m = NULL; char* cm = NULL;
   size_t nlen, flen, fmlen, mlen, cmlen;
@@ -317,7 +317,7 @@ int assignConfigValues(configData* d, LRC_configNamespace* head){
 }
 
 /* Equivalent of LRC_printAll() */
-int mechanic_printConfig(configData *cd, int flag){
+int mechanic_printConfig(Config *cd, int flag){
 
   if (silent == 0) {
     mechanic_message(flag, "name: %s\n", cd->name);

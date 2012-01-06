@@ -52,16 +52,16 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
 
   module_query_int_f query;
 
-  masterData result;
-  masterData inidata;
+  TaskData result;
+  TaskData inidata;
 
   MPI_Datatype masterResultsType;
   MPI_Datatype initialConditionsType;
   MPI_Status mpi_status;
 
   /* Allocate memory */
-  result.res = AllocateDoubleVec(handler->info->mrl);
-  inidata.res = AllocateDoubleVec(handler->info->irl);
+  result.data = AllocateDoubleVec(handler->info->mrl);
+  inidata.data = AllocateDoubleVec(handler->info->irl);
 
   /* Build derived type for master result and initial condition */
   mstat = buildMasterResultsType(handler->info->mrl, &result, &masterResultsType);
@@ -176,8 +176,8 @@ finalize:
     MPI_Type_free(&masterResultsType);
     MPI_Type_free(&initialConditionsType);
 
-    FreeDoubleVec(result.res);
-    FreeDoubleVec(inidata.res);
+    FreeDoubleVec(result.data);
+    FreeDoubleVec(inidata.data);
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node %d terminated\n", handler->node);
     return mstat;
