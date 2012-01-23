@@ -1,7 +1,7 @@
 /*
  * MECHANIC
  *
- * Copyright (c) 2010-2011, Mariusz Slonina (Nicolaus Copernicus University)
+ * Copyright (c) 2010-2012 Authors (Nicolaus Copernicus University)
  * All rights reserved.
  *
  * This file is part of MECHANIC code.
@@ -9,8 +9,9 @@
  * MECHANIC was created to help solving many numerical problems by providing
  * tools for improving scalability and functionality of the code. MECHANIC was
  * released in belief it will be useful. If you are going to use this code, or
- * its parts, please consider referring to the authors either by the website
- * or the user guide reference.
+ * its parts, please consider referring to the authors by the following paper:
+ *
+ * Slonina M., Gozdziewski K., Migaszewski C., Rozenkiewicz A, 2012
  *
  * http://git.astri.umk.pl/projects/mechanic
  *
