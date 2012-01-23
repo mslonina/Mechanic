@@ -71,7 +71,7 @@ char* mechanic_module_filename(char* name){
   strncat(module_file, LIB_EXT, LIB_ESZ);
   module_file[module_file_len] = LRC_NULL;
 
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "Module file: %s\n", module_file);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "TaskInfo file: %s\n", module_file);
 
   return module_file;
 }
@@ -203,7 +203,7 @@ module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function
     free(override);
     if (handler != NULL) return handler;
 
-    /* Module: Function */
+    /* TaskInfo: Function */
     handler = mechanic_module_sym_lookup(modhand->handler, modhand->config->module, function);
     if (handler != NULL) return handler;
 
@@ -218,7 +218,7 @@ module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function
     if (handler != NULL) return handler;
 
   } else {
-    /* Module: Function */
+    /* TaskInfo: Function */
     handler = mechanic_module_sym_lookup(modhand->handler, modhand->config->module, function);
     if (handler != NULL) return handler;
 
@@ -236,11 +236,11 @@ module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function
         break;
       case MECHANIC_MODULE_WARN:
         mechanic_message(MECHANIC_MESSAGE_WARN,
-            "Module warning: Cannot load function '%s' nor its templates.\n", function);
+            "TaskInfo warning: Cannot load function '%s' nor its templates.\n", function);
         break;
       case MECHANIC_MODULE_ERROR:
         mechanic_message(MECHANIC_MESSAGE_ERR,
-            "Module error: Cannot load function '%s' nor its templates.\n", function);
+            "TaskInfo error: Cannot load function '%s' nor its templates.\n", function);
         break;
       default:
         break;
@@ -257,7 +257,7 @@ module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function
 /*
  * Initialize internal data structure
  */
-mechanic_internals mechanic_internals_init(int mpi_size, int node, Module* m, Config* d) {
+mechanic_internals mechanic_internals_init(int mpi_size, int node, TaskInfo* m, TaskConfig* d) {
 
   mechanic_internals internals;
   char* module_filename;
@@ -306,7 +306,7 @@ int prepare_ice(mechanic_internals *internals) {
 /*
  * Allocate memory for schema
  */
-void mechanic_internals_schema_init(int node, Module* m, mechanic_internals* internals) {
+void mechanic_internals_schema_init(int node, TaskInfo* m, mechanic_internals* internals) {
 
   /* Allocate schema */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Schemasize is %d\n", m->schemasize);

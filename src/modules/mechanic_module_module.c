@@ -60,7 +60,7 @@
 
 /**
  * @internal
- * @fn int module_init(Module* md)
+ * @fn int module_init(TaskInfo* md)
  * @brief The initial function of the module.
  *
  * The init function takes care of the module info struct.
@@ -72,8 +72,8 @@
  * md->author
  * md->date
  * md->version
- * md->mrl
- * md->irl
+ * md->output_length
+ * md->input_length
  * @endcode
  *
  * @param *md
@@ -84,21 +84,21 @@
  *
  * @ingroup module_required
  */
-int module_init(int mpi_size, int node, Module* md, Config* d){
+int module_init(int mpi_size, int node, TaskInfo* md, TaskConfig* d){
 
-  md->mrl = 3;
-  md->irl = 3;
+  md->output_length = 3;
+  md->input_length = 3;
   md->schemasize = 1;
   md->options = 0;
 
   return MECHANIC_TASK_SUCCESS;
 }
 
-int module_setup_schema(Module* md) {
+int module_setup_schema(TaskInfo* md) {
   return MECHANIC_TASK_SUCCESS;
 }
 
-int module_storage_schema(int mpi_size, int node, Module* md, Config* d) {
+int module_storage_schema(int mpi_size, int node, TaskInfo* md, TaskConfig* d) {
 
   /* Schema */
 
@@ -107,14 +107,14 @@ int module_storage_schema(int mpi_size, int node, Module* md, Config* d) {
   md->schema[0].datatype = H5T_NATIVE_DOUBLE;
   md->schema[0].rank = 2;
   md->schema[0].dimsize[0] = d->xres * d->yres;
-  md->schema[0].dimsize[1] = md->mrl;
+  md->schema[0].dimsize[1] = md->output_length;
 
   return MECHANIC_TASK_SUCCESS;
 }
 
 /**
  * @internal
- * @fn int module_comm_prepare(Module* md)
+ * @fn int module_comm_prepare(TaskInfo* md)
  * @brief The custom query of the module.
  *
  * @param *md
@@ -125,13 +125,13 @@ int module_storage_schema(int mpi_size, int node, Module* md, Config* d) {
  *
  * @ingroup module_optional
  */
-int module_comm_prepare(int mpi_size, int node, Module* md, Config* d){
+int module_comm_prepare(int mpi_size, int node, TaskInfo* md, TaskConfig* d){
   return MECHANIC_TASK_SUCCESS;
 }
 
 /**
  * @internal
- * @fn int module_cleanup(Module* md)
+ * @fn int module_cleanup(TaskInfo* md)
  * @brief The cleanup functions of the module.
  *
  * @param *md
@@ -142,7 +142,7 @@ int module_comm_prepare(int mpi_size, int node, Module* md, Config* d){
  *
  * @ingroup module_required
  */
-int module_cleanup(int mpi_size, int node, Module* md, Config* d){
+int module_cleanup(int mpi_size, int node, TaskInfo* md, TaskConfig* d){
   return MECHANIC_TASK_SUCCESS;
 }
 
@@ -180,7 +180,7 @@ int module_cleanup(int mpi_size, int node, Module* md, Config* d){
 
 /**
  * @internal
- * @fn int module_farmResolution(int x, int y, Module* md, Config* d)
+ * @fn int module_farmResolution(int x, int y, TaskInfo* md, TaskConfig* d)
  * @brief Defines the resolution of the farm (method = 6)
  *
  * You can override default farm resolution mapping.
@@ -206,7 +206,7 @@ int module_cleanup(int mpi_size, int node, Module* md, Config* d){
 
 /* [6FARM] */
 
-int module_taskpool_resolution(int x, int y, Module* md, Config* d){
+int module_taskpool_resolution(int x, int y, TaskInfo* md, TaskConfig* d){
 
   return x*y;
 }
@@ -215,8 +215,8 @@ int module_taskpool_resolution(int x, int y, Module* md, Config* d){
 
 /**
  * @internal
- * @fn int module_pixelCoordsMap(int t[], int p, int x, int y, Module* md,
- * Config* d)
+ * @fn int module_pixelCoordsMap(int t[], int p, int x, int y, TaskInfo* md,
+ * TaskConfig* d)
  * @brief Defines pixel mapping in the farm (method = 6)
  *
  * You can overwrite pixel coords alignment here. Used only when method = 6.
@@ -249,8 +249,8 @@ int module_taskpool_resolution(int x, int y, Module* md, Config* d){
 
 /* [6COORDS] */
 
-int module_task_coordinates_mapping(int t[], int numofpx, int xres, int yres, Module* md,
-    Config* d){
+int module_task_coordinates_mapping(int t[], int numofpx, int xres, int yres, TaskInfo* md,
+    TaskConfig* d){
 
   if (numofpx < yres) {
     t[0] = numofpx / yres;
@@ -269,8 +269,8 @@ int module_task_coordinates_mapping(int t[], int numofpx, int xres, int yres, Mo
 
 /**
  * @internal
- * @fn int module_pixelCoords(int node, int t[], Module* md,
- * Config* d, TaskData* r)
+ * @fn int module_pixelCoords(int node, int t[], TaskInfo* md,
+ * TaskConfig* d, TaskData* r)
  * @brief Task coords mapping
  *
  * Each slave takes the pixel coordinates and then do its work.
@@ -307,7 +307,7 @@ int module_task_coordinates_mapping(int t[], int numofpx, int xres, int yres, Mo
 
 /* [6PIXELS] */
 
-int module_task_coordinates_assign(int node, int t[], Module* md, Config* d,
+int module_task_coordinates_assign(int node, int t[], TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* r){
 
   r->coords[0] = t[0];
@@ -321,7 +321,7 @@ int module_task_coordinates_assign(int node, int t[], Module* md, Config* d,
 
 /**
  * @internal
- * @fn int module_processTask(int node, Module* md, Config* d,
+ * @fn int module_processTask(int node, TaskInfo* md, TaskConfig* d,
  * TaskData* r)
  * @brief Task compute routine
  *
@@ -347,7 +347,7 @@ int module_task_coordinates_assign(int node, int t[], Module* md, Config* d,
  *
  * @ingroup module_required
  */
-int module_task_process(int node, Module* md, Config* d,
+int module_task_process(int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* result){
   
   result->data[0] = 0.12;
@@ -369,25 +369,25 @@ int module_task_process(int node, Module* md, Config* d,
  *
  * @subsection nonmpi Non-MPI based functions (used in all modes)
  *
- * - @ct module_node_in(int mpi_size, int node, Module* md, Config* d) @tc <br>
+ * - @ct module_node_in(int mpi_size, int node, TaskInfo* md, TaskConfig* d) @tc <br>
  *   This function is called before any operations on data are performed. The possible
  *   overrides are:
  *   - @c module_master_in()
  *   - @c module_slave_in() (not in Masteralone mode)
  *
- * - @ct module_node_out(int mpi_size, int node, Module* md, Config* d) @tc <br>
+ * - @ct module_node_out(int mpi_size, int node, TaskInfo* md, TaskConfig* d) @tc <br>
  *   This function is called after all operations on data are finished. The possible
  *   overrides are:
  *   - @c module_master_out()
  *   - @c module_slave_out() (not in Masteralone mode)
  *
- * - @ct module_node_before_processTask(int node, Module* md, Config*
+ * - @ct module_node_before_processTask(int node, TaskInfo* md, TaskConfig*
  *   d, <br> TaskData* r) @tc <br>
  *   This function is called before computation of the pixel. The possible overrides are:
  *   - @c module_master_beforeProcessTask()
  *   - @c module_slave_beforeProcessTask() (not in Masteralone mode)
  * 
- * - @ct module_node_after_processTask(int node, Module* md, Config*
+ * - @ct module_node_after_processTask(int node, TaskInfo* md, TaskConfig*
  *   d, <br> TaskData* r) @tc <br>
  *   This function is called before computation of the pixel. The possible overrides are:
  *   - @c module_master_afterProcessTask()
@@ -395,7 +395,7 @@ int module_task_process(int node, Module* md, Config* d,
  *
  * @subsection mpibased MPI-based functions (not used in Masteralone mode)
  *
- * - @ct module_node_beforeSend(int node, Module* md, Config* d,
+ * - @ct module_node_beforeSend(int node, TaskInfo* md, TaskConfig* d,
  *   <br> TaskData* r) @tc <br>
  *   This function is called before any data send operation. In case of
  *   the master node, this will apply before sending the initial data to slave nodes,
@@ -404,7 +404,7 @@ int module_task_process(int node, Module* md, Config* d,
  *   - @c module_master_beforeSend()
  *   - @c module_slave_beforeSend()
  * 
- * - @ct module_node_afterSend(int node, Module* md, Config* d,
+ * - @ct module_node_afterSend(int node, TaskInfo* md, TaskConfig* d,
  *   <br> TaskData* r) @tc <br>
  *   This function is called right after any data send operation. In case of
  *   the master node, this will apply after sending the initial data to slave nodes,
@@ -413,7 +413,7 @@ int module_task_process(int node, Module* md, Config* d,
  *   - @c module_master_afterSend()
  *   - @c module_slave_afterSend()
  * 
- * - @ct module_node_beforeReceive(int node, Module* md, Config* d,
+ * - @ct module_node_beforeReceive(int node, TaskInfo* md, TaskConfig* d,
  *   <br> TaskData* r) @tc <br>
  *   This function is called just before the data is received. In case of the master node, 
  *   this will apply on the result data from the previous computed pixel, in case of
@@ -422,7 +422,7 @@ int module_task_process(int node, Module* md, Config* d,
  *   - @c module_master_beforeReceive()
  *   - @c module_slave_beforeReceive()
  * 
- * - @ct module_node_afterReceive(int node, Module* md, Config* d,
+ * - @ct module_node_afterReceive(int node, TaskInfo* md, TaskConfig* d,
  *   <br> TaskData* r) @tc <br>
  *   This function is called right after the data is received. In case of the master node, 
  *   this will apply on the result data, in case of slave nodes -- on the initial data.
@@ -462,7 +462,7 @@ int module_task_process(int node, Module* md, Config* d,
 
 /* [/TEMPLATES] */
 
-int module_node_task_prepare(int node, Module* md, Config* d,
+int module_node_task_prepare(int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* result) {
 
   return MECHANIC_TASK_SUCCESS;
@@ -470,8 +470,8 @@ int module_node_task_prepare(int node, Module* md, Config* d,
 
 /**
  * @internal
- * @fn int module_node_beforeProcessTask(int node, Module* md,
- * Config* d, TaskData* r)
+ * @fn int module_node_beforeProcessTask(int node, TaskInfo* md,
+ * TaskConfig* d, TaskData* r)
  * @brief Operates on data before pixel computation
  *
  * This function can be used before pixel computation.
@@ -493,15 +493,15 @@ int module_node_task_prepare(int node, Module* md, Config* d,
  *
  * @ingroup module_themeable
  */
-int module_node_task_before_process(int node, Module* md, Config* d,
+int module_node_task_before_process(int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* r){
   return MECHANIC_TASK_SUCCESS;
 }
 
 /**
  * @internal
- * @fn int module_node_afterProcessTask(int node, Module* md,
- * Config* d, TaskData* r)
+ * @fn int module_node_afterProcessTask(int node, TaskInfo* md,
+ * TaskConfig* d, TaskData* r)
  * @brief Operates on data after pixel computation
  *
  * This function can be used after pixel computation.
@@ -523,15 +523,15 @@ int module_node_task_before_process(int node, Module* md, Config* d,
  *
  * @ingroup module_themeable
  */
-int module_node_task_after_process(int node, Module* md, Config* d,
+int module_node_task_after_process(int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* r){
   return MECHANIC_TASK_SUCCESS;
 }
 
 /**
  * @internal
- * @fn int module_node_in(int mpi_size, int node, Module* md,
- * Config* d)
+ * @fn int module_node_in(int mpi_size, int node, TaskInfo* md,
+ * TaskConfig* d)
  * @brief Called before any farm operations.
  *
  * You can do something before computations starts.
@@ -553,14 +553,14 @@ int module_node_task_after_process(int node, Module* md, Config* d,
  *
  * @ingroup module_themeable
  */
-int module_node_in(int mpi_size, int node, Module* md, Config* d, TaskData* inidata){
+int module_node_in(int mpi_size, int node, TaskInfo* md, TaskConfig* d, TaskData* inidata){
   return MECHANIC_TASK_SUCCESS;
 }
 
 /**
  * @internal
- * @fn int module_node_out(int mpi_size, int node, Module* md,
- * Config* d, TaskData *r)
+ * @fn int module_node_out(int mpi_size, int node, TaskInfo* md,
+ * TaskConfig* d, TaskData *r)
  * @brief Called after all farm operations.
  *
  * You can do something after computations finish.
@@ -585,14 +585,14 @@ int module_node_in(int mpi_size, int node, Module* md, Config* d, TaskData* inid
  *
  * @ingroup module_themeable
  */
-int module_node_out(int mpi_size, int node, Module* md, Config* d,
+int module_node_out(int mpi_size, int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* r){
   return MECHANIC_TASK_SUCCESS;
 }
 
 /**
  * @internal
- * @fn int module_node_beforeSend(int node, Module* md, Config* d,
+ * @fn int module_node_beforeSend(int node, TaskInfo* md, TaskConfig* d,
  * TaskData* r)
  * @brief Called before send data to slaves.
  *
@@ -613,14 +613,14 @@ int module_node_out(int mpi_size, int node, Module* md, Config* d,
  *
  * @ingroup module_themeable
  */
-int module_node_task_before_data_send(int node, Module* md, Config* d,
+int module_node_task_before_data_send(int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* r){
   return MECHANIC_TASK_SUCCESS;
 }
 
 /**
  * @internal
- * @fn int module_node_afterSend(int node, Module *md, Config* d,
+ * @fn int module_node_afterSend(int node, TaskInfo *md, TaskConfig* d,
  * TaskData* r)
  * @brief Called after data was send to slaves.
  *
@@ -642,7 +642,7 @@ int module_node_task_before_data_send(int node, Module* md, Config* d,
  * @ingroup module_themeable
  */
 
-int module_node_task_after_data_send(int node, Module* md, Config* d,
+int module_node_task_after_data_send(int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* r)
 {
   return MECHANIC_TASK_SUCCESS;
@@ -650,8 +650,8 @@ int module_node_task_after_data_send(int node, Module* md, Config* d,
 
 /**
  * @internal
- * @fn int module_node_beforeReceive(int node, Module* md,
- * Config* d, TaskData* r)
+ * @fn int module_node_beforeReceive(int node, TaskInfo* md,
+ * TaskConfig* d, TaskData* r)
  * @brief Called before data receive from the slave.
  *
  * @param node
@@ -672,14 +672,14 @@ int module_node_task_after_data_send(int node, Module* md, Config* d,
  * @ingroup module_themeable
  */
 
-int module_node_task_before_data_receive(int node, Module* md, Config* d,
+int module_node_task_before_data_receive(int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* result){
   return MECHANIC_TASK_SUCCESS;
 }
 
 /**
  * @internal
- * @fn int module_node_afterReceive(int node, Module* md, Config* d,
+ * @fn int module_node_afterReceive(int node, TaskInfo* md, TaskConfig* d,
  * TaskData* r)
  * @brief Called after data is received.
  *
@@ -701,17 +701,17 @@ int module_node_task_before_data_receive(int node, Module* md, Config* d,
  * @ingroup module_themeable
  */
 
-int module_node_task_after_data_receive(int node, Module* md, Config* d,
+int module_node_task_after_data_receive(int node, TaskInfo* md, TaskConfig* d,
     TaskData* inidata, TaskData* result){
   return MECHANIC_TASK_SUCCESS;
 }
 
-int module_node_task_before_checkpoint(int nodes, Module* md, Config* d,
+int module_node_task_before_checkpoint(int nodes, TaskInfo* md, TaskConfig* d,
     int* coordsvec, MECHANIC_DATATYPE* resultvec) {
   return MECHANIC_TASK_SUCCESS;
 }
 
-int module_node_task_after_checkpoint(int nodes, Module* md, Config* d,
+int module_node_task_after_checkpoint(int nodes, TaskInfo* md, TaskConfig* d,
     int* coordsvec, MECHANIC_DATATYPE* resultvec) {
   return MECHANIC_TASK_SUCCESS;
 }

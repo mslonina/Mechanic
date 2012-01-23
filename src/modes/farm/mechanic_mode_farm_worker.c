@@ -60,13 +60,13 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
   MPI_Status mpi_status;
 
   /* Allocate memory */
-  result.data = AllocateDoubleVec(handler->info->mrl);
-  inidata.data = AllocateDoubleVec(handler->info->irl);
+  result.data = AllocateDoubleVec(handler->info->output_length);
+  inidata.data = AllocateDoubleVec(handler->info->input_length);
 
   /* Build derived type for master result and initial condition */
-  mstat = buildMasterResultsType(handler->info->mrl, &result, &masterResultsType);
+  mstat = buildMasterResultsType(handler->info->output_length, &result, &masterResultsType);
   mechanic_check_mstat(mstat);
-  mstat = buildMasterResultsType(handler->info->irl, &inidata, &initialConditionsType);
+  mstat = buildMasterResultsType(handler->info->input_length, &inidata, &initialConditionsType);
   mechanic_check_mstat(mstat);
 
   /* Worker can do something useful before __all__ computations */

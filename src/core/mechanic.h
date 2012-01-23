@@ -47,7 +47,8 @@
 #include "libreadconfig_hdf5.h"
 #include "hdf5.h"
 
-#include "mechanic_core_task.h"
+#define MECHANIC_MAX_HDF_RANK 7
+/* #include "mechanic_core_task.h" */
 
 #define MECHANIC_ERR_MPI 911
 #define MECHANIC_ERR_HDF 912
@@ -103,14 +104,13 @@ typedef struct {
   /*unsigned long*/ int checkpoint;
   /*unsigned short*/ int restartmode;
   /*unsigned short*/ int mode;
-} Config;
+} TaskConfig;
 /* [/CONFIGDATA] */
 
 /* [MASTERDATA] */
 typedef struct {
   MECHANIC_DATATYPE *data;
   /*unsigned long*/ int coords[3]; /* 0 - x 1 - y 2 - number of the pixel */
-  int size;
 } TaskData;
 /* [/MASTERDATA] */
 
@@ -132,15 +132,15 @@ typedef struct {
 
 /* [MODULEINFO] */
 typedef struct {
-  int irl;
-  int mrl;
+  int input_length;
+  int output_length;
   int api;
   int schemasize;
   int options;
   mechanicSchema *schema;
   LRC_configDefaults *mconfig;
   LRC_configNamespace *moptions;
-} Module;
+} TaskInfo;
 
 /* [/MODULEINFO] */
 
@@ -155,8 +155,8 @@ typedef struct {
   int comm;
   void* module;
   void* handler;
-  Config* config;
-  Module* info;
+  TaskConfig* config;
+  TaskInfo* info;
   char ice[MECHANIC_STRLEN+4];
 } mechanic_internals;
 
@@ -169,8 +169,8 @@ typedef struct {
   int datafile_len; /* Fortran requirement: length of the datafile string */
   int module_len; /* Fortran requirement: length of the module string */
   int schemasize;
-  int irl;
-  int mrl;
+  int input_length;
+  int output_length;
   struct {
     int comm;
     int mpisize;

@@ -59,7 +59,7 @@
  *
  * - @c 911 -- MPI related error
  * - @c 912 -- HDF related error
- * - @c 913 -- Module subsystem related error
+ * - @c 913 -- TaskInfo subsystem related error
  * - @c 914 -- Setup subsystem related error
  * - @c 915 -- Memory allocation related error
  * - @c 916 -- Checkpoint subsytem related error
@@ -70,7 +70,7 @@
  *
  * - @c 811 -- MPI related error
  * - @c 812 -- HDF related error
- * - @c 813 -- Module subsystem related error
+ * - @c 813 -- TaskInfo subsystem related error
  * - @c 814 -- Setup subsystem related error
  * - @c 815 -- Memory allocation related error
  * - @c 816 -- Checkpoint subsytem related error
@@ -103,7 +103,7 @@ void mechanic_error(int errcode){
     mechanic_abort(MECHANIC_ERR_SETUP);
   }
   if (errcode == MECHANIC_MODULE_ERR_SETUP) {
-		mechanic_message(MECHANIC_MESSAGE_ERR,"Module setup error");
+		mechanic_message(MECHANIC_MESSAGE_ERR,"TaskInfo setup error");
     mechanic_abort(MECHANIC_MODULE_ERR_SETUP);
   }
 

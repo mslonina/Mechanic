@@ -103,7 +103,7 @@
  * in C99 with help of MPI and HDF5 storage. It provides extensible
  * user API and loadable module support -- each numerical problem
  * can be coded as a standalone module, loaded dynamically during runtime.
- * @M uses @c LibReadConfig (@c LRC) for handling configuration aspects
+ * @M uses @c LibReadTaskConfig (@c LRC) for handling configuration aspects
  * and @c Popt library for command line (@c CLI) options.
  *
  * @M is in pre-alpha stage, this means, that there are some bugs in code,
@@ -132,7 +132,7 @@
  *
  * - @c MPI2 implementation (we prefer @c OpenMPI, and @M was tested with it)
  * - @c HDF5, at least 1.8
- * - @c LibReadConfig with @c HDF5 support -- @c LRC can be downloaded from
+ * - @c LibReadTaskConfig with @c HDF5 support -- @c LRC can be downloaded from
  *   our git repository, since it is a helper tool builded especially for @M,
  *   but can be used independly. By default it comes with HDF5 support. 
  * - @c Popt library (may be already installed on your system)
@@ -217,8 +217,8 @@
 int main(int argc, char** argv) {
 
   /* MECHANIC Helpers */
-  Config cd; /* struct for command line args */
-  Module md; /* struct for module info */
+  TaskConfig cd; /* struct for command line args */
+  TaskInfo md; /* struct for module info */
   int i, n, mstat; /* mechanic internal error value */
   struct stat st; /* stat.h */
   struct stat ct; /* stat.h */
@@ -239,8 +239,8 @@ int main(int argc, char** argv) {
   /*unsigned long*/ int yres = 0;
   /*unsigned long*/ int checkpoint = 0;
   int poptflags = 0;
-  int useConfigFile = 0;
-  int useModuleConfigFile = 0;
+  int useTaskConfigFile = 0;
+  int useTaskInfoTaskConfigFile = 0;
   char optvalue;
   int restartmode = 0;
   char convstr[MECHANIC_MAXLENGTH];
@@ -248,7 +248,7 @@ int main(int argc, char** argv) {
   help = 0;
   usage = 0;
 
-  /* Module functions */
+  /* TaskInfo functions */
   module_query_int_f init, schema, query, cleanup;
 
   /* HDF Helpers */
@@ -259,7 +259,7 @@ int main(int argc, char** argv) {
   int mpi_size;
   int node = 0;
   int lengths[4];
-  MPI_Datatype ConfigType, lrc_mpi_t;
+  MPI_Datatype TaskConfigType, lrc_mpi_t;
   MPI_Status mpi_status;
   char processor_name[MPI_MAX_PROCESSOR_NAME];
   int processor_len;
@@ -317,11 +317,11 @@ int main(int argc, char** argv) {
     {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
       &name, 0, "Problem name", "NAME"},
     {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-      &ConfigFile, 0, "Config file", "/path/to/config/file"},
+      &TaskConfigFile, 0, "TaskConfig file", "/path/to/config/file"},
     {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-      &module_name, 0, "Module", "MODULE"},
+      &module_name, 0, "TaskInfo", "MODULE"},
     {"mconfig", 'm', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-      &ModuleConfigFile, 0, "Module Config file", "/path/to/module/config/file"},
+      &TaskInfoTaskConfigFile, 0, "TaskInfo TaskConfig file", "/path/to/module/config/file"},
     {"xres", 'x', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
       &xres, 0, "X resolution", "XRES"},
     {"yres", 'y', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
@@ -382,8 +382,8 @@ int main(int argc, char** argv) {
   /* Assign POPT defaults */
   name = MECHANIC_NAME_DEFAULT;
   module_name = MECHANIC_MODULE_DEFAULT;
-  ConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
-  ModuleConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
+  TaskConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
+  TaskInfoTaskConfigFile = MECHANIC_CONFIG_FILE_DEFAULT;
   xres = atoi(MECHANIC_XRES_DEFAULT);
   yres = atoi(MECHANIC_YRES_DEFAULT);
   checkpoint = atoi(MECHANIC_CHECKPOINT_DEFAULT);
@@ -407,8 +407,8 @@ int main(int argc, char** argv) {
    * */
   if ((name != NULL) && (validate_arg(name) < 0)) goto setupfinalize;
   if ((module_name != NULL) && (validate_arg(module_name) < 0)) goto setupfinalize;
-  if ((ConfigFile != NULL) && (validate_arg(ConfigFile) < 0)) goto setupfinalize;
-  if ((ModuleConfigFile != NULL) && (validate_arg(ModuleConfigFile) < 0)) goto setupfinalize;
+  if ((TaskConfigFile != NULL) && (validate_arg(TaskConfigFile) < 0)) goto setupfinalize;
+  if ((TaskInfoTaskConfigFile != NULL) && (validate_arg(TaskInfoTaskConfigFile) < 0)) goto setupfinalize;
   if ((CheckpointFile != NULL) && (validate_arg(CheckpointFile) < 0)) goto setupfinalize;
 
   /* POPT error detection */
@@ -478,24 +478,24 @@ int main(int argc, char** argv) {
   /* PROCESS CONFIGURATION DATA */
   if (node == MECHANIC_MPI_MASTER_NODE) {
 
-    /* Config file is set and we are not in restart mode */
-    if (strcmp(ConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0
+    /* TaskConfig file is set and we are not in restart mode */
+    if (strcmp(TaskConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0
        && restartmode == 0) {
-      useConfigFile = 1;
+      useTaskConfigFile = 1;
     }
-    /* Module config file is set and we are not in restart mode */
-    if (strcmp(ModuleConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0
+    /* TaskInfo config file is set and we are not in restart mode */
+    if (strcmp(TaskInfoTaskConfigFile, MECHANIC_CONFIG_FILE_DEFAULT) != 0
        && restartmode == 0) {
-      useModuleConfigFile = 1;
+      useTaskInfoTaskConfigFile = 1;
     }
 
     /* STEP 1A: Read config file, if any.
      * This will override LRC_configDefaults
      * In restart mode we try provided checkpoint file */
     if (restartmode == 1) {
-      allopts = readCheckpointConfig(CheckpointFile, MECHANIC_CONFIG_GROUP, head);
+      allopts = readCheckpointTaskConfig(CheckpointFile, MECHANIC_CONFIG_GROUP, head);
     } else {
-      allopts = readDefaultConfig(ConfigFile, useConfigFile, head);
+      allopts = readDefaultTaskConfig(TaskConfigFile, useTaskConfigFile, head);
     }
 
     /* STEP 1B: Reset POPT defaults
@@ -506,7 +506,7 @@ int main(int argc, char** argv) {
     if (restartmode == 0) {
       name = LRC_getOptionValue("default", "name", head);
       module_name = LRC_getOptionValue("default", "module", head);
-      ModuleConfigFile = LRC_getOptionValue("default", "mconfig", head);
+      TaskInfoTaskConfigFile = LRC_getOptionValue("default", "mconfig", head);
       mode = LRC_option2int("default", "mode", head);
       xres = LRC_option2int("default", "xres", head);
       yres = LRC_option2int("default", "yres", head);
@@ -522,7 +522,7 @@ int main(int argc, char** argv) {
        * If there was no commandline options, LRC table will be untouched. */
       LRC_modifyOption("default", "name", name, LRC_STRING, head);
       LRC_modifyOption("default", "module", module_name, LRC_STRING, head);
-      LRC_modifyOption("default", "mconfig", ModuleConfigFile, LRC_STRING, head);
+      LRC_modifyOption("default", "mconfig", TaskInfoTaskConfigFile, LRC_STRING, head);
 
       LRC_itoa(convstr, xres, LRC_INT);
       LRC_modifyOption("default", "xres", convstr, LRC_INT, head);
@@ -549,11 +549,11 @@ int main(int argc, char** argv) {
     }
 
     /* STEP 3: Options are processed, we can now assign config values. */
-    mstat = assignConfigValues(&cd, head);
+    mstat = assignTaskConfigValues(&cd, head);
     mechanic_check_mstat(mstat);
 
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"Config file contents:\n\n");
-    mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG,"TaskConfig file contents:\n\n");
+    mechanic_printTaskConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
     /* Security check: if mpi_size = 1 switch to masteralone mode */
     if (mpi_size == 1) {
@@ -575,7 +575,7 @@ int main(int argc, char** argv) {
 
     mechanic_message(MECHANIC_MESSAGE_INFO,
       "Mechanic will use these startup values:\n\n");
-    mechanic_printConfig(&cd, MECHANIC_MESSAGE_CONT);
+    mechanic_printTaskConfig(&cd, MECHANIC_MESSAGE_CONT);
 
     /* Backup master data file, if exists */
     if (stat(cd.datafile,&st) == 0) {
@@ -645,10 +645,10 @@ int main(int argc, char** argv) {
     cd.module_len = lengths[2];
     cd.mconfig_len = lengths[3];
 
-    mstat = buildConfigDataType(lengths, cd, &ConfigType);
-    if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType committing failed.\n");
-    MPI_Bcast(&cd, 1, ConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
-    MPI_Type_free(&ConfigType);
+    mstat = buildTaskConfigDataType(lengths, cd, &TaskConfigType);
+    if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "TaskConfigDataType committing failed.\n");
+    MPI_Bcast(&cd, 1, TaskConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
+    MPI_Type_free(&TaskConfigType);
 
     cd.name[lengths[0]] = LRC_NULL;
     cd.datafile[lengths[1]] = LRC_NULL;
@@ -661,7 +661,7 @@ int main(int argc, char** argv) {
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG,
       "Node [%d] received following configuration:\n\n", node);
-    mechanic_printConfig(&cd, MECHANIC_MESSAGE_DEBUG);
+    mechanic_printTaskConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
     /* If we are in masteralone mode, finalize workers */
     if (node != MECHANIC_MPI_MASTER_NODE && cd.mode == MECHANIC_MODE_MASTERALONE) 
@@ -669,8 +669,8 @@ int main(int argc, char** argv) {
   }
 
   /* Assign some fair defaults */
-  md.mrl = MECHANIC_MRL_DEFAULT;
-  md.irl = MECHANIC_IRL_DEFAULT;
+  md.output_length = MECHANIC_MRL_DEFAULT;
+  md.input_length = MECHANIC_IRL_DEFAULT;
   md.api = MECHANIC_MODULE_API;
   md.schemasize = 1;
   md.options = 0;
@@ -679,7 +679,7 @@ int main(int argc, char** argv) {
   /* Initialize internals and load modules  */
   internals = mechanic_internals_init(mpi_size, node, &md, &cd);
 
-  /* Module init */
+  /* TaskInfo init */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
   init = mechanic_load_sym(&internals, "init", MECHANIC_MODULE_ERROR, MECHANIC_TEMPLATE);
   if (init) mstat = init(internals.mpi_size, internals.node, internals.info, internals.config);
@@ -700,27 +700,27 @@ int main(int argc, char** argv) {
   /* Initialize schema (module storage and setup) */
   mechanic_internals_schema_init(node, &md, &internals);
   
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.mrl = %d\n", internals.info->mrl);
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.irl = %d\n", internals.info->irl);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.output_length = %d\n", internals.info->output_length);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.input_length = %d\n", internals.info->input_length);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.api = %d\n", internals.info->api);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.options = %d\n", internals.info->options);
 
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "mrl = %d\n", md.mrl);
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "irl = %d\n", md.irl);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "output_length = %d\n", md.output_length);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "input_length = %d\n", md.input_length);
 
-  if (internals.info->mrl <= 0) {
+  if (internals.info->output_length <= 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Master result length must be greater than 0\n");
     mechanic_error(MECHANIC_ERR_SETUP);
   }
 
-  if (internals.info->irl <= 0) {
+  if (internals.info->input_length <= 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Initial condition length must be greater than 0\n");
     mechanic_error(MECHANIC_ERR_SETUP);
   }
   
-  /* Module setup schema */
+  /* TaskInfo setup schema */
   if (internals.info->options > 0) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module setup schema\n");
     query = mechanic_load_sym(&internals, "setup_schema", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
@@ -734,11 +734,11 @@ int main(int argc, char** argv) {
 
     /* Read module setup file on the master node only */
     if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 0) {
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "UseModuleConfigFile = %d\n", useModuleConfigFile);
-      readDefaultConfig(ModuleConfigFile, useModuleConfigFile, module_head);
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "UseTaskInfoTaskConfigFile = %d\n", useTaskInfoTaskConfigFile);
+      readDefaultTaskConfig(TaskInfoTaskConfigFile, useTaskInfoTaskConfigFile, module_head);
     }
     if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 1) {
-      readCheckpointConfig(CheckpointFile, internals.config->module, module_head);
+      readCheckpointTaskConfig(CheckpointFile, internals.config->module, module_head);
     }
     
     /* 
@@ -803,9 +803,9 @@ int main(int argc, char** argv) {
     /* First of all, save configuration */
     LRC_HDF5Writer(file_id, MECHANIC_CONFIG_GROUP, head);
     
-    /* Module configuration if any */
+    /* TaskInfo configuration if any */
     if (internals.info->options > 0) {
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "Config group: %s\n", internals.config->module);
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "TaskConfig group: %s\n", internals.config->module);
       LRC_HDF5Writer(file_id, internals.config->module, module_head);
     }
 
@@ -843,7 +843,7 @@ int main(int argc, char** argv) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "MPI Barrier crossed\n");
   }
 
-  /* Module cleanup */
+  /* TaskInfo cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
   cleanup = mechanic_load_sym(&internals, "cleanup", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
   if (cleanup) mstat = cleanup(internals.mpi_size, internals.node, internals.info, internals.config);

@@ -88,7 +88,7 @@
  * - @c -0 -- masteralone mode
  * - @c -1 -- MPI task farm mode
  *
- * @subsection configfile Config File
+ * @subsection configfile TaskConfig File
  *
  * @M uses @c LRC for handling config files. To load configuration from
  * custom config file use @c -c or @c --config switch. If this option is set,
@@ -193,7 +193,7 @@
 /* SETUP TOOLS */
 
 /* Default config file parser */
-int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head){
+int readDefaultTaskConfig(char* inifile, int flag, LRC_configNamespace* head){
 
   int opts = 0;
   char* sep = "=";
@@ -222,13 +222,13 @@ int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head){
    * we just use defaults instead */
   else {
     mechanic_message(MECHANIC_MESSAGE_WARN,
-        "Config file not specified/doesn't exist. Will use defaults.\n");
+        "TaskConfig file not specified/doesn't exist. Will use defaults.\n");
     opts = 2;
   }
 
   if(opts == 0){
 		mechanic_message(MECHANIC_MESSAGE_WARN,
-        "Config file seems to be empty.\n");
+        "TaskConfig file seems to be empty.\n");
 	}
 
   if(opts < 0) mechanic_error(MECHANIC_ERR_SETUP);
@@ -241,7 +241,7 @@ int readDefaultConfig(char* inifile, int flag, LRC_configNamespace* head){
  * @todo
  * return mstat, opts in function argument
  */
-int readCheckpointConfig(char* file, char* group, LRC_configNamespace* head) {
+int readCheckpointTaskConfig(char* file, char* group, LRC_configNamespace* head) {
 
   int opts = 0;
   hid_t f;
@@ -259,7 +259,7 @@ int readCheckpointConfig(char* file, char* group, LRC_configNamespace* head) {
 
 /* Assign config values, one by one.
  * Final struct contains config values of the run */
-int assignConfigValues(Config* d, LRC_configNamespace* head){
+int assignTaskConfigValues(TaskConfig* d, LRC_configNamespace* head){
 
   char* n = NULL; char* tf = NULL; char* m = NULL; char* cm = NULL;
   size_t nlen, flen, fmlen, mlen, cmlen;
@@ -317,7 +317,7 @@ int assignConfigValues(Config* d, LRC_configNamespace* head){
 }
 
 /* Equivalent of LRC_printAll() */
-int mechanic_printConfig(Config *cd, int flag){
+int mechanic_printTaskConfig(TaskConfig *cd, int flag){
 
   if (silent == 0) {
     mechanic_message(flag, "name: %s\n", cd->name);

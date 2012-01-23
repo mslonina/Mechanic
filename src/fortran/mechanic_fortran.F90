@@ -114,15 +114,15 @@ module mechanic_fortran
   ! [/F2003BIND_MSG]
 
   ! [F2003BIND_MD]
-  type, bind(c) :: moduleInfo
-    integer (c_int) :: irl
-    integer (c_int) :: mrl
+  type, bind(c) :: TaskInfo
+    integer (c_int) :: input_length
+    integer (c_int) :: output_length
     integer (c_int) :: api
-  end type moduleInfo
+  end type TaskInfo
   ! [/F2003BIND_MD]
 
   ! [F2003BIND_CONFIG]
-  type, bind(c) :: configData
+  type, bind(c) :: TaskConfig
     character(kind = c_char, len = MECHANIC_STRLEN_F) :: p_name 
     character(kind = c_char, len = MECHANIC_STRLEN_F) :: datafile 
     character(kind = c_char, len = MECHANIC_STRLEN_F) :: u_module
@@ -136,14 +136,14 @@ module mechanic_fortran
     integer (c_int) :: checkpoint
     integer (c_int) :: restartmode
     integer (c_int) :: mode
-  end type configData
+  end type TaskConfig
   ! [/F2003BIND_CONFIG]
 
   ! [F2003BIND_DATA]
-  type, bind(c) :: masterData
-    type (c_ptr) :: res
+  type, bind(c) :: TaskData
+    type (c_ptr) :: data
     integer (c_int) :: coords(3)
-  end type masterData
+  end type TaskData
   ! [/F2003BIND_DATA]
 
   contains

@@ -92,7 +92,7 @@
 /* HDF5 FUNCTIONS */
 
 /* Master data scheme */
-int H5createMasterDataScheme(hid_t file_id, Module *md, Config* d){
+int H5createMasterDataScheme(hid_t file_id, TaskInfo *md, TaskConfig* d){
 
   hsize_t dimsf[2];
   hid_t boardspace, dataspace;
@@ -184,7 +184,7 @@ int H5createMasterAttributes(hid_t loc_id) {
   attr_minorv_id = H5Acreate(loc_id, "Minor Version", attr_minorv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
   attr_patchv_id = H5Acreate(loc_id, "Patch Version", attr_patchv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
   attr_sapiv_id = H5Acreate(loc_id, "Storage API Version", attr_sapiv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
-  attr_mapiv_id = H5Acreate(loc_id, "Module API Version", attr_mapiv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
+  attr_mapiv_id = H5Acreate(loc_id, "TaskInfo API Version", attr_mapiv_t, aspace_id, H5P_DEFAULT,H5P_DEFAULT);
   
   H5Awrite(attr_software_id, attr_software_mt, MECHANIC_NAME);
   H5Awrite(attr_majorv_id, attr_majorv_mt, MECHANIC_VERSION_MAJOR);
@@ -206,10 +206,10 @@ int H5createMasterAttributes(hid_t loc_id) {
 }
 
 /* Write data to master file */
-int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, Module *md,
-    Config* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
+int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, TaskInfo *md,
+    TaskConfig* d, int* coordsarr, MECHANIC_DATATYPE* resultarr){
 
-  //MECHANIC_DATATYPE rdata[md->mrl][1]; /* And this is the place where C99 helps... */
+  //MECHANIC_DATATYPE rdata[md->output_length][1]; /* And this is the place where C99 helps... */
   //MECHANIC_DATATYPE **rdata;
   hsize_t co[2], off[2];
   herr_t hdf_status;
@@ -217,15 +217,15 @@ int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, Module *md,
   //int j = 0;
 
   /* Allocate memory for rdata */
-  //rdata = AllocateDouble2D(md->mrl, 1);
+  //rdata = AllocateDouble2D(md->output_length, 1);
 
   co[0] = 1;
-  co[1] = md->mrl;
+  co[1] = md->output_length;
 
   off[0] = coordsarr[2];
   off[1] = 0;
 
-  /*for (j = 0; j < md->mrl; j++){
+  /*for (j = 0; j < md->output_length; j++){
     rdata[j][0] = resultarr[j];
     printf("%.2f ", rdata[j][0]);
   }
@@ -236,7 +236,7 @@ int H5writeMaster(hid_t dset, hid_t memspace, hid_t space, Module *md,
     //  H5P_DEFAULT, *rdata[]);
       H5P_DEFAULT, resultarr);
 
-  //FreeDouble2D(rdata, md->mrl);
+  //FreeDouble2D(rdata, md->output_length);
 
   if (hdf_status < 0) mstat = MECHANIC_ERR_HDF;
   return mstat;

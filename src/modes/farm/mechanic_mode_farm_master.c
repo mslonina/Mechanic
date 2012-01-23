@@ -78,11 +78,11 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   module_query_int_f query;
   
   /* Allocate memory */
-  result.data = AllocateDoubleVec(handler->info->mrl);
-  inidata.data = AllocateDoubleVec(handler->info->irl);
+  result.data = AllocateDoubleVec(handler->info->output_length);
+  inidata.data = AllocateDoubleVec(handler->info->input_length);
 
   coordsarr = AllocateInt2D(handler->config->checkpoint,3);
-  resultarr = AllocateDouble2D(handler->config->checkpoint,handler->info->mrl);
+  resultarr = AllocateDouble2D(handler->config->checkpoint,handler->info->output_length);
 
   board = AllocateInt2D(handler->config->xres,handler->config->yres);
 
@@ -95,10 +95,10 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Num of computed pixels = %d\n", computed);
 
   /* Build derived type for master result */
-  mstat = buildMasterResultsType(handler->info->mrl, &result, &masterResultsType);
+  mstat = buildMasterResultsType(handler->info->output_length, &result, &masterResultsType);
   mechanic_check_mstat(mstat);
 
-  mstat = buildMasterResultsType(handler->info->irl, &inidata, &initialConditionsType);
+  mstat = buildMasterResultsType(handler->info->input_length, &inidata, &initialConditionsType);
   mechanic_check_mstat(mstat);
 
   /* Master can do something useful before computations. */
@@ -216,7 +216,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
         totalnumofpx, pixeldiff,  result.coords[0], result.coords[1],
         result.coords[2], handler->recvnode);
 
-    for (j = 0; j < handler->info->mrl; j++) {
+    for (j = 0; j < handler->info->output_length; j++) {
       resultarr[check][j] = result.data[j];
 			mechanic_message(MECHANIC_MESSAGE_DEBUG, "%2.2f\t", result.data[j]);
     }
@@ -235,7 +235,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
        * Convert 2D coordinates array to 1D vector, as well as
        * results array */
       coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
-      resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
+      resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->output_length);
 
       query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
@@ -322,7 +322,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
     coordsarr[check][1] = result.coords[1];
     coordsarr[check][2] = result.coords[2];
 
-    for (j = 0; j < handler->info->mrl; j++) {
+    for (j = 0; j < handler->info->output_length; j++) {
       resultarr[check][j] = result.data[j];
     }
 
@@ -338,7 +338,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
        * Convert 2D coordinates array to 1D vector, as well as
        * results array */
       coordsvec = IntArrayToVec(coordsarr, handler->config->checkpoint, vecsize);
-      resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->mrl);
+      resultsvec = DoubleArrayToVec(resultarr, handler->config->checkpoint, handler->info->output_length);
 
       query = mechanic_load_sym(handler, "task_before_checkpoint", MECHANIC_MODULE_SILENT, MECHANIC_TEMPLATE);
       if (query) mstat = query(handler->nodes, handler->info, handler->config, coordsvec, resultsvec);
@@ -374,7 +374,7 @@ int mechanic_mode_farm_master(mechanic_internals *handler) {
    * Convert 2D coordinates array to 1D vector, as well as
    * results array */
   //coordsvec = IntArrayToVec(coordsarr, d->checkpoint, vecsize);
-  //resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->mrl);
+  //resultsvec = DoubleArrayToVec(resultarr, d->checkpoint, md->output_length);
 
   //query = mechanic_load_sym(handler, "node_task_before_checkpoint",
   //  "master_task_before_checkpoint", MECHANIC_MODULE_SILENT);
