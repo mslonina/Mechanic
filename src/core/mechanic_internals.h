@@ -1,5 +1,5 @@
 #ifndef MECHANIC_INTERNALS_H
-#define MECHANIC_INTERNALS_H
+#define MECHANIC_INTERNALS_H 1
 
 #if HAVE_CONFIG_H
   #include <config.h>

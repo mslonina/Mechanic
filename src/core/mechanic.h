@@ -3,7 +3,7 @@
  * The Mechanic core headers
  */
 #ifndef MECHANIC_H
-#define MECHANIC_H
+#define MECHANIC_H 1
 
 #include "libreadconfig.h"
 #include "libreadconfig_hdf5.h"

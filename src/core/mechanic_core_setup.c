@@ -184,16 +184,16 @@ int readDefaultTaskConfig(char* inifile, int flag, LRC_configNamespace* head){
    * we just use defaults instead */
   else {
     mechanic_message(MECHANIC_MESSAGE_WARN,
-        "TaskConfig file not specified/doesn't exist. Will use defaults.\n");
+        "Config file not specified/doesn't exist. Will use defaults.\n");
     opts = 2;
   }
 
-  if(opts == 0){
+  if (opts == 0) {
 		mechanic_message(MECHANIC_MESSAGE_WARN,
-        "TaskConfig file seems to be empty.\n");
+        "Config file seems to be empty.\n");
 	}
 
-  if(opts < 0) mechanic_error(MECHANIC_ERR_SETUP);
+  if (opts < 0) mechanic_error(MECHANIC_ERR_SETUP);
 
   return opts;
 }

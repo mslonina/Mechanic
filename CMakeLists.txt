@@ -4,7 +4,7 @@ project (mechanic)
 set (Mechanic_VERSION_MAJOR 0)
 set (Mechanic_VERSION_MINOR 12)
 set (Mechanic_VERSION_PATCH 0-UNSTABLE-3-6-3)
-set (Mechanic_VERSION_API 0120362)
+set (Mechanic_VERSION_API 0120363)
 
 set (package_version
   "\"${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}\"")
@@ -72,7 +72,7 @@ CONFIGURE_FILE (
 )
 
 add_definitions (-DHAVE_CONFIG_H)
-set (CMAKE_C_FLAGS "-Wall -std=c99 -g -ggdb")
+set (CMAKE_C_FLAGS "-Wall -Wextra -std=c99")
 
 add_subdirectory(src)
 add_subdirectory(src/core)
