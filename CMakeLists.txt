@@ -3,14 +3,14 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 0)
 set (Mechanic_VERSION_MINOR 12)
-set (Mechanic_VERSION_PATCH 0-UNSTABLE-3-6-3)
-set (Mechanic_VERSION_API 0120363)
+set (Mechanic_VERSION_PATCH 0)
+set (Mechanic_VERSION_API 0120364)
 
 set (package_version
   "\"${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}\"")
 
 set (package_name "\"${CMAKE_PROJECT_NAME}\"")
-set (package_author "\"Mariusz Slonina (NCU)\"")
+set (package_author "\"Celestial Mechanics Group (TCFA/NCU)\"")
 set (package_bugs "\"slonina@astri.umk.pl\"")
 set (package_url "\"http://git.astri.umk.pl/projects/mechanic\"")
 set (package_version_major "\"${Mechanic_VERSION_MAJOR}\"")
@@ -84,7 +84,7 @@ if (BUILD_FORTRAN)
 endif (BUILD_FORTRAN)
 
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mechanic")
-SET (CPACK_PACKAGE_VENDOR "Mariusz Slonina (NCU)")
+SET (CPACK_PACKAGE_VENDOR "Celestial Mechanics Group (TCFA/NCU)")
 SET (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
 SET (CPACK_RESOURCE_FILE_README "${CMAKE_CURRENT_SOURCE_DIR}/README.txt")
 SET (CPACK_PACKAGE_VERSION_MAJOR "${Mechanic_VERSION_MAJOR}")
