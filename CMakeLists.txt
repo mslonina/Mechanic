@@ -34,7 +34,7 @@ option (BUILD_DOCS "Build documentation" off)
 if (BUILD_FORTRAN)
   enable_language (Fortran)
   set (CMAKE_Fortran_FLAGS 
-    "-I. -I/usr/include -I/usr/lib -I/usr/local/include -I/usr/local/lib -std=f2003 -fbounds-check -fbacktrace -ffpe-trap=zero,overflow -fdefault-real-8")
+    "-I. -std=f2003 -fbounds-check -fbacktrace -ffpe-trap=zero,overflow -fdefault-real-8")
 endif (BUILD_FORTRAN)
 
 include (CheckIncludeFiles)
