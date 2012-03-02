@@ -2,9 +2,9 @@ cmake_minimum_required (VERSION 2.8)
 project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 0)
-set (Mechanic_VERSION_MINOR 12)
+set (Mechanic_VERSION_MINOR 13)
 set (Mechanic_VERSION_PATCH 0)
-set (Mechanic_VERSION_API 0120364)
+set (Mechanic_VERSION_API 0130)
 
 set (package_version
   "\"${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}\"")
@@ -28,14 +28,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set (platform_linux 1)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-option (BUILD_FORTRAN "Build Fortran bindings" on)
 option (BUILD_DOCS "Build documentation" off)
-
-if (BUILD_FORTRAN)
-  enable_language (Fortran)
-  set (CMAKE_Fortran_FLAGS 
-    "-I. -std=f2003 -fbounds-check -fbacktrace -ffpe-trap=zero,overflow -fdefault-real-8")
-endif (BUILD_FORTRAN)
 
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
@@ -55,6 +48,7 @@ CHECK_INCLUDE_FILES (sys/types.h HAVE_TYPES_H)
 CHECK_INCLUDE_FILES (unistd.h HAVE_UNISTD_H)
 CHECK_INCLUDE_FILES (popt.h HAVE_POPT_H)
 CHECK_INCLUDE_FILES (math.h HAVE_MATH_H)
+CHECK_INCLUDE_FILES (mpi.h HAVE_MPI_H)
 CHECK_INCLUDE_FILES (hdf5.h HAVE_HDF5_H)
 CHECK_INCLUDE_FILES (libreadconfig.h HAVE_LRC_H)
 CHECK_INCLUDE_FILES (libreadconfig_hdf5.h HAVE_LRC_HDF5_H)
@@ -72,16 +66,12 @@ CONFIGURE_FILE (
 )
 
 add_definitions (-DHAVE_CONFIG_H)
-set (CMAKE_C_FLAGS "-Wall -Wextra -std=c99")
+set (CMAKE_C_FLAGS "-Wall -std=c99")
 
 add_subdirectory(src)
 add_subdirectory(src/core)
-add_subdirectory(src/modes)
+#add_subdirectory(src/modes)
 add_subdirectory(src/modules)
-
-if (BUILD_FORTRAN)
-  add_subdirectory(src/fortran)
-endif (BUILD_FORTRAN)
 
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mechanic")
 SET (CPACK_PACKAGE_VENDOR "Celestial Mechanics Group (TCFA/NCU)")

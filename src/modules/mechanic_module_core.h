@@ -1,5 +1,5 @@
-#ifndef MECHANIC_MODULE_MODULE_H
-#define MECHANIC_MODULE_MODULE_H
+#ifndef MECHANIC_MODULE_CORE_H
+#define MECHANIC_MODULE_CORE_H
 
 #include <stdio.h>
 #include <stdlib.h>

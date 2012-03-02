@@ -1,27 +1,25 @@
 include_directories(. .. ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src)
 set (coresources
-    mechanic.h
-    mechanic_core_task.h
-    mechanic_internals.h
-    mechanic_core_checkpoint.c
-    mechanic_core_derived.c
-    mechanic_core_hdf5.c
-    mechanic_core_setup.c
+    MTypes.h MMechanic2.h
+    MBootstrap.c
+    MCore.c
+    MModules.c
+    MTask.c
+    MPool.c
+    MSetup.c
+    MMpi.c
+    MStorage.c
+    MLog.c
+    MTools.c
     )
-set (sharedsources
-    mechanic_core_internals.c
-    mechanic_core_devel.c
-    mechanic_core_errors.c
-    mechanic_core_tools.c
+set (mainsources
+    MMain.c
     )
 
-add_library(core ${coresources} ${sharedsources})
-target_link_libraries(core hdf5 m mpi readconfig)
+add_library(core ${coresources})
+target_link_libraries(core hdf5 m mpi readconfig ltdl)
 
-add_library(libmechanic SHARED ${sharedsources})
-target_link_libraries(libmechanic hdf5 m mpi readconfig)
-set_target_properties(libmechanic PROPERTIES OUTPUT_NAME mechanic)
-
-install (TARGETS libmechanic DESTINATION lib${LIB_SUFFIX})
-install (FILES mechanic.h DESTINATION include)
-install (FILES mechanic_internals.h DESTINATION include)
+add_executable(mechanic2 ${mainsources})
+target_link_libraries(mechanic2 core popt readconfig mpi hdf5 m ltdl)
+install (TARGETS mechanic2 DESTINATION bin)
+install (FILES MMechanic2.h DESTINATION include)
