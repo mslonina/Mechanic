@@ -7,8 +7,11 @@
 /**
  * @function
  * Wrapper to dlsym()
+ *
+ * @return
+ * Function handler
  */
-query* LoadSym(void* handler, char* function) {
+query* LoadSym(void *handler, char* function) {
   query* q = NULL;
   char *err;
 

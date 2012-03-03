@@ -1,16 +1,41 @@
 #ifndef MECHANIC_TYPES_H
 #define MECHANIC_TYPES_H
 
-#include "MMechanic2.h"
-#include "MIncludes.h"
-
+/**
+ * @class
+ * Defines the layer
+ *
+ * @param void*
+ *  Pointer to the dlopened() shared library
+ * @param init
+ *  Initialization structure
+ * @param setup
+ *  Setup structure
+ */
 typedef struct {
   void *handler;
+  init init;
   setup setup;
 } layer; 
 
-typedef int (query) ();
+/**
+ * @class
+ * Defines the module
+ *
+ * @param layer
+ *  The actual module layer
+ * @param fallback
+ *  The fallback module layer
+ */
+typedef struct {
+  layer layer;
+  layer fallback;
+} module;
 
-#define MASTER 0
+/**
+ * @class
+ * Basic dynamic query type
+ */
+typedef int (query) ();
 
 #endif

@@ -17,72 +17,123 @@
  * - Loads the Setup function, if present
  * - Boots LRC API
  */
-layer Bootstrap(int node, char* name) {
-  layer l;
-  query* q = NULL;
-  int mstat;
+module Bootstrap(int node, char *name, module *f) {
+  module m;
   
-  l = Load(node, name);
-  
-  if (l.handler) {
+  m = Load(node, name);
 
-    /* Setup sane defaults */
-    Init(node, &l);
+  /* Fallback module */
+  if (f->layer.handler) {
+    m.fallback.handler = f->layer.handler;
+    m.fallback.init = f->layer.init;
+    m.fallback.setup = f->layer.setup;
+  }
 
-    /* Load module setup */
-    q = LoadSym(l.handler, "Setup");
-    if (q) { 
-      mstat = q(l.setup);
-      CheckStatus(mstat);
-      l.setup.head = LRC_assignDefaults(l.setup.options);
-    }
+  if (m.layer.handler) {
+
+    /* Initialize the module */
+    Init(node, &m);
+
+    /* Load module Setup */
+    Setup(node, &m);
+
   } 
 
-  return l;
+  return m;
 }
 
 /**
  * @function
  * Wrapper to dlopen()
  */
-layer Load(int node, char *name) {
-  layer l;
+module Load(int node, char *name) {
+  module m;
   char *fname = NULL;
 
-  fname = Filename(name);
+  fname = Filename(MECHANIC_MODULE_PREFIX, name, "", LIBEXT);
 
   Message(MESSAGE_DEBUG, "Loading module '%s'\n", fname);
 
-  l.handler = dlopen(fname, RTLD_NOW|RTLD_GLOBAL);
-  if (!l.handler) {
+  m.layer.handler = dlopen(fname, RTLD_NOW|RTLD_GLOBAL);
+  if (!m.layer.handler) {
     Message(MESSAGE_ERR, "Cannot load module '%s': %s\n", name, dlerror());
     Error(CORE_ERR_MODULE);
   }
+
+  m.fallback.handler = NULL;
   
   free(fname);
-  return l;
+  return m;
 
 }
 
 /**
  * @function
  * Allocates initial memory for the Layer
+ *
+ * - Load fallback layer function
+ * - If the layer function exists, overwrite fallback
  */
-int Init(int node, layer *l) {
+int Init(int node, module *m) {
+  query *q;
+  int opts;
+  int mstat;
+
+  /* Load fallback layer, at least core module must implement this */
+  if (m->fallback.handler) {
+    m->layer.init = m->fallback.init;
+  }
+
+  q = LoadSym(m->layer.handler, "Init");
+  if (q) {
+    mstat = q(&m->layer.init);
+    CheckStatus(mstat);
+  } 
+  opts = m->layer.init.options;
+  if (m->fallback.handler) opts = opts + m->fallback.init.options;
+  printf("opts = %d\n", opts);
   
-  l->setup.options = calloc(CONFIG_OPTIONS*sizeof(LRC_configDefaults), sizeof(LRC_configDefaults));
-  if (!l->setup.options) Error(CORE_ERR_MEM);
+  m->layer.setup.options = calloc(opts*sizeof(LRC_configDefaults), sizeof(LRC_configDefaults));
+  if (!m->layer.setup.options) Error(CORE_ERR_MEM);
 
-  l->setup.head = NULL;
+  m->layer.setup.head = NULL;
 
-  return 0;
+  return mstat;
+}
+
+/**
+ * @function
+ * Initializes the Setup
+ *
+ * This function calls the Setup() from the module to initialize the LRC default option
+ * structure. It merges the fallback structure, so that all setup is available in one
+ * layer (and only one config file can be used, with i.e. core setup included, but not
+ * necessary).
+ */
+int Setup(int node, module *m) {
+  query *q;
+  int mstat;
+
+  q = LoadSym(m->layer.handler, "Setup");
+  if (q) {
+    mstat = q(&m->layer.setup);
+    CheckStatus(mstat);
+
+    if (m->fallback.handler) {
+      mstat = LRC_mergeDefaults(m->layer.setup.options, m->fallback.setup.options);
+    } 
+
+    m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
+  }
+
+  return mstat;
 }
 
 /**
  * @function
  * Finalizes the layer
  */
-void Finalize(int node, layer* l) {
+void FinalizeLayer(int node, layer *l) {
   dlclose(l->handler);
   free(l->setup.options);
   if (l->setup.head) LRC_cleanup(l->setup.head);
@@ -90,31 +141,9 @@ void Finalize(int node, layer* l) {
 
 /**
  * @function
- * Creates module filename
- *
- * @in_group
- * Helpers
+ * Finalizes the module
  */
-char* Filename(char* name) {
-  char* fname;
-  size_t len, pref, flen;
-
-  pref = strlen(MECHANIC_MODULE_PREFIX);
-  len = strlen(name);
-  flen = pref + len + strlen(LIBEXT) + 1;
-
-  fname = calloc(flen*sizeof(char*), sizeof(char*));
-  if (!fname) Error(CORE_ERR_MEM);
-
-  strncpy(fname, MECHANIC_MODULE_PREFIX, pref);
-  fname[pref] = LRC_NULL;
-
-  strncat(fname, name, len);
-  fname[pref+len] = LRC_NULL;
-
-  strncat(fname, LIBEXT, strlen(LIBEXT));
-  fname[flen] = LRC_NULL;
-  
-  return fname;
+void Finalize(int node, module* m) {
+  FinalizeLayer(node, &m->layer);
 }
 

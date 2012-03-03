@@ -3,8 +3,9 @@
 
 #include "MMechanic2.h"
 #include "MTypes.h"
+#include "MCommon.h"
 #include "MLog.h"
 
-query* LoadSym(void* handler, char* name);
+query* LoadSym(void *handler, char* name);
 
 #endif

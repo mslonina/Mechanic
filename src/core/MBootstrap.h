@@ -3,15 +3,16 @@
 
 #include "MMechanic2.h"
 #include "MTypes.h"
+#include "MCommon.h"
 #include "MModules.h"
 
-layer Bootstrap(int node, char *name);
-layer Load(int node, char *name);
-int Init(int node, layer *l);
-void Finalize(int node, layer *l);
-char* Filename(char *name);
+module Bootstrap(int node, char *name, module *f);
+module Load(int node, char *name);
+int Init(int node, module *m);
+int Setup(int node, module *m);
+void FinalizeLayer(int node, layer *l);
+void Finalize(int node, module *m);
 
-#define CONFIG_OPTIONS 128
 #define MECHANIC_MODULE_PREFIX "libmechanic_module_"
 
 #if PLATFORM_DARWIN == 1

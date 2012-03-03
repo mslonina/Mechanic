@@ -5,10 +5,8 @@
 
 int main(int argc, char** argv) {
   
-  int mpirank, mpisize, node, mstat;
-  LRC_configNamespace* opthead;
-  layer core, module;
-  query *q;
+  int mpirank, mpisize, node;
+  module core, module, fallback;
 
   /* Initialize MPI */
   MPI_Init(&argc, &argv);
@@ -17,13 +15,21 @@ int main(int argc, char** argv) {
   node = mpirank;
 
 bootstrap:
-  core = Bootstrap(node, CORE_MODULE);
-  if (!core.handler) Error(CORE_ERR_CORE); // OOPS! At least Core module should be loaded
+  fallback.layer.handler = NULL;
+  core = Bootstrap(node, CORE_MODULE, &fallback);
+  if (!core.layer.handler) Error(CORE_ERR_CORE); // OOPS! At least Core module should be loaded
 
-  module = Bootstrap(node, TEST_MODULE);
+  /**
+   * @todo
+   * If module is not present (i.e. test drive), bootstrap core the second time with the
+   * fallback of core
+   */
+  module = Bootstrap(node, TEST_MODULE, &core);
 
-  if (node == MASTER && core.setup.head) LRC_printAll(core.setup.head);
-  if (node == MASTER && module.setup.head) LRC_printAll(module.setup.head);
+  if (node == MASTER && core.layer.setup.head) LRC_printAll(core.layer.setup.head);
+  if (node == MASTER && module.layer.setup.head) LRC_printAll(module.layer.setup.head);
+
+  /* Setup Broadcast */
 
 finalize:
   Finalize(node, &module);

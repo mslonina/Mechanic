@@ -26,6 +26,11 @@
 #include <libreadconfig_hdf5.h>
 
 typedef struct {
+  int options;
+  int pools;
+} init;
+
+typedef struct {
   LRC_configDefaults *options;
   LRC_configNamespace *head;
 } setup;
