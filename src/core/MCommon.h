@@ -8,6 +8,8 @@
 #endif
 
 #define MASTER 0
+#define NORMAL_MODE 0
+#define RESTART_MODE 1
 
 enum {
   MESSAGE_INFO,

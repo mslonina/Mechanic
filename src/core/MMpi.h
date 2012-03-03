@@ -14,5 +14,6 @@
 #define RESULT 59
 #define TERMINATE 99
 
+int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t);
 
 #endif

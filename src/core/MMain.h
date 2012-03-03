@@ -8,5 +8,7 @@
 #include "MModules.h"
 #include "MCore.h"
 #include "MLog.h"
+#include "MSetup.h"
+#include "MMpi.h"
 
 #endif

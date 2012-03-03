@@ -7,11 +7,11 @@
 #include "MModules.h"
 
 module Bootstrap(int node, char *name, module *f);
-module Load(int node, char *name);
-int Init(int node, module *m);
-int Setup(int node, module *m);
+module ModuleLoad(int node, char *name);
+int ModuleInit(int node, module *m);
+int ModuleSetup(int node, module *m);
 void FinalizeLayer(int node, layer *l);
-void Finalize(int node, module *m);
+void ModuleFinalize(int node, module *m);
 
 #define MECHANIC_MODULE_PREFIX "libmechanic_module_"
 

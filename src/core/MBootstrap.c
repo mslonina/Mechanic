@@ -20,7 +20,7 @@
 module Bootstrap(int node, char *name, module *f) {
   module m;
   
-  m = Load(node, name);
+  m = ModuleLoad(node, name);
 
   /* Fallback module */
   if (f->layer.handler) {
@@ -32,10 +32,10 @@ module Bootstrap(int node, char *name, module *f) {
   if (m.layer.handler) {
 
     /* Initialize the module */
-    Init(node, &m);
+    ModuleInit(node, &m);
 
     /* Load module Setup */
-    Setup(node, &m);
+    ModuleSetup(node, &m);
 
   } 
 
@@ -46,7 +46,7 @@ module Bootstrap(int node, char *name, module *f) {
  * @function
  * Wrapper to dlopen()
  */
-module Load(int node, char *name) {
+module ModuleLoad(int node, char *name) {
   module m;
   char *fname = NULL;
 
@@ -74,7 +74,7 @@ module Load(int node, char *name) {
  * - Load fallback layer function
  * - If the layer function exists, overwrite fallback
  */
-int Init(int node, module *m) {
+int ModuleInit(int node, module *m) {
   query *q;
   int opts;
   int mstat;
@@ -91,7 +91,6 @@ int Init(int node, module *m) {
   } 
   opts = m->layer.init.options;
   if (m->fallback.handler) opts = opts + m->fallback.init.options;
-  printf("opts = %d\n", opts);
   
   m->layer.setup.options = calloc(opts*sizeof(LRC_configDefaults), sizeof(LRC_configDefaults));
   if (!m->layer.setup.options) Error(CORE_ERR_MEM);
@@ -110,7 +109,7 @@ int Init(int node, module *m) {
  * layer (and only one config file can be used, with i.e. core setup included, but not
  * necessary).
  */
-int Setup(int node, module *m) {
+int ModuleSetup(int node, module *m) {
   query *q;
   int mstat;
 
@@ -143,7 +142,7 @@ void FinalizeLayer(int node, layer *l) {
  * @function
  * Finalizes the module
  */
-void Finalize(int node, module* m) {
+void ModuleFinalize(int node, module* m) {
   FinalizeLayer(node, &m->layer);
 }
 

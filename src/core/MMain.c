@@ -8,12 +8,19 @@ int main(int argc, char** argv) {
   int mpirank, mpisize, node;
   module core, module, fallback;
 
+  char *filename;
+
+  int mstat = 0;
+
   /* Initialize MPI */
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpirank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpisize);
   node = mpirank;
 
+  /* Popt */
+
+  /* Bootstrap */
 bootstrap:
   fallback.layer.handler = NULL;
   core = Bootstrap(node, CORE_MODULE, &fallback);
@@ -23,17 +30,22 @@ bootstrap:
    * @todo
    * If module is not present (i.e. test drive), bootstrap core the second time with the
    * fallback of core
+   *
+   * @todo
+   * replace TEST_MODULE with popt
    */
   module = Bootstrap(node, TEST_MODULE, &core);
 
-  if (node == MASTER && core.layer.setup.head) LRC_printAll(core.layer.setup.head);
-  if (node == MASTER && module.layer.setup.head) LRC_printAll(module.layer.setup.head);
+  /* Setup */
+setup:
+  filename = Filename("mechanic-", "config", "", ".cfg");
+  mstat = Setup(node, &module, filename, NORMAL_MODE);
+  free(filename);
 
-  /* Setup Broadcast */
 
 finalize:
-  Finalize(node, &module);
-  Finalize(node, &core);
+  ModuleFinalize(node, &module);
+  ModuleFinalize(node, &core);
   
   MPI_Finalize();
 }
