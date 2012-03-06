@@ -1,4 +1,5 @@
-include_directories(. .. ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src)
+include_directories(. .. ../modes/taskfarm ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
+  ${PROJECT_BINARY_DIR}/src/modes/taskfarm)
 set (coresources
     MTypes.h MMechanic2.h
     MCommon.c MCommon.h
@@ -17,9 +18,9 @@ set (mainsources
     )
 
 add_library(core ${coresources})
-target_link_libraries(core hdf5 m mpi readconfig ltdl)
+target_link_libraries(core hdf5 m mpi readconfig)
 
 add_executable(mechanic2 ${mainsources})
-target_link_libraries(mechanic2 core popt readconfig mpi hdf5 m ltdl)
+target_link_libraries(mechanic2 core taskfarm popt readconfig mpi hdf5 m)
 install (TARGETS mechanic2 DESTINATION bin)
 install (FILES MMechanic2.h DESTINATION include)

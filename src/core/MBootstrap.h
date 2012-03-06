@@ -5,13 +5,14 @@
 #include "MTypes.h"
 #include "MCommon.h"
 #include "MModules.h"
+#include "MSetup.h"
 
-module Bootstrap(int node, char *name, module *f);
-module ModuleLoad(int node, char *name);
-int ModuleInit(int node, module *m);
-int ModuleSetup(int node, module *m);
-void FinalizeLayer(int node, layer *l);
-void ModuleFinalize(int node, module *m);
+module Bootstrap(int node, int mpisize, char *name, module *f);
+module ModuleLoad(char *name);
+int ModuleInit(module *m);
+int ModuleSetup(module *m);
+void FinalizeLayer(layer *l);
+void ModuleFinalize(module *m);
 
 #define MECHANIC_MODULE_PREFIX "libmechanic_module_"
 

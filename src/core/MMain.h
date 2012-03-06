@@ -10,5 +10,6 @@
 #include "MLog.h"
 #include "MSetup.h"
 #include "MMpi.h"
+#include "Taskfarm.h"
 
 #endif

@@ -25,19 +25,6 @@
 #include <libreadconfig.h>
 #include <libreadconfig_hdf5.h>
 
-typedef struct {
-  int options;
-  int pools;
-} init;
-
-typedef struct {
-  LRC_configDefaults *options;
-  LRC_configNamespace *head;
-} setup;
-
-typedef struct {
-} task;
-
 /* Error codes */
 #define TASK_SUCCESS 0
 #define CORE_ERR_CORE 901
@@ -57,5 +44,45 @@ typedef struct {
 #define MODULE_ERR_MEM 815
 #define MODULE_ERR_CHECKPOINT 816
 #define MODULE_ERR_OTHER 888
+
+#define POOL_FINALIZE 0
+#define POOL_CREATE_NEW 1
+
+#define MAX_RANK 2
+
+typedef struct {
+  int options;
+  int pools;
+  int datasets_per_pool;
+} init;
+
+typedef struct {
+  LRC_configDefaults *options;
+  LRC_configNamespace *head;
+  struct poptOption *popt;
+  poptContext poptcontext;
+} setup;
+
+typedef struct {
+  char *path;
+  H5S_class_t type;
+  hid_t datatype;
+  int rank;
+  hsize_t dimsf[MAX_RANK];
+  int use_hdf;
+} storage;
+
+typedef struct {
+  int tid;
+} task;
+
+typedef struct {
+  int pid;
+  char name[LRC_CONFIG_LEN];
+  char *path;
+  hid_t location;
+  storage *storage;
+} pool;
+
 
 #endif

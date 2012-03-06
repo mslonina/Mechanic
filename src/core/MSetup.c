@@ -23,14 +23,19 @@
  * @return
  *  The error code, 0 otherwise
  */
-int Setup(int node, module *m, char *filename, int mode) {
+int Setup(module *m, char *filename, int mode) {
   int mstat = 0, opts = 0, i = 0, n = 0;
   MPI_Datatype mpi_t;
-  int mpisize;
   MPI_Status mpi_status;
-  
-  if (node == MASTER) {
-    mstat = ReadConfig(filename, m->layer.setup.head);
+  char *fname;
+
+  /* Read the specified configuration file */
+  if (m->node == MASTER) {
+    if (mode == RESTART_MODE) {
+      
+    } else {
+      mstat = ReadConfig(filename, m->layer.setup.head);
+    }
   }
 
   LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
@@ -40,9 +45,8 @@ int Setup(int node, module *m, char *filename, int mode) {
   mstat = LRC_datatype(m->layer.setup.options[0], &mpi_t);
 
   for (i = 0; i < opts; i++) {
-    if (node == MASTER) {
-      MPI_Comm_size(MPI_COMM_WORLD, &mpisize);
-      for (n = 1; n < mpisize; n++) {
+    if (m->node == MASTER) {
+      for (n = 1; n < m->mpi_size; n++) {
         MPI_Send(&m->layer.setup.options[i], 1, mpi_t, n, STANDBY, MPI_COMM_WORLD);
       }
     } else {
@@ -59,6 +63,22 @@ int Setup(int node, module *m, char *filename, int mode) {
   m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
 
   LRC_printAll(m->layer.setup.head);
+
+  /**
+   * Write the configuration to the master file
+   */
+  if (m->node == MASTER && mode != RESTART_MODE) {
+    fname = Filename(LRC_getOptionValue("core", "name", m->layer.setup.head),
+      "-master", "-00", ".h5");
+
+    strncpy(m->filename, fname, strlen(fname));
+    m->filename[strlen(fname)] = LRC_NULL;
+
+    m->datafile = H5Fcreate(m->filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    LRC_HDF5Writer(m->datafile, CONFIG_GROUP, m->layer.setup.head);
+    H5Fclose(m->datafile);
+    free(fname);
+  }
 
   return mstat;
 }
@@ -82,3 +102,44 @@ int ReadConfig(char *filename, LRC_configNamespace *head) {
   return mstat;
 }
 
+/**
+ * @function
+ * Popt command line parser
+ */
+int Popt(int node, int argc, char** argv, setup *s) {
+  //poptContext context;
+  char value;
+  s->poptcontext = poptGetContext(NULL, argc, (const char **) argv, s->popt, 0);
+  value = poptGetNextOpt(s->poptcontext);
+
+  //printf("value = %s\n", value);
+
+  return 0;
+}
+
+int PoptCountOptions(struct poptOption *p) {
+  int options = 0;
+  while (p[options].longName != NULL) {
+    printf("longName = %s\n", p[options].longName);
+    options++;
+  }
+  return options;
+}
+
+int PoptMergeOptions(module *m, struct poptOption *in, struct poptOption *add) {
+  int index, addopts, i;
+  int status = 0;
+  
+  index = PoptCountOptions(in);
+  addopts = PoptCountOptions(add);
+
+  for (i = 0; i < addopts; i++) {
+    in[index+i] = add[i];
+//    if (m->fallback.handler) {
+//      in[index+i].arg = m->fallback.layer.setup.options[i].value;
+//    }
+  }
+
+  return status;
+
+}

@@ -6,6 +6,10 @@
 #include "MCommon.h"
 #include "MLog.h"
 
-query* LoadSym(void *handler, char* name);
+#define LOAD_DEFAULT 0
+#define NO_FALLBACK 1
+#define FALLBACK_ONLY 2
+
+query* LoadSym(module *m, char* name, int flag);
 
 #endif

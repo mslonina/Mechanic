@@ -17,10 +17,13 @@
  * - Loads the Setup function, if present
  * - Boots LRC API
  */
-module Bootstrap(int node, char *name, module *f) {
+module Bootstrap(int node, int mpi_size, char *name, module *f) {
   module m;
   
-  m = ModuleLoad(node, name);
+  m = ModuleLoad(name);
+
+  m.node = node;
+  m.mpi_size = mpi_size;
 
   /* Fallback module */
   if (f->layer.handler) {
@@ -32,10 +35,10 @@ module Bootstrap(int node, char *name, module *f) {
   if (m.layer.handler) {
 
     /* Initialize the module */
-    ModuleInit(node, &m);
+    ModuleInit(&m);
 
     /* Load module Setup */
-    ModuleSetup(node, &m);
+    ModuleSetup(&m);
 
   } 
 
@@ -46,7 +49,7 @@ module Bootstrap(int node, char *name, module *f) {
  * @function
  * Wrapper to dlopen()
  */
-module ModuleLoad(int node, char *name) {
+module ModuleLoad(char *name) {
   module m;
   char *fname = NULL;
 
@@ -74,7 +77,7 @@ module ModuleLoad(int node, char *name) {
  * - Load fallback layer function
  * - If the layer function exists, overwrite fallback
  */
-int ModuleInit(int node, module *m) {
+int ModuleInit(module *m) {
   query *q;
   int opts;
   int mstat;
@@ -84,16 +87,17 @@ int ModuleInit(int node, module *m) {
     m->layer.init = m->fallback.init;
   }
 
-  q = LoadSym(m->layer.handler, "Init");
-  if (q) {
-    mstat = q(&m->layer.init);
-    CheckStatus(mstat);
-  } 
+  q = LoadSym(m, "Init", NO_FALLBACK);
+  if (q) mstat = q(&m->layer.init);
+  CheckStatus(mstat);
+   
   opts = m->layer.init.options;
   if (m->fallback.handler) opts = opts + m->fallback.init.options;
   
   m->layer.setup.options = calloc(opts*sizeof(LRC_configDefaults), sizeof(LRC_configDefaults));
   if (!m->layer.setup.options) Error(CORE_ERR_MEM);
+  m->layer.setup.popt = calloc((opts+2)*sizeof(struct poptOption), sizeof(struct poptOption));
+  if (!m->layer.setup.popt) Error(CORE_ERR_MEM);
 
   m->layer.setup.head = NULL;
 
@@ -109,17 +113,22 @@ int ModuleInit(int node, module *m) {
  * layer (and only one config file can be used, with i.e. core setup included, but not
  * necessary).
  */
-int ModuleSetup(int node, module *m) {
+int ModuleSetup(module *m) {
   query *q;
   int mstat;
 
-  q = LoadSym(m->layer.handler, "Setup");
+  q = LoadSym(m, "Setup", NO_FALLBACK);
   if (q) {
     mstat = q(&m->layer.setup);
     CheckStatus(mstat);
 
+    /**
+     * Note:
+     * Since we merge core layer to module layer, the user cannot change the core defaults
+     */
     if (m->fallback.handler) {
       mstat = LRC_mergeDefaults(m->layer.setup.options, m->fallback.setup.options);
+      //mstat = PoptMergeOptions(m, m->layer.setup.popt, m->fallback.setup.popt);
     } 
 
     m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
@@ -132,9 +141,11 @@ int ModuleSetup(int node, module *m) {
  * @function
  * Finalizes the layer
  */
-void FinalizeLayer(int node, layer *l) {
+void FinalizeLayer(layer *l) {
   dlclose(l->handler);
   free(l->setup.options);
+  free(l->setup.popt);
+  //poptFreeContext(l->setup.poptcontext);
   if (l->setup.head) LRC_cleanup(l->setup.head);
 }
 
@@ -142,7 +153,7 @@ void FinalizeLayer(int node, layer *l) {
  * @function
  * Finalizes the module
  */
-void ModuleFinalize(int node, module* m) {
-  FinalizeLayer(node, &m->layer);
+void ModuleFinalize(module* m) {
+  FinalizeLayer(&m->layer);
 }
 

@@ -5,7 +5,7 @@
 
 int main(int argc, char** argv) {
   
-  int mpirank, mpisize, node;
+  int mpi_rank, mpi_size, node;
   module core, module, fallback;
 
   char *filename;
@@ -14,16 +14,18 @@ int main(int argc, char** argv) {
 
   /* Initialize MPI */
   MPI_Init(&argc, &argv);
-  MPI_Comm_rank(MPI_COMM_WORLD, &mpirank);
-  MPI_Comm_size(MPI_COMM_WORLD, &mpisize);
-  node = mpirank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  node = mpi_rank;
 
-  /* Popt */
+  /* Initialize HDF */
+  mstat = H5open();
+  CheckStatus(mstat);
 
   /* Bootstrap */
-bootstrap:
+//bootstrap:
   fallback.layer.handler = NULL;
-  core = Bootstrap(node, CORE_MODULE, &fallback);
+  core = Bootstrap(node, mpi_size, CORE_MODULE, &fallback);
   if (!core.layer.handler) Error(CORE_ERR_CORE); // OOPS! At least Core module should be loaded
 
   /**
@@ -34,18 +36,35 @@ bootstrap:
    * @todo
    * replace TEST_MODULE with popt
    */
-  module = Bootstrap(node, TEST_MODULE, &core);
+  module = Bootstrap(node, mpi_size, TEST_MODULE, &core);
 
   /* Setup */
-setup:
+//setup:
+
   filename = Filename("mechanic-", "config", "", ".cfg");
-  mstat = Setup(node, &module, filename, NORMAL_MODE);
+
+  mstat = Setup(&module, filename, NORMAL_MODE);
+  CheckStatus(mstat);
+
   free(filename);
 
+    /**
+   * @todo Popt
+   */ 
+  //Popt(node, argc, argv, &module.layer.setup);
+  //poptPrintHelp(module.layer.setup.poptcontext, stdout, 0);
+  //
 
-finalize:
-  ModuleFinalize(node, &module);
-  ModuleFinalize(node, &core);
+  /* Modes */
+  mstat = Taskfarm(&module);
+  CheckStatus(mstat);
+
+  MPI_Barrier(MPI_COMM_WORLD);
+
+//finalize:
+  ModuleFinalize(&module);
+  ModuleFinalize(&core);
   
+  H5close();
   MPI_Finalize();
 }
