@@ -5,7 +5,13 @@
 #include "MLog.h"
 #include "MTypes.h"
 #include "MCommon.h"
+#include "MModules.h"
 
 int CommitStorageLayout(hid_t location, storage *s);
+int CommitMemoryLayout(hid_t location, storage *s);
+int Storage(module *m, pool *p);
+
+int CommitData(hid_t location, storage *s, double **data);
+int WritePoolData(pool *s);
 
 #endif

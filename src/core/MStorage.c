@@ -1,31 +1,118 @@
 /**
  * @file
+ * The storage stage.
  */
 #include "MStorage.h"
+
+/**
+ * @function
+ */
+int Storage(module *m, pool *p) {
+  int mstat = 0;
+  query *q;
+
+  /* First load the fallback (core) storage layout */
+  if (m->fallback.handler) {
+    q = LoadSym(m, "Storage", FALLBACK_ONLY);
+    if (q) mstat = q(p, &m->layer.setup);
+    CheckStatus(mstat);
+  }
+
+  /* Load the module setup */
+  q = LoadSym(m, "Storage", NO_FALLBACK);
+  if (q) mstat = q(p, &m->layer.setup);
+  CheckStatus(mstat);
+  
+  /* Commit the storage layout (only the Master node) */
+  if (m->node == MASTER) {
+    CommitStorageLayout(p->location, p->storage);
+  }
+
+  /* Commit memory layout used during the task pool */
+  CommitMemoryLayout(p->location, p->storage);
+
+  return mstat;
+}
 
 /** 
  * Commits the storage layout to the HDF5 datafile
  */ 
 int CommitStorageLayout(hid_t location, storage *s) {
   int mstat = 0, i = 0;
-  hid_t dataspace, data;
+  hid_t dataspace, dataset;
   herr_t hdf_status;
+  hsize_t dims[MAX_RANK];
 
-  while (s[i].path) {
-    if (s[i].use_hdf) {
-      dataspace = H5Screate(s[i].type);
-      if (s[i].type == H5S_SIMPLE) {
-        hdf_status = H5Sset_extent_simple(dataspace, s[i].rank, s[i].dimsf, NULL);
+  while (s[i].layout.path) {
+    if (s[i].layout.use_hdf) {
+      dataspace = H5Screate(s[i].layout.dataspace_type);
+      if (s[i].layout.dataspace_type == H5S_SIMPLE) {
+        dims[0] = s[i].layout.dim[0];
+        dims[1] = s[i].layout.dim[1];
+        hdf_status = H5Sset_extent_simple(dataspace, s[i].layout.rank, dims, NULL);
       }
-      data = H5Dcreate(location, s[i].path, s[i].datatype, dataspace, 
+      dataset = H5Dcreate(location, s[i].layout.path, s[i].layout.datatype, dataspace, 
           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-      H5Dclose(data);
+      H5Dclose(dataset);
       H5Sclose(dataspace);
     }
+
+    /* The memory */
+    s[i].data = AllocateDoubleArray(s[i].layout.dim);
+
     i++;
   }
 
+
+  if (hdf_status < 0) mstat = CORE_ERR_HDF;
+  return mstat;
+}
+
+/**
+ * @function
+ * Commits the memory layout
+ *
+ * This function must run on every node -- the size of data arrays shared between nodes
+ * depends on the memory layout.
+ */
+int CommitMemoryLayout(hid_t location, storage *s) {
+  int mstat = 0;
+
+  return mstat;
+}
+
+/**
+ * @function
+ * Writes the data buffer to the dataset
+ */
+int CommitData(hid_t location, storage *s, double **data) {
+  int mstat = 0;
+  herr_t hdf_status;
+
+  hdf_status = H5Dwrite(location, s->layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0][0]);
+  if (hdf_status < 0) mstat = CORE_ERR_HDF;
+  return mstat;
+}
+
+/**
+ * @function
+ * Writes all specified data buffers to the master file
+ */
+int WritePoolData(pool *p) {
+  int mstat = 0, i = 0;
+  hid_t dataset;
+  herr_t hdf_status;
+  
+  while (p->storage[i].layout.path) {
+    if (p->storage[i].layout.use_hdf) {
+      dataset = H5Dopen(p->location, p->storage[i].layout.path, H5P_DEFAULT);
+      hdf_status = CommitData(dataset, &p->storage[i], p->storage[i].data);
+      H5Dclose(dataset);
+    }
+    i++;
+  }
+  
   if (hdf_status < 0) mstat = CORE_ERR_HDF;
   return mstat;
 }

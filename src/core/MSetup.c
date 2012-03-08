@@ -1,5 +1,6 @@
 /**
  * @file
+ * The setup stage.
  */
 #include "MSetup.h"
 

@@ -1,5 +1,6 @@
 /**
  * @file
+ * The module interface.
  */
 
 #include "MModules.h"
@@ -28,20 +29,20 @@ query* LoadSym(module *m, char* function, int flag) {
     fallback = NULL;
   }
 
-  Message(MESSAGE_INFO, "Querying function '%s'\n", function);
+  Message(MESSAGE_DEBUG, "Querying function '%s'\n", function);
   q = (query*) dlsym(handler, function);
   err = dlerror();
 
   if (err == NULL) {
-    Message(MESSAGE_INFO, "Loading function '%s'\n", function);
+    Message(MESSAGE_DEBUG, "Loading function '%s'\n", function);
     return q;
   } else {
     if (fallback) {
-      Message(MESSAGE_INFO, "Querying fallback function '%s'\n", function);
+      Message(MESSAGE_DEBUG, "Querying fallback function '%s'\n", function);
       q = (query*) dlsym(fallback, function);
       err = dlerror();
       if (err == NULL) {
-        Message(MESSAGE_INFO, "Loading fallback function '%s'\n", function);
+        Message(MESSAGE_DEBUG, "Loading fallback function '%s'\n", function);
       return q;
       }
     }

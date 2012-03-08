@@ -26,4 +26,9 @@ void Message(int type, char* message, ...);
 void Error(int status);
 void CheckStatus(int status);
 
+double* AllocateDoubleVec(int *dims);
+double** AllocateDoubleArray(int *dims);
+void FreeDoubleVec(double *vec, int *dims);
+void FreeDoubleArray(double **array, int *dims);
+
 #endif

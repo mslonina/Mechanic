@@ -53,7 +53,8 @@
 typedef struct {
   int options;
   int pools;
-  int datasets_per_pool;
+  int banks_per_pool;
+  int banks_per_task;
 } init;
 
 typedef struct {
@@ -65,23 +66,33 @@ typedef struct {
 
 typedef struct {
   char *path;
-  H5S_class_t type;
-  hid_t datatype;
-  int rank;
-  hsize_t dimsf[MAX_RANK];
   int use_hdf;
+  int rank;
+  int storage_type;
+  H5S_class_t dataspace_type;
+  hid_t datatype;
+  int dim[MAX_RANK];
+} schema;
+
+typedef struct {
+  schema layout;
+  double **data;
 } storage;
 
 typedef struct {
-  int tid;
+  int pid; /* The parent pool id */
+  int tid; /* The task id */
+  int location[MAX_RANK]; /* Coordinates of the task */
+  storage *storage;
 } task;
 
 typedef struct {
-  int pid;
-  char name[LRC_CONFIG_LEN];
-  char *path;
+  int pid; /* The pool id */
+  char name[LRC_CONFIG_LEN]; /* The pool name */
+  char *path; /* */
   hid_t location;
   storage *storage;
+  task task;
 } pool;
 
 

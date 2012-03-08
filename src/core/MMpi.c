@@ -1,5 +1,6 @@
 /**
  * @file
+ * The MPI-related functions and wrappers.
  */
 #include "MMpi.h"
 

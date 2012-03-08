@@ -1,5 +1,6 @@
 /**
  * @file
+ * The Bootstrap stage.
  */
 #include "MBootstrap.h"
 

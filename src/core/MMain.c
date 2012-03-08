@@ -1,5 +1,6 @@
 /**
  * @file
+ * The Main function.
  */
 #include "MMain.h"
 

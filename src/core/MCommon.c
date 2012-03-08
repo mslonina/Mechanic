@@ -1,5 +1,6 @@
 /**
  * @file
+ * Common functions.
  */
 
 #include "MCommon.h"
@@ -47,6 +48,7 @@ char* Filename(char *prefix, char* name, char *suffix, char *extension) {
 void Message(int type, char *message, ...) {
 
   int silent = 0;
+  int debug = 0;
   static char message2[2048];
   va_list args;
 
@@ -56,8 +58,7 @@ void Message(int type, char *message, ...) {
       if (type == MESSAGE_INFO) printf("-> %s", message2);
       if (type == MESSAGE_CONT) printf("   %s", message2);
       if (type == MESSAGE_CONT2) printf("   \t\t %s", message2);
-		  if (type == MESSAGE_DEBUG) printf("   %s", message2);
-		  //if (type == MESSAGE_DEBUG && debug == 1) printf("   %s", message2);
+		  if (type == MESSAGE_DEBUG && debug == 1) printf("   %s", message2);
     }
       if (type == MESSAGE_ERR) perror(message2);
       if (type == MESSAGE_IERR) printf("!! %s", message2);
@@ -72,4 +73,54 @@ void Error(int errcode) {
 
 void CheckStatus(int status) {
 
+}
+
+/**
+ * @function
+ * Allocates double vector
+ */
+double* AllocateDoubleVec(int *dims) {
+  double *vec;
+
+//  printf("Allocation VEC = %d\n", dims[0]);
+  vec = calloc(sizeof(double*) * dims[0], sizeof(double*));
+  if (!vec) Error(CORE_ERR_MEM);
+
+  return vec;
+}
+
+/** 
+ * @function
+ * Allocates double array
+ *
+ * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
+ */
+double** AllocateDoubleArray(int *dims) {
+  double** array;
+  int i;
+
+  array = (double**) calloc(dims[0]*sizeof(double*), sizeof(double*));
+  array[0] = (double*) calloc(dims[0]*dims[1]*sizeof(double), sizeof(double));
+  for (i = 1; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
+
+  return array;
+}
+
+/**
+ * @function
+ * Frees double vector
+ */
+void FreeDoubleVec(double *vec, int *dims) {
+  free(vec);
+}
+
+/**
+ * @function
+ * Frees double array
+ *
+ * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
+ */
+void FreeDoubleArray(double **array, int *dims) {
+  free(array[0]);
+  free(array);
 }

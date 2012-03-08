@@ -8,7 +8,7 @@
 #include "MModules.h"
 #include "MStorage.h"
 
-pool PoolLoad(module *m, int pid, hid_t location);
+pool PoolLoad(module *m, int pid);
 int PoolInit(module *m, pool *p);
 void PoolFinalize(pool *p);
 
