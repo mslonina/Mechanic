@@ -10,6 +10,8 @@
 
 pool PoolLoad(module *m, int pid);
 int PoolInit(module *m, pool *p);
-void PoolFinalize(pool *p);
+int PoolPrepare(module *m, pool *p);
+int PoolPostprocess(module *m, pool *p);
+void PoolFinalize(module *m, pool *p);
 
 #endif

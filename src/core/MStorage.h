@@ -8,7 +8,7 @@
 #include "MModules.h"
 
 int CommitStorageLayout(hid_t location, storage *s);
-int CommitMemoryLayout(hid_t location, storage *s);
+int CommitMemoryLayout(storage *s);
 int Storage(module *m, pool *p);
 
 int CommitData(hid_t location, storage *s, double **data);

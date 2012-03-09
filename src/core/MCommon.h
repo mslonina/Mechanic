@@ -30,5 +30,6 @@ double* AllocateDoubleVec(int *dims);
 double** AllocateDoubleArray(int *dims);
 void FreeDoubleVec(double *vec, int *dims);
 void FreeDoubleArray(double **array, int *dims);
+int GetSize(int rank, int *dims);
 
 #endif

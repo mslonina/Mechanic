@@ -68,7 +68,7 @@ void Message(int type, char *message, ...) {
 }
 
 void Error(int errcode) {
-//  if (errcode == CORE_ERR_CORE) Abort(CORE_ERR_CORE);
+  //if (errcode == CORE_ERR_MEM) Abort(CORE_ERR_MEM);
 }
 
 void CheckStatus(int status) {
@@ -123,4 +123,19 @@ void FreeDoubleVec(double *vec, int *dims) {
 void FreeDoubleArray(double **array, int *dims) {
   free(array[0]);
   free(array);
+}
+
+/**
+ * @function
+ * Gets the size.
+ */
+int GetSize(int rank, int *dims){
+  int i = 0, size;
+
+  size = dims[0];
+  for (i = 1; i < rank; i++) {
+    size = size * dims[i];
+  }
+
+  return size;
 }

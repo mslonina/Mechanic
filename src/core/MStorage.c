@@ -22,14 +22,14 @@ int Storage(module *m, pool *p) {
   q = LoadSym(m, "Storage", NO_FALLBACK);
   if (q) mstat = q(p, &m->layer.setup);
   CheckStatus(mstat);
+
+  /* Commit memory layout used during the task pool */
+  CommitMemoryLayout(p->storage);
   
   /* Commit the storage layout (only the Master node) */
   if (m->node == MASTER) {
     CommitStorageLayout(p->location, p->storage);
   }
-
-  /* Commit memory layout used during the task pool */
-  CommitMemoryLayout(p->location, p->storage);
 
   return mstat;
 }
@@ -57,13 +57,8 @@ int CommitStorageLayout(hid_t location, storage *s) {
       H5Dclose(dataset);
       H5Sclose(dataspace);
     }
-
-    /* The memory */
-    s[i].data = AllocateDoubleArray(s[i].layout.dim);
-
     i++;
   }
-
 
   if (hdf_status < 0) mstat = CORE_ERR_HDF;
   return mstat;
@@ -76,8 +71,13 @@ int CommitStorageLayout(hid_t location, storage *s) {
  * This function must run on every node -- the size of data arrays shared between nodes
  * depends on the memory layout.
  */
-int CommitMemoryLayout(hid_t location, storage *s) {
-  int mstat = 0;
+int CommitMemoryLayout(storage *s) {
+  int mstat = 0, i = 0;
+
+  while (s[i].layout.path) {
+    s[i].data = AllocateDoubleArray(s[i].layout.dim);
+    i++;
+  }
 
   return mstat;
 }

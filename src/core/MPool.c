@@ -14,7 +14,9 @@ pool PoolLoad(module *m, int pid) {
   p.pid = pid;
   sprintf(p.name,"pool-%04d",pid);
 
-  p.location = H5Gcreate(m->location, p.name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  if (m->node == MASTER) {
+    p.location = H5Gcreate(m->location, p.name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  }
 
   return p;
 }
@@ -37,11 +39,53 @@ int PoolInit(module *m, pool *p) {
 
 /**
  * @function
+ * Prepares the pool.
+ */
+int PoolPrepare(module *m, pool *p) {
+  int mstat = 0, i = 0;
+  query *q;
+  int size;
+
+  if (m->node == MASTER) {
+    q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
+    if (q) mstat = q(p, m->layer.setup);
+    mstat = WritePoolData(p);
+  }
+
+  while (p->storage[i].layout.path) {
+    size = GetSize(p->storage[i].layout.rank, p->storage[i].layout.dim);
+    MPI_Bcast(&(p->storage[i].data[0][0]), size, MPI_DOUBLE, MASTER, MPI_COMM_WORLD);
+    i++;
+  }
+
+  return mstat;
+}
+
+/**
+ * @function
+ * Postprocesses the pool.
+ */
+int PoolPostprocess(module *m, pool *p) {
+  int mstat = 0;
+  query *q;
+
+  if (m->node == MASTER) {
+    q = LoadSym(m, "PoolPostprocess", LOAD_DEFAULT);
+    if (q) mstat = q(p, m->layer.setup);
+  }
+
+  MPI_Bcast(&mstat, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
+
+  return mstat;
+}
+
+/**
+ * @function
  * Finalizes the pool
  */
-void PoolFinalize(pool *p) {
+void PoolFinalize(module *m, pool *p) {
   FreeDoubleArray(p->storage->data, p->storage->layout.dim);
   free(p->storage);
   free(p->task.storage);
-  H5Gclose(p->location);
+  if (m->node == MASTER) H5Gclose(p->location);
 }

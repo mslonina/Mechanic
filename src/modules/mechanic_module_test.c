@@ -72,6 +72,14 @@ int PoolPrepare(pool *p, setup *s) {
  * Implementation of PoolPostprocess().
  */
 int PoolPostprocess(pool *p, setup *s) {
+  /*int i,j;
+  for (j = 0; j < p->storage[2].layout.dim[0]; j++) {
+    for (i = 0; i < p->storage[2].layout.dim[1]; i++) { 
+      printf("%02.1f " , p->storage[2].data[j][i]);
+    }
+    printf("\n");
+  }*/
+
   if (p->pid > 2) return POOL_FINALIZE;
   return POOL_CREATE_NEW;
 }
