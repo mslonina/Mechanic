@@ -25,8 +25,10 @@
 #include <libreadconfig.h>
 #include <libreadconfig_hdf5.h>
 
-/* Error codes */
 #define TASK_SUCCESS 0
+#define CORE_ICE 112
+
+/* Error codes */
 #define CORE_ERR_CORE 901
 #define CORE_ERR_MPI 911
 #define CORE_ERR_HDF 912
@@ -35,7 +37,6 @@
 #define CORE_ERR_MEM 915
 #define CORE_ERR_CHECKPOINT 916
 #define CORE_ERR_OTHER 999
-#define CORE_ICE 31337
 
 #define MODULE_ERR_MPI 811
 #define MODULE_ERR_HDF 812
@@ -91,6 +92,7 @@ typedef struct {
   char name[LRC_CONFIG_LEN]; /* The pool name */
   char *path; /* */
   hid_t location;
+  schema board;
   storage *storage;
   task task;
 } pool;

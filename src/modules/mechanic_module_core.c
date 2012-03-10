@@ -59,6 +59,9 @@ int Setup(setup *s) {
  *
  * The Pool data is broadcasted right after PoolPrepare() and saved to the master
  * datafile.
+ *
+ * You can adjust the number of available memory/storage banks by implementing the Init
+ * function and using banks_per_pool and banks_per_task variables.
  */
 int Storage(pool *p, setup *s) {
 
@@ -81,33 +84,62 @@ int Storage(pool *p, setup *s) {
   p->storage[1].layout.use_hdf = 0;
 
   /* Path: /Pools/pool-ID/tasks/masterdata */
-/*  p->task.storage[0].layout.path = "masterdata";
+  p->task.storage[0].layout.path = "masterdata";
   p->task.storage[0].layout.dataspace_type = H5S_SIMPLE;
   p->task.storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task.storage[0].layout.rank = 2;
   p->task.storage[0].layout.dim[0] = 1;
   p->task.storage[0].layout.dim[1] = 12;
   p->task.storage[0].layout.use_hdf = 1;
-*/
+
   /* Path: /Pools/pool-ID/tasks/tmpdata */
-/*  p->task.storage[1].layout.path = "tmpdata";
+  p->task.storage[1].layout.path = "tmpdata";
   p->task.storage[1].layout.dataspace_type = H5S_SIMPLE;
   p->task.storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task.storage[1].layout.rank = 2;
   p->task.storage[1].layout.dim[0] = 10;
   p->task.storage[1].layout.dim[1] = 12;
   p->task.storage[1].layout.use_hdf = 0;
-*/
+
   return TASK_SUCCESS;
 }
 
 /**
  * @function
- * Postprocess the pool
+ * Prepares the pool.
+ *
+ * This is a perfect place to read additional configuration, input files and assign values
+ * to pool data tables. The data stored in the pool is broadcasted to all nodes, right
+ * after the function is performed, as well as hdf storage for all datasets with use_hdf =
+ * 1.
+ */
+int PoolPrepare(pool *p, setup *s) {
+  return TASK_SUCCESS;
+}
+
+/**
+ * @function
+ * Process the pool
  *
  * @return
  * POOL_FINALIZE for the last pool or POOL_CREATE_NEW, if the pool loop have to continue
  */
-int PoolPostprocess(pool *p, setup *s) {
+int PoolProcess(pool *p, setup *s) {
   return POOL_FINALIZE;
+}
+
+/**
+ * @function
+ * Prepares the task.
+ */
+int TaskPrepare(pool *p, task *t, setup *s) {
+  return TASK_SUCCESS;
+}
+
+/**
+ * @function
+ * Process the task.
+ */
+int TaskProcess(pool *p, task *t, setup *s) {
+  return TASK_SUCCESS;
 }

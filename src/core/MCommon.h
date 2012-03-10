@@ -21,13 +21,14 @@ enum {
 	MESSAGE_DEBUG
 } MessageType;
 
-char* Filename(char *prefix, char *name, char *suffix, char *extension);
+char* Name(char *prefix, char *name, char *suffix, char *extension);
 void Message(int type, char* message, ...);
 void Error(int status);
+void Abort(int status);
 void CheckStatus(int status);
 
 double* AllocateDoubleVec(int *dims);
-double** AllocateDoubleArray(int *dims);
+double** AllocateDoubleArray(int rank, int *dims);
 void FreeDoubleVec(double *vec, int *dims);
 void FreeDoubleArray(double **array, int *dims);
 int GetSize(int rank, int *dims);

@@ -7,12 +7,12 @@
 
 /**
  * @function
- * Creates module filename
+ * Creates name
  *
  * @in_group
  * Helpers
  */
-char* Filename(char *prefix, char* name, char *suffix, char *extension) {
+char* Name(char *prefix, char* name, char *suffix, char *extension) {
   char* fname;
   size_t preflen, nlen, sufflen, extlen, filelen;
 
@@ -67,12 +67,28 @@ void Message(int type, char *message, ...) {
 
 }
 
+/**
+ * @function
+ * Common error handler
+ */
 void Error(int errcode) {
-  //if (errcode == CORE_ERR_MEM) Abort(CORE_ERR_MEM);
+  Abort(errcode);
 }
 
-void CheckStatus(int status) {
+/**
+ * @function
+ * Wrapper to MPI_Abort
+ */
+void Abort(int errcode) {
+  MPI_Abort(MPI_COMM_WORLD, errcode);
+}
 
+/**
+ * @function
+ * Common status check
+ */
+void CheckStatus(int status) {
+  if (status >= CORE_ERR_CORE) Error(status); 
 }
 
 /**
@@ -94,13 +110,16 @@ double* AllocateDoubleVec(int *dims) {
  * Allocates double array
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
+ * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
  */
-double** AllocateDoubleArray(int *dims) {
+double** AllocateDoubleArray(int rank, int *dims) {
   double** array;
-  int i;
+  int i, size;
+
+  size = GetSize(rank, dims);
 
   array = (double**) calloc(dims[0]*sizeof(double*), sizeof(double*));
-  array[0] = (double*) calloc(dims[0]*dims[1]*sizeof(double), sizeof(double));
+  array[0] = (double*) calloc(size*sizeof(double), sizeof(double));
   for (i = 1; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
 
   return array;

@@ -54,7 +54,7 @@ module ModuleLoad(char *name) {
   module m;
   char *fname = NULL;
 
-  fname = Filename(MECHANIC_MODULE_PREFIX, name, "", LIBEXT);
+  fname = Name(MECHANIC_MODULE_PREFIX, name, "", LIBEXT);
 
   Message(MESSAGE_DEBUG, "Loading module '%s'\n", fname);
 

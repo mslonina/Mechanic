@@ -75,7 +75,7 @@ int CommitMemoryLayout(storage *s) {
   int mstat = 0, i = 0;
 
   while (s[i].layout.path) {
-    s[i].data = AllocateDoubleArray(s[i].layout.dim);
+    s[i].data = AllocateDoubleArray(s[i].layout.rank, s[i].layout.dim);
     i++;
   }
 

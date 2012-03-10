@@ -63,14 +63,14 @@ int PoolPrepare(module *m, pool *p) {
 
 /**
  * @function
- * Postprocesses the pool.
+ * Processes the pool.
  */
-int PoolPostprocess(module *m, pool *p) {
+int PoolProcess(module *m, pool *p) {
   int mstat = 0;
   query *q;
 
   if (m->node == MASTER) {
-    q = LoadSym(m, "PoolPostprocess", LOAD_DEFAULT);
+    q = LoadSym(m, "PoolProcess", LOAD_DEFAULT);
     if (q) mstat = q(p, m->layer.setup);
   }
 

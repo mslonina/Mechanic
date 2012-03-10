@@ -11,6 +11,4 @@
 #define CORE_MODULE "core"
 #define TEST_MODULE "test"
 
-int Abort(int errcode);
-
 #endif

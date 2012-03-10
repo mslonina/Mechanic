@@ -69,9 +69,9 @@ int PoolPrepare(pool *p, setup *s) {
 
 /**
  * @function
- * Implementation of PoolPostprocess().
+ * Implementation of PoolProcess().
  */
-int PoolPostprocess(pool *p, setup *s) {
+int PoolProcess(pool *p, setup *s) {
   /*int i,j;
   for (j = 0; j < p->storage[2].layout.dim[0]; j++) {
     for (i = 0; i < p->storage[2].layout.dim[1]; i++) { 
@@ -82,4 +82,20 @@ int PoolPostprocess(pool *p, setup *s) {
 
   if (p->pid > 2) return POOL_FINALIZE;
   return POOL_CREATE_NEW;
+}
+
+/**
+ * @function
+ * Implementation of TaskPrepare().
+ */
+int TaskPrepare(pool *p, task *t, setup *s) {
+  return TASK_SUCCESS;
+}
+
+/**
+ * @function
+ * Implementation of TaskProcess().
+ */
+int TaskProcess(pool *p, task *t, setup *s) {
+  return TASK_SUCCESS;
 }

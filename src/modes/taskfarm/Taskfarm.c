@@ -29,7 +29,7 @@ int Taskfarm(module *m) {
 
     // The task loop goes here 
 
-    mstat = PoolPostprocess(m, &p); 
+    mstat = PoolProcess(m, &p); 
 //    printf("node %d, pool mstat%d\n", node, mstat);
     PoolFinalize(m, &p);
     pid++;

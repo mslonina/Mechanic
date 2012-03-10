@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
   /* Setup */
 //setup:
 
-  filename = Filename("mechanic-", "config", "", ".cfg");
+  filename = Name("mechanic-", "config", "", ".cfg");
 
   mstat = Setup(&module, filename, NORMAL_MODE);
   CheckStatus(mstat);

@@ -69,7 +69,7 @@ int Setup(module *m, char *filename, int mode) {
    * Write the configuration to the master file
    */
   if (m->node == MASTER && mode != RESTART_MODE) {
-    fname = Filename(LRC_getOptionValue("core", "name", m->layer.setup.head),
+    fname = Name(LRC_getOptionValue("core", "name", m->layer.setup.head),
       "-master", "-00", ".h5");
 
     strncpy(m->filename, fname, strlen(fname));
@@ -97,6 +97,7 @@ int ReadConfig(char *filename, LRC_configNamespace *head) {
     mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
   } else {
     Message(MESSAGE_ERR, "Error opening config file");
+    Error(MESSAGE_ERR);
   }
   fclose(inif);
 
