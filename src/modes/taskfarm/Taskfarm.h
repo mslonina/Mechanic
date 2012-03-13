@@ -6,6 +6,9 @@
 #include "MTypes.h"
 #include "MLog.h"
 #include "MPool.h"
+#include "MMpi.h"
+#include "MCheckpoint.h"
+#include "MTask.h"
 
 int Taskfarm(module *m);
 int Master(module *m);

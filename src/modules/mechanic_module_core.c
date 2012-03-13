@@ -101,6 +101,8 @@ int Storage(pool *p, setup *s) {
   p->task.storage[1].layout.dim[1] = 12;
   p->task.storage[1].layout.use_hdf = 0;
 
+  p->checkpoint_size = 2; // 2*mpi_size
+
   return TASK_SUCCESS;
 }
 
@@ -141,5 +143,34 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * Process the task.
  */
 int TaskProcess(pool *p, task *t, setup *s) {
+  return TASK_SUCCESS;
+}
+
+/**
+ * @function
+ * Prepares the checkpoint
+ *
+ * @in_group
+ * The master node
+ */
+int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
+  int i = 0;
+
+  //printf("pool %d, cid %d, size = %d\n", p->pid, c->cid, c->size);
+  //for (i = 0; i < c->size; i++) {
+  //  printf("checkpoint %d, data[%d] = %d\n", c->cid, i, c->data[i]);
+  //}
+
+  return TASK_SUCCESS;
+}
+
+/**
+ * @function
+ * Processes the checkpoint
+ * 
+ * @in_group
+ * The master node
+ */
+int CheckpointProcess(pool *p, checkpoint *c, setup *s) {
   return TASK_SUCCESS;
 }

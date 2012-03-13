@@ -44,11 +44,12 @@ int PoolInit(module *m, pool *p) {
 int PoolPrepare(module *m, pool *p) {
   int mstat = 0, i = 0;
   query *q;
+  setup s = m->layer.setup;
   int size;
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
-    if (q) mstat = q(p, m->layer.setup);
+    if (q) mstat = q(p, s);
     mstat = WritePoolData(p);
   }
 
@@ -67,11 +68,12 @@ int PoolPrepare(module *m, pool *p) {
  */
 int PoolProcess(module *m, pool *p) {
   int mstat = 0;
+  setup s = m->layer.setup;
   query *q;
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolProcess", LOAD_DEFAULT);
-    if (q) mstat = q(p, m->layer.setup);
+    if (q) mstat = q(p, s);
   }
 
   MPI_Bcast(&mstat, 1, MPI_INT, MASTER, MPI_COMM_WORLD);

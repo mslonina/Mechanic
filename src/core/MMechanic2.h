@@ -88,14 +88,21 @@ typedef struct {
 } task;
 
 typedef struct {
+  int cid; /* The checkpoint id */
+  int counter;
+  int size;
+  int *data;
+} checkpoint;
+
+typedef struct {
   int pid; /* The pool id */
   char name[LRC_CONFIG_LEN]; /* The pool name */
   char *path; /* */
   hid_t location;
   schema board;
   storage *storage;
+  int checkpoint_size;
   task task;
 } pool;
-
 
 #endif

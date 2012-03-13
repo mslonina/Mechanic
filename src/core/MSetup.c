@@ -48,10 +48,10 @@ int Setup(module *m, char *filename, int mode) {
   for (i = 0; i < opts; i++) {
     if (m->node == MASTER) {
       for (n = 1; n < m->mpi_size; n++) {
-        MPI_Send(&m->layer.setup.options[i], 1, mpi_t, n, STANDBY, MPI_COMM_WORLD);
+        MPI_Send(&m->layer.setup.options[i], 1, mpi_t, n, TAG_STANDBY, MPI_COMM_WORLD);
       }
     } else {
-      MPI_Recv(&m->layer.setup.options[i], 1, mpi_t, MASTER, STANDBY, MPI_COMM_WORLD, &mpi_status);
+      MPI_Recv(&m->layer.setup.options[i], 1, mpi_t, MASTER, TAG_STANDBY, MPI_COMM_WORLD, &mpi_status);
     }
   }
   MPI_Type_free(&mpi_t);
