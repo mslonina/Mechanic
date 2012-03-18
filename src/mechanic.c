@@ -244,7 +244,7 @@ int main(int argc, char** argv) {
     {"default", "mconfig", MECHANIC_CONFIG_FILE_DEFAULT, LRC_STRING},
     {"default", "mode", MECHANIC_MODE_DEFAULT, LRC_INT},
     {"logs", "checkpoint", MECHANIC_CHECKPOINT_DEFAULT, LRC_INT},
-    LRC_OPTIONS_END
+    {LRC_OPTIONS_END}
   };
 
   /* POPT tables */
