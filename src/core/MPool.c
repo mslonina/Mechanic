@@ -18,6 +18,12 @@ pool PoolLoad(module *m, int pid) {
     p.location = H5Gcreate(m->location, p.name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   }
 
+  p.storage = calloc(m->layer.init.banks_per_pool * sizeof(storage), sizeof(storage));
+  if (!p.storage) Error(CORE_ERR_MEM);
+  
+  p.task.storage = calloc(m->layer.init.banks_per_task * sizeof(storage), sizeof(storage));
+  if (!p.task.storage) Error(CORE_ERR_MEM);
+
   return p;
 }
 
@@ -27,12 +33,6 @@ pool PoolLoad(module *m, int pid) {
  */
 int PoolInit(module *m, pool *p) {
   int mstat = 0;
-
-  p->storage = calloc(m->layer.init.banks_per_pool * sizeof(storage), sizeof(storage));
-  if (!p->storage) Error(CORE_ERR_MEM);
-  
-  p->task.storage = calloc(m->layer.init.banks_per_task * sizeof(storage), sizeof(storage));
-  if (!p->task.storage) Error(CORE_ERR_MEM);
 
   return mstat;
 }
@@ -54,8 +54,10 @@ int PoolPrepare(module *m, pool *p) {
   }
 
   while (p->storage[i].layout.path) {
-    size = GetSize(p->storage[i].layout.rank, p->storage[i].layout.dim);
-    MPI_Bcast(&(p->storage[i].data[0][0]), size, MPI_DOUBLE, MASTER, MPI_COMM_WORLD);
+    if (p->storage[i].layout.sync) {
+      size = GetSize(p->storage[i].layout.rank, p->storage[i].layout.dim);
+      MPI_Bcast(&(p->storage[i].data[0][0]), size, MPI_DOUBLE, MASTER, MPI_COMM_WORLD);
+    }
     i++;
   }
 

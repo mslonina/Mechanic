@@ -33,6 +33,8 @@ typedef struct {
   hid_t location;
   int node;
   int mpi_size;
+  int pool_banks;
+  int task_banks;
   layer layer;
   layer fallback;
 } module;

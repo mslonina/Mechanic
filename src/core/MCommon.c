@@ -119,8 +119,10 @@ double** AllocateDoubleArray(int rank, int *dims) {
   size = GetSize(rank, dims);
 
   array = (double**) calloc(dims[0]*sizeof(double*), sizeof(double*));
-  array[0] = (double*) calloc(size*sizeof(double), sizeof(double));
-  for (i = 1; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
+  if (array) {
+    array[0] = (double*) calloc(size*sizeof(double), sizeof(double));
+    for (i = 1; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
+  }
 
   return array;
 }
@@ -140,8 +142,10 @@ void FreeDoubleVec(double *vec, int *dims) {
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  */
 void FreeDoubleArray(double **array, int *dims) {
-  free(array[0]);
-  free(array);
+
+  if (array[0]) free(array[0]);
+  if (array) free(array);
+
 }
 
 /**
@@ -157,4 +161,34 @@ int GetSize(int rank, int *dims){
   }
 
   return size;
+}
+
+/**
+ * @function
+ * Copies Array to vector
+ */
+void Array2Vec(double *vec, double **array, int rank, int *dims) {
+  int i = 0, j = 0, k = 0;
+ 
+  for (i = 0; i < dims[0]; i++) {
+    k = i * dims[1];
+    for (j = 0; j < dims[1]; j++) {
+      vec[j+k] = array[i][j];
+    }
+  }
+}
+
+/**
+ * @function
+ * Copies vector to array
+ */
+void Vec2Array(double *vec, double **array, int rank, int *dims) {
+  int i = 0, j = 0, k = 0;
+
+  for (i = 0; i < dims[0]; i++) {
+    k = i * dims[1];
+    for (j = 0; j < dims[1]; j++) {
+      array[i][j] = vec[j+k];
+    }
+  }
 }

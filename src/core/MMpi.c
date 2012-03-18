@@ -38,3 +38,72 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
 
   return mstat;
 }
+
+/**
+ * @function
+ * Packs the task data to 1D contigous array
+ */
+int Pack(module *m, double *buffer, int buffer_size, pool p, task t, int tag) {
+  int mstat = 0;
+  int position = 0;
+  int i = 0;
+  int size = 0;
+
+  buffer[0] = (double) tag; /* Message tag */
+
+  if (tag != TAG_TERMINATE) {
+    buffer[1] = (double) t.tid; /* Task ID */
+
+    position = 2;
+    
+    /* Task location in the pool */
+    for (i = 0; i < p.board.rank; i++) {
+      buffer[i+position] = t.location[i];
+    }
+    position = position + p.board.rank;
+ 
+    /* Task data */
+    for (i = 0; i < m->task_banks; i++) {
+      Array2Vec(buffer+position, t.storage[i].data, t.storage[i].layout.rank, t.storage[i].layout.dim);
+      size = GetSize(t.storage[i].layout.rank, t.storage[i].layout.dim);
+      position = position + size;
+    }
+  }
+
+  return mstat;
+}
+
+/**
+ * @function
+ * Unpack the 1D-contigous array to task
+ */
+int Unpack(module *m, double *buffer, int buffer_size, pool p, task *t, int *tag) {
+  int mstat = 0;
+  int position = 0;
+  int i = 0;
+  int size = 0;
+
+  *tag = (int)buffer[0]; /* Message tag */
+
+  if (*tag != TAG_TERMINATE) {
+    t->tid = (int)buffer[1]; /* Task ID*/
+    
+    position = 2;
+
+    /* Task location in the pool */
+    for (i = 0; i < p.board.rank; i++) {
+      t->location[i] = buffer[i+position];
+    }
+    position = position + p.board.rank;
+
+    /* Task data */
+    for (i = 0; i < m->task_banks; i++) {
+      Vec2Array(buffer+position, t->storage[i].data, t->storage[i].layout.rank, t->storage[i].layout.dim);
+      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
+      position = position + size;
+    }
+  }
+
+  return mstat;
+}
+

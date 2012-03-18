@@ -67,12 +67,13 @@ typedef struct {
 
 typedef struct {
   char *path;
-  int use_hdf;
   int rank;
+  int dim[MAX_RANK];
+  int use_hdf;
+  int sync;
   int storage_type;
   H5S_class_t dataspace_type;
   hid_t datatype;
-  int dim[MAX_RANK];
 } schema;
 
 typedef struct {
@@ -92,6 +93,7 @@ typedef struct {
   int counter;
   int size;
   int *data;
+  task *task;
 } checkpoint;
 
 typedef struct {

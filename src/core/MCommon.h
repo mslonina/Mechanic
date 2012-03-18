@@ -33,4 +33,7 @@ void FreeDoubleVec(double *vec, int *dims);
 void FreeDoubleArray(double **array, int *dims);
 int GetSize(int rank, int *dims);
 
+void Array2Vec(double *vec, double **array, int rank, int *dims);
+void Vec2Array(double *vec, double **array, int rank, int *dims);
+
 #endif

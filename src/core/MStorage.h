@@ -9,9 +9,14 @@
 
 int CommitStorageLayout(hid_t location, storage *s);
 int CommitMemoryLayout(storage *s);
+void FreeMemoryLayout(storage *s);
 int Storage(module *m, pool *p);
 
 int CommitData(hid_t location, storage *s, double **data);
-int WritePoolData(pool *s);
+int WritePoolData(pool *p);
+
+int GetBanks(storage *s);
+
+
 
 #endif

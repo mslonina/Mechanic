@@ -31,6 +31,11 @@ int Storage(module *m, pool *p) {
     CommitStorageLayout(p->location, p->storage);
   }
 
+  m->pool_banks = GetBanks(p->storage);
+  m->task_banks = GetBanks(p->task.storage);
+
+//  printf("BANKS :: pool %d, task %d\n", m->pool_banks, m->task_banks);
+
   return mstat;
 }
 
@@ -80,6 +85,33 @@ int CommitMemoryLayout(storage *s) {
   }
 
   return mstat;
+}
+
+/**
+ * @function
+ * Frees the memory
+ */
+void FreeMemoryLayout(storage *s) {
+  int i = 0;
+
+  while (s[i].layout.path) {
+    if (s[i].data) {
+      FreeDoubleArray(s[i].data, s[i].layout.dim);
+    }
+    i++;
+  }
+}
+
+/**
+ * @function
+ * Gets the number of used memory banks.
+ */
+int GetBanks(storage *s) {
+  int banks = 0;
+  while (s[banks].layout.path) {
+    banks++;
+  }
+  return banks;
 }
 
 /**

@@ -65,6 +65,10 @@ int Setup(setup *s) {
  */
 int Storage(pool *p, setup *s) {
 
+  p->board.rank = 2; // pool rank
+  p->board.dim[0] = 12; // x-res
+  p->board.dim[1] = 12; // y-res
+
   /* Path: /Pools/pool-ID/master */
   p->storage[0].layout.path = "master";
   p->storage[0].layout.dataspace_type = H5S_SIMPLE;
@@ -73,6 +77,7 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout.dim[0] = 23;
   p->storage[0].layout.dim[1] = 7;
   p->storage[0].layout.use_hdf = 1;
+  p->storage[0].layout.sync = 1;
  
   /* Path: /Pools/pool-ID/tmp */
   p->storage[1].layout.path = "tmp";
@@ -82,6 +87,7 @@ int Storage(pool *p, setup *s) {
   p->storage[1].layout.dim[0] = 43;
   p->storage[1].layout.dim[1] = 7;
   p->storage[1].layout.use_hdf = 0;
+  p->storage[1].layout.sync = 1;
 
   /* Path: /Pools/pool-ID/tasks/masterdata */
   p->task.storage[0].layout.path = "masterdata";
@@ -154,13 +160,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * The master node
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
-  int i = 0;
-
-  //printf("pool %d, cid %d, size = %d\n", p->pid, c->cid, c->size);
-  //for (i = 0; i < c->size; i++) {
-  //  printf("checkpoint %d, data[%d] = %d\n", c->cid, i, c->data[i]);
-  //}
-
   return TASK_SUCCESS;
 }
 

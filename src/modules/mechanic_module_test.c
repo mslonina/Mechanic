@@ -89,6 +89,27 @@ int PoolProcess(pool *p, setup *s) {
  * Implementation of TaskPrepare().
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
+  int i,j;
+  int dims[4];
+
+  dims[0] = t->storage[0].layout.dim[0];
+  dims[1] = t->storage[0].layout.dim[1];
+
+  dims[2] = t->storage[1].layout.dim[0];
+  dims[3] = t->storage[1].layout.dim[1];
+
+  for (j = 0; j < dims[0]; j++) {
+    for (i = 0; i < dims[1]; i++) { 
+      t->storage[0].data[j][i] = i + j;
+    }
+  }
+
+  for (j = 0; j < dims[2]; j++) {
+    for (i = 0; i < dims[3]; i++) { 
+      t->storage[1].data[j][i] = i * j;
+    }
+  }
+
   return TASK_SUCCESS;
 }
 
@@ -97,6 +118,23 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * Implementation of TaskProcess().
  */
 int TaskProcess(pool *p, task *t, setup *s) {
+//  printf("pool id %d, task id %d\n", p->pid, t->tid);
+
+  /*int i,j;
+  for (j = 0; j < t->storage[0].layout.dim[0]; j++) {
+    for (i = 0; i < t->storage[0].layout.dim[1]; i++) { 
+      printf("%04.1f " , t->storage[0].data[j][i]);
+    }
+    printf("\n");
+  }
+  
+  for (j = 0; j < t->storage[1].layout.dim[0]; j++) {
+    for (i = 0; i < t->storage[1].layout.dim[1]; i++) { 
+      printf("%04.1f " , t->storage[1].data[j][i]);
+    }
+    printf("\n");
+  }*/
+
   return TASK_SUCCESS;
 }
 
@@ -110,8 +148,8 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 //  printf("module :: pool %d, cid %d, size = %d\n", p->pid, c->cid, c->size);
 
   for (i = 0; i < c->size; i++) {
- //   printf("module :: checkpoint %d, data[%d] = %d\n", c->cid, i, c->data[i]);
-    c->data[i] = c->data[i] + 1;
+//    printf("module :: checkpoint %d, data[%d] = %d\n", c->cid, i, c->data[i]);
+    //c->data[i] = c->data[i] + 1;
   }
 
   return TASK_SUCCESS;
