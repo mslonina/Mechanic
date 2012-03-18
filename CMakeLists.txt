@@ -3,7 +3,7 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 0)
 set (Mechanic_VERSION_MINOR 12)
-set (Mechanic_VERSION_PATCH 0)
+set (Mechanic_VERSION_PATCH 1)
 set (Mechanic_VERSION_API 0120364)
 
 set (package_version
@@ -72,7 +72,7 @@ CONFIGURE_FILE (
 )
 
 add_definitions (-DHAVE_CONFIG_H)
-set (CMAKE_C_FLAGS "-Wall -Wextra -std=c99")
+set (CMAKE_C_FLAGS "-Warray-bounds -Wall -Wextra -std=c99")
 
 add_subdirectory(src)
 add_subdirectory(src/core)
@@ -92,7 +92,7 @@ SET (CPACK_PACKAGE_VERSION_MINOR "${Mechanic_VERSION_MINOR}")
 SET (CPACK_PACKAGE_VERSION_PATCH "${Mechanic_VERSION_PATCH}")
 SET (CPACK_PACKAGE_INSTALL_DIRECTORY "/usr/local")
 SET (CPACK_SOURCE_PACKAGE_FILE_NAME
-  "${CMAKE_PROJECT_NAME}-${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}-src")
+  "${CMAKE_PROJECT_NAME}-${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}")
 SET (CPACK_SOURCE_IGNORE_FILES
   "/build/;/.DS_Store;/.gitignore;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 
