@@ -28,7 +28,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set (platform_linux 1)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-option (BUILD_FORTRAN "Build Fortran bindings" on)
+option (BUILD_FORTRAN "Build Fortran bindings" off)
 option (BUILD_DOCS "Build documentation" off)
 
 if (BUILD_FORTRAN)
