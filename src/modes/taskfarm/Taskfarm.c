@@ -42,11 +42,11 @@ int Taskfarm(module *m) {
      * - Implement the task board
      */
     
-    //if (m->node == MASTER) {
-    //  mstat = Master(m, p);
-    //} else {
-    //  mstat = Worker(m, p);
-    //}
+    if (m->node == MASTER) {
+      mstat = Master(m, p);
+    } else {
+      mstat = Worker(m, p);
+    }
 
     pool_create = PoolProcess(m, p); 
     

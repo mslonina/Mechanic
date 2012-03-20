@@ -19,10 +19,10 @@ int Master(module *m, pool *p) {
   MPI_Request *mpi_request;
   int *intags, index = 0, req_flag, send_node, tag;
 
-  task t;
-  checkpoint c;
+  task *t;
+  checkpoint *c;
   
-  intags = calloc(m->mpi_size * sizeof(uintptr_t), sizeof(uintptr_t));
+  intags = malloc(m->mpi_size * sizeof(int));
   for (i = 0; i < m->mpi_size; i++) {
     intags[i] = i;
   }
@@ -45,18 +45,20 @@ int Master(module *m, pool *p) {
 
   t = TaskLoad(m, p, 0);
 
+  goto finalize;
+
   c = CheckpointLoad(m, p, 0);
 
-  mstat = CheckpointInit(m, p, &c);
+  mstat = CheckpointInit(m, p, c);
   CheckStatus(mstat);
   
   /* Send initial tasks to all workers */
   task_counter = 0;
   for (i = 1; i < m->mpi_size; i++) {
-    t.tid = task_counter;
-    TaskPrepare(m, p, &t);
+    t->tid = task_counter;
+    TaskPrepare(m, p, t);
     
-    Pack(m, &send_buffer[i-1][0], buffer_dims[1], p, &t, TAG_DATA);
+    Pack(m, &send_buffer[i-1][0], buffer_dims[1], p, t, TAG_DATA);
     MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
         i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
     MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
@@ -66,7 +68,7 @@ int Master(module *m, pool *p) {
   }
   
   /* The task farm loop (Non-blocking communication) */
-  c.counter = 0;
+  c->counter = 0;
   while (1) {
     /* Test for any completed request */
     MPI_Testany(m->mpi_size-1, mpi_request, &index, &req_flag, &mpis);
@@ -74,36 +76,36 @@ int Master(module *m, pool *p) {
     if (!req_flag) {
 
       /* Flush checkpoint buffer and write data, reset counter */
-      if (c.counter == c.size) {
-        mstat = CheckpointPrepare(m, p, &c);
+      if (c->counter == c->size) {
+        mstat = CheckpointPrepare(m, p, c);
         CheckStatus(mstat);
 
-        mstat = CheckpointProcess(m, p, &c);
+        mstat = CheckpointProcess(m, p, c);
         CheckStatus(mstat);
         
-        CheckpointFinalize(m, p, &c);
+        CheckpointFinalize(m, p, c);
         cid++;
   
         /* Initialize the next checkpoint */
         c = CheckpointLoad(m, p, cid);
 
-        mstat = CheckpointInit(m, p, &c);
+        mstat = CheckpointInit(m, p, c);
         CheckStatus(mstat);
-        c.counter = 0;
+        c->counter = 0;
       }
     
       /* Wait for any operation to complete */
       MPI_Waitany(m->mpi_size-1, mpi_request, &index, &mpis);
       send_node = index+1;
 
-      Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, &c.task[c.counter], &tag);
-      c.counter++;
+      Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, &c->task[c->counter], &tag);
+      c->counter++;
 
       if (task_counter <= tasks) {
-        t.tid = task_counter;
-        TaskPrepare(m, p, &t);
+        t->tid = task_counter;
+        TaskPrepare(m, p, t);
 
-        Pack(m, &send_buffer[index][0], buffer_dims[1], p, &t, TAG_DATA);
+        Pack(m, &send_buffer[index][0], buffer_dims[1], p, t, TAG_DATA);
     
        /* printf("Master Buffer tag = %d, tid = %d, location %d, %d to worker %d\n",
             (int)send_buffer[index][0], (int)send_buffer[index][1],
@@ -123,14 +125,14 @@ int Master(module *m, pool *p) {
   }
 
   /* Process the last checkpoint */
-  if (c.counter > 0 && c.counter < c.size) {
-    mstat = CheckpointPrepare(m, p, &c);
+  if (c->counter > 0 && c->counter < c->size) {
+    mstat = CheckpointPrepare(m, p, c);
     CheckStatus(mstat);
-    mstat = CheckpointProcess(m, p, &c);
+    mstat = CheckpointProcess(m, p, c);
     CheckStatus(mstat);
   }
 
-  CheckpointFinalize(m, p, &c);
+  CheckpointFinalize(m, p, c);
 
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size; i++) {
@@ -143,7 +145,8 @@ int Master(module *m, pool *p) {
     
   }
 
-  TaskFinalize(m, p, &t);
+finalize:
+  TaskFinalize(m, p, t);
 
   /* Free the buffer */
   FreeDoubleArray(send_buffer, buffer_dims);

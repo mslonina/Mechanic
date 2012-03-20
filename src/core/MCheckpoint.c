@@ -8,21 +8,24 @@
 /**
  * @function
  */
-checkpoint CheckpointLoad(module *m, pool *p, int cid) {
-  checkpoint c;
+checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
+  checkpoint *c;
   int i = 0;
 
-  c.cid = cid;
-  
-  c.counter = 0;
+  /* Allocate checkpoint pointer */
+  c = (checkpoint*) malloc(sizeof(checkpoint));
+  if (!c) Error(CORE_ERR_MEM);
 
-  c.size = p->checkpoint_size * m->mpi_size;
+  c->cid = cid;
+  c->counter = 0;
+  c->size = p->checkpoint_size * m->mpi_size;
  
-  c.task = calloc((c.size) * sizeof(task),sizeof(task));
-  if (!c.task) Error(CORE_ERR_MEM);
+  /* Allocate tasks bank */
+  c->task = (task*) malloc((c->size) * sizeof(task*));
+  if (!c->task) Error(CORE_ERR_MEM);
 
-  for (i = 0; i < c.size; i++) {
-    c.task[i] = TaskLoad(m, p, i);
+  for (i = 0; i < c->size; i++) {
+  //  c->task[i] = TaskLoad(m, p, i);
   } 
 
   return c;
@@ -81,7 +84,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
   int i = 0;
   for (i = 0; i < c->size; i++) {
-    TaskFinalize(m, p, &c->task[i]);
+//    TaskFinalize(m, p, &c->task[i]);
   }
-  free(c->task);
+  if (c->task) free(c->task);
+  if (c) free(c);
 }
