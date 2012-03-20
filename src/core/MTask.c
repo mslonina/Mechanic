@@ -8,7 +8,7 @@
  * @function
  */
 task* TaskLoad(module *m, pool *p, int tid) {
-  task* t;
+  task* t = NULL;
   int i = 0, j = 0;
   size_t len;
 
@@ -45,7 +45,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
     if (t->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.path != NULL) {
         len = strlen(p->task->storage[i].layout.path);
-        printf("task load path: %s len: %d\n", p->task->storage[i].layout.path, (int)len);
+        //printf("task load path: %s len: %d\n", p->task->storage[i].layout.path, (int)len);
         t->storage[i].layout.path = (char*) malloc((len+1) * sizeof(char));
         if (!t->storage[i].layout.path) Error(CORE_ERR_MEM);
 

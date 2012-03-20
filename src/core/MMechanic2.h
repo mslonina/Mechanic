@@ -92,7 +92,7 @@ typedef struct {
   int cid; /* The checkpoint id */
   int counter;
   int size;
-  task *task;
+  task **task;
 } checkpoint;
 
 typedef struct {

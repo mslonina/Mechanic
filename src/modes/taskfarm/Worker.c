@@ -10,14 +10,14 @@
  */
 int Worker(module *m, pool *p) {
   int mstat = 0;
-  double **send_buffer, **recv_buffer;
+  double **send_buffer = NULL, **recv_buffer = NULL;
   int buffer_dims[2], buffer_rank;
   int i, node, tag, intag;
 
   MPI_Status mpi_status;
   MPI_Request mpi_request;
 
-  task *t;
+  task *t = NULL;
 
   node = m->node;
   intag = node;
@@ -34,7 +34,7 @@ int Worker(module *m, pool *p) {
   recv_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
 
   t = TaskLoad(m, p, 0);
-goto finalize;
+//goto finalize;
 
   while (1) {
 
@@ -65,8 +65,8 @@ finalize:
   TaskFinalize(m, p, t);
 
   /* Free the buffer */
-  FreeDoubleArray(send_buffer, buffer_dims);
-  FreeDoubleArray(recv_buffer, buffer_dims);
+  if (send_buffer) FreeDoubleArray(send_buffer, buffer_dims);
+  if (recv_buffer) FreeDoubleArray(recv_buffer, buffer_dims);
 
   return mstat;
 }

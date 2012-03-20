@@ -11,7 +11,7 @@
 int Master(module *m, pool *p) {
   int mstat = 0;
 
-  double **send_buffer, **recv_buffer;
+  double **send_buffer = NULL, **recv_buffer = NULL;
   int buffer_dims[2], buffer_rank;
   int i = 0, task_counter = 0, tasks = 0, cid = 0;
 
@@ -44,14 +44,12 @@ int Master(module *m, pool *p) {
   recv_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
 
   t = TaskLoad(m, p, 0);
-
-  goto finalize;
-
   c = CheckpointLoad(m, p, 0);
 
   mstat = CheckpointInit(m, p, c);
   CheckStatus(mstat);
   
+//  goto finalize;
   /* Send initial tasks to all workers */
   task_counter = 0;
   for (i = 1; i < m->mpi_size; i++) {
@@ -98,7 +96,7 @@ int Master(module *m, pool *p) {
       MPI_Waitany(m->mpi_size-1, mpi_request, &index, &mpis);
       send_node = index+1;
 
-      Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, &c->task[c->counter], &tag);
+      Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
       c->counter++;
 
       if (task_counter <= tasks) {
@@ -132,8 +130,6 @@ int Master(module *m, pool *p) {
     CheckStatus(mstat);
   }
 
-  CheckpointFinalize(m, p, c);
-
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size; i++) {
     send_buffer[i-1][0] = (double) TAG_TERMINATE;
@@ -144,17 +140,19 @@ int Master(module *m, pool *p) {
         i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
     
   }
+  MPI_Waitall(m->mpi_size - 1, mpi_request, mpi_status);
 
 finalize:
+  CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
+  
+  if (intags) free(intags);
+  if (mpi_status) free(mpi_status);
+  if (mpi_request) free(mpi_request);
 
   /* Free the buffer */
-  FreeDoubleArray(send_buffer, buffer_dims);
-  FreeDoubleArray(recv_buffer, buffer_dims);
-  
-  free(intags);
-  free(mpi_status);
-  free(mpi_request);
+  if (send_buffer) FreeDoubleArray(send_buffer, buffer_dims);
+  if (recv_buffer) FreeDoubleArray(recv_buffer, buffer_dims);
 
   return mstat;
 }
