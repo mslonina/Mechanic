@@ -22,13 +22,13 @@ int Storage(module *m, pool *p) {
   q = LoadSym(m, "Storage", NO_FALLBACK);
   if (q) mstat = q(p, &m->layer.setup);
   CheckStatus(mstat);
-  
+
   m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
   m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
 
   /* Commit memory layout used during the task pool */
   CommitMemoryLayout(m->pool_banks, p->storage);
-  
+
   /* Commit the storage layout (only the Master node) */
   if (m->node == MASTER) {
     CheckLayout(m->pool_banks, p->storage);
@@ -46,7 +46,7 @@ int Storage(module *m, pool *p) {
  */
 int CheckLayout(int banks, storage *s) {
   int i = 0, mstat = 0;
-  
+
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
       if (s[i].layout.path == NULL) {
@@ -62,13 +62,13 @@ int CheckLayout(int banks, storage *s) {
   return mstat;
 }
 
-/** 
+/**
  * @function
  * Commits the storage layout to the HDF5 datafile
  *
  * @todo
  * The CheckAndFixLayout must run before.
- */ 
+ */
 int CommitStorageLayout(hid_t location, int banks, storage *s) {
   int mstat = 0, i = 0;
   hid_t dataspace, dataset;
@@ -119,7 +119,7 @@ int CommitMemoryLayout(int banks, storage *s) {
 void FreeMemoryLayout(int banks, storage *s) {
   int i = 0;
 
- for (i = 0; i < banks; i++) {
+  for (i = 0; i < banks; i++) {
     if (s[i].data) {
       FreeDoubleArray(s[i].data, s[i].layout.dim);
     }
@@ -140,7 +140,7 @@ int GetBanks(int allocated_banks, storage *s) {
   int i = 0;
 
   for (i = 0; i < allocated_banks; i++) {
-    //if (s[i].layout.path != NULL) {
+    //if (s[i].layout.rank > 0) {
       banks_in_use++;
     //  printf("rank %d, bank: %s\n", s[i].layout.rank, s[i].layout.path);
     //}

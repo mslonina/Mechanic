@@ -37,7 +37,7 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
 
   strncat(fname, extension, extlen);
   fname[filelen] = LRC_NULL;
-  
+
   return fname;
 }
 
@@ -88,10 +88,10 @@ void Abort(int errcode) {
  * Common status check
  */
 void CheckStatus(int status) {
-  if (status >= CORE_ERR_CORE) Error(status); 
+  if (status >= CORE_ERR_CORE) Error(status);
 }
 
-/** 
+/**
  * @function
  * Allocates double array
  *
@@ -99,16 +99,18 @@ void CheckStatus(int status) {
  * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
  */
 double** AllocateDoubleArray(int rank, int *dims) {
-  double** array;
-  int i, size;
+  double** array = NULL;
+  int i = 0, size = 0;
 
   size = GetSize(rank, dims);
 
-  array = (double**) malloc(dims[0]*sizeof(double*));
-  //if (array) {
-    array[0] = (double*) malloc(size*sizeof(double));
-    for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
-  //}
+  if (size > 0) {
+    array = (double**) malloc(dims[0]*sizeof(double*));
+    if (array) {
+      array[0] = (double*) malloc(size*sizeof(double));
+      for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
+    }
+  }
 
   return array;
 }
@@ -121,10 +123,8 @@ double** AllocateDoubleArray(int rank, int *dims) {
  */
 void FreeDoubleArray(double **array, int *dims) {
 
-  //if (array[0][0]) 
-    free(&(array[0][0]));
-  //if (array) 
-    free(array);
+  if (array[0]) free(array[0]);
+  if (array) free(array);
 
 }
 
@@ -133,7 +133,7 @@ void FreeDoubleArray(double **array, int *dims) {
  * Gets the size.
  */
 int GetSize(int rank, int *dims){
-  int i = 0, size;
+  int i = 0, size = 0;
 
   size = dims[0];
   for (i = 1; i < rank; i++) {

@@ -10,7 +10,8 @@
  */
 pool* PoolLoad(module *m, int pid) {
   pool *p = NULL;
-  
+  int i = 0;
+
   /* Allocate pool pointer */
   p = (pool*) malloc(sizeof(pool));
   if (!p) Error(CORE_ERR_MEM);
@@ -19,17 +20,27 @@ pool* PoolLoad(module *m, int pid) {
   p->storage = (storage*) malloc(m->layer.init.banks_per_pool * sizeof(storage));
   if (!p->storage) Error(CORE_ERR_MEM);
 
+  for (i = 0; i < m->layer.init.banks_per_pool; i++) {
+    p->storage[i].layout = (schema) STORAGE_END;
+    p->storage[i].data = NULL;
+  }
+
   /* Allocate task pointer */
   p->task = (task*) malloc(sizeof(task));
   if (!p->task) Error(CORE_ERR_MEM);
-  
+
   p->task->storage = (storage*) malloc(m->layer.init.banks_per_task * sizeof(storage));
   if (!p->task->storage) Error(CORE_ERR_MEM);
+
+  for (i = 0; i < m->layer.init.banks_per_task; i++) {
+    p->task->storage[i].layout = (schema) STORAGE_END;
+    p->task->storage[i].data = NULL;
+  }
 
   /* Setup some sane defaults */
   p->pid = pid;
   sprintf(p->name, "pool-%04d", p->pid);
-  
+
   /* Pool data group */
   if (m->node == MASTER) {
     p->location = H5Gcreate(m->location, p->name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -53,10 +64,9 @@ int PoolInit(module *m, pool *p) {
  * Prepares the pool.
  */
 int PoolPrepare(module *m, pool *p) {
-  int mstat = 0, i = 0;
+  int mstat = 0, i = 0, size = 0;
   query *q;
   setup s = m->layer.setup;
-  int size;
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
@@ -67,7 +77,9 @@ int PoolPrepare(module *m, pool *p) {
   for (i = 0; i < m->pool_banks; i++) {
     if (p->storage[i].layout.sync) {
       size = GetSize(p->storage[i].layout.rank, p->storage[i].layout.dim);
-      MPI_Bcast(&(p->storage[i].data[0][0]), size, MPI_DOUBLE, MASTER, MPI_COMM_WORLD);
+      if (size > 0) {
+        MPI_Bcast(&(p->storage[i].data[0][0]), size, MPI_DOUBLE, MASTER, MPI_COMM_WORLD);
+      }
     }
   }
 
