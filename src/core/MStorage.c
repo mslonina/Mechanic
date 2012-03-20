@@ -22,33 +22,60 @@ int Storage(module *m, pool *p) {
   q = LoadSym(m, "Storage", NO_FALLBACK);
   if (q) mstat = q(p, &m->layer.setup);
   CheckStatus(mstat);
+  
+  m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
+  m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
 
   /* Commit memory layout used during the task pool */
-  CommitMemoryLayout(p->storage);
+  CommitMemoryLayout(m->pool_banks, p->storage);
   
   /* Commit the storage layout (only the Master node) */
   if (m->node == MASTER) {
-    CommitStorageLayout(p->location, p->storage);
+    CheckLayout(m->pool_banks, p->storage);
+    CommitStorageLayout(p->location, m->pool_banks, p->storage);
   }
-
-  m->pool_banks = GetBanks(p->storage);
-  m->task_banks = GetBanks(p->task.storage);
 
 //  printf("BANKS :: pool %d, task %d\n", m->pool_banks, m->task_banks);
 
   return mstat;
 }
 
+/**
+ * @function
+ * Checks inconsitencies in the storage layout
+ */
+int CheckLayout(int banks, storage *s) {
+  int i = 0, mstat = 0;
+  
+  for (i = 0; i < banks; i++) {
+    if (s[i].layout.use_hdf) {
+      if (s[i].layout.path == NULL) {
+        Message(MESSAGE_ERR, "The storage path is required when use_hdf\n");
+        Error(CORE_ERR_STORAGE);
+      }
+      if (s[i].layout.rank == 0) {
+        Message(MESSAGE_ERR, "Rank must be > 0 when use_hdf\n");
+        Error(CORE_ERR_STORAGE);
+      }
+    }
+  }
+  return mstat;
+}
+
 /** 
+ * @function
  * Commits the storage layout to the HDF5 datafile
+ *
+ * @todo
+ * The CheckAndFixLayout must run before.
  */ 
-int CommitStorageLayout(hid_t location, storage *s) {
+int CommitStorageLayout(hid_t location, int banks, storage *s) {
   int mstat = 0, i = 0;
   hid_t dataspace, dataset;
   herr_t hdf_status;
   hsize_t dims[MAX_RANK];
 
-  while (s[i].layout.path) {
+  for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
       dataspace = H5Screate(s[i].layout.dataspace_type);
       if (s[i].layout.dataspace_type == H5S_SIMPLE) {
@@ -62,7 +89,6 @@ int CommitStorageLayout(hid_t location, storage *s) {
       H5Dclose(dataset);
       H5Sclose(dataspace);
     }
-    i++;
   }
 
   if (hdf_status < 0) mstat = CORE_ERR_HDF;
@@ -76,12 +102,11 @@ int CommitStorageLayout(hid_t location, storage *s) {
  * This function must run on every node -- the size of data arrays shared between nodes
  * depends on the memory layout.
  */
-int CommitMemoryLayout(storage *s) {
+int CommitMemoryLayout(int banks, storage *s) {
   int mstat = 0, i = 0;
 
-  while (s[i].layout.path) {
+  for (i = 0; i < banks; i++) {
     s[i].data = AllocateDoubleArray(s[i].layout.rank, s[i].layout.dim);
-    i++;
   }
 
   return mstat;
@@ -91,27 +116,37 @@ int CommitMemoryLayout(storage *s) {
  * @function
  * Frees the memory
  */
-void FreeMemoryLayout(storage *s) {
+void FreeMemoryLayout(int banks, storage *s) {
   int i = 0;
 
-  while (s[i].layout.path) {
+ for (i = 0; i < banks; i++) {
     if (s[i].data) {
       FreeDoubleArray(s[i].data, s[i].layout.dim);
     }
-    i++;
   }
 }
 
 /**
  * @function
  * Gets the number of used memory banks.
+ *
+ * @todo
+ * This function should return the number of memory banks in use, however, do we really
+ * need such thing? Maybe only use CheckAndFixLayout() function to detect inconsitencies
+ * when i.e. use_hdf = 1 and path is NULL?
  */
-int GetBanks(storage *s) {
-  int banks = 0;
-  while (s[banks].layout.path) {
-    banks++;
+int GetBanks(int allocated_banks, storage *s) {
+  int banks_in_use = 0;
+  int i = 0;
+
+  for (i = 0; i < allocated_banks; i++) {
+    //if (s[i].layout.path != NULL) {
+      banks_in_use++;
+    //  printf("rank %d, bank: %s\n", s[i].layout.rank, s[i].layout.path);
+    //}
   }
-  return banks;
+
+  return banks_in_use;
 }
 
 /**
@@ -147,4 +182,23 @@ int WritePoolData(pool *p) {
   
   if (hdf_status < 0) mstat = CORE_ERR_HDF;
   return mstat;
+}
+
+/**
+ * @function
+ */
+storage* StorageLoad(int banks) {
+  storage *s = NULL;
+
+  s = (storage*) malloc(banks * sizeof(storage));
+  if (!s) Error(CORE_ERR_MEM);
+
+  return s;
+}
+
+/**
+ * @function
+ */
+void StorageFinalize(int banks, storage *s) {
+
 }

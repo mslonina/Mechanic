@@ -78,6 +78,16 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout.dim[1] = 7;
   p->storage[0].layout.use_hdf = 1;
   p->storage[0].layout.sync = 1;
+
+  /*p->storage[0].layout = (schema) {
+    .path = "master",
+    .dataspace_type = H5S_SIMPLE,
+    .datatype = H5T_NATIVE_DOUBLE,
+    .rank = 2,
+    .dim = {23,7},
+    .use_hdf = 1,
+    .sync = 1
+  };*/
  
   /* Path: /Pools/pool-ID/tmp */
   p->storage[1].layout.path = "tmp";
@@ -89,23 +99,27 @@ int Storage(pool *p, setup *s) {
   p->storage[1].layout.use_hdf = 0;
   p->storage[1].layout.sync = 1;
 
+  p->storage[2].layout = (schema) STORAGE_END;
+
   /* Path: /Pools/pool-ID/tasks/masterdata */
-  p->task.storage[0].layout.path = "masterdata";
-  p->task.storage[0].layout.dataspace_type = H5S_SIMPLE;
-  p->task.storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
-  p->task.storage[0].layout.rank = 2;
-  p->task.storage[0].layout.dim[0] = 1;
-  p->task.storage[0].layout.dim[1] = 12;
-  p->task.storage[0].layout.use_hdf = 1;
+  p->task->storage[0].layout.path = "masterdata";
+  p->task->storage[0].layout.dataspace_type = H5S_SIMPLE;
+  p->task->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
+  p->task->storage[0].layout.rank = 2;
+  p->task->storage[0].layout.dim[0] = 1;
+  p->task->storage[0].layout.dim[1] = 12;
+  p->task->storage[0].layout.use_hdf = 1;
 
   /* Path: /Pools/pool-ID/tasks/tmpdata */
-  p->task.storage[1].layout.path = "tmpdata";
-  p->task.storage[1].layout.dataspace_type = H5S_SIMPLE;
-  p->task.storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
-  p->task.storage[1].layout.rank = 2;
-  p->task.storage[1].layout.dim[0] = 10;
-  p->task.storage[1].layout.dim[1] = 12;
-  p->task.storage[1].layout.use_hdf = 0;
+  p->task->storage[1].layout.path = "tmpdata";
+  p->task->storage[1].layout.dataspace_type = H5S_SIMPLE;
+  p->task->storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
+  p->task->storage[1].layout.rank = 2;
+  p->task->storage[1].layout.dim[0] = 10;
+  p->task->storage[1].layout.dim[1] = 12;
+  p->task->storage[1].layout.use_hdf = 0;
+
+  p->task->storage[2].layout = (schema) STORAGE_END;
 
   p->checkpoint_size = 2; // 2*mpi_size
 

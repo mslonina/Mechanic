@@ -37,7 +37,7 @@ int Master(module *m, pool *p) {
   buffer_dims[0] = m->mpi_size - 1;
   buffer_dims[1] = m->mpi_size + 2 + MAX_RANK; // offset: tag, tid, location
   for (i = 0; i < m->task_banks; i++) {
-    buffer_dims[1] += GetSize(p->task.storage[i].layout.rank, p->task.storage[i].layout.dim);
+    buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
     
   send_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);

@@ -7,8 +7,9 @@
 #include "MLog.h"
 #include "MModules.h"
 #include "MStorage.h"
+#include "MMpi.h"
 
-pool PoolLoad(module *m, int pid);
+pool* PoolLoad(module *m, int pid);
 int PoolInit(module *m, pool *p);
 int PoolPrepare(module *m, pool *p);
 int PoolProcess(module *m, pool *p);

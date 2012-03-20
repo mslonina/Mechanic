@@ -35,6 +35,7 @@
 #define CORE_ERR_SETUP 914
 #define CORE_ERR_MEM 915
 #define CORE_ERR_CHECKPOINT 916
+#define CORE_ERR_STORAGE 917
 #define CORE_ERR_OTHER 999
 
 #define MODULE_ERR_MPI 811
@@ -45,8 +46,8 @@
 #define MODULE_ERR_CHECKPOINT 816
 #define MODULE_ERR_OTHER 888
 
-#define POOL_FINALIZE 0
-#define POOL_CREATE_NEW 1
+#define POOL_FINALIZE 1001
+#define POOL_CREATE_NEW 1003
 
 #define MAX_RANK 2
 
@@ -102,7 +103,9 @@ typedef struct {
   schema board;
   storage *storage;
   int checkpoint_size;
-  task task;
+  task *task;
 } pool;
+
+#define STORAGE_END {.path = NULL, .dataspace_type = 0, .datatype = 0, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0}
 
 #endif

@@ -44,6 +44,8 @@ int Storage(pool *p, setup *s) {
   p->storage[2].layout.dim[1] = 6;
   p->storage[2].layout.use_hdf = 1;
 
+  p->storage[3].layout = (schema) STORAGE_END;
+
   return TASK_SUCCESS;
 }
 
@@ -72,13 +74,14 @@ int PoolPrepare(pool *p, setup *s) {
  * Implementation of PoolProcess().
  */
 int PoolProcess(pool *p, setup *s) {
-  /*int i,j;
-  for (j = 0; j < p->storage[2].layout.dim[0]; j++) {
+  //int i,j;
+  /*for (j = 0; j < p->storage[2].layout.dim[0]; j++) {
     for (i = 0; i < p->storage[2].layout.dim[1]; i++) { 
       printf("%02.1f " , p->storage[2].data[j][i]);
     }
     printf("\n");
   }*/
+  //printf("pool pid = %d\n", p->pid);
 
   if (p->pid > 2) return POOL_FINALIZE;
   return POOL_CREATE_NEW;
