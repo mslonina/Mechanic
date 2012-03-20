@@ -1,6 +1,6 @@
 /**
  * @file
- * Common functions.
+ * Common functions
  */
 
 #include "MCommon.h"
@@ -105,9 +105,9 @@ double** AllocateDoubleArray(int rank, int *dims) {
   size = GetSize(rank, dims);
 
   if (size > 0) {
-    array = malloc(dims[0]*sizeof(double*));
+    array = calloc(dims[0]*sizeof(double*), sizeof(double*));
     if (array) {
-      array[0] = malloc(size*sizeof(double));
+      array[0] = calloc(size*sizeof(double), sizeof(double));
       for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
     }
   }
@@ -130,7 +130,7 @@ void FreeDoubleArray(double **array, int *dims) {
 
 /**
  * @function
- * Gets the size.
+ * Gets the size
  */
 int GetSize(int rank, int *dims){
   int i = 0, size = 0;
@@ -145,7 +145,7 @@ int GetSize(int rank, int *dims){
 
 /**
  * @function
- * Copies Array to vector
+ * Copies array to vector
  */
 void Array2Vec(double *vec, double **array, int rank, int *dims) {
   int i = 0, j = 0, k = 0;

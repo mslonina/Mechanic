@@ -23,9 +23,9 @@ Compilation
     make
     make install
 
-If you want to disable Fortran support run
+If you want to enable Fortran support run
 
-    CC=mpicc cmake .. -DBUILD_FORTRAN:BOOL=OFF
+    CC=mpicc cmake .. -DBUILD_FORTRAN:BOOL=ON
 
 
 By default, Cmake installs to /usr/local. You can change this by setting
@@ -37,3 +37,9 @@ Additional modules
 
 All but core module have been moved to separate project.
 See http://git.astri.umk.pl/projects/mechanic_modules
+
+Gentoo users
+------------
+
+There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see:
+http://github.com/mslonina/mechanic-overlay

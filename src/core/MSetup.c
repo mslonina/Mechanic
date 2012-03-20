@@ -1,6 +1,6 @@
 /**
  * @file
- * The setup stage.
+ * The setup stage
  */
 #include "MSetup.h"
 
@@ -62,8 +62,6 @@ int Setup(module *m, char *filename, int mode) {
    */
   LRC_cleanup(m->layer.setup.head);
   m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
-
-//  LRC_printAll(m->layer.setup.head);
 
   /**
    * Write the configuration to the master file

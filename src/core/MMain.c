@@ -1,6 +1,6 @@
 /**
  * @file
- * The Main function.
+ * The Main function
  */
 #include "MMain.h"
 
@@ -24,7 +24,6 @@ int main(int argc, char** argv) {
   CheckStatus(mstat);
 
   /* Bootstrap */
-//bootstrap:
   fallback.layer.handler = NULL;
   core = Bootstrap(node, mpi_size, CORE_MODULE, &fallback);
   if (!core.layer.handler) Error(CORE_ERR_CORE); // OOPS! At least Core module should be loaded
@@ -40,8 +39,6 @@ int main(int argc, char** argv) {
   module = Bootstrap(node, mpi_size, TEST_MODULE, &core);
 
   /* Setup */
-//setup:
-
   filename = Name("mechanic-", "config", "", ".cfg");
 
   mstat = Setup(&module, filename, NORMAL_MODE);
@@ -49,20 +46,18 @@ int main(int argc, char** argv) {
 
   free(filename);
 
-    /**
+  /**
    * @todo Popt
    */ 
   //Popt(node, argc, argv, &module.layer.setup);
   //poptPrintHelp(module.layer.setup.poptcontext, stdout, 0);
-  //
 
   /* Modes */
   mstat = Taskfarm(&module);
   CheckStatus(mstat);
 
-  //MPI_Barrier(MPI_COMM_WORLD);
+  MPI_Barrier(MPI_COMM_WORLD);
 
-//finalize:
   ModuleFinalize(&module);
   ModuleFinalize(&core);
   

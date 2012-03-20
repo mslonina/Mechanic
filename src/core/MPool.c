@@ -1,23 +1,23 @@
 /**
  * @file
- * The Task Pool related functions.
+ * The Task Pool related functions
  */
 #include "MPool.h"
 
 /**
  * @function
- * Loads the task pool
+ * Load the task pool
  */
 pool* PoolLoad(module *m, int pid) {
   pool *p = NULL;
   int i = 0;
 
   /* Allocate pool pointer */
-  p = malloc(sizeof(pool));
+  p = calloc(sizeof(pool), sizeof(pool));
   if (!p) Error(CORE_ERR_MEM);
 
   /* Allocate pool data banks */
-  p->storage = malloc(m->layer.init.banks_per_pool * sizeof(storage));
+  p->storage = calloc(m->layer.init.banks_per_pool * sizeof(storage), sizeof(storage));
   if (!p->storage) Error(CORE_ERR_MEM);
 
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
@@ -26,10 +26,10 @@ pool* PoolLoad(module *m, int pid) {
   }
 
   /* Allocate task pointer */
-  p->task = malloc(sizeof(task));
+  p->task = calloc(sizeof(task), sizeof(task));
   if (!p->task) Error(CORE_ERR_MEM);
 
-  p->task->storage = malloc(m->layer.init.banks_per_task * sizeof(storage));
+  p->task->storage = calloc(m->layer.init.banks_per_task * sizeof(storage), sizeof(storage));
   if (!p->task->storage) Error(CORE_ERR_MEM);
 
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
@@ -51,7 +51,7 @@ pool* PoolLoad(module *m, int pid) {
 
 /**
  * @function
- * Initializes the task pool.
+ * Initializes the task pool
  */
 int PoolInit(module *m, pool *p) {
   int mstat = 0;
@@ -61,7 +61,7 @@ int PoolInit(module *m, pool *p) {
 
 /**
  * @function
- * Prepares the pool.
+ * Prepare the pool
  */
 int PoolPrepare(module *m, pool *p) {
   int mstat = 0, i = 0, size = 0;
@@ -88,7 +88,7 @@ int PoolPrepare(module *m, pool *p) {
 
 /**
  * @function
- * Processes the pool.
+ * Process the pool
  */
 int PoolProcess(module *m, pool *p) {
   int pool_create = 0;
@@ -107,7 +107,7 @@ int PoolProcess(module *m, pool *p) {
 
 /**
  * @function
- * Finalizes the pool
+ * Finalize the pool
  */
 void PoolFinalize(module *m, pool *p) {
   if (p->storage) {

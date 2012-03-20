@@ -1,12 +1,12 @@
 /**
  * @file
- * The MPI-related functions and wrappers.
+ * The MPI-related functions and wrappers
  */
 #include "MMpi.h"
 
 /**
  * @function
- * Builds MPI derived type for LRC_configDefaults
+ * Build MPI derived type for LRC_configDefaults
  */
 int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
   int mstat = 0, i = 0;
@@ -41,7 +41,7 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
 
 /**
  * @function
- * Packs the task data to 1D contigous array
+ * Pack the task data to 1D contigous array
  */
 int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) {
   int mstat = 0;

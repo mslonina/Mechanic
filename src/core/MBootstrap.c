@@ -110,7 +110,7 @@ int ModuleInit(module *m) {
  * Initializes the Setup
  *
  * This function calls the Setup() from the module to initialize the LRC default option
- * structure. It merges the fallback structure, so that all setup is available in one
+ * structure. It merges with the fallback structure, so that all setup is available in one
  * layer (and only one config file can be used, with i.e. core setup included, but not
  * necessary).
  */

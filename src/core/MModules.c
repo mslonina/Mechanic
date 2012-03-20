@@ -1,6 +1,6 @@
 /**
  * @file
- * The module interface.
+ * The module interface
  */
 
 #include "MModules.h"

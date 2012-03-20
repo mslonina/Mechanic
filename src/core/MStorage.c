@@ -1,6 +1,6 @@
 /**
  * @file
- * The storage stage.
+ * The storage stage
  */
 #include "MStorage.h"
 
@@ -42,7 +42,7 @@ int Storage(module *m, pool *p) {
 
 /**
  * @function
- * Checks inconsitencies in the storage layout
+ * Checks inconsistencies in the storage layout
  */
 int CheckLayout(int banks, storage *s) {
   int i = 0, mstat = 0;
@@ -190,7 +190,7 @@ int WritePoolData(pool *p) {
 storage* StorageLoad(int banks) {
   storage *s = NULL;
 
-  s = malloc(banks * sizeof(storage));
+  s = calloc(banks * sizeof(storage), sizeof(storage));
   if (!s) Error(CORE_ERR_MEM);
 
   return s;

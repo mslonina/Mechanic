@@ -1,11 +1,12 @@
 /**
  * @file
- * The task related functions.
+ * The task related functions
  */
 #include "MTask.h"
 
 /**
  * @function
+ * Load the task
  */
 task* TaskLoad(module *m, pool *p, int tid) {
   task* t = NULL;
@@ -13,13 +14,13 @@ task* TaskLoad(module *m, pool *p, int tid) {
   size_t len;
 
   /* Allocate the task pointer */
-  t = malloc(sizeof(task));
+  t = calloc(sizeof(task), sizeof(task));
   if (!t) Error(CORE_ERR_MEM);
 
   t->pid = p->pid;
   t->tid = tid;
 
-  t->storage = malloc(m->layer.init.banks_per_task * sizeof(storage));
+  t->storage = calloc(m->layer.init.banks_per_task * sizeof(storage), sizeof(storage));
   if (!t->storage) Error(CORE_ERR_MEM);
 
   /* Initialize task banks */
@@ -45,8 +46,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
     if (t->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.path != NULL) {
         len = strlen(p->task->storage[i].layout.path);
-        //printf("task load path: %s len: %d\n", p->task->storage[i].layout.path, (int)len);
-        t->storage[i].layout.path = malloc((len+1) * sizeof(char));
+        t->storage[i].layout.path = calloc((len+1) * sizeof(char), sizeof(char));
         if (!t->storage[i].layout.path) Error(CORE_ERR_MEM);
 
         strncpy(t->storage[i].layout.path, p->task->storage[i].layout.path, len);
@@ -62,6 +62,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
 
 /**
  * @function
+ * Initialize the task
  */
 int TaskInit(module *m, pool *p, task *t) {
   int mstat = 0;
@@ -71,6 +72,7 @@ int TaskInit(module *m, pool *p, task *t) {
 
 /**
  * @function
+ * Prepare the task
  */
 int TaskPrepare(module *m, pool *p, task *t) {
   int mstat = 0;
@@ -90,6 +92,7 @@ int TaskPrepare(module *m, pool *p, task *t) {
 
 /**
  * @function
+ * Process the task
  */
 int TaskProcess(module *m, pool *p, task *t) {
   int mstat = 0;
@@ -104,6 +107,7 @@ int TaskProcess(module *m, pool *p, task *t) {
 
 /**
  * @function
+ * Finalize the task
  */
 void TaskFinalize(module *m, pool *p, task *t) {
   int i = 0;
