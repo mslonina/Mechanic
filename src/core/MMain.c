@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
   mstat = Taskfarm(&module);
   CheckStatus(mstat);
 
-  MPI_Barrier(MPI_COMM_WORLD);
+  //MPI_Barrier(MPI_COMM_WORLD);
 
 //finalize:
   ModuleFinalize(&module);

@@ -66,7 +66,7 @@ CONFIGURE_FILE (
 )
 
 add_definitions (-DHAVE_CONFIG_H)
-set (CMAKE_C_FLAGS "-Wall -std=c99 -Warray-bounds")
+set (CMAKE_C_FLAGS "-Wall -std=c99 -Warray-bounds -g -ggdb")
 
 add_subdirectory(src)
 add_subdirectory(src/core)

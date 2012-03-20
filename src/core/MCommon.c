@@ -91,20 +91,6 @@ void CheckStatus(int status) {
   if (status >= CORE_ERR_CORE) Error(status); 
 }
 
-/**
- * @function
- * Allocates double vector
- */
-double* AllocateDoubleVec(int *dims) {
-  double *vec;
-
-//  printf("Allocation VEC = %d\n", dims[0]);
-  vec = calloc(sizeof(double*) * dims[0], sizeof(double*));
-  if (!vec) Error(CORE_ERR_MEM);
-
-  return vec;
-}
-
 /** 
  * @function
  * Allocates double array
@@ -118,21 +104,13 @@ double** AllocateDoubleArray(int rank, int *dims) {
 
   size = GetSize(rank, dims);
 
-  array = (double**) calloc(dims[0]*sizeof(double*), sizeof(double*));
-  if (array) {
-    array[0] = (double*) calloc(size*sizeof(double), sizeof(double));
-    for (i = 1; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
-  }
+  array = (double**) malloc(dims[0]*sizeof(double*));
+  //if (array) {
+    array[0] = (double*) malloc(size*sizeof(double));
+    for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
+  //}
 
   return array;
-}
-
-/**
- * @function
- * Frees double vector
- */
-void FreeDoubleVec(double *vec, int *dims) {
-  free(vec);
 }
 
 /**
@@ -143,8 +121,10 @@ void FreeDoubleVec(double *vec, int *dims) {
  */
 void FreeDoubleArray(double **array, int *dims) {
 
-  if (array[0]) free(array[0]);
-  if (array) free(array);
+  //if (array[0][0]) 
+    free(&(array[0][0]));
+  //if (array) 
+    free(array);
 
 }
 
@@ -192,3 +172,4 @@ void Vec2Array(double *vec, double **array, int rank, int *dims) {
     }
   }
 }
+

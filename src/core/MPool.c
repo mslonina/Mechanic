@@ -18,10 +18,10 @@ pool PoolLoad(module *m, int pid) {
     p.location = H5Gcreate(m->location, p.name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   }
 
-  p.storage = calloc(m->layer.init.banks_per_pool * sizeof(storage), sizeof(storage));
+  p.storage = calloc(m->layer.init.banks_per_pool * sizeof(storage*), sizeof(storage*));
   if (!p.storage) Error(CORE_ERR_MEM);
   
-  p.task.storage = calloc(m->layer.init.banks_per_task * sizeof(storage), sizeof(storage));
+  p.task.storage = calloc(m->layer.init.banks_per_task * sizeof(storage*), sizeof(storage*));
   if (!p.task.storage) Error(CORE_ERR_MEM);
 
   return p;

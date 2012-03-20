@@ -135,6 +135,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
     printf("\n");
   }*/
 
+  //sleep(5);
+
   return TASK_SUCCESS;
 }
 
@@ -143,14 +145,14 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * Implementation of CheckpointPrepare().
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
-  int i = 0;
+//  int i = 0;
 
 //  printf("module :: pool %d, cid %d, size = %d\n", p->pid, c->cid, c->size);
 
-  for (i = 0; i < c->size; i++) {
+//  for (i = 0; i < c->size; i++) {
 //    printf("module :: checkpoint %d, data[%d] = %d\n", c->cid, i, c->data[i]);
     //c->data[i] = c->data[i] + 1;
-  }
+//  }
 
   return TASK_SUCCESS;
 }

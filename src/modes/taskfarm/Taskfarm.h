@@ -11,7 +11,7 @@
 #include "MTask.h"
 
 int Taskfarm(module *m);
-int Master(module *m);
-int Worker(module *m);
+int Master(module *m, pool *p);
+int Worker(module *m, pool *p);
 
 #endif
