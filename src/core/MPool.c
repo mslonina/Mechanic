@@ -13,11 +13,11 @@ pool* PoolLoad(module *m, int pid) {
   int i = 0;
 
   /* Allocate pool pointer */
-  p = (pool*) malloc(sizeof(pool));
+  p = malloc(sizeof(pool));
   if (!p) Error(CORE_ERR_MEM);
 
   /* Allocate pool data banks */
-  p->storage = (storage*) malloc(m->layer.init.banks_per_pool * sizeof(storage));
+  p->storage = malloc(m->layer.init.banks_per_pool * sizeof(storage));
   if (!p->storage) Error(CORE_ERR_MEM);
 
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
@@ -26,10 +26,10 @@ pool* PoolLoad(module *m, int pid) {
   }
 
   /* Allocate task pointer */
-  p->task = (task*) malloc(sizeof(task));
+  p->task = malloc(sizeof(task));
   if (!p->task) Error(CORE_ERR_MEM);
 
-  p->task->storage = (storage*) malloc(m->layer.init.banks_per_task * sizeof(storage));
+  p->task->storage = malloc(m->layer.init.banks_per_task * sizeof(storage));
   if (!p->task->storage) Error(CORE_ERR_MEM);
 
   for (i = 0; i < m->layer.init.banks_per_task; i++) {

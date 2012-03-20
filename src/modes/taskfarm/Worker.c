@@ -34,7 +34,6 @@ int Worker(module *m, pool *p) {
   recv_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
 
   t = TaskLoad(m, p, 0);
-//goto finalize;
 
   while (1) {
 
@@ -61,7 +60,7 @@ int Worker(module *m, pool *p) {
 
     if (tag == TAG_TERMINATE) break;
   }
-finalize:
+  
   TaskFinalize(m, p, t);
 
   /* Free the buffer */

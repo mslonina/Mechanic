@@ -190,7 +190,7 @@ int WritePoolData(pool *p) {
 storage* StorageLoad(int banks) {
   storage *s = NULL;
 
-  s = (storage*) malloc(banks * sizeof(storage));
+  s = malloc(banks * sizeof(storage));
   if (!s) Error(CORE_ERR_MEM);
 
   return s;

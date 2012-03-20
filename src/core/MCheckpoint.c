@@ -13,7 +13,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   int i = 0;
 
   /* Allocate checkpoint pointer */
-  c = (checkpoint*) malloc(sizeof(checkpoint));
+  c = malloc(sizeof(checkpoint));
   if (!c) Error(CORE_ERR_MEM);
 
   c->cid = cid;

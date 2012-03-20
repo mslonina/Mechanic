@@ -19,8 +19,8 @@ int Master(module *m, pool *p) {
   MPI_Request *mpi_request;
   int *intags, index = 0, req_flag, send_node, tag;
 
-  task *t;
-  checkpoint *c;
+  task *t = NULL;
+  checkpoint *c = NULL;
   
   intags = malloc(m->mpi_size * sizeof(int));
   for (i = 0; i < m->mpi_size; i++) {
@@ -49,7 +49,6 @@ int Master(module *m, pool *p) {
   mstat = CheckpointInit(m, p, c);
   CheckStatus(mstat);
   
-//  goto finalize;
   /* Send initial tasks to all workers */
   task_counter = 0;
   for (i = 1; i < m->mpi_size; i++) {
@@ -142,7 +141,6 @@ int Master(module *m, pool *p) {
   }
   MPI_Waitall(m->mpi_size - 1, mpi_request, mpi_status);
 
-finalize:
   CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
   

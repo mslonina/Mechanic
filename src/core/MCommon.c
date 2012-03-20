@@ -105,9 +105,9 @@ double** AllocateDoubleArray(int rank, int *dims) {
   size = GetSize(rank, dims);
 
   if (size > 0) {
-    array = (double**) malloc(dims[0]*sizeof(double*));
+    array = malloc(dims[0]*sizeof(double*));
     if (array) {
-      array[0] = (double*) malloc(size*sizeof(double));
+      array[0] = malloc(size*sizeof(double));
       for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
     }
   }
