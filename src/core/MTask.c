@@ -3,6 +3,7 @@
  * The task related functions.
  */
 #include "MTask.h"
+
 /**
  * @function
  */
@@ -41,7 +42,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
     }
 
     /* Setup path, we need this only when use_hdf = 1 */
-    /*if (t->storage[i].layout.use_hdf) {
+    if (t->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.path != NULL) {
         len = strlen(p->task->storage[i].layout.path);
         printf("task load path: %s len: %d\n", p->task->storage[i].layout.path, (int)len);
@@ -51,7 +52,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
         strncpy(t->storage[i].layout.path, p->task->storage[i].layout.path, len);
         t->storage[i].layout.path[len] = LRC_NULL;
       }
-    }*/
+    }
   }
 
   CommitMemoryLayout(m->task_banks, t->storage);
@@ -107,13 +108,12 @@ int TaskProcess(module *m, pool *p, task *t) {
 void TaskFinalize(module *m, pool *p, task *t) {
   int i = 0;
 
-  /*for (i = 0; i < m->task_banks; i++) {
+  for (i = 0; i < m->task_banks; i++) {
     if (t->storage[i].layout.use_hdf) {
-      if (p->task->storage[i].layout.path != NULL) {
-//        if (t->storage[i].layout.path) free(t->storage[i].layout.path);
-      }
+      if (t->storage[i].layout.path) free(t->storage[i].layout.path);
     }
-  }*/
+  }
+
   FreeMemoryLayout(m->task_banks, t->storage);
 
   if (t->storage) free(t->storage);
