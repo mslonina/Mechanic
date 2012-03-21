@@ -35,6 +35,9 @@ int Storage(module *m, pool *p) {
     CommitStorageLayout(p->location, m->pool_banks, p->storage);
   }
 
+  /* Commit Board */
+  p->board->data = AllocateDoubleArray(p->board->layout.rank,p->board->layout.dim);
+
 //  printf("BANKS :: pool %d, task %d\n", m->pool_banks, m->task_banks);
 
   return mstat;

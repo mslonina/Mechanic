@@ -7,7 +7,7 @@
 
 /**
  * @function
- * Implementation of Init().
+ * Implementation of Init()
  */
 int Init(init *i) {
   i->options = 123;
@@ -18,7 +18,7 @@ int Init(init *i) {
 
 /**
  * @function
- * Implementation of Setup().
+ * Implementation of Setup()
  */
 int Setup(setup *s) {
   s->options[0] = (LRC_configDefaults) {"test", "step", "0.25", LRC_DOUBLE};
@@ -32,7 +32,7 @@ int Setup(setup *s) {
 
 /**
  * @function
- * Implementation of Storage().
+ * Implementation of Storage()
  */
 int Storage(pool *p, setup *s) {
 
@@ -51,7 +51,7 @@ int Storage(pool *p, setup *s) {
 
 /**
  * @function
- * Implementation of PoolPrepare().
+ * Implementation of PoolPrepare()
  */
 int PoolPrepare(pool *p, setup *s) {
   int i,j;
@@ -71,7 +71,7 @@ int PoolPrepare(pool *p, setup *s) {
 
 /**
  * @function
- * Implementation of PoolProcess().
+ * Implementation of PoolProcess()
  */
 int PoolProcess(pool *p, setup *s) {
   //int i,j;
@@ -89,7 +89,7 @@ int PoolProcess(pool *p, setup *s) {
 
 /**
  * @function
- * Implementation of TaskPrepare().
+ * Implementation of TaskPrepare()
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
   int i,j;
@@ -118,7 +118,7 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * Implementation of TaskProcess().
+ * Implementation of TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
 //  printf("pool id %d, task id %d\n", p->pid, t->tid);
@@ -142,7 +142,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * Implementation of CheckpointPrepare().
+ * Implementation of CheckpointPrepare()
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 //  int i = 0;
@@ -159,7 +159,7 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 
 /**
  * @function
- * Implementation of CheckpointProcess().
+ * Implementation of CheckpointProcess()
  */
 int CheckpointProcess(pool *p, checkpoint *c, setup *s) {
   int i,j,k,l;

@@ -128,7 +128,7 @@ int Storage(pool *p, setup *s) {
 
 /**
  * @function
- * Prepares the pool.
+ * Prepares the pool
  *
  * This is a perfect place to read additional configuration, input files and assign values
  * to pool data tables. The data stored in the pool is broadcasted to all nodes, right

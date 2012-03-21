@@ -13,7 +13,7 @@ int Master(module *m, pool *p) {
 
   double **send_buffer = NULL, **recv_buffer = NULL;
   int buffer_dims[2], buffer_rank;
-  int i = 0, task_counter = 0, cid = 0;
+  int i = 0, cid = 0;
 
   MPI_Status *mpi_status, mpis;
   MPI_Request *mpi_request;
@@ -48,18 +48,16 @@ int Master(module *m, pool *p) {
   CheckStatus(mstat);
   
   /* Send initial tasks to all workers */
-  task_counter = 0;
   for (i = 1; i < m->mpi_size; i++) {
-    t->tid = task_counter;
-    TaskPrepare(m, p, t);
+    mstat = TaskPrepare(m, p, t);
+    if (mstat != NO_MORE_TASKS) {
     
-    Pack(m, &send_buffer[i-1][0], buffer_dims[1], p, t, TAG_DATA);
-    MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
-        i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
-    MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
-        i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
-
-    task_counter++;
+      Pack(m, &send_buffer[i-1][0], buffer_dims[1], p, t, TAG_DATA);
+      MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
+          i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
+      MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
+          i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
+    }
   }
   
   /* The task farm loop (Non-blocking communication) */
@@ -96,24 +94,15 @@ int Master(module *m, pool *p) {
       Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
       c->counter++;
 
-      if (task_counter <= p->pool_size) {
-        t->tid = task_counter;
-        TaskPrepare(m, p, t);
+      mstat = TaskPrepare(m, p, t);
+      if (mstat != NO_MORE_TASKS) {
 
         Pack(m, &send_buffer[index][0], buffer_dims[1], p, t, TAG_DATA);
     
-       /* printf("Master Buffer tag = %d, tid = %d, location %d, %d to worker %d\n",
-            (int)send_buffer[index][0], (int)send_buffer[index][1],
-            (int)send_buffer[index][2], (int)send_buffer[index][3],
-            send_node
-            );
-*/
         MPI_Isend(&send_buffer[index][0], buffer_dims[1], MPI_DOUBLE, 
             send_node, intags[send_node], MPI_COMM_WORLD, &mpi_request[index]);
         MPI_Irecv(&recv_buffer[index][0], buffer_dims[1], MPI_DOUBLE, 
             send_node, intags[send_node], MPI_COMM_WORLD, &mpi_request[index]);
-    
-        task_counter++;
       } 
     } 
     if (index == MPI_UNDEFINED) break;

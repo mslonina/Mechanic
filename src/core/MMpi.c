@@ -68,6 +68,11 @@ int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) 
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
       position = position + size;
     }
+
+    /* Mark the task on board */
+    if (m->node == MASTER) {
+      p->board->data[t->location[0]][t->location[1]] = TASK_IN_USE;
+    }
   }
 
   return mstat;
@@ -101,6 +106,11 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
       Vec2Array(buffer+position, t->storage[i].data, t->storage[i].layout.rank, t->storage[i].layout.dim);
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
       position = position + size;
+    }
+    
+    /* Mark the task on board */
+    if (m->node == MASTER) {
+      p->board->data[t->location[0]][t->location[1]] = TASK_FINISHED;
     }
   }
 

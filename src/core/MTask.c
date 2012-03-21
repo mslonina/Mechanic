@@ -76,12 +76,26 @@ int TaskInit(module *m, pool *p, task *t) {
  */
 int TaskPrepare(module *m, pool *p, task *t) {
   int mstat = 0;
+  int x, y;
   query *q;
   setup s = m->layer.setup;
 
   if (m->node == MASTER) {
-    q = LoadSym(m, "TaskMapping", LOAD_DEFAULT);
-    if (q) mstat = q(p, t, s);
+
+    /* Get the ID of the available task */
+    while(1) {
+      if (t->tid >= p->pool_size) return NO_MORE_TASKS;
+
+      q = LoadSym(m, "TaskMapping", LOAD_DEFAULT);
+      if (q) mstat = q(p, t, s);
+
+      x = t->location[0];
+      y = t->location[1];
+
+      if (p->board->data[x][y] == (double) TASK_AVAILABLE) break;
+      t->tid++;
+
+    }
 
     q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
     if (q) mstat = q(p, t, s);
