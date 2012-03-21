@@ -14,8 +14,8 @@ int Worker(module *m, pool *p) {
   int buffer_dims[2], buffer_rank;
   int i, node, tag, intag;
 
-  MPI_Status mpi_status;
-  MPI_Request mpi_request;
+  MPI_Status recv_status;
+  MPI_Request send_request, recv_request;
 
   task *t = NULL;
 
@@ -38,8 +38,8 @@ int Worker(module *m, pool *p) {
   while (1) {
 
     MPI_Irecv(&recv_buffer[0][0], buffer_dims[1], MPI_DOUBLE, 
-        MASTER, intag, MPI_COMM_WORLD, &mpi_request);
-    MPI_Wait(&mpi_request, &mpi_status);
+        MASTER, intag, MPI_COMM_WORLD, &recv_request);
+    MPI_Wait(&recv_request, &recv_status);
 
     Unpack(m, &recv_buffer[0][0], buffer_dims[1], p, t, &tag);
 
@@ -56,7 +56,7 @@ int Worker(module *m, pool *p) {
     Pack(m, &send_buffer[0][0], buffer_dims[1], p, t, tag);
 
     MPI_Isend(&send_buffer[0][0], buffer_dims[1], MPI_DOUBLE, 
-        MASTER, intag, MPI_COMM_WORLD, &mpi_request);
+        MASTER, intag, MPI_COMM_WORLD, &send_request);
 
     if (tag == TAG_TERMINATE) break;
   }

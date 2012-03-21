@@ -69,7 +69,7 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
-  int i,j, x,y;
+  int i,x,y;
   query *q;
   setup s = m->layer.setup;
   
@@ -84,6 +84,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
     y = c->task[i]->location[1];
     p->board->data[x][y] = 1.0;
   }
+
+  /* Commit data for the task board */
+  CommitData(p->location, 1, p->board, STORAGE_FULL);
 
   return mstat;
 }

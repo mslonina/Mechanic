@@ -65,9 +65,14 @@ int Setup(setup *s) {
  */
 int Storage(pool *p, setup *s) {
 
+  /* Path: /Pools/pool-ID/board */
+  p->board->layout.path = "board";
   p->board->layout.rank = 2; // pool rank
+  p->board->layout.dataspace_type = H5S_SIMPLE;
+  p->board->layout.datatype = H5T_NATIVE_DOUBLE;
   p->board->layout.dim[0] = 12; // x-res
   p->board->layout.dim[1] = 12; // y-res
+  p->board->layout.use_hdf = 1;
 
   /* Path: /Pools/pool-ID/master */
   p->storage[0].layout.path = "pool-global";

@@ -83,6 +83,7 @@ typedef struct {
 } schema;
 
 typedef struct {
+  hid_t location;
   schema layout;
   double **data;
 } storage;

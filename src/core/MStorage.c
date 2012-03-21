@@ -33,6 +33,7 @@ int Storage(module *m, pool *p) {
   if (m->node == MASTER) {
     CheckLayout(m->pool_banks, p->storage);
     CommitStorageLayout(p->location, m->pool_banks, p->storage);
+    CommitStorageLayout(p->location, 1, p->board); // The task board dataset
   }
 
   /* Commit Board */
@@ -156,12 +157,31 @@ int GetBanks(int allocated_banks, storage *s) {
  * @function
  * Writes the data buffer to the dataset
  */
-int CommitData(hid_t location, storage *s, double **data) {
+int CommitDataset(hid_t location, storage *s, double **data) {
   int mstat = 0;
   herr_t hdf_status;
 
   hdf_status = H5Dwrite(location, s->layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0][0]);
   if (hdf_status < 0) mstat = CORE_ERR_HDF;
+  return mstat;
+}
+
+/**
+ * @function
+ * Commits data to the master file
+ */
+int CommitData(hid_t location, int banks, storage *s, int flag) {
+  int mstat = 0, i = 0;
+  hid_t dataset;
+  herr_t hdf_status;
+
+  for (i = 0; i < banks; i++) {
+    if (s[i].layout.use_hdf) {
+      dataset = H5Dopen(location, s[i].layout.path, H5P_DEFAULT);
+      hdf_status = CommitDataset(dataset, &s[i], s[i].data);
+      H5Dclose(dataset);
+    }
+  }
   return mstat;
 }
 
@@ -177,7 +197,7 @@ int WritePoolData(pool *p) {
   while (p->storage[i].layout.path) {
     if (p->storage[i].layout.use_hdf) {
       dataset = H5Dopen(p->location, p->storage[i].layout.path, H5P_DEFAULT);
-      hdf_status = CommitData(dataset, &p->storage[i], p->storage[i].data);
+      hdf_status = CommitDataset(dataset, &p->storage[i], p->storage[i].data);
       H5Dclose(dataset);
     }
     i++;

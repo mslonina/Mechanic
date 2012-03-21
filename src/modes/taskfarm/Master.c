@@ -15,8 +15,8 @@ int Master(module *m, pool *p) {
   int buffer_dims[2], buffer_rank;
   int i = 0, cid = 0;
 
-  MPI_Status *mpi_status, mpis;
-  MPI_Request *mpi_request;
+  MPI_Status *send_status, *recv_status, mpi_status;
+  MPI_Request *send_request, *recv_request;
   int *intags, index = 0, req_flag, send_node, tag;
 
   task *t = NULL;
@@ -27,8 +27,11 @@ int Master(module *m, pool *p) {
     intags[i] = i;
   }
 
-  mpi_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
-  mpi_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
+  send_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
+  send_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
+  
+  recv_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
+  recv_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
 
   buffer_rank = 2;
   
@@ -54,17 +57,18 @@ int Master(module *m, pool *p) {
     
       Pack(m, &send_buffer[i-1][0], buffer_dims[1], p, t, TAG_DATA);
       MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
-          i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
+          i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
       MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
-          i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
+          i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
     }
   }
   
   /* The task farm loop (Non-blocking communication) */
   c->counter = 0;
   while (1) {
+
     /* Test for any completed request */
-    MPI_Testany(m->mpi_size-1, mpi_request, &index, &req_flag, &mpis);
+    MPI_Testany(m->mpi_size-1, recv_request, &index, &req_flag, &mpi_status);
 
     if (!req_flag) {
 
@@ -88,7 +92,7 @@ int Master(module *m, pool *p) {
       }
     
       /* Wait for any operation to complete */
-      MPI_Waitany(m->mpi_size-1, mpi_request, &index, &mpis);
+      MPI_Waitany(m->mpi_size-1, recv_request, &index, &mpi_status);
       send_node = index+1;
 
       Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
@@ -100,40 +104,42 @@ int Master(module *m, pool *p) {
         Pack(m, &send_buffer[index][0], buffer_dims[1], p, t, TAG_DATA);
     
         MPI_Isend(&send_buffer[index][0], buffer_dims[1], MPI_DOUBLE, 
-            send_node, intags[send_node], MPI_COMM_WORLD, &mpi_request[index]);
+            send_node, intags[send_node], MPI_COMM_WORLD, &send_request[index]);
         MPI_Irecv(&recv_buffer[index][0], buffer_dims[1], MPI_DOUBLE, 
-            send_node, intags[send_node], MPI_COMM_WORLD, &mpi_request[index]);
-      } 
+            send_node, intags[send_node], MPI_COMM_WORLD, &recv_request[index]);
+      }
     } 
     if (index == MPI_UNDEFINED) break;
   }
 
   /* Process the last checkpoint */
-  if (c->counter > 0 && c->counter < c->size) {
+  //if (c->counter > 0 && c->counter < c->size) {
     mstat = CheckpointPrepare(m, p, c);
     CheckStatus(mstat);
     mstat = CheckpointProcess(m, p, c);
     CheckStatus(mstat);
-  }
+  //}
 
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size; i++) {
     send_buffer[i-1][0] = (double) TAG_TERMINATE;
 
     MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
-        i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
+        i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
     MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
-        i, intags[i], MPI_COMM_WORLD, &mpi_request[i-1]);
+        i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
     
   }
-  MPI_Waitall(m->mpi_size - 1, mpi_request, mpi_status);
+  MPI_Waitall(m->mpi_size - 1, recv_request, send_status);
 
   CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
   
   if (intags) free(intags);
-  if (mpi_status) free(mpi_status);
-  if (mpi_request) free(mpi_request);
+  if (send_status) free(send_status);
+  if (send_request) free(send_request);
+  if (recv_status) free(recv_status);
+  if (recv_request) free(recv_request);
 
   /* Free the buffer */
   if (send_buffer) FreeDoubleArray(send_buffer, buffer_dims);

@@ -36,6 +36,16 @@ int Setup(setup *s) {
  */
 int Storage(pool *p, setup *s) {
 
+  /* Change the pool size (number of tasks) according to the pool id */
+  if (p->pid == 1) {
+    p->board->layout.dim[0] = 13;
+    p->board->layout.dim[1] = 13;
+  }
+  if (p->pid == 2) {
+    p->board->layout.dim[0] = 3;
+    p->board->layout.dim[1] = 5;
+  }
+
   p->storage[2].layout.path = "conditions";
   p->storage[2].layout.dataspace_type = H5S_SIMPLE;
   p->storage[2].layout.datatype = H5T_NATIVE_DOUBLE;
@@ -81,10 +91,10 @@ int PoolProcess(pool *p, setup *s) {
     }
     printf("\n");
   }*/
-  //printf("pool pid = %d\n", p->pid);
+  printf("pool pid = %d\n", p->pid);
 
-  if (p->pid > 1) return POOL_FINALIZE;
-  return POOL_CREATE_NEW;
+  if (p->pid < 2) return POOL_CREATE_NEW;
+  return POOL_FINALIZE;
 }
 
 /**
@@ -125,7 +135,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   int i,j,k;
 
-  printf("Node %04d Task ID :: %d at [%04d, %04d]\n", p->node, t->tid, t->location[0], t->location[1]);
+//  printf("Node %04d Task ID :: %d at [%04d, %04d]\n", p->node, t->tid, t->location[0], t->location[1]);
   for (k = 0; k < 2; k++) {
     for (j = 0; j < t->storage[k].layout.dim[0]; j++) {
       for (i = 0; i < t->storage[k].layout.dim[1]; i++) { 

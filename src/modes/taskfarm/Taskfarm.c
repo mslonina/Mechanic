@@ -23,7 +23,7 @@ int Taskfarm(module *m) {
    */
   pid = 0;
   pool_create = POOL_CREATE_NEW;
-  do {
+  while (pool_create != POOL_FINALIZE) {
     p = PoolLoad(m, pid);
     mstat = PoolInit(m, p);
     CheckStatus(mstat);
@@ -52,7 +52,7 @@ int Taskfarm(module *m) {
     
     PoolFinalize(m, p);
     pid++;
-  } while (pool_create != POOL_FINALIZE); 
+  } 
   /* The Pool loop */
 
   if (m->node == MASTER) {
