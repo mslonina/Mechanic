@@ -1,4 +1,10 @@
 /**
+ * C programmers never die. They are just cast into void.
+ * 
+ * Dennis Ritchie (1941-2011)
+ */
+ 
+/**
  * @file
  * The Main function
  */
