@@ -46,10 +46,16 @@
 #define MODULE_ERR_CHECKPOINT 816
 #define MODULE_ERR_OTHER 888
 
+/* Pool */
 #define POOL_FINALIZE 1001
 #define POOL_CREATE_NEW 1003
 
+/* Storage */
 #define MAX_RANK 2
+#define STORAGE_BASIC 11
+#define STORAGE_PM3D 12
+#define STORAGE_BOARD 13
+#define STORAGE_SINGLE 14
 
 typedef struct {
   int options;
@@ -102,8 +108,10 @@ typedef struct {
   hid_t location;
   schema board;
   storage *storage;
-  int checkpoint_size;
   task *task;
+  int checkpoint_size;
+  int node;
+  int mpi_size;
 } pool;
 
 #define STORAGE_END {.path = NULL, .dataspace_type = 0, .datatype = 0, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0}

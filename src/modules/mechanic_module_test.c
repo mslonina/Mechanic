@@ -83,7 +83,7 @@ int PoolProcess(pool *p, setup *s) {
   }*/
   //printf("pool pid = %d\n", p->pid);
 
-  if (p->pid > 2) return POOL_FINALIZE;
+  if (p->pid > 1) return POOL_FINALIZE;
   return POOL_CREATE_NEW;
 }
 
@@ -123,23 +123,20 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 int TaskProcess(pool *p, task *t, setup *s) {
 //  printf("pool id %d, task id %d\n", p->pid, t->tid);
 
-  /*int i,j;
-  for (j = 0; j < t->storage[0].layout.dim[0]; j++) {
-    for (i = 0; i < t->storage[0].layout.dim[1]; i++) { 
-      printf("%04.1f " , t->storage[0].data[j][i]);
+  int i,j,k;
+
+//  printf("\nTask ID :: %d\n", t->tid);
+  for (k = 0; k < 2; k++) {
+    for (j = 0; j < t->storage[k].layout.dim[0]; j++) {
+      for (i = 0; i < t->storage[k].layout.dim[1]; i++) { 
+//        printf("%04.1f " , t->storage[k].data[j][i]);
+        t->storage[k].data[j][i] = t->tid;
+      }
+//      printf("\n");
     }
-    printf("\n");
+//    printf("\n");
   }
   
-  for (j = 0; j < t->storage[1].layout.dim[0]; j++) {
-    for (i = 0; i < t->storage[1].layout.dim[1]; i++) { 
-      printf("%04.1f " , t->storage[1].data[j][i]);
-    }
-    printf("\n");
-  }*/
-
-  //sleep(5);
-
   return TASK_SUCCESS;
 }
 
@@ -165,5 +162,20 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
  * Implementation of CheckpointProcess().
  */
 int CheckpointProcess(pool *p, checkpoint *c, setup *s) {
+  int i,j,k,l;
+
+  for (l = 0; l < c->size; l++) {
+//    printf("\nCheckpoint Task ID :: %d\n", c->task[l]->tid);
+    for (k = 0; k < 2; k++) {
+      for (j = 0; j < c->task[l]->storage[k].layout.dim[0]; j++) {
+        for (i = 0; i < c->task[l]->storage[k].layout.dim[1]; i++) { 
+//          printf("%04.1f " , c->task[l]->storage[k].data[j][i]);
+        }
+//        printf("\n");
+      }
+//      printf("\n");
+    }
+  }
+
   return TASK_SUCCESS;
 }

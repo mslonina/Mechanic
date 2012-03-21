@@ -22,13 +22,13 @@ int Master(module *m, pool *p) {
   task *t = NULL;
   checkpoint *c = NULL;
   
-  intags = malloc(m->mpi_size * sizeof(int));
+  intags = calloc(m->mpi_size * sizeof(uintptr_t), sizeof(uintptr_t));
   for (i = 0; i < m->mpi_size; i++) {
     intags[i] = i;
   }
 
-  mpi_status = malloc((m->mpi_size-1) * sizeof(MPI_Status));
-  mpi_request = malloc((m->mpi_size-1) * sizeof(MPI_Request));
+  mpi_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
+  mpi_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
 
   tasks = m->mpi_size * 4;
 

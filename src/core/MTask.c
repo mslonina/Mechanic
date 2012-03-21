@@ -82,10 +82,10 @@ int TaskPrepare(module *m, pool *p, task *t) {
   if (m->node == MASTER) {
     t->location[0] = 27;
     t->location[1] = 43;
-  }
 
-  q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
-  if (q) mstat = q(p, t, s);
+    q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
+    if (q) mstat = q(p, t, s);
+  }
 
   return mstat;
 }

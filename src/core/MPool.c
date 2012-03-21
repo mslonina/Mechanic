@@ -40,6 +40,8 @@ pool* PoolLoad(module *m, int pid) {
   /* Setup some sane defaults */
   p->pid = pid;
   sprintf(p->name, "pool-%04d", p->pid);
+  p->node = m->node;
+  p->mpi_size = m->mpi_size;
 
   /* Pool data group */
   if (m->node == MASTER) {
