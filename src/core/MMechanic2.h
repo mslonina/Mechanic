@@ -106,10 +106,11 @@ typedef struct {
   char name[LRC_CONFIG_LEN]; /* The pool name */
   char *path; /* */
   hid_t location;
-  schema board;
+  storage *board;
   storage *storage;
   task *task;
   int checkpoint_size;
+  int pool_size;
   int node;
   int mpi_size;
 } pool;

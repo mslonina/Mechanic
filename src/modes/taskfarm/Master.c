@@ -13,7 +13,7 @@ int Master(module *m, pool *p) {
 
   double **send_buffer = NULL, **recv_buffer = NULL;
   int buffer_dims[2], buffer_rank;
-  int i = 0, task_counter = 0, tasks = 0, cid = 0;
+  int i = 0, task_counter = 0, cid = 0;
 
   MPI_Status *mpi_status, mpis;
   MPI_Request *mpi_request;
@@ -29,8 +29,6 @@ int Master(module *m, pool *p) {
 
   mpi_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
   mpi_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
-
-  tasks = m->mpi_size * 4;
 
   buffer_rank = 2;
   
@@ -98,7 +96,7 @@ int Master(module *m, pool *p) {
       Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
       c->counter++;
 
-      if (task_counter <= tasks) {
+      if (task_counter <= p->pool_size) {
         t->tid = task_counter;
         TaskPrepare(m, p, t);
 

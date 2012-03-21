@@ -25,6 +25,12 @@ pool* PoolLoad(module *m, int pid) {
     p->storage[i].data = NULL;
   }
 
+  /* Allocate task board pointer */
+  p->board = calloc(sizeof(storage), sizeof(storage));
+  if (!p->board) Error(CORE_ERR_MEM);
+  p->board->layout = (schema) STORAGE_END;
+  p->board->data = NULL;
+
   /* Allocate task pointer */
   p->task = calloc(sizeof(task), sizeof(task));
   if (!p->task) Error(CORE_ERR_MEM);
@@ -69,6 +75,9 @@ int PoolPrepare(module *m, pool *p) {
   int mstat = 0, i = 0, size = 0;
   query *q;
   setup s = m->layer.setup;
+
+  /* Number of tasks to do */
+  p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
@@ -124,5 +133,11 @@ void PoolFinalize(module *m, pool *p) {
   }
   if (m->node == MASTER) H5Gclose(p->location);
 
+  if (p->board) {
+    if (p->board->data) {
+      FreeDoubleArray(p->board->data, p->board->layout.dim);
+    }
+    free(p->board);
+  }
   free(p);
 }

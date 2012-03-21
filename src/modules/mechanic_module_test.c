@@ -125,7 +125,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   int i,j,k;
 
-//  printf("\nTask ID :: %d\n", t->tid);
+  printf("Node %04d Task ID :: %d at [%04d, %04d]\n", p->node, t->tid, t->location[0], t->location[1]);
   for (k = 0; k < 2; k++) {
     for (j = 0; j < t->storage[k].layout.dim[0]; j++) {
       for (i = 0; i < t->storage[k].layout.dim[1]; i++) { 

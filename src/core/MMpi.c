@@ -57,10 +57,10 @@ int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) 
     position = 2;
     
     /* Task location in the pool */
-    for (i = 0; i < p->board.rank; i++) {
+    for (i = 0; i < p->board->layout.rank; i++) {
       buffer[i+position] = t->location[i];
     }
-    position = position + p->board.rank;
+    position = position + p->board->layout.rank;
  
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {
@@ -91,10 +91,10 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
     position = 2;
 
     /* Task location in the pool */
-    for (i = 0; i < p->board.rank; i++) {
+    for (i = 0; i < p->board->layout.rank; i++) {
       t->location[i] = buffer[i+position];
     }
-    position = position + p->board.rank;
+    position = position + p->board->layout.rank;
 
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {

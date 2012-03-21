@@ -65,9 +65,9 @@ int Setup(setup *s) {
  */
 int Storage(pool *p, setup *s) {
 
-  p->board.rank = 2; // pool rank
-  p->board.dim[0] = 12; // x-res
-  p->board.dim[1] = 12; // y-res
+  p->board->layout.rank = 2; // pool rank
+  p->board->layout.dim[0] = 12; // x-res
+  p->board->layout.dim[1] = 12; // y-res
 
   /* Path: /Pools/pool-ID/master */
   p->storage[0].layout.path = "pool-global";
@@ -150,9 +150,32 @@ int PoolProcess(pool *p, setup *s) {
   return POOL_FINALIZE;
 }
 
+/** 
+ * @function
+ * Maps tasks
+ */
+int TaskMapping(pool *p, task *t, setup *s) {
+  int px, y;
+
+  px = t->tid;
+  y = p->board->layout.dim[1];
+
+  if (px < y) {
+    t->location[0] = px / y;
+    t->location[1] = px;
+  }
+
+  if (px > y - 1) {
+    t->location[0] = px / y;
+    t->location[1] = px % y;
+  }
+
+  return TASK_SUCCESS;
+}
+
 /**
  * @function
- * Prepares the task.
+ * Prepares the task
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
   return TASK_SUCCESS;
@@ -160,7 +183,7 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * Process the task.
+ * Process the task
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   return TASK_SUCCESS;
