@@ -13,7 +13,7 @@ int Master(module *m, pool *p) {
 
   double **send_buffer = NULL, **recv_buffer = NULL;
   int buffer_dims[2], buffer_rank;
-  int i = 0, cid = 0;
+  int i = 0, cid = 0, terminated_nodes = 0;
 
   MPI_Status *send_status, *recv_status, mpi_status;
   MPI_Request *send_request, *recv_request;
@@ -62,16 +62,19 @@ int Master(module *m, pool *p) {
   /* Send initial tasks to all workers */
   for (i = 1; i < m->mpi_size; i++) {
     mstat = TaskPrepare(m, p, t);
-    if (mstat != NO_MORE_TASKS) {
     
+    if (mstat != NO_MORE_TASKS) {
       mstat = Pack(m, &send_buffer[i-1][0], buffer_dims[1], p, t, TAG_DATA);
       CheckStatus(mstat);
-
-      MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
-          i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
-      MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
-          i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
+    } else {
+      send_buffer[i-1][0] = (double) TAG_TERMINATE;
+      terminated_nodes++;
     }
+
+    MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
+        i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
+    MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
+        i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
   }
   
   /* The task farm loop (Non-blocking communication) */
@@ -137,7 +140,7 @@ int Master(module *m, pool *p) {
   //}
 
   /* Terminate all workers */
-  for (i = 1; i < m->mpi_size; i++) {
+  for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
     send_buffer[i-1][0] = (double) TAG_TERMINATE;
 
     MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
