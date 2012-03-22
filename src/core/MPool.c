@@ -82,7 +82,7 @@ int PoolPrepare(module *m, pool *p) {
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(p, s);
-    mstat = WritePoolData(p);
+    mstat = CommitData(p->location, m->pool_banks, p->storage, STORAGE_FULL);
   }
 
   for (i = 0; i < m->pool_banks; i++) {
@@ -123,7 +123,7 @@ int PoolProcess(module *m, pool *p) {
 void PoolFinalize(module *m, pool *p) {
   if (p->storage) {
     if (p->storage->data) {
-      FreeDoubleArray(p->storage->data, p->storage->layout.dim);
+      FreeBuffer(p->storage->data, p->storage->layout.dim);
     }
     free(p->storage);
   }
@@ -135,7 +135,7 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p->board) {
     if (p->board->data) {
-      FreeDoubleArray(p->board->data, p->board->layout.dim);
+      FreeBuffer(p->board->data, p->board->layout.dim);
     }
     free(p->board);
   }

@@ -30,10 +30,10 @@ int Worker(module *m, pool *p) {
     buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
     
-  send_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
+  send_buffer = AllocateBuffer(buffer_rank, buffer_dims);
   if (!send_buffer) Error(CORE_ERR_MEM);
 
-  recv_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
+  recv_buffer = AllocateBuffer(buffer_rank, buffer_dims);
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
   t = TaskLoad(m, p, 0);
@@ -69,8 +69,8 @@ int Worker(module *m, pool *p) {
   /* Finalize */
   TaskFinalize(m, p, t);
 
-  if (send_buffer) FreeDoubleArray(send_buffer, buffer_dims);
-  if (recv_buffer) FreeDoubleArray(recv_buffer, buffer_dims);
+  if (send_buffer) FreeBuffer(send_buffer, buffer_dims);
+  if (recv_buffer) FreeBuffer(recv_buffer, buffer_dims);
 
   return mstat;
 }

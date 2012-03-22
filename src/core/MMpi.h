@@ -9,6 +9,7 @@
 #include "MCommon.h"
 #include "MPool.h"
 #include "MTask.h"
+#include "MLog.h"
 
 #define DEST 0
 #define SOURCE 0

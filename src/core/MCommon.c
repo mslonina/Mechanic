@@ -93,12 +93,12 @@ void CheckStatus(int status) {
 
 /**
  * @function
- * Allocates double array
+ * Allocate memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
  */
-double** AllocateDoubleArray(int rank, int *dims) {
+double** AllocateBuffer(int rank, int *dims) {
   double** array = NULL;
   int i = 0, size = 0;
 
@@ -117,11 +117,11 @@ double** AllocateDoubleArray(int rank, int *dims) {
 
 /**
  * @function
- * Frees double array
+ * Free memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  */
-void FreeDoubleArray(double **array, int *dims) {
+void FreeBuffer(double **array, int *dims) {
 
   if (array[0]) free(array[0]);
   if (array) free(array);

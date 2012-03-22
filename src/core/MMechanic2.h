@@ -116,6 +116,6 @@ typedef struct {
   int mpi_size;
 } pool;
 
-#define STORAGE_END {.path = NULL, .dataspace_type = 0, .datatype = 0, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0}
+#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0}
 
 #endif

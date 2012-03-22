@@ -47,10 +47,10 @@ int Master(module *m, pool *p) {
     buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
     
-  send_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
+  send_buffer = AllocateBuffer(buffer_rank, buffer_dims);
   if (!send_buffer) Error(CORE_ERR_MEM);
 
-  recv_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
+  recv_buffer = AllocateBuffer(buffer_rank, buffer_dims);
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
   t = TaskLoad(m, p, 0);
@@ -160,8 +160,8 @@ int Master(module *m, pool *p) {
   if (send_request) free(send_request);
   if (recv_status) free(recv_status);
   if (recv_request) free(recv_request);
-  if (send_buffer) FreeDoubleArray(send_buffer, buffer_dims);
-  if (recv_buffer) FreeDoubleArray(recv_buffer, buffer_dims);
+  if (send_buffer) FreeBuffer(send_buffer, buffer_dims);
+  if (recv_buffer) FreeBuffer(recv_buffer, buffer_dims);
 
   return mstat;
 }

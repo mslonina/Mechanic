@@ -27,8 +27,8 @@ void Error(int status);
 void Abort(int status);
 void CheckStatus(int status);
 
-double** AllocateDoubleArray(int rank, int *dims);
-void FreeDoubleArray(double **array, int *dims);
+double** AllocateBuffer(int rank, int *dims);
+void FreeBuffer(double **array, int *dims);
 int GetSize(int rank, int *dims);
 
 void Array2Vec(double *vec, double **array, int rank, int *dims);

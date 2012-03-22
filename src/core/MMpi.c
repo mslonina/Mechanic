@@ -34,7 +34,10 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
   }
 
   mstat = MPI_Type_struct(4, block_lengths, displacements, types, mpi_t);
+  CheckStatus(mstat);
+  
   mstat = MPI_Type_commit(mpi_t);
+  CheckStatus(mstat);
 
   return mstat;
 }

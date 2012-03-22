@@ -18,7 +18,6 @@ int CheckLayout(int banks, storage *s);
 
 int CommitDataset(hid_t location, storage *s, double **data);
 int CommitData(hid_t location, int banks, storage *s, int flags);
-int WritePoolData(pool *p);
 
 int GetBanks(int allocated_banks, storage *s);
 
