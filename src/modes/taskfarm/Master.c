@@ -23,16 +23,22 @@ int Master(module *m, pool *p) {
   checkpoint *c = NULL;
   
   intags = calloc(m->mpi_size * sizeof(uintptr_t), sizeof(uintptr_t));
-  for (i = 0; i < m->mpi_size; i++) {
-    intags[i] = i;
-  }
+  if (!intags) Error(CORE_ERR_MEM);
 
   send_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
+  if (!send_status) Error(CORE_ERR_MEM);
+  
   send_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
+  if (!send_request) Error(CORE_ERR_MEM);
   
   recv_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
+  if (!recv_status) Error(CORE_ERR_MEM);
+  
   recv_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
+  if (!recv_request) Error(CORE_ERR_MEM);
 
+  for (i = 0; i < m->mpi_size; i++) intags[i] = i;
+  
   buffer_rank = 2;
   
   buffer_dims[0] = m->mpi_size - 1;
@@ -42,7 +48,10 @@ int Master(module *m, pool *p) {
   }
     
   send_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
+  if (!send_buffer) Error(CORE_ERR_MEM);
+
   recv_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
+  if (!recv_buffer) Error(CORE_ERR_MEM);
 
   t = TaskLoad(m, p, 0);
   c = CheckpointLoad(m, p, 0);
@@ -55,7 +64,9 @@ int Master(module *m, pool *p) {
     mstat = TaskPrepare(m, p, t);
     if (mstat != NO_MORE_TASKS) {
     
-      Pack(m, &send_buffer[i-1][0], buffer_dims[1], p, t, TAG_DATA);
+      mstat = Pack(m, &send_buffer[i-1][0], buffer_dims[1], p, t, TAG_DATA);
+      CheckStatus(mstat);
+
       MPI_Isend(&send_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
           i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
       MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
@@ -88,6 +99,7 @@ int Master(module *m, pool *p) {
 
         mstat = CheckpointInit(m, p, c);
         CheckStatus(mstat);
+
         c->counter = 0;
       }
     
@@ -95,13 +107,16 @@ int Master(module *m, pool *p) {
       MPI_Waitany(m->mpi_size-1, recv_request, &index, &mpi_status);
       send_node = index+1;
 
-      Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
+      mstat = Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
+      CheckStatus(mstat);
+
       c->counter++;
 
       mstat = TaskPrepare(m, p, t);
       if (mstat != NO_MORE_TASKS) {
 
-        Pack(m, &send_buffer[index][0], buffer_dims[1], p, t, TAG_DATA);
+        mstat = Pack(m, &send_buffer[index][0], buffer_dims[1], p, t, TAG_DATA);
+        CheckStatus(mstat);
     
         MPI_Isend(&send_buffer[index][0], buffer_dims[1], MPI_DOUBLE, 
             send_node, intags[send_node], MPI_COMM_WORLD, &send_request[index]);
@@ -116,6 +131,7 @@ int Master(module *m, pool *p) {
   //if (c->counter > 0 && c->counter < c->size) {
     mstat = CheckpointPrepare(m, p, c);
     CheckStatus(mstat);
+
     mstat = CheckpointProcess(m, p, c);
     CheckStatus(mstat);
   //}
@@ -132,6 +148,7 @@ int Master(module *m, pool *p) {
   }
   MPI_Waitall(m->mpi_size - 1, recv_request, send_status);
 
+  /* Finalize */
   CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
   
@@ -140,8 +157,6 @@ int Master(module *m, pool *p) {
   if (send_request) free(send_request);
   if (recv_status) free(recv_status);
   if (recv_request) free(recv_request);
-
-  /* Free the buffer */
   if (send_buffer) FreeDoubleArray(send_buffer, buffer_dims);
   if (recv_buffer) FreeDoubleArray(recv_buffer, buffer_dims);
 

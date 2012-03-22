@@ -31,7 +31,10 @@ int Worker(module *m, pool *p) {
   }
     
   send_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
+  if (!send_buffer) Error(CORE_ERR_MEM);
+
   recv_buffer = AllocateDoubleArray(buffer_rank, buffer_dims);
+  if (!recv_buffer) Error(CORE_ERR_MEM);
 
   t = TaskLoad(m, p, 0);
 
@@ -41,19 +44,21 @@ int Worker(module *m, pool *p) {
         MASTER, intag, MPI_COMM_WORLD, &recv_request);
     MPI_Wait(&recv_request, &recv_status);
 
-    Unpack(m, &recv_buffer[0][0], buffer_dims[1], p, t, &tag);
+    mstat = Unpack(m, &recv_buffer[0][0], buffer_dims[1], p, t, &tag);
+    CheckStatus(mstat);
 
     if (tag != TAG_TERMINATE) {
 
       mstat = TaskPrepare(m, p, t);
+      CheckStatus(mstat);
+
       mstat = TaskProcess(m, p, t);
+      CheckStatus(mstat);
 
     }
 
-//    printf("Worker %d received tid = %d and tag = %d at location %d, %d\n", 
-//        node, t.tid, tag, t.location[0], t.location[1]);
-
-    Pack(m, &send_buffer[0][0], buffer_dims[1], p, t, tag);
+    mstat = Pack(m, &send_buffer[0][0], buffer_dims[1], p, t, tag);
+    CheckStatus(mstat);
 
     MPI_Isend(&send_buffer[0][0], buffer_dims[1], MPI_DOUBLE, 
         MASTER, intag, MPI_COMM_WORLD, &send_request);
@@ -61,9 +66,9 @@ int Worker(module *m, pool *p) {
     if (tag == TAG_TERMINATE) break;
   }
   
+  /* Finalize */
   TaskFinalize(m, p, t);
 
-  /* Free the buffer */
   if (send_buffer) FreeDoubleArray(send_buffer, buffer_dims);
   if (recv_buffer) FreeDoubleArray(recv_buffer, buffer_dims);
 
