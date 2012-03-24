@@ -36,6 +36,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
     t->storage[i].layout.rank = p->task->storage[i].layout.rank;
     t->storage[i].layout.use_hdf = p->task->storage[i].layout.use_hdf;
     t->storage[i].layout.sync = p->task->storage[i].layout.sync;
+    t->storage[i].layout.storage_type = p->task->storage[i].layout.storage_type;
 
     /* Memory size */
     for (j = 0; j < t->storage[i].layout.rank; j++) {

@@ -30,7 +30,7 @@ typedef struct {
 typedef struct {
   char filename[LRC_CONFIG_LEN];
   hid_t datafile;
-  hid_t location;
+  hid_t h5location;
   int node;
   int mpi_size;
   int pool_banks;

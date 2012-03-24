@@ -11,6 +11,8 @@
 pool* PoolLoad(module *m, int pid) {
   pool *p = NULL;
   int i = 0;
+  hid_t h5location, group, poolgroup;
+  char poolname[LRC_CONFIG_LEN];
 
   /* Allocate pool pointer */
   p = calloc(sizeof(pool), sizeof(pool));
@@ -45,13 +47,23 @@ pool* PoolLoad(module *m, int pid) {
 
   /* Setup some sane defaults */
   p->pid = pid;
-  sprintf(p->name, "pool-%04d", p->pid);
   p->node = m->node;
   p->mpi_size = m->mpi_size;
 
-  /* Pool data group */
+  /* Pool data group: /Pools */
   if (m->node == MASTER) {
-    p->location = H5Gcreate(m->location, p->name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    if (!H5Lexists(h5location, "Pools", H5P_DEFAULT)) {
+      group = H5Gcreate(h5location, "Pools", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    } else {
+      group = H5Gopen(h5location, "Pools", H5P_DEFAULT);
+    }
+    sprintf(poolname, "pool-%04d", p->pid);
+    poolgroup = H5Gcreate(group, poolname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    H5Gclose(poolgroup);
+    H5Gclose(group);
+    H5Fclose(h5location);
   }
 
   return p;
@@ -75,6 +87,9 @@ int PoolPrepare(module *m, pool *p) {
   int mstat = 0, i = 0, size = 0;
   query *q;
   setup s = m->layer.setup;
+  hid_t h5location, group;
+  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
+  char path[LRC_CONFIG_LEN];
 
   /* Number of tasks to do */
   p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
@@ -82,7 +97,12 @@ int PoolPrepare(module *m, pool *p) {
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(p, s);
-    mstat = CommitData(p->location, m->pool_banks, p->storage, STORAGE_FULL);
+    h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    sprintf(path, "/Pools/pool-%04d", p->pid);
+    group = H5Gopen(h5location, path, H5P_DEFAULT);
+    mstat = CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
+    H5Gclose(group);
+    H5Fclose(h5location);
   }
 
   for (i = 0; i < m->pool_banks; i++) {
@@ -131,7 +151,7 @@ void PoolFinalize(module *m, pool *p) {
     if (p->task->storage) free(p->task->storage);
     free(p->task);
   }
-  if (m->node == MASTER) H5Gclose(p->location);
+  //if (m->node == MASTER) H5Gclose(p->h5location);
 
   if (p->board) {
     if (p->board->data) {

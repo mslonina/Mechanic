@@ -87,7 +87,7 @@ int Master(module *m, pool *p) {
     if (!req_flag) {
 
       /* Flush checkpoint buffer and write data, reset counter */
-      if (c->counter == c->size) {
+      if (c->counter > (c->size-1)) {
         mstat = CheckpointPrepare(m, p, c);
         CheckStatus(mstat);
 
@@ -108,6 +108,7 @@ int Master(module *m, pool *p) {
     
       /* Wait for any operation to complete */
       MPI_Waitany(m->mpi_size-1, recv_request, &index, &mpi_status);
+      //printf("recv from index %d\n", index);
       send_node = index+1;
 
       mstat = Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);

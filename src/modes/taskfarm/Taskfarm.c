@@ -13,11 +13,6 @@ int Taskfarm(module *m) {
   pool *p = NULL;
   int pool_create;
 
-  if (m->node == MASTER) {
-    m->datafile = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
-    m->location = H5Gcreate(m->datafile, "Pools", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  }
-
   /**
    * The Pool loop
    */
@@ -25,8 +20,8 @@ int Taskfarm(module *m) {
   pool_create = POOL_CREATE_NEW;
   while (pool_create != POOL_FINALIZE) {
     p = PoolLoad(m, pid);
-    mstat = PoolInit(m, p);
-    CheckStatus(mstat);
+   // mstat = PoolInit(m, p);
+   // CheckStatus(mstat);
 
     mstat = Storage(m, p);
     CheckStatus(mstat);
@@ -54,11 +49,6 @@ int Taskfarm(module *m) {
     pid++;
   } 
   /* The Pool loop */
-
-  if (m->node == MASTER) {
-    H5Gclose(m->location);
-    H5Fclose(m->datafile);
-  }
 
   return mstat;
 }

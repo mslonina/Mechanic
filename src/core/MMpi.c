@@ -114,6 +114,7 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
     /* Mark the task on board */
     if (m->node == MASTER) {
       p->board->data[t->location[0]][t->location[1]] = TASK_FINISHED;
+      t->status = TASK_FINISHED;
     }
   }
 

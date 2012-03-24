@@ -37,7 +37,7 @@ int Setup(setup *s) {
 int Storage(pool *p, setup *s) {
 
   /* Change the pool size (number of tasks) according to the pool id */
-  if (p->pid == 1) {
+/*  if (p->pid == 1) {
     p->board->layout.dim[0] = 13;
     p->board->layout.dim[1] = 13;
   }
@@ -45,7 +45,7 @@ int Storage(pool *p, setup *s) {
     p->board->layout.dim[0] = 3;
     p->board->layout.dim[1] = 5;
   }
-
+*/
   p->storage[2].layout.path = "conditions";
   p->storage[2].layout.dataspace_type = H5S_SIMPLE;
   p->storage[2].layout.datatype = H5T_NATIVE_DOUBLE;
@@ -93,7 +93,7 @@ int PoolProcess(pool *p, setup *s) {
   }*/
   printf("pool pid = %d\n", p->pid);
 
-  if (p->pid < 2) return POOL_CREATE_NEW;
+  if (p->pid < 1) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }
 
@@ -103,13 +103,16 @@ int PoolProcess(pool *p, setup *s) {
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
   int i,j;
-  int dims[4];
+  int dims[6];
 
   dims[0] = t->storage[0].layout.dim[0];
   dims[1] = t->storage[0].layout.dim[1];
 
   dims[2] = t->storage[1].layout.dim[0];
   dims[3] = t->storage[1].layout.dim[1];
+
+  dims[4] = t->storage[2].layout.dim[0];
+  dims[5] = t->storage[2].layout.dim[1];
 
   for (j = 0; j < dims[0]; j++) {
     for (i = 0; i < dims[1]; i++) { 
@@ -119,7 +122,13 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 
   for (j = 0; j < dims[2]; j++) {
     for (i = 0; i < dims[3]; i++) { 
-      t->storage[1].data[j][i] = i * j;
+      t->storage[1].data[j][i] = t->tid;
+    }
+  }
+  
+  for (j = 0; j < dims[4]; j++) {
+    for (i = 0; i < dims[5]; i++) { 
+      t->storage[2].data[j][i] = t->tid;
     }
   }
 
@@ -167,25 +176,3 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
   return TASK_SUCCESS;
 }
 
-/**
- * @function
- * Implementation of CheckpointProcess()
- */
-int CheckpointProcess(pool *p, checkpoint *c, setup *s) {
-  int i,j,k,l;
-
-  for (l = 0; l < c->size; l++) {
-//    printf("\nCheckpoint Task ID :: %d\n", c->task[l]->tid);
-    for (k = 0; k < 2; k++) {
-      for (j = 0; j < c->task[l]->storage[k].layout.dim[0]; j++) {
-        for (i = 0; i < c->task[l]->storage[k].layout.dim[1]; i++) { 
-//          printf("%04.1f " , c->task[l]->storage[k].data[j][i]);
-        }
-//        printf("\n");
-      }
-//      printf("\n");
-    }
-  }
-
-  return TASK_SUCCESS;
-}

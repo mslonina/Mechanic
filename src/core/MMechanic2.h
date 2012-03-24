@@ -57,6 +57,13 @@
 #define STORAGE_BOARD 13
 #define STORAGE_SINGLE 14
 
+/* Task */
+#define TASK_EMPTY -88
+#define TASK_FINISHED 1
+#define TASK_AVAILABLE 0
+#define TASK_IN_USE -1
+#define NO_MORE_TASKS -99
+
 typedef struct {
   int options;
   int pools;
@@ -83,7 +90,6 @@ typedef struct {
 } schema;
 
 typedef struct {
-  hid_t location;
   schema layout;
   double **data;
 } storage;
@@ -91,6 +97,8 @@ typedef struct {
 typedef struct {
   int pid; /* The parent pool id */
   int tid; /* The task id */
+  int status;
+  char* path;
   int location[MAX_RANK]; /* Coordinates of the task */
   storage *storage;
 } task;
@@ -104,9 +112,8 @@ typedef struct {
 
 typedef struct {
   int pid; /* The pool id */
-  char name[LRC_CONFIG_LEN]; /* The pool name */
   char *path; /* */
-  hid_t location;
+  char name[LRC_CONFIG_LEN]; /* The pool name */
   storage *board;
   storage *storage;
   task *task;
@@ -116,6 +123,6 @@ typedef struct {
   int mpi_size;
 } pool;
 
-#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0}
+#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_BASIC}
 
 #endif

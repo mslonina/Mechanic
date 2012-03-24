@@ -29,11 +29,14 @@ int Setup(module *m, char *filename, int mode) {
   MPI_Datatype mpi_t;
   MPI_Status mpi_status;
   char *fname;
+  hid_t h5location;
 
   /* Read the specified configuration file */
   if (m->node == MASTER) {
     if (mode == RESTART_MODE) {
-      
+      h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+      LRC_HDF5Parser(h5location, CONFIG_GROUP, m->layer.setup.head);
+      H5Fclose(h5location);
     } else {
       mstat = ReadConfig(filename, m->layer.setup.head);
     }
@@ -72,10 +75,10 @@ int Setup(module *m, char *filename, int mode) {
 
     strncpy(m->filename, fname, strlen(fname));
     m->filename[strlen(fname)] = LRC_NULL;
-
-    m->datafile = H5Fcreate(m->filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    LRC_HDF5Writer(m->datafile, CONFIG_GROUP, m->layer.setup.head);
-    H5Fclose(m->datafile);
+    
+    h5location = H5Fcreate(m->filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    LRC_HDF5Writer(h5location, CONFIG_GROUP, m->layer.setup.head);
+    H5Fclose(h5location);
     free(fname);
   }
 

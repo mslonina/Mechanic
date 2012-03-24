@@ -7,6 +7,37 @@
 /**
  * @function
  */
+/*storage* StorageLoad(module *m, pool*p) {
+  storage *s = NULL;
+  query *q;
+
+  s = calloc(banks * sizeof(storage), sizeof(storage));
+  if (!s) Error(CORE_ERR_MEM);
+*/
+  /* First load the fallback (core) storage layout */
+/*  if (m->fallback.handler) {
+    q = LoadSym(m, "Storage", FALLBACK_ONLY);
+    if (q) mstat = q(p, &m->layer.setup);
+    CheckStatus(mstat);
+  }
+*/
+  /* Load the module setup */
+/*  q = LoadSym(m, "Storage", NO_FALLBACK);
+  if (q) mstat = q(p, &m->layer.setup);
+  CheckStatus(mstat);
+
+  return s;
+}*/
+
+/**
+ * @function
+ */
+void StorageFinalize(int banks, storage *s) {
+
+}
+/**
+ * @function
+ */
 int Storage(module *m, pool *p) {
   int mstat = 0;
   query *q;
@@ -32,8 +63,8 @@ int Storage(module *m, pool *p) {
   /* Commit the storage layout (only the Master node) */
   if (m->node == MASTER) {
     CheckLayout(m->pool_banks, p->storage);
-    CommitStorageLayout(p->location, m->pool_banks, p->storage);
-    CommitStorageLayout(p->location, 1, p->board); // The task board dataset
+  //  CommitStorageLayout(p->h5location, m->pool_banks, p->storage);
+  //  CommitStorageLayout(p->h5location, 1, p->board); // The task board dataset
   }
 
   /* Commit Board */
@@ -53,14 +84,20 @@ int CheckLayout(int banks, storage *s) {
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
+      /* Common fixes before future development */
+      s[i].layout.rank = 2;
+      s[i].layout.dataspace_type = H5S_SIMPLE;
+      s[i].layout.datatype = H5T_NATIVE_DOUBLE;
+
+      /* Check for mistakes */
       if (s[i].layout.path == NULL) {
         Message(MESSAGE_ERR, "The storage path is required when use_hdf\n");
         Error(CORE_ERR_STORAGE);
       }
-      if (s[i].layout.rank == 0) {
+      /*if (s[i].layout.rank == 0) {
         Message(MESSAGE_ERR, "Rank must be > 0 when use_hdf\n");
         Error(CORE_ERR_STORAGE);
-      }
+      }*/
     }
   }
   return mstat;
@@ -73,7 +110,7 @@ int CheckLayout(int banks, storage *s) {
  * @todo
  * The CheckAndFixLayout must run before.
  */
-int CommitStorageLayout(hid_t location, int banks, storage *s) {
+int CommitStorageLayout(hid_t h5location, int banks, storage *s) {
   int mstat = 0, i = 0;
   hid_t dataspace, dataset;
   herr_t hdf_status;
@@ -87,7 +124,7 @@ int CommitStorageLayout(hid_t location, int banks, storage *s) {
         dims[1] = s[i].layout.dim[1];
         hdf_status = H5Sset_extent_simple(dataspace, s[i].layout.rank, dims, NULL);
       }
-      dataset = H5Dcreate(location, s[i].layout.path, s[i].layout.datatype, dataspace, 
+      dataset = H5Dcreate(h5location, s[i].layout.path, s[i].layout.datatype, dataspace, 
           H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
       H5Dclose(dataset);
@@ -157,11 +194,11 @@ int GetBanks(int allocated_banks, storage *s) {
  * @function
  * Writes the data buffer to the dataset
  */
-int CommitDataset(hid_t location, storage *s, double **data) {
+int CommitDataset(hid_t h5location, storage *s, double **data) {
   int mstat = 0;
   herr_t hdf_status;
 
-  hdf_status = H5Dwrite(location, s->layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0][0]);
+  hdf_status = H5Dwrite(h5location, s->layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0][0]);
   if (hdf_status < 0) mstat = CORE_ERR_HDF;
   return mstat;
 }
@@ -170,37 +207,68 @@ int CommitDataset(hid_t location, storage *s, double **data) {
  * @function
  * Commits data to the master file
  */
-int CommitData(hid_t location, int banks, storage *s, int flag) {
+int CommitData(hid_t h5location, int banks, storage *s, int flag, hsize_t *board_dims, hsize_t *offsets) {
   int mstat = 0, i = 0;
-  hid_t dataset;
+  hid_t dataspace, dataset, memspace;
   herr_t hdf_status;
+  hsize_t dims[MAX_RANK], ldims[MAX_RANK];
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
-      dataset = H5Dopen(location, s[i].layout.path, H5P_DEFAULT);
-      hdf_status = CommitDataset(dataset, &s[i], s[i].data);
+
+      dataspace = H5Screate(s[i].layout.dataspace_type);
+      
+      if (s[i].layout.dataspace_type == H5S_SIMPLE) {
+      
+        if (s[i].layout.storage_type == STORAGE_BASIC) {
+          dims[0] = s[i].layout.dim[0];
+          dims[1] = s[i].layout.dim[1];
+        }
+        
+        if (s[i].layout.storage_type == STORAGE_PM3D) {
+          dims[0] = s[i].layout.dim[0] * board_dims[0] * board_dims[1];
+          dims[1] = s[i].layout.dim[1];
+        }
+        
+        if (s[i].layout.storage_type == STORAGE_BOARD) {
+          dims[0] = s[i].layout.dim[0] * board_dims[0];
+          dims[1] = s[i].layout.dim[1] * board_dims[1];
+        }
+        
+        hdf_status = H5Sset_extent_simple(dataspace, s[i].layout.rank, dims, NULL);
+      }
+
+      if (!H5Lexists(h5location, s[i].layout.path, H5P_DEFAULT)) {
+        dataset = H5Dcreate(h5location, s[i].layout.path, s[i].layout.datatype, dataspace,
+            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+      } else {
+        dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
+      }
+        
+      /* Whole dataset at once */
+      if (s[i].layout.storage_type == STORAGE_BASIC) {
+        hdf_status = H5Dwrite(dataset, s[i].layout.datatype, 
+            H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
+        if (hdf_status < 0) mstat = CORE_ERR_HDF;
+      } else {
+        ldims[0] = s[i].layout.dim[0];
+        ldims[1] = s[i].layout.dim[1];
+        memspace = H5Screate_simple(s[i].layout.rank, ldims, NULL);
+        H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, ldims, NULL);
+        hdf_status = H5Dwrite(dataset, s[i].layout.datatype, 
+            memspace, dataspace, H5P_DEFAULT, &(s[i].data[0][0]));
+        if (hdf_status < 0) mstat = CORE_ERR_HDF;
+
+        H5Sclose(memspace);
+      }
+
+      H5Sclose(dataspace);
       H5Dclose(dataset);
+
     }
   }
   if (hdf_status < 0) mstat = CORE_ERR_HDF;
   return mstat;
 }
 
-/**
- * @function
- */
-storage* StorageLoad(int banks) {
-  storage *s = NULL;
-
-  s = calloc(banks * sizeof(storage), sizeof(storage));
-  if (!s) Error(CORE_ERR_MEM);
-
-  return s;
-}
-
-/**
- * @function
- */
-void StorageFinalize(int banks, storage *s) {
-
-}

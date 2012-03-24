@@ -47,18 +47,37 @@ int Setup(setup *s) {
  * Define the pool storage layout
  *
  * If the user-supplied module implements this function, the layout will be merged with
- * the core.
+ * the core. You may change the layout per pool.
+ *
+ * POOL STORAGE
  *
  * The Pool will store its global data in the /Pools/pool-ID. The task data will be stored
- * in /Pools/pool-ID/tasks. 
+ * in /Pools/pool-ID/Tasks. 
  *
  * The size of the storage dataset and the memory is the same. In the case of pool, whole
- * memory block is stored at once, if use_hdf = 1. In case of task, the storage dataset
- * has the size of dim[0]*number-of-tasks, and each task-dataset is stored with the offset
- * of dim[0]*task-ID.
- *
+ * memory block is stored at once, if use_hdf = 1. 
+ * 
  * The Pool data is broadcasted right after PoolPrepare() and saved to the master
  * datafile.
+ *
+ * TASK STORAGE
+ * 
+ * The task data is stored inside /Pools/pool-ID/Tasks group. There are three available
+ * methods to store the task result:
+ *
+ * - STORAGE_BASIC - the whole memory block is stored in a dataset inside /Tasks/task-ID
+ *   group
+ * - STORAGE_PM3D - the memory block is stored in a dataset with a column-offset, so that
+ *   the output is suitable to process with Gnuplot
+ * - STORAGE_BOARD - the memory block is stored in a dataset with a {row,column}-offset
+ *   according to the board-location of the task
+ *
+ * CHECKPOINT
+ *
+ * The checkpoint is defined as a multiply of the MPI_COMM_WORLD-1, minimum = 1. It
+ * contains the results from tasks that have been processed and received. When the
+ * checkpoint is full, the result is stored in the master datafile, according to the
+ * storage information provided in the module.
  *
  * You can adjust the number of available memory/storage banks by implementing the Init
  * function and using banks_per_pool and banks_per_task variables.
@@ -70,8 +89,8 @@ int Storage(pool *p, setup *s) {
   p->board->layout.rank = 2; // pool rank
   p->board->layout.dataspace_type = H5S_SIMPLE;
   p->board->layout.datatype = H5T_NATIVE_DOUBLE;
-  p->board->layout.dim[0] = 12; // x-res
-  p->board->layout.dim[1] = 12; // y-res
+  p->board->layout.dim[0] = 4; // vertical res
+  p->board->layout.dim[1] = 4; // horizontal res
   p->board->layout.use_hdf = 1;
 
   /* Path: /Pools/pool-ID/master */
@@ -84,16 +103,6 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout.use_hdf = 1;
   p->storage[0].layout.sync = 1;
 
-  /*p->storage[0].layout = (schema) {
-    .path = "master",
-    .dataspace_type = H5S_SIMPLE,
-    .datatype = H5T_NATIVE_DOUBLE,
-    .rank = 2,
-    .dim = {23,7},
-    .use_hdf = 1,
-    .sync = 1
-  };*/
- 
   /* Path: /Pools/pool-ID/tmp */
   p->storage[1].layout.path = "pool-tmp";
   p->storage[1].layout.dataspace_type = H5S_SIMPLE;
@@ -111,22 +120,34 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout.dataspace_type = H5S_SIMPLE;
   p->task->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task->storage[0].layout.rank = 2;
-  p->task->storage[0].layout.dim[0] = 3;
+  p->task->storage[0].layout.dim[0] = 1;
   p->task->storage[0].layout.dim[1] = 12;
   p->task->storage[0].layout.use_hdf = 1;
+  p->task->storage[0].layout.storage_type = STORAGE_BASIC;
 
   /* Path: /Pools/pool-ID/tasks/tmpdata */
   p->task->storage[1].layout.path = "task-tmp";
   p->task->storage[1].layout.dataspace_type = H5S_SIMPLE;
   p->task->storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task->storage[1].layout.rank = 2;
-  p->task->storage[1].layout.dim[0] = 3;
+  p->task->storage[1].layout.dim[0] = 1;
   p->task->storage[1].layout.dim[1] = 12;
-  p->task->storage[1].layout.use_hdf = 0;
+  p->task->storage[1].layout.use_hdf = 1;
+  p->task->storage[1].layout.storage_type = STORAGE_PM3D;
 
-  p->task->storage[2].layout = (schema) STORAGE_END;
+  /* Path: /Pools/pool-ID/tasks/tmpdata */
+  p->task->storage[2].layout.path = "task-board";
+  p->task->storage[2].layout.dataspace_type = H5S_SIMPLE;
+  p->task->storage[2].layout.datatype = H5T_NATIVE_DOUBLE;
+  p->task->storage[2].layout.rank = 2;
+  p->task->storage[2].layout.dim[0] = 2;
+  p->task->storage[2].layout.dim[1] = 3;
+  p->task->storage[2].layout.use_hdf = 1;
+  p->task->storage[2].layout.storage_type = STORAGE_BOARD;
 
-  p->checkpoint_size = 2; // 2*mpi_size
+  p->task->storage[3].layout = (schema) STORAGE_END;
+
+  p->checkpoint_size = 2;
 
   return TASK_SUCCESS;
 }
@@ -158,21 +179,33 @@ int PoolProcess(pool *p, setup *s) {
 /** 
  * @function
  * Maps tasks
+ *
+ * The mapping starts from the top left corner:
+ *
+ * (0,0) (0,1) (0,2) (0,3) ...
+ * (1,0) (1,1) (1,2) (1,3)
+ * (2,0) (2,1) (2,2) (2,3)
+ *  ...
+ *
+ *  This follows the hdf5 storage, row by row:
+ *
+ *  0  1  2  3
+ *  4  5  6  7
+ *  8  9 10 11
  */
 int TaskMapping(pool *p, task *t, setup *s) {
-  int px, y;
+  int px, vert;
 
   px = t->tid;
-  y = p->board->layout.dim[1];
+  vert = p->board->layout.dim[1];
 
-  if (px < y) {
-    t->location[0] = px / y;
+  if (px < vert) {
+    t->location[0] = px / vert;
     t->location[1] = px;
   }
-
-  if (px > y - 1) {
-    t->location[0] = px / y;
-    t->location[1] = px % y;
+  if (px > vert - 1) {
+    t->location[0] = px / vert;
+    t->location[1] = px % vert;
   }
 
   return TASK_SUCCESS;
@@ -202,16 +235,5 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * The master node
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
-  return TASK_SUCCESS;
-}
-
-/**
- * @function
- * Processes the checkpoint
- * 
- * @in_group
- * The master node
- */
-int CheckpointProcess(pool *p, checkpoint *c, setup *s) {
   return TASK_SUCCESS;
 }
