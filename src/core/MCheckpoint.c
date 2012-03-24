@@ -28,6 +28,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   for (i = 0; i < c->size; i++) {
     c->task[i] = TaskLoad(m, p, i);
     c->task[i]->status = TASK_EMPTY;
+    //CheckLayout();
   } 
 
   return c;

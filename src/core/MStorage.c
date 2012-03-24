@@ -7,37 +7,6 @@
 /**
  * @function
  */
-/*storage* StorageLoad(module *m, pool*p) {
-  storage *s = NULL;
-  query *q;
-
-  s = calloc(banks * sizeof(storage), sizeof(storage));
-  if (!s) Error(CORE_ERR_MEM);
-*/
-  /* First load the fallback (core) storage layout */
-/*  if (m->fallback.handler) {
-    q = LoadSym(m, "Storage", FALLBACK_ONLY);
-    if (q) mstat = q(p, &m->layer.setup);
-    CheckStatus(mstat);
-  }
-*/
-  /* Load the module setup */
-/*  q = LoadSym(m, "Storage", NO_FALLBACK);
-  if (q) mstat = q(p, &m->layer.setup);
-  CheckStatus(mstat);
-
-  return s;
-}*/
-
-/**
- * @function
- */
-void StorageFinalize(int banks, storage *s) {
-
-}
-/**
- * @function
- */
 int Storage(module *m, pool *p) {
   int mstat = 0;
   query *q;
@@ -63,14 +32,10 @@ int Storage(module *m, pool *p) {
   /* Commit the storage layout (only the Master node) */
   if (m->node == MASTER) {
     CheckLayout(m->pool_banks, p->storage);
-  //  CommitStorageLayout(p->h5location, m->pool_banks, p->storage);
-  //  CommitStorageLayout(p->h5location, 1, p->board); // The task board dataset
   }
 
   /* Commit Board */
   p->board->data = AllocateBuffer(p->board->layout.rank,p->board->layout.dim);
-
-//  printf("BANKS :: pool %d, task %d\n", m->pool_banks, m->task_banks);
 
   return mstat;
 }
@@ -100,39 +65,6 @@ int CheckLayout(int banks, storage *s) {
       }*/
     }
   }
-  return mstat;
-}
-
-/**
- * @function
- * Commits the storage layout to the HDF5 datafile
- *
- * @todo
- * The CheckAndFixLayout must run before.
- */
-int CommitStorageLayout(hid_t h5location, int banks, storage *s) {
-  int mstat = 0, i = 0;
-  hid_t dataspace, dataset;
-  herr_t hdf_status;
-  hsize_t dims[MAX_RANK];
-
-  for (i = 0; i < banks; i++) {
-    if (s[i].layout.use_hdf) {
-      dataspace = H5Screate(s[i].layout.dataspace_type);
-      if (s[i].layout.dataspace_type == H5S_SIMPLE) {
-        dims[0] = s[i].layout.dim[0];
-        dims[1] = s[i].layout.dim[1];
-        hdf_status = H5Sset_extent_simple(dataspace, s[i].layout.rank, dims, NULL);
-      }
-      dataset = H5Dcreate(h5location, s[i].layout.path, s[i].layout.datatype, dataspace, 
-          H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-      H5Dclose(dataset);
-      H5Sclose(dataspace);
-    }
-  }
-
-  if (hdf_status < 0) mstat = CORE_ERR_HDF;
   return mstat;
 }
 
@@ -181,10 +113,9 @@ int GetBanks(int allocated_banks, storage *s) {
   int i = 0;
 
   for (i = 0; i < allocated_banks; i++) {
-    //if (s[i].layout.rank > 0) {
+    if (s[i].layout.rank > 0) {
       banks_in_use++;
-    //  printf("rank %d, bank: %s\n", s[i].layout.rank, s[i].layout.path);
-    //}
+    }
   }
 
   return banks_in_use;
