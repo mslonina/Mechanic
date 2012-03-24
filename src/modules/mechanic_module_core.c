@@ -37,7 +37,10 @@ int Setup(setup *s) {
   s->options[2] = (LRC_configDefaults) {"core", "silent", "0", LRC_INT};
   s->options[3] = (LRC_configDefaults) {"core", "api", "2", LRC_INT};
   s->options[4] = (LRC_configDefaults) {"core", "hdf", "3", LRC_INT};
-  s->options[5] = (LRC_configDefaults) {LRC_OPTIONS_END};
+  s->options[5] = (LRC_configDefaults) {"core", "xres", "5", LRC_INT};
+  s->options[6] = (LRC_configDefaults) {"core", "yres", "5", LRC_INT};
+  s->options[7] = (LRC_configDefaults) {"core", "checkpoint", "2", LRC_INT};
+  s->options[8] = (LRC_configDefaults) {LRC_OPTIONS_END};
   
   return TASK_SUCCESS;
 }
@@ -89,12 +92,12 @@ int Storage(pool *p, setup *s) {
   p->board->layout.rank = 2; // pool rank
   p->board->layout.dataspace_type = H5S_SIMPLE;
   p->board->layout.datatype = H5T_NATIVE_DOUBLE;
-  p->board->layout.dim[0] = 4; // vertical res
-  p->board->layout.dim[1] = 4; // horizontal res
+  p->board->layout.dim[0] = LRC_option2int("core", "xres", s->head); // vertical res
+  p->board->layout.dim[1] = LRC_option2int("core", "yres", s->head); // horizontal res
   p->board->layout.use_hdf = 1;
 
   /* Path: /Pools/pool-ID/master */
-  p->storage[0].layout.path = "pool-global";
+  /*p->storage[0].layout.path = "pool-global";
   p->storage[0].layout.dataspace_type = H5S_SIMPLE;
   p->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
   p->storage[0].layout.rank = 2;
@@ -102,9 +105,9 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout.dim[1] = 7;
   p->storage[0].layout.use_hdf = 1;
   p->storage[0].layout.sync = 1;
-
+*/
   /* Path: /Pools/pool-ID/tmp */
-  p->storage[1].layout.path = "pool-tmp";
+ /* p->storage[1].layout.path = "pool-tmp";
   p->storage[1].layout.dataspace_type = H5S_SIMPLE;
   p->storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
   p->storage[1].layout.rank = 2;
@@ -112,11 +115,11 @@ int Storage(pool *p, setup *s) {
   p->storage[1].layout.dim[1] = 7;
   p->storage[1].layout.use_hdf = 0;
   p->storage[1].layout.sync = 1;
-
-  p->storage[2].layout = (schema) STORAGE_END;
+*/
+//  p->storage[2].layout = (schema) STORAGE_END;
 
   /* Path: /Pools/pool-ID/tasks/masterdata */
-  p->task->storage[0].layout.path = "task-data";
+ /* p->task->storage[0].layout.path = "task-data";
   p->task->storage[0].layout.dataspace_type = H5S_SIMPLE;
   p->task->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task->storage[0].layout.rank = 2;
@@ -124,9 +127,9 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout.dim[1] = 12;
   p->task->storage[0].layout.use_hdf = 1;
   p->task->storage[0].layout.storage_type = STORAGE_BASIC;
-
+*/
   /* Path: /Pools/pool-ID/tasks/tmpdata */
-  p->task->storage[1].layout.path = "task-tmp";
+  /*p->task->storage[1].layout.path = "task-tmp";
   p->task->storage[1].layout.dataspace_type = H5S_SIMPLE;
   p->task->storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task->storage[1].layout.rank = 2;
@@ -134,9 +137,9 @@ int Storage(pool *p, setup *s) {
   p->task->storage[1].layout.dim[1] = 12;
   p->task->storage[1].layout.use_hdf = 1;
   p->task->storage[1].layout.storage_type = STORAGE_PM3D;
-
+*/
   /* Path: /Pools/pool-ID/tasks/tmpdata */
-  p->task->storage[2].layout.path = "task-board";
+  /*p->task->storage[2].layout.path = "task-board";
   p->task->storage[2].layout.dataspace_type = H5S_SIMPLE;
   p->task->storage[2].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task->storage[2].layout.rank = 2;
@@ -146,8 +149,8 @@ int Storage(pool *p, setup *s) {
   p->task->storage[2].layout.storage_type = STORAGE_BOARD;
 
   p->task->storage[3].layout = (schema) STORAGE_END;
-
-  p->checkpoint_size = 2;
+*/
+  p->checkpoint_size = LRC_option2int("core", "checkpoint", s->head);
 
   return TASK_SUCCESS;
 }

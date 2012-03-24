@@ -86,7 +86,7 @@ int PoolInit(module *m, pool *p) {
 int PoolPrepare(module *m, pool *p) {
   int mstat = 0, i = 0, size = 0;
   query *q;
-  setup s = m->layer.setup;
+  setup *s = &(m->layer.setup);
   hid_t h5location, group;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
@@ -123,7 +123,7 @@ int PoolPrepare(module *m, pool *p) {
  */
 int PoolProcess(module *m, pool *p) {
   int pool_create = 0;
-  setup s = m->layer.setup;
+  setup *s = &(m->layer.setup);
   query *q;
 
   if (m->node == MASTER) {

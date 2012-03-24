@@ -79,7 +79,7 @@ int TaskPrepare(module *m, pool *p, task *t) {
   int mstat = 0;
   int x, y;
   query *q;
-  setup s = m->layer.setup;
+  setup *s = &(m->layer.setup);
 
   if (m->node == MASTER) {
 
@@ -112,7 +112,7 @@ int TaskPrepare(module *m, pool *p, task *t) {
 int TaskProcess(module *m, pool *p, task *t) {
   int mstat = 0;
   query *q;
-  setup s = m->layer.setup;
+  setup *s = &(m->layer.setup);
 
   q = LoadSym(m, "TaskProcess", LOAD_DEFAULT);
   if (q) mstat = q(p, t, s);

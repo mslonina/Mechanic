@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
    * @todo
    * replace TEST_MODULE with popt
    */
-  module = Bootstrap(node, mpi_size, TEST_MODULE, &core);
+  module = Bootstrap(node, mpi_size, "web", &core);
 
   /* Setup */
   filename = Name("mechanic-", "config", "", ".cfg");

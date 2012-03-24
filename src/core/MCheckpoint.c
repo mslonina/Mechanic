@@ -50,7 +50,7 @@ int CheckpointInit(module *m, pool *p, checkpoint *c) {
 int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
   query *q;
-  setup s = m->layer.setup;
+  setup *s = &(m->layer.setup);
   
   if (m->node == MASTER) {
     q = LoadSym(m, "CheckpointPrepare", LOAD_DEFAULT);
