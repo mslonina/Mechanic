@@ -97,8 +97,7 @@ int ReadConfig(char *filename, LRC_configNamespace *head) {
   if (inif) {
     mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
   } else {
-    Message(MESSAGE_ERR, "Error opening config file");
-    Error(MESSAGE_ERR);
+    Message(MESSAGE_INFO, "No config file specified, using defaults.\n");
   }
   fclose(inif);
 

@@ -122,6 +122,27 @@ int TaskProcess(module *m, pool *p, task *t) {
 
 /**
  * @function
+ */
+void TaskReset(module *m, pool *p, task *t, int tid) {
+  int i = 0, size;
+
+/*  t->pid = p->pid;
+  t->tid = tid;
+
+  for (i = 0; i < MAX_RANK; i++) {
+    t->location[i] = 0;
+  }
+  */
+  /* Resets data in the task banks */
+  /*for (i = 0; i < m->task_banks; i++) {
+    size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
+    memset(&(t->storage[i].data[0][0]), 0, (size_t) size);
+  }*/
+  t->status = TASK_EMPTY;
+}
+
+/**
+ * @function
  * Finalize the task
  */
 void TaskFinalize(module *m, pool *p, task *t) {

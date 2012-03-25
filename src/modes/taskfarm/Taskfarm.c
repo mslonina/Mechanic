@@ -13,6 +13,8 @@ int Taskfarm(module *m) {
   pool *p = NULL;
   int pool_create;
 
+  if (m->node == MASTER) Message(MESSAGE_INFO, "Running the task pool...\n");
+
   /**
    * The Pool loop
    */
@@ -45,6 +47,7 @@ int Taskfarm(module *m) {
 
     pool_create = PoolProcess(m, p); 
     
+    if (m->node == MASTER) Message(MESSAGE_CONT, "Pool %d finished.\n", p->pid);
     PoolFinalize(m, p);
     pid++;
   } 

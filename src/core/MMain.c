@@ -29,6 +29,8 @@ int main(int argc, char** argv) {
   mstat = H5open();
   CheckStatus(mstat);
 
+  if (node == MASTER) Welcome();
+
   /* Bootstrap */
   fallback.layer.handler = NULL;
   core = Bootstrap(node, mpi_size, CORE_MODULE, &fallback);
@@ -42,7 +44,9 @@ int main(int argc, char** argv) {
    * @todo
    * replace TEST_MODULE with popt
    */
-  module = Bootstrap(node, mpi_size, "web", &core);
+  module = Bootstrap(node, mpi_size, TEST_MODULE, &core);
+  if (node == MASTER) 
+    Message(MESSAGE_INFO, "Module '%s' bootstrapped.\n", TEST_MODULE);
 
   /* Setup */
   filename = Name("mechanic-", "config", "", ".cfg");
@@ -69,4 +73,7 @@ int main(int argc, char** argv) {
   
   H5close();
   MPI_Finalize();
+
+  if (node == MASTER)
+    Message(MESSAGE_INFO, "Mechanic did the job. Have a nice day!\n");
 }

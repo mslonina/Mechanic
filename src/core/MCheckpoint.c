@@ -28,7 +28,6 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   for (i = 0; i < c->size; i++) {
     c->task[i] = TaskLoad(m, p, i);
     c->task[i]->status = TASK_EMPTY;
-    //CheckLayout();
   } 
 
   return c;
@@ -67,10 +66,11 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
-  int i,j,x,y;
+  int i, j, x, y;
   hid_t h5location, group, tasks, datapath;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
+  float progress;
 
   /* Mark board */
   for (i = 0; i < c->size; i++) {
@@ -92,7 +92,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   }
 
   /* Commit data for the task */
-  for (i = 0; i < c->size; i++) {
+/*  for (i = 0; i < c->size; i++) {
     if (c->task[i]->status != TASK_EMPTY) {
       for (j = 0; j < m->task_banks; j++) {
         if (c->task[i]->storage[j].layout.storage_type == STORAGE_BASIC) {
@@ -105,15 +105,14 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         } else {
           datapath = H5Gopen(group, "Tasks", H5P_DEFAULT);
 
+          dims[0] = p->board->layout.dim[0];
+          dims[1] = p->board->layout.dim[1];
+
           if (c->task[i]->storage[j].layout.storage_type == STORAGE_PM3D) {
-            dims[0] = p->board->layout.dim[0];
-            dims[1] = p->board->layout.dim[1];
             offsets[0] = c->task[i]->location[0] + dims[0]*c->task[i]->location[1];
             offsets[1] = 0;
           }
           if (c->task[i]->storage[j].layout.storage_type == STORAGE_BOARD) {
-            dims[0] = p->board->layout.dim[0];
-            dims[1] = p->board->layout.dim[1];
             offsets[0] = c->task[i]->location[0] * c->task[i]->storage[j].layout.dim[0];
             offsets[1] = c->task[i]->location[1] * c->task[i]->storage[j].layout.dim[1];
           }
@@ -121,16 +120,83 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         }
         CommitData(datapath, 1, &c->task[i]->storage[j], 
             c->task[i]->storage[j].layout.storage_type, dims, offsets);
+  
+        H5Gclose(datapath);
+      }
+    }
+  }
+*/
+  for (j = 0; j < m->task_banks; j++) {
+    if (p->task->storage[j].layout.storage_type == STORAGE_PM3D || 
+        p->task->storage[j].layout.storage_type == STORAGE_BASIC) {
+      
+      datapath = H5Gopen(group, "Tasks", H5P_DEFAULT);
+
+      dims[0] = p->board->layout.dim[0];
+      dims[1] = p->board->layout.dim[1];
+
+      for (i = 0; i < c->size; i++) {
+        if (c->task[i]->status != TASK_EMPTY) {
+
+          if (c->task[i]->storage[j].layout.storage_type == STORAGE_PM3D) {
+            offsets[0] = c->task[i]->location[0] + dims[0]*c->task[i]->location[1];
+            offsets[1] = 0;
+          }
+          if (c->task[i]->storage[j].layout.storage_type == STORAGE_BOARD) {
+            offsets[0] = c->task[i]->location[0] * c->task[i]->storage[j].layout.dim[0];
+            offsets[1] = c->task[i]->location[1] * c->task[i]->storage[j].layout.dim[1];
+          }
+
+          CommitData(datapath, 1, &c->task[i]->storage[j], 
+            c->task[i]->storage[j].layout.storage_type, dims, offsets);
+        }
+      }
+      H5Gclose(datapath);
+    }
+    if (p->task->storage[j].layout.storage_type == STORAGE_BASIC) {
+      for (i = 0; i < c->size; i++) {
+        if (c->task[i]->status != TASK_EMPTY) {
+          sprintf(path, "task-%04d", c->task[i]->tid);
+          if (!H5Lexists(tasks, path, H5P_DEFAULT)) {
+            datapath = H5Gcreate(tasks, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+          } else {
+            datapath = H5Gopen(tasks, path, H5P_DEFAULT);
+          }
+
+          CommitData(datapath, 1, &c->task[i]->storage[j], 
+            c->task[i]->storage[j].layout.storage_type, dims, offsets);
+      
+          H5Gclose(datapath);
+        }
       }
     }
   }
 
-  H5Gclose(datapath);
   H5Gclose(tasks);
   H5Gclose(group);
   H5Fclose(h5location);
 
+  progress = (c->cid+1) * c->size;
+  progress = (progress / (float) p->pool_size) * 100.0;
+  Message(MESSAGE_CONT,"  %5.2f%% processed\n", progress);
+
   return mstat;
+}
+
+/**
+ * @function
+ * Reset the checkpoint
+ */
+void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
+  int i = 0;
+
+  c->cid = cid;
+  c->counter = 0;
+
+  for (i = 0; i < c->size; i++) {
+    c->task[i]->status = TASK_EMPTY;
+//    TaskReset(m, p, c->task[i], i);
+  }
 }
 
 /**

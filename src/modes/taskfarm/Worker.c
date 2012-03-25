@@ -63,6 +63,7 @@ int Worker(module *m, pool *p) {
     MPI_Isend(&send_buffer[0][0], buffer_dims[1], MPI_DOUBLE, 
         MASTER, intag, MPI_COMM_WORLD, &send_request);
 
+//    TaskReset(m, p, t, 0);
     if (tag == TAG_TERMINATE) break;
   }
   

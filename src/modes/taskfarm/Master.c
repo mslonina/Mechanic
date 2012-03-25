@@ -61,6 +61,7 @@ int Master(module *m, pool *p) {
   
   /* Send initial tasks to all workers */
   for (i = 1; i < m->mpi_size; i++) {
+  //  TaskReset(m, p, t, 0);
     mstat = TaskPrepare(m, p, t);
     
     if (mstat != NO_MORE_TASKS) {
@@ -94,21 +95,15 @@ int Master(module *m, pool *p) {
         mstat = CheckpointProcess(m, p, c);
         CheckStatus(mstat);
         
-        CheckpointFinalize(m, p, c);
         cid++;
   
-        /* Initialize the next checkpoint */
-        c = CheckpointLoad(m, p, cid);
-
-        mstat = CheckpointInit(m, p, c);
-        CheckStatus(mstat);
-
+        /* Reset the checkpoint */
+        CheckpointReset(m, p, c, cid);
         c->counter = 0;
       }
     
       /* Wait for any operation to complete */
       MPI_Waitany(m->mpi_size-1, recv_request, &index, &mpi_status);
-      //printf("recv from index %d\n", index);
       send_node = index+1;
 
       mstat = Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
@@ -116,6 +111,7 @@ int Master(module *m, pool *p) {
 
       c->counter++;
 
+//      TaskReset(m, p, t, 0);
       mstat = TaskPrepare(m, p, t);
       if (mstat != NO_MORE_TASKS) {
 
@@ -132,13 +128,11 @@ int Master(module *m, pool *p) {
   }
 
   /* Process the last checkpoint */
-  //if (c->counter > 0 && c->counter < c->size) {
-    mstat = CheckpointPrepare(m, p, c);
-    CheckStatus(mstat);
+  mstat = CheckpointPrepare(m, p, c);
+  CheckStatus(mstat);
 
-    mstat = CheckpointProcess(m, p, c);
-    CheckStatus(mstat);
-  //}
+  mstat = CheckpointProcess(m, p, c);
+  CheckStatus(mstat);
 
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {

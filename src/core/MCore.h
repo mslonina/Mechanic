@@ -7,8 +7,11 @@
 #include "MMechanic2.h"
 #include "MTypes.h"
 #include "MLog.h"
+#include "MCommon.h"
 
 #define CORE_MODULE "core"
-#define TEST_MODULE "test"
+#define TEST_MODULE "web"
+
+void Welcome();
 
 #endif
