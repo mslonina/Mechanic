@@ -33,7 +33,9 @@ int Setup(setup *s) {
   s->options[5] = (LRC_configDefaults) {"arnold", "ymax", "1.2", LRC_DOUBLE};
   s->options[6] = (LRC_configDefaults) {"arnold", "eps", "0.01", LRC_DOUBLE};
   s->options[7] = (LRC_configDefaults) {"arnold", "driver", "1", LRC_INT};
-  s->options[8] = (LRC_configDefaults) {LRC_OPTIONS_END};
+  s->options[8] = (LRC_configDefaults) {"arnold", "eps_interval", "0.01", LRC_DOUBLE};
+  s->options[9] = (LRC_configDefaults) {"arnold", "epsmax", "0.04", LRC_DOUBLE};
+  s->options[10] = (LRC_configDefaults) {LRC_OPTIONS_END};
 
   return TASK_SUCCESS;
 }
@@ -98,6 +100,7 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   double err, xv[6], tend, step, eps, result;
+  double epsmin, epsmax, epsint;
   int driver;
 
   step  = 0.25*(pow(5,0.5)-1)/2.0;
@@ -107,8 +110,12 @@ int TaskProcess(pool *p, task *t, setup *s) {
   step = LRC_option2double("arnold", "step", s->head);
   step  = step*(pow(5,0.5)-1)/2.0;
   tend = LRC_option2double("arnold", "tend", s->head);
-  eps  = LRC_option2double("arnold", "eps", s->head);
+  epsmin  = LRC_option2double("arnold", "eps", s->head);
+  epsmax  = LRC_option2double("arnold", "epsmax", s->head);
+  epsint  = LRC_option2double("arnold", "eps_interval", s->head);
   driver = LRC_option2int("arnold", "driver", s->head);
+
+  eps = epsmin + (double)p->pid * epsint;
 
   /* Initial data */  
   xv[0] = t->storage[0].data[0][0];
@@ -135,5 +142,12 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool *p, setup *s) {
+  double eps, epsmin, epsmax, epsint;
+  epsmin  = LRC_option2double("arnold", "eps", s->head);
+  epsmax  = LRC_option2double("arnold", "epsmax", s->head);
+  epsint  = LRC_option2double("arnold", "eps_interval", s->head);
+
+  eps = epsmin + (double)p->pid * epsint; 
+  if (eps <= epsmax) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }

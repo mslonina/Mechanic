@@ -56,8 +56,9 @@ int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) 
 
   if (tag != TAG_TERMINATE) {
     buffer[1] = (double) t->tid; /* Task ID */
+    buffer[2] = (double) t->status; /* Task status */
 
-    position = 2;
+    position = 3;
     
     /* Task location in the pool */
     for (i = 0; i < p->board->layout.rank; i++) {
@@ -95,8 +96,9 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
 
   if (*tag != TAG_TERMINATE) {
     t->tid = (int)buffer[1]; /* Task ID*/
+    t->status = (int)buffer[2]; /* Task status */
     
-    position = 2;
+    position = 3;
 
     /* Task location in the pool */
     for (i = 0; i < p->board->layout.rank; i++) {
@@ -113,8 +115,7 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
     
     /* Mark the task on board */
     if (m->node == MASTER) {
-      p->board->data[t->location[0]][t->location[1]] = TASK_FINISHED;
-      t->status = TASK_FINISHED;
+      p->board->data[t->location[0]][t->location[1]] = t->status;
     }
   }
 

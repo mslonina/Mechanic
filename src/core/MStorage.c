@@ -9,6 +9,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = 0;
+  int i, j;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -36,6 +37,11 @@ int Storage(module *m, pool *p) {
 
   /* Commit Board */
   p->board->data = AllocateBuffer(p->board->layout.rank,p->board->layout.dim);
+  for (i = 0; i < p->board->layout.dim[0]; i++) {
+    for (j = 0; j < p->board->layout.dim[j]; j++) {
+      p->board->data[i][j] = TASK_AVAILABLE;
+    }
+  }
 
   return mstat;
 }
@@ -119,19 +125,6 @@ int GetBanks(int allocated_banks, storage *s) {
   }
 
   return banks_in_use;
-}
-
-/**
- * @function
- * Writes the data buffer to the dataset
- */
-int CommitDataset(hid_t h5location, storage *s, double **data) {
-  int mstat = 0;
-  herr_t hdf_status;
-
-  hdf_status = H5Dwrite(h5location, s->layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0][0]);
-  if (hdf_status < 0) mstat = CORE_ERR_HDF;
-  return mstat;
 }
 
 /**

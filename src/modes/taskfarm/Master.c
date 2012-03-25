@@ -14,6 +14,7 @@ int Master(module *m, pool *p) {
   double **send_buffer = NULL, **recv_buffer = NULL;
   int buffer_dims[2], buffer_rank;
   int i = 0, cid = 0, terminated_nodes = 0;
+  int k = 0;
 
   MPI_Status *send_status, *recv_status, mpi_status;
   MPI_Request *send_request, *recv_request;
@@ -42,7 +43,7 @@ int Master(module *m, pool *p) {
   buffer_rank = 2;
   
   buffer_dims[0] = m->mpi_size - 1;
-  buffer_dims[1] = m->mpi_size + 2 + MAX_RANK; // offset: tag, tid, location
+  buffer_dims[1] = 3 + MAX_RANK + m->mpi_size; // offset: tag, tid, status, location
   for (i = 0; i < m->task_banks; i++) {
     buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
@@ -61,7 +62,6 @@ int Master(module *m, pool *p) {
   
   /* Send initial tasks to all workers */
   for (i = 1; i < m->mpi_size; i++) {
-  //  TaskReset(m, p, t, 0);
     mstat = TaskPrepare(m, p, t);
     
     if (mstat != NO_MORE_TASKS) {
@@ -106,12 +106,14 @@ int Master(module *m, pool *p) {
       MPI_Waitany(m->mpi_size-1, recv_request, &index, &mpi_status);
       send_node = index+1;
 
-      mstat = Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
-      CheckStatus(mstat);
+//      printf("received = %d / %d\n", received, p->pool_size);
+//      mstat = Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
+//      CheckStatus(mstat);
+      for (k = 0; k < buffer_dims[1]; k++) c->data[c->counter][k] = recv_buffer[index][k];
+      p->board->data[(int)c->data[c->counter][3]][(int)c->data[c->counter][4]] = c->data[c->counter][2];
 
       c->counter++;
 
-//      TaskReset(m, p, t, 0);
       mstat = TaskPrepare(m, p, t);
       if (mstat != NO_MORE_TASKS) {
 

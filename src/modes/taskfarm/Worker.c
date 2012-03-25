@@ -25,7 +25,7 @@ int Worker(module *m, pool *p) {
   buffer_rank = 2;
   
   buffer_dims[0] = 1;
-  buffer_dims[1] = m->mpi_size + 2 + MAX_RANK; // offset: tag, tid, location
+  buffer_dims[1] = m->mpi_size + 3 + MAX_RANK; // offset: tag, tid, location
   for (i = 0; i < m->task_banks; i++) {
     buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
@@ -57,13 +57,14 @@ int Worker(module *m, pool *p) {
 
     }
 
+    t->status = TASK_FINISHED;
+
     mstat = Pack(m, &send_buffer[0][0], buffer_dims[1], p, t, tag);
     CheckStatus(mstat);
 
     MPI_Isend(&send_buffer[0][0], buffer_dims[1], MPI_DOUBLE, 
         MASTER, intag, MPI_COMM_WORLD, &send_request);
 
-//    TaskReset(m, p, t, 0);
     if (tag == TAG_TERMINATE) break;
   }
   
