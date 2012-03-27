@@ -26,6 +26,7 @@ int Storage(module *m, pool *p) {
 
   m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
   m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
+  p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
 
   /* Commit memory layout used during the task pool */
   CommitMemoryLayout(m->pool_banks, p->storage);
@@ -33,6 +34,7 @@ int Storage(module *m, pool *p) {
   /* Commit the storage layout (only the Master node) */
   if (m->node == MASTER) {
     CheckLayout(m->pool_banks, p->storage);
+    CommitStorageLayout(m, p);
   }
 
   /* Commit Board */
@@ -107,6 +109,96 @@ void FreeMemoryLayout(int banks, storage *s) {
 
 /**
  * @function
+ * Commit the storage layout
+ */
+int CommitStorageLayout(module *m, pool *p) {
+  int mstat = 0, i = 0, j = 0;
+  hid_t h5location, h5group, h5pools, h5tasks, h5board, h5task;
+  char path[LRC_CONFIG_LEN];
+
+  h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+  if (!H5Lexists(h5location, "/Pools", H5P_DEFAULT)) {
+    h5pools = H5Gcreate(h5location, "/Pools", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  } else {
+    h5pools = H5Gopen(h5location, "/Pools", H5P_DEFAULT);
+  }
+    
+  sprintf(path, "/Pools/pool-%04d", p->pid);
+  h5group = H5Gcreate(h5pools, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  CreateDataset(h5group, p->board, m, p);
+
+  for (i = 0; i < m->pool_banks; i++) {
+    if (p->storage[i].layout.use_hdf) {
+      CreateDataset(h5group, &p->storage[i], m, p);
+    }
+  }
+
+  h5tasks = H5Gcreate(h5group, "Tasks", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+  for (i = 0; i < m->task_banks; i++) {
+    if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
+      p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
+        CreateDataset(h5tasks, &p->task->storage[i], m, p);
+    }
+    if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) {
+      for (j = 0; j < p->pool_size; j++) {
+        sprintf(path, "task-%04d", j);
+        if (!H5Lexists(h5group, path, H5P_DEFAULT)) {
+          h5task = H5Gcreate(h5tasks, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        } else {
+          h5task = H5Gopen(h5tasks, path, H5P_DEFAULT);
+        }
+        CreateDataset(h5task, &p->task->storage[i], m, p);
+        H5Gclose(h5task);
+      }
+    }
+  }
+
+  H5Gclose(h5tasks);
+  H5Gclose(h5group);
+  H5Gclose(h5pools);
+  H5Fclose(h5location);
+  return mstat;
+}
+
+/**
+ * @function
+ * Creates dataset
+ */
+int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
+  int mstat = 0;
+  hid_t h5dataset, h5dataspace;
+  hsize_t dims[MAX_RANK];
+  herr_t h5status;
+
+  h5dataspace = H5Screate(s->layout.dataspace_type);
+  if (s->layout.dataspace_type == H5S_SIMPLE) {
+    if (s->layout.storage_type == STORAGE_BASIC) {
+      dims[0] = s->layout.dim[0];
+      dims[1] = s->layout.dim[1];
+    }
+    if (s->layout.storage_type == STORAGE_PM3D) {
+      dims[0] = s->layout.dim[0] * p->pool_size;
+      dims[1] = s->layout.dim[1];
+    }
+    if (s->layout.storage_type == STORAGE_BOARD) {
+      dims[0] = s->layout.dim[0] * p->board->layout.dim[0];
+      dims[1] = s->layout.dim[1] * p->board->layout.dim[1];
+    }
+    h5status = H5Sset_extent_simple(h5dataspace, s->layout.rank, dims, NULL);
+  }
+
+  h5dataset = H5Dcreate(h5location, s->layout.path, s->layout.datatype, h5dataspace,
+      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+  H5Dclose(h5dataset);
+  H5Sclose(h5dataspace);
+
+  return mstat;
+}
+
+/**
+ * @function
  * Gets the number of used memory banks.
  *
  * @todo
@@ -140,35 +232,8 @@ int CommitData(hid_t h5location, int banks, storage *s, int flag, hsize_t *board
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
 
-      dataspace = H5Screate(s[i].layout.dataspace_type);
-      
-      if (s[i].layout.dataspace_type == H5S_SIMPLE) {
-      
-        if (s[i].layout.storage_type == STORAGE_BASIC) {
-          dims[0] = s[i].layout.dim[0];
-          dims[1] = s[i].layout.dim[1];
-        }
-        
-        if (s[i].layout.storage_type == STORAGE_PM3D) {
-          dims[0] = s[i].layout.dim[0] * board_dims[0] * board_dims[1];
-          dims[1] = s[i].layout.dim[1];
-        }
-        
-        if (s[i].layout.storage_type == STORAGE_BOARD) {
-          dims[0] = s[i].layout.dim[0] * board_dims[0];
-          dims[1] = s[i].layout.dim[1] * board_dims[1];
-        }
-        
-        hdf_status = H5Sset_extent_simple(dataspace, s[i].layout.rank, dims, NULL);
-      }
-
-      if (!H5Lexists(h5location, s[i].layout.path, H5P_DEFAULT)) {
-        dataset = H5Dcreate(h5location, s[i].layout.path, s[i].layout.datatype, dataspace,
-            H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-      } else {
-        dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
-      }
+      dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
+      dataspace = H5Dget_space(dataset);
         
       /* Whole dataset at once */
       if (s[i].layout.storage_type == STORAGE_BASIC) {

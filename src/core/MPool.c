@@ -11,8 +11,6 @@
 pool* PoolLoad(module *m, int pid) {
   pool *p = NULL;
   int i = 0;
-  hid_t h5location, group, poolgroup;
-  char poolname[LRC_CONFIG_LEN];
 
   /* Allocate pool pointer */
   p = calloc(sizeof(pool), sizeof(pool));
@@ -49,22 +47,6 @@ pool* PoolLoad(module *m, int pid) {
   p->pid = pid;
   p->node = m->node;
   p->mpi_size = m->mpi_size;
-
-  /* Pool data group: /Pools */
-  if (m->node == MASTER) {
-    h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
-    if (!H5Lexists(h5location, "Pools", H5P_DEFAULT)) {
-      group = H5Gcreate(h5location, "Pools", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    } else {
-      group = H5Gopen(h5location, "Pools", H5P_DEFAULT);
-    }
-    sprintf(poolname, "pool-%04d", p->pid);
-    poolgroup = H5Gcreate(group, poolname, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-
-    H5Gclose(poolgroup);
-    H5Gclose(group);
-    H5Fclose(h5location);
-  }
 
   return p;
 }

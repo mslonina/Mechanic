@@ -84,20 +84,14 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   group = H5Gopen(h5location, path, H5P_DEFAULT);
   CommitData(group, 1, p->board, STORAGE_BASIC, dims, offsets);
 
-  if (!H5Lexists(group, "Tasks", H5P_DEFAULT)) {
-    tasks = H5Gcreate(group, "Tasks", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  } else {
-    tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
-  }
+  tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
 
   t = TaskLoad(m, p, 0);
   position = 5;
   for (j = 0; j < m->task_banks; j++) {
     if (p->task->storage[j].layout.storage_type == STORAGE_PM3D || 
-        p->task->storage[j].layout.storage_type == STORAGE_BASIC) {
+        p->task->storage[j].layout.storage_type == STORAGE_BOARD) {
       
-      datapath = H5Gopen(group, "Tasks", H5P_DEFAULT);
-
       dims[0] = p->board->layout.dim[0];
       dims[1] = p->board->layout.dim[1];
 
@@ -117,11 +111,10 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           }
           Vec2Array(&c->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
 
-          CommitData(datapath, 1, &t->storage[j], 
+          CommitData(tasks, 1, &t->storage[j], 
             t->storage[j].layout.storage_type, dims, offsets);
         }
       }
-      H5Gclose(datapath);
     }
     if (p->task->storage[j].layout.storage_type == STORAGE_BASIC) {
       for (i = 0; i < c->size; i++) {
@@ -131,11 +124,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[1] = c->data[i][4];
         if (t->status != TASK_EMPTY) {
           sprintf(path, "task-%04d", t->tid);
-          if (!H5Lexists(tasks, path, H5P_DEFAULT)) {
-            datapath = H5Gcreate(tasks, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-          } else {
-            datapath = H5Gopen(tasks, path, H5P_DEFAULT);
-          }
+          datapath = H5Gopen(tasks, path, H5P_DEFAULT);
           Vec2Array(&c->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
 
           CommitData(datapath, 1, &t->storage[j], 

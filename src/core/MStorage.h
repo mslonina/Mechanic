@@ -10,12 +10,13 @@
 #define STORAGE_FULL 1
 #define STORAGE_DEFAULT 0
 
-int CommitStorageLayout(hid_t h5location, int banks, storage *s);
+int CommitStorageLayout(module *m, pool *p);
 int CommitMemoryLayout(int banks, storage *s);
 void FreeMemoryLayout(int banks, storage *s);
 int Storage(module *m, pool *p);
 int CheckLayout(int banks, storage *s);
 
+int CreateDataset(hid_t location, storage *s, module *m, pool *p);
 int CommitDataset(hid_t h5location, storage *s, double **data);
 int CommitData(hid_t h5location, int banks, storage *s, int flags, hsize_t *board_dims, hsize_t *offsets);
 
