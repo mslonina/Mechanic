@@ -48,6 +48,9 @@ pool* PoolLoad(module *m, int pid) {
   p->node = m->node;
   p->mpi_size = m->mpi_size;
 
+  /* Pool storage */
+  Storage(m, p);
+
   return p;
 }
 

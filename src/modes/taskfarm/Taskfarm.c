@@ -22,11 +22,6 @@ int Taskfarm(module *m) {
   pool_create = POOL_CREATE_NEW;
   while (pool_create != POOL_FINALIZE) {
     p = PoolLoad(m, pid);
-   // mstat = PoolInit(m, p);
-   // CheckStatus(mstat);
-
-    mstat = Storage(m, p);
-    CheckStatus(mstat);
 
     mstat = PoolPrepare(m, p);
     CheckStatus(mstat);

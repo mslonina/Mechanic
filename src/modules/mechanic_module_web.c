@@ -20,6 +20,17 @@
 #include "mechanic_module_web.h"
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->options = 24;
+  i->pools = 5;
+  i->banks_per_pool = 1;
+  i->banks_per_task = 3;
+  
+  return TASK_SUCCESS;
+}
+/**
  * @function
  * Implemens Setup()
  */
