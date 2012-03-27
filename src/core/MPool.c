@@ -136,7 +136,6 @@ void PoolFinalize(module *m, pool *p) {
     if (p->task->storage) free(p->task->storage);
     free(p->task);
   }
-  //if (m->node == MASTER) H5Gclose(p->h5location);
 
   if (p->board) {
     if (p->board->data) {

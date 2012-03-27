@@ -28,10 +28,6 @@ int Taskfarm(module *m) {
 
     /**
      * The Task loop
-     *
-     * @todo
-     * - Implement the task storage scheme
-     * - Implement the task board
      */
     
     if (m->node == MASTER) {

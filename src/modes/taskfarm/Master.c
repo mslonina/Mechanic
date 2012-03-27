@@ -77,6 +77,7 @@ int Master(module *m, pool *p) {
     MPI_Irecv(&recv_buffer[i-1][0], buffer_dims[1], MPI_DOUBLE, 
         i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
   }
+  MPI_Waitall(m->mpi_size - 1, send_request, send_status);
   
   /* The task farm loop (Non-blocking communication) */
   c->counter = 0;
@@ -124,6 +125,8 @@ int Master(module *m, pool *p) {
             send_node, intags[send_node], MPI_COMM_WORLD, &send_request[index]);
         MPI_Irecv(&recv_buffer[index][0], buffer_dims[1], MPI_DOUBLE, 
             send_node, intags[send_node], MPI_COMM_WORLD, &recv_request[index]);
+
+        MPI_Wait(&send_request[index], &send_status[index]);
       }
     } 
     if (index == MPI_UNDEFINED) break;
@@ -146,7 +149,8 @@ int Master(module *m, pool *p) {
         i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
     
   }
-  MPI_Waitall(m->mpi_size - 1, recv_request, send_status);
+  MPI_Waitall(m->mpi_size - 1, recv_request, recv_status);
+  MPI_Waitall(m->mpi_size - 1, send_request, send_status);
 
   /* Finalize */
   CheckpointFinalize(m, p, c);

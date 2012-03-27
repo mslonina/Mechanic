@@ -14,7 +14,7 @@ int Worker(module *m, pool *p) {
   int buffer_dims[2], buffer_rank;
   int i, node, tag, intag;
 
-  MPI_Status recv_status;
+  MPI_Status recv_status, send_status;
   MPI_Request send_request, recv_request;
 
   task *t = NULL;
@@ -64,6 +64,7 @@ int Worker(module *m, pool *p) {
 
     MPI_Isend(&send_buffer[0][0], buffer_dims[1], MPI_DOUBLE, 
         MASTER, intag, MPI_COMM_WORLD, &send_request);
+    MPI_Wait(&send_request, &send_status);
 
     if (tag == TAG_TERMINATE) break;
   }
