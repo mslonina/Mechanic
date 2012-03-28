@@ -6,7 +6,7 @@
 
 /**
  * @function
- * Performes worker node operations
+ * Performs worker node operations
  */
 int Worker(module *m, pool *p) {
   int mstat = 0;
@@ -25,7 +25,7 @@ int Worker(module *m, pool *p) {
   buffer_rank = 2;
   
   buffer_dims[0] = 1;
-  buffer_dims[1] = m->mpi_size + 3 + MAX_RANK; // offset: tag, tid, location
+  buffer_dims[1] = m->mpi_size + 3 + MAX_RANK; // offset: tag, tid, status, location
   for (i = 0; i < m->task_banks; i++) {
     buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }

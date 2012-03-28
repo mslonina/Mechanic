@@ -124,7 +124,7 @@ int TaskProcess(module *m, pool *p, task *t) {
  * @function
  */
 void TaskReset(module *m, pool *p, task *t, int tid) {
-  int i = 0, size;
+//  int i = 0, size;
 
 /*  t->pid = p->pid;
   t->tid = tid;

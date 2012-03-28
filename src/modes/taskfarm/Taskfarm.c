@@ -13,8 +13,6 @@ int Taskfarm(module *m) {
   pool *p = NULL;
   int pool_create;
 
-  if (m->node == MASTER) Message(MESSAGE_INFO, "Running the task pool...\n");
-
   /**
    * The Pool loop
    */
@@ -22,6 +20,7 @@ int Taskfarm(module *m) {
   pool_create = POOL_CREATE_NEW;
   while (pool_create != POOL_FINALIZE) {
     p = PoolLoad(m, pid);
+    if (m->node == MASTER) Message(MESSAGE_INFO, "Running the task pool %d ...\n", p->pid);
 
     mstat = PoolPrepare(m, p);
     CheckStatus(mstat);
@@ -29,7 +28,6 @@ int Taskfarm(module *m) {
     /**
      * The Task loop
      */
-    
     if (m->node == MASTER) {
       mstat = Master(m, p);
     } else {

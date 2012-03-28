@@ -6,7 +6,7 @@
 
 /**
  * @function
- * Performes master node operations
+ * Performs master node operations
  */
 int Master(module *m, pool *p) {
   int mstat = 0;
@@ -18,7 +18,7 @@ int Master(module *m, pool *p) {
 
   MPI_Status *send_status, *recv_status, mpi_status;
   MPI_Request *send_request, *recv_request;
-  int *intags, index = 0, req_flag, send_node, tag;
+  int *intags, index = 0, req_flag, send_node;
 
   task *t = NULL;
   checkpoint *c = NULL;
@@ -107,9 +107,7 @@ int Master(module *m, pool *p) {
       MPI_Waitany(m->mpi_size-1, recv_request, &index, &mpi_status);
       send_node = index+1;
 
-//      printf("received = %d / %d\n", received, p->pool_size);
-//      mstat = Unpack(m, &recv_buffer[index][0], buffer_dims[1], p, c->task[c->counter], &tag);
-//      CheckStatus(mstat);
+      /* Copy data to the checkpoint buffer */
       for (k = 0; k < buffer_dims[1]; k++) c->data[c->counter][k] = recv_buffer[index][k];
       p->board->data[(int)c->data[c->counter][3]][(int)c->data[c->counter][4]] = c->data[c->counter][2];
 
@@ -131,6 +129,8 @@ int Master(module *m, pool *p) {
     } 
     if (index == MPI_UNDEFINED) break;
   }
+  MPI_Waitall(m->mpi_size - 1, recv_request, recv_status);
+  MPI_Waitall(m->mpi_size - 1, send_request, send_status);
 
   /* Process the last checkpoint */
   mstat = CheckpointPrepare(m, p, c);

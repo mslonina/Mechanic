@@ -113,28 +113,36 @@ void FreeMemoryLayout(int banks, storage *s) {
  */
 int CommitStorageLayout(module *m, pool *p) {
   int mstat = 0, i = 0, j = 0;
-  hid_t h5location, h5group, h5pools, h5tasks, h5board, h5task;
+  hid_t h5location, h5group, h5pools, h5tasks, h5task;
   char path[LRC_CONFIG_LEN];
 
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+
+  /* The Pools */
   if (!H5Lexists(h5location, "/Pools", H5P_DEFAULT)) {
     h5pools = H5Gcreate(h5location, "/Pools", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   } else {
     h5pools = H5Gopen(h5location, "/Pools", H5P_DEFAULT);
   }
     
+  /* The Pool-ID group */
   sprintf(path, "/Pools/pool-%04d", p->pid);
   h5group = H5Gcreate(h5pools, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+  /* The Pool-ID task board */
   CreateDataset(h5group, p->board, m, p);
 
+  /* The Pool-ID datasets */
   for (i = 0; i < m->pool_banks; i++) {
     if (p->storage[i].layout.use_hdf) {
       CreateDataset(h5group, &p->storage[i], m, p);
     }
   }
 
+  /* The Tasks group */
   h5tasks = H5Gcreate(h5group, "Tasks", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
+  /* The task datasets */
   for (i = 0; i < m->task_banks; i++) {
     if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
       p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
@@ -200,11 +208,6 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
 /**
  * @function
  * Gets the number of used memory banks.
- *
- * @todo
- * This function should return the number of memory banks in use, however, do we really
- * need such thing? Maybe only use CheckAndFixLayout() function to detect inconsitencies
- * when i.e. use_hdf = 1 and path is NULL?
  */
 int GetBanks(int allocated_banks, storage *s) {
   int banks_in_use = 0;
@@ -227,7 +230,7 @@ int CommitData(hid_t h5location, int banks, storage *s, int flag, hsize_t *board
   int mstat = 0, i = 0;
   hid_t dataspace, dataset, memspace;
   herr_t hdf_status;
-  hsize_t dims[MAX_RANK], ldims[MAX_RANK];
+  hsize_t ldims[MAX_RANK];
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {

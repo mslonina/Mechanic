@@ -23,10 +23,9 @@
  * Implements Init()
  */
 int Init(init *i) {
-  i->options = 24;
-  i->pools = 5;
-  i->banks_per_pool = 1;
-  i->banks_per_task = 3;
+  i->options = 24; // max options
+  i->banks_per_pool = 2; // max memory banks per pool
+  i->banks_per_task = 3; // max memory banks per task
   
   return TASK_SUCCESS;
 }
@@ -42,7 +41,7 @@ int Setup(setup *s) {
   s->options[3] = (LRC_configDefaults) {"arnold", "xmax", "1.2", LRC_DOUBLE};
   s->options[4] = (LRC_configDefaults) {"arnold", "ymin", "0.8", LRC_DOUBLE};
   s->options[5] = (LRC_configDefaults) {"arnold", "ymax", "1.2", LRC_DOUBLE};
-  s->options[6] = (LRC_configDefaults) {"arnold", "eps", "0.01", LRC_DOUBLE};
+  s->options[6] = (LRC_configDefaults) {"arnold", "eps", "0.00", LRC_DOUBLE};
   s->options[7] = (LRC_configDefaults) {"arnold", "driver", "1", LRC_INT};
   s->options[8] = (LRC_configDefaults) {"arnold", "eps_interval", "0.01", LRC_DOUBLE};
   s->options[9] = (LRC_configDefaults) {"arnold", "epsmax", "0.04", LRC_DOUBLE};
@@ -70,7 +69,7 @@ int Storage(pool *p, setup *s) {
   p->task->storage[1].layout.path = "result";
   p->task->storage[1].layout.rank = 2;
   p->task->storage[1].layout.dim[0] = 1;
-  p->task->storage[1].layout.dim[1] = 4;
+  p->task->storage[1].layout.dim[1] = 5;
   p->task->storage[1].layout.use_hdf = 1;
   p->task->storage[1].layout.dataspace_type = H5S_SIMPLE;
   p->task->storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
@@ -114,10 +113,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
   double epsmin, epsmax, epsint;
   int driver;
 
-  step  = 0.25*(pow(5,0.5)-1)/2.0;
-  tend  = 20000.0;
-  eps   = 0.01;
-
   step = LRC_option2double("arnold", "step", s->head);
   step  = step*(pow(5,0.5)-1)/2.0;
   tend = LRC_option2double("arnold", "tend", s->head);
@@ -145,6 +140,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   t->storage[1].data[0][1] = xv[4];
   t->storage[1].data[0][2] = result;
   t->storage[1].data[0][3] = err;
+  t->storage[1].data[0][4] = eps;
 
   return TASK_SUCCESS;
 }
@@ -159,6 +155,6 @@ int PoolProcess(pool *p, setup *s) {
   epsint  = LRC_option2double("arnold", "eps_interval", s->head);
 
   eps = epsmin + (double)p->pid * epsint; 
-  if (eps <= epsmax) return POOL_CREATE_NEW;
+  if (eps < epsmax) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }
