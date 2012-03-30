@@ -35,7 +35,7 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
 
   mstat = MPI_Type_struct(4, block_lengths, displacements, types, mpi_t);
   CheckStatus(mstat);
-  
+
   mstat = MPI_Type_commit(mpi_t);
   CheckStatus(mstat);
 
@@ -59,13 +59,13 @@ int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) 
     buffer[2] = (double) t->status; /* Task status */
 
     position = 3;
-    
+
     /* Task location in the pool */
     for (i = 0; i < p->board->layout.rank; i++) {
       buffer[i+position] = t->location[i];
     }
     position = position + p->board->layout.rank;
- 
+
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {
       Array2Vec(buffer+position, t->storage[i].data, t->storage[i].layout.rank, t->storage[i].layout.dim);
@@ -97,7 +97,7 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
   if (*tag != TAG_TERMINATE) {
     t->tid = (int)buffer[1]; /* Task ID*/
     t->status = (int)buffer[2]; /* Task status */
-    
+
     position = 3;
 
     /* Task location in the pool */
@@ -112,7 +112,7 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
       position = position + size;
     }
-    
+
     /* Mark the task on board */
     if (m->node == MASTER) {
       p->board->data[t->location[0]][t->location[1]] = t->status;
