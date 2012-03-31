@@ -68,7 +68,7 @@
  * - options = 128 -- max number of setup options
  * - pools = 64 -- max number of pools
  * - banks_per_pool = 8 -- memory banks per pool
- * - bansk_per_task = 8 -- memory banks per task
+ * - banks_per_task = 8 -- memory banks per task
  */
 int Init(init *i) {
   i->options = 24;
@@ -101,9 +101,9 @@ int Init(init *i) {
  *
  * [core]
  * name = arnoldweb
- * xres = 2048
- * yres = 2048
- * checkpoint = 4
+ * xres = 2048 # p->board->layout.dim[1]
+ * yres = 2048 # p->board->layout.dim[0]
+ * checkpoint = 4 # checkpoint_size = checkpoint * (mpi_size-1)
  *
  * [arnold]
  * step = 0.3
@@ -114,7 +114,7 @@ int Init(init *i) {
  * ymax = 1.05
  * driver = 2
  * eps = 0.0
- * epsnax = 0.1
+ * epsmax = 0.1
  * eps_interval = 0.02
  *
  * The final run configuration is stored in the master datafile.
@@ -232,9 +232,11 @@ int Storage(pool *p, setup *s) {
  * The default task mapping follows the HDF5 storage scheme.
  * The mapping starts from the top left corner:
  *
- * (0,0) (0,1) (0,2) (0,3) ...
- * (1,0) (1,1) (1,2) (1,3)
- * (2,0) (2,1) (2,2) (2,3)
+ *      -- dim[1] --
+ *
+ * (0,0) (0,1) (0,2) (0,3) ...   
+ * (1,0) (1,1) (1,2) (1,3)       | dim[0]
+ * (2,0) (2,1) (2,2) (2,3)       
  *  ...
  *
  * The current task location is available at t->location array. The pool resolution
@@ -329,4 +331,11 @@ int PoolProcess(pool **all, pool *p, setup *s) {
 
   if (eps < epsmax) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
+}
+
+/**
+ * Implements CheckpointPrepare()
+ */
+int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
+  return TASK_SUCCESS;
 }
