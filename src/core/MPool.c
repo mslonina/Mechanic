@@ -48,9 +48,6 @@ pool* PoolLoad(module *m, int pid) {
   p->node = m->node;
   p->mpi_size = m->mpi_size;
 
-  /* Pool storage */
-  Storage(m, p);
-
   return p;
 }
 
@@ -158,5 +155,5 @@ void PoolFinalize(module *m, pool *p) {
     }
     free(p->board);
   }
-  //if (p) free(p);
+  if (p) free(p);
 }

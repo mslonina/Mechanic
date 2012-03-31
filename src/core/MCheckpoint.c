@@ -84,6 +84,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   group = H5Gopen(h5location, path, H5P_DEFAULT);
   CommitData(group, 1, p->board, STORAGE_BASIC, dims, offsets);
 
+  /* Update pool data */
+  CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
+
   tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
 
   t = TaskLoad(m, p, 0);
