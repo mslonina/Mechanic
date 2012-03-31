@@ -68,7 +68,7 @@ int PoolInit(module *m, pool *p) {
  * @function
  * Prepare the pool
  */
-int PoolPrepare(module *m, pool *p) {
+int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = 0, i = 0, size = 0;
   query *q;
   setup *s = &(m->layer.setup);
@@ -81,7 +81,9 @@ int PoolPrepare(module *m, pool *p) {
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
-    if (q) mstat = q(p, s);
+    if (q) mstat = q(all, p, s);
+    
+    /* Write pool data */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
     sprintf(path, "/Pools/pool-%04d", p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
@@ -90,6 +92,7 @@ int PoolPrepare(module *m, pool *p) {
     H5Fclose(h5location);
   }
 
+  /* Broadcast pool data */
   for (i = 0; i < m->pool_banks; i++) {
     if (p->storage[i].layout.sync) {
       size = GetSize(p->storage[i].layout.rank, p->storage[i].layout.dim);
@@ -106,14 +109,26 @@ int PoolPrepare(module *m, pool *p) {
  * @function
  * Process the pool
  */
-int PoolProcess(module *m, pool *p) {
+int PoolProcess(module *m, pool **all, pool *p) {
   int pool_create = 0;
   setup *s = &(m->layer.setup);
   query *q;
+  hid_t h5location, group;
+  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
+  char path[LRC_CONFIG_LEN];
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolProcess", LOAD_DEFAULT);
-    if (q) pool_create = q(p, s);
+    if (q) pool_create = q(all, p, s);
+
+    /* Write pool data */
+    h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    sprintf(path, "/Pools/pool-%04d", p->pid);
+    group = H5Gopen(h5location, path, H5P_DEFAULT);
+    CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
+    H5Gclose(group);
+    H5Fclose(h5location);
+
   }
 
   MPI_Bcast(&pool_create, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
@@ -143,5 +158,5 @@ void PoolFinalize(module *m, pool *p) {
     }
     free(p->board);
   }
-  free(p);
+  //if (p) free(p);
 }

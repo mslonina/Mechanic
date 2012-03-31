@@ -63,7 +63,7 @@ int Storage(pool *p, setup *s) {
  * @function
  * Implementation of PoolPrepare()
  */
-int PoolPrepare(pool *p, setup *s) {
+int PoolPrepare(pool **all, pool *p, setup *s) {
   int i,j;
   int dims[2];
 
@@ -83,7 +83,7 @@ int PoolPrepare(pool *p, setup *s) {
  * @function
  * Implementation of PoolProcess()
  */
-int PoolProcess(pool *p, setup *s) {
+int PoolProcess(pool **all, pool *p, setup *s) {
   //int i,j;
   /*for (j = 0; j < p->storage[2].layout.dim[0]; j++) {
     for (i = 0; i < p->storage[2].layout.dim[1]; i++) { 

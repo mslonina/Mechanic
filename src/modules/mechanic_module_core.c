@@ -33,14 +33,26 @@ int Init(init *i) {
  */
 int Setup(setup *s) {
   s->options[0] = (LRC_configDefaults) {"core", "name", "mechanic", LRC_STRING};
-  s->options[1] = (LRC_configDefaults) {"core", "debug", "0", LRC_INT};
-  s->options[2] = (LRC_configDefaults) {"core", "silent", "0", LRC_INT};
-  s->options[3] = (LRC_configDefaults) {"core", "api", "2", LRC_INT};
-  s->options[4] = (LRC_configDefaults) {"core", "hdf", "3", LRC_INT};
-  s->options[5] = (LRC_configDefaults) {"core", "xres", "5", LRC_INT};
-  s->options[6] = (LRC_configDefaults) {"core", "yres", "5", LRC_INT};
-  s->options[7] = (LRC_configDefaults) {"core", "checkpoint", "2", LRC_INT};
-  s->options[8] = (LRC_configDefaults) {LRC_OPTIONS_END};
+  s->options[1] = (LRC_configDefaults) {"core", "xres", "5", LRC_INT};
+  s->options[2] = (LRC_configDefaults) {"core", "yres", "5", LRC_INT};
+  s->options[3] = (LRC_configDefaults) {"core", "checkpoint", "2", LRC_INT};
+  s->options[4] = (LRC_configDefaults) {"core", "debug", "0", LRC_INT};
+  s->options[5] = (LRC_configDefaults) {"core", "silent", "0", LRC_INT};
+  s->options[6] = (LRC_configDefaults) {LRC_OPTIONS_END};
+/*
+  s->popt[0] = (struct poptOption) {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
+    &s->options[0].value, 0, "Problem name", "NAME"};
+  s->popt[1] = (struct poptOption) {"xres", 'x', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
+    &s->options[1].value, 0, "X resolution", "XRES"};
+  s->popt[2] = (struct poptOption) {"yres", 'y', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
+    &s->options[2].value, 0, "Y resolution", "YRES"};
+  s->popt[3] = (struct poptOption) {"checkpoint", 'd', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
+    &s->options[3].value, 0, "Checkpoint size", "CHECKPOINT"};
+  s->popt[4] = (struct poptOption) POPT_TABLEEND;*/
+/*  s->popt[4] = (struct poptOption) {"debug", 'g', POPT_ARG_VAL,
+    &s->options[4].value, "1", "Debug mode", "0"};
+  s->popt[5] = (struct poptOption) {"silent", 's', POPT_ARG_VAL,
+    &s->options[5].value, "1", "Silent mode", "0"};*/
   
   return TASK_SUCCESS;
 }
@@ -164,7 +176,7 @@ int Storage(pool *p, setup *s) {
  * after the function is performed, as well as hdf storage for all datasets with use_hdf =
  * 1.
  */
-int PoolPrepare(pool *p, setup *s) {
+int PoolPrepare(pool **allpools, pool *current, setup *s) {
   return TASK_SUCCESS;
 }
 
@@ -175,7 +187,7 @@ int PoolPrepare(pool *p, setup *s) {
  * @return
  * POOL_FINALIZE for the last pool or POOL_CREATE_NEW, if the pool loop have to continue
  */
-int PoolProcess(pool *p, setup *s) {
+int PoolProcess(pool **allpools, pool *current, setup *s) {
   return POOL_FINALIZE;
 }
 

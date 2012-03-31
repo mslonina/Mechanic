@@ -26,6 +26,7 @@ int Init(init *i) {
   i->options = 24; // max options
   i->banks_per_pool = 2; // max memory banks per pool
   i->banks_per_task = 3; // max memory banks per task
+  i->pools = 25; // max pools
   
   return TASK_SUCCESS;
 }
@@ -54,8 +55,19 @@ int Setup(setup *s) {
  * Implements Storage()
  */
 int Storage(pool *p, setup *s) {
+
+  /* /Pools/pool-ID/pool-data */
+  p->storage[0].layout.path = "pool-data";
+  p->storage[0].layout.rank = 2;
+  p->storage[0].layout.dim[0] = 1;
+  p->storage[0].layout.dim[1] = 6;
+  p->storage[0].layout.use_hdf = 1;
+  p->storage[0].layout.dataspace_type = H5S_SIMPLE;
+  p->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
+  p->storage[0].layout.storage_type = STORAGE_BASIC;
+  p->storage[0].layout.sync = 1;
   
-  /* Pools/pool-D/Tasks/input */
+  /* /Pools/pool-ID/Tasks/input */
   p->task->storage[0].layout.path = "input";
   p->task->storage[0].layout.rank = 2;
   p->task->storage[0].layout.dim[0] = 1;
@@ -65,11 +77,11 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task->storage[0].layout.storage_type = STORAGE_PM3D;
 
-  /* Pools/pool-D/Tasks/result */
+  /* /Pools/pool-ID/Tasks/result */
   p->task->storage[1].layout.path = "result";
   p->task->storage[1].layout.rank = 2;
   p->task->storage[1].layout.dim[0] = 1;
-  p->task->storage[1].layout.dim[1] = 5;
+  p->task->storage[1].layout.dim[1] = 4;
   p->task->storage[1].layout.use_hdf = 1;
   p->task->storage[1].layout.dataspace_type = H5S_SIMPLE;
   p->task->storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
@@ -110,18 +122,12 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   double err, xv[6], tend, step, eps, result;
-  double epsmin, epsmax, epsint;
-  int driver;
+  int driver = 0;
 
   step = LRC_option2double("arnold", "step", s->head);
   step  = step*(pow(5,0.5)-1)/2.0;
   tend = LRC_option2double("arnold", "tend", s->head);
-  epsmin  = LRC_option2double("arnold", "eps", s->head);
-  epsmax  = LRC_option2double("arnold", "epsmax", s->head);
-  epsint  = LRC_option2double("arnold", "eps_interval", s->head);
-  driver = LRC_option2int("arnold", "driver", s->head);
-
-  eps = epsmin + (double)p->pid * epsint;
+  eps = p->storage[0].data[0][0]; 
 
   /* Initial data */  
   xv[0] = t->storage[0].data[0][0];
@@ -140,21 +146,32 @@ int TaskProcess(pool *p, task *t, setup *s) {
   t->storage[1].data[0][1] = xv[4];
   t->storage[1].data[0][2] = result;
   t->storage[1].data[0][3] = err;
-  t->storage[1].data[0][4] = eps;
 
+  return TASK_SUCCESS;
+}
+
+/**
+ * Implements PoolPrepare()
+ */
+int PoolPrepare(pool **all, pool *p, setup *s) {
+  double eps, epsmin, epsint;
+  epsmin  = LRC_option2double("arnold", "eps", s->head);
+  epsint  = LRC_option2double("arnold", "eps_interval", s->head);
+  eps = epsmin + (double)p->pid * epsint; 
+
+  p->storage[0].data[0][0] = eps; 
   return TASK_SUCCESS;
 }
  
 /**
  * Implements PoolProcess()
  */
-int PoolProcess(pool *p, setup *s) {
-  double eps, epsmin, epsmax, epsint;
-  epsmin  = LRC_option2double("arnold", "eps", s->head);
+int PoolProcess(pool **all, pool *p, setup *s) {
+  double eps, epsmax;
+  int i = 0;
+  eps = p->storage[0].data[0][0];
   epsmax  = LRC_option2double("arnold", "epsmax", s->head);
-  epsint  = LRC_option2double("arnold", "eps_interval", s->head);
 
-  eps = epsmin + (double)p->pid * epsint; 
   if (eps < epsmax) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }

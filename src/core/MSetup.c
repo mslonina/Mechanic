@@ -109,10 +109,9 @@ int ReadConfig(char *filename, LRC_configNamespace *head) {
  * Popt command line parser
  */
 int Popt(int node, int argc, char** argv, setup *s) {
-  //poptContext context;
-  char value;
-  s->poptcontext = poptGetContext(NULL, argc, (const char **) argv, s->popt, 0);
-  value = poptGetNextOpt(s->poptcontext);
+  //char value;
+  s->poptcontext = poptGetContext(NULL, argc, (const char **) argv, &s->popt[0], 0);
+  //value = poptGetNextOpt(s->poptcontext);
 
   //printf("value = %s\n", value);
 

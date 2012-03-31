@@ -146,7 +146,7 @@ void FinalizeLayer(layer *l) {
   dlclose(l->handler);
   free(l->setup.options);
   free(l->setup.popt);
-  //poptFreeContext(l->setup.poptcontext);
+//  poptFreeContext(l->setup.poptcontext);
   if (l->setup.head) LRC_cleanup(l->setup.head);
 }
 

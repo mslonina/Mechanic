@@ -11,8 +11,8 @@
 
 pool* PoolLoad(module *m, int pid);
 int PoolInit(module *m, pool *p);
-int PoolPrepare(module *m, pool *p);
-int PoolProcess(module *m, pool *p);
+int PoolPrepare(module *m, pool **all, pool *p);
+int PoolProcess(module *m, pool **all, pool *p);
 void PoolFinalize(module *m, pool *p);
 
 #endif
