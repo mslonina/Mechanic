@@ -14,7 +14,7 @@
  * - The Pool-oriented task management, you may define as many task pools as needed, on
  *   the fly (see PoolProcess())
  * - Custom setup, both for core and the module, only one config file is used (see
- *   Setup())
+ *   Setup()), all setup stored in the master datafile
  * - Custom storage, both for core and the module (see Storage())
  * - No MPI and HDF5 knowledge required (i.e. the PoolPrepare() does MPI_Broadcast under
  *   the hood)
@@ -27,8 +27,8 @@
  * loop:
  *
  *  1. PoolPrepare()
- *    All nodes enter the PoolPrepare(). Data of all pools is passed to this
- *    function, so that we may prepare specifically the current pool. The current pool
+ *    All nodes enter the PoolPrepare(). Data of all previous pools is passed to this
+ *    function, so that we may use them to prepare data for the current pool. The current pool
  *    data is broadcasted to all nodes and stored in the master datafile.
  *  2. The Task Loop
  *    All nodes enter the task loop. The master node prepares the task during
@@ -62,7 +62,7 @@
  * @function
  * Implements Init()
  *
- * This function is used to setup some sane defaults, you should use it only, if the core
+ * This function is used to setup some sane defaults, you should use it only if the core
  * defaults are not enough to handle your simulation. The core defaults are:
  *
  * - options = 128 -- max number of setup options
@@ -96,8 +96,8 @@ int Init(init *i) {
  *
  * The options table must finish with LRC_OPTIONS_END.
  *
- * The configuration file might be used then, in a sample form (only one configuration
- * file both for core and module):
+ * The configuration file may be used then, in a sample form (only one configuration
+ * file both for core and the module):
  *
  * [core]
  * name = arnoldweb
@@ -137,6 +137,7 @@ int Setup(setup *s) {
 }
 
 /**
+ * @function
  * Implements Storage()
  *
  * This function is used to create the storage layout of your run. You define here all
@@ -145,7 +146,7 @@ int Setup(setup *s) {
  * - storage[0].layout.path - the dataset name
  * - storage[0].layout.rank - the dataset rank (MAX_RANK = 2)
  * - storage[0].layout.dim - the dataset dimensions
- * - storage[0].layout.use_hdf - whether use hdf5 storage or not
+ * - storage[0].layout.use_hdf - whether to use hdf5 storage or not
  * - storage[0].layout.dataspace_type - the type of the hdf5 dataspace for the dataset
  *   (H5S_SIMPLE)
  * - storage[0].layout.datatype - the datatype of data in the dataset (H5T_NATIVE_DOUBLE)
@@ -167,6 +168,8 @@ int Setup(setup *s) {
  * - p->task->storage[1]
  *
  * The task storage is independent on the pool storage.
+ * 
+ * The storage scheme layout is checked before memory allocation.
  */
 int Storage(pool *p, setup *s) {
 
@@ -234,7 +237,7 @@ int Storage(pool *p, setup *s) {
  * (2,0) (2,1) (2,2) (2,3)
  *  ...
  *
- * The current task location is available at t->location array. The task pool resolution
+ * The current task location is available at t->location array. The pool resolution
  * is available at p->board->layout.dim array. The pool_size is a multiplication of
  * p->board->layout.dim[i], i < p->board->layout.rank. 
  *
@@ -300,8 +303,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
 /**
  * Implements PoolPrepare()
  *
- * You may use the **all array to access data of all previous pools. The data of the
- * current pool p are broadcasted and stored (if use_hdf = 1) right after PoolPrepare().
+ * You may use the **all array to access global data of all previous pools. The gloabl data of the
+ * current pool p is broadcasted and stored (if use_hdf = 1) right after PoolPrepare().
  */
 int PoolPrepare(pool **all, pool *p, setup *s) {
   double eps, epsmin, epsint;
@@ -316,8 +319,8 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
 /**
  * Implements PoolProcess()
  *
- * You may the **all array to access data of all previous pools. This function should
- * return POOL_CREATE_NEW when the new pool will be created or POOL_FINALIZE otherwise.
+ * You may use the **all array to access global data of all previous pools. This function should
+ * return POOL_CREATE_NEW when the new pool has to be created or POOL_FINALIZE otherwise.
  */
 int PoolProcess(pool **all, pool *p, setup *s) {
   double eps, epsmax;
