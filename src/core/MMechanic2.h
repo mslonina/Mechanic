@@ -26,6 +26,7 @@
 
 #define TASK_SUCCESS 0
 #define CORE_ICE 112
+#define CORE_SETUP_HELP 212
 
 /* Error codes */
 #define CORE_ERR_CORE 901
@@ -72,10 +73,17 @@ typedef struct {
 } init;
 
 typedef struct {
-  LRC_configDefaults *options;
-  LRC_configNamespace *head;
   struct poptOption *popt;
   poptContext poptcontext;
+  char **string_args;
+  int *int_args;
+  double *double_args;
+} popt;
+
+typedef struct {
+  LRC_configDefaults *options;
+  LRC_configNamespace *head;
+  popt *popt;
 } setup;
 
 typedef struct {

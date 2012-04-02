@@ -11,6 +11,8 @@
 #define NORMAL_MODE 0
 #define RESTART_MODE 1
 
+#define DEFAULT_CONFIG_FILE "mechanic-config.cfg"
+
 enum {
   MESSAGE_INFO,
   MESSAGE_ERR,

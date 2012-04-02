@@ -21,10 +21,18 @@ int Init(init *i) {
  * Implementation of Setup()
  */
 int Setup(setup *s) {
-  s->options[0] = (LRC_configDefaults) {"test", "step", "0.25", LRC_DOUBLE};
-  s->options[1] = (LRC_configDefaults) {"test", "tend", "1000.0", LRC_DOUBLE};
-  s->options[2] = (LRC_configDefaults) {"test", "driver", "1", LRC_INT};
-  s->options[3] = (LRC_configDefaults) {"pool0", "size", "25", LRC_INT};
+  s->options[0] = (LRC_configDefaults) {
+    .space="test", .name="step", .shortName='\0', .value="0.25", .type=LRC_DOUBLE,
+    .description="The time step"};
+  s->options[1] = (LRC_configDefaults) {
+    .space="test", .name="tend", .shortName='t', .value="1000.0", .type=LRC_DOUBLE,
+    .description="The period"};
+  s->options[2] = (LRC_configDefaults) {
+    .space="test", .name="driver", .shortName='i', .value="1", .type=LRC_INT,
+    .description="The driver"};
+  s->options[3] = (LRC_configDefaults) {
+    .space="pool0", .name="size", .shortName='z', .value="25", .type=LRC_INT,
+    .description="The pool size"};
   s->options[4] = (LRC_configDefaults) {LRC_OPTIONS_END};
 
   return TASK_SUCCESS;

@@ -13,6 +13,7 @@
  *  Setup structure
  */
 typedef struct {
+  char *name;
   void *handler;
   init init;
   setup setup;
@@ -37,6 +38,7 @@ typedef struct {
   int task_banks;
   layer layer;
   layer fallback;
+  popt *popt;
 } module;
 
 /**

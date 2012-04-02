@@ -18,7 +18,7 @@
  * - Loads the Setup function, if present
  * - Boots LRC API
  */
-module Bootstrap(int node, int mpi_size, char *name, module *f) {
+module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, module *f) {
   module m;
   
   m = ModuleLoad(name);
@@ -40,6 +40,21 @@ module Bootstrap(int node, int mpi_size, char *name, module *f) {
 
     /* Load module Setup */
     ModuleSetup(&m);
+
+    /* Popt defaults, global options */
+    m.popt->popt[0] = (struct poptOption) 
+      {"module", 'p', POPT_ARG_STRING, &m.popt->string_args[0], 0, "Module name", NULL};
+    m.popt->popt[1] = (struct poptOption) 
+      {"config", 'c', POPT_ARG_STRING, &m.popt->string_args[1], 0, "Config filename", NULL};
+    m.popt->popt[2] = (struct poptOption)
+      {"help", '?', POPT_ARG_VAL, &m.popt->int_args[2], 1, "Show this help message", NULL}; 
+    m.popt->popt[3] = (struct poptOption)
+      {"usage", '\0', POPT_ARG_VAL, &m.popt->int_args[3], 1, "Display brief message", NULL}; 
+    m.popt->popt[4] = (struct poptOption) POPT_TABLEEND;
+
+    /* Get the global Popt context */
+    m.popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, m.popt->popt, 0);
+    poptGetNextOpt(m.popt->poptcontext);
 
   } 
 
@@ -97,8 +112,36 @@ int ModuleInit(module *m) {
   
   m->layer.setup.options = calloc(opts*sizeof(LRC_configDefaults), sizeof(LRC_configDefaults));
   if (!m->layer.setup.options) Error(CORE_ERR_MEM);
-  m->layer.setup.popt = calloc((opts+2)*sizeof(struct poptOption), sizeof(struct poptOption));
+  
+  m->layer.setup.popt = calloc(sizeof(popt), sizeof(popt));
   if (!m->layer.setup.popt) Error(CORE_ERR_MEM);
+
+  m->layer.setup.popt->popt = calloc(3*opts*sizeof(struct poptOption), sizeof(struct poptOption));
+  if (!m->layer.setup.popt->popt) Error(CORE_ERR_MEM);
+  
+  m->layer.setup.popt->string_args = calloc(3*opts*sizeof(char), sizeof(char));
+  if (!m->layer.setup.popt->string_args) Error(CORE_ERR_MEM);
+  
+  m->layer.setup.popt->int_args = calloc(3*opts*sizeof(int), sizeof(int));
+  if (!m->layer.setup.popt->int_args) Error(CORE_ERR_MEM);
+
+  m->layer.setup.popt->double_args = calloc(3*opts*sizeof(double), sizeof(double));
+  if (!m->layer.setup.popt->double_args) Error(CORE_ERR_MEM);
+
+  m->popt = calloc(sizeof(popt), sizeof(popt));
+  if (!m->popt) Error(CORE_ERR_MEM);
+  
+  m->popt->popt = calloc(opts*sizeof(struct poptOption), sizeof(struct poptOption));
+  if (!m->popt->popt) Error(CORE_ERR_MEM);
+  
+  m->popt->string_args = calloc(opts*sizeof(char), sizeof(char));
+  if (!m->popt->string_args) Error(CORE_ERR_MEM);
+  
+  m->popt->int_args = calloc(opts*sizeof(int), sizeof(int));
+  if (!m->popt->int_args) Error(CORE_ERR_MEM);
+
+  m->popt->double_args = calloc(opts*sizeof(double), sizeof(double));
+  if (!m->popt->double_args) Error(CORE_ERR_MEM);
 
   m->layer.setup.head = NULL;
 
@@ -129,11 +172,11 @@ int ModuleSetup(module *m) {
      */
     if (m->fallback.handler) {
       mstat = LRC_mergeDefaults(m->layer.setup.options, m->fallback.setup.options);
-      //mstat = PoptMergeOptions(m, m->layer.setup.popt, m->fallback.setup.popt);
     } 
-
-    m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
   }
+  
+  m->layer.setup.head = NULL;
+  m->layer.setup.popt->poptcontext = NULL;
 
   return mstat;
 }
@@ -143,10 +186,14 @@ int ModuleSetup(module *m) {
  * Finalizes the layer
  */
 void FinalizeLayer(layer *l) {
-  dlclose(l->handler);
-  free(l->setup.options);
-  free(l->setup.popt);
-//  poptFreeContext(l->setup.poptcontext);
+  if (l->handler) dlclose(l->handler);
+  if (l->setup.options) free(l->setup.options);
+  if (l->setup.popt->popt) free(l->setup.popt->popt);
+  if (l->setup.popt->string_args) free(l->setup.popt->string_args);
+  if (l->setup.popt->int_args) free(l->setup.popt->int_args);
+  if (l->setup.popt->double_args) free(l->setup.popt->double_args);
+  if (l->setup.popt->poptcontext) poptFreeContext(l->setup.popt->poptcontext);
+  if (l->setup.popt) free(l->setup.popt);
   if (l->setup.head) LRC_cleanup(l->setup.head);
 }
 
@@ -156,5 +203,11 @@ void FinalizeLayer(layer *l) {
  */
 void ModuleFinalize(module* m) {
   FinalizeLayer(&m->layer);
+  if (m->popt->popt) free(m->popt->popt);
+  if (m->popt->string_args) free(m->popt->string_args);
+  if (m->popt->int_args) free(m->popt->int_args);
+  if (m->popt->double_args) free(m->popt->double_args);
+  if (m->popt->poptcontext) poptFreeContext(m->popt->poptcontext);
+  if (m->popt) free(m->popt);
 }
 

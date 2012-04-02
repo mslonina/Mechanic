@@ -7,7 +7,7 @@
 #include "MModules.h"
 #include "MSetup.h"
 
-module Bootstrap(int node, int mpisize, char *name, module *f);
+module Bootstrap(int node, int mpisize, int argc, char **argv, char *name, module *f);
 module ModuleLoad(char *name);
 int ModuleInit(module *m);
 int ModuleSetup(module *m);

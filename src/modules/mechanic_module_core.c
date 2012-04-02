@@ -30,29 +30,41 @@ int Init(init *i) {
  * This is an implementation of the LRC API. We initialize here default options.
  * If the user-supplied module implements this function, the setup options will be merged
  * with the core. All options will be available in the setup->head linked list.
+ *
+ * Configuration options are automatically added to the Popt arg table, so that, you may
+ * override the defaults with the command line.
  */
 int Setup(setup *s) {
-  s->options[0] = (LRC_configDefaults) {"core", "name", "mechanic", LRC_STRING};
-  s->options[1] = (LRC_configDefaults) {"core", "xres", "5", LRC_INT};
-  s->options[2] = (LRC_configDefaults) {"core", "yres", "5", LRC_INT};
-  s->options[3] = (LRC_configDefaults) {"core", "checkpoint", "2", LRC_INT};
-  s->options[4] = (LRC_configDefaults) {"core", "debug", "0", LRC_INT};
-  s->options[5] = (LRC_configDefaults) {"core", "silent", "0", LRC_INT};
-  s->options[6] = (LRC_configDefaults) {LRC_OPTIONS_END};
-/*
-  s->popt[0] = (struct poptOption) {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-    &s->options[0].value, 0, "Problem name", "NAME"};
-  s->popt[1] = (struct poptOption) {"xres", 'x', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-    &s->options[1].value, 0, "X resolution", "XRES"};
-  s->popt[2] = (struct poptOption) {"yres", 'y', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-    &s->options[2].value, 0, "Y resolution", "YRES"};
-  s->popt[3] = (struct poptOption) {"checkpoint", 'd', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-    &s->options[3].value, 0, "Checkpoint size", "CHECKPOINT"};
-  s->popt[4] = (struct poptOption) POPT_TABLEEND;*/
-/*  s->popt[4] = (struct poptOption) {"debug", 'g', POPT_ARG_VAL,
-    &s->options[4].value, "1", "Debug mode", "0"};
-  s->popt[5] = (struct poptOption) {"silent", 's', POPT_ARG_VAL,
-    &s->options[5].value, "1", "Silent mode", "0"};*/
+  s->options[0] = (LRC_configDefaults) {
+    .space="core", 
+    .name="name", 
+    .shortName='n', 
+    .value="mechanic", 
+    .type=LRC_STRING,
+    .description="The name of the run"
+  };
+  s->options[1] = (LRC_configDefaults) {
+    .space="core", 
+    .name="xres", 
+    .value="5", 
+    .type=LRC_INT,
+    .description="The task pool board dim[1] resolution"
+  };
+  s->options[2] = (LRC_configDefaults) {
+    .space="core", 
+    .name="yres", 
+    .value="5", 
+    .type=LRC_INT,
+    .description="The task pool board dim[0] resolution"
+  };
+  s->options[3] = (LRC_configDefaults) {
+    .space="core",
+    .name="checkpoint",
+    .value="2",
+    .type=LRC_INT,
+    .description="The checkpoint size (value is multiplied by mpi_size - 1)"
+  };
+  s->options[4] = (LRC_configDefaults) {LRC_OPTIONS_END};
   
   return TASK_SUCCESS;
 }

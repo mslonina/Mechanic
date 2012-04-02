@@ -78,6 +78,7 @@ int Init(init *i) {
   
   return TASK_SUCCESS;
 }
+
 /**
  * @function
  * Implements Setup()
@@ -85,13 +86,22 @@ int Init(init *i) {
  * This function uses the LRC API for setup options. Options are merged with the core. The
  * syntax is:
  *
- * s->options[0] = (LRC_configDefaults) {namespace, variable, value, type};
+ * s->options[0] = (LRC_configDefaults) {
+ *  .space="NAMESPACE", 
+ *  .name="VARIABLE", 
+ *  .shortName="V", 
+ *  .value="DEFAULT_VALUE", 
+ *  .type=TYPE, 
+ *  .description="SHORT DESCRIPTION"
+ *  };
  *
  * where
  *
- * - namespace - the name of the configuration namespace (string)
- * - variable - the name of the variable (string)
+ * - space - the name of the configuration namespace (string)
+ * - name - the name of the variable (string)
+ * - shortName - the short name of the variable (string), used in commandline agrs
  * - value - the default value (string)
+ * - description - description for the variable (string), used in commandline args
  * - type - the variable type (LRC_INT, LRC_FLOAT, LRC_DOUBLE, LRC_STRING)
  *
  * The options table must finish with LRC_OPTIONS_END.
@@ -121,16 +131,36 @@ int Init(init *i) {
  */
 int Setup(setup *s) {
 
-  s->options[0] = (LRC_configDefaults) {"arnold", "step", "0.25", LRC_DOUBLE};
-  s->options[1] = (LRC_configDefaults) {"arnold", "tend", "1000.0", LRC_DOUBLE};
-  s->options[2] = (LRC_configDefaults) {"arnold", "xmin", "0.8", LRC_DOUBLE};
-  s->options[3] = (LRC_configDefaults) {"arnold", "xmax", "1.2", LRC_DOUBLE};
-  s->options[4] = (LRC_configDefaults) {"arnold", "ymin", "0.8", LRC_DOUBLE};
-  s->options[5] = (LRC_configDefaults) {"arnold", "ymax", "1.2", LRC_DOUBLE};
-  s->options[6] = (LRC_configDefaults) {"arnold", "eps", "0.0", LRC_DOUBLE};
-  s->options[7] = (LRC_configDefaults) {"arnold", "driver", "1", LRC_INT};
-  s->options[8] = (LRC_configDefaults) {"arnold", "eps_interval", "0.01", LRC_DOUBLE};
-  s->options[9] = (LRC_configDefaults) {"arnold", "epsmax", "0.04", LRC_DOUBLE};
+  s->options[0] = (LRC_configDefaults) {
+    .space="arnold", .name="step", .shortName='\0', .value="0.25", .type=LRC_DOUBLE, 
+    .description="The time step"};
+  s->options[1] = (LRC_configDefaults) {
+    .space="arnold", .name="tend", .shortName='\0', .value="1000.0", .type=LRC_DOUBLE, 
+    .description="The period"};
+  s->options[2] = (LRC_configDefaults) {
+    .space="arnold", .name="xmin", .shortName='\0', .value="0.8", .type=LRC_DOUBLE, 
+    .description="Minimum x"};
+  s->options[3] = (LRC_configDefaults) {
+    .space="arnold", .name="xmax", .shortName='\0', .value="1.2", .type=LRC_DOUBLE, 
+    .description="Maximum x"};
+  s->options[4] = (LRC_configDefaults) {
+    .space="arnold", .name="ymin", .shortName='\0', .value="0.8", .type=LRC_DOUBLE, 
+    .description="Minimum y"};
+  s->options[5] = (LRC_configDefaults) {
+    .space="arnold", .name="ymax", .shortName='\0', .value="1.2", .type=LRC_DOUBLE, 
+    .description="Maximum y"};
+  s->options[6] = (LRC_configDefaults) {
+    .space="arnold", .name="eps", .shortName='\0', .value="0.0", .type=LRC_DOUBLE, 
+    .description="Minimum perturbation parameter"};
+  s->options[7] = (LRC_configDefaults) {
+    .space="arnold", .name="driver", .shortName='\0', .value="1", .type=LRC_INT,
+    .description="The driver: 1 - leapfrog, 2 - SABA3"};
+  s->options[8] = (LRC_configDefaults) {
+    .space="arnold", .name="eps_interval", .value="0.01", .type=LRC_DOUBLE,
+    .description="The pool perturbation interval"};
+  s->options[9] = (LRC_configDefaults) {
+    .space="arnold", .name="epsmax", .value="0.04", .type=LRC_DOUBLE,
+    .description="The maximum perturbation parameter"};
   s->options[10] = (LRC_configDefaults) {LRC_OPTIONS_END};
 
   return TASK_SUCCESS;
@@ -178,7 +208,6 @@ int Storage(pool *p, setup *s) {
    *
    * The pool global data. Each dataset is stored in a pool-ID group, where ID is the
    * unique pool ID. The STORAGE_BASIC mode may be only used here.
-   *
    */
   p->storage[0].layout.path = "pool-data";
   p->storage[0].layout.rank = 2;
@@ -303,6 +332,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 }
 
 /**
+ * @function
  * Implements PoolPrepare()
  *
  * You may use the **all array to access global data of all previous pools. The gloabl data of the
@@ -319,6 +349,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
 }
  
 /**
+ * @function
  * Implements PoolProcess()
  *
  * You may use the **all array to access global data of all previous pools. This function should
@@ -334,6 +365,7 @@ int PoolProcess(pool **all, pool *p, setup *s) {
 }
 
 /**
+ * @function
  * Implements CheckpointPrepare()
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
