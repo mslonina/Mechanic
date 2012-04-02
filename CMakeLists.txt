@@ -3,7 +3,7 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 0)
 set (Mechanic_VERSION_MINOR 12)
-set (Mechanic_VERSION_PATCH 1)
+set (Mechanic_VERSION_PATCH 2)
 set (Mechanic_VERSION_API 0120364)
 
 set (package_version
@@ -11,7 +11,7 @@ set (package_version
 
 set (package_name "\"${CMAKE_PROJECT_NAME}\"")
 set (package_author "\"Celestial Mechanics Group (TCFA/NCU)\"")
-set (package_bugs "\"slonina@astri.umk.pl\"")
+set (package_bugs "\"mechanics@astri.umk.pl\"")
 set (package_url "\"http://git.astri.umk.pl/projects/mechanic\"")
 set (package_version_major "\"${Mechanic_VERSION_MAJOR}\"")
 set (package_version_minor "\"${Mechanic_VERSION_MINOR}\"")
@@ -72,7 +72,7 @@ CONFIGURE_FILE (
 )
 
 add_definitions (-DHAVE_CONFIG_H)
-set (CMAKE_C_FLAGS "-Warray-bounds -Wall -Wextra -std=c99")
+set (CMAKE_C_FLAGS "-Warray-bounds -Wall -std=c99")
 
 add_subdirectory(src)
 add_subdirectory(src/core)

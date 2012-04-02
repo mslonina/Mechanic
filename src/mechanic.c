@@ -237,13 +237,14 @@ int main(int argc, char** argv) {
 
   /* LRC defaults */
   LRC_configDefaults cs[] = {
-    {"default", "name", MECHANIC_NAME_DEFAULT, LRC_STRING},
-    {"default", "xres", MECHANIC_XRES_DEFAULT, LRC_INT},
-    {"default", "yres", MECHANIC_YRES_DEFAULT, LRC_INT},
-    {"default", "module", MECHANIC_MODULE_DEFAULT, LRC_STRING},
-    {"default", "mconfig", MECHANIC_CONFIG_FILE_DEFAULT, LRC_STRING},
-    {"default", "mode", MECHANIC_MODE_DEFAULT, LRC_INT},
-    {"logs", "checkpoint", MECHANIC_CHECKPOINT_DEFAULT, LRC_INT},
+    {.space="default", .name="name", .value=MECHANIC_NAME_DEFAULT, .type=LRC_STRING},
+    {.space="default", .name="xres", .value=MECHANIC_XRES_DEFAULT, .type=LRC_INT},
+    {.space="default", .name="yres", .value=MECHANIC_YRES_DEFAULT, .type=LRC_INT},
+    {.space="default", .name="module", .value=MECHANIC_MODULE_DEFAULT, .type=LRC_STRING},
+    {.space="default", .name="mconfig", .value=MECHANIC_CONFIG_FILE_DEFAULT, .type=LRC_STRING},
+    {.space="default", .name="mode", .value=MECHANIC_MODE_DEFAULT, .type=LRC_INT},
+    {.space="logs", .name="checkpoint", .value=MECHANIC_CHECKPOINT_DEFAULT, .type=LRC_INT},
+//    {.space=LRC_NULL, .name=LRC_NULL, .shortName=LRC_NULL, .value=LRC_NULL, .type=LRC_INT,.description=LRC_NULL}
     {LRC_OPTIONS_END}
   };
 
@@ -280,11 +281,11 @@ int main(int argc, char** argv) {
     {"name", 'n', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
       &name, 0, "Problem name", "NAME"},
     {"config", 'c', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-      &TaskConfigFile, 0, "TaskConfig file", "/path/to/config/file"},
+      &TaskConfigFile, 0, "Config file", "/path/to/config/file"},
     {"module", 'p', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-      &module_name, 0, "TaskInfo", "MODULE"},
+      &module_name, 0, "Module", "MODULE"},
     {"mconfig", 'm', POPT_ARG_STRING|POPT_ARGFLAG_SHOW_DEFAULT,
-      &TaskInfoTaskConfigFile, 0, "TaskInfo TaskConfig file", "/path/to/module/config/file"},
+      &TaskInfoTaskConfigFile, 0, "Module Config file", "/path/to/module/config/file"},
     {"xres", 'x', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
       &xres, 0, "X resolution", "XRES"},
     {"yres", 'y', POPT_ARG_INT|POPT_ARGFLAG_SHOW_DEFAULT,
