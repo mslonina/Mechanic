@@ -10,7 +10,6 @@
 #include "hdf5.h"
 
 #define MECHANIC_MAX_HDF_RANK 7
-/* #include "mechanic_core_task.h" */
 
 #define MECHANIC_ERR_MPI 911
 #define MECHANIC_ERR_HDF 912

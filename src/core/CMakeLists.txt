@@ -1,7 +1,6 @@
 include_directories(. .. ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src)
 set (coresources
     mechanic.h
-    mechanic_core_task.h
     mechanic_internals.h
     mechanic_core_checkpoint.c
     mechanic_core_derived.c
