@@ -83,8 +83,8 @@ int Init(init *i) {
  * @function
  * Implements Setup()
  *
- * This function uses the LRC API for setup options. Options are merged with the core. The
- * syntax is:
+ * This function uses the LRC API for setup options. Options are merged with the core. Any 
+ * C99 struct initialization is valid here, i.e.:
  *
  * s->options[0] = (LRC_configDefaults) {
  *  .space="NAMESPACE", 
@@ -99,12 +99,12 @@ int Init(init *i) {
  *
  * - space - the name of the configuration namespace (string)
  * - name - the name of the variable (string)
- * - shortName - the short name of the variable (string), used in commandline agrs
+ * - shortName - the short name of the variable (string), used in commandline args
  * - value - the default value (string)
  * - description - description for the variable (string), used in commandline args
  * - type - the variable type (LRC_INT, LRC_FLOAT, LRC_DOUBLE, LRC_STRING)
  *
- * The options table must finish with LRC_OPTIONS_END.
+ * The options table must finish with LRC_OPTIONS_END. 
  *
  * The configuration file may be used then, in a sample form (only one configuration
  * file both for core and the module):
@@ -128,39 +128,91 @@ int Init(init *i) {
  * eps_interval = 0.02
  *
  * The final run configuration is stored in the master datafile.
+ * 
+ * All configuration options are available in the command line. Try:
+ * mpirun -np 2 mechanic2 -p web --help
+ * 
  */
 int Setup(setup *s) {
 
   s->options[0] = (LRC_configDefaults) {
-    .space="arnold", .name="step", .shortName='\0', .value="0.25", .type=LRC_DOUBLE, 
-    .description="The time step"};
+    .space="arnold",
+    .name="step",
+    .shortName='\0',
+    .value="0.25",
+    .type=LRC_DOUBLE, 
+    .description="The time step"
+  };
   s->options[1] = (LRC_configDefaults) {
-    .space="arnold", .name="tend", .shortName='\0', .value="1000.0", .type=LRC_DOUBLE, 
-    .description="The period"};
+    .space="arnold",
+    .name="tend",
+    .shortName='\0',
+    .value="1000.0",
+    .type=LRC_DOUBLE, 
+    .description="The period"
+  };
   s->options[2] = (LRC_configDefaults) {
-    .space="arnold", .name="xmin", .shortName='\0', .value="0.8", .type=LRC_DOUBLE, 
-    .description="Minimum x"};
+    .space="arnold",
+    .name="xmin",
+    .shortName='\0',
+    .value="0.8",
+    .type=LRC_DOUBLE, 
+    .description="Minimum x"
+  };
   s->options[3] = (LRC_configDefaults) {
-    .space="arnold", .name="xmax", .shortName='\0', .value="1.2", .type=LRC_DOUBLE, 
-    .description="Maximum x"};
+    .space="arnold",
+    .name="xmax",
+    .shortName='\0',
+    .value="1.2",
+    .type=LRC_DOUBLE, 
+    .description="Maximum x"
+  };
   s->options[4] = (LRC_configDefaults) {
-    .space="arnold", .name="ymin", .shortName='\0', .value="0.8", .type=LRC_DOUBLE, 
-    .description="Minimum y"};
+    .space="arnold",
+    .name="ymin",
+    .shortName='\0',
+    .value="0.8",
+    .type=LRC_DOUBLE, 
+    .description="Minimum y"
+  };
   s->options[5] = (LRC_configDefaults) {
-    .space="arnold", .name="ymax", .shortName='\0', .value="1.2", .type=LRC_DOUBLE, 
-    .description="Maximum y"};
+    .space="arnold",
+    .name="ymax",
+    .shortName='\0',
+    .value="1.2",
+    .type=LRC_DOUBLE, 
+    .description="Maximum y"
+  };
   s->options[6] = (LRC_configDefaults) {
-    .space="arnold", .name="eps", .shortName='\0', .value="0.0", .type=LRC_DOUBLE, 
-    .description="Minimum perturbation parameter"};
+    .space="arnold",
+    .name="eps",
+    .shortName='\0',
+    .value="0.0",
+    .type=LRC_DOUBLE, 
+    .description="Minimum perturbation parameter"
+  };
   s->options[7] = (LRC_configDefaults) {
-    .space="arnold", .name="driver", .shortName='\0', .value="1", .type=LRC_INT,
-    .description="The driver: 1 - leapfrog, 2 - SABA3"};
+    .space="arnold",
+    .name="driver",
+    .shortName='\0',
+    .value="1",
+    .type=LRC_INT,
+    .description="The driver: 1 - leapfrog, 2 - SABA3"
+  };
   s->options[8] = (LRC_configDefaults) {
-    .space="arnold", .name="eps_interval", .value="0.01", .type=LRC_DOUBLE,
-    .description="The pool perturbation interval"};
+    .space="arnold",
+    .name="eps_interval",
+    .value="0.01",
+    .type=LRC_DOUBLE,
+    .description="The pool perturbation interval"
+  };
   s->options[9] = (LRC_configDefaults) {
-    .space="arnold", .name="epsmax", .value="0.04", .type=LRC_DOUBLE,
-    .description="The maximum perturbation parameter"};
+    .space="arnold",
+    .name="epsmax",
+    .value="0.04",
+    .type=LRC_DOUBLE,
+    .description="The maximum perturbation parameter"
+  };
   s->options[10] = (LRC_configDefaults) {LRC_OPTIONS_END};
 
   return TASK_SUCCESS;
