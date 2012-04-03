@@ -165,17 +165,17 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p->task) {
     for (i = 0; i < m->task_banks; i++) {
-      /*if (p->task->storage[i].layout.storage_type == STORAGE_PM3D) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_PM3D) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
         dims[1] = p->task->storage[i].layout.dim[1];
       }
       if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
         dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
-      }*/
-//      FreeBuffer(p->task->storage[i].data, dims);
-//      free(p->task->storage[i].data[0]);
-//      free(p->task->storage[i].data);
+      }
+      if (p->task->storage[i].data) {
+        FreeBuffer(p->task->storage[i].data, dims);
+      }
     }
     if (p->task->storage) free(p->task->storage);
     free(p->task);
