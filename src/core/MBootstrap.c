@@ -47,10 +47,12 @@ module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, modu
     m.popt->popt[1] = (struct poptOption) 
       {"config", 'c', POPT_ARG_STRING, &m.popt->string_args[1], 0, "Config filename", NULL};
     m.popt->popt[2] = (struct poptOption)
-      {"help", '?', POPT_ARG_VAL, &m.popt->int_args[2], 1, "Show this help message", NULL}; 
+      {"print-defaults", '\0', POPT_ARG_VAL, &m.popt->int_args[2], 1, "Print default settings", NULL}; 
     m.popt->popt[3] = (struct poptOption)
-      {"usage", '\0', POPT_ARG_VAL, &m.popt->int_args[3], 1, "Display brief message", NULL}; 
-    m.popt->popt[4] = (struct poptOption) POPT_TABLEEND;
+      {"help", '?', POPT_ARG_VAL, &m.popt->int_args[3], 1, "Show this help message", NULL}; 
+    m.popt->popt[4] = (struct poptOption)
+      {"usage", '\0', POPT_ARG_VAL, &m.popt->int_args[4], 1, "Display brief message", NULL}; 
+    m.popt->popt[5] = (struct poptOption) POPT_TABLEEND;
 
     /* Get the global Popt context */
     m.popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, m.popt->popt, 0);

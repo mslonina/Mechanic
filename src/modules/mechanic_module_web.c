@@ -322,7 +322,7 @@ int Storage(pool *p, setup *s) {
  *
  * The current task location is available at t->location array. The pool resolution
  * is available at p->board->layout.dim array. The pool_size is a multiplication of
- * p->board->layout.dim[i], i < p->board->layout.rank. 
+ * p->board->layout.dim[i], where i < p->board->layout.rank. 
  *
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
@@ -406,11 +406,25 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
  *
  * You may use the **all array to access global data of all previous pools. This function should
  * return POOL_CREATE_NEW when the new pool has to be created or POOL_FINALIZE otherwise.
+ *
+ * The Task data (whole datasets for STORAGE_PM3D and STORAGE_BOARD) is available at:
+ * p->task->storage[].data
+ *
+ * The global pool data is updated in the master datafile right after this function.
  */
 int PoolProcess(pool **all, pool *p, setup *s) {
   double eps, epsmax;
+//  int i, j;
   eps = p->storage[0].data[0][0];
   epsmax  = LRC_option2double("arnold", "epsmax", s->head);
+/*
+  for (i = 0; i < p->task->storage[0].layout.dim[0] * p->pool_size; i++) {
+    for (j = 0; j < p->task->storage[0].layout.dim[1]; j++) {
+      printf("%.2f ", p->task->storage[0].data[i][j]);
+    }
+    printf("\n");
+  }
+  printf("\n");*/
 
   if (eps < epsmax) return POOL_CREATE_NEW;
   return POOL_FINALIZE;

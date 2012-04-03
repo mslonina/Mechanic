@@ -76,7 +76,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   LRC_cleanup(m->layer.setup.head);
 
   m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
-  if (m->node == MASTER) LRC_printAll(m->layer.setup.head);
+  if (m->node == MASTER && m->popt->int_args[2]) LRC_printAll(m->layer.setup.head);
 
   /**
    * Write the configuration to the master file
@@ -145,14 +145,14 @@ int Popt(module *m, int argc, char** argv, setup *s) {
     return CORE_SETUP_HELP;
   }
 
-  if (m->popt->int_args[2] == 1) {
+  if (m->popt->int_args[3] == 1) {
     if (m->node == MASTER) {
       poptPrintHelp(s->popt->poptcontext, stdout, 0);
     }
     return CORE_SETUP_HELP;
   }
   
-  if (m->popt->int_args[3] == 1) {
+  if (m->popt->int_args[4] == 1) {
     if (m->node == MASTER) {
       poptPrintUsage(s->popt->poptcontext, stdout, 0);
     }

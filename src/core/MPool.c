@@ -107,22 +107,39 @@ int PoolPrepare(module *m, pool **all, pool *p) {
  * Process the pool
  */
 int PoolProcess(module *m, pool **all, pool *p) {
-  int pool_create = 0;
+  int pool_create = 0, i = 0;
   setup *s = &(m->layer.setup);
   query *q;
-  hid_t h5location, group;
+  hid_t h5location, group, tasks, dataset;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
 
   if (m->node == MASTER) {
+    h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    sprintf(path, "/Pools/pool-%04d", p->pid);
+    group = H5Gopen(h5location, path, H5P_DEFAULT);
+
+    /* Read task datasets */
+    tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
+    
+    for (i = 0; i < m->task_banks; i++) {
+      if (p->task->storage[i].layout.use_hdf) {
+        if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
+            p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
+          dataset = H5Dopen(tasks, p->task->storage[i].layout.path, H5P_DEFAULT);
+          H5Dread(dataset, p->task->storage[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, p->task->storage[i].data[0]);
+          H5Dclose(dataset);
+        }
+      }
+    }
+
     q = LoadSym(m, "PoolProcess", LOAD_DEFAULT);
     if (q) pool_create = q(all, p, s);
 
     /* Write pool data */
-    h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
-    sprintf(path, "/Pools/pool-%04d", p->pid);
-    group = H5Gopen(h5location, path, H5P_DEFAULT);
     CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
+
+    H5Gclose(tasks);
     H5Gclose(group);
     H5Fclose(h5location);
 
@@ -138,13 +155,28 @@ int PoolProcess(module *m, pool **all, pool *p) {
  * Finalize the pool
  */
 void PoolFinalize(module *m, pool *p) {
+  int i = 0, dims[MAX_RANK];
   if (p->storage) {
     if (p->storage->data) {
       FreeBuffer(p->storage->data, p->storage->layout.dim);
     }
     free(p->storage);
   }
+
   if (p->task) {
+    for (i = 0; i < m->task_banks; i++) {
+      /*if (p->task->storage[i].layout.storage_type == STORAGE_PM3D) {
+        dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
+        dims[1] = p->task->storage[i].layout.dim[1];
+      }
+      if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
+        dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
+        dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
+      }*/
+//      FreeBuffer(p->task->storage[i].data, dims);
+//      free(p->task->storage[i].data[0]);
+//      free(p->task->storage[i].data);
+    }
     if (p->task->storage) free(p->task->storage);
     free(p->task);
   }
@@ -155,5 +187,6 @@ void PoolFinalize(module *m, pool *p) {
     }
     free(p->board);
   }
+
   if (p) free(p);
 }
