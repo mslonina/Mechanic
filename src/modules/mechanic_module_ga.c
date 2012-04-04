@@ -42,11 +42,20 @@ int Init(init *i) {
  */
 int Setup(setup *s) {
   s->options[0] = (LRC_configDefaults) {
-    .space="ga", .name="max-generations", .shortName='\0', .value="1000", .type=LRC_INT, .description="Maximum generations (max 1000)"};
-  s->options[1] = (LRC_configDefaults) {.space="ga", .name="genes", .shortName='\0', .value="20", .type=LRC_INT, .description="Number of genes"};
-  s->options[2] = (LRC_configDefaults) {.space="ga", .name="alleles", .shortName='\0', .value="4", .type=LRC_INT, .description="Number of types of genes"};
-  s->options[3] = (LRC_configDefaults) {.space="ga", .name="mutation-rate", .shortName='\0', .value="0.001", .type=LRC_DOUBLE, .description="Mutation rate"};
-  s->options[4] = (LRC_configDefaults) {.space="ga", .name="max-fitness", .shortName='\0', .value="20", .type=LRC_INT, .description="Maximum fitness"};
+    .space="ga", .name="max-generations", .shortName='\0', 
+    .value="1000", .type=LRC_INT, .description="Maximum generations (max 1000)"};
+  s->options[1] = (LRC_configDefaults) {
+    .space="ga", .name="genes", .shortName='\0', 
+    .value="20", .type=LRC_INT, .description="Number of genes"};
+  s->options[2] = (LRC_configDefaults) {
+    .space="ga", .name="alleles", .shortName='\0', 
+    .value="4", .type=LRC_INT, .description="Number of types of genes"};
+  s->options[3] = (LRC_configDefaults) {
+    .space="ga", .name="mutation-rate", .shortName='\0', 
+    .value="0.001", .type=LRC_DOUBLE, .description="Mutation rate"};
+  s->options[4] = (LRC_configDefaults) {
+    .space="ga", .name="max-fitness", .shortName='\0', 
+    .value="20", .type=LRC_INT, .description="Maximum fitness"};
   s->options[5] = (LRC_configDefaults) {LRC_OPTIONS_END};
 
   return TASK_SUCCESS; 
@@ -81,7 +90,7 @@ int Storage(pool *p, setup *s) {
 
   /** 
    * Path: /Pools/pool-ID/model 
-   * The objective -- The model organism
+   * The model organism
    */
   p->storage[1].layout.path = "model";
   p->storage[1].layout.rank = 2;
@@ -234,14 +243,14 @@ int InitializeOrganisms(pool *p, int genes, int alleles) {
   int i = 0, j = 0;
 
   /* Organisms */
-  for (i = 0; i < p->pool_size; ++i) {
-    for (j = 0; j < genes; ++j) {
+  for (i = 0; i < p->pool_size; i++) {
+    for (j = 0; j < genes; j++) {
       p->storage[0].data[i][j] = rand() % alleles;
     }
   }
 
   /* Model */
-  for (i = 0; i < genes; ++i) {
+  for (i = 0; i < genes; i++) {
     p->storage[1].data[0][i] = rand() % alleles;
   }
 
@@ -255,9 +264,9 @@ int InitializeOrganisms(pool *p, int genes, int alleles) {
 int Fitness(pool *p, task *t, int genes) {
   int i = 0, fit = 0;
     
-  for (i = 0; i < genes; ++i) {
+  for (i = 0; i < genes; i++) {
     if ((int)p->storage[0].data[t->tid][i] == (int)p->storage[1].data[0][i]) {
-      ++fit;
+      fit++;
     }
   }
     
@@ -298,12 +307,12 @@ int ProduceNextGeneration(pool *p, int genes, int alleles, double mutation_rate)
   int crossoverPoint;
   int mutateThisGene;
 
-  for (i = 0; i < p->pool_size; ++i) {
+  for (i = 0; i < p->pool_size; i++) {
     parentOne = SelectOneOrganism(p);
     parentTwo = SelectOneOrganism(p);
     crossoverPoint = rand() % genes;
 
-    for (j = 0; j < genes; ++j) {
+    for (j = 0; j < genes; j++) {
       mutateThisGene = rand() % (int)(1.0/mutation_rate);
       if (mutateThisGene == 0) {
         p->storage[3].data[i][j] = rand() % alleles;
@@ -329,7 +338,7 @@ int SelectOneOrganism(pool *p) {
   
   r = rand() % ((int)p->storage[2].data[0][0] + 1);
 
-  for (i = 0; i < p->pool_size; ++i) {
+  for (i = 0; i < p->pool_size; i++) {
     t += (int)p->task->storage[0].data[i][0];
     if (t >= r) {
       return i;
