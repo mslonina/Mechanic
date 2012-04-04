@@ -125,6 +125,7 @@ int PoolProcess(module *m, pool **all, pool *p) {
     for (i = 0; i < m->task_banks; i++) {
       if (p->task->storage[i].layout.use_hdf) {
         if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
+            p->task->storage[i].layout.storage_type == STORAGE_LIST ||
             p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
           dataset = H5Dopen(tasks, p->task->storage[i].layout.path, H5P_DEFAULT);
           H5Dread(dataset, p->task->storage[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, p->task->storage[i].data[0]);
@@ -165,7 +166,8 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p->task) {
     for (i = 0; i < m->task_banks; i++) {
-      if (p->task->storage[i].layout.storage_type == STORAGE_PM3D) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
+        p->task->storage[i].layout.storage_type == STORAGE_LIST) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
         dims[1] = p->task->storage[i].layout.dim[1];
       }

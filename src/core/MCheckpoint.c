@@ -93,12 +93,14 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   position = 5;
   for (j = 0; j < m->task_banks; j++) {
     if (p->task->storage[j].layout.storage_type == STORAGE_PM3D || 
+        p->task->storage[j].layout.storage_type == STORAGE_LIST || 
         p->task->storage[j].layout.storage_type == STORAGE_BOARD) {
       
       dims[0] = p->board->layout.dim[0];
       dims[1] = p->board->layout.dim[1];
 
       for (i = 0; i < c->size; i++) {
+        t->tid = c->data[i][1];
         t->status = c->data[i][2];
         t->location[0] = c->data[i][3];
         t->location[1] = c->data[i][4];
@@ -106,6 +108,10 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
           if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
             offsets[0] = t->location[0] + dims[0]*t->location[1];
+            offsets[1] = 0;
+          }
+          if (t->storage[j].layout.storage_type == STORAGE_LIST) {
+            offsets[0] = t->tid;
             offsets[1] = 0;
           }
           if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
@@ -150,8 +156,11 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   for (i = 0; i < c->size; i++) {
     if (c->data[i][2] == TASK_FINISHED) p->progress++;
   }
-  progress = 100.0 * p->progress / (float) p->pool_size;
-  Message(MESSAGE_CONT,"  %6.2f%% processed\n", progress);
+  /* There is a chance, that at the last checkpoint we write some data, that have been
+   * already written. Mark this specific case: */
+//  if (p->progress > p->pool_size) p->progress = p->pool_size; 
+//  progress = 100.0 * p->progress / (float) p->pool_size;
+//  Message(MESSAGE_CONT,"  %6.2f%% processed\n", progress);
 
   return mstat;
 }

@@ -57,6 +57,7 @@
 #define STORAGE_PM3D 12
 #define STORAGE_BOARD 13
 #define STORAGE_SINGLE 14
+#define STORAGE_LIST 15
 
 /* Task */
 #define TASK_EMPTY -88

@@ -34,7 +34,8 @@ int Storage(module *m, pool *p) {
   /* Commit memory for task banks (whole datasets) */
   for (i = 0; i < m->task_banks; i++) {
     if (p->task->storage[i].layout.use_hdf) {
-      if (p->task->storage[i].layout.storage_type == STORAGE_PM3D) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
+          p->task->storage[i].layout.storage_type == STORAGE_LIST) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
         dims[1] = p->task->storage[i].layout.dim[1];
         p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
@@ -161,6 +162,7 @@ int CommitStorageLayout(module *m, pool *p) {
   /* The task datasets */
   for (i = 0; i < m->task_banks; i++) {
     if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
+      p->task->storage[i].layout.storage_type == STORAGE_LIST ||
       p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
         CreateDataset(h5tasks, &p->task->storage[i], m, p);
     }
@@ -201,7 +203,8 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
       dims[0] = s->layout.dim[0];
       dims[1] = s->layout.dim[1];
     }
-    if (s->layout.storage_type == STORAGE_PM3D) {
+    if (s->layout.storage_type == STORAGE_PM3D ||
+        s->layout.storage_type == STORAGE_LIST) {
       dims[0] = s->layout.dim[0] * p->pool_size;
       dims[1] = s->layout.dim[1];
     }
