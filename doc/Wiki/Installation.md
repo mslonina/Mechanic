@@ -27,22 +27,22 @@ _Most of the requirements can be installed from the package repository of your L
 
 2. Download and install the Mechanic
 ```
-    tar -xvvf mechanic-0.12.0-UNSTABLE-3-6-2-src.tar.gz
-    cd mechanic-0.12.0-UNSTABLE-3-6-2-src
-    mkdir build && cd build
-    CC=mpicc FC=mpif90 cmake ..
-    make
-    sudo make install
+tar -xvvf mechanic-0.12.0-UNSTABLE-3-6-2-src.tar.gz
+cd mechanic-0.12.0-UNSTABLE-3-6-2-src
+mkdir build && cd build
+CC=mpicc FC=mpif90 cmake ..
+make
+sudo make install
 ```
 
 3. Download and install the ArnoldWeb sample module
 ```
-   tar -xvvf mechanic_module_arnold-1.0.0-Source.tar.gz
-   cd mechanic_module_arnold-1.0.0-Source
-   mkdir build && cd build
-   CC=mpicc cmake ..
-   make
-   sudo make install
+tar -xvvf mechanic_module_arnold-1.0.0-Source.tar.gz
+cd mechanic_module_arnold-1.0.0-Source
+mkdir build && cd build
+CC=mpicc cmake ..
+make
+sudo make install
 ```
 
 ### Local installation
