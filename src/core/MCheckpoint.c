@@ -74,7 +74,6 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   hid_t h5location, group, tasks, datapath;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
-  float progress = 0.0;
   task *t;
   int size, position;
 
@@ -151,16 +150,6 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   H5Gclose(tasks);
   H5Gclose(group);
   H5Fclose(h5location);
-
-  /* Mark progress */
-  for (i = 0; i < c->size; i++) {
-    if (c->data[i][2] == TASK_FINISHED) p->progress++;
-  }
-  /* There is a chance, that at the last checkpoint we write some data, that have been
-   * already written. Mark this specific case: */
-//  if (p->progress > p->pool_size) p->progress = p->pool_size; 
-//  progress = 100.0 * p->progress / (float) p->pool_size;
-//  Message(MESSAGE_CONT,"  %6.2f%% processed\n", progress);
 
   return mstat;
 }
