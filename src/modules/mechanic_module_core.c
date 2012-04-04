@@ -80,6 +80,7 @@ int Setup(setup *s) {
  * the core. You may change the layout per pool.
  *
  * POOL STORAGE
+ * ------------
  *
  * The Pool will store its global data in the /Pools/pool-ID. The task data will be stored
  * in /Pools/pool-ID/Tasks. 
@@ -90,20 +91,101 @@ int Setup(setup *s) {
  * The Pool data is broadcasted right after PoolPrepare() and saved to the master
  * datafile.
  *
+ * Note: All global pool datasets must use STORAGE_BASIC storage_type.
+ *
  * TASK STORAGE
+ * ------------
  * 
- * The task data is stored inside /Pools/pool-ID/Tasks group. There are three available
+ * The task data is stored inside /Pools/pool-ID/Tasks group. There are four available
  * methods to store the task result:
  *
  * - STORAGE_BASIC - the whole memory block is stored in a dataset inside /Tasks/task-ID
- *   group
+ *   group, i.e., for a dataset defined similar to:
+ *   
+ *   p->task->storage[0].layout.path = "basic-dataset";
+ *   p->task->storage[0].layout.dim[0] = 2;
+ *   p->task->storage[0].layout.dim[1] = 6;
+ *   p->task->storage[0].layout.storage_type = STORAGE_BASIC;
+ *   p->task->storage[0].layout.use_hdf = 1;
+ *
+ *   The output is stored in /Pools/pool-ID/Tasks/task-ID/basic-dataset:
+ *
+ *   9 9 9 9 9 9
+ *   9 9 9 9 9 9
+ *
  * - STORAGE_PM3D - the memory block is stored in a dataset with a column-offset, so that
- *   the output is suitable to process with Gnuplot
- * - STORAGE_LIST - the memory block is stored in a dataset with a task-ID offset
+ *   the output is suitable to process with Gnuplot. Example: Suppose we have a 2x5 task
+ *   pool:
+ *
+ *   1 2 3 4 5
+ *   6 7 8 9 0
+ *
+ *   While each worker returns the result of size 2x7. For a dataset defined similar to:
+ *
+ *   p->task->storage[0].layout.path = "pm3d-dataset";
+ *   p->task->storage[0].layout.dim[0] = 2;
+ *   p->task->storage[0].layout.dim[1] = 7;
+ *   p->task->storage[0].layout.storage_type = STORAGE_PM3D;
+ *   p->task->storage[0].layout.use_hdf = 1;
+ *
+ *   We have: /Pools/pool-ID/Tasks/pm3d-dataset with:
+ *
+ *   1 1 1 1 1 1 1
+ *   1 1 1 1 1 1 1
+ *   6 6 6 6 6 6 6
+ *   6 6 6 6 6 6 6
+ *   2 2 2 2 2 2 2
+ *   2 2 2 2 2 2 2
+ *   7 7 7 7 7 7 7
+ *   7 7 7 7 7 7 7
+ *   ...
+ *
+ * - STORAGE_LIST - the memory block is stored in a dataset with a task-ID offset, This is
+ *   similar to STORAGE_PM3D, this time however, there is no column-offset. For a dataset
+ *   defined as below:
+ *
+ *   p->task->storage[0].layout.path = "list-dataset";
+ *   p->task->storage[0].layout.dim[0] = 2;
+ *   p->task->storage[0].layout.dim[1] = 7;
+ *   p->task->storage[0].layout.storage_type = STORAGE_LIST;
+ *   p->task->storage[0].layout.use_hdf = 1;
+ *
+ *   The output is stored in /Pools/pool-ID/Tasks/list-dataset:
+ *
+ *   1 1 1 1 1 1 1
+ *   1 1 1 1 1 1 1
+ *   2 2 2 2 2 2 2
+ *   2 2 2 2 2 2 2
+ *   3 3 3 3 3 3 3
+ *   3 3 3 3 3 3 3
+ *   4 4 4 4 4 4 4
+ *   4 4 4 4 4 4 4
+ *   ...
+ *
  * - STORAGE_BOARD - the memory block is stored in a dataset with a {row,column}-offset
- *   according to the board-location of the task
+ *   according to the board-location of the task. Suppose we have a dataset defined like
+ *   this:
+ *
+ *   p->task->storage[0].layout.path = "board-dataset";
+ *   p->task->storage[0].layout.dim[0] = 2;
+ *   p->task->storage[0].layout.dim[1] = 3;
+ *   p->task->storage[0].layout.storage_type = STORAGE_BOARD;
+ *   p->task->storage[0].layout.use_hdf = 1;
+ *
+ *   For a 2x5 task pool:
+ *
+ *   1 2 3 4 5
+ *   6 7 8 9 0
+ *
+ *   the result is stored in /Pools/pool-ID/Tasks/board-dataset:
+ *
+ *   1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
+ *   1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
+ *   6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
+ *   6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
  *
  * CHECKPOINT
+ * ----------
  *
  * The checkpoint is defined as a multiply of the MPI_COMM_WORLD-1, minimum = 1. It
  * contains the results from tasks that have been processed and received. When the
@@ -207,9 +289,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
 /**
  * @function
  * Prepares the checkpoint
- *
- * @in_group
- * The master node
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
   return TASK_SUCCESS;
