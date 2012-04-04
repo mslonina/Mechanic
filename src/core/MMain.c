@@ -65,8 +65,12 @@ int main(int argc, char** argv) {
   CheckStatus(mstat);
 
   /* Modes */
-  mstat = Taskfarm(&module);
-  CheckStatus(mstat);
+  if (mpi_size > 1) {
+    mstat = Taskfarm(&module);
+    CheckStatus(mstat);
+  } else {
+    Message(MESSAGE_WARN, "Master-alone mode not supported yet. Aborting...\n");
+  }
   
 finalize:
   MPI_Barrier(MPI_COMM_WORLD);
