@@ -106,11 +106,11 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         if (t->status != TASK_EMPTY) {
 
           if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
-            offsets[0] = t->location[0] + dims[0]*t->location[1];
+            offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dim[0];
             offsets[1] = 0;
           }
           if (t->storage[j].layout.storage_type == STORAGE_LIST) {
-            offsets[0] = t->tid;
+            offsets[0] = t->tid * t->storage[j].layout.dim[0];
             offsets[1] = 0;
           }
           if (t->storage[j].layout.storage_type == STORAGE_BOARD) {

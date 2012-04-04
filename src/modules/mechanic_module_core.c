@@ -46,6 +46,7 @@ int Setup(setup *s) {
   s->options[1] = (LRC_configDefaults) {
     .space="core", 
     .name="xres", 
+    .shortName='x', 
     .value="5", 
     .type=LRC_INT,
     .description="The task pool board dim[1] resolution"
@@ -53,6 +54,7 @@ int Setup(setup *s) {
   s->options[2] = (LRC_configDefaults) {
     .space="core", 
     .name="yres", 
+    .shortName='y', 
     .value="5", 
     .type=LRC_INT,
     .description="The task pool board dim[0] resolution"
@@ -60,6 +62,7 @@ int Setup(setup *s) {
   s->options[3] = (LRC_configDefaults) {
     .space="core",
     .name="checkpoint",
+    .shortName='d', 
     .value="2",
     .type=LRC_INT,
     .description="The checkpoint size (value is multiplied by mpi_size - 1)"
@@ -96,6 +99,7 @@ int Setup(setup *s) {
  *   group
  * - STORAGE_PM3D - the memory block is stored in a dataset with a column-offset, so that
  *   the output is suitable to process with Gnuplot
+ * - STORAGE_LIST - the memory block is stored in a dataset with a task-ID offset
  * - STORAGE_BOARD - the memory block is stored in a dataset with a {row,column}-offset
  *   according to the board-location of the task
  *
