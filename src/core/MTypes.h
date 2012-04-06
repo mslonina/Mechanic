@@ -38,7 +38,6 @@ typedef struct {
   int task_banks;
   layer layer;
   layer fallback;
-  popt *popt;
 } module;
 
 /**

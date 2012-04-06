@@ -37,24 +37,16 @@ int main(int argc, char** argv) {
   core = Bootstrap(node, mpi_size, argc, argv, CORE_MODULE, &fallback);
   if (!core.layer.handler) Error(CORE_ERR_CORE); // OOPS! At least Core module should be loaded
 
-  /* Fallback to core if module not specified */
-  if (!core.popt->string_args[0]) {
-    module_name = CORE_MODULE;  
-  } else {
-    module_name = core.popt->string_args[0];
-  }
+  module_name = LRC_getOptionValue("core", "module", core.layer.setup.head);
 
-  /* Bootstrap the module */
+  /* Bootstrap the module 
+   * Fallback to core if module not specified */
   module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
   if (node == MASTER) 
     Message(MESSAGE_INFO, "Module '%s' bootstrapped.\n", module_name);
 
-  /* Setup */
-  if (!module.popt->string_args[1]) {
-    filename = DEFAULT_CONFIG_FILE;
-  } else {
-    filename = module.popt->string_args[1];
-  }
+  /* Configuration file */
+  filename = LRC_getOptionValue("core", "config", module.layer.setup.head);
 
   if (node == MASTER)
     Message(MESSAGE_INFO, "Config file to use: '%s'\n", filename);
@@ -84,5 +76,5 @@ finalize:
   if (node == MASTER)
     Message(MESSAGE_INFO, "Mechanic did the job. Have a nice day!\n");
 
-  return EXIT_SUCCESS;
+  exit(EXIT_SUCCESS);
 }

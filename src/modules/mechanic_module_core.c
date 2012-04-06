@@ -67,7 +67,47 @@ int Setup(setup *s) {
     .type=LRC_INT,
     .description="The checkpoint size (value is multiplied by mpi_size - 1)"
   };
-  s->options[4] = (LRC_configDefaults) {LRC_OPTIONS_END};
+  s->options[4] = (LRC_configDefaults) {
+    .space="core",
+    .name="module",
+    .shortName='p',
+    .value="core",
+    .type=LRC_STRING,
+    .description="The user-supplied module name"
+  };
+  s->options[5] = (LRC_configDefaults) {
+    .space="core",
+    .name="config",
+    .shortName='c',
+    .value="mechanic-config.cfg",
+    .type=LRC_STRING,
+    .description="The configuration file"
+  };
+  s->options[6] = (LRC_configDefaults) {
+    .space="core",
+    .name="print-defaults",
+    .shortName='\0',
+    .value="0",
+    .type=LRC_VAL,
+    .description="Print default settings"
+  };
+  s->options[7] = (LRC_configDefaults) {
+    .space="core",
+    .name="help",
+    .shortName='?',
+    .value="0",
+    .type=LRC_VAL,
+    .description="Show this help message"
+  };
+  s->options[8] = (LRC_configDefaults) {
+    .space="core",
+    .name="usage",
+    .shortName='\0',
+    .value="0",
+    .type=LRC_VAL,
+    .description="Display brief message"
+  };
+  s->options[9] = (LRC_configDefaults) {LRC_OPTIONS_END};
   
   return TASK_SUCCESS;
 }

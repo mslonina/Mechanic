@@ -4,15 +4,29 @@
  *
  * The algorithm is based on the geneticAlgorithm1.c by John LeFlohic (February 24, 1999)
  * http://www-cs-students.stanford.edu/~jl/Essays/ga.html
+ *
+ * Note:
+ * The result of the GA depends on the number of organisms. For a goo test try:
+ * 
+ *    mpirun -np 4 mechanic2 -p ga -x 10 -y 10
+ *
+ * which will use 100 organisms and should result with:
+ *    
+ *    Generation 42 with fitness 1681
+ *
+ * The maximum number of generations is arbitrary, and i.e. for default 5x5 task board
+ * this limit will be reached (in fact, the original code ends with over 10000
+ * generations). 
+ *
+ * The maxium number of generations clearly depends on the available memory (number of
+ * task pools that can be allocated on each node).
+ *
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 
 #include "MMechanic2.h"
-
-#define TRUE 1
-#define FALSE 0
 
 #define MAX_GENERATIONS 1000
 
@@ -207,7 +221,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * reached, we generate the next population (children of the current population). 
  */
 int PoolProcess(pool **all, pool *p, setup *s) {
-  int perfectGeneration = FALSE;
+  int perfectGeneration = 0;
   int maxgen, max_fitness, genes, alleles;
   double mutation_rate;
 
@@ -220,8 +234,13 @@ int PoolProcess(pool **all, pool *p, setup *s) {
   /* Has the model organism been reached? */
   perfectGeneration = EvaluateOrganisms(p, max_fitness);
   
-  if (perfectGeneration == TRUE || p->pid > maxgen || p->pid > MAX_GENERATIONS) {
+  if (perfectGeneration) {
     printf("Generation %d with fitness %d\n", p->pid+1, (int)p->storage[2].data[0][0]);
+    return POOL_FINALIZE;
+  }
+
+  if (p->pid+1 >= maxgen || p->pid+1 >= MAX_GENERATIONS) {
+    printf("Max generations (%d) reached.\n", p->pid+1);
     return POOL_FINALIZE;
   }
 
@@ -289,11 +308,11 @@ int EvaluateOrganisms(pool *p, int max_fitness) {
 
   for (i = 0; i < p->pool_size; i++) {
     if ((int)p->task->storage[0].data[i][0] == max_fitness) {
-      return TRUE;
+      return 1;
     }
   }
 
-  return FALSE;
+  return 0;
 }
 
 /**

@@ -39,24 +39,7 @@ module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, modu
     ModuleInit(&m);
 
     /* Load module Setup */
-    ModuleSetup(&m);
-
-    /* Popt defaults, global options */
-    m.popt->popt[0] = (struct poptOption) 
-      {"module", 'p', POPT_ARG_STRING, &m.popt->string_args[0], 0, "Module name", NULL};
-    m.popt->popt[1] = (struct poptOption) 
-      {"config", 'c', POPT_ARG_STRING, &m.popt->string_args[1], 0, "Config filename", NULL};
-    m.popt->popt[2] = (struct poptOption)
-      {"print-defaults", '\0', POPT_ARG_VAL, &m.popt->int_args[2], 1, "Print default settings", NULL}; 
-    m.popt->popt[3] = (struct poptOption)
-      {"help", '?', POPT_ARG_VAL, &m.popt->int_args[3], 1, "Show this help message", NULL}; 
-    m.popt->popt[4] = (struct poptOption)
-      {"usage", '\0', POPT_ARG_VAL, &m.popt->int_args[4], 1, "Display brief message", NULL}; 
-    m.popt->popt[5] = (struct poptOption) POPT_TABLEEND;
-
-    /* Get the global Popt context */
-    m.popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, m.popt->popt, 0);
-    poptGetNextOpt(m.popt->poptcontext);
+    ModuleSetup(&m, argc, argv);
 
   } 
 
@@ -130,22 +113,8 @@ int ModuleInit(module *m) {
   m->layer.setup.popt->double_args = calloc(3*opts*sizeof(double), sizeof(double));
   if (!m->layer.setup.popt->double_args) Error(CORE_ERR_MEM);
 
-  m->popt = calloc(sizeof(popt), sizeof(popt));
-  if (!m->popt) Error(CORE_ERR_MEM);
-  
-  m->popt->popt = calloc(opts*sizeof(struct poptOption), sizeof(struct poptOption));
-  if (!m->popt->popt) Error(CORE_ERR_MEM);
-  
-  m->popt->string_args = calloc(opts*sizeof(char), sizeof(char));
-  if (!m->popt->string_args) Error(CORE_ERR_MEM);
-  
-  m->popt->int_args = calloc(opts*sizeof(int), sizeof(int));
-  if (!m->popt->int_args) Error(CORE_ERR_MEM);
-
-  m->popt->double_args = calloc(opts*sizeof(double), sizeof(double));
-  if (!m->popt->double_args) Error(CORE_ERR_MEM);
-
   m->layer.setup.head = NULL;
+  m->layer.setup.popt->poptcontext = NULL;
 
   return mstat;
 }
@@ -159,7 +128,7 @@ int ModuleInit(module *m) {
  * layer (and only one config file can be used, with i.e. core setup included, but not
  * necessary).
  */
-int ModuleSetup(module *m) {
+int ModuleSetup(module *m, int argc, char **argv) {
   query *q;
   int mstat;
 
@@ -176,12 +145,19 @@ int ModuleSetup(module *m) {
       mstat = LRC_mergeDefaults(m->layer.setup.options, m->fallback.setup.options);
     } 
   }
-  
-  m->layer.setup.head = NULL;
-  m->layer.setup.popt->poptcontext = NULL;
+
+  m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
+
+  /* Popt options */
+  mstat = PoptOptions(m, &m->layer.setup);
+  m->layer.setup.popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, m->layer.setup.popt->popt, 0);
+  poptGetNextOpt(m->layer.setup.popt->poptcontext);
+
+  LRCUpdate(&m->layer.setup);
 
   return mstat;
 }
+
 
 /**
  * @function
@@ -205,11 +181,5 @@ void FinalizeLayer(layer *l) {
  */
 void ModuleFinalize(module* m) {
   FinalizeLayer(&m->layer);
-  if (m->popt->popt) free(m->popt->popt);
-  if (m->popt->string_args) free(m->popt->string_args);
-  if (m->popt->int_args) free(m->popt->int_args);
-  if (m->popt->double_args) free(m->popt->double_args);
-  if (m->popt->poptcontext) poptFreeContext(m->popt->poptcontext);
-  if (m->popt) free(m->popt);
 }
 

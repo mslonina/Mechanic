@@ -30,12 +30,6 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   MPI_Status mpi_status;
   char *fname;
   hid_t h5location;
-  
-  /* LRC Defaults */
-  m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
-
-  /* Popt options */
-  mstat = PoptOptions(m, &m->layer.setup);
 
   /* Read the specified configuration file */
   if (m->node == MASTER) {
@@ -54,6 +48,8 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   /* Read popt options and overwrite the config file */
   mstat = Popt(m, argc, argv, &m->layer.setup);
   if (mstat != 0) return mstat;
+  
+  LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
 
   /* Broadcast new configuration */
   mstat = LRC_datatype(m->layer.setup.options[0], &mpi_t);
@@ -76,7 +72,8 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   LRC_cleanup(m->layer.setup.head);
 
   m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
-  if (m->node == MASTER && m->popt->int_args[2]) LRC_printAll(m->layer.setup.head);
+  if (m->node == MASTER && LRC_option2int("core", "print-defaults", m->layer.setup.head)) 
+    LRC_printAll(m->layer.setup.head);
 
   /**
    * Write the configuration to the master file
@@ -130,8 +127,7 @@ int ReadConfig(char *filename, LRC_configNamespace *head) {
  * Popt command line parser
  */
 int Popt(module *m, int argc, char** argv, setup *s) {
-  int rc, mstat = 0, i = 0;
-  size_t len;
+  int rc, mstat = 0;
 
   /* Get the command line args */
   s->popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, s->popt->popt, 0);
@@ -144,39 +140,22 @@ int Popt(module *m, int argc, char** argv, setup *s) {
     }
     return CORE_SETUP_HELP;
   }
-
-  if (m->popt->int_args[3] == 1) {
+  
+  /* Update the LRC options struct with values from command line */
+  LRCUpdate(s);
+  
+  if (LRC_option2int("core", "help", s->head)) {
     if (m->node == MASTER) {
       poptPrintHelp(s->popt->poptcontext, stdout, 0);
     }
     return CORE_SETUP_HELP;
   }
   
-  if (m->popt->int_args[4] == 1) {
+  if (LRC_option2int("core", "usage", s->head)) {
     if (m->node == MASTER) {
       poptPrintUsage(s->popt->poptcontext, stdout, 0);
     }
     return CORE_SETUP_HELP;
-  }
-
-  /* Update the LRC options struct with values from command line */
-  while (s->options[i].name[0] != LRC_NULL) {
-    if (s->options[i].type == LRC_STRING) {
-      if (s->popt->string_args[i] != NULL) {
-        if (LRC_trim(&s->popt->string_args[i][0]) != LRC_NULL) {
-          len = strlen(LRC_trim(s->popt->string_args[i]));
-          strncpy(s->options[i].value, LRC_trim(s->popt->string_args[i]), len);
-          s->options[i].value[len] = LRC_NULL;
-        }
-      }
-    }
-    if (s->options[i].type == LRC_INT) {
-      sprintf(s->options[i].value,"%d",s->popt->int_args[i]);
-    }
-    if (s->options[i].type == LRC_DOUBLE) {
-      sprintf(s->options[i].value,"%f",s->popt->double_args[i]);
-    }
-    i++;
   }
 
   return mstat;
@@ -187,7 +166,7 @@ int Popt(module *m, int argc, char** argv, setup *s) {
  * Initialize the popt tables according to the Setup()
  */
 int PoptOptions(module *m, setup *s) {
-  int mstat = 0, i = 0, k = 0;
+  int mstat = 0, i = 0;
   char* garbage;
  
   /* Module options */
@@ -205,6 +184,13 @@ int PoptOptions(module *m, setup *s) {
           &s->popt->int_args[i], 0, s->options[i].description, s->options[i].value
       };
     }
+   if (s->options[i].type == LRC_VAL) {
+      s->popt->int_args[i] = (int)strtol(s->options[i].value, &garbage, 0);
+      s->popt->popt[i] = (struct poptOption) {
+        s->options[i].name, s->options[i].shortName, POPT_ARG_VAL,
+          &s->popt->int_args[i], 1, s->options[i].description, NULL
+      };
+    }
     if (s->options[i].type == LRC_DOUBLE) {
       s->popt->double_args[i] = strtod(s->options[i].value, &garbage);
       s->popt->popt[i] = (struct poptOption) {
@@ -215,47 +201,41 @@ int PoptOptions(module *m, setup *s) {
     i++;
   }
 
-  /* Merge the global options */
-  k = 0;
-  while (m->popt->popt[k].longName != NULL) {
-    if (m->popt->popt[k].argInfo == POPT_ARG_STRING) {
-      s->popt->popt[i] = (struct poptOption) {
-        m->popt->popt[k].longName,
-        m->popt->popt[k].shortName,
-        m->popt->popt[k].argInfo,
-        &m->popt->string_args[k],
-        m->popt->popt[k].val,
-        m->popt->popt[k].descrip,
-        m->popt->popt[k].argDescrip
-      };
-    }
-    if (m->popt->popt[k].argInfo == POPT_ARG_INT ||
-        m->popt->popt[k].argInfo == POPT_ARG_VAL) {
-      s->popt->popt[i] = (struct poptOption) {
-        m->popt->popt[k].longName,
-        m->popt->popt[k].shortName,
-        m->popt->popt[k].argInfo,
-        &m->popt->int_args[k],
-        m->popt->popt[k].val,
-        m->popt->popt[k].descrip,
-        m->popt->popt[k].argDescrip
-      };
-    }
-    if (m->popt->popt[k].argInfo == POPT_ARG_DOUBLE) {
-      s->popt->popt[i] = (struct poptOption) {
-        m->popt->popt[k].longName,
-        m->popt->popt[k].shortName,
-        m->popt->popt[k].argInfo,
-        &m->popt->double_args[k],
-        m->popt->popt[k].val,
-        m->popt->popt[k].descrip,
-        m->popt->popt[k].argDescrip
-      };
-    }
-    i++; k++;
-  }
   s->popt->popt[i+1] = (struct poptOption) POPT_TABLEEND;
 
   return mstat;
 }
 
+/**
+ * @function
+ * Updatesthe LRC options tablewith popt values
+ */
+int LRCUpdate(setup *s) {
+  int i = 0, mstat = 0;
+  size_t len;
+ 
+  while (s->options[i].name[0] != LRC_NULL) {
+    if (s->options[i].type == LRC_STRING) {
+      if (s->popt->string_args[i] != NULL) {
+        if (LRC_trim(&s->popt->string_args[i][0]) != LRC_NULL) {
+          len = strlen(LRC_trim(s->popt->string_args[i]));
+          strncpy(s->options[i].value, LRC_trim(s->popt->string_args[i]), len);
+          s->options[i].value[len] = LRC_NULL;
+        }
+      }
+    }
+    if (s->options[i].type == LRC_INT) {
+      sprintf(s->options[i].value,"%d",s->popt->int_args[i]);
+    }
+    if (s->options[i].type == LRC_VAL) {
+      sprintf(s->options[i].value,"%d",s->popt->int_args[i]);
+    }
+    if (s->options[i].type == LRC_DOUBLE) {
+      sprintf(s->options[i].value,"%f",s->popt->double_args[i]);
+    }
+    LRC_modifyOption(s->options[i].space, s->options[i].name, 
+        s->options[i].value, s->options[i].type, s->head);
+    i++;
+  }
+  return mstat;
+}
