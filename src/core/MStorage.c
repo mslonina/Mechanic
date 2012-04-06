@@ -136,14 +136,14 @@ int CommitStorageLayout(module *m, pool *p) {
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
 
   /* The Pools */
-  if (!H5Lexists(h5location, "/Pools", H5P_DEFAULT)) {
-    h5pools = H5Gcreate(h5location, "/Pools", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  if (!H5Lexists(h5location, POOLS_GROUP, H5P_DEFAULT)) {
+    h5pools = H5Gcreate(h5location, POOLS_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   } else {
-    h5pools = H5Gopen(h5location, "/Pools", H5P_DEFAULT);
+    h5pools = H5Gopen(h5location, POOLS_GROUP, H5P_DEFAULT);
   }
     
   /* The Pool-ID group */
-  sprintf(path, "/Pools/pool-%04d", p->pid);
+  sprintf(path, POOL_PATH, p->pid);
   h5group = H5Gcreate(h5pools, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
   /* The Pool-ID task board */
@@ -157,7 +157,7 @@ int CommitStorageLayout(module *m, pool *p) {
   }
 
   /* The Tasks group */
-  h5tasks = H5Gcreate(h5group, "Tasks", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  h5tasks = H5Gcreate(h5group, TASKS_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
   /* The task datasets */
   for (i = 0; i < m->task_banks; i++) {
@@ -168,7 +168,7 @@ int CommitStorageLayout(module *m, pool *p) {
     }
     if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) {
       for (j = 0; j < p->pool_size; j++) {
-        sprintf(path, "task-%04d", j);
+        sprintf(path, TASK_PATH, j);
         if (!H5Lexists(h5group, path, H5P_DEFAULT)) {
           h5task = H5Gcreate(h5tasks, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
         } else {

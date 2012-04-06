@@ -82,7 +82,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     
     /* Write pool data */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
-    sprintf(path, "/Pools/pool-%04d", p->pid);
+    sprintf(path, POOL_PATH, p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
     mstat = CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
     H5Gclose(group);
@@ -116,7 +116,7 @@ int PoolProcess(module *m, pool **all, pool *p) {
 
   if (m->node == MASTER) {
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
-    sprintf(path, "/Pools/pool-%04d", p->pid);
+    sprintf(path, POOL_PATH, p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
 
     /* Read task datasets */

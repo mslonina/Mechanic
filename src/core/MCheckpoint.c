@@ -79,14 +79,14 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
   /* Commit data for the task board */
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
-  sprintf(path, "/Pools/pool-%04d", p->pid);
+  sprintf(path, POOL_PATH, p->pid);
   group = H5Gopen(h5location, path, H5P_DEFAULT);
   CommitData(group, 1, p->board, STORAGE_BASIC, dims, offsets);
 
   /* Update pool data */
   CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
 
-  tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
+  tasks = H5Gopen(group, TASKS_GROUP, H5P_DEFAULT);
 
   t = TaskLoad(m, p, 0);
   position = 5;
@@ -131,7 +131,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[0] = c->data[i][3];
         t->location[1] = c->data[i][4];
         if (t->status != TASK_EMPTY) {
-          sprintf(path, "task-%04d", t->tid);
+          sprintf(path, TASK_PATH, t->tid);
           datapath = H5Gopen(tasks, path, H5P_DEFAULT);
           Vec2Array(&c->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
 

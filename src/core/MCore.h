@@ -10,7 +10,6 @@
 #include "MCommon.h"
 
 #define CORE_MODULE "core"
-#define TEST_MODULE "web"
 
 void Welcome();
 

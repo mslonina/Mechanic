@@ -38,7 +38,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
       LRC_HDF5Parser(h5location, CONFIG_GROUP, m->layer.setup.head);
       H5Fclose(h5location);
     } else {
-      mstat = ReadConfig(filename, m->layer.setup.head);
+      mstat = ReadConfig(m, filename, m->layer.setup.head);
     }
   }
 
@@ -98,7 +98,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
  * @function
  * Reads the configuration file
  */
-int ReadConfig(char *filename, LRC_configNamespace *head) {
+int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
   int mstat = 0;
   FILE *inif;
 
@@ -111,7 +111,7 @@ int ReadConfig(char *filename, LRC_configNamespace *head) {
   if (inif) {
     mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
   } else if (inif == NULL) {
-    if (strcmp(filename, DEFAULT_CONFIG_FILE) != 0) {
+    if (strcmp(filename, LRC_getOptionValue("core", "config", m->fallback.setup.head)) != 0) {
       Message(MESSAGE_ERR, "The specified config file could not be opened\n");
       Error(CORE_ERR_SETUP);
     }
