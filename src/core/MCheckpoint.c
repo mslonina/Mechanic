@@ -70,7 +70,7 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
-  int i, j;
+  int i, j, k, l;
   hid_t h5location, group, tasks, datapath;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
@@ -103,7 +103,11 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->status = c->data[i][2];
         t->location[0] = c->data[i][3];
         t->location[1] = c->data[i][4];
+
         if (t->status != TASK_EMPTY) {
+
+          offsets[0] = 0;
+          offsets[1] = 0;
 
           if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
             offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dim[0];
@@ -119,6 +123,14 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           }
           Vec2Array(&c->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
 
+          /* Commit data to the pool */
+          for (k = offsets[0]; k < offsets[0] + t->storage[j].layout.dim[0]; k++) {
+            for (l = offsets[1]; l < offsets[1] + t->storage[j].layout.dim[1]; l++) {
+              p->task->storage[j].data[k][l] = t->storage[j].data[k-offsets[0]][l-offsets[1]];
+            }
+          }
+
+          /* Commit data to master datafile */
           CommitData(tasks, 1, &t->storage[j], 
             t->storage[j].layout.storage_type, dims, offsets);
         }
