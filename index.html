@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Mechanic : The MPI task management system for the dynamical astronomy" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Mechanic</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/mslonina/Mechanic">Fork Me on GitHub</a>
+
+          <h1 id="project_title">Mechanic</h1>
+          <h2 id="project_tagline">The MPI task management system for the dynamical astronomy</h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/mslonina/Mechanic/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/mslonina/Mechanic/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>Overview</h3>
+
+<p>The aim of the Mechanic is to help in conducting massive numerical simulations. It provides tools to help you focus on numerical problem: the storage, checkpoints (backups, restarts), setup, command-line, splitting the workload, CPU-communication etc. is handled by the core code. The rest is in user-supplied module.</p>
+
+<h3>Key features</h3>
+
+<ul>
+<li>Core-module architecture -- the numerical code separated from the communication and storage layers</li>
+<li>C-based user-supplied modules, which allows to connect several C-interoperable programming languages (such as C++, OpenCl, CUDA, partly Fortran2003+)</li>
+<li>Task farm communication pattern (on top of the MPI2 standard), working well on large CPU-clusters, PC-workstations or laptops </li>
+<li>Unified data management (on top of the HDF5 library) with storage scheme implemented through the rich user API</li>
+<li>The module setup implemented through the API (among with the command-line options)</li>
+<li>No MPI or HDF5 knowledge required</li>
+<li>Pool-based task farm, task pools created on-the-fly, based on data from previous pools (example: Genetic Algorithms)</li>
+<li>Several storage types, which allows to store result data for different purposes (example: Dynamical Maps)</li>
+<li>Custom storage scheme per pool</li>
+</ul><h3>Sample module</h3>
+
+<pre><code>#include "MMechanic2.h"
+
+int Storage(pool *p) {
+  p-&gt;task-&gt;storage[0].layout = (schema) {
+    .path = "conditions";
+    .dataspace_type = H5S_SIMPLE;
+    .datatype = H5T_NATIVE_DOUBLE;
+    .rank = 2;
+    .dim[0] = 5;
+    .dim[1] = 6;
+    .use_hdf = 1;
+  return 0;
+}
+
+int TaskProcess(pool *p, task *t, setup *s) {
+ t-&gt;storage[0].data[0][4] = 123.45;
+ return 0;
+}
+</code></pre>
+
+<h3>Authors</h3>
+
+<ul>
+<li>Mariusz Słonina, <em>Toruń Centre for Astronomy, NCU</em> (Maintainer)</li>
+<li>Krzysztof Goździewski, <em>Toruń Centre for Astronomy, NCU</em>
+</li>
+<li>Cezary Migaszewski, <em>Toruń Centre for Astronomy, NCU</em>
+</li>
+</ul><h3>Acknowledgements</h3>
+
+<p>This project is supported by the Polish Ministry of Science and Higher Education through the grant N/N203/402739. This work is conducted within the POWIEW project of the European Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Mechanic maintained by <a href="https://github.com/mslonina">mslonina</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
