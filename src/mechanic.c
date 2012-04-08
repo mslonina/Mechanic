@@ -244,8 +244,7 @@ int main(int argc, char** argv) {
     {.space="default", .name="mconfig", .value=MECHANIC_CONFIG_FILE_DEFAULT, .type=LRC_STRING},
     {.space="default", .name="mode", .value=MECHANIC_MODE_DEFAULT, .type=LRC_INT},
     {.space="logs", .name="checkpoint", .value=MECHANIC_CHECKPOINT_DEFAULT, .type=LRC_INT},
-//    {.space=LRC_NULL, .name=LRC_NULL, .shortName=LRC_NULL, .value=LRC_NULL, .type=LRC_INT,.description=LRC_NULL}
-    {LRC_OPTIONS_END}
+    LRC_OPTIONS_END
   };
 
   /* POPT tables */

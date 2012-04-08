@@ -34,7 +34,7 @@ option (BUILD_DOCS "Build documentation" off)
 if (BUILD_FORTRAN)
   enable_language (Fortran)
   set (CMAKE_Fortran_FLAGS 
-    "-I. -std=f2003 -fbounds-check -fbacktrace -ffpe-trap=zero,overflow -fdefault-real-8")
+    "${CMAKE_Fortran_FLAGS} -I. -std=f2003 -fbounds-check -fbacktrace -ffpe-trap=zero,overflow -fdefault-real-8")
 endif (BUILD_FORTRAN)
 
 include (CheckIncludeFiles)
@@ -72,7 +72,7 @@ CONFIGURE_FILE (
 )
 
 add_definitions (-DHAVE_CONFIG_H)
-set (CMAKE_C_FLAGS "-Warray-bounds -Wall -std=c99")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Warray-bounds -Wall -std=c99")
 
 add_subdirectory(src)
 add_subdirectory(src/core)
