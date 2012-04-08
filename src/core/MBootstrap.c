@@ -20,7 +20,7 @@
  */
 module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, module *f) {
   module m;
-  
+
   m = ModuleLoad(name);
 
   m.node = node;
@@ -41,7 +41,7 @@ module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, modu
     /* Load module Setup */
     ModuleSetup(&m, argc, argv);
 
-  } 
+  }
 
   return m;
 }
@@ -65,7 +65,7 @@ module ModuleLoad(char *name) {
   }
 
   m.fallback.handler = NULL;
-  
+
   free(fname);
   return m;
 
@@ -91,22 +91,22 @@ int ModuleInit(module *m) {
   q = LoadSym(m, "Init", NO_FALLBACK);
   if (q) mstat = q(&m->layer.init);
   CheckStatus(mstat);
-   
+
   opts = m->layer.init.options;
   if (m->fallback.handler) opts = opts + m->fallback.init.options;
-  
+
   m->layer.setup.options = calloc(opts*sizeof(LRC_configDefaults), sizeof(LRC_configDefaults));
   if (!m->layer.setup.options) Error(CORE_ERR_MEM);
-  
+
   m->layer.setup.popt = calloc(sizeof(popt), sizeof(popt));
   if (!m->layer.setup.popt) Error(CORE_ERR_MEM);
 
   m->layer.setup.popt->popt = calloc(3*opts*sizeof(struct poptOption), sizeof(struct poptOption));
   if (!m->layer.setup.popt->popt) Error(CORE_ERR_MEM);
-  
+
   m->layer.setup.popt->string_args = calloc(3*opts*sizeof(char), sizeof(char));
   if (!m->layer.setup.popt->string_args) Error(CORE_ERR_MEM);
-  
+
   m->layer.setup.popt->int_args = calloc(3*opts*sizeof(int), sizeof(int));
   if (!m->layer.setup.popt->int_args) Error(CORE_ERR_MEM);
 
@@ -143,7 +143,7 @@ int ModuleSetup(module *m, int argc, char **argv) {
      */
     if (m->fallback.handler) {
       mstat = LRC_mergeDefaults(m->layer.setup.options, m->fallback.setup.options);
-    } 
+    }
   }
 
   m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);

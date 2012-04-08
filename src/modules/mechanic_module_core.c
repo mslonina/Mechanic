@@ -19,7 +19,7 @@ int Init(init *i) {
   i->pools = 64;
   i->banks_per_pool = 8;
   i->banks_per_task = 8;
-  
+
   return TASK_SUCCESS;
 }
 
@@ -36,33 +36,33 @@ int Init(init *i) {
  */
 int Setup(setup *s) {
   s->options[0] = (LRC_configDefaults) {
-    .space="core", 
-    .name="name", 
-    .shortName='n', 
-    .value="mechanic", 
+    .space="core",
+    .name="name",
+    .shortName='n',
+    .value="mechanic",
     .type=LRC_STRING,
     .description="The name of the run"
   };
   s->options[1] = (LRC_configDefaults) {
-    .space="core", 
-    .name="xres", 
-    .shortName='x', 
-    .value="5", 
+    .space="core",
+    .name="xres",
+    .shortName='x',
+    .value="5",
     .type=LRC_INT,
     .description="The task pool board dim[1] resolution"
   };
   s->options[2] = (LRC_configDefaults) {
-    .space="core", 
-    .name="yres", 
-    .shortName='y', 
-    .value="5", 
+    .space="core",
+    .name="yres",
+    .shortName='y',
+    .value="5",
     .type=LRC_INT,
     .description="The task pool board dim[0] resolution"
   };
   s->options[3] = (LRC_configDefaults) {
     .space="core",
     .name="checkpoint",
-    .shortName='d', 
+    .shortName='d',
     .value="2",
     .type=LRC_INT,
     .description="The checkpoint size (value is multiplied by mpi_size - 1)"
@@ -107,8 +107,8 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Display brief message"
   };
-  s->options[9] = (LRC_configDefaults) {LRC_OPTIONS_END};
-  
+  s->options[9] = (LRC_configDefaults) LRC_OPTIONS_END;
+
   return TASK_SUCCESS;
 }
 

@@ -11,7 +11,6 @@
 #include "MStorage.h"
 
 task* TaskLoad(module *m, pool *p, int tid);
-int TaskInit(module *m, pool *p, task *t);
 int TaskPrepare(module *m, pool *p, task *t);
 int TaskProcess(module *m, pool *p, task *t);
 void TaskReset(module *m, pool *p, task *t, int tid);

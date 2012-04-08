@@ -65,71 +65,99 @@
 #define TASK_IN_USE -1
 #define NO_MORE_TASKS -99
 
+/**
+ * @struct
+ * Bootstrap initializations
+ */
 typedef struct {
-  int options;
-  int pools;
-  int banks_per_pool;
-  int banks_per_task;
+  int options; /**< The maxium size of the LRC options table */
+  int pools; /**< The maximum size of the pools array */
+  int banks_per_pool; /**< The maximum number of memory/storage banks per pool */
+  int banks_per_task; /**< The maximum number of memory/storage banks per task */
 } init;
 
+/**
+ * @struct
+ * Popt
+ */
 typedef struct {
-  struct poptOption *popt;
-  poptContext poptcontext;
-  char **string_args;
-  int *int_args;
-  double *double_args;
+  struct poptOption *popt; /**< The Popt options */
+  poptContext poptcontext; /**< The Popt context */
+  char **string_args; /**< String arguments received from Popt */
+  int *int_args; /**< Integer arguments received from Popt */
+  double *double_args; /**< Double arguments received from Popt */
 } popt;
 
+/**
+ * @struct
+ * The setup structure, combines LRC and Popt
+ */
 typedef struct {
-  LRC_configDefaults *options;
-  LRC_configNamespace *head;
-  popt *popt;
+  LRC_configDefaults *options; /**< The LRC default options table */
+  LRC_configNamespace *head; /**< The LRC options linked list */
+  popt *popt; /**< The popt options, @see popt */
 } setup;
 
+/**
+ * @struct
+ * Defines the memory/storage schema
+ */
 typedef struct {
-  char *path;
-  int rank;
-  int dim[MAX_RANK];
-  int use_hdf;
-  int sync;
-  int storage_type;
-  H5S_class_t dataspace_type;
-  hid_t datatype;
+  char *path; /**< The name of the dataset */
+  int rank; /**< The rank of the dataset */
+  int dim[MAX_RANK]; /**< The dimensions of the dataset */
+  int use_hdf; /**< Enables HDF5 storage for the memory block */
+  int sync; /**< @unused*/
+  int storage_type; /**< The storage type: STORAGE_BASIC, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
+  H5S_class_t dataspace_type; /**< The type of the HDF5 dataspace (H5S_SIMPLE) */
+  hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
 } schema;
 
+/**
+ * @struct
+ * The storage structure
+ */
 typedef struct {
-  schema layout;
-  double **data;
+  schema layout; /**< The memory/storage schema, @see schema */
+  double **data; /**< The data pointer */
 } storage;
 
+/**
+ * @struct
+ * The task
+ */
 typedef struct {
-  int pid; /* The parent pool id */
-  int tid; /* The task id */
-  int status;
-  char* path;
-  int location[MAX_RANK]; /* Coordinates of the task */
-  storage *storage;
+  int pid; /**< The parent pool id */
+  int tid; /**< The task id */
+  int status; /**< The task status */
+  int location[MAX_RANK]; /**< Coordinates of the task */
+  storage *storage; /**< The storage schema and data */
 } task;
 
+/**
+ * @struct
+ * The checkpoint
+ */
 typedef struct {
-  int cid; /* The checkpoint id */
-  int counter;
-  int size;
-  storage *storage;
-  double **data;
+  int cid; /**< The checkpoint id */
+  int counter; /**< The checkpoint internal counter */
+  int size; /**< The actual checkpoint size */
+  storage *storage; /**< The checkpoint data */
 } checkpoint;
 
+/**
+ * @struct
+ * The pool
+ */
 typedef struct {
-  int pid; /* The pool id */
-  char *path; /* */
-  char name[LRC_CONFIG_LEN]; /* The pool name */
-  storage *board;
-  storage *storage;
-  task *task;
-  int checkpoint_size;
-  int pool_size;
-  int node;
-  int mpi_size;
+  int pid; /**< The pool id */
+  storage *board; /**< The task board */
+  storage *storage; /**< The global pool storage scheme */
+  task *task; /**< The task scheme */
+  int checkpoint_size; /**< The checkpoint size multiplier */
+  int pool_size; /**< The pool size (number of tasks to do) */
+  int node; /**< The node ID */
+  int mpi_size; /**< The MPI COMM size */
 } pool;
 
 #define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_BASIC}

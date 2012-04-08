@@ -63,16 +63,6 @@ task* TaskLoad(module *m, pool *p, int tid) {
 
 /**
  * @function
- * Initialize the task
- */
-int TaskInit(module *m, pool *p, task *t) {
-  int mstat = 0;
-
-  return mstat;
-}
-
-/**
- * @function
  * Prepare the task
  */
 int TaskPrepare(module *m, pool *p, task *t) {

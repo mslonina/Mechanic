@@ -12,39 +12,33 @@
 checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   checkpoint *c = NULL;
   int i = 0;
-  int buffer_rank, buffer_dims[MAX_RANK];
 
   /* Allocate checkpoint pointer */
   c = calloc(sizeof(checkpoint), sizeof(checkpoint));
   if (!c) Error(CORE_ERR_MEM);
 
+  c->storage = calloc(sizeof(storage), sizeof(storage));
+  if (!c->storage) Error(CORE_ERR_MEM);
+
+  c->storage->layout = (schema) STORAGE_END;
+  c->storage->data = NULL;
+
   c->cid = cid;
   c->counter = 0;
   c->size = p->checkpoint_size * (m->mpi_size-1);
- 
-  /* Allocate data buffer */
-  buffer_rank = 2;
-  
-  buffer_dims[0] = c->size;
-  buffer_dims[1] = m->mpi_size + 3 + MAX_RANK; // offset: tag, tid, status, location
+
+  /* The storage buffer */
+  c->storage->layout.rank = 2;
+  c->storage->layout.dim[0] = c->size;
+  c->storage->layout.dim[1] = m->mpi_size + 3 + MAX_RANK; // offset: tag, tid, status, location
+
   for (i = 0; i < m->task_banks; i++) {
-    buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
+    c->storage->layout.dim[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
 
-  c->data = AllocateBuffer(buffer_rank, buffer_dims);
-  if (!c->data) Error(CORE_ERR_MEM);
+  c->storage->data = AllocateBuffer(c->storage->layout.rank, c->storage->layout.dim);
 
   return c;
-}
-
-/**
- * @function
- * Initialize the checkpoint
- */
-int CheckpointInit(module *m, pool *p, checkpoint *c) {
-  int mstat = 0;
-
-  return mstat;
 }
 
 /**
@@ -55,7 +49,7 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
   query *q;
   setup *s = &(m->layer.setup);
-  
+
   if (m->node == MASTER) {
     q = LoadSym(m, "CheckpointPrepare", LOAD_DEFAULT);
     if (q) mstat = q(p, c, s);
@@ -91,18 +85,18 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   t = TaskLoad(m, p, 0);
   position = 5;
   for (j = 0; j < m->task_banks; j++) {
-    if (p->task->storage[j].layout.storage_type == STORAGE_PM3D || 
-        p->task->storage[j].layout.storage_type == STORAGE_LIST || 
+    if (p->task->storage[j].layout.storage_type == STORAGE_PM3D ||
+        p->task->storage[j].layout.storage_type == STORAGE_LIST ||
         p->task->storage[j].layout.storage_type == STORAGE_BOARD) {
-      
+
       dims[0] = p->board->layout.dim[0];
       dims[1] = p->board->layout.dim[1];
 
       for (i = 0; i < c->size; i++) {
-        t->tid = c->data[i][1];
-        t->status = c->data[i][2];
-        t->location[0] = c->data[i][3];
-        t->location[1] = c->data[i][4];
+        t->tid = c->storage->data[i][1];
+        t->status = c->storage->data[i][2];
+        t->location[0] = c->storage->data[i][3];
+        t->location[1] = c->storage->data[i][4];
 
         if (t->status != TASK_EMPTY) {
 
@@ -121,35 +115,35 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             offsets[0] = t->location[0] * t->storage[j].layout.dim[0];
             offsets[1] = t->location[1] * t->storage[j].layout.dim[1];
           }
-          Vec2Array(&c->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
+          Vec2Array(&c->storage->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
 
           /* Commit data to the pool */
-          for (k = offsets[0]; k < offsets[0] + t->storage[j].layout.dim[0]; k++) {
-            for (l = offsets[1]; l < offsets[1] + t->storage[j].layout.dim[1]; l++) {
-              p->task->storage[j].data[k][l] = t->storage[j].data[k-offsets[0]][l-offsets[1]];
+          for (k = (int)offsets[0]; k < (int)offsets[0] + t->storage[j].layout.dim[0]; k++) {
+            for (l = (int)offsets[1]; l < (int)offsets[1] + t->storage[j].layout.dim[1]; l++) {
+              p->task->storage[j].data[k][l] = t->storage[j].data[k-(int)offsets[0]][l-(int)offsets[1]];
             }
           }
 
           /* Commit data to master datafile */
-          CommitData(tasks, 1, &t->storage[j], 
+          CommitData(tasks, 1, &t->storage[j],
             t->storage[j].layout.storage_type, dims, offsets);
         }
       }
     }
     if (p->task->storage[j].layout.storage_type == STORAGE_BASIC) {
       for (i = 0; i < c->size; i++) {
-        t->tid = c->data[i][1];
-        t->status = c->data[i][2];
-        t->location[0] = c->data[i][3];
-        t->location[1] = c->data[i][4];
+        t->tid = c->storage->data[i][1];
+        t->status = c->storage->data[i][2];
+        t->location[0] = c->storage->data[i][3];
+        t->location[1] = c->storage->data[i][4];
         if (t->status != TASK_EMPTY) {
           sprintf(path, TASK_PATH, t->tid);
           datapath = H5Gopen(tasks, path, H5P_DEFAULT);
-          Vec2Array(&c->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
+          Vec2Array(&c->storage->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
 
-          CommitData(datapath, 1, &t->storage[j], 
+          CommitData(datapath, 1, &t->storage[j],
             t->storage[j].layout.storage_type, dims, offsets);
-      
+
           H5Gclose(datapath);
         }
       }
@@ -177,7 +171,7 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
   c->counter = 0;
 
   for (i = 0; i < c->size; i++) {
-    c->data[i][2] = TASK_EMPTY;
+    c->storage->data[i][2] = TASK_EMPTY;
   }
 }
 
@@ -186,16 +180,7 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
  * Finalize the checkpoint
  */
 void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
-  int i = 0;
-  int buffer_dims[MAX_RANK];
-  
-  buffer_dims[0] = m->mpi_size - 1;
-  buffer_dims[1] = m->mpi_size + 3 + MAX_RANK; // offset: tag, tid, location
-  for (i = 0; i < m->task_banks; i++) {
-    buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
-  }
-  if (c->data) FreeBuffer(c->data, buffer_dims);
-
+  if (c->storage->data) FreeBuffer(c->storage->data, c->storage->layout.dim);
   if (c) free(c);
 }
 

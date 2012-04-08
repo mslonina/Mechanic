@@ -19,14 +19,15 @@ int Storage(module *m, pool *p) {
     CheckStatus(mstat);
   }
 
-  /* The pool size */
-  p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
-
   /* Load the module setup */
   q = LoadSym(m, "Storage", NO_FALLBACK);
   if (q) mstat = q(p, &m->layer.setup);
   CheckStatus(mstat);
 
+  /* The pool size */
+  p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
+
+  /* Memory/Storage banks */
   m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
   m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
 
@@ -51,6 +52,13 @@ int Storage(module *m, pool *p) {
   /* Commit the storage layout (only the Master node) */
   if (m->node == MASTER) {
     CheckLayout(m->pool_banks, p->storage);
+    CheckLayout(m->pool_banks, p->task->storage);
+
+    /* Right now, there is no support for different storage types of pool datasets */
+    for (i = 0; i < m->pool_banks; i++) {
+      p->storage[i].layout.storage_type = STORAGE_BASIC;
+    }
+
     CommitStorageLayout(m, p);
   }
 
@@ -75,7 +83,7 @@ int CheckLayout(int banks, storage *s) {
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
       /* Common fixes before future development */
-      s[i].layout.rank = 2;
+      s[i].layout.rank = MAX_RANK;
       s[i].layout.dataspace_type = H5S_SIMPLE;
       s[i].layout.datatype = H5T_NATIVE_DOUBLE;
 
@@ -141,7 +149,7 @@ int CommitStorageLayout(module *m, pool *p) {
   } else {
     h5pools = H5Gopen(h5location, POOLS_GROUP, H5P_DEFAULT);
   }
-    
+
   /* The Pool-ID group */
   sprintf(path, POOL_PATH, p->pid);
   h5group = H5Gcreate(h5pools, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -215,6 +223,7 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
       dims[1] = s->layout.dim[1] * p->board->layout.dim[1];
     }
     h5status = H5Sset_extent_simple(h5dataspace, s->layout.rank, dims, NULL);
+    if (h5status < 0) return CORE_ERR_HDF;
   }
 
   h5dataset = H5Dcreate(h5location, s->layout.path, s->layout.datatype, h5dataspace,
@@ -258,10 +267,10 @@ int CommitData(hid_t h5location, int banks, storage *s, int flag, hsize_t *board
 
       dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
       dataspace = H5Dget_space(dataset);
-        
+
       /* Whole dataset at once */
       if (s[i].layout.storage_type == STORAGE_BASIC) {
-        hdf_status = H5Dwrite(dataset, s[i].layout.datatype, 
+        hdf_status = H5Dwrite(dataset, s[i].layout.datatype,
             H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
         if (hdf_status < 0) mstat = CORE_ERR_HDF;
       } else {
@@ -269,7 +278,7 @@ int CommitData(hid_t h5location, int banks, storage *s, int flag, hsize_t *board
         ldims[1] = s[i].layout.dim[1];
         memspace = H5Screate_simple(s[i].layout.rank, ldims, NULL);
         H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, ldims, NULL);
-        hdf_status = H5Dwrite(dataset, s[i].layout.datatype, 
+        hdf_status = H5Dwrite(dataset, s[i].layout.datatype,
             memspace, dataspace, H5P_DEFAULT, &(s[i].data[0][0]));
         if (hdf_status < 0) mstat = CORE_ERR_HDF;
 
@@ -295,13 +304,13 @@ int CommitData(hid_t h5location, int banks, storage *s, int flag, hsize_t *board
   int mstat = 0, i = 0;
   hid_t h5location, group, tasks, dataset;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
-  
+
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
   sprintf(path, POOL_PATH, p->pid);
   group = H5Gopen(h5location, path, H5P_DEFAULT);
 
     tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
-    
+
     for (i = 0; i < m->task_banks; i++) {
       if (p->task->storage[i].layout.use_hdf) {
         if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||

@@ -47,22 +47,17 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
  */
 void Message(int type, char *message, ...) {
 
-  int silent = 0;
-  int debug = 0;
   static char message2[2048];
   va_list args;
 
   va_start(args, message);
     vsprintf(message2, message, args);
-    if (silent == 0) {
-      if (type == MESSAGE_INFO) printf("-> %s", message2);
-      if (type == MESSAGE_CONT) printf("   %s", message2);
-      if (type == MESSAGE_CONT2) printf("   \t\t %s", message2);
-		  if (type == MESSAGE_DEBUG && debug == 1) printf("   %s", message2);
-    }
-      if (type == MESSAGE_ERR) perror(message2);
-      if (type == MESSAGE_IERR) printf("!! %s", message2);
-		  if (type == MESSAGE_WARN) printf(".. %s", message2);
+    if (type == MESSAGE_INFO) printf("-> %s", message2);
+    if (type == MESSAGE_CONT) printf("   %s", message2);
+    if (type == MESSAGE_CONT2) printf("   \t\t %s", message2);
+    if (type == MESSAGE_ERR) perror(message2);
+    if (type == MESSAGE_IERR) printf("!! %s", message2);
+		if (type == MESSAGE_WARN) printf(".. %s", message2);
   va_end(args);
 
 }
@@ -149,7 +144,7 @@ int GetSize(int rank, int *dims){
  */
 void Array2Vec(double *vec, double **array, int rank, int *dims) {
   int i = 0, j = 0, k = 0;
- 
+
   for (i = 0; i < dims[0]; i++) {
     k = i * dims[1];
     for (j = 0; j < dims[1]; j++) {

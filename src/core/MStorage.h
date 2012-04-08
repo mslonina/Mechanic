@@ -22,7 +22,6 @@ int CommitData(hid_t h5location, int banks, storage *s, int flags, hsize_t *boar
 
 int GetBanks(int allocated_banks, storage *s);
 
-//storage* StorageLoad(int banks);
 void StorageFinalize(int banks, storage *s);
 
 #endif

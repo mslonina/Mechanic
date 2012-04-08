@@ -43,22 +43,11 @@ pool* PoolLoad(module *m, int pid) {
     p->task->storage[i].data = NULL;
   }
 
-  /* Setup some sane defaults */
   p->pid = pid;
   p->node = m->node;
   p->mpi_size = m->mpi_size;
 
   return p;
-}
-
-/**
- * @function
- * Initializes the task pool
- */
-int PoolInit(module *m, pool *p) {
-  int mstat = 0;
-
-  return mstat;
 }
 
 /**
@@ -79,7 +68,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(all, p, s);
-    
+
     /* Write pool data */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
     sprintf(path, POOL_PATH, p->pid);

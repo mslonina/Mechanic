@@ -1,9 +1,9 @@
 /**
  * C programmers never die. They are just cast into void.
- * 
+ *
  * Dennis Ritchie (1941-2011)
  */
- 
+
 /**
  * @file
  * The Main function
@@ -11,7 +11,7 @@
 #include "MMain.h"
 
 int main(int argc, char** argv) {
-  
+
   int mpi_rank, mpi_size, node;
   module core, module, fallback;
 
@@ -39,10 +39,10 @@ int main(int argc, char** argv) {
 
   module_name = LRC_getOptionValue("core", "module", core.layer.setup.head);
 
-  /* Bootstrap the module 
+  /* Bootstrap the module
    * Fallback to core if module not specified */
   module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
-  if (node == MASTER) 
+  if (node == MASTER)
     Message(MESSAGE_INFO, "Module '%s' bootstrapped.\n", module_name);
 
   /* Configuration file */
@@ -63,13 +63,13 @@ int main(int argc, char** argv) {
   } else {
     Message(MESSAGE_WARN, "Master-alone mode not supported yet. Aborting...\n");
   }
-  
+
 finalize:
   MPI_Barrier(MPI_COMM_WORLD);
 
   ModuleFinalize(&module);
   ModuleFinalize(&core);
-  
+
   H5close();
   MPI_Finalize();
 

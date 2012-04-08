@@ -123,7 +123,7 @@ double smegno2(double *xv0, double step, double tend, double eps, double *err) {
   double acc[6], dy[6], var[6], xv[6], t, en, en0, h, delta, delta0;
   long int ks;
   int i, checkout;
-  double v0;
+  //double v0;
    
   c1    = 0.5-sqrt(3.0)/10.0;
   c2    = sqrt(3.0)/3.0;
@@ -143,7 +143,7 @@ double smegno2(double *xv0, double step, double tend, double eps, double *err) {
   /* Normalize the tangent vector */
   delta0= norm(6, dy, 1); 
   en0   = energy(xv, eps);
-  v0    = variat(xv, dy, eps);
+  //v0    = variat(xv, dy, eps);
   
   /* SABA2 integrator + variations */
   
@@ -215,7 +215,7 @@ double smegno3(double *xv0, double step, double tend, double eps,  double *err) 
   double acc[6], dy[6], var[6], xv[6], t, en, en0, h, delta, delta0;
   long int ks;
   int i, checkout;
-  double v0;
+  //double v0;
    
   // SABA3 coefficients
   c1    = 0.5 - sqrt(15.0)/10.0;
@@ -225,6 +225,7 @@ double smegno3(double *xv0, double step, double tend, double eps,  double *err) 
                   
   t     = 0.0;
   maxe  = 0.0;
+  checkout = 1000;
   Y0    = mY0   = Y1    = mY1   = 0.0;
 
   /* Initialize state vector */
@@ -237,7 +238,7 @@ double smegno3(double *xv0, double step, double tend, double eps,  double *err) 
   delta0= norm(6, dy, 1); 
 
   en0   = energy(xv, eps);
-  v0    = variat(xv, dy, eps);
+  //v0    = variat(xv, dy, eps);
   
   /* SABA3 integrator + variations */ 
   ks    = 0;

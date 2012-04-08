@@ -48,7 +48,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   /* Read popt options and overwrite the config file */
   mstat = Popt(m, argc, argv, &m->layer.setup);
   if (mstat != 0) return mstat;
-  
+
   LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
 
   /* Broadcast new configuration */
@@ -66,14 +66,15 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   MPI_Type_free(&mpi_t);
 
   /**
-   * Cleanup previous default configuration 
+   * Cleanup previous default configuration
    * Reassigning defaults should be faster than modifying options one-by-one
    */
   LRC_cleanup(m->layer.setup.head);
 
   m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
-  if (m->node == MASTER && LRC_option2int("core", "print-defaults", m->layer.setup.head)) 
+  if (m->node == MASTER && LRC_option2int("core", "print-defaults", m->layer.setup.head)) {
     LRC_printAll(m->layer.setup.head);
+  }
 
   /**
    * Write the configuration to the master file
@@ -84,7 +85,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
 
     strncpy(m->filename, fname, strlen(fname));
     m->filename[strlen(fname)] = LRC_NULL;
-    
+
     h5location = H5Fcreate(m->filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     LRC_HDF5Writer(h5location, CONFIG_GROUP, m->layer.setup.head);
     H5Fclose(h5location);
@@ -140,17 +141,17 @@ int Popt(module *m, int argc, char** argv, setup *s) {
     }
     return CORE_SETUP_HELP;
   }
-  
+
   /* Update the LRC options struct with values from command line */
   LRCUpdate(s);
-  
+
   if (LRC_option2int("core", "help", s->head)) {
     if (m->node == MASTER) {
       poptPrintHelp(s->popt->poptcontext, stdout, 0);
     }
     return CORE_SETUP_HELP;
   }
-  
+
   if (LRC_option2int("core", "usage", s->head)) {
     if (m->node == MASTER) {
       poptPrintUsage(s->popt->poptcontext, stdout, 0);
@@ -168,7 +169,7 @@ int Popt(module *m, int argc, char** argv, setup *s) {
 int PoptOptions(module *m, setup *s) {
   int mstat = 0, i = 0;
   char* garbage;
- 
+
   /* Module options */
   while (s->options[i].name[0] != LRC_NULL) {
     if (s->options[i].type == LRC_STRING) {
@@ -213,7 +214,7 @@ int PoptOptions(module *m, setup *s) {
 int LRCUpdate(setup *s) {
   int i = 0, mstat = 0;
   size_t len;
- 
+
   while (s->options[i].name[0] != LRC_NULL) {
     if (s->options[i].type == LRC_STRING) {
       if (s->popt->string_args[i] != NULL) {
@@ -233,7 +234,7 @@ int LRCUpdate(setup *s) {
     if (s->options[i].type == LRC_DOUBLE) {
       sprintf(s->options[i].value,"%f",s->popt->double_args[i]);
     }
-    LRC_modifyOption(s->options[i].space, s->options[i].name, 
+    LRC_modifyOption(s->options[i].space, s->options[i].name,
         s->options[i].value, s->options[i].type, s->head);
     i++;
   }

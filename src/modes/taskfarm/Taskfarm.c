@@ -22,7 +22,7 @@ int Taskfarm(module *m) {
   for (pid = 0; pid < m->layer.init.pools; pid++) {
     p[pid] = PoolLoad(m, pid);
   }
-  
+
   /**
    * The Pool loop
    */
@@ -45,17 +45,17 @@ int Taskfarm(module *m) {
       mstat = Worker(m, p[pid]);
     }
 
-    pool_create = PoolProcess(m, p, p[pid]); 
-   
+    pool_create = PoolProcess(m, p, p[pid]);
+
     pid++;
 
     /* Security check */
     if (pid == m->layer.init.pools) pool_create = POOL_FINALIZE;
-  
+
   } while (pool_create != POOL_FINALIZE);
 
   /* Finalize the pool bank */
-  for (pid = 0; pid < m->layer.init.pools; pid++) {  
+  for (pid = 0; pid < m->layer.init.pools; pid++) {
     PoolFinalize(m, p[pid]);
   }
   free(p);

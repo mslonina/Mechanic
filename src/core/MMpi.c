@@ -53,12 +53,11 @@ int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) 
   int size = 0;
 
   buffer[0] = (double) tag; /* Message tag */
+  position++;
 
   if (tag != TAG_TERMINATE) {
-    buffer[1] = (double) t->tid; /* Task ID */
-    buffer[2] = (double) t->status; /* Task status */
-
-    position = 3;
+    buffer[1] = (double) t->tid; position++; /* Task ID */
+    buffer[2] = (double) t->status; position++; /* Task status */
 
     /* Task location in the pool */
     for (i = 0; i < p->board->layout.rank; i++) {
@@ -93,12 +92,11 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
   int size = 0;
 
   *tag = (int)buffer[0]; /* Message tag */
+  position++;
 
   if (*tag != TAG_TERMINATE) {
-    t->tid = (int)buffer[1]; /* Task ID*/
-    t->status = (int)buffer[2]; /* Task status */
-
-    position = 3;
+    t->tid = (int)buffer[1]; position++; /* Task ID*/
+    t->status = (int)buffer[2]; position++; /* Task status */
 
     /* Task location in the pool */
     for (i = 0; i < p->board->layout.rank; i++) {

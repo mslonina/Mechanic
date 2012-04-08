@@ -17,7 +17,7 @@ typedef struct {
   void *handler;
   init init;
   setup setup;
-} layer; 
+} layer;
 
 /**
  * @class

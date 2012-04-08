@@ -213,7 +213,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The maximum perturbation parameter"
   };
-  s->options[10] = (LRC_configDefaults) {LRC_OPTIONS_END};
+  s->options[10] = (LRC_configDefaults) LRC_OPTIONS_END;
 
   return TASK_SUCCESS;
 }

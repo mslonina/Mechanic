@@ -70,7 +70,7 @@ int Setup(setup *s) {
   s->options[4] = (LRC_configDefaults) {
     .space="ga", .name="max-fitness", .shortName='\0', 
     .value="20", .type=LRC_INT, .description="Maximum fitness"};
-  s->options[5] = (LRC_configDefaults) {LRC_OPTIONS_END};
+  s->options[5] = (LRC_configDefaults) LRC_OPTIONS_END;
 
   return TASK_SUCCESS; 
 }
