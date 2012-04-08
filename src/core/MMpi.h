@@ -20,7 +20,7 @@
 
 int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t);
 
-int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag);
-int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *tag);
+int Pack(module *m, double *buffer, pool *p, task *t, int tag);
+int Unpack(module *m, double *buffer, pool *p, task *t, int *tag);
 
 #endif

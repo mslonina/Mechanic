@@ -33,10 +33,12 @@ void Abort(int status);
 void CheckStatus(int status);
 
 double** AllocateBuffer(int rank, int *dims);
-void FreeBuffer(double **array, int *dims);
+void FreeBuffer(double **array);
 int GetSize(int rank, int *dims);
 
 void Array2Vec(double *vec, double **array, int rank, int *dims);
 void Vec2Array(double *vec, double **array, int rank, int *dims);
+
+int Copy(char *in, char *out);
 
 #endif

@@ -47,6 +47,8 @@ int Storage(module *m, pool *p) {
       dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
       p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
     }
+    p->task->storage[i].layout.offset[0] = 0;
+    p->task->storage[i].layout.offset[1] = 0;
   }
 
   /* Commit the storage layout (only the Master node) */
@@ -86,6 +88,8 @@ int CheckLayout(int banks, storage *s) {
       s[i].layout.rank = MAX_RANK;
       s[i].layout.dataspace_type = H5S_SIMPLE;
       s[i].layout.datatype = H5T_NATIVE_DOUBLE;
+      s[i].layout.offset[0] = 0; // Offsets calculated automatically
+      s[i].layout.offset[1] = 0;
 
       /* Check for mistakes */
       if (s[i].layout.path == NULL) {
@@ -127,7 +131,7 @@ void FreeMemoryLayout(int banks, storage *s) {
 
   for (i = 0; i < banks; i++) {
     if (s[i].data) {
-      FreeBuffer(s[i].data, s[i].layout.dim);
+      FreeBuffer(s[i].data);
     }
   }
 }
@@ -256,11 +260,11 @@ int GetBanks(int allocated_banks, storage *s) {
  * @function
  * Commits data to the master file
  */
-int CommitData(hid_t h5location, int banks, storage *s, int flag, hsize_t *board_dims, hsize_t *offsets) {
+int CommitData(hid_t h5location, int banks, storage *s) {
   int mstat = 0, i = 0;
   hid_t dataspace, dataset, memspace;
   herr_t hdf_status;
-  hsize_t ldims[MAX_RANK];
+  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
@@ -274,10 +278,12 @@ int CommitData(hid_t h5location, int banks, storage *s, int flag, hsize_t *board
             H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
         if (hdf_status < 0) mstat = CORE_ERR_HDF;
       } else {
-        ldims[0] = s[i].layout.dim[0];
-        ldims[1] = s[i].layout.dim[1];
-        memspace = H5Screate_simple(s[i].layout.rank, ldims, NULL);
-        H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, ldims, NULL);
+        dims[0] = s[i].layout.dim[0];
+        dims[1] = s[i].layout.dim[1];
+        offsets[0] = s[i].layout.offset[0];
+        offsets[1] = s[i].layout.offset[1];
+        memspace = H5Screate_simple(s[i].layout.rank, dims, NULL);
+        H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, dims, NULL);
         hdf_status = H5Dwrite(dataset, s[i].layout.datatype,
             memspace, dataspace, H5P_DEFAULT, &(s[i].data[0][0]));
         if (hdf_status < 0) mstat = CORE_ERR_HDF;

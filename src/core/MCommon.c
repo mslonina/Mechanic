@@ -116,7 +116,7 @@ double** AllocateBuffer(int rank, int *dims) {
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  */
-void FreeBuffer(double **array, int *dims) {
+void FreeBuffer(double **array) {
 
   if (array[0]) free(array[0]);
   if (array) free(array);
@@ -167,4 +167,65 @@ void Vec2Array(double *vec, double **array, int rank, int *dims) {
     }
   }
 }
+
+/**
+ * @function
+ * Copies files
+ */
+int Copy(char* in, char* out) {
+  int input;
+  int output;
+  int mstat = 0;
+  char *c;
+  struct stat st;
+
+  /* Read and write files in binary mode */
+  input = open(in, O_RDONLY);
+  if (input < 0) {
+    Message(MESSAGE_ERR, "Could not open input file %s\n", in);
+    return CORE_ERR_HDF;
+  }
+
+  stat(in, &st);
+  Message(MESSAGE_DEBUG,
+      "Input file size: %d\n", (int) st.st_size);
+
+  output = open(out, O_RDWR | O_CREAT | O_TRUNC, 0644);
+  if (output < 0) {
+    Message(MESSAGE_ERR, "Could not open output file %s\n", out);
+    return CORE_ERR_HDF;
+  }
+
+  /* CHAR_BIT in limits.h */
+  c = malloc(st.st_size * CHAR_BIT + 1);
+  if (c == NULL) return CORE_ERR_MEM;
+
+  /* Read and write the whole file, without loops */
+  mstat = read(input, c, st.st_size);
+  if (mstat < 0) {
+    Message(MESSAGE_ERR, "Could not read input file %s\n", in);
+    return CORE_ERR_HDF;
+  }
+
+  mstat = write(output, c, st.st_size);
+  if (mstat < 0) {
+    Message(MESSAGE_ERR, "Could not write output file %s\n", out);
+    return CORE_ERR_HDF;
+  }
+
+  free(c);
+
+  if (close(input) < 0) {
+    Message(MESSAGE_ERR, "Error closing input file\n");
+    return CORE_ERR_HDF;
+  }
+
+  if (close(output) < 0) {
+    Message(MESSAGE_ERR, "Error closing output file\n");
+    return CORE_ERR_HDF;
+  }
+
+  return mstat;
+}
+
 

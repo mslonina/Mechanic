@@ -33,7 +33,8 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   c->storage->layout.dim[1] = 3 + MAX_RANK; // offset: tag, tid, status, location
 
   for (i = 0; i < m->task_banks; i++) {
-    c->storage->layout.dim[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
+    c->storage->layout.dim[1] +=
+      GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
 
   c->storage->data = AllocateBuffer(c->storage->layout.rank, c->storage->layout.dim);
@@ -80,10 +81,10 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
   sprintf(path, POOL_PATH, p->pid);
   group = H5Gopen(h5location, path, H5P_DEFAULT);
-  CommitData(group, 1, p->board, STORAGE_BASIC, dims, offsets);
+  CommitData(group, 1, p->board);
 
   /* Update pool data */
-  CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
+  CommitData(group, m->pool_banks, p->storage);
 
   tasks = H5Gopen(group, TASKS_GROUP, H5P_DEFAULT);
 
@@ -109,7 +110,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           offsets[1] = 0;
 
           if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
-            offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dim[0];
+            offsets[0] = (t->location[0] + dims[0]*t->location[1])
+              * t->storage[j].layout.dim[0];
             offsets[1] = 0;
           }
           if (t->storage[j].layout.storage_type == STORAGE_LIST) {
@@ -120,34 +122,42 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             offsets[0] = t->location[0] * t->storage[j].layout.dim[0];
             offsets[1] = t->location[1] * t->storage[j].layout.dim[1];
           }
-          Vec2Array(&c->storage->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
+
+          t->storage[j].layout.offset[0] = offsets[0];
+          t->storage[j].layout.offset[1] = offsets[1];
+
+          Vec2Array(&c->storage->data[i][position], t->storage[j].data,
+              t->storage[j].layout.rank, t->storage[j].layout.dim);
 
           /* Commit data to the pool */
           for (k = (int)offsets[0]; k < (int)offsets[0] + t->storage[j].layout.dim[0]; k++) {
             for (l = (int)offsets[1]; l < (int)offsets[1] + t->storage[j].layout.dim[1]; l++) {
-              p->task->storage[j].data[k][l] = t->storage[j].data[k-(int)offsets[0]][l-(int)offsets[1]];
+              p->task->storage[j].data[k][l] =
+                t->storage[j].data[k-(int)offsets[0]][l-(int)offsets[1]];
             }
           }
 
           /* Commit data to master datafile */
-          CommitData(tasks, 1, &t->storage[j],
-            t->storage[j].layout.storage_type, dims, offsets);
+          CommitData(tasks, 1, &t->storage[j]);
         }
       }
     }
+
     if (p->task->storage[j].layout.storage_type == STORAGE_BASIC) {
       for (i = 0; i < c->size; i++) {
         t->tid = c->storage->data[i][1];
         t->status = c->storage->data[i][2];
         t->location[0] = c->storage->data[i][3];
         t->location[1] = c->storage->data[i][4];
+        t->storage[j].layout.offset[0] = 0;
+        t->storage[j].layout.offset[1] = 0;
         if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
           sprintf(path, TASK_PATH, t->tid);
           datapath = H5Gopen(tasks, path, H5P_DEFAULT);
-          Vec2Array(&c->storage->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
+          Vec2Array(&c->storage->data[i][position], t->storage[j].data,
+              t->storage[j].layout.rank, t->storage[j].layout.dim);
 
-          CommitData(datapath, 1, &t->storage[j],
-            t->storage[j].layout.storage_type, dims, offsets);
+          CommitData(datapath, 1, &t->storage[j]);
 
           H5Gclose(datapath);
         }
@@ -186,7 +196,49 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
  * Finalize the checkpoint
  */
 void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
-  if (c->storage->data) FreeBuffer(c->storage->data, c->storage->layout.dim);
+  if (c->storage->data) FreeBuffer(c->storage->data);
   if (c) free(c);
 }
 
+/**
+ * @function
+ * Creates incremental backup
+ */
+int Backup(module *m, setup *s) {
+  int i = 0, b = 0, mstat = 0;
+  char *current_name, *backup_name, iter[4];
+  struct stat current;
+  struct stat backup;
+
+  current_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", "00", ".h5");
+  backup_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", "01", ".h5");
+
+  b = LRC_option2int("core", "backups", s->head);
+
+  for (i = b; i >= 0; i--) {
+    snprintf(iter, 1, "%02d", i+1);
+    backup_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", iter, ".h5");
+
+    snprintf(iter, 1,"%02d", i);
+    current_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", iter, ".h5");
+
+    if (stat(backup_name, &backup) == 0) {
+      if (stat(current_name, &current) < 0) {
+        mstat = Copy(current_name, backup_name);
+        CheckStatus(mstat);
+      } else {
+        if (i == 0) {
+          mstat = Copy(current_name, backup_name);
+          CheckStatus(mstat);
+        } else {
+          mstat = rename(current_name, backup_name);
+          if (mstat < 0) Error(CORE_ERR_CHECKPOINT);
+        }
+      }
+    }
+    free(current_name);
+    free(backup_name);
+  }
+
+  return mstat;
+}

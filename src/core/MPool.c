@@ -59,7 +59,6 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   query *q;
   setup *s = &(m->layer.setup);
   hid_t h5location, group;
-  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
 
   /* Number of tasks to do */
@@ -73,7 +72,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
     sprintf(path, POOL_PATH, p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
-    mstat = CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
+    mstat = CommitData(group, m->pool_banks, p->storage);
     H5Gclose(group);
     H5Fclose(h5location);
   }
@@ -100,7 +99,6 @@ int PoolProcess(module *m, pool **all, pool *p) {
   setup *s = &(m->layer.setup);
   query *q;
   hid_t h5location, group;
-  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
 
   if (m->node == MASTER) {
@@ -112,7 +110,7 @@ int PoolProcess(module *m, pool **all, pool *p) {
     sprintf(path, POOL_PATH, p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
 
-    CommitData(group, m->pool_banks, p->storage, STORAGE_BASIC, dims, offsets);
+    CommitData(group, m->pool_banks, p->storage);
 
     H5Gclose(group);
     H5Fclose(h5location);
@@ -129,27 +127,18 @@ int PoolProcess(module *m, pool **all, pool *p) {
  * Finalize the pool
  */
 void PoolFinalize(module *m, pool *p) {
-  int i = 0, dims[MAX_RANK];
+  int i = 0;
   if (p->storage) {
     if (p->storage->data) {
-      FreeBuffer(p->storage->data, p->storage->layout.dim);
+      FreeBuffer(p->storage->data);
     }
     free(p->storage);
   }
 
   if (p->task) {
     for (i = 0; i < m->task_banks; i++) {
-      if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
-        p->task->storage[i].layout.storage_type == STORAGE_LIST) {
-        dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
-        dims[1] = p->task->storage[i].layout.dim[1];
-      }
-      if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
-        dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
-        dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
-      }
       if (p->task->storage[i].data) {
-        FreeBuffer(p->task->storage[i].data, dims);
+        FreeBuffer(p->task->storage[i].data);
       }
     }
     if (p->task->storage) free(p->task->storage);
@@ -158,7 +147,7 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p->board) {
     if (p->board->data) {
-      FreeBuffer(p->board->data, p->board->layout.dim);
+      FreeBuffer(p->board->data);
     }
     free(p->board);
   }

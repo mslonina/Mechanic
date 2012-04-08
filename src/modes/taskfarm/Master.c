@@ -69,7 +69,7 @@ int Master(module *m, pool *p) {
     mstat = TaskPrepare(m, p, t);
 
     if (mstat != NO_MORE_TASKS) {
-      mstat = Pack(m, &send_buffer->data[i-1][0], send_buffer->layout.dim[1], p, t, TAG_DATA);
+      mstat = Pack(m, &send_buffer->data[i-1][0], p, t, TAG_DATA);
       CheckStatus(mstat);
     } else {
       send_buffer->data[i-1][0] = (double) TAG_TERMINATE;
@@ -123,7 +123,7 @@ int Master(module *m, pool *p) {
       mstat = TaskPrepare(m, p, t);
       if (mstat != NO_MORE_TASKS) {
 
-        mstat = Pack(m, &send_buffer->data[index][0], send_buffer->layout.dim[1], p, t, TAG_DATA);
+        mstat = Pack(m, &send_buffer->data[index][0], p, t, TAG_DATA);
         CheckStatus(mstat);
 
         MPI_Isend(&send_buffer->data[index][0], send_buffer->layout.dim[1], MPI_DOUBLE,
@@ -189,12 +189,12 @@ int Master(module *m, pool *p) {
   if (recv_request) free(recv_request);
 
   if (send_buffer) {
-    if (send_buffer->data) FreeBuffer(send_buffer->data, send_buffer->layout.dim);
+    if (send_buffer->data) FreeBuffer(send_buffer->data);
     free(send_buffer);
   }
 
   if (recv_buffer) {
-    if (recv_buffer->data) FreeBuffer(recv_buffer->data, recv_buffer->layout.dim);
+    if (recv_buffer->data) FreeBuffer(recv_buffer->data);
     free(recv_buffer);
   }
 

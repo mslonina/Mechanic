@@ -85,13 +85,21 @@ int Setup(setup *s) {
   };
   s->options[6] = (LRC_configDefaults) {
     .space="core",
+    .name="backups",
+    .shortName='b',
+    .value="2",
+    .type=LRC_STRING,
+    .description="The number of incremental backups of master file"
+  };
+  s->options[7] = (LRC_configDefaults) {
+    .space="core",
     .name="print-defaults",
     .shortName='\0',
     .value="0",
     .type=LRC_VAL,
     .description="Print default settings"
   };
-  s->options[7] = (LRC_configDefaults) {
+  s->options[8] = (LRC_configDefaults) {
     .space="core",
     .name="help",
     .shortName='?',
@@ -99,7 +107,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Show this help message"
   };
-  s->options[8] = (LRC_configDefaults) {
+  s->options[9] = (LRC_configDefaults) {
     .space="core",
     .name="usage",
     .shortName='\0',
@@ -107,7 +115,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Display brief message"
   };
-  s->options[9] = (LRC_configDefaults) LRC_OPTIONS_END;
+  s->options[10] = (LRC_configDefaults) LRC_OPTIONS_END;
 
   return TASK_SUCCESS;
 }

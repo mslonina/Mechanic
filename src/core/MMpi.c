@@ -46,7 +46,7 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
  * @function
  * Pack the task data to 1D contigous array
  */
-int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) {
+int Pack(module *m, double *buffer, pool *p, task *t, int tag) {
   int mstat = 0;
   int position = 0;
   int i = 0;
@@ -67,7 +67,8 @@ int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) 
 
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {
-      Array2Vec(buffer+position, t->storage[i].data, t->storage[i].layout.rank, t->storage[i].layout.dim);
+      Array2Vec(buffer+position, t->storage[i].data,
+          t->storage[i].layout.rank, t->storage[i].layout.dim);
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
       position = position + size;
     }
@@ -85,7 +86,7 @@ int Pack(module *m, double *buffer, int buffer_size, pool *p, task *t, int tag) 
  * @function
  * Unpack the 1D-contigous array to task
  */
-int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *tag) {
+int Unpack(module *m, double *buffer, pool *p, task *t, int *tag) {
   int mstat = 0;
   int position = 0;
   int i = 0;
@@ -106,7 +107,8 @@ int Unpack(module *m, double *buffer, int buffer_size, pool *p, task *t, int *ta
 
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {
-      Vec2Array(buffer+position, t->storage[i].data, t->storage[i].layout.rank, t->storage[i].layout.dim);
+      Vec2Array(buffer+position, t->storage[i].data,
+          t->storage[i].layout.rank, t->storage[i].layout.dim);
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
       position = position + size;
     }

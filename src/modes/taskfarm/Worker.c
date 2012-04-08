@@ -52,7 +52,7 @@ int Worker(module *m, pool *p) {
         MASTER, intag, MPI_COMM_WORLD, &recv_request);
     MPI_Wait(&recv_request, &recv_status);
 
-    mstat = Unpack(m, &recv_buffer->data[0][0], recv_buffer->layout.dim[1], p, t, &tag);
+    mstat = Unpack(m, &recv_buffer->data[0][0], p, t, &tag);
     CheckStatus(mstat);
 
     if (tag != TAG_TERMINATE) {
@@ -67,7 +67,7 @@ int Worker(module *m, pool *p) {
 
     t->status = TASK_FINISHED;
 
-    mstat = Pack(m, &send_buffer->data[0][0], send_buffer->layout.dim[1], p, t, tag);
+    mstat = Pack(m, &send_buffer->data[0][0], p, t, tag);
     CheckStatus(mstat);
 
     MPI_Isend(&send_buffer->data[0][0], send_buffer->layout.dim[1], MPI_DOUBLE,
@@ -82,12 +82,12 @@ int Worker(module *m, pool *p) {
   TaskFinalize(m, p, t);
 
   if (send_buffer) {
-    if (send_buffer->data) FreeBuffer(send_buffer->data, send_buffer->layout.dim);
+    if (send_buffer->data) FreeBuffer(send_buffer->data);
     free(send_buffer);
   }
 
   if (recv_buffer) {
-    if (recv_buffer->data) FreeBuffer(recv_buffer->data, recv_buffer->layout.dim);
+    if (recv_buffer->data) FreeBuffer(recv_buffer->data);
     free(recv_buffer);
   }
 

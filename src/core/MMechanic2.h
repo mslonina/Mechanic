@@ -106,6 +106,7 @@ typedef struct {
   char *path; /**< The name of the dataset */
   int rank; /**< The rank of the dataset */
   int dim[MAX_RANK]; /**< The dimensions of the dataset */
+  int offset[MAX_RANK]; /**< The offsets (calculated automatically) */
   int use_hdf; /**< Enables HDF5 storage for the memory block */
   int sync; /**< @unused*/
   int storage_type; /**< The storage type: STORAGE_BASIC, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
