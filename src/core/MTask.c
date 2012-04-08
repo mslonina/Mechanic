@@ -114,6 +114,7 @@ int TaskProcess(module *m, pool *p, task *t) {
  * @function
  */
 void TaskReset(module *m, pool *p, task *t, int tid) {
+  t->tid = TASK_EMPTY;
   t->status = TASK_EMPTY;
 }
 

@@ -53,13 +53,13 @@ int Master(module *m, pool *p) {
 
   /* Initialize data buffers */
   send_buffer->layout.rank = c->storage->layout.rank;
-  send_buffer->layout.dim[0] = c->storage->layout.dim[0];
+  send_buffer->layout.dim[0] = m->mpi_size - 1;
   send_buffer->layout.dim[1] = c->storage->layout.dim[1];
   send_buffer->data = AllocateBuffer(send_buffer->layout.rank, send_buffer->layout.dim);
   if (!send_buffer->data) Error(CORE_ERR_MEM);
 
   recv_buffer->layout.rank = c->storage->layout.rank;
-  recv_buffer->layout.dim[0] = c->storage->layout.dim[0];
+  recv_buffer->layout.dim[0] = m->mpi_size - 1;
   recv_buffer->layout.dim[1] = c->storage->layout.dim[1];
   recv_buffer->data = AllocateBuffer(recv_buffer->layout.rank, recv_buffer->layout.dim);
   if (!recv_buffer->data) Error(CORE_ERR_MEM);
@@ -84,7 +84,6 @@ int Master(module *m, pool *p) {
   MPI_Waitall(m->mpi_size - 1, send_request, send_status);
 
   /* The task farm loop (Non-blocking communication) */
-  c->counter = 0;
   while (1) {
 
     /* Test for any completed request */
@@ -104,7 +103,6 @@ int Master(module *m, pool *p) {
 
         /* Reset the checkpoint */
         CheckpointReset(m, p, c, cid);
-        c->counter = 0;
       }
 
       /* Wait for any operation to complete */
@@ -115,7 +113,10 @@ int Master(module *m, pool *p) {
       for (k = 0; k < recv_buffer->layout.dim[1]; k++) {
         c->storage->data[c->counter][k] = recv_buffer->data[index][k];
       }
-      p->board->data[(int)c->storage->data[c->counter][3]][(int)c->storage->data[c->counter][4]] = c->storage->data[c->counter][2];
+      p->board->
+        data[(int)c->storage->data[c->counter][3]]
+            [(int)c->storage->data[c->counter][4]]
+        = c->storage->data[c->counter][2];
 
       c->counter++;
 
@@ -142,25 +143,25 @@ int Master(module *m, pool *p) {
   mstat = CheckpointProcess(m, p, c);
   CheckStatus(mstat);
 
+  cid++;
   CheckpointReset(m, p, c, cid);
-  c->counter = 0;
 
   /* Receive outstanding data */
   MPI_Waitall(m->mpi_size - 1, send_request, send_status);
   MPI_Waitall(m->mpi_size - 1, recv_request, recv_status);
 
-/*  for (i = 0; i < recv_buffer->layout.dim[0]; i++) {
+  for (i = 0; i < m->mpi_size - 1; i++) {
     for (k = 0; k < recv_buffer->layout.dim[1]; k++) {
       c->storage->data[i][k] = recv_buffer->data[i][k];
     }
     p->board->data[(int)c->storage->data[i][3]][(int)c->storage->data[i][4]] = c->storage->data[i][2];
   }
-*/
+
   /* Process the last checkpoint */
-//  mstat = CheckpointPrepare(m, p, c);
+  mstat = CheckpointPrepare(m, p, c);
   CheckStatus(mstat);
 
-//  mstat = CheckpointProcess(m, p, c);
+  mstat = CheckpointProcess(m, p, c);
   CheckStatus(mstat);
 
   /* Terminate all workers */

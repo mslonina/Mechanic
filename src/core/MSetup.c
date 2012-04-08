@@ -111,6 +111,7 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
   inif = fopen(filename, "ro");
   if (inif) {
     mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
+    fclose(inif);
   } else if (inif == NULL) {
     if (strcmp(filename, LRC_getOptionValue("core", "config", m->fallback.setup.head)) != 0) {
       Message(MESSAGE_ERR, "The specified config file could not be opened\n");
@@ -118,7 +119,6 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
     }
     Message(MESSAGE_INFO, "No config file specified, using defaults.\n");
   }
-  fclose(inif);
 
   return mstat;
 }

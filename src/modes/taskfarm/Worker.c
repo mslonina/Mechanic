@@ -10,41 +10,49 @@
  */
 int Worker(module *m, pool *p) {
   int mstat = 0;
-  double **send_buffer = NULL, **recv_buffer = NULL;
-  int buffer_dims[2], buffer_rank;
-  int i, node, tag, intag;
+  int node, tag, intag;
 
   MPI_Status recv_status, send_status;
   MPI_Request send_request, recv_request;
 
   task *t = NULL;
+  checkpoint *c = NULL;
+  storage *send_buffer = NULL, *recv_buffer = NULL;
 
   node = m->node;
   intag = node;
 
-  buffer_rank = 2;
+  /* Initialize the task and checkpoint */
+  t = TaskLoad(m, p, 0);
+  c = CheckpointLoad(m, p, 0);
 
-  buffer_dims[0] = 1;
-  buffer_dims[1] = m->mpi_size + 3 + MAX_RANK; // offset: tag, tid, status, location
-  for (i = 0; i < m->task_banks; i++) {
-    buffer_dims[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
-  }
-
-  send_buffer = AllocateBuffer(buffer_rank, buffer_dims);
+  /* Data buffers */
+  send_buffer = calloc(sizeof(storage), sizeof(storage));
   if (!send_buffer) Error(CORE_ERR_MEM);
 
-  recv_buffer = AllocateBuffer(buffer_rank, buffer_dims);
+  recv_buffer = calloc(sizeof(storage), sizeof(storage));
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
-  t = TaskLoad(m, p, 0);
+  /* Initialize data buffers */
+  send_buffer->layout.rank = 2;
+  send_buffer->layout.dim[0] = 1;
+  send_buffer->layout.dim[1] = c->storage->layout.dim[1];
+  send_buffer->data = AllocateBuffer(send_buffer->layout.rank, send_buffer->layout.dim);
+  if (!send_buffer->data) Error(CORE_ERR_MEM);
+
+  recv_buffer->layout.rank = 2;
+  recv_buffer->layout.dim[0] = 1;
+  recv_buffer->layout.dim[1] = c->storage->layout.dim[1];
+  recv_buffer->data = AllocateBuffer(recv_buffer->layout.rank, recv_buffer->layout.dim);
+  if (!recv_buffer->data) Error(CORE_ERR_MEM);
 
   while (1) {
 
-    MPI_Irecv(&recv_buffer[0][0], buffer_dims[1], MPI_DOUBLE,
+    MPI_Irecv(&recv_buffer->data[0][0], recv_buffer->layout.dim[1], MPI_DOUBLE,
         MASTER, intag, MPI_COMM_WORLD, &recv_request);
     MPI_Wait(&recv_request, &recv_status);
 
-    mstat = Unpack(m, &recv_buffer[0][0], buffer_dims[1], p, t, &tag);
+    mstat = Unpack(m, &recv_buffer->data[0][0], recv_buffer->layout.dim[1], p, t, &tag);
     CheckStatus(mstat);
 
     if (tag != TAG_TERMINATE) {
@@ -59,10 +67,10 @@ int Worker(module *m, pool *p) {
 
     t->status = TASK_FINISHED;
 
-    mstat = Pack(m, &send_buffer[0][0], buffer_dims[1], p, t, tag);
+    mstat = Pack(m, &send_buffer->data[0][0], send_buffer->layout.dim[1], p, t, tag);
     CheckStatus(mstat);
 
-    MPI_Isend(&send_buffer[0][0], buffer_dims[1], MPI_DOUBLE,
+    MPI_Isend(&send_buffer->data[0][0], send_buffer->layout.dim[1], MPI_DOUBLE,
         MASTER, intag, MPI_COMM_WORLD, &send_request);
     MPI_Wait(&send_request, &send_status);
 
@@ -70,10 +78,18 @@ int Worker(module *m, pool *p) {
   }
 
   /* Finalize */
+  CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
 
-  if (send_buffer) FreeBuffer(send_buffer, buffer_dims);
-  if (recv_buffer) FreeBuffer(recv_buffer, buffer_dims);
+  if (send_buffer) {
+    if (send_buffer->data) FreeBuffer(send_buffer->data, send_buffer->layout.dim);
+    free(send_buffer);
+  }
+
+  if (recv_buffer) {
+    if (recv_buffer->data) FreeBuffer(recv_buffer->data, recv_buffer->layout.dim);
+    free(recv_buffer);
+  }
 
   return mstat;
 }

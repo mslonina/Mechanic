@@ -435,5 +435,8 @@ int PoolProcess(pool **all, pool *p, setup *s) {
  * Implements CheckpointPrepare()
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
+
+  printf("Checkpoint %d processed\n", c->cid);
+
   return TASK_SUCCESS;
 }

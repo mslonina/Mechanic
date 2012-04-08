@@ -30,13 +30,18 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   /* The storage buffer */
   c->storage->layout.rank = 2;
   c->storage->layout.dim[0] = c->size;
-  c->storage->layout.dim[1] = m->mpi_size + 3 + MAX_RANK; // offset: tag, tid, status, location
+  c->storage->layout.dim[1] = 3 + MAX_RANK; // offset: tag, tid, status, location
 
   for (i = 0; i < m->task_banks; i++) {
     c->storage->layout.dim[1] += GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
 
   c->storage->data = AllocateBuffer(c->storage->layout.rank, c->storage->layout.dim);
+
+  for (i = 0; i < c->size; i++) {
+    c->storage->data[i][1] = TASK_EMPTY; // t->tid
+    c->storage->data[i][2] = TASK_EMPTY; // t->status
+  }
 
   return c;
 }
@@ -98,7 +103,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[0] = c->storage->data[i][3];
         t->location[1] = c->storage->data[i][4];
 
-        if (t->status != TASK_EMPTY) {
+        if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
 
           offsets[0] = 0;
           offsets[1] = 0;
@@ -136,7 +141,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->status = c->storage->data[i][2];
         t->location[0] = c->storage->data[i][3];
         t->location[1] = c->storage->data[i][4];
-        if (t->status != TASK_EMPTY) {
+        if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
           sprintf(path, TASK_PATH, t->tid);
           datapath = H5Gopen(tasks, path, H5P_DEFAULT);
           Vec2Array(&c->storage->data[i][position], t->storage[j].data, t->storage[j].layout.rank, t->storage[j].layout.dim);
@@ -171,6 +176,7 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
   c->counter = 0;
 
   for (i = 0; i < c->size; i++) {
+    c->storage->data[i][1] = TASK_EMPTY;
     c->storage->data[i][2] = TASK_EMPTY;
   }
 }
