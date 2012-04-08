@@ -45,6 +45,9 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
   opts = LRC_allOptions(m->layer.setup.head);
 
+  /* In case of config file, we need to update the popt tables with new defaults  */
+  PoptOptions(m, &m->layer.setup);
+
   /* Read popt options and overwrite the config file */
   mstat = Popt(m, argc, argv, &m->layer.setup);
   if (mstat != 0) return mstat;
