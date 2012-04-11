@@ -272,7 +272,7 @@ int GetBanks(int allocated_banks, storage *s) {
 int CommitData(hid_t h5location, int banks, storage *s) {
   int mstat = 0, i = 0;
   hid_t dataspace, dataset, memspace;
-  herr_t hdf_status;
+  herr_t hdf_status = 0;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
 
   for (i = 0; i < banks; i++) {

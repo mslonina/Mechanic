@@ -13,6 +13,7 @@
 
 #define POOLS_GROUP "Pools"
 #define POOL_PATH "/Pools/pool-%04d"
+#define LAST_GROUP "/Pools/last"
 #define TASKS_GROUP "Tasks"
 #define TASK_PATH "task-%04d"
 

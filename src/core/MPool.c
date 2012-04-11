@@ -58,7 +58,9 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = 0, i = 0, size = 0;
   query *q;
   setup *s = &(m->layer.setup);
-  hid_t h5location, group;
+  hid_t h5location, group, attribute_id, attrspace_id;
+  hsize_t adims;
+  int attr_data;
   char path[LRC_CONFIG_LEN];
 
   /* Number of tasks to do */
@@ -73,6 +75,22 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     sprintf(path, POOL_PATH, p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
     mstat = CommitData(group, m->pool_banks, p->storage);
+
+    /* Create "latest" link */
+    if (H5Lexists(h5location, LAST_GROUP, H5P_DEFAULT)) {
+      H5Ldelete(h5location, LAST_GROUP, H5P_DEFAULT);
+    }
+    H5Lcreate_hard(group, path, h5location, LAST_GROUP, H5P_DEFAULT, H5P_DEFAULT);
+
+    /* Create attributes */
+    adims = 1;
+    attr_data = p->pid;
+    attrspace_id = H5Screate_simple(1, &adims, NULL);
+    attribute_id = H5Acreate(group, "Id", H5T_NATIVE_INT, attrspace_id, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attribute_id, H5T_NATIVE_INT, &attr_data);
+    H5Aclose(attribute_id);
+    H5Sclose(attrspace_id);
+
     H5Gclose(group);
     H5Fclose(h5location);
   }
