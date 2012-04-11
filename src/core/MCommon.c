@@ -198,7 +198,7 @@ int Copy(char* in, char* out) {
 
   /* CHAR_BIT in limits.h */
   c = malloc(st.st_size * CHAR_BIT + 1);
-  if (c == NULL) return CORE_ERR_MEM;
+  if (!c) return CORE_ERR_MEM;
 
   /* Read and write the whole file, without loops */
   mstat = read(input, c, st.st_size);
@@ -225,7 +225,7 @@ int Copy(char* in, char* out) {
     return CORE_ERR_HDF;
   }
 
-  return mstat;
+  return 0;
 }
 
 

@@ -77,6 +77,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   task *t;
   int size, position;
 
+  Backup(m, &m->layer.setup);
+
   /* Commit data for the task board */
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
   sprintf(path, POOL_PATH, p->pid);
@@ -210,20 +212,17 @@ int Backup(module *m, setup *s) {
   struct stat current;
   struct stat backup;
 
-  current_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", "00", ".h5");
-  backup_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", "01", ".h5");
+  b = LRC_option2int("core", "checkpoint-files", s->head);
 
-  b = LRC_option2int("core", "backups", s->head);
-
-  for (i = b; i >= 0; i--) {
-    snprintf(iter, 1, "%02d", i+1);
+  for (i = b-2; i >= 0; i--) {
+    snprintf(iter, 3, "%02d", i+1);
     backup_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", iter, ".h5");
 
-    snprintf(iter, 1,"%02d", i);
+    snprintf(iter, 3,"%02d", i);
     current_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", iter, ".h5");
 
-    if (stat(backup_name, &backup) == 0) {
-      if (stat(current_name, &current) < 0) {
+    if (stat(current_name, &current) == 0) {
+      if (stat(backup_name, &backup) < 0) {
         mstat = Copy(current_name, backup_name);
         CheckStatus(mstat);
       } else {

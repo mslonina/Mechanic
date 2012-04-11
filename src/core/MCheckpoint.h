@@ -12,5 +12,6 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c);
 int CheckpointProcess(module *m, pool *p, checkpoint *c);
 void CheckpointReset(module *m, pool *p, checkpoint *c, int cid);
 void CheckpointFinalize(module *m, pool *p, checkpoint *c);
+int Backup(module *m, setup *s);
 
 #endif
