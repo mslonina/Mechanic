@@ -10,6 +10,8 @@
 #define SEPARATOR "="
 #define COMMENTS "#"
 #define CONFIG_GROUP "all"
+#define CORE_SETUP 0
+#define MODULE_SETUP 1
 
 int Setup(module *m, char *filename, int argc, char **argv, int mode);
 int ReadConfig(module *m, char *filename, LRC_configNamespace *head);

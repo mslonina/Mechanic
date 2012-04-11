@@ -24,7 +24,7 @@
  * @return
  *  The error code, 0 otherwise
  */
-int Setup(module *m, char *filename, int argc, char** argv, int mode) {
+int Setup(module *m, char *filename, int argc, char** argv, int flag) {
   int mstat = 0, opts = 0, i = 0, n = 0;
   MPI_Datatype mpi_t;
   MPI_Status mpi_status;
@@ -32,9 +32,17 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
 
   /* Read the specified configuration file */
   if (m->node == MASTER) {
-    if (mode == RESTART_MODE) {
+    if (m->mode == RESTART_MODE) {
       h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
-      LRC_HDF5Parser(h5location, CONFIG_GROUP, m->layer.setup.head);
+
+      if (flag == CORE_SETUP) {
+        LRC_HDF5Parser(h5location, "/config/core", m->layer.setup.head);
+      }
+
+      if (flag == MODULE_SETUP) {
+        LRC_HDF5Parser(h5location, "/config/module", m->layer.setup.head);
+      }
+
       H5Fclose(h5location);
     } else {
       mstat = ReadConfig(m, filename, m->layer.setup.head);
@@ -51,7 +59,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   mstat = Popt(m, argc, argv, &m->layer.setup);
   if (mstat != 0) return mstat;
 
-  if (mode != RESTART_MODE) {
+  if (m->mode != RESTART_MODE) {
     LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
   }
 
@@ -76,7 +84,9 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   LRC_cleanup(m->layer.setup.head);
 
   m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
-  if (m->node == MASTER && LRC_option2int("core", "print-defaults", m->layer.setup.head)) {
+  if (flag == MODULE_SETUP
+      && m->node == MASTER
+      && LRC_option2int("core", "print-defaults", m->layer.setup.head)) {
     LRC_printAll(m->layer.setup.head);
   }
 

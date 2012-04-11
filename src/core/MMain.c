@@ -84,13 +84,14 @@ int main(int argc, char** argv) {
    * (E) Core setup
    */
   filename = Name(LRC_getOptionValue("core", "config", core.layer.setup.head), "", "", "");
-  mstat = Setup(&core, filename, argc, argv, core.mode);
+  mstat = Setup(&core, filename, argc, argv, CORE_SETUP);
   free(filename);
 
   if (mstat == CORE_SETUP_HELP) goto finalize; // Special help message handling
   CheckStatus(mstat);
 
-  Message(MESSAGE_INFO, "Core configured\n");
+  if (node == MASTER)
+    Message(MESSAGE_INFO, "Core configured\n");
 
   /**
    * (F) Bootstrap the module
@@ -99,21 +100,25 @@ int main(int argc, char** argv) {
   module_name = LRC_getOptionValue("core", "module", core.layer.setup.head);
   module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
   module.filename = Name(LRC_getOptionValue("core", "restart-file", core.layer.setup.head), "", "", "");
+  module.mode = core.mode;
 
   if (node == MASTER)
     Message(MESSAGE_INFO, "Module '%s' bootstrapped.\n", module_name);
-
-  if (node == MASTER)
-    Message(MESSAGE_INFO, "Config file to use: '%s'\n", filename);
 
   /**
    * (G) Configure the module
    */
   filename = Name(LRC_getOptionValue("core", "config", core.layer.setup.head), "", "", "");
-  mstat = Setup(&module, filename, argc, argv, core.mode);
+
+  if (node == MASTER)
+    Message(MESSAGE_INFO, "Config file to use: '%s'\n", filename);
+
+  mstat = Setup(&module, filename, argc, argv, MODULE_SETUP);
   free(filename);
 
-  Message(MESSAGE_INFO, "Module configured\n");
+
+  if (node == MASTER)
+    Message(MESSAGE_INFO, "Module configured\n");
 
   /**
    * (H) Backup the master data file
@@ -142,7 +147,8 @@ int main(int argc, char** argv) {
       "-master", "-00", ".h5");
 
     h5location = H5Fcreate(module.filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    LRC_HDF5Writer(h5location, CONFIG_GROUP, module.layer.setup.head);
+    LRC_HDF5Writer(h5location, "/config/core", core.layer.setup.head);
+    LRC_HDF5Writer(h5location, "/config/module", module.layer.setup.head);
     H5Fclose(h5location);
   }
 
