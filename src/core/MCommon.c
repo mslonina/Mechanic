@@ -228,4 +228,10 @@ int Copy(char* in, char* out) {
   return 0;
 }
 
-
+/**
+ * @function
+ * Validate the checkpoint file
+ */
+int Validate(char *filename) {
+  return 0;
+}

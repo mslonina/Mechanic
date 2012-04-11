@@ -88,7 +88,7 @@ int Setup(setup *s) {
     .name="checkpoint-files",
     .shortName='b',
     .value="2",
-    .type=LRC_STRING,
+    .type=LRC_INT,
     .description="The number of incremental backups of the master file"
   };
   s->options[7] = (LRC_configDefaults) {
@@ -99,7 +99,24 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Disable the initial master file backup"
   };
+
   s->options[8] = (LRC_configDefaults) {
+    .space="core",
+    .name="restart-mode",
+    .shortName='r',
+    .value="0",
+    .type=LRC_VAL,
+    .description="The restart mode"
+  };
+  s->options[9] = (LRC_configDefaults) {
+    .space="core",
+    .name="restart-file",
+    .shortName='\0',
+    .value="restart-file.h5",
+    .type=LRC_STRING,
+    .description="The name of the file to use in the restart mode"
+  };
+  s->options[10] = (LRC_configDefaults) {
     .space="core",
     .name="print-defaults",
     .shortName='\0',
@@ -107,7 +124,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Print default settings"
   };
-  s->options[9] = (LRC_configDefaults) {
+  s->options[11] = (LRC_configDefaults) {
     .space="core",
     .name="help",
     .shortName='?',
@@ -115,7 +132,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Show this help message"
   };
-  s->options[10] = (LRC_configDefaults) {
+  s->options[12] = (LRC_configDefaults) {
     .space="core",
     .name="usage",
     .shortName='\0',
@@ -123,7 +140,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Display brief message"
   };
-  s->options[11] = (LRC_configDefaults) LRC_OPTIONS_END;
+  s->options[13] = (LRC_configDefaults) LRC_OPTIONS_END;
 
   return TASK_SUCCESS;
 }

@@ -29,13 +29,14 @@ typedef struct {
  *  The fallback module layer
  */
 typedef struct {
-  char filename[LRC_CONFIG_LEN];
+  char *filename;
   hid_t datafile;
   hid_t h5location;
   int node;
   int mpi_size;
   int pool_banks;
   int task_banks;
+  int mode;
   layer layer;
   layer fallback;
 } module;

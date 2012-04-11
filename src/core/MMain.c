@@ -20,61 +20,135 @@ int main(int argc, char** argv) {
   char *masterfile, *masterfile_backup;
 
   struct stat file;
+  hid_t h5location;
 
   int mstat = 0;
 
-  /* Initialize MPI */
+  /**
+   * (A) Initialize MPI
+   */
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   node = mpi_rank;
 
-  /* Initialize HDF */
+  /**
+   * (B) Initialize HDF
+   */
   mstat = H5open();
   CheckStatus(mstat);
 
   if (node == MASTER) Welcome();
 
-  /* Bootstrap core */
+  /**
+   * (C) Bootstrap core
+   */
+  core.layer.handler = NULL;
+  module.layer.handler = NULL;
   fallback.layer.handler = NULL;
+
   core = Bootstrap(node, mpi_size, argc, argv, CORE_MODULE, &fallback);
   if (!core.layer.handler) Error(CORE_ERR_CORE); // OOPS! At least Core module should be loaded
 
-  module_name = LRC_getOptionValue("core", "module", core.layer.setup.head);
+  core.mode = NORMAL_MODE;
 
-  /* Backup the master data file */
-  if (!LRC_option2int("core", "no-backup", core.layer.setup.head)) {
-    masterfile = Name(LRC_getOptionValue("core", "name", core.layer.setup.head),
-        "-master-", "00", ".h5");
-    masterfile_backup = Name("backup-", masterfile, "", "");
-
-    if (stat(masterfile, &file) == 0) {
-      Message(MESSAGE_INFO, "Backup '%s' -> '%s'\n", masterfile, masterfile_backup);
-      Copy(masterfile, masterfile_backup);
+  /**
+   * (D) Handle the restart mode
+   */
+  if (node == MASTER) {
+    if (LRC_option2int("core", "restart-mode", core.layer.setup.head)) {
+      core.filename = Name(LRC_getOptionValue("core", "restart-file", core.layer.setup.head), "", "", "");
+      Message(MESSAGE_INFO,
+          "Switching to restart mode with checkpoint file: '%s'\n", core.filename);
+      if (stat(core.filename, &file) < 0) {
+        Message(MESSAGE_ERR, "The checkpoint file could not be opened. Aborting\n");
+        goto finalize;
+      } else {
+        if (!H5Fis_hdf5(core.filename)) { // Validate HDF5
+          Message(MESSAGE_ERR, "The checkpoint file is not a valid HDF5 file. Aborting\n");
+          goto finalize;
+        } else { // Validate the Mechanic file
+          if (Validate(core.filename) < 0) {
+            Message(MESSAGE_ERR, "The checkpoint file is not a valid Mechanic file. Aborting\n");
+            goto finalize;
+          }
+        }
+      }
+      core.mode = RESTART_MODE;
     }
-
-    free(masterfile);
-    free(masterfile_backup);
   }
 
-  /* Bootstrap the module
-   * Fallback to core if module not specified */
-  module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
-  if (node == MASTER)
-    Message(MESSAGE_INFO, "Module '%s' bootstrapped.\n", module_name);
+  MPI_Bcast(&core.mode, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
 
-  /* Configuration file */
-  filename = LRC_getOptionValue("core", "config", module.layer.setup.head);
-
-  if (node == MASTER)
-    Message(MESSAGE_INFO, "Config file to use: '%s'\n", filename);
-
-  mstat = Setup(&module, filename, argc, argv, NORMAL_MODE);
+  /**
+   * (E) Core setup
+   */
+  filename = Name(LRC_getOptionValue("core", "config", core.layer.setup.head), "", "", "");
+  mstat = Setup(&core, filename, argc, argv, core.mode);
+  free(filename);
 
   if (mstat == CORE_SETUP_HELP) goto finalize; // Special help message handling
   CheckStatus(mstat);
 
-  /* Modes */
+  Message(MESSAGE_INFO, "Core configured\n");
+
+  /**
+   * (F) Bootstrap the module
+   * Fallback to core if module not specified
+   */
+  module_name = LRC_getOptionValue("core", "module", core.layer.setup.head);
+  module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
+  module.filename = Name(LRC_getOptionValue("core", "restart-file", core.layer.setup.head), "", "", "");
+
+  if (node == MASTER)
+    Message(MESSAGE_INFO, "Module '%s' bootstrapped.\n", module_name);
+
+  if (node == MASTER)
+    Message(MESSAGE_INFO, "Config file to use: '%s'\n", filename);
+
+  /**
+   * (G) Configure the module
+   */
+  filename = Name(LRC_getOptionValue("core", "config", core.layer.setup.head), "", "", "");
+  mstat = Setup(&module, filename, argc, argv, core.mode);
+  free(filename);
+
+  Message(MESSAGE_INFO, "Module configured\n");
+
+  /**
+   * (H) Backup the master data file
+   */
+  if (node == MASTER) {
+    if (!LRC_option2int("core", "no-backup", core.layer.setup.head)) {
+      masterfile = Name(LRC_getOptionValue("core", "name", core.layer.setup.head),
+        "-master-", "00", ".h5");
+      masterfile_backup = Name("backup-", masterfile, "", "");
+
+      if (stat(masterfile, &file) == 0) {
+        Message(MESSAGE_INFO, "Backup '%s' -> '%s'\n", masterfile, masterfile_backup);
+        Copy(masterfile, masterfile_backup);
+      }
+
+      free(masterfile);
+      free(masterfile_backup);
+    }
+  }
+
+  /**
+   * (I) Write the configuration to the master file
+   */
+  if (node == MASTER && module.mode != RESTART_MODE) {
+    module.filename = Name(LRC_getOptionValue("core", "name", module.layer.setup.head),
+      "-master", "-00", ".h5");
+
+    h5location = H5Fcreate(module.filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    LRC_HDF5Writer(h5location, CONFIG_GROUP, module.layer.setup.head);
+    H5Fclose(h5location);
+  }
+
+  /**
+   * (J) Modes
+   */
   if (mpi_size > 1) {
     mstat = Taskfarm(&module);
     CheckStatus(mstat);
@@ -82,11 +156,15 @@ int main(int argc, char** argv) {
     Message(MESSAGE_WARN, "Master-alone mode not supported yet. Aborting...\n");
   }
 
+  /**
+   * (K) Finalize
+   */
+
 finalize:
   MPI_Barrier(MPI_COMM_WORLD);
 
-  ModuleFinalize(&module);
-  ModuleFinalize(&core);
+  if (module.layer.handler) ModuleFinalize(&module);
+  if (core.layer.handler) ModuleFinalize(&core);
 
   H5close();
   MPI_Finalize();

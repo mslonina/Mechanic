@@ -28,13 +28,12 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   int mstat = 0, opts = 0, i = 0, n = 0;
   MPI_Datatype mpi_t;
   MPI_Status mpi_status;
-  char *fname;
   hid_t h5location;
 
   /* Read the specified configuration file */
   if (m->node == MASTER) {
     if (mode == RESTART_MODE) {
-      h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+      h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
       LRC_HDF5Parser(h5location, CONFIG_GROUP, m->layer.setup.head);
       H5Fclose(h5location);
     } else {
@@ -52,7 +51,9 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
   mstat = Popt(m, argc, argv, &m->layer.setup);
   if (mstat != 0) return mstat;
 
-  LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
+  if (mode != RESTART_MODE) {
+    LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
+  }
 
   /* Broadcast new configuration */
   mstat = LRC_datatype(m->layer.setup.options[0], &mpi_t);
@@ -79,22 +80,6 @@ int Setup(module *m, char *filename, int argc, char** argv, int mode) {
     LRC_printAll(m->layer.setup.head);
   }
 
-  /**
-   * Write the configuration to the master file
-   */
-  if (m->node == MASTER && mode != RESTART_MODE) {
-    fname = Name(LRC_getOptionValue("core", "name", m->layer.setup.head),
-      "-master", "-00", ".h5");
-
-    strncpy(m->filename, fname, strlen(fname));
-    m->filename[strlen(fname)] = LRC_NULL;
-
-    h5location = H5Fcreate(m->filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    LRC_HDF5Writer(h5location, CONFIG_GROUP, m->layer.setup.head);
-    H5Fclose(h5location);
-    free(fname);
-  }
-
   return mstat;
 }
 
@@ -116,7 +101,7 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
     mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
     fclose(inif);
   } else if (inif == NULL) {
-    if (strcmp(filename, LRC_getOptionValue("core", "config", m->fallback.setup.head)) != 0) {
+    if (strcmp(filename, LRC_getOptionValue("core", "config", m->layer.setup.head)) != 0) {
       Message(MESSAGE_ERR, "The specified config file could not be opened\n");
       Error(CORE_ERR_SETUP);
     }

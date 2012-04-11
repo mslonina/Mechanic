@@ -41,5 +41,6 @@ void Array2Vec(double *vec, double **array, int rank, int *dims);
 void Vec2Array(double *vec, double **array, int rank, int *dims);
 
 int Copy(char *in, char *out);
+int Validate(char *filename);
 
 #endif

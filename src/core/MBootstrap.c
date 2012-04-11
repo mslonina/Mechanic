@@ -54,6 +54,8 @@ module ModuleLoad(char *name) {
   module m;
   char *fname = NULL;
 
+  m.layer.handler = NULL;
+
   fname = Name(MECHANIC_MODULE_PREFIX, name, "", LIBEXT);
 
   Message(MESSAGE_DEBUG, "Loading module '%s'\n", fname);
@@ -115,6 +117,7 @@ int ModuleInit(module *m) {
 
   m->layer.setup.head = NULL;
   m->layer.setup.popt->poptcontext = NULL;
+  m->filename = NULL;
 
   return mstat;
 }
@@ -180,6 +183,7 @@ void FinalizeLayer(layer *l) {
  * Finalizes the module
  */
 void ModuleFinalize(module* m) {
-  FinalizeLayer(&m->layer);
+  if (m->layer.handler) FinalizeLayer(&m->layer);
+  if (m->filename) free(m->filename);
 }
 

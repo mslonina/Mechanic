@@ -65,6 +65,10 @@
 #define TASK_IN_USE -1
 #define NO_MORE_TASKS -99
 
+/* Runtime modes */
+#define MODE_NORMAL 600
+#define MODE_RESTART 601
+
 /**
  * @struct
  * Bootstrap initializations
