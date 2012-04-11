@@ -17,6 +17,9 @@ int main(int argc, char** argv) {
 
   char *filename;
   char *module_name;
+  char *masterfile, *masterfile_backup;
+
+  struct stat file;
 
   int mstat = 0;
 
@@ -38,6 +41,21 @@ int main(int argc, char** argv) {
   if (!core.layer.handler) Error(CORE_ERR_CORE); // OOPS! At least Core module should be loaded
 
   module_name = LRC_getOptionValue("core", "module", core.layer.setup.head);
+
+  /* Backup the master data file */
+  if (!LRC_option2int("core", "no-backup", core.layer.setup.head)) {
+    masterfile = Name(LRC_getOptionValue("core", "name", core.layer.setup.head),
+        "-master-", "00", ".h5");
+    masterfile_backup = Name("backup-", masterfile, "", "");
+
+    if (stat(masterfile, &file) == 0) {
+      Message(MESSAGE_INFO, "Backup '%s' -> '%s'\n", masterfile, masterfile_backup);
+      Copy(masterfile, masterfile_backup);
+    }
+
+    free(masterfile);
+    free(masterfile_backup);
+  }
 
   /* Bootstrap the module
    * Fallback to core if module not specified */
