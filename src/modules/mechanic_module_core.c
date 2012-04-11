@@ -49,7 +49,7 @@ int Setup(setup *s) {
     .shortName='x',
     .value="5",
     .type=LRC_INT,
-    .description="The task pool board dim[1] resolution"
+    .description="The task pool board horizontal resolution"
   };
   s->options[2] = (LRC_configDefaults) {
     .space="core",
@@ -57,7 +57,7 @@ int Setup(setup *s) {
     .shortName='y',
     .value="5",
     .type=LRC_INT,
-    .description="The task pool board dim[0] resolution"
+    .description="The task pool board vertical resolution"
   };
   s->options[3] = (LRC_configDefaults) {
     .space="core",
@@ -253,6 +253,7 @@ int Storage(pool *p, setup *s) {
   p->board->layout.dim[0] = LRC_option2int("core", "xres", s->head); // vertical res
   p->board->layout.dim[1] = LRC_option2int("core", "yres", s->head); // horizontal res
   p->board->layout.use_hdf = 1;
+  p->board->layout.storage_type = STORAGE_BASIC;
 
   p->checkpoint_size = LRC_option2int("core", "checkpoint", s->head);
 

@@ -31,6 +31,11 @@ int Storage(module *m, pool *p) {
   m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
   m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
 
+  /* Check and fix the memory/storage layout */
+  CheckLayout(1, p->board);
+  CheckLayout(m->pool_banks, p->storage);
+  CheckLayout(m->pool_banks, p->task->storage);
+
   /* Commit memory layout used during the task pool */
   CommitMemoryLayout(m->pool_banks, p->storage);
 
@@ -53,8 +58,6 @@ int Storage(module *m, pool *p) {
 
   /* Commit the storage layout (only the Master node) */
   if (m->node == MASTER) {
-    CheckLayout(m->pool_banks, p->storage);
-    CheckLayout(m->pool_banks, p->task->storage);
 
     /* Right now, there is no support for different storage types of pool datasets */
     for (i = 0; i < m->pool_banks; i++) {
@@ -83,11 +86,11 @@ int CheckLayout(int banks, storage *s) {
   int i = 0, mstat = 0;
 
   for (i = 0; i < banks; i++) {
+    s[i].layout.rank = MAX_RANK;
+    s[i].layout.datatype = H5T_NATIVE_DOUBLE;
     if (s[i].layout.use_hdf) {
       /* Common fixes before future development */
-      s[i].layout.rank = MAX_RANK;
       s[i].layout.dataspace_type = H5S_SIMPLE;
-      s[i].layout.datatype = H5T_NATIVE_DOUBLE;
       s[i].layout.offset[0] = 0; // Offsets calculated automatically
       s[i].layout.offset[1] = 0;
 
@@ -98,6 +101,10 @@ int CheckLayout(int banks, storage *s) {
       }
       if (s[i].layout.rank == 0) {
         Message(MESSAGE_ERR, "Rank must be > 0 when use_hdf\n");
+        Error(CORE_ERR_STORAGE);
+      }
+      if (s[i].layout.storage_type < 0) {
+        Message(MESSAGE_ERR, "The storage type is missing\n");
         Error(CORE_ERR_STORAGE);
       }
     }

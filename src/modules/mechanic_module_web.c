@@ -225,14 +225,14 @@ int Setup(setup *s) {
  * This function is used to create the storage layout of your run. You define here all
  * datasets used during pool/task processing. The storage scheme is as follows:
  *
- * - storage[0].layout.path - the dataset name
- * - storage[0].layout.rank - the dataset rank (MAX_RANK = 2)
- * - storage[0].layout.dim - the dataset dimensions
+ * - storage[0].layout.path - the dataset name (required when use_hdf = 1)
+ * - storage[0].layout.rank - the dataset rank (MAX_RANK = 2) (required)
+ * - storage[0].layout.dim - the dataset dimensions (required)
  * - storage[0].layout.use_hdf - whether to use hdf5 storage or not
  * - storage[0].layout.dataspace_type - the type of the hdf5 dataspace for the dataset
  *   (H5S_SIMPLE)
  * - storage[0].layout.datatype - the datatype of data in the dataset (H5T_NATIVE_DOUBLE)
- * - storage[0].layout.storage_type - the type of storage for the dataset
+ * - storage[0].layout.storage_type - the type of storage for the dataset (required)
  *   - STORAGE_BASIC to store whole dataset at once,
  *   - STORAGE_PM3D to store data in a Gnuplot PM3D ready format
  *   - STORAGE_BOARD to store data in a task-pool dimension way, which is ready to process
@@ -250,13 +250,13 @@ int Setup(setup *s) {
  * - p->task->storage[1]
  *
  * The task storage is independent on the pool storage.
- * 
+ *
  * The storage scheme layout is checked before memory allocation.
  */
 int Storage(pool *p, setup *s) {
 
-  /** 
-   * Path: /Pools/pool-ID/pool-data 
+  /**
+   * Path: /Pools/pool-ID/pool-data
    *
    * The pool global data. Each dataset is stored in a pool-ID group, where ID is the
    * unique pool ID. The STORAGE_BASIC mode may be only used here.
@@ -266,11 +266,9 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout.dim[0] = 1;
   p->storage[0].layout.dim[1] = 6;
   p->storage[0].layout.use_hdf = 1;
-  p->storage[0].layout.dataspace_type = H5S_SIMPLE;
-  p->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
   p->storage[0].layout.storage_type = STORAGE_BASIC;
   p->storage[0].layout.sync = 1;
-  
+
   /**
    * Path: /Pools/pool-ID/Tasks/input 
    *
@@ -284,8 +282,6 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout.dim[0] = 1;
   p->task->storage[0].layout.dim[1] = 6;
   p->task->storage[0].layout.use_hdf = 1;
-  p->task->storage[0].layout.dataspace_type = H5S_SIMPLE;
-  p->task->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task->storage[0].layout.storage_type = STORAGE_PM3D;
 
   /**
@@ -299,8 +295,6 @@ int Storage(pool *p, setup *s) {
   p->task->storage[1].layout.dim[0] = 1;
   p->task->storage[1].layout.dim[1] = 4;
   p->task->storage[1].layout.use_hdf = 1;
-  p->task->storage[1].layout.dataspace_type = H5S_SIMPLE;
-  p->task->storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
   p->task->storage[1].layout.storage_type = STORAGE_PM3D;
 
   return TASK_SUCCESS;
