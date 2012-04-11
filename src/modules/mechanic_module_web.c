@@ -261,28 +261,32 @@ int Storage(pool *p, setup *s) {
    * The pool global data. Each dataset is stored in a pool-ID group, where ID is the
    * unique pool ID. The STORAGE_BASIC mode may be only used here.
    */
-  p->storage[0].layout.path = "pool-data";
-  p->storage[0].layout.rank = 2;
-  p->storage[0].layout.dim[0] = 1;
-  p->storage[0].layout.dim[1] = 6;
-  p->storage[0].layout.use_hdf = 1;
-  p->storage[0].layout.storage_type = STORAGE_BASIC;
-  p->storage[0].layout.sync = 1;
+  p->storage[0].layout = (schema) {
+    .path = "pool-data",
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = 6,
+    .use_hdf = 1,
+    .storage_type = STORAGE_BASIC,
+    .sync = 1,
+  };
 
   /**
-   * Path: /Pools/pool-ID/Tasks/input 
+   * Path: /Pools/pool-ID/Tasks/input
    *
    * The task dataset. The data will be stored in the pool-ID/Tasks group as a
    * Gnuplot-PM3D ready dataset. This dataset is used for the initial
    * condition. Each worker node receives the 1x6 inital state array. Since the storage is
    * STORAGE_PM3D, the size of the output dataset is pool_size * dim[1].
    */
-  p->task->storage[0].layout.path = "input";
-  p->task->storage[0].layout.rank = 2;
-  p->task->storage[0].layout.dim[0] = 1;
-  p->task->storage[0].layout.dim[1] = 6;
-  p->task->storage[0].layout.use_hdf = 1;
-  p->task->storage[0].layout.storage_type = STORAGE_PM3D;
+  p->task->storage[0].layout = (schema) {
+    .path = "input",
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = 6,
+    .use_hdf = 1,
+    .storage_type = STORAGE_PM3D,
+  };
 
   /**
    * Path: /Pools/pool-ID/Tasks/result
@@ -290,12 +294,14 @@ int Storage(pool *p, setup *s) {
    * The task result dataset, similar to the input one. The result consists of the
    * location (coordinates) of the task and the MEGNO.
    */
-  p->task->storage[1].layout.path = "result";
-  p->task->storage[1].layout.rank = 2;
-  p->task->storage[1].layout.dim[0] = 1;
-  p->task->storage[1].layout.dim[1] = 4;
-  p->task->storage[1].layout.use_hdf = 1;
-  p->task->storage[1].layout.storage_type = STORAGE_PM3D;
+  p->task->storage[1].layout = (schema) {
+    .path = "result",
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = 4,
+    .use_hdf = 1,
+    .storage_type = STORAGE_PM3D,
+  };
 
   return TASK_SUCCESS;
 }
@@ -309,14 +315,14 @@ int Storage(pool *p, setup *s) {
  *
  *      -- dim[1] --
  *
- * (0,0) (0,1) (0,2) (0,3) ...   
+ * (0,0) (0,1) (0,2) (0,3) ...
  * (1,0) (1,1) (1,2) (1,3)       | dim[0]
- * (2,0) (2,1) (2,2) (2,3)       
+ * (2,0) (2,1) (2,2) (2,3)
  *  ...
  *
  * The current task location is available at t->location array. The pool resolution
  * is available at p->board->layout.dim array. The pool_size is a multiplication of
- * p->board->layout.dim[i], where i < p->board->layout.rank. 
+ * p->board->layout.dim[i], where i < p->board->layout.rank.
  *
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
@@ -333,10 +339,10 @@ int TaskPrepare(pool *p, task *t, setup *s) {
   t->storage[0].data[0][1] = 0.132;
   t->storage[0].data[0][2] = 0.212;
 
-  /* Map coordinates */  
+  /* Map coordinates */
   t->storage[0].data[0][3] = xmin + t->location[1]*(xmax-xmin)/(1.0*p->board->layout.dim[1]);
   t->storage[0].data[0][4] = ymin + t->location[0]*(ymax-ymin)/(1.0*p->board->layout.dim[0]);
-  t->storage[0].data[0][5] = 0.01;  
+  t->storage[0].data[0][5] = 0.01;
 
   return TASK_SUCCESS;
 }
@@ -352,17 +358,17 @@ int TaskProcess(pool *p, task *t, setup *s) {
   step = LRC_option2double("arnold", "step", s->head);
   step  = step*(pow(5,0.5)-1)/2.0;
   tend = LRC_option2double("arnold", "tend", s->head);
-  eps = p->storage[0].data[0][0]; 
+  eps = p->storage[0].data[0][0];
 
   driver = LRC_option2int("arnold", "driver", s->head);
 
-  /* Initial data */  
+  /* Initial data */
   xv[0] = t->storage[0].data[0][0];
   xv[1] = t->storage[0].data[0][1];
   xv[2] = t->storage[0].data[0][2];
   xv[3] = t->storage[0].data[0][3];
   xv[4] = t->storage[0].data[0][4];
-  xv[5] = t->storage[0].data[0][5];  
+  xv[5] = t->storage[0].data[0][5];
 
   /* Numerical integration goes here */
   if (driver == 1) result = smegno2(xv, step, tend, eps, &err);
@@ -388,12 +394,12 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
   double eps, epsmin, epsint;
   epsmin  = LRC_option2double("arnold", "eps", s->head);
   epsint  = LRC_option2double("arnold", "eps_interval", s->head);
-  eps = epsmin + (double)p->pid * epsint; 
+  eps = epsmin + (double)p->pid * epsint;
 
-  p->storage[0].data[0][0] = eps; 
+  p->storage[0].data[0][0] = eps;
   return TASK_SUCCESS;
 }
- 
+
 /**
  * @function
  * Implements PoolProcess()
@@ -408,17 +414,8 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
  */
 int PoolProcess(pool **all, pool *p, setup *s) {
   double eps, epsmax;
-//  int i, j;
   eps = p->storage[0].data[0][0];
   epsmax  = LRC_option2double("arnold", "epsmax", s->head);
-/*
-  for (i = 0; i < p->task->storage[0].layout.dim[0] * p->pool_size; i++) {
-    for (j = 0; j < p->task->storage[0].layout.dim[1]; j++) {
-      printf("%.2f ", p->task->storage[0].data[i][j]);
-    }
-    printf("\n");
-  }
-  printf("\n");*/
 
   if (eps < epsmax) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
@@ -430,7 +427,7 @@ int PoolProcess(pool **all, pool *p, setup *s) {
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 
-  printf("Checkpoint %d processed\n", c->cid);
+  printf("Pool: %04d, checkpoint %04d processed\n", p->pid, c->cid);
 
   return TASK_SUCCESS;
 }

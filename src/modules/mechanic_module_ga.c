@@ -47,7 +47,7 @@ int SelectOneOrganism(pool *p);
  */
 int Init(init *i) {
   i->pools = MAX_GENERATIONS;
-  return TASK_SUCCESS; 
+  return TASK_SUCCESS;
 }
 
 /**
@@ -56,23 +56,23 @@ int Init(init *i) {
  */
 int Setup(setup *s) {
   s->options[0] = (LRC_configDefaults) {
-    .space="ga", .name="max-generations", .shortName='\0', 
+    .space="ga", .name="max-generations", .shortName='\0',
     .value="1000", .type=LRC_INT, .description="Maximum generations (max 1000)"};
   s->options[1] = (LRC_configDefaults) {
-    .space="ga", .name="genes", .shortName='\0', 
+    .space="ga", .name="genes", .shortName='\0',
     .value="20", .type=LRC_INT, .description="Number of genes"};
   s->options[2] = (LRC_configDefaults) {
-    .space="ga", .name="alleles", .shortName='\0', 
+    .space="ga", .name="alleles", .shortName='\0',
     .value="4", .type=LRC_INT, .description="Number of types of genes"};
   s->options[3] = (LRC_configDefaults) {
-    .space="ga", .name="mutation-rate", .shortName='\0', 
+    .space="ga", .name="mutation-rate", .shortName='\0',
     .value="0.001", .type=LRC_DOUBLE, .description="Mutation rate"};
   s->options[4] = (LRC_configDefaults) {
-    .space="ga", .name="max-fitness", .shortName='\0', 
+    .space="ga", .name="max-fitness", .shortName='\0',
     .value="20", .type=LRC_INT, .description="Maximum fitness"};
   s->options[5] = (LRC_configDefaults) LRC_OPTIONS_END;
 
-  return TASK_SUCCESS; 
+  return TASK_SUCCESS;
 }
 
 /**
@@ -86,62 +86,62 @@ int Storage(pool *p, setup *s) {
   pool_size = p->board->layout.dim[0] * p->board->layout.dim[1];
   genes = LRC_option2int("ga", "genes", s->head);
 
-  /** 
-   * Path: /Pools/pool-ID/population 
+  /**
+   * Path: /Pools/pool-ID/population
    * Current population
    *
    * The STORAGE_BASIC will store the whole dataset at once
    */
-  p->storage[0].layout.path = "population";
-  p->storage[0].layout.rank = 2;
-  p->storage[0].layout.dim[0] = pool_size;
-  p->storage[0].layout.dim[1] = genes; 
-  p->storage[0].layout.use_hdf = 1;
-  p->storage[0].layout.sync = 1;
-  p->storage[0].layout.dataspace_type = H5S_SIMPLE;
-  p->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
-  p->storage[0].layout.storage_type = STORAGE_BASIC;
+  p->storage[0].layout = (schema) {
+    .path = "population",
+    .rank = 2,
+    .dim[0] = pool_size,
+    .dim[1] = genes,
+    .use_hdf = 1,
+    .sync = 1,
+    .storage_type = STORAGE_BASIC,
+  };
 
-  /** 
-   * Path: /Pools/pool-ID/model 
+  /**
+   * Path: /Pools/pool-ID/model
    * The model organism
    */
-  p->storage[1].layout.path = "model";
-  p->storage[1].layout.rank = 2;
-  p->storage[1].layout.dim[0] = 1;
-  p->storage[1].layout.dim[1] = genes;
-  p->storage[1].layout.use_hdf = 1;
-  p->storage[1].layout.sync = 1;
-  p->storage[1].layout.dataspace_type = H5S_SIMPLE;
-  p->storage[1].layout.datatype = H5T_NATIVE_DOUBLE;
-  p->storage[1].layout.storage_type = STORAGE_BASIC;
+  p->storage[1].layout = (schema) {
+    .path = "model",
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = genes,
+    .use_hdf = 1,
+    .sync = 1,
+    .storage_type = STORAGE_BASIC,
+  };
 
   /**
    * Path: /Pools/pool-ID/tmp-data
    * Temporary space for the pool data, not stored in the master datafile
    */
-  p->storage[2].layout.path = "tmp-data";
-  p->storage[2].layout.rank = 2;
-  p->storage[2].layout.dim[0] = 1;
-  p->storage[2].layout.dim[1] = genes;
-  p->storage[2].layout.use_hdf = 0;
-  p->storage[2].layout.dataspace_type = H5S_SIMPLE;
-  p->storage[2].layout.datatype = H5T_NATIVE_DOUBLE;
-  p->storage[2].layout.storage_type = STORAGE_BASIC;
+  p->storage[2].layout = (schema) {
+    .path = "tmp-data",
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = genes,
+    .use_hdf = 0,
+    .storage_type = STORAGE_BASIC,
+  };
 
   /**
    * Path: /Pools/pool-ID/children
    * The children of the current population
    */
-  p->storage[3].layout.path = "children";
-  p->storage[3].layout.rank = 2;
-  p->storage[3].layout.dim[0] = pool_size;
-  p->storage[3].layout.dim[1] = genes; 
-  p->storage[3].layout.use_hdf = 0;
-  p->storage[3].layout.sync = 1;
-  p->storage[3].layout.dataspace_type = H5S_SIMPLE;
-  p->storage[3].layout.datatype = H5T_NATIVE_DOUBLE;
-  p->storage[3].layout.storage_type = STORAGE_BASIC;
+  p->storage[3].layout = (schema) {
+    .path = "children",
+    .rank = 2,
+    .dim[0] = pool_size,
+    .dim[1] = genes,
+    .use_hdf = 0,
+    .sync = 1,
+    .storage_type = STORAGE_BASIC,
+  };
 
   /**
    * Path: /Pools/pool-ID/Tasks/fitness
@@ -151,14 +151,14 @@ int Storage(pool *p, setup *s) {
    * The STORAGE_LIST will store the fitness in the same order as the population organisms
    * are stored in the /Pools/pool-ID/population (one-by-one task mapping)
    */
-  p->task->storage[0].layout.path = "fitness";
-  p->task->storage[0].layout.rank = 2;
-  p->task->storage[0].layout.dim[0] = 1;
-  p->task->storage[0].layout.dim[1] = 1; // 0 - fitness
-  p->task->storage[0].layout.use_hdf = 1;
-  p->task->storage[0].layout.dataspace_type = H5S_SIMPLE;
-  p->task->storage[0].layout.datatype = H5T_NATIVE_DOUBLE;
-  p->task->storage[0].layout.storage_type = STORAGE_LIST;
+  p->task->storage[0].layout = (schema) {
+    .path = "fitness",
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = 1, // 0 - fitness
+    .use_hdf = 1,
+    .storage_type = STORAGE_LIST,
+  };
 
   return TASK_SUCCESS;
 }

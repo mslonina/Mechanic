@@ -8,7 +8,7 @@
 
 /**
  * @function
- * Initializes critical core variables 
+ * Initializes critical core variables
  *
  * At least the core module implements this function. The user may override the core
  * defaults in custom module -- in such case, the module variables will be merged with
@@ -131,11 +131,11 @@ int Setup(setup *s) {
  * ------------
  *
  * The Pool will store its global data in the /Pools/pool-ID. The task data will be stored
- * in /Pools/pool-ID/Tasks. 
+ * in /Pools/pool-ID/Tasks.
  *
  * The size of the storage dataset and the memory is the same. In the case of pool, whole
- * memory block is stored at once, if use_hdf = 1. 
- * 
+ * memory block is stored at once, if use_hdf = 1.
+ *
  * The Pool data is broadcasted right after PoolPrepare() and saved to the master
  * datafile.
  *
@@ -143,13 +143,13 @@ int Setup(setup *s) {
  *
  * TASK STORAGE
  * ------------
- * 
+ *
  * The task data is stored inside /Pools/pool-ID/Tasks group. There are four available
  * methods to store the task result:
  *
  * - STORAGE_BASIC - the whole memory block is stored in a dataset inside /Tasks/task-ID
  *   group, i.e., for a dataset defined similar to:
- *   
+ *
  *   p->task->storage[0].layout.path = "basic-dataset";
  *   p->task->storage[0].layout.dim[0] = 2;
  *   p->task->storage[0].layout.dim[1] = 6;
@@ -246,14 +246,14 @@ int Setup(setup *s) {
 int Storage(pool *p, setup *s) {
 
   /* Path: /Pools/pool-ID/board */
-  p->board->layout.path = "board";
-  p->board->layout.rank = 2; // pool rank
-  p->board->layout.dataspace_type = H5S_SIMPLE;
-  p->board->layout.datatype = H5T_NATIVE_DOUBLE;
-  p->board->layout.dim[0] = LRC_option2int("core", "xres", s->head); // vertical res
-  p->board->layout.dim[1] = LRC_option2int("core", "yres", s->head); // horizontal res
-  p->board->layout.use_hdf = 1;
-  p->board->layout.storage_type = STORAGE_BASIC;
+  p->board->layout = (schema) {
+    .path = "board",
+    .rank = 2, // pool rank
+    .dim[0] = LRC_option2int("core", "xres", s->head), // vertical res
+    .dim[1] = LRC_option2int("core", "yres", s->head), // horizontal res
+    .use_hdf = 1,
+    .storage_type = STORAGE_BASIC,
+  };
 
   p->checkpoint_size = LRC_option2int("core", "checkpoint", s->head);
 
@@ -284,7 +284,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   return POOL_FINALIZE;
 }
 
-/** 
+/**
  * @function
  * Maps tasks
  *

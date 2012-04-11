@@ -12,7 +12,7 @@
 int Init(init *i) {
   i->options = 123;
   i->pools = 61;
-  
+
   return TASK_SUCCESS;
 }
 
@@ -54,15 +54,14 @@ int Storage(pool *p, setup *s) {
     p->board->layout.dim[1] = 5;
   }
 */
-  p->storage[2].layout.path = "conditions";
-  p->storage[2].layout.dataspace_type = H5S_SIMPLE;
-  p->storage[2].layout.datatype = H5T_NATIVE_DOUBLE;
-  p->storage[2].layout.rank = 2;
-  p->storage[2].layout.dim[0] = 5;
-  p->storage[2].layout.dim[1] = 6;
-  p->storage[2].layout.use_hdf = 1;
-
-  p->storage[3].layout = (schema) STORAGE_END;
+  p->storage[2].layout = (schema) {
+    .path = "conditions",
+    .rank = 2,
+    .dim[0] = 5,
+    .dim[1] = 6,
+    .use_hdf = 1,
+    .storage_type = STORAGE_BASIC,
+  };
 
   return TASK_SUCCESS;
 }
