@@ -81,7 +81,7 @@ module ModuleLoad(char *name) {
 int ModuleInit(module *m) {
   query *q;
   int opts;
-  int mstat;
+  int mstat = 0;
 
   /* Load fallback layer, at least core module must implement this */
   if (m->fallback.handler) {

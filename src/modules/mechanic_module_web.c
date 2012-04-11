@@ -352,11 +352,11 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * Implements TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  double err, xv[6], tend, step, eps, result;
+  double err, xv[6], tend, step, eps, result = 0.0;
   int driver = 0;
 
   step = LRC_option2double("arnold", "step", s->head);
-  step  = step*(pow(5,0.5)-1)/2.0;
+  step = step*(pow(5,0.5)-1)/2.0;
   tend = LRC_option2double("arnold", "tend", s->head);
   eps = p->storage[0].data[0][0];
 
