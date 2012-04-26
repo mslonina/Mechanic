@@ -125,9 +125,9 @@ typedef struct {
 LRC_MPIStruct* allocateLRCMPIStruct(int options);
 int LRC2MPI(LRC_MPIStruct*, LRC_configNamespace* head);
 char* mechanic_module_filename(char* name);
-mechanic_internals mechanic_module_open(char* module);
+mechanic_internals* mechanic_module_open(char* module);
 void mechanic_module_close(mechanic_internals* module);
-mechanic_internals mechanic_internals_init(int mpi_size, int node, TaskInfo* m, TaskConfig* d);
+mechanic_internals* mechanic_internals_init(int mpi_size, int node, TaskInfo* m, TaskConfig* d);
 void mechanic_internals_schema_init(int node, TaskInfo* m, mechanic_internals* internals);
 void mechanic_internals_close(mechanic_internals* handler);
 

@@ -42,22 +42,24 @@ char* mechanic_module_filename(char* name){
  * Wrapper to dlopen()
  *
  */
-mechanic_internals mechanic_module_open(char* modulename) {
+mechanic_internals* mechanic_module_open(char* modulename) {
 
-  mechanic_internals modhand;
+  mechanic_internals* modhand;
   char* defaultname;
+
+  modhand = calloc(sizeof(mechanic_internals), sizeof(mechanic_internals));
 
   defaultname = mechanic_module_filename(MECHANIC_MODULE_DEFAULT);
 
-  modhand.module = dlopen(defaultname, RTLD_NOW|RTLD_GLOBAL);
-  if (!modhand.module) {
+  modhand->module = dlopen(defaultname, RTLD_NOW|RTLD_GLOBAL);
+  if (!modhand->module) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Cannot load module '%s': %s\n", MECHANIC_MODULE_DEFAULT, dlerror());
     mechanic_error(MECHANIC_ERR_MODULE);
   }
 
-  modhand.handler = dlopen(modulename, RTLD_NOW|RTLD_GLOBAL);
-  if (!modhand.handler) {
+  modhand->handler = dlopen(modulename, RTLD_NOW|RTLD_GLOBAL);
+  if (!modhand->handler) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Cannot load module '%s': %s\n", modulename, dlerror());
     mechanic_error(MECHANIC_ERR_MODULE);
@@ -219,9 +221,9 @@ module_query_int_f mechanic_load_sym(mechanic_internals *modhand, char* function
 /*
  * Initialize internal data structure
  */
-mechanic_internals mechanic_internals_init(int mpi_size, int node, TaskInfo* m, TaskConfig* d) {
+mechanic_internals* mechanic_internals_init(int mpi_size, int node, TaskInfo* m, TaskConfig* d) {
 
-  mechanic_internals internals;
+  mechanic_internals *internals;
   char* module_filename;
 
   module_filename = mechanic_module_filename(d->module);
@@ -230,11 +232,11 @@ mechanic_internals mechanic_internals_init(int mpi_size, int node, TaskInfo* m, 
   internals = mechanic_module_open(module_filename);
 
   /* Fill the rest of the structure */
-  internals.node = node;
-  internals.mpi_size = mpi_size;
-  internals.config = d;
-  internals.info = m;
-  
+  internals->node = node;
+  internals->mpi_size = mpi_size;
+  internals->config = d;
+  internals->info = m;
+
   free(module_filename);
 
   return internals;
@@ -281,7 +283,7 @@ void mechanic_internals_schema_init(int node, TaskInfo* m, mechanic_internals* i
   if (!m->schema) {
     mechanic_abort(MECHANIC_ERR_MEM);
   }
-  
+
   /* Allocate module setup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Setupsize is %d\n", m->options);
   m->mconfig = realloc(m->mconfig, sizeof(LRC_configDefaults) * (m->options + 1));

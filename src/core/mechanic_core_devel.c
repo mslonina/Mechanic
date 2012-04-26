@@ -293,7 +293,7 @@ int mechanic_ice(mechanic_internals* modhand) {
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "ICE FILE: '%s'\n", modhand->ice);
 
-  mstat = stat((const char *restrict)modhand->ice, &buffer);
+  mstat = stat((const char *)modhand->ice, &buffer);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "stat = %d\n", mstat);
   if (mstat == 0) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "MECHANIC ICE FILE DETECTED\n"); 

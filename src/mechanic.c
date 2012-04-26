@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
   int i, n, mstat; /* mechanic internal error value */
   struct stat st; /* stat.h */
   struct stat ct; /* stat.h */
-  mechanic_internals internals;
+  mechanic_internals *internals;
   char* oldfile;
   size_t olen, opreflen, dlen;
 
@@ -598,9 +598,9 @@ int main(int argc, char** argv) {
       lengths[3] = (int) strlen(cd.mconfig);
 
     }
-      
+
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node[%d] ready\n", node);
-      
+
     MPI_Bcast(lengths, 4, MPI_INT, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
 
     cd.name_len = lengths[0];
@@ -644,56 +644,56 @@ int main(int argc, char** argv) {
 
   /* TaskInfo init */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module init\n");
-  init = mechanic_load_sym(&internals, "init", MECHANIC_MODULE_ERROR, MECHANIC_TEMPLATE);
-  if (init) mstat = init(internals.mpi_size, internals.node, internals.info, internals.config);
+  init = mechanic_load_sym(internals, "init", MECHANIC_MODULE_ERROR, MECHANIC_TEMPLATE);
+  if (init) mstat = init(internals->mpi_size, internals->node, internals->info, internals->config);
   mechanic_check_mstat(mstat);
-  
+
   /* This will override defaults */
   internals = mechanic_internals_init(mpi_size, node, &md, &cd);
 
   /* ICE file name */
-  prepare_ice(&internals);
+  prepare_ice(internals);
 
   /* ICE file presence check */
-  if ((node == MECHANIC_MPI_MASTER_NODE) && (mechanic_ice(&internals) == MECHANIC_ICE)) {
+  if ((node == MECHANIC_MPI_MASTER_NODE) && (mechanic_ice(internals) == MECHANIC_ICE)) {
       mechanic_message(MECHANIC_MESSAGE_WARN, "ICE file is present, will abort now\n");
       mechanic_abort(MECHANIC_ICE);
   }
 
   /* Initialize schema (module storage and setup) */
-  mechanic_internals_schema_init(node, &md, &internals);
-  
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.output_length = %d\n", internals.info->output_length);
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.input_length = %d\n", internals.info->input_length);
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.api = %d\n", internals.info->api);
-  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.options = %d\n", internals.info->options);
+  mechanic_internals_schema_init(node, &md, internals);
+
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.output_length = %d\n", internals->info->output_length);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.input_length = %d\n", internals->info->input_length);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.api = %d\n", internals->info->api);
+  mechanic_message(MECHANIC_MESSAGE_DEBUG, "info.options = %d\n", internals->info->options);
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "output_length = %d\n", md.output_length);
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "input_length = %d\n", md.input_length);
 
-  if (internals.info->output_length <= 0) {
+  if (internals->info->output_length <= 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Master result length must be greater than 0\n");
     mechanic_error(MECHANIC_ERR_SETUP);
   }
 
-  if (internals.info->input_length <= 0) {
+  if (internals->info->input_length <= 0) {
     mechanic_message(MECHANIC_MESSAGE_ERR,
       "Initial condition length must be greater than 0\n");
     mechanic_error(MECHANIC_ERR_SETUP);
   }
   
   /* TaskInfo setup schema */
-  if (internals.info->options > 0) {
+  if (internals->info->options > 0) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module setup schema\n");
-    query = mechanic_load_sym(&internals, "setup_schema", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
-    if (query) mstat = query(internals.info);
+    query = mechanic_load_sym(internals, "setup_schema", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
+    if (query) mstat = query(internals->info);
     mechanic_check_mstat(mstat);
 
     /* LRC module configuration */
-    module_head = LRC_assignDefaults(internals.info->mconfig);
-    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node [%d] options = %d\n", node, internals.info->options);
-    ccc = allocateLRCMPIStruct(internals.info->options);
+    module_head = LRC_assignDefaults(internals->info->mconfig);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node [%d] options = %d\n", node, internals->info->options);
+    ccc = allocateLRCMPIStruct(internals->info->options);
 
     /* Read module setup file on the master node only */
     if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 0) {
@@ -701,7 +701,7 @@ int main(int argc, char** argv) {
       readDefaultTaskConfig(TaskInfoTaskConfigFile, useTaskInfoTaskConfigFile, module_head);
     }
     if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 1) {
-      readCheckpointTaskConfig(CheckpointFile, internals.config->module, module_head);
+      readCheckpointTaskConfig(CheckpointFile, internals->config->module, module_head);
     }
     
     /* 
@@ -720,7 +720,7 @@ int main(int argc, char** argv) {
      */
  //   MPI_Bcast(&ccc, internals.info->options, lrc_mpi_t, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
 
-    for (i = 0; i < internals.info->options; i++) {
+    for (i = 0; i < internals->info->options; i++) {
       if (node == MECHANIC_MPI_MASTER_NODE) {
         for (n = 1; n < mpi_size; n++) {
           MPI_Send(&ccc[i], 1, lrc_mpi_t, n, MECHANIC_MPI_STANDBY_TAG, MPI_COMM_WORLD);
@@ -733,12 +733,12 @@ int main(int argc, char** argv) {
     MPI_Type_free(&lrc_mpi_t);
 
     /* Modify module configuration */
-    for (i = 0; i < internals.info->options; i++) {
+    for (i = 0; i < internals->info->options; i++) {
       LRC_modifyOption(ccc[i].space, ccc[i].name, ccc[i].value, ccc[i].type, module_head);
     }
 
     /* Assign current configuration so that it could be passed to API */
-    internals.info->moptions = module_head;
+    internals->info->moptions = module_head;
 
     free(ccc);
   }
@@ -753,11 +753,11 @@ int main(int argc, char** argv) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Create master data file\n");
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Filename is %s\n", cd.datafile);
     file_id = H5Fcreate(cd.datafile, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-  
+
     /* Storage schema */
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module storage schema\n");
-    schema = mechanic_load_sym(&internals, "storage_schema", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
-    if (schema) mstat = schema(internals.mpi_size, internals.node, internals.info, internals.config);
+    schema = mechanic_load_sym(internals, "storage_schema", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
+    if (schema) mstat = schema(internals->mpi_size, internals->node, internals->info, internals->config);
     mechanic_check_mstat(mstat);
     
     mstat = H5createMasterDataScheme(file_id, &md, &cd);
@@ -767,9 +767,9 @@ int main(int argc, char** argv) {
     LRC_HDF5Writer(file_id, MECHANIC_CONFIG_GROUP, head);
     
     /* TaskInfo configuration if any */
-    if (internals.info->options > 0) {
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "TaskConfig group: %s\n", internals.config->module);
-      LRC_HDF5Writer(file_id, internals.config->module, module_head);
+    if (internals->info->options > 0) {
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "TaskConfig group: %s\n", internals->config->module);
+      LRC_HDF5Writer(file_id, internals->config->module, module_head);
     }
 
     H5Fclose(file_id);
@@ -779,19 +779,19 @@ int main(int argc, char** argv) {
    * the master file has been prepared, configuration stored. We can call
    * additional query on all nodes here, if needed. */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module comm_prepare\n");
-  query = mechanic_load_sym(&internals, "comm_prepare", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
-  if (query) mstat = query(internals.mpi_size, internals.node, internals.info, internals.config);
+  query = mechanic_load_sym(internals, "comm_prepare", MECHANIC_MODULE_SILENT, MECHANIC_NO_TEMPLATE);
+  if (query) mstat = query(internals->mpi_size, internals->node, internals->info, internals->config);
   mechanic_check_mstat(mstat);
 
   /* Bootstrap done, call modes */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Loading mode\n");
   switch (cd.mode) {
     case MECHANIC_MODE_MASTERALONE:
-      mstat = mechanic_mode_masteralone(&internals);
+      mstat = mechanic_mode_masteralone(internals);
       mechanic_check_mstat(mstat);
       break;
     case MECHANIC_MODE_FARM:
-      mstat = mechanic_mode_farm(&internals);
+      mstat = mechanic_mode_farm(internals);
       mechanic_check_mstat(mstat);
       break;
     default:
@@ -808,12 +808,12 @@ int main(int argc, char** argv) {
 
   /* TaskInfo cleanup */
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module cleanup\n");
-  cleanup = mechanic_load_sym(&internals, "cleanup", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
-  if (cleanup) mstat = cleanup(internals.mpi_size, internals.node, internals.info, internals.config);
+  cleanup = mechanic_load_sym(internals, "cleanup", MECHANIC_MODULE_ERROR, MECHANIC_NO_TEMPLATE);
+  if (cleanup) mstat = cleanup(internals->mpi_size, internals->node, internals->info, internals->config);
   mechanic_check_mstat(mstat);
 
   /* Mechanic cleanup */
-  mechanic_internals_close(&internals);
+  mechanic_internals_close(internals);
   mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] Internals closed.\n", node);
 
 setupfinalize:
@@ -828,7 +828,7 @@ setupfinalize:
 
   /* Cleanup LRC */
   LRC_cleanup(head);
-  if (internals.info->options > 0) LRC_cleanup(module_head);
+  if (internals->info->options > 0) LRC_cleanup(module_head);
   mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] LRC closed.\n", node);
 
   /* Finalize */
@@ -839,6 +839,8 @@ setupfinalize:
     mechanic_message(MECHANIC_MESSAGE_INFO, "Mechanic finished his job\n");
     mechanic_message(MECHANIC_MESSAGE_CONT, "Have a nice day!\n\n");
   }
+
+  free(internals);
 
   exit(EXIT_SUCCESS);
 
