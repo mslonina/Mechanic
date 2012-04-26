@@ -3,7 +3,7 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 0)
 set (Mechanic_VERSION_MINOR 12)
-set (Mechanic_VERSION_PATCH 5)
+set (Mechanic_VERSION_PATCH 6)
 set (Mechanic_VERSION_API 0120364)
 
 set (package_version
