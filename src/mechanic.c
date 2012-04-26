@@ -682,7 +682,7 @@ int main(int argc, char** argv) {
       "Initial condition length must be greater than 0\n");
     mechanic_error(MECHANIC_ERR_SETUP);
   }
-  
+
   /* TaskInfo setup schema */
   if (internals->info->options > 0) {
     mechanic_message(MECHANIC_MESSAGE_DEBUG, "Calling module setup schema\n");
@@ -703,13 +703,13 @@ int main(int argc, char** argv) {
     if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 1) {
       readCheckpointTaskConfig(CheckpointFile, internals->config->module, module_head);
     }
-    
-    /* 
+
+    /*
      * Important: put something into LRC-MPI structure. It will be defaults on worker
      * nodes and eventually overrides on the master.
      */
     LRC2MPI(ccc, module_head);
-    
+
     /* Broadcast LRC module configuration */
     mstat = LRC_datatype(ccc[0], &lrc_mpi_t);
     if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "LRC_Datatype committing failed.\n");
@@ -815,6 +815,7 @@ int main(int argc, char** argv) {
   /* Mechanic cleanup */
   mechanic_internals_close(internals);
   mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] Internals closed.\n", node);
+  free(internals);
 
 setupfinalize:
 
@@ -828,7 +829,7 @@ setupfinalize:
 
   /* Cleanup LRC */
   LRC_cleanup(head);
-  if (internals->info->options > 0) LRC_cleanup(module_head);
+  if (md.options > 0) LRC_cleanup(module_head);
   mechanic_message(MECHANIC_MESSAGE_DEBUG,"Node[%d] LRC closed.\n", node);
 
   /* Finalize */
@@ -840,7 +841,6 @@ setupfinalize:
     mechanic_message(MECHANIC_MESSAGE_CONT, "Have a nice day!\n\n");
   }
 
-  free(internals);
 
   exit(EXIT_SUCCESS);
 

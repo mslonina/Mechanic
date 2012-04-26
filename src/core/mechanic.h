@@ -118,7 +118,7 @@ typedef struct {
   void* handler;
   TaskConfig* config;
   TaskInfo* info;
-  char ice[MECHANIC_STRLEN+4];
+  char* ice;
 } mechanic_internals;
 
 typedef struct {

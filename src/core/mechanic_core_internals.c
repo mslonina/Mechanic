@@ -47,7 +47,7 @@ mechanic_internals* mechanic_module_open(char* modulename) {
   mechanic_internals* modhand;
   char* defaultname;
 
-  modhand = calloc(sizeof(mechanic_internals), sizeof(mechanic_internals));
+  modhand = calloc(sizeof(mechanic_internals*), sizeof(mechanic_internals*));
 
   defaultname = mechanic_module_filename(MECHANIC_MODULE_DEFAULT);
 
@@ -244,26 +244,20 @@ mechanic_internals* mechanic_internals_init(int mpi_size, int node, TaskInfo* m,
 
 int prepare_ice(mechanic_internals *internals) {
   int mstat = 0;
-  char* buf;
-  size_t len, flen;
+  size_t flen;
 
-  len = internals->config->name_len;
   flen = strlen(internals->config->name) + 1;
-  buf = calloc(flen + 4 + 2*sizeof(char*), sizeof(char*));
-  if (!buf) mechanic_error(MECHANIC_ERR_MEM);
+  internals->ice = calloc(flen + 4 + 2*sizeof(char*), sizeof(char*));
+  if (!internals->ice) mechanic_error(MECHANIC_ERR_MEM);
 
-  strncpy(buf, internals->config->name, len);
-  buf[len] = LRC_NULL;
+  strncpy(internals->ice, internals->config->name, flen);
+  internals->ice[flen] = LRC_NULL;
 
-  strncat(buf, ".ice", 4);
-  buf[len+4] = LRC_NULL;
-
-  strncpy(internals->ice, buf, len+4);
-  internals->ice[len+4] = LRC_NULL;
+  strncat(internals->ice, ".ice", 4);
+  internals->ice[flen+4] = LRC_NULL;
 
   mechanic_message(MECHANIC_MESSAGE_DEBUG, "ICE FILE IS: %s\n", internals->ice);
 
-  free(buf);
   return mstat;
 }
 
