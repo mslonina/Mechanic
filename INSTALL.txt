@@ -23,14 +23,19 @@ Compilation
     make
     make install
 
-If you want to disable Fortran support run
-
-    CC=mpicc cmake .. -DBUILD_FORTRAN:BOOL=OFF
-
-
 By default, Cmake installs to /usr/local. You can change this by setting
     
     -DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
+
+Fortran support
+---------------
+
+Mechanic supports direct Fortran2003+ bindings (using the iso_c_binding module).
+This make it possible to write entire module in Fortran. To enable direct bindings run
+
+    CC=mpicc cmake .. -DBUILD_FORTRAN:BOOL=ON
+
+Otherwise, the C-module must connect with Fortran code in a compiler-specific way.
 
 Additional modules
 ------------------

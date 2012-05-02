@@ -43,7 +43,7 @@ int mechanic_mode_farm_worker(mechanic_internals *handler) {
       MPI_COMM_WORLD, &mpi_status);
 
   if (mpi_status.MPI_TAG == MECHANIC_MPI_TERMINATE_TAG) {
-    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node %d recevied tag %d\n", handler->node, mpi_status.MPI_TAG);
+    mechanic_message(MECHANIC_MESSAGE_DEBUG, "Node %d has recevied tag %d\n", handler->node, mpi_status.MPI_TAG);
     goto finalize;
   }
 

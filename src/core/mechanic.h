@@ -75,12 +75,6 @@ typedef struct {
 } TaskData;
 /* [/MASTERDATA] */
 
-typedef struct {
-  int coordinates[3];
-  TaskData *input;
-  TaskData *output;
-} Task;
-
 /* [SCHEMA] */
 typedef struct {
   char *path;

@@ -7,11 +7,7 @@
  * @mainpage
  * @author Mariusz Slonina <mariusz.slonina@gmail.com>
  * @version 0.12
- * @date 2011
- *
- * @todo
- *   - HDF5 error handling with H5E (including file storage)
- *   - multifarm mode
+ * @date 2012
  *
  */
 
@@ -515,7 +511,7 @@ int main(int argc, char** argv) {
     mstat = assignTaskConfigValues(&cd, head);
     mechanic_check_mstat(mstat);
 
-    mechanic_message(MECHANIC_MESSAGE_DEBUG,"TaskConfig file contents:\n\n");
+    mechanic_message(MECHANIC_MESSAGE_DEBUG,"Config file contents:\n\n");
     mechanic_printTaskConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
     /* Security check: if mpi_size = 1 switch to masteralone mode */
@@ -609,7 +605,7 @@ int main(int argc, char** argv) {
     cd.mconfig_len = lengths[3];
 
     mstat = buildTaskConfigDataType(lengths, cd, &TaskConfigType);
-    if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "TaskConfigDataType committing failed.\n");
+    if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "ConfigDataType committing failed.\n");
     MPI_Bcast(&cd, 1, TaskConfigType, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
     MPI_Type_free(&TaskConfigType);
 
@@ -623,7 +619,7 @@ int main(int argc, char** argv) {
       node, cd.name_len, cd.datafile_len, cd.module_len, cd.mconfig_len);
 
     mechanic_message(MECHANIC_MESSAGE_DEBUG,
-      "Node [%d] received following configuration:\n\n", node);
+      "Node [%d] has received following configuration:\n\n", node);
     mechanic_printTaskConfig(&cd, MECHANIC_MESSAGE_DEBUG);
 
     /* If we are in masteralone mode, finalize workers */
@@ -697,7 +693,7 @@ int main(int argc, char** argv) {
 
     /* Read module setup file on the master node only */
     if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 0) {
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "UseTaskInfoTaskConfigFile = %d\n", useTaskInfoTaskConfigFile);
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "Use ConfigFile = %d\n", useTaskInfoTaskConfigFile);
       readDefaultTaskConfig(TaskInfoTaskConfigFile, useTaskInfoTaskConfigFile, module_head);
     }
     if (node == MECHANIC_MPI_MASTER_NODE && restartmode == 1) {
@@ -713,12 +709,6 @@ int main(int argc, char** argv) {
     /* Broadcast LRC module configuration */
     mstat = LRC_datatype(ccc[0], &lrc_mpi_t);
     if (mstat < 0) mechanic_message(MECHANIC_MESSAGE_ERR, "LRC_Datatype committing failed.\n");
-
-    /*
-     * For some reason BCAST crashes here, in Fortran such thing works, here,
-     * unfortunately no.
-     */
- //   MPI_Bcast(&ccc, internals.info->options, lrc_mpi_t, MECHANIC_MPI_DEST, MPI_COMM_WORLD);
 
     for (i = 0; i < internals->info->options; i++) {
       if (node == MECHANIC_MPI_MASTER_NODE) {
@@ -768,7 +758,7 @@ int main(int argc, char** argv) {
     
     /* TaskInfo configuration if any */
     if (internals->info->options > 0) {
-      mechanic_message(MECHANIC_MESSAGE_DEBUG, "TaskConfig group: %s\n", internals->config->module);
+      mechanic_message(MECHANIC_MESSAGE_DEBUG, "Config group: %s\n", internals->config->module);
       LRC_HDF5Writer(file_id, internals->config->module, module_head);
     }
 
