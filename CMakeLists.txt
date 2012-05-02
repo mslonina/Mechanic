@@ -1,45 +1,44 @@
-cmake_minimum_required (VERSION 2.8)
-project (mechanic)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
+PROJECT (mechanic)
 
-set (Mechanic_VERSION_MAJOR 0)
-set (Mechanic_VERSION_MINOR 12)
-set (Mechanic_VERSION_PATCH 6)
-set (Mechanic_VERSION_API 0120364)
+SET (Mechanic_VERSION_MAJOR 0)
+SET (Mechanic_VERSION_MINOR 12)
+SET (Mechanic_VERSION_PATCH 7)
+SET (Mechanic_VERSION_API 0120364)
 
-set (package_version
+SET (package_version
   "\"${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}\"")
 
-set (package_name "\"${CMAKE_PROJECT_NAME}\"")
-set (package_author "\"Celestial Mechanics Group (TCFA/NCU)\"")
-set (package_bugs "\"mechanics@astri.umk.pl\"")
-set (package_url "\"http://git.astri.umk.pl/projects/mechanic\"")
-set (package_version_major "\"${Mechanic_VERSION_MAJOR}\"")
-set (package_version_minor "\"${Mechanic_VERSION_MINOR}\"")
-set (package_version_patch "\"${Mechanic_VERSION_PATCH}\"")
-set (package_version_api "\"${Mechanic_VERSION_API}\"")
+SET (package_name "\"${CMAKE_PROJECT_NAME}\"")
+SET (package_author "\"Celestial Mechanics Group (TCFA/NCU)\"")
+SET (package_bugs "\"mechanics@astri.umk.pl\"")
+SET (package_url "\"http://git.astri.umk.pl/projects/mechanic\"")
+SET (package_version_major "\"${Mechanic_VERSION_MAJOR}\"")
+SET (package_version_minor "\"${Mechanic_VERSION_MINOR}\"")
+SET (package_version_patch "\"${Mechanic_VERSION_PATCH}\"")
+SET (package_version_api "\"${Mechanic_VERSION_API}\"")
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set (platform_darwin 1)
-  set (platform_linux 0)
-endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  SET (platform_darwin 1)
+  SET (platform_linux 0)
+ENDIF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  set (platform_darwin 0)
-  set (platform_linux 1)
-endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+IF (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  SET (platform_darwin 0)
+  SET (platform_linux 1)
+ENDIF (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
-option (BUILD_FORTRAN "Build Fortran bindings" off)
-option (BUILD_DOCS "Build documentation" off)
+OPTION (BUILD_FORTRAN "Build Fortran bindings" OFF)
 
-if (BUILD_FORTRAN)
-  enable_language (Fortran)
-  set (CMAKE_Fortran_FLAGS 
-    "${CMAKE_Fortran_FLAGS} -I. -std=f2003")
-endif (BUILD_FORTRAN)
+IF (BUILD_FORTRAN)
+  ENABLE_LANGUAGE (Fortran)
+ENDIF (BUILD_FORTRAN)
 
-include (CheckIncludeFiles)
-include (CheckLibraryExists)
-include (CheckCSourceCompiles)
+LIST (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+
+INCLUDE (MechanicIncludes)
+INCLUDE (MechanicLibraryExists)
+INCLUDE (CheckCSourceCompiles)
 
 CHECK_INCLUDE_FILES (stdio.h HAVE_STDIO_H)
 CHECK_INCLUDE_FILES (dlfcn.h HAVE_DLFCN_H)
@@ -59,29 +58,47 @@ CHECK_INCLUDE_FILES (hdf5.h HAVE_HDF5_H)
 CHECK_INCLUDE_FILES (libreadconfig.h HAVE_LRC_H)
 CHECK_INCLUDE_FILES (libreadconfig_hdf5.h HAVE_LRC_HDF5_H)
 
-CHECK_LIBRARY_EXISTS(dl dlopen "" HAVE_DLFCN_LIB)
-CHECK_LIBRARY_EXISTS(hdf5 H5Dopen2 "" HAVE_HDF5_LIB)
-CHECK_LIBRARY_EXISTS(m pow "" HAVE_M_LIB)
-CHECK_LIBRARY_EXISTS(popt poptGetContext "" HAVE_POPT_LIB)
-
-CHECK_LIBRARY_EXISTS(readconfig LRC_HDF5Writer "" HAVE_LRC_HDF5_LIB)
+CHECK_LIBRARY_EXISTS (dl dlopen "" HAVE_DLFCN_LIB)
+CHECK_LIBRARY_EXISTS (hdf5 H5Dopen2 "" HAVE_HDF5_LIB)
+CHECK_LIBRARY_EXISTS (m pow "" HAVE_M_LIB)
+CHECK_LIBRARY_EXISTS (popt poptGetContext "" HAVE_POPT_LIB)
+CHECK_LIBRARY_EXISTS (readconfig LRC_HDF5Writer "" HAVE_LRC_HDF5_LIB)
 
 CONFIGURE_FILE (
   ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in 
   ${CMAKE_CURRENT_BINARY_DIR}/src/config.h
 )
 
-add_definitions (-DHAVE_CONFIG_H)
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
+ADD_DEFINITIONS (-DHAVE_CONFIG_H)
 
-add_subdirectory(src)
-add_subdirectory(src/core)
-add_subdirectory(src/modes)
-add_subdirectory(src/modules)
+# C Compiler flags
+IF (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+  SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
+ELSEIF (${CMAKE_C_COMPILER_ID} STREQUAL "Intel")
+  SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
+ELSE (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
+  SET (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -std=c99")
+ENDIF (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
 
-if (BUILD_FORTRAN)
-  add_subdirectory(src/fortran)
-endif (BUILD_FORTRAN)
+# Fortran Compiler flags
+IF (BUILD_FORTRAN)
+  IF (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
+    SET (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I. -std=f2003")
+  ELSEIF (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
+    SET (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I. -stand f03")
+  ELSE (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
+    SET (CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -I. -std=f2003")
+  ENDIF (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
+ENDIF (BUILD_FORTRAN)
+
+ADD_SUBDIRECTORY(src)
+ADD_SUBDIRECTORY(src/core)
+ADD_SUBDIRECTORY(src/modes)
+ADD_SUBDIRECTORY(src/modules)
+
+IF (BUILD_FORTRAN)
+  ADD_SUBDIRECTORY(src/fortran)
+ENDIF (BUILD_FORTRAN)
 
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mechanic")
 SET (CPACK_PACKAGE_VENDOR "Celestial Mechanics Group (TCFA/NCU)")
@@ -96,7 +113,7 @@ SET (CPACK_SOURCE_PACKAGE_FILE_NAME
 SET (CPACK_SOURCE_IGNORE_FILES
   "/build/;/.DS_Store;/.gitignore;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 
-include (CPack)
+INCLUDE (CPack)
 
-add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
+ADD_CUSTOM_TARGET (dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 
