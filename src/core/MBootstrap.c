@@ -1,4 +1,25 @@
 /**
+ * We are now on the eve of the second transit of a pair, after which there will be no
+ * other till the twenty-first century of our era has dawned upon the earth, and the June
+ * flowers are blooming in 2004. When the last transit season occurred the intellectual
+ * world was awakening from the slumber of ages, and that wondrous scientific activity
+ * which has led to our present advanced knowledge was just beginning. What will be the
+ * state of science when the next transit season arrives God only knows. Not even our
+ * children's children will live to take part in the astronomy of that day. As for
+ * ourselves, we have to do with the present...
+ *
+ * William Harkness, The Transit of Venus
+ *
+ * I think the astronomers of the first years of the twenty first century, looking back
+ * over the long transit-less period which will then have passed, will understand the
+ * anxiety of astronomers in our own time to utilise to the full whatever opportunities
+ * the coming transits may afford...;and I venture to hope...they will not be disposed to
+ * judge over harshly what some in our own day may have regarded as an excess of zeal.
+ *
+ * Richard Proctor, Transits of Venus, A Popular Account, 1875
+ */
+
+/**
  * @file
  * The Bootstrap stage
  */
