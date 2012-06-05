@@ -430,4 +430,25 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
   return TASK_SUCCESS;
 }
 
+/**
+ * @function
+ * @brief The prepare hook
+ *
+ * This hook is called right before the pool starts
+ */
+int Prepare(char *masterfile, setup *s) {
+  return TASK_SUCCESS;
+}
+
+/**
+ * @function
+ * @brief The process hook
+ *
+ * This hook is called after the pool loop finishes.
+ * Example:
+ * - You may do some specific data file postprocessing here
+ */
+int Process(char *masterfile, setup *s) {
+  return TASK_SUCCESS;
+}
 /** @} */

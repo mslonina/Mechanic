@@ -133,6 +133,7 @@ int main(int argc, char** argv) {
    */
   filename = Name(LRC_getOptionValue("core", "config", core.layer.setup.head), "", "", "");
   mstat = Setup(&core, filename, argc, argv, CORE_SETUP);
+  CheckStatus(mstat);
   free(filename);
 
   if (node == MASTER)
@@ -159,6 +160,7 @@ int main(int argc, char** argv) {
     Message(MESSAGE_INFO, "Config file to use: '%s'\n", filename);
 
   mstat = Setup(&module, filename, argc, argv, MODULE_SETUP);
+  CheckStatus(mstat);
   free(filename);
 
   if (node == MASTER)
@@ -179,7 +181,6 @@ int main(int argc, char** argv) {
     goto finalize; // Special help message handling
   }
 
-  CheckStatus(mstat);
 
   /**
    * (H) Backup the master data file

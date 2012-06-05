@@ -9,6 +9,7 @@
 #include "MMpi.h"
 #include "MCheckpoint.h"
 #include "MTask.h"
+#include "MCore.h"
 
 int Taskfarm(module *m);
 int Master(module *m, pool *p);

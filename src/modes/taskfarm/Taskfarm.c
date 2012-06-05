@@ -13,6 +13,8 @@ int Taskfarm(module *m) {
   pool **p = NULL;
   int pool_create;
 
+  Prepare(m);
+
   /**
    * Initialize the pool bank
    */
@@ -61,6 +63,8 @@ int Taskfarm(module *m) {
     PoolFinalize(m, p[pid]);
   }
   free(p);
+
+  Process(m);
 
   return mstat;
 }
