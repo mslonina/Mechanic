@@ -4,10 +4,18 @@
  */
 #include "MCore.h"
 
+/**
+ * @function
+ * The Welcome message
+ */
 void Welcome() {
   Message(MESSAGE_INFO, "This is Mechanic2.\n");
 }
 
+/**
+ * @function
+ * The Prepare hook
+ */
 int Prepare(module *m) {
   int mstat = 0;
   setup *s = &(m->layer.setup);
@@ -21,6 +29,10 @@ int Prepare(module *m) {
   return mstat;
 }
 
+/**
+ * @function
+ * The Process hook
+ */
 int Process(module *m) {
   int mstat = 0;
   setup *s = &(m->layer.setup);
