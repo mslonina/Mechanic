@@ -2,7 +2,6 @@
  * @file
  * Common functions
  */
-
 #include "MCommon.h"
 
 /**
@@ -46,7 +45,6 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
  * Common messaging interface
  */
 void Message(int type, char *message, ...) {
-
   static char message2[2048];
   va_list args;
 
@@ -59,7 +57,6 @@ void Message(int type, char *message, ...) {
     if (type == MESSAGE_IERR) printf("!! %s", message2);
 		if (type == MESSAGE_WARN) printf(".. %s", message2);
   va_end(args);
-
 }
 
 /**
@@ -117,10 +114,8 @@ double** AllocateBuffer(int rank, int *dims) {
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  */
 void FreeBuffer(double **array) {
-
   if (array[0]) free(array[0]);
   if (array) free(array);
-
 }
 
 /**
@@ -187,8 +182,7 @@ int Copy(char* in, char* out) {
   }
 
   stat(in, &st);
-  Message(MESSAGE_DEBUG,
-      "Input file size: %d\n", (int) st.st_size);
+  Message(MESSAGE_DEBUG, "Input file size: %d\n", (int) st.st_size);
 
   output = open(out, O_RDWR | O_CREAT | O_TRUNC, 0644);
   if (output < 0) {

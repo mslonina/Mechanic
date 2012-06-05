@@ -1,7 +1,7 @@
 #ifndef MECHANIC_MECHANIC_H
 #define MECHANIC_MECHANIC_H
 
-#include <inttypes.h> /* for 32 and 64 bits */
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,6 +49,7 @@
 
 /* Pool */
 #define POOL_FINALIZE 1001
+#define POOL_RESET 1002
 #define POOL_CREATE_NEW 1003
 
 /* Storage */

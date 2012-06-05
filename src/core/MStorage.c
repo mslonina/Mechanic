@@ -111,6 +111,7 @@ int CheckLayout(int banks, storage *s) {
       }
     }
   }
+
   return mstat;
 }
 
@@ -207,6 +208,7 @@ int CommitStorageLayout(module *m, pool *p) {
   H5Gclose(h5group);
   H5Gclose(h5pools);
   H5Fclose(h5location);
+
   return mstat;
 }
 
@@ -305,7 +307,9 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
     }
   }
+
   if (hdf_status < 0) mstat = CORE_ERR_HDF;
+
   return mstat;
 }
 

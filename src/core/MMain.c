@@ -8,15 +8,63 @@
  * @file
  * The Main function
  */
+
+/**
+ * @mainpage
+ *
+ * ## Overview Overview
+ *
+ * What is all about
+ *
+ * ## Key features
+ *
+ * - Task farm based approach
+ *
+ * @page Installation
+ *
+ * [TOC]
+ *
+ * Some installation notes
+ *
+ * @section Requirements Requirements
+ *
+ * - C compiler (GCC 4.6, Intel 12)
+ * - MPI (we favor OpenMPI 1.5)
+ * - CMake 2.8
+ * - Popt 1.14
+ * - LibReadConfig 0.12.4
+ *
+ * @section gentoo Gentoo Prefix
+ *
+ *     emerge mechanic
+ *
+ * @section manual Manual Installation
+ *
+ *     mkdir build && cd build
+ *     CC=mpicc cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/install/prefix/path
+ *     make
+ *     make install
+ *
+ *
+ * @page Publications
+ *
+ * List of publications
+ *
+ * @page Test
+ *
+ * [TOC]
+ *
+ * @section SectionOne Section One
+ *
+ * @section SectionTwo Section Two
+ */
 #include "MMain.h"
 
 int main(int argc, char** argv) {
-
   int mpi_rank, mpi_size, node;
   module core, module, fallback;
 
-  char *filename;
-  char *module_name;
+  char *filename, *module_name;
   char *masterfile, *masterfile_backup;
 
   struct stat file;

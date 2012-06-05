@@ -2,7 +2,6 @@
  * @file
  * The module interface
  */
-
 #include "MModules.h"
 
 /**
@@ -50,5 +49,3 @@ query* LoadSym(module *m, char* function, int flag) {
 
   return q;
 }
-
-

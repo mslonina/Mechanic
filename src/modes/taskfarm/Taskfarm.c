@@ -33,19 +33,21 @@ int Taskfarm(module *m) {
     /* Pool storage */
     Storage(m, p[pid]);
 
-    mstat = PoolPrepare(m, p, p[pid]);
-    CheckStatus(mstat);
+    do {
+      mstat = PoolPrepare(m, p, p[pid]);
+      CheckStatus(mstat);
 
-    /**
-     * The Task loop
-     */
-    if (m->node == MASTER) {
-      mstat = Master(m, p[pid]);
-    } else {
-      mstat = Worker(m, p[pid]);
-    }
+      /**
+       * The Task loop
+       */
+      if (m->node == MASTER) {
+        mstat = Master(m, p[pid]);
+      } else {
+        mstat = Worker(m, p[pid]);
+      }
 
-    pool_create = PoolProcess(m, p, p[pid]);
+      pool_create = PoolProcess(m, p, p[pid]);
+    } while (pool_create == POOL_RESET);
 
     pid++;
 

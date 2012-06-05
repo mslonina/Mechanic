@@ -3,16 +3,28 @@
  * Core Mechanic module, implementation of all API functions
  */
 
+/**
+ * @defgroup public_api The Public API
+ * @{
+ */
+
 #include "MMechanic2.h"
 #include "mechanic_module_core.h"
 
 /**
  * @function
- * Initializes critical core variables
+ * @brief Initializes critical core variables
  *
  * At least the core module implements this function. The user may override the core
- * defaults in custom module -- in such case, the module variables will be merged with
+ * defaults in a custom module -- in such a case, the module variables will be merged with
  * core.
+ *
+ * @param i The init structure
+ * @return TASK_SUCCESS on success, error code otherwise
+ */
+
+/**
+ * .. c:function:: int Init(init *i)
  */
 int Init(init *i) {
   i->options = 128;
@@ -25,7 +37,7 @@ int Init(init *i) {
 
 /**
  * @function
- * Define the default configuration options
+ * @brief Define the default configuration options
  *
  * This is an implementation of the LRC API. We initialize here default options.
  * If the user-supplied module implements this function, the setup options will be merged
@@ -33,6 +45,9 @@ int Init(init *i) {
  *
  * Configuration options are automatically added to the Popt arg table, so that, you may
  * override the defaults with the command line.
+ *
+ * @param s The setup structure
+ * @return TASK_SUCCESS on success, error code otherwise
  */
 int Setup(setup *s) {
   s->options[0] = (LRC_configDefaults) {
@@ -147,13 +162,12 @@ int Setup(setup *s) {
 
 /**
  * @function
- * Define the pool storage layout
+ * @brief Define the pool storage layout
  *
  * If the user-supplied module implements this function, the layout will be merged with
  * the core. You may change the layout per pool.
  *
- * POOL STORAGE
- * ------------
+ * ## POOL STORAGE
  *
  * The Pool will store its global data in the /Pools/pool-ID. The task data will be stored
  * in /Pools/pool-ID/Tasks.
@@ -166,99 +180,107 @@ int Setup(setup *s) {
  *
  * Note: All global pool datasets must use STORAGE_BASIC storage_type.
  *
- * TASK STORAGE
- * ------------
+ * ## TASK STORAGE
  *
  * The task data is stored inside /Pools/pool-ID/Tasks group. There are four available
  * methods to store the task result:
  *
- * - STORAGE_BASIC - the whole memory block is stored in a dataset inside /Tasks/task-ID
- *   group, i.e., for a dataset defined similar to:
+ * ### STORAGE_BASIC
  *
- *   p->task->storage[0].layout.path = "basic-dataset";
- *   p->task->storage[0].layout.dim[0] = 2;
- *   p->task->storage[0].layout.dim[1] = 6;
- *   p->task->storage[0].layout.storage_type = STORAGE_BASIC;
- *   p->task->storage[0].layout.use_hdf = 1;
+ * The whole memory block is stored in a dataset inside /Tasks/task-ID
+ * group, i.e., for a dataset defined similar to:
  *
- *   The output is stored in /Pools/pool-ID/Tasks/task-ID/basic-dataset:
+ *     p->task->storage[0].layout.path = "basic-dataset";
+ *     p->task->storage[0].layout.dim[0] = 2;
+ *     p->task->storage[0].layout.dim[1] = 6;
+ *     p->task->storage[0].layout.storage_type = STORAGE_BASIC;
+ *     p->task->storage[0].layout.use_hdf = 1;
  *
- *   9 9 9 9 9 9
- *   9 9 9 9 9 9
+ * The output is stored in /Pools/pool-ID/Tasks/task-ID/basic-dataset:
  *
- * - STORAGE_PM3D - the memory block is stored in a dataset with a column-offset, so that
- *   the output is suitable to process with Gnuplot. Example: Suppose we have a 2x5 task
- *   pool:
+ *     9 9 9 9 9 9
+ *     9 9 9 9 9 9
  *
- *   1 2 3 4 5
- *   6 7 8 9 0
  *
- *   While each worker returns the result of size 2x7. For a dataset defined similar to:
+ * ### STORAGE_PM3D
  *
- *   p->task->storage[0].layout.path = "pm3d-dataset";
- *   p->task->storage[0].layout.dim[0] = 2;
- *   p->task->storage[0].layout.dim[1] = 7;
- *   p->task->storage[0].layout.storage_type = STORAGE_PM3D;
- *   p->task->storage[0].layout.use_hdf = 1;
+ * The memory block is stored in a dataset with a column-offset, so that
+ * the output is suitable to process with Gnuplot. Example: Suppose we have a 2x5 task
+ * pool:
  *
- *   We have: /Pools/pool-ID/Tasks/pm3d-dataset with:
+ *     1 2 3 4 5
+ *     6 7 8 9 0
  *
- *   1 1 1 1 1 1 1
- *   1 1 1 1 1 1 1
- *   6 6 6 6 6 6 6
- *   6 6 6 6 6 6 6
- *   2 2 2 2 2 2 2
- *   2 2 2 2 2 2 2
- *   7 7 7 7 7 7 7
- *   7 7 7 7 7 7 7
- *   ...
+ * While each worker returns the result of size 2x7. For a dataset defined similar to:
  *
- * - STORAGE_LIST - the memory block is stored in a dataset with a task-ID offset, This is
- *   similar to STORAGE_PM3D, this time however, there is no column-offset. For a dataset
- *   defined as below:
+ *     p->task->storage[0].layout.path = "pm3d-dataset";
+ *     p->task->storage[0].layout.dim[0] = 2;
+ *     p->task->storage[0].layout.dim[1] = 7;
+ *     p->task->storage[0].layout.storage_type = STORAGE_PM3D;
+ *     p->task->storage[0].layout.use_hdf = 1;
  *
- *   p->task->storage[0].layout.path = "list-dataset";
- *   p->task->storage[0].layout.dim[0] = 2;
- *   p->task->storage[0].layout.dim[1] = 7;
- *   p->task->storage[0].layout.storage_type = STORAGE_LIST;
- *   p->task->storage[0].layout.use_hdf = 1;
+ * We have: /Pools/pool-ID/Tasks/pm3d-dataset with:
  *
- *   The output is stored in /Pools/pool-ID/Tasks/list-dataset:
+ *     1 1 1 1 1 1 1
+ *     1 1 1 1 1 1 1
+ *     6 6 6 6 6 6 6
+ *     6 6 6 6 6 6 6
+ *     2 2 2 2 2 2 2
+ *     2 2 2 2 2 2 2
+ *     7 7 7 7 7 7 7
+ *     7 7 7 7 7 7 7
+ *     ...
  *
- *   1 1 1 1 1 1 1
- *   1 1 1 1 1 1 1
- *   2 2 2 2 2 2 2
- *   2 2 2 2 2 2 2
- *   3 3 3 3 3 3 3
- *   3 3 3 3 3 3 3
- *   4 4 4 4 4 4 4
- *   4 4 4 4 4 4 4
- *   ...
+ * ### STORAGE_LIST
  *
- * - STORAGE_BOARD - the memory block is stored in a dataset with a {row,column}-offset
- *   according to the board-location of the task. Suppose we have a dataset defined like
- *   this:
+ * The memory block is stored in a dataset with a task-ID offset, This is
+ * similar to STORAGE_PM3D, this time however, there is no column-offset. For a dataset
+ * defined as below:
  *
- *   p->task->storage[0].layout.path = "board-dataset";
- *   p->task->storage[0].layout.dim[0] = 2;
- *   p->task->storage[0].layout.dim[1] = 3;
- *   p->task->storage[0].layout.storage_type = STORAGE_BOARD;
- *   p->task->storage[0].layout.use_hdf = 1;
+ *     p->task->storage[0].layout.path = "list-dataset";
+ *     p->task->storage[0].layout.dim[0] = 2;
+ *     p->task->storage[0].layout.dim[1] = 7;
+ *     p->task->storage[0].layout.storage_type = STORAGE_LIST;
+ *     p->task->storage[0].layout.use_hdf = 1;
  *
- *   For a 2x5 task pool:
+ * The output is stored in /Pools/pool-ID/Tasks/list-dataset:
  *
- *   1 2 3 4 5
- *   6 7 8 9 0
+ *     1 1 1 1 1 1 1
+ *     1 1 1 1 1 1 1
+ *     2 2 2 2 2 2 2
+ *     2 2 2 2 2 2 2
+ *     3 3 3 3 3 3 3
+ *     3 3 3 3 3 3 3
+ *     4 4 4 4 4 4 4
+ *     4 4 4 4 4 4 4
+ *     ...
  *
- *   the result is stored in /Pools/pool-ID/Tasks/board-dataset:
+ * ### STORAGE_BOARD
  *
- *   1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
- *   1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
- *   6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
- *   6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
+ * The memory block is stored in a dataset with a {row,column}-offset
+ * according to the board-location of the task. Suppose we have a dataset defined like
+ * this:
  *
- * CHECKPOINT
- * ----------
+ *     p->task->storage[0].layout.path = "board-dataset";
+ *     p->task->storage[0].layout.dim[0] = 2;
+ *     p->task->storage[0].layout.dim[1] = 3;
+ *     p->task->storage[0].layout.storage_type = STORAGE_BOARD;
+ *     p->task->storage[0].layout.use_hdf = 1;
+ *
+ * For a 2x5 task pool:
+ *
+ *     1 2 3 4 5
+ *     6 7 8 9 0
+ *
+ * the result is stored in /Pools/pool-ID/Tasks/board-dataset:
+ *
+ *     1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
+ *     1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
+ *     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
+ *     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
+ *
+ *
+ * ## CHECKPOINT
  *
  * The checkpoint is defined as a multiply of the MPI_COMM_WORLD-1, minimum = 1. It
  * contains the results from tasks that have been processed and received. When the
@@ -267,6 +289,11 @@ int Setup(setup *s) {
  *
  * You can adjust the number of available memory/storage banks by implementing the Init
  * function and using banks_per_pool and banks_per_task variables.
+ *
+ * @param p The pool structure
+ * @param s The setup structure
+ *
+ * @return TASK_SUCCESS on success, error code otherwise
  */
 int Storage(pool *p, setup *s) {
 
@@ -287,12 +314,18 @@ int Storage(pool *p, setup *s) {
 
 /**
  * @function
- * Prepares the pool
+ * @brief Prepares the pool
  *
  * This is a perfect place to read additional configuration, input files and assign values
  * to pool data tables. The data stored in the pool is broadcasted to all nodes, right
  * after the function is performed, as well as hdf storage for all datasets with use_hdf =
- * 1.
+ * 1
+ *
+ * @param allpools The pointer to all pools
+ * @param p The current pool structure
+ * @param s The setup structure
+ *
+ * @return TASK_SUCCESS on success, error code otherwise
  */
 int PoolPrepare(pool **allpools, pool *current, setup *s) {
   return TASK_SUCCESS;
@@ -300,7 +333,11 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
 
 /**
  * @function
- * Process the pool
+ * @brief Process the pool
+ *
+ * @param allpools The pointer to all pools
+ * @param p The current pool structure
+ * @param s The setup structure
  *
  * @return
  * POOL_FINALIZE for the last pool or POOL_CREATE_NEW, if the pool loop have to continue
@@ -311,20 +348,26 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 
 /**
  * @function
- * Maps tasks
+ * @brief Maps tasks
  *
  * The mapping starts from the top left corner:
  *
- * (0,0) (0,1) (0,2) (0,3) ...
- * (1,0) (1,1) (1,2) (1,3)
- * (2,0) (2,1) (2,2) (2,3)
- *  ...
+ *     (0,0) (0,1) (0,2) (0,3) ...
+ *     (1,0) (1,1) (1,2) (1,3)
+ *     (2,0) (2,1) (2,2) (2,3)
+ *     ...
  *
  *  This follows the hdf5 storage, row by row:
  *
- *  0  1  2  3
- *  4  5  6  7
- *  8  9 10 11
+ *      0  1  2  3
+ *      4  5  6  7
+ *      8  9 10 11
+ *
+ *  @param p
+ *  @param t
+ *  @param s
+ *
+ *  @return
  */
 int TaskMapping(pool *p, task *t, setup *s) {
   int px, vert;
@@ -346,7 +389,13 @@ int TaskMapping(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * Prepares the task
+ * @brief Prepares the task
+ *
+ * @param p
+ * @param t
+ * @param s
+ *
+ * @return
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
   return TASK_SUCCESS;
@@ -354,7 +403,13 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * Process the task
+ * @brief Process the task
+ *
+ * @param p
+ * @param t
+ * @param s
+ *
+ * @return
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   return TASK_SUCCESS;
@@ -362,8 +417,17 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * Prepares the checkpoint
+ * @brief Prepares the checkpoint
+ *
+ * @param p
+ * @param c
+ * @param s
+ *
+ * @return
+ *
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
   return TASK_SUCCESS;
 }
+
+/** @} */

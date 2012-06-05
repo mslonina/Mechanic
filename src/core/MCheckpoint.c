@@ -1,8 +1,7 @@
 /**
  * @function
- * Checkpoint related stuff
+ * The checkpoint
  */
-
 #include "MCheckpoint.h"
 
 /**
@@ -53,7 +52,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
  */
 int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
-  query *q;
+  query *q = NULL;
   setup *s = &(m->layer.setup);
 
   if (m->node == MASTER) {
@@ -70,7 +69,7 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
-  int i, j, k, l;
+  int i = 0, j = 0, k = 0, l = 0;
   hid_t h5location, group, tasks, datapath;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
@@ -168,6 +167,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
     size = GetSize(t->storage[j].layout.rank, t->storage[j].layout.dim);
     position = position + size;
   }
+
   TaskFinalize(m, p, t);
 
   H5Gclose(tasks);
@@ -182,7 +182,6 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
  * Reset the checkpoint
  */
 void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
-
   int i = 0;
   c->cid = cid;
   c->counter = 0;

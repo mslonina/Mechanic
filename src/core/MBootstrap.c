@@ -1,6 +1,6 @@
 /**
  * @file
- * The Bootstrap stage.
+ * The Bootstrap stage
  */
 #include "MBootstrap.h"
 
@@ -69,8 +69,8 @@ module ModuleLoad(char *name) {
   m.fallback.handler = NULL;
 
   free(fname);
-  return m;
 
+  return m;
 }
 
 /**
@@ -81,8 +81,8 @@ module ModuleLoad(char *name) {
  * - If the layer function exists, overwrite fallback
  */
 int ModuleInit(module *m) {
-  query *q;
-  int opts;
+  query *q = NULL;
+  int opts = 0;
   int mstat = 0;
 
   /* Load fallback layer, at least core module must implement this */
@@ -132,8 +132,8 @@ int ModuleInit(module *m) {
  * necessary).
  */
 int ModuleSetup(module *m, int argc, char **argv) {
-  query *q;
-  int mstat;
+  query *q = NULL;
+  int mstat = 0;
 
   q = LoadSym(m, "Setup", NO_FALLBACK);
   if (q) {

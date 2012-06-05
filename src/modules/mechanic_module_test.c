@@ -5,6 +5,8 @@
 #include "MMechanic2.h"
 #include "mechanic_module_test.h"
 
+extern int nbody();
+
 /**
  * @function
  * Implementation of Init()
@@ -54,13 +56,22 @@ int Storage(pool *p, setup *s) {
     p->board->layout.dim[1] = 5;
   }
 */
-  p->storage[2].layout = (schema) {
+  p->storage[0].layout = (schema) {
     .path = "conditions",
     .rank = 2,
     .dim[0] = 5,
     .dim[1] = 6,
     .use_hdf = 1,
     .storage_type = STORAGE_BASIC,
+  };
+
+  p->task->storage[0].layout = (schema) {
+    .path = "result",
+    .rank = 2,
+    .dim[0] = 5,
+    .dim[1] = 6,
+    .use_hdf = 1,
+    .storage_type = STORAGE_LIST,
   };
 
   return TASK_SUCCESS;
@@ -74,12 +85,12 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
   int i,j;
   int dims[2];
 
-  dims[0] = p->storage[2].layout.dim[0];
-  dims[1] = p->storage[2].layout.dim[1];
+  dims[0] = p->storage[0].layout.dim[0];
+  dims[1] = p->storage[0].layout.dim[1];
 
   for (j = 0; j < dims[0]; j++) {
     for (i = 0; i < dims[1]; i++) { 
-      p->storage[2].data[j][i] = i + j;
+      p->storage[0].data[j][i] = i + j;
     }
   }
 
@@ -115,27 +126,9 @@ int TaskPrepare(pool *p, task *t, setup *s) {
   dims[0] = t->storage[0].layout.dim[0];
   dims[1] = t->storage[0].layout.dim[1];
 
-  dims[2] = t->storage[1].layout.dim[0];
-  dims[3] = t->storage[1].layout.dim[1];
-
-  dims[4] = t->storage[2].layout.dim[0];
-  dims[5] = t->storage[2].layout.dim[1];
-
   for (j = 0; j < dims[0]; j++) {
     for (i = 0; i < dims[1]; i++) { 
       t->storage[0].data[j][i] = i + j;
-    }
-  }
-
-  for (j = 0; j < dims[2]; j++) {
-    for (i = 0; i < dims[3]; i++) { 
-      t->storage[1].data[j][i] = t->tid;
-    }
-  }
-  
-  for (j = 0; j < dims[4]; j++) {
-    for (i = 0; i < dims[5]; i++) { 
-      t->storage[2].data[j][i] = t->tid;
     }
   }
 
@@ -147,22 +140,10 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * Implementation of TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-//  printf("pool id %d, task id %d\n", p->pid, t->tid);
-
   int i,j,k;
 
-//  printf("Node %04d Task ID :: %d at [%04d, %04d]\n", p->node, t->tid, t->location[0], t->location[1]);
-  for (k = 0; k < 2; k++) {
-    for (j = 0; j < t->storage[k].layout.dim[0]; j++) {
-      for (i = 0; i < t->storage[k].layout.dim[1]; i++) { 
-//        printf("%04.1f " , t->storage[k].data[j][i]);
-        t->storage[k].data[j][i] = t->tid;
-      }
-//      printf("\n");
-    }
-//    printf("\n");
-  }
-  
+  nbody();
+
   return TASK_SUCCESS;
 }
 

@@ -5,6 +5,10 @@
  * Working code for the Mechanic-0.13 master branch
  */
 
+/**
+ * @defgroup module_arnold_web The Arnold Web module
+ * @{
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -21,7 +25,7 @@
 
 /**
  * @function
- * Implements Init()
+ * @brief Implements Init()
  */
 int Init(init *i) {
   i->options = 24;
@@ -34,7 +38,7 @@ int Init(init *i) {
 
 /**
  * @function
- * Implements Setup()
+ * @brief Implements Setup()
  */
 int Setup(setup *s) {
 
@@ -123,7 +127,7 @@ int Setup(setup *s) {
 
 /**
  * @function
- * Implements Storage()
+ * @brief Implements Storage()
  */
 int Storage(pool *p, setup *s) {
 
@@ -156,7 +160,7 @@ int Storage(pool *p, setup *s) {
 
 /**
  * @function
- * Implements TaskPrepare()
+ * @brief Implements TaskPrepare()
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
   double xmin, xmax, ymin, ymax;
@@ -182,7 +186,7 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * Implements TaskProcess()
+ * @brief Implements TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   double err, xv[6], tend, step, eps, result = 0.0;
@@ -218,7 +222,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * Implements CheckpointPrepare()
+ * @brief Implements CheckpointPrepare()
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 
@@ -226,3 +230,5 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 
   return TASK_SUCCESS;
 }
+
+/** }@ */
