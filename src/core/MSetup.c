@@ -135,7 +135,6 @@ int Popt(module *m, int argc, char** argv, setup *s) {
     if (m->node == MASTER) {
       Message(MESSAGE_WARN,"%s: %s\n", poptBadOption(s->popt->poptcontext, POPT_BADOPTION_NOALIAS),
           poptStrerror(rc));
-      poptPrintHelp(s->popt->poptcontext, stdout, 0);
     }
     return CORE_SETUP_HELP;
   }
@@ -144,17 +143,11 @@ int Popt(module *m, int argc, char** argv, setup *s) {
   LRCUpdate(s);
 
   if (LRC_option2int("core", "help", s->head)) {
-    if (m->node == MASTER) {
-      poptPrintHelp(s->popt->poptcontext, stdout, 0);
-    }
     return CORE_SETUP_HELP;
   }
 
   if (LRC_option2int("core", "usage", s->head)) {
-    if (m->node == MASTER) {
-      poptPrintUsage(s->popt->poptcontext, stdout, 0);
-    }
-    return CORE_SETUP_HELP;
+    return CORE_SETUP_USAGE;
   }
 
   return mstat;
@@ -207,7 +200,7 @@ int PoptOptions(module *m, setup *s) {
 
 /**
  * @function
- * Updatesthe LRC options tablewith popt values
+ * Updates the LRC options table with popt values
  */
 int LRCUpdate(setup *s) {
   int i = 0, mstat = 0;

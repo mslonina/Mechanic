@@ -161,7 +161,6 @@ int ModuleSetup(module *m, int argc, char **argv) {
   return mstat;
 }
 
-
 /**
  * @function
  * Finalizes the layer

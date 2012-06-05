@@ -135,9 +135,6 @@ int main(int argc, char** argv) {
   mstat = Setup(&core, filename, argc, argv, CORE_SETUP);
   free(filename);
 
-  if (mstat == CORE_SETUP_HELP) goto finalize; // Special help message handling
-  CheckStatus(mstat);
-
   if (node == MASTER)
     Message(MESSAGE_INFO, "Core configured\n");
 
@@ -164,9 +161,25 @@ int main(int argc, char** argv) {
   mstat = Setup(&module, filename, argc, argv, MODULE_SETUP);
   free(filename);
 
-
   if (node == MASTER)
     Message(MESSAGE_INFO, "Module configured\n");
+
+  /* Help message */
+  if (mstat == CORE_SETUP_HELP) {
+    if (module.node == MASTER) {
+      poptPrintHelp(module.layer.setup.popt->poptcontext, stdout, 0);
+    }
+    goto finalize; // Special help message handling
+  }
+
+  if (mstat == CORE_SETUP_USAGE) {
+    if (module.node == MASTER) {
+      poptPrintUsage(module.layer.setup.popt->poptcontext, stdout, 0);
+    }
+    goto finalize; // Special help message handling
+  }
+
+  CheckStatus(mstat);
 
   /**
    * (H) Backup the master data file

@@ -27,6 +27,7 @@
 #define TASK_SUCCESS 0
 #define CORE_ICE 112
 #define CORE_SETUP_HELP 212
+#define CORE_SETUP_USAGE 213
 
 /* Error codes */
 #define CORE_ERR_CORE 901
