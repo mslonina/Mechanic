@@ -11,8 +11,6 @@
 #include "MMechanic2.h"
 #include "mechanic_module_core.h"
 
-int reset_counter = 0;
-
 /**
  * @function
  * @brief Initializes critical core variables
@@ -25,9 +23,6 @@ int reset_counter = 0;
  * @return TASK_SUCCESS on success, error code otherwise
  */
 
-/**
- * .. c:function:: int Init(init *i)
- */
 int Init(init *i) {
   i->options = 128;
   i->pools = 64;
@@ -354,15 +349,22 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  *
  * - POOL_FINALIZE - finalizes the pool loop and simulation
  *
+ * ### Example
+ *
+ *     int PoolProcess(pool **allpools, pool *current, setup *s) {
+ *       if (current->rid < 5) {
+ *         printf("Pool reset ID: %d\n", current->rid);
+ *         return POOL_RESET;
+ *       }
+ *       printf("Pool finalized after %d resets\n", current->rid);
+ *       return POOL_FINALIZE;
+ *     }
+ *
+ *
  * @return
  * POOL_FINALIZE, POOL_CREATE_NEW, POOL_RESET
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
-  if (current->rid < 5) {
-    printf("Pool reset ID: %d\n", current->rid);
-    return POOL_RESET;
-  }
-  printf("Pool finalized after %d resets\n", current->rid);
   return POOL_FINALIZE;
 }
 
