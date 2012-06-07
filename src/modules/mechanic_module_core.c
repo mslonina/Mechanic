@@ -11,6 +11,8 @@
 #include "MMechanic2.h"
 #include "mechanic_module_core.h"
 
+int reset_counter = 0;
+
 /**
  * @function
  * @brief Initializes critical core variables
@@ -339,10 +341,28 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  * @param p The current pool structure
  * @param s The setup structure
  *
+ * ### Return values
+ *
+ * - POOL_CREATE_NEW - if the pool loop should continue (the new pool will be created)
+ * - POOL_RESET - reset the current pool: the task board will be reset. The task loop can
+ *   be restarted within the same loop, i.e. from sligthly different startup values
+ *   Hybrid Genetic Algoriths example:
+ *   1. Compute first iteration of children
+ *   2. Loop N-times in the children loop using POOL_RESET (and p->rid counter), to
+ *   improve the current generation
+ *   3. Create new generation with POOL_CREATE_NEW
+ *
+ * - POOL_FINALIZE - finalizes the pool loop and simulation
+ *
  * @return
- * POOL_FINALIZE for the last pool or POOL_CREATE_NEW, if the pool loop have to continue
+ * POOL_FINALIZE, POOL_CREATE_NEW, POOL_RESET
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
+  if (current->rid < 5) {
+    printf("Pool reset ID: %d\n", current->rid);
+    return POOL_RESET;
+  }
+  printf("Pool finalized after %d resets\n", current->rid);
   return POOL_FINALIZE;
 }
 

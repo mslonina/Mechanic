@@ -44,6 +44,7 @@ pool* PoolLoad(module *m, int pid) {
   }
 
   p->pid = pid;
+  p->rid = 0;
   p->node = m->node;
   p->mpi_size = m->mpi_size;
 
@@ -83,13 +84,15 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     H5Lcreate_hard(group, path, h5location, LAST_GROUP, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create attributes */
-    adims = 1;
-    attr_data = p->pid;
-    attrspace_id = H5Screate_simple(1, &adims, NULL);
-    attribute_id = H5Acreate(group, "Id", H5T_NATIVE_INT, attrspace_id, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attribute_id, H5T_NATIVE_INT, &attr_data);
-    H5Aclose(attribute_id);
-    H5Sclose(attrspace_id);
+    if (p->rid == 0) {
+      adims = 1;
+      attr_data = p->pid;
+      attrspace_id = H5Screate_simple(1, &adims, NULL);
+      attribute_id = H5Acreate(group, "Id", H5T_NATIVE_INT, attrspace_id, H5P_DEFAULT, H5P_DEFAULT);
+      H5Awrite(attribute_id, H5T_NATIVE_INT, &attr_data);
+      H5Aclose(attribute_id);
+      H5Sclose(attrspace_id);
+    }
 
     H5Gclose(group);
     H5Fclose(h5location);
@@ -140,6 +143,36 @@ int PoolProcess(module *m, pool **all, pool *p) {
   return pool_create;
 }
 
+/**
+ * @function
+ * Reset the pool
+ */
+int PoolReset(module *m, pool *p) {
+  int mstat = 0;
+  int i,j;
+  hid_t h5location, group;
+  char path[LRC_CONFIG_LEN];
+
+  /* Reset the board memory banks */
+  if (m->node == MASTER) {
+    for (i = 0; i < p->board->layout.dim[0]; i++) {
+      for (j = 0; j < p->board->layout.dim[1]; j++) {
+        p->board->data[i][j] = TASK_AVAILABLE;
+      }
+    }
+
+    /* Reset the board storage banks */
+    h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    sprintf(path, POOL_PATH, p->pid);
+    group = H5Gopen(h5location, path, H5P_DEFAULT);
+    mstat = CommitData(group, 1, p->board);
+
+    H5Gclose(group);
+    H5Fclose(h5location);
+  }
+
+  return mstat;
+}
 /**
  * @function
  * Finalize the pool

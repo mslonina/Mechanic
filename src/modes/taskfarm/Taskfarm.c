@@ -36,6 +36,9 @@ int Taskfarm(module *m) {
     Storage(m, p[pid]);
 
     do {
+      mstat = PoolReset(m, p[pid]);
+      CheckStatus(mstat);
+
       mstat = PoolPrepare(m, p, p[pid]);
       CheckStatus(mstat);
 
@@ -49,6 +52,7 @@ int Taskfarm(module *m) {
       }
 
       pool_create = PoolProcess(m, p, p[pid]);
+      p[pid]->rid++;
     } while (pool_create == POOL_RESET);
 
     pid++;

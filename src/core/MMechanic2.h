@@ -158,6 +158,7 @@ typedef struct {
  */
 typedef struct {
   int pid; /**< The pool id */
+  int rid; /**< The reset id */
   storage *board; /**< The task board */
   storage *storage; /**< The global pool storage scheme */
   task *task; /**< The task scheme */

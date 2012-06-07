@@ -145,8 +145,8 @@ int main(int argc, char** argv) {
    */
   module_name = LRC_getOptionValue("core", "module", core.layer.setup.head);
   module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
-  module.filename = Name(LRC_getOptionValue("core", "restart-file", core.layer.setup.head), "", "", "");
   module.mode = core.mode;
+  if (node == MASTER && core.mode == RESTART_MODE) module.filename = Name(core.filename, "", "", "");
 
   if (node == MASTER)
     Message(MESSAGE_INFO, "Module '%s' bootstrapped.\n", module_name);
@@ -168,14 +168,14 @@ int main(int argc, char** argv) {
 
   /* Help message */
   if (mstat == CORE_SETUP_HELP) {
-    if (module.node == MASTER) {
+    if (node == MASTER) {
       poptPrintHelp(module.layer.setup.popt->poptcontext, stdout, 0);
     }
     goto finalize; // Special help message handling
   }
 
   if (mstat == CORE_SETUP_USAGE) {
-    if (module.node == MASTER) {
+    if (node == MASTER) {
       poptPrintUsage(module.layer.setup.popt->poptcontext, stdout, 0);
     }
     goto finalize; // Special help message handling

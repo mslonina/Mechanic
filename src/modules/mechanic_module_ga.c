@@ -177,19 +177,21 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
   genes = LRC_option2int("ga", "genes", s->head);
   alleles = LRC_option2int("ga", "alleles", s->head);
 
-  if (p->pid == 0) {
-    InitializeOrganisms(p, genes, alleles);
-  } else {
-    /* Copy children of previous generation to the current one */
-    for (i = 0; i < p->pool_size; i++) {
-      for (j = 0; j < genes; j++) {
-        p->storage[0].data[i][j] = all[p->pid-1]->storage[3].data[i][j];
+  if (p->rid == 0) {
+    if (p->pid == 0) {
+      InitializeOrganisms(p, genes, alleles);
+    } else {
+      /* Copy children of previous generation to the current one */
+      for (i = 0; i < p->pool_size; i++) {
+        for (j = 0; j < genes; j++) {
+          p->storage[0].data[i][j] = all[p->pid-1]->storage[3].data[i][j];
+        }
       }
-    }
-    
-    /* Copy the model */
-    for (j = 0; j < genes; j++) {
-      p->storage[1].data[0][j] = all[p->pid-1]->storage[1].data[0][j];
+      
+      /* Copy the model */
+      for (j = 0; j < genes; j++) {
+        p->storage[1].data[0][j] = all[p->pid-1]->storage[1].data[0][j];
+      }
     }
   }
   
@@ -224,6 +226,11 @@ int PoolProcess(pool **all, pool *p, setup *s) {
   int perfectGeneration = 0;
   int maxgen, max_fitness, genes, alleles;
   double mutation_rate;
+
+  /*if (p->rid < 3) {
+    printf("Generation %d, reset %d\n", p->pid, p->rid);
+    return POOL_RESET;
+  }*/
 
   maxgen = LRC_option2int("ga", "max-generations", s->head);
   max_fitness = LRC_option2int("ga", "max-fitness", s->head);
