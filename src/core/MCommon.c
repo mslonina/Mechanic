@@ -225,6 +225,10 @@ int Copy(char* in, char* out) {
 /**
  * @function
  * Validate the checkpoint file
+ *
+ * @todo
+ * Write module_name as an attribute, so that we could validate the restart file
+ * Maybe write some other attributes?
  */
 int Validate(char *filename) {
   return 0;

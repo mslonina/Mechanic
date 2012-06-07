@@ -76,8 +76,6 @@ int Storage(module *m, pool *p) {
         p->board->data[i][j] = TASK_AVAILABLE;
       }
     }
-  } else {
-    // Read board data from the restart file
   }
 
   return mstat;

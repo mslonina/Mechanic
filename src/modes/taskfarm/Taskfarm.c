@@ -36,15 +36,7 @@ int Taskfarm(module *m) {
     if (m->node == MASTER) {
       Message(MESSAGE_INFO, "Recreating the pool loop\n");
     }
-
     mstat = Restart(m, p, &pid);
-
-    /**
-     * @todo
-     * Write module_name as an attribute, so that we could validate the restart file
-     * Maybe write some other attributes?
-     */
-    //goto finalize;
   }
 
   /**
@@ -86,7 +78,6 @@ int Taskfarm(module *m) {
     if (m->mode == RESTART_MODE && pool_create == POOL_CREATE_NEW) m->mode = NORMAL_MODE;
   } while (pool_create != POOL_FINALIZE);
 
-//finalize:
   /* Finalize the pool bank */
   for (pid = 0; pid < m->layer.init.pools; pid++) {
     PoolFinalize(m, p[pid]);
