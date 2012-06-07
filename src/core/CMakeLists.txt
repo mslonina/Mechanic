@@ -13,6 +13,7 @@ set (coresources
     MStorage.c MStorage.h
     MLog.c MLog.h
     MCheckpoint.c MCheckpoint.h
+    MRestart.c MRestart.h
     )
 set (mainsources
     MMain.c

@@ -10,6 +10,7 @@
 #include "MCheckpoint.h"
 #include "MTask.h"
 #include "MCore.h"
+#include "MRestart.h"
 
 int Taskfarm(module *m);
 int Master(module *m, pool *p);

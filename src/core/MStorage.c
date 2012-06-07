@@ -46,6 +46,7 @@ int Storage(module *m, pool *p) {
   CommitMemoryLayout(m->pool_banks, p->storage);
 
   /* Commit memory for task banks (whole datasets) */
+  // @todo implement STORAGE_BASIC for task groups
   for (i = 0; i < m->task_banks; i++) {
     if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
       p->task->storage[i].layout.storage_type == STORAGE_LIST) {
@@ -63,16 +64,20 @@ int Storage(module *m, pool *p) {
   }
 
   /* Commit the storage layout (only the Master node) */
-  if (m->node == MASTER) {
+  if (m->node == MASTER && m->mode != RESTART_MODE) {
     CommitStorageLayout(m, p);
   }
 
   /* Commit Board */
   p->board->data = AllocateBuffer(p->board->layout.rank, p->board->layout.dim);
-  for (i = 0; i < p->board->layout.dim[0]; i++) {
-    for (j = 0; j < p->board->layout.dim[1]; j++) {
-      p->board->data[i][j] = TASK_AVAILABLE;
+  if (m->mode != RESTART_MODE) {
+    for (i = 0; i < p->board->layout.dim[0]; i++) {
+      for (j = 0; j < p->board->layout.dim[1]; j++) {
+        p->board->data[i][j] = TASK_AVAILABLE;
+      }
     }
+  } else {
+    // Read board data from the restart file
   }
 
   return mstat;
@@ -344,3 +349,19 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
 
 }*/
+
+int ReadData(hid_t h5location, int banks, storage *s) {
+  int mstat = 0, i = 0;
+  hid_t dataset;
+
+  for (i = 0; i < banks; i++) {
+    if (s[i].layout.use_hdf) {
+      Message(MESSAGE_DEBUG, "Read Data storage path: %s\n", s[i].layout.path);
+      dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
+      H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
+      H5Dclose(dataset);
+    }
+  }
+
+  return mstat;
+}

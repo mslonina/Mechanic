@@ -110,15 +110,15 @@ int main(int argc, char** argv) {
           "Switching to restart mode with checkpoint file: '%s'\n", core.filename);
       if (stat(core.filename, &file) < 0) {
         Message(MESSAGE_ERR, "The checkpoint file could not be opened. Aborting\n");
-        goto finalize;
+        Abort(CORE_ERR_CHECKPOINT);
       } else {
         if (!H5Fis_hdf5(core.filename)) { // Validate HDF5
           Message(MESSAGE_ERR, "The checkpoint file is not a valid HDF5 file. Aborting\n");
-          goto finalize;
+          Abort(CORE_ERR_CHECKPOINT);
         } else { // Validate the Mechanic file
           if (Validate(core.filename) < 0) {
             Message(MESSAGE_ERR, "The checkpoint file is not a valid Mechanic file. Aborting\n");
-            goto finalize;
+            Abort(CORE_ERR_CHECKPOINT);
           }
         }
       }

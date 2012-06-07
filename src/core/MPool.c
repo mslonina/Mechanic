@@ -61,7 +61,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   setup *s = &(m->layer.setup);
   hid_t h5location, group, attribute_id, attrspace_id;
   hsize_t adims;
-  int attr_data;
+  int attr_id;
   char path[LRC_CONFIG_LEN];
 
   /* Number of tasks to do */
@@ -84,12 +84,12 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     H5Lcreate_hard(group, path, h5location, LAST_GROUP, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Create attributes */
-    if (p->rid == 0) {
+    if (p->rid == 0 && m->mode != RESTART_MODE) {
       adims = 1;
-      attr_data = p->pid;
+      attr_id = p->pid;
       attrspace_id = H5Screate_simple(1, &adims, NULL);
       attribute_id = H5Acreate(group, "Id", H5T_NATIVE_INT, attrspace_id, H5P_DEFAULT, H5P_DEFAULT);
-      H5Awrite(attribute_id, H5T_NATIVE_INT, &attr_data);
+      H5Awrite(attribute_id, H5T_NATIVE_INT, &attr_id);
       H5Aclose(attribute_id);
       H5Sclose(attrspace_id);
     }
