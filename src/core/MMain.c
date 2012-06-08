@@ -199,6 +199,20 @@ int main(int argc, char** argv) {
       free(masterfile);
       free(masterfile_backup);
     }
+
+    /* Copy the restart file to the master file */
+    if (module.mode == RESTART_MODE) {
+      masterfile = Name(LRC_getOptionValue("core", "name", core.layer.setup.head),
+        "-master-", "00", ".h5");
+      Copy(module.filename, masterfile);
+      free(masterfile);
+
+      /* Our restart file now becomes the master file */
+      free(core.filename);
+      free(module.filename);
+      core.filename = Name(LRC_getOptionValue("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
+      module.filename = Name(LRC_getOptionValue("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
+    }
   }
 
   /**

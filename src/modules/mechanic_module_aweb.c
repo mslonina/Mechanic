@@ -47,7 +47,7 @@ int Setup(setup *s) {
     .name="step",
     .shortName='\0',
     .value="0.25",
-    .type=LRC_DOUBLE, 
+    .type=LRC_DOUBLE,
     .description="The time step"
   };
   s->options[1] = (LRC_configDefaults) {
@@ -55,7 +55,7 @@ int Setup(setup *s) {
     .name="tend",
     .shortName='\0',
     .value="1000.0",
-    .type=LRC_DOUBLE, 
+    .type=LRC_DOUBLE,
     .description="The period"
   };
   s->options[2] = (LRC_configDefaults) {
@@ -63,7 +63,7 @@ int Setup(setup *s) {
     .name="xmin",
     .shortName='\0',
     .value="0.8",
-    .type=LRC_DOUBLE, 
+    .type=LRC_DOUBLE,
     .description="Minimum x"
   };
   s->options[3] = (LRC_configDefaults) {
@@ -71,7 +71,7 @@ int Setup(setup *s) {
     .name="xmax",
     .shortName='\0',
     .value="1.2",
-    .type=LRC_DOUBLE, 
+    .type=LRC_DOUBLE,
     .description="Maximum x"
   };
   s->options[4] = (LRC_configDefaults) {
@@ -79,7 +79,7 @@ int Setup(setup *s) {
     .name="ymin",
     .shortName='\0',
     .value="0.8",
-    .type=LRC_DOUBLE, 
+    .type=LRC_DOUBLE,
     .description="Minimum y"
   };
   s->options[5] = (LRC_configDefaults) {
@@ -87,7 +87,7 @@ int Setup(setup *s) {
     .name="ymax",
     .shortName='\0',
     .value="1.2",
-    .type=LRC_DOUBLE, 
+    .type=LRC_DOUBLE,
     .description="Maximum y"
   };
   s->options[6] = (LRC_configDefaults) {
@@ -95,7 +95,7 @@ int Setup(setup *s) {
     .name="eps",
     .shortName='\0',
     .value="0.0",
-    .type=LRC_DOUBLE, 
+    .type=LRC_DOUBLE,
     .description="Minimum perturbation parameter"
   };
   s->options[7] = (LRC_configDefaults) {

@@ -83,6 +83,11 @@ int TaskPrepare(module *m, pool *p, task *t) {
       x = t->location[0];
       y = t->location[1];
 
+      if (m->mode == RESTART_MODE) {
+        if (p->board->data[x][y] == (double) TASK_AVAILABLE
+            || p->board->data[x][y] == (double) TASK_IN_USE) break;
+      }
+
       if (p->board->data[x][y] == (double) TASK_AVAILABLE) break;
       t->tid++;
 
