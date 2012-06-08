@@ -9,9 +9,9 @@
  */
 int Restart(module *m, pool **pools, int *pool_counter) {
   int mstat = 0;
-  int i, j, size;
-  hid_t h5location, group, tasks, attr_id;
-  char path[LRC_CONFIG_LEN];
+  int i, j, k, size;
+  hid_t h5location, group, tasks, task_id, attr_id;
+  char path[LRC_CONFIG_LEN], task_path[LRC_CONFIG_LEN];
 
   if (m->node == MASTER) {
     h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
@@ -51,8 +51,9 @@ int Restart(module *m, pool **pools, int *pool_counter) {
       }
 
       /* Read task data */
-      // @todo implement STORAGE_BASIC for task groups
       tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
+
+      /* Read simple datasets */
       for (j = 0; j < m->task_banks; j++) {
         size = GetSize(pools[i]->task->storage[j].layout.rank, pools[i]->task->storage[j].layout.dim);
         if (size > 0 && pools[i]->task->storage[j].layout.use_hdf) {
@@ -63,9 +64,27 @@ int Restart(module *m, pool **pools, int *pool_counter) {
           }
         }
       }
+
+      /* Read datasets inside TaskID groups */
+      for (j = 0; j < pools[i]->pool_size; j++) {
+        for (k = 0; k < m->task_banks; k++) {
+          if (pools[i]->task->storage[k].layout.use_hdf
+              && pools[i]->task->storage[k].layout.storage_type == STORAGE_BASIC) {
+            size = GetSize(pools[i]->task->storage[k].layout.rank, pools[i]->task->storage[k].layout.dim);
+            if (size > 0) {
+              sprintf(task_path, TASK_PATH, k);
+              task_id = H5Gopen(tasks, task_path, H5P_DEFAULT);
+              ReadData(task_id, 1, &(pools[i]->tasks[j].storage[k]));
+              H5Gclose(task_id);
+            }
+          }
+        }
+      }
+
       H5Gclose(tasks);
       H5Gclose(group);
     }
+
     H5Fclose(h5location);
   }
 

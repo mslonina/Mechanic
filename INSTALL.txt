@@ -1,4 +1,3 @@
-
 Requirements
 ------------
 
@@ -7,7 +6,7 @@ maintained), if following requirements are met:
 
 - gcc >= 4.6 or ifort >= 11.0
 - CMake >= 2.8
-- MPI2 implementation (optional: Fortran support) (we favour OpenMPI)
+- MPI2 implementation
 - HDF5 >= 1.8
 - Popt library
 - Libreadconfig with HDF5 support (see http://git.astri.umk.pl/projects/lrc)
@@ -19,14 +18,9 @@ Compilation
     cd mechanic-VERSION
     mkdir build
     cd build
-    CC=mpicc FC=mpif90 cmake ..
+    CC=mpicc cmake ..
     make
     make install
-
-If you want to enable Fortran support run
-
-    CC=mpicc cmake .. -DBUILD_FORTRAN:BOOL=ON
-
 
 By default, Cmake installs to /usr/local. You can change this by setting
     

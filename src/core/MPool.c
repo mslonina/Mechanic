@@ -196,6 +196,13 @@ void PoolFinalize(module *m, pool *p) {
     free(p->task);
   }
 
+  if (p->tasks) {
+    for (i = 0; i < p->pool_size; i++) {
+      TaskFinalize(m, p, &(p->tasks[i]));
+    }
+    free(p->tasks);
+  }
+
   if (p->board) {
     if (p->board->data) {
       FreeBuffer(p->board->data);

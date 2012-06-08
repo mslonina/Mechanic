@@ -6,6 +6,7 @@
 #include "MTypes.h"
 #include "MCommon.h"
 #include "MModules.h"
+#include "MTask.h"
 
 #define STORAGE_FULL 1
 #define STORAGE_DEFAULT 0

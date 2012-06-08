@@ -10,6 +10,7 @@
 int Storage(module *m, pool *p) {
   int mstat = 0;
   int i, j, dims[MAX_RANK];
+  int task_groups = 0;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -48,6 +49,7 @@ int Storage(module *m, pool *p) {
   /* Commit memory for task banks (whole datasets) */
   // @todo implement STORAGE_BASIC for task groups
   for (i = 0; i < m->task_banks; i++) {
+    if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) task_groups = 1;
     if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
       p->task->storage[i].layout.storage_type == STORAGE_LIST) {
       dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
@@ -75,6 +77,14 @@ int Storage(module *m, pool *p) {
       for (j = 0; j < p->board->layout.dim[1]; j++) {
         p->board->data[i][j] = TASK_AVAILABLE;
       }
+    }
+  }
+
+  /* TaskID groups */
+  if (task_groups) {
+    p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
+    for (i = 0; i < p->pool_size; i++) {
+      p->tasks[i] = *TaskLoad(m, p, i);
     }
   }
 
@@ -318,36 +328,8 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
 /**
  * @function
- * Read data
- *
- * @todo
+ * Read the dataset
  */
-/*int ReadData(module *m, pool *p, setup *s){
-  int mstat = 0, i = 0;
-  hid_t h5location, group, tasks, dataset;
-  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
-
-  h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
-  sprintf(path, POOL_PATH, p->pid);
-  group = H5Gopen(h5location, path, H5P_DEFAULT);
-
-    tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
-
-    for (i = 0; i < m->task_banks; i++) {
-      if (p->task->storage[i].layout.use_hdf) {
-        if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
-            p->task->storage[i].layout.storage_type == STORAGE_LIST ||
-            p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
-          dataset = H5Dopen(tasks, p->task->storage[i].layout.path, H5P_DEFAULT);
-          H5Dread(dataset, p->task->storage[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, p->task->storage[i].data[0]);
-          H5Dclose(dataset);
-        }
-      }
-    }
-
-
-}*/
-
 int ReadData(hid_t h5location, int banks, storage *s) {
   int mstat = 0, i = 0;
   hid_t dataset;
