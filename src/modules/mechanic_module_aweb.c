@@ -226,7 +226,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 
-  printf("Pool: %04d, checkpoint %04d processed\n", p->pid, c->cid);
+  Message(MESSAGE_INFO, "Pool: %04d, checkpoint %04d processed\n", p->pid, c->cid);
 
   return TASK_SUCCESS;
 }
