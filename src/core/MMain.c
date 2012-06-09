@@ -132,7 +132,7 @@ int main(int argc, char** argv) {
   free(filename);
 
   if (node == MASTER)
-    Message(MESSAGE_INFO, "Core configured\n");
+    Message(MESSAGE_INFO, "The core has been bootstrapped and configured\n");
 
   /**
    * (F) Bootstrap the module
@@ -143,23 +143,17 @@ int main(int argc, char** argv) {
   module.mode = core.mode;
   if (node == MASTER && core.mode == RESTART_MODE) module.filename = Name(core.filename, "", "", "");
 
-  if (node == MASTER)
-    Message(MESSAGE_INFO, "Module '%s' bootstrapped\n", module_name);
-
   /**
    * (G) Configure the module
    */
   filename = Name(LRC_getOptionValue("core", "config", core.layer.setup.head), "", "", "");
-
-  if (node == MASTER)
-    Message(MESSAGE_INFO, "Config file to use: '%s'\n", filename);
 
   mstat = Setup(&module, filename, argc, argv, MODULE_SETUP);
   CheckStatus(mstat);
   free(filename);
 
   if (node == MASTER)
-    Message(MESSAGE_INFO, "Module configured\n");
+    Message(MESSAGE_INFO, "The '%s' module has been bootstrapped and configured\n", module_name);
 
   /* Help message */
   if (mstat == CORE_SETUP_HELP) {
@@ -226,11 +220,16 @@ int main(int argc, char** argv) {
   /**
    * (J) Modes
    */
+  if (node == MASTER) {
+    Message(MESSAGE_INFO, "Entering the pool loop\n");
+    Message(MESSAGE_OUTPUT, "\n");
+  }
+
   if (mpi_size > 1) {
     mstat = Taskfarm(&module);
     CheckStatus(mstat);
   } else {
-    Message(MESSAGE_WARN, "Master-alone mode not supported yet. Aborting...\n");
+    Message(MESSAGE_WARN, "Master-alone mode is not supported by now. Aborting\n");
   }
 
   /**
@@ -246,8 +245,10 @@ finalize:
   H5close();
   MPI_Finalize();
 
-  if (node == MASTER)
+  if (node == MASTER) {
+    Message(MESSAGE_OUTPUT, "\n");
     Message(MESSAGE_INFO, "Mechanic did the job. Have a nice day!\n");
+  }
 
   exit(EXIT_SUCCESS);
 }

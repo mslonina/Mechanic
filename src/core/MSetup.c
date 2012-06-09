@@ -14,11 +14,11 @@
  * @param filename The filename to read
  * @param argc The command line argc table
  * @param argv The command line argv table
- * @param flag On of the flags: CORE_SETUP, MODULE_SETUP
+ * @param setup_mode One of the flags: CORE_SETUP, MODULE_SETUP
  *
  * @return 0 on success, error code otherwise
  */
-int Setup(module *m, char *filename, int argc, char** argv, int flag) {
+int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
   int mstat = 0, opts = 0, i = 0, n = 0;
   MPI_Datatype mpi_t;
   MPI_Status mpi_status;
@@ -29,17 +29,17 @@ int Setup(module *m, char *filename, int argc, char** argv, int flag) {
     if (m->mode == RESTART_MODE) {
       h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-      if (flag == CORE_SETUP) {
+      if (setup_mode == CORE_SETUP) {
         LRC_HDF5Parser(h5location, "/config/core", m->layer.setup.head);
       }
 
-      if (flag == MODULE_SETUP) {
+      if (setup_mode == MODULE_SETUP) {
         LRC_HDF5Parser(h5location, "/config/module", m->layer.setup.head);
       }
 
       H5Fclose(h5location);
     } else {
-      mstat = ReadConfig(m, filename, m->layer.setup.head);
+      mstat = ReadConfig(m, filename, m->layer.setup.head, setup_mode);
     }
   }
 
@@ -78,7 +78,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int flag) {
   LRC_cleanup(m->layer.setup.head);
 
   m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
-  if (flag == MODULE_SETUP
+  if (setup_mode == MODULE_SETUP
       && m->node == MASTER
       && LRC_option2int("core", "print-defaults", m->layer.setup.head)) {
     LRC_printAll(m->layer.setup.head);
@@ -93,28 +93,33 @@ int Setup(module *m, char *filename, int argc, char** argv, int flag) {
  * @param m The module pointer
  * @param filename The name of the configuration file
  * @param head The LRC linked list pointer
+ * @param setup_mode One of the flags: CORE_SETUP, MODULE_SETUP
  *
  * @return 0 on success, error code otherwise
  */
-int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
+int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_mode) {
   int mstat = 0;
   FILE *inif;
 
   if (filename == NULL || filename[0] == LRC_NULL) {
-    Message(MESSAGE_ERR, "Option -c|--config specified but no valid config file present\n");
+    Message(MESSAGE_ERR, "Option -c|--config specified but no valid configuration file present\n");
     Error(CORE_ERR_SETUP);
   }
 
+
   inif = fopen(filename, "ro");
   if (inif) {
+    if (setup_mode == MODULE_SETUP)
+      Message(MESSAGE_INFO, "Configuration file to use: '%s'\n", filename);
     mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
     fclose(inif);
   } else if (inif == NULL) {
     if (strcmp(filename, LRC_getOptionValue("core", "config", m->layer.setup.head)) != 0) {
-      Message(MESSAGE_ERR, "The specified config file could not be opened\n");
+      Message(MESSAGE_ERR, "The specified configuration file could not be opened\n");
       Error(CORE_ERR_SETUP);
     }
-    Message(MESSAGE_INFO, "No config file specified, using defaults\n");
+    if (setup_mode == MODULE_SETUP)
+      Message(MESSAGE_INFO, "No configuration file specified, using defaults\n");
   }
 
   return mstat;
