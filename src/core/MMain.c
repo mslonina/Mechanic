@@ -229,7 +229,8 @@ int main(int argc, char** argv) {
     mstat = Taskfarm(&module);
     CheckStatus(mstat);
   } else {
-    Message(MESSAGE_WARN, "Master-alone mode is not supported by now. Aborting\n");
+    Message(MESSAGE_WARN, "You must use min. two MPI threads to run Mechanic.\n");
+    Message(MESSAGE_WARN, "Try: mpirun -np 2 mechanic2\n");
   }
 
   /**
