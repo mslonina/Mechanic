@@ -10,7 +10,6 @@
 #include "mechanic_module_aweb.h"
 
 /**
- * @function
  * The right hand sides + variational equations of the Hamiltonian model of the Arnold web, 
  * see Froeschle+ Science 289 (2000)
  */
@@ -58,7 +57,6 @@ void vinteraction(double *y,  double *a, double *dy, double *v, double eps) {
 }
 
 /**
- * @function
  * The energy integral
  */
 double energy(double *y, double eps) {
@@ -82,7 +80,6 @@ double energy(double *y, double eps) {
 }
 
 /**
- * @function
  * The variational integral
  */
 double variat(double *xv, double *dy, double eps) {
@@ -97,7 +94,6 @@ double variat(double *xv, double *dy, double eps) {
 }
 
 /**
- * @function
  * Normalizes the variational vector (flag = 1)
  */
 double norm(int dim, double *a, int flag) {
@@ -112,7 +108,6 @@ double norm(int dim, double *a, int flag) {
 }
 
 /**
- * @function
  * Symplectic MEGNO (Gozdziewski, Breiter & Borczyk, MNRAS, 2008)
  * with the modified Leapfrog integrator SABA2 (Laskar & Robutel, CMDA, 2001)
  */
@@ -204,7 +199,6 @@ double smegno2(double *xv0, double step, double tend, double eps, double *err) {
 }
 
 /**
- * @function
  * Symplectic MEGNO (Gozdziewski, Breiter & Borczyk, MNRAS, 2008)
  * with the modified Leapfrog integrator SABA2 (Laskar & Robutel, CMDA, 2001)
  */

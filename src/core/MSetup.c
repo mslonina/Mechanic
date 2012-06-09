@@ -5,7 +5,6 @@
 #include "MSetup.h"
 
 /**
- * @function
  * @brief The Setup
  *
  * This function reads the configuration on the master node and broadcasts it to all
@@ -89,7 +88,6 @@ int Setup(module *m, char *filename, int argc, char** argv, int flag) {
 }
 
 /**
- * @function
  * @brief Reads the configuration file
  *
  * @param m The module pointer
@@ -123,7 +121,6 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
 }
 
 /**
- * @function
  * @brief Popt command line parser
  *
  * @param m The module pointer
@@ -162,7 +159,6 @@ int Popt(module *m, int argc, char** argv, setup *s) {
 }
 
 /**
- * @function
  * @brief Initialize the popt tables according to the Setup()
  *
  * @param m The module pointer
@@ -212,7 +208,6 @@ int PoptOptions(module *m, setup *s) {
 }
 
 /**
- * @function
  * @brief Updates the LRC options table with popt values
  *
  * @param s The setup pointer

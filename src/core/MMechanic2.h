@@ -72,7 +72,7 @@
 #define NO_MORE_TASKS -99
 
 /**
- * @struct
+ * @struct init
  * Bootstrap initializations
  */
 typedef struct {
@@ -83,7 +83,7 @@ typedef struct {
 } init;
 
 /**
- * @struct
+ * @struct popt
  * Popt
  */
 typedef struct {
@@ -95,7 +95,7 @@ typedef struct {
 } popt;
 
 /**
- * @struct
+ * @struct setup
  * The setup structure, combines LRC and Popt
  */
 typedef struct {
@@ -105,7 +105,7 @@ typedef struct {
 } setup;
 
 /**
- * @struct
+ * @struct schema
  * Defines the memory/storage schema
  */
 typedef struct {
@@ -114,14 +114,14 @@ typedef struct {
   int dim[MAX_RANK]; /**< The dimensions of the dataset */
   int offset[MAX_RANK]; /**< The offsets (calculated automatically) */
   int use_hdf; /**< Enables HDF5 storage for the memory block */
-  int sync; /**< @unused*/
+  int sync; /**< Whether to synchronize memory bank between master and worker */
   int storage_type; /**< The storage type: STORAGE_BASIC, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
   H5S_class_t dataspace_type; /**< The type of the HDF5 dataspace (H5S_SIMPLE) */
   hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
 } schema;
 
 /**
- * @struct
+ * @struct storage
  * The storage structure
  */
 typedef struct {
@@ -130,7 +130,7 @@ typedef struct {
 } storage;
 
 /**
- * @struct
+ * @struct task
  * The task
  */
 typedef struct {
@@ -142,7 +142,7 @@ typedef struct {
 } task;
 
 /**
- * @struct
+ * @struct checkpoint
  * The checkpoint
  */
 typedef struct {
@@ -153,7 +153,7 @@ typedef struct {
 } checkpoint;
 
 /**
- * @struct
+ * @struct pool
  * The pool
  */
 typedef struct {
@@ -169,7 +169,11 @@ typedef struct {
   int mpi_size; /**< The MPI COMM size */
 } pool;
 
-enum {
+/**
+ * @enum MessageType
+ * The types of messages
+ */
+typedef enum {
   MESSAGE_INFO,
   MESSAGE_ERR,
   MESSAGE_IERR,

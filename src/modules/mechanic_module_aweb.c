@@ -24,7 +24,6 @@
 #include "mechanic_module_aweb.h"
 
 /**
- * @function
  * @brief Implements Init()
  */
 int Init(init *i) {
@@ -37,7 +36,6 @@ int Init(init *i) {
 }
 
 /**
- * @function
  * @brief Implements Setup()
  */
 int Setup(setup *s) {
@@ -126,7 +124,6 @@ int Setup(setup *s) {
 }
 
 /**
- * @function
  * @brief Implements Storage()
  */
 int Storage(pool *p, setup *s) {
@@ -159,7 +156,6 @@ int Storage(pool *p, setup *s) {
 }
 
 /**
- * @function
  * @brief Implements TaskPrepare()
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
@@ -185,7 +181,6 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 }
 
 /**
- * @function
  * @brief Implements TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
@@ -221,7 +216,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
 }
 
 /**
- * @function
  * @brief Implements CheckpointPrepare()
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
@@ -231,4 +225,4 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
   return TASK_SUCCESS;
 }
 
-/** }@ */
+/** @} */

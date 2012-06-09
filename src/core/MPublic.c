@@ -5,7 +5,6 @@
 #include "MMechanic2.h"
 
 /**
- * @function
  * @brief Common messaging interface
  *
  * @param type The type of the message

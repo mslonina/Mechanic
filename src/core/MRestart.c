@@ -5,7 +5,6 @@
 #include "MRestart.h"
 
 /**
- * @function
  * @brief Performs restart-related tasks
  *
  * @param m The module pointer

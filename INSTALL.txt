@@ -2,20 +2,20 @@ Requirements
 ------------
 
 Mechanic should run on Unix-like platforms (Linux and MacOSX are actively
-maintained), if following requirements are met:
+maintained), if the following requirements are met:
 
 - gcc >= 4.6 or ifort >= 11.0
 - CMake >= 2.8
 - MPI2 implementation
 - HDF5 >= 1.8
-- Popt library
-- Libreadconfig with HDF5 support (see http://git.astri.umk.pl/projects/lrc)
+- Popt library >= 1.14
+- Libreadconfig with HDF5 support >= 0.12.4 (see http://git.astri.umk.pl/projects/lrc)
 
 Compilation
 -----------
 
-    tar -xvvf mechanic-VERSION.tar.gz
-    cd mechanic-VERSION
+    tar -xvvf mechanic-2.0.0-src.tar.gz
+    cd mechanic-2.0.0
     mkdir build
     cd build
     CC=mpicc cmake ..
@@ -35,5 +35,7 @@ See http://git.astri.umk.pl/projects/mechanic_modules
 Gentoo users
 ------------
 
-There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see:
-http://github.com/mslonina/mechanic-overlay
+There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
+http://github.com/mslonina/mechanic-overlay:
+
+    emerge mechanic2

@@ -30,11 +30,24 @@
  *     CC=mpicc cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/install/prefix/path
  *     make
  *     make install
+ *
+ * @section features Key features
+ *
+ * - The Pool-oriented task management, you may define as many task pools as needed, on
+ *   the fly (PoolProcess())
+ * - Custom setup, both for core and the module, only one config file is used (
+ *   Setup()), all setup stored in the master datafile
+ * - Custom storage, both for core and the module (Storage())
+ * - No MPI and HDF5 knowledge required (i.e. PoolPrepare() does MPI_Broadcast under
+ *   the hood)
+ * - Non-blocking communication between nodes
+ *
+ * @section publications Publications
+ *
  */
 #include "MMain.h"
 
 /**
- * @function
  * @brief The Main function
  *
  * @param argc The command line argc table

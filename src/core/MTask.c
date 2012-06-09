@@ -5,7 +5,6 @@
 #include "MTask.h"
 
 /**
- * @function
  * @brief Load the task
  *
  * @param m The module pointer
@@ -68,7 +67,6 @@ task* TaskLoad(module *m, pool *p, int tid) {
 }
 
 /**
- * @function
  * @brief Prepare the task
  *
  * @param m The module pointer
@@ -113,7 +111,6 @@ int TaskPrepare(module *m, pool *p, task *t) {
 }
 
 /**
- * @function
  * @brief Process the task
  *
  * @param m The module pointer
@@ -134,7 +131,6 @@ int TaskProcess(module *m, pool *p, task *t) {
 }
 
 /**
- * @function
  * @brief Reset the task, change the task ID
  *
  * @param m The module pointer
@@ -148,7 +144,6 @@ void TaskReset(module *m, pool *p, task *t, int tid) {
 }
 
 /**
- * @function
  * @brief Finalize the task
  *
  * @param m The module pointer

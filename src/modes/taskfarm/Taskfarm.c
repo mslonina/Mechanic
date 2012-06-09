@@ -5,7 +5,6 @@
 #include "Taskfarm.h"
 
 /**
- * @function
  * @brief The MPI Task Farm main function
  *
  * @param m The module pointer

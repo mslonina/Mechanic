@@ -5,7 +5,6 @@
 #include "Taskfarm.h"
 
 /**
- * @function
  * @brief Performs worker node operations
  *
  * @param m The module pointer

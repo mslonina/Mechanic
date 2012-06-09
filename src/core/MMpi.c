@@ -5,7 +5,6 @@
 #include "MMpi.h"
 
 /**
- * @function
  * @brief Build MPI derived type for LRC_configDefaults
  *
  * @param c The input LRC defaults structure
@@ -48,7 +47,6 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
 }
 
 /**
- * @function
  * @brief Pack the task data into 1D contigous array
  *
  * @param m The module pointer
@@ -96,7 +94,6 @@ int Pack(module *m, double *buffer, pool *p, task *t, int tag) {
 }
 
 /**
- * @function
  * @brief Unpack the 1D-contigous array into task structure
  *
  * @param m The module pointer

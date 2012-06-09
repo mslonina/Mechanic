@@ -5,7 +5,6 @@
 #include "MCheckpoint.h"
 
 /**
- * @function
  * @brief Load the checkpoint
  *
  * @param m The module pointer
@@ -53,7 +52,6 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
 }
 
 /**
- * @function
  * @brief Prepare the checkpoint
  *
  * @param m The module pointer
@@ -76,7 +74,6 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
 }
 
 /**
- * @function
  * @brief Process the checkpoint
  *
  * @param m The module pointer
@@ -210,7 +207,6 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 }
 
 /**
- * @function
  * @brief Reset the checkpoint pointer and update the checkpoint id
  *
  * @param m The module pointer
@@ -230,7 +226,6 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
 }
 
 /**
- * @function
  * @brief Finalize the checkpoint
  *
  * @param m The module pointer
@@ -243,7 +238,6 @@ void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
 }
 
 /**
- * @function
  * @brief Create incremental backup
  *
  * @param m The module pointer

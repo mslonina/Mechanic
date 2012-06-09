@@ -28,7 +28,6 @@
 #include "MBootstrap.h"
 
 /**
- * @function
  * @brief Bootstraps the layer
  *
  * The Mechanic works upon two module layers: the core, and the user-supplied module. All
@@ -79,7 +78,6 @@ module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, modu
 }
 
 /**
- * @function
  * @brief Wrapper to dlopen()
  *
  * @param name The name of the module to load
@@ -110,7 +108,6 @@ module ModuleLoad(char *name) {
 }
 
 /**
- * @function
  * @brief Allocates initial memory for the Layer
  *
  * - Load fallback layer function
@@ -163,7 +160,6 @@ int ModuleInit(module *m) {
 }
 
 /**
- * @function
  * @brief Initializes the Setup
  *
  * This function calls the Setup() from the module to initialize the LRC default option
@@ -208,10 +204,9 @@ int ModuleSetup(module *m, int argc, char **argv) {
 }
 
 /**
- * @function
  * @brief Finalize the layer
  *
- * @param The layer pointer to finalize
+ * @param l The layer pointer to finalize
  */
 void FinalizeLayer(layer *l) {
   if (l->handler) dlclose(l->handler);
@@ -226,10 +221,9 @@ void FinalizeLayer(layer *l) {
 }
 
 /**
- * @function
  * @brief Finalize the module
  *
- * @param The module pointer to finalize
+ * @param m The module pointer to finalize
  */
 void ModuleFinalize(module* m) {
   if (m->layer.handler) FinalizeLayer(&m->layer);

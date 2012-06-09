@@ -8,7 +8,6 @@
 extern int nbody();
 
 /**
- * @function
  * Implementation of Init()
  */
 int Init(init *i) {
@@ -19,7 +18,6 @@ int Init(init *i) {
 }
 
 /**
- * @function
  * Implementation of Setup()
  */
 int Setup(setup *s) {
@@ -41,7 +39,6 @@ int Setup(setup *s) {
 }
 
 /**
- * @function
  * Implementation of Storage()
  */
 int Storage(pool *p, setup *s) {
@@ -78,7 +75,6 @@ int Storage(pool *p, setup *s) {
 }
 
 /**
- * @function
  * Implementation of PoolPrepare()
  */
 int PoolPrepare(pool **all, pool *p, setup *s) {
@@ -98,7 +94,6 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
 }
 
 /**
- * @function
  * Implementation of PoolProcess()
  */
 int PoolProcess(pool **all, pool *p, setup *s) {
@@ -116,7 +111,6 @@ int PoolProcess(pool **all, pool *p, setup *s) {
 }
 
 /**
- * @function
  * Implementation of TaskPrepare()
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
@@ -136,7 +130,6 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 }
 
 /**
- * @function
  * Implementation of TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
@@ -148,7 +141,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
 }
 
 /**
- * @function
  * Implementation of CheckpointPrepare()
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {

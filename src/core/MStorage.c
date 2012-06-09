@@ -5,7 +5,6 @@
 #include "MStorage.h"
 
 /**
- * @function
  * @brief Create the storage layout for the pool
  *
  * @param m The module pointer
@@ -97,7 +96,6 @@ int Storage(module *m, pool *p) {
 }
 
 /**
- * @function
  * @brief Check for any inconsistencies in the storage layout
  *
  * @param banks The number of memory/storage banks
@@ -139,7 +137,6 @@ int CheckLayout(int banks, storage *s) {
 }
 
 /**
- * @function
  * @brief Commits the memory layout
  *
  * This function must run on every node -- the size of data arrays shared between nodes
@@ -162,7 +159,6 @@ int CommitMemoryLayout(int banks, storage *s) {
 }
 
 /**
- * @function
  * @brief Frees the memory layout
  *
  * @param banks The number of memory/storage banks
@@ -179,7 +175,6 @@ void FreeMemoryLayout(int banks, storage *s) {
 }
 
 /**
- * @function
  * @brief Commit the storage layout
  *
  * @param m The module pointer
@@ -250,7 +245,6 @@ int CommitStorageLayout(module *m, pool *p) {
 }
 
 /**
- * @function
  * @brief Create a dataset
  *
  * @param h5location The HDF5 location id
@@ -295,7 +289,6 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
 }
 
 /**
- * @function
  * @brief Get the number of used memory banks
  *
  * @param allocated_banks Number of allocated memory/storage banks
@@ -317,7 +310,6 @@ int GetBanks(int allocated_banks, storage *s) {
 }
 
 /**
- * @function
  * @brief Commit the data to the master file
  *
  * @param h5location The HDF5 location id
@@ -369,7 +361,6 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 }
 
 /**
- * @function
  * @brief Read the dataset data
  *
  * @param h5location The HDF5 location id

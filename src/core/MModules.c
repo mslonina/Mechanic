@@ -5,7 +5,6 @@
 #include "MModules.h"
 
 /**
- * @function
  * @brief Wrapper to dlsym()
  *
  * This function loads the specified function from the module. By default the core module

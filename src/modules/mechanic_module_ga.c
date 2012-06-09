@@ -45,7 +45,6 @@ int SelectOneOrganism(pool *p);
  */
 
 /**
- * @function
  * Implements Init()
  *
  * We overwrite here the default pools number
@@ -56,7 +55,6 @@ int Init(init *i) {
 }
 
 /**
- * @function
  * Implements Setup()
  */
 int Setup(setup *s) {
@@ -81,7 +79,6 @@ int Setup(setup *s) {
 }
 
 /**
- * @function
  * Implements Storage()
  */
 int Storage(pool *p, setup *s) {
@@ -164,7 +161,6 @@ int Storage(pool *p, setup *s) {
 }
 
 /**
- * @function
  * Implements PoolPrepare()
  *
  * If p->pid = 0 we initialize the population (the first generation), otherwise, we copy
@@ -199,7 +195,6 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
 }
 
 /**
- * @function
  * Implements TaskProcess()
  *
  * We compute here the fitness function (in parallel, each worker receives an organism to
@@ -216,7 +211,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
 }
 
 /**
- * @function
  * Implements PoolProcess()
  *
  * We decide here, whether the model has been reached or not. When the model is not
@@ -252,14 +246,14 @@ int PoolProcess(pool **all, pool *p, setup *s) {
   return POOL_CREATE_NEW;
 }
 
-/** }@ */
+/** @} */
 
 /**
  * @defgroup ga_functions geneticAlgorithm1.c based functions
+ * @ingroup ga
  */
 
 /**
- * @function
  * Initialize the first generation
  */
 int InitializeOrganisms(pool *p, int genes, int alleles) {
@@ -281,7 +275,6 @@ int InitializeOrganisms(pool *p, int genes, int alleles) {
 }
 
 /**
- * @function
  * Compute the fitness of current organism (task)
  */
 int Fitness(pool *p, task *t, int genes) {
@@ -297,7 +290,6 @@ int Fitness(pool *p, task *t, int genes) {
 }
 
 /**
- * @function
  * Evaluate organisms in the current generation (pool)
  */
 int EvaluateOrganisms(pool *p, int max_fitness) {
@@ -320,7 +312,6 @@ int EvaluateOrganisms(pool *p, int max_fitness) {
 }
 
 /**
- * @function
  * Produce the next generation
  */
 int ProduceNextGeneration(pool *p, int genes, int alleles, double mutation_rate) {
@@ -353,7 +344,6 @@ int ProduceNextGeneration(pool *p, int genes, int alleles, double mutation_rate)
 }
 
 /**
- * @function
  * Selects the parent
  */
 int SelectOneOrganism(pool *p) {
@@ -370,4 +360,4 @@ int SelectOneOrganism(pool *p) {
   return 0;
 }
 
-/** }@ */
+/** @} */

@@ -5,11 +5,10 @@
 #include "Taskfarm.h"
 
 /**
- * @function
  * @brief Performs master node operations
  *
- * @param The module pointer
- * @param The current pool pointer
+ * @param m The module pointer
+ * @param p The current pool pointer
  *
  * @return 0 on success, error code otherwise
  */

@@ -8,19 +8,54 @@
 /**
  * @defgroup all_nodes Hooks called on all nodes
  * @{
- * }@
  */
 
-/**
- * @defgroup master_only Hooks called on the master node
- * @{
- * }@
- */
+/** @} */
 
 /**
- * @defgroup worker_only Hooks called on worker nodes
+ * @defgroup master_only Hooks called on the master node only
  * @{
- * }@
+ */
+
+/** @} */
+
+/**
+ * @defgroup worker_only Hooks called on worker nodes only
+ * @{
+ */
+
+/** @} */
+
+#include "MMechanic2.h"
+#include "mechanic_module_core.h"
+
+/**
+ * @page pool_loop The pool loop explained
+ *
+ * After the core and the module are bootstrapped, the Mechanic enters the four-step pool
+ * loop:
+ *
+ * 1. PoolPrepare()
+ *  All nodes enter the PoolPrepare(). Data of all previous pools is passed to this
+ *  function, so that we may use them to prepare data for the current pool. The current pool
+ *  data is broadcasted to all nodes and stored in the master datafile.
+ *
+ * 2. The Task Loop
+ *  All nodes enter the task loop. The master node prepares the task during
+ *  TaskPrepare(). Each worker receives a task, and calls the TaskProcess(). The task
+ *  data, marked with use_hdf = 1 are received by the master node after the
+ *  TaskProcess() is finished and stored during the CheckpointProcess().
+ *
+ * 3. The Checkpoint
+ *  The CheckpointPrepare() function might be used to adjust the received data (2D array
+ *  of packed data, each row is a separate task). The pool data might be adjusted here
+ *  as well, the data is stored again during CheckpointProcess().
+ *
+ * 4. PoolProcess()
+ *  After the task loop is finished, the PoolProcess() is used to decide whether to
+ *  continue the pool loop or not. The data of all pools is passed to this function. 
+ *
+ * @page task_loop The task loop explained
  */
 
 /**
@@ -28,49 +63,7 @@
  * @{
  */
 
-#include "MMechanic2.h"
-#include "mechanic_module_core.h"
-
 /**
- * @page user_guide Mechanic2 short user guide
- *
- * ## Main features
- *
- * - The Pool-oriented task management, you may define as many task pools as needed, on
- *   the fly (@see PoolProcess())
- * - Custom setup, both for core and the module, only one config file is used (@see
- *   Setup()), all setup stored in the master datafile
- * - Custom storage, both for core and the module (@see Storage())
- * - No MPI and HDF5 knowledge required (i.e. @see PoolPrepare() does MPI_Broadcast under
- *   the hood)
- * - Non-blocking communication between nodes
- *
- *
- * ## The Pool Loop explained
- *
- * After the core and the module are bootstrapped, the Mechanic enters the four-step pool
- * loop:
- *
- *  1. PoolPrepare()
- *    All nodes enter the PoolPrepare(). Data of all previous pools is passed to this
- *    function, so that we may use them to prepare data for the current pool. The current pool
- *    data is broadcasted to all nodes and stored in the master datafile.
- *  2. The Task Loop
- *    All nodes enter the task loop. The master node prepares the task during
- *    TaskPrepare(). Each worker receives a task, and calls the TaskProcess(). The task
- *    data, marked with use_hdf = 1 are received by the master node after the
- *    TaskProcess() is finished and stored during the CheckpointProcess().
- *  3. The Checkpoint
- *    The CheckpointPrepare() function might be used to adjust the received data (2D array
- *    of packed data, each row is a separate task). The pool data might be adjusted here
- *    as well, the data is stored again during CheckpointProcess().
- *  4. PoolProcess()
- *    After the task loop is finished, the PoolProcess() is used to decide whether to
- *    continue the pool loop or not. The data of all pools is passed to this function. 
- */
-
-/**
- * @function
  * @brief Initialize critical core variables
  *
  * This function is used to initialize critical core variables, such as number of
@@ -104,7 +97,6 @@ int Init(init *i) {
 }
 
 /**
- * @function
  * @brief Define the configuration options
  *
  * This function is used to define configuration options. The LRC user API is used here.
@@ -293,7 +285,6 @@ int Setup(setup *s) {
 }
 
 /**
- * @function
  * @brief Define the pool storage layout
  *
  * This function is used to define the storage layout. The layout may be defined per pool
@@ -493,7 +484,6 @@ int Storage(pool *p, setup *s) {
 }
 
 /**
- * @function
  * @brief Prepare the task pool
  *
  * This function is used to prepare the task pool. All memory banks defined in Storage()
@@ -511,7 +501,7 @@ int Storage(pool *p, setup *s) {
  *
  * @ingroup master_only
  * @param allpools The pointer to all pools
- * @param p The current pool structure
+ * @param current The current pool structure
  * @param s The setup structure
  *
  * @return TASK_SUCCESS on success, error code otherwise
@@ -521,7 +511,6 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
 }
 
 /**
- * @function
  * @brief Process the pool
  *
  * This function is used to process the task pool after the task loop is finished and
@@ -557,7 +546,7 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  *
  * @ingroup master_only
  * @param allpools The pointer to all pools
- * @param p The current pool structure
+ * @param current The current pool structure
  * @param s The setup structure
  *
  * @return POOL_FINALIZE, POOL_CREATE_NEW, POOL_RESET
@@ -567,7 +556,6 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 }
 
 /**
- * @function
  * @brief Maps tasks
  *
  * The default task mapping follows the HDF5 storage scheme.
@@ -620,7 +608,6 @@ int TaskMapping(pool *p, task *t, setup *s) {
 }
 
 /**
- * @function
  * @brief Prepare the task
  *
  * This function is used to do any task-specific preparation, i.e. changing initial
@@ -646,7 +633,6 @@ int TaskPrepare(pool *p, task *t, setup *s) {
 }
 
 /**
- * @function
  * @brief Process the task
  *
  * This function is used to process the current task, i.e. to perform main computations.
@@ -667,7 +653,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
 }
 
 /**
- * @function
  * @brief Prepare the checkpoint
  *
  * This function is used to prepare the checkpoint. You may do some data-related
@@ -702,7 +687,6 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 }
 
 /**
- * @function
  * @brief The prepare hook
  *
  * This function is used to do any simulation-related prepare operations. It is called
@@ -713,7 +697,7 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
  *
  * @ingroup master_only
  * @param masterfile The name of the master data file
- * @setup The setup structure
+ * @param s The setup structure
  *
  * @return TASK_SUCCESS or error code otherwise
  */
@@ -722,7 +706,6 @@ int Prepare(char *masterfile, setup *s) {
 }
 
 /**
- * @function
  * @brief The process hook
  *
  * This function is used to perform any simulation post operations, such as specific data
@@ -733,7 +716,7 @@ int Prepare(char *masterfile, setup *s) {
  *
  * @ingroup master_only
  * @param masterfile The name of the master data file
- * @setup The setup structure
+ * @param s The setup structure
  *
  * @return TASK_SUCCESS or error code otherwise
  */

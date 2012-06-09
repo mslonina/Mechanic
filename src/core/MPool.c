@@ -5,7 +5,6 @@
 #include "MPool.h"
 
 /**
- * @function
  * @brief Load the task pool
  *
  * @param m The module pointer
@@ -57,7 +56,6 @@ pool* PoolLoad(module *m, int pid) {
 }
 
 /**
- * @function
  * @brief Prepare the pool
  *
  * @param m The module pointer
@@ -123,7 +121,6 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 }
 
 /**
- * @function
  * @brief Process the pool
  *
  * @param m The module pointer
@@ -161,7 +158,6 @@ int PoolProcess(module *m, pool **all, pool *p) {
 }
 
 /**
- * @function
  * @brief Reset the current pool
  *
  * @param m The module pointer
@@ -196,7 +192,6 @@ int PoolReset(module *m, pool *p) {
   return mstat;
 }
 /**
- * @function
  * @brief Finalize the pool
  *
  * @param m The module pointer

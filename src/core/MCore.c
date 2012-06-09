@@ -5,7 +5,6 @@
 #include "MCore.h"
 
 /**
- * @function
  * @brief The Welcome message
  */
 void Welcome() {
@@ -13,7 +12,6 @@ void Welcome() {
 }
 
 /**
- * @function
  * @brief The Prepare hook
  *
  * @param m The module pointer
@@ -34,7 +32,6 @@ int Prepare(module *m) {
 }
 
 /**
- * @function
  * @brief The Process hook
  *
  * @param m The module pointer
@@ -53,3 +50,4 @@ int Process(module *m) {
 
   return mstat;
 }
+

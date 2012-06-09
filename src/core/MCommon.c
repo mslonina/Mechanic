@@ -5,10 +5,8 @@
 #include "MCommon.h"
 
 /**
- * @function
  * @brief Creates name
  *
- * @in_group Helpers
  * @param prefix The prefix for the name
  * @param name The name
  * @param suffix The suffix for the name
@@ -48,7 +46,6 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
 
 
 /**
- * @function
  * @brief Common error handler
  *
  * @param errcode The error code to use
@@ -58,7 +55,6 @@ void Error(int errcode) {
 }
 
 /**
- * @function
  * @brief Wrapper to MPI_Abort
  *
  * @param errcode The error code to use
@@ -68,7 +64,6 @@ void Abort(int errcode) {
 }
 
 /**
- * @function
  * @brief Common status check
  *
  * @param status The status code to check for
@@ -78,7 +73,6 @@ void CheckStatus(int status) {
 }
 
 /**
- * @function
  * @brief Allocate memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
@@ -107,7 +101,6 @@ double** AllocateBuffer(int rank, int *dims) {
 }
 
 /**
- * @function
  * @brief Free memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
@@ -120,7 +113,6 @@ void FreeBuffer(double **array) {
 }
 
 /**
- * @function
  * @brief Get the 1D size of the array
  *
  * @param rank The rank of the array
@@ -140,7 +132,6 @@ int GetSize(int rank, int *dims){
 }
 
 /**
- * @function
  * @brief Copies array to vector
  *
  * @param vec The output vector
@@ -160,7 +151,6 @@ void Array2Vec(double *vec, double **array, int rank, int *dims) {
 }
 
 /**
- * @function
  * @brief Copies vector to array
  *
  * @param vec The input vector
@@ -180,7 +170,6 @@ void Vec2Array(double *vec, double **array, int rank, int *dims) {
 }
 
 /**
- * @function
  * @brief Copy files
  *
  * @param in The input filename
@@ -244,7 +233,6 @@ int Copy(char* in, char* out) {
 }
 
 /**
- * @function
  * @brief Validate the checkpoint file
  *
  * @todo

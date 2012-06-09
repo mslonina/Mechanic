@@ -6,47 +6,34 @@
 #define MECHANIC_TYPES_H
 
 /**
- * @class
+ * @struct layer
  * Defines the layer
- *
- * @param void*
- *  Pointer to the dlopened() shared library
- * @param init
- *  Initialization structure
- * @param setup
- *  Setup structure
  */
 typedef struct {
-  char *name;
-  void *handler;
-  init init;
-  setup setup;
+  void *handler; /**< The module handler */
+  init init; /**< The init structure */
+  setup setup; /**< The setup structure */
 } layer;
 
 /**
- * @class
+ * @struct module
  * Defines the module
- *
- * @param layer
- *  The actual module layer
- * @param fallback
- *  The fallback module layer
  */
 typedef struct {
-  char *filename;
-  hid_t datafile;
-  hid_t h5location;
-  int node;
-  int mpi_size;
-  int pool_banks;
-  int task_banks;
-  int mode;
-  layer layer;
-  layer fallback;
+  char *filename; /**< The filename */
+  hid_t datafile; /**< The datafile HDF5 pointer */
+  hid_t h5location; /**< The HDF5 location pointer */
+  int node; /**< The node ID */
+  int mpi_size; /**< The MPI_COMM_WORLD size */
+  int pool_banks; /**< The number of pool memory banks */
+  int task_banks; /**< The number of task memory banks */
+  int mode; /**< The running mode */
+  layer layer; /**< The layer pointer */
+  layer fallback; /**< The fallback layer pointer */
 } module;
 
 /**
- * @class
+ * @typedef query
  * Basic dynamic query type
  */
 typedef int (query) ();
