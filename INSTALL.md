@@ -36,6 +36,6 @@ Gentoo users
 ------------
 
 There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
-http://github.com/mslonina/mechanic-overlay:
+http://github.com/mslonina/mechanic-overlay. After you install the overlay, you may use:
 
     emerge mechanic2
