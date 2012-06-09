@@ -84,7 +84,7 @@ Posters
 
 - Slonina M., Gozdziewski K., Migaszewski C., Simtech2011 (Stuttgart, June 2011)
 - Slonina M., Gozdziewski K., Migaszewski C., Orbital Couples: "Pas de Deux" in the Solar
-  System and the Milky Way(Paris, October 2011)
+  System and the Milky Way (Paris, October 2011)
 
 Acknowledgments
 ---------------
