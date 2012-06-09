@@ -84,7 +84,7 @@
  * @ingroup all_nodes
  *
  * @param i The init structure
- * @return TASK_SUCCESS on success, error code otherwise
+ * @return SUCCESS on success, error code otherwise
  */
 
 int Init(init *i) {
@@ -93,7 +93,7 @@ int Init(init *i) {
   i->banks_per_pool = 8;
   i->banks_per_task = 8;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -172,7 +172,7 @@ int Init(init *i) {
  *
  * @param s The setup structure
  *
- * @return TASK_SUCCESS on success, error code otherwise
+ * @return SUCCESS on success, error code otherwise
  */
 int Setup(setup *s) {
   s->options[0] = (LRC_configDefaults) {
@@ -281,7 +281,7 @@ int Setup(setup *s) {
   };
   s->options[13] = (LRC_configDefaults) LRC_OPTIONS_END;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -464,7 +464,7 @@ int Setup(setup *s) {
  * @param p The pool structure
  * @param s The setup structure
  *
- * @return TASK_SUCCESS on success, error code otherwise
+ * @return SUCCESS on success, error code otherwise
  */
 int Storage(pool *p, setup *s) {
 
@@ -480,7 +480,7 @@ int Storage(pool *p, setup *s) {
 
   p->checkpoint_size = LRC_option2int("core", "checkpoint", s->head);
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -504,10 +504,10 @@ int Storage(pool *p, setup *s) {
  * @param current The current pool structure
  * @param s The setup structure
  *
- * @return TASK_SUCCESS on success, error code otherwise
+ * @return SUCCESS on success, error code otherwise
  */
 int PoolPrepare(pool **allpools, pool *current, setup *s) {
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -587,7 +587,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
  * @param t The current task structure
  * @param s The setup structure
  *
- * @return TASK_SUCCESS or error code otherwise
+ * @return SUCCESS or error code otherwise
  */
 int TaskMapping(pool *p, task *t, setup *s) {
   int px, vert;
@@ -604,7 +604,7 @@ int TaskMapping(pool *p, task *t, setup *s) {
     t->location[1] = px % vert;
   }
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -626,10 +626,10 @@ int TaskMapping(pool *p, task *t, setup *s) {
  * @param t The current task structure
  * @param s The setup structure
  *
- * @return TASK_SUCCESS on success of error code otherwise
+ * @return SUCCESS on success of error code otherwise
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -646,10 +646,10 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * @param t The current task structure
  * @param s The setup structure
  *
- * @return TASK_SUCCESS on success or error code otherwise
+ * @return SUCCESS on success or error code otherwise
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -680,10 +680,10 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * @param c The current checkpoint structrue
  * @param s The setup structure
  *
- * @return TASK_SUCCESS or error code otherwise
+ * @return SUCCESS or error code otherwise
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -699,10 +699,10 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
  * @param masterfile The name of the master data file
  * @param s The setup structure
  *
- * @return TASK_SUCCESS or error code otherwise
+ * @return SUCCESS or error code otherwise
  */
 int Prepare(char *masterfile, setup *s) {
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -718,9 +718,9 @@ int Prepare(char *masterfile, setup *s) {
  * @param masterfile The name of the master data file
  * @param s The setup structure
  *
- * @return TASK_SUCCESS or error code otherwise
+ * @return SUCCESS or error code otherwise
  */
 int Process(char *masterfile, setup *s) {
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 /** @} */

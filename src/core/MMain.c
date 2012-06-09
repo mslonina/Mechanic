@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
   if (node == MASTER && core.mode == RESTART_MODE) module.filename = Name(core.filename, "", "", "");
 
   if (node == MASTER)
-    Message(MESSAGE_INFO, "Module '%s' bootstrapped.\n", module_name);
+    Message(MESSAGE_INFO, "Module '%s' bootstrapped\n", module_name);
 
   /**
    * (G) Configure the module

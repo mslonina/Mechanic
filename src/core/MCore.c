@@ -8,7 +8,7 @@
  * @brief The Welcome message
  */
 void Welcome() {
-  Message(MESSAGE_INFO, "This is Mechanic2.\n");
+  Message(MESSAGE_INFO, "This is Mechanic2\n");
 }
 
 /**

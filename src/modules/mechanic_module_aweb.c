@@ -32,7 +32,7 @@ int Init(init *i) {
   i->banks_per_task = 3;
   i->pools = 25;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -120,7 +120,7 @@ int Setup(setup *s) {
   };
   s->options[10] = (LRC_configDefaults) LRC_OPTIONS_END;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -152,7 +152,7 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_PM3D,
   };
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -177,7 +177,7 @@ int TaskPrepare(pool *p, task *t, setup *s) {
   t->storage[0].data[0][4] = ymin + t->location[0]*(ymax-ymin)/(1.0*p->board->layout.dim[0]);
   t->storage[0].data[0][5] = 0.01;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -212,7 +212,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   t->storage[1].data[0][2] = result;
   t->storage[1].data[0][3] = err;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -220,9 +220,9 @@ int TaskProcess(pool *p, task *t, setup *s) {
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 
-  Message(MESSAGE_INFO, "Pool: %04d, checkpoint %04d processed\n", p->pid, c->cid);
+  Message(MESSAGE_COMMENT, "Pool: %04d, checkpoint %04d processed\n", p->pid, c->cid);
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /** @} */

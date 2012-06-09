@@ -114,7 +114,7 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
       Message(MESSAGE_ERR, "The specified config file could not be opened\n");
       Error(CORE_ERR_SETUP);
     }
-    Message(MESSAGE_INFO, "No config file specified, using defaults.\n");
+    Message(MESSAGE_INFO, "No config file specified, using defaults\n");
   }
 
   return mstat;

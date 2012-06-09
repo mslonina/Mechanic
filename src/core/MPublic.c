@@ -16,11 +16,10 @@ void Message(int type, char *message, ...) {
 
   va_start(args, message);
     vsprintf(message2, message, args);
-    if (type == MESSAGE_INFO) printf("-> %s", message2);
-    if (type == MESSAGE_CONT) printf("   %s", message2);
-    if (type == MESSAGE_CONT2) printf("   \t\t %s", message2);
-    if (type == MESSAGE_ERR) perror(message2);
-    if (type == MESSAGE_IERR) printf("!! %s", message2);
+    if (type == MESSAGE_INFO)    printf("-- %s", message2);
+    if (type == MESSAGE_COMMENT) printf("#  %s", message2);
+    if (type == MESSAGE_OUTPUT) printf("   %s", message2);
+    if (type == MESSAGE_ERR) printf("!! %s", message2);
 		if (type == MESSAGE_WARN) printf(".. %s", message2);
   va_end(args);
 }

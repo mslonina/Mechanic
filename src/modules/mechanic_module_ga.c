@@ -51,7 +51,7 @@ int SelectOneOrganism(pool *p);
  */
 int Init(init *i) {
   i->pools = MAX_GENERATIONS;
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -75,7 +75,7 @@ int Setup(setup *s) {
     .value="20", .type=LRC_INT, .description="Maximum fitness"};
   s->options[5] = (LRC_configDefaults) LRC_OPTIONS_END;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -157,7 +157,7 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_LIST,
   };
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -191,7 +191,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
     }
   }
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -207,7 +207,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   t->storage[0].data[0][0] = Fitness(p, t, genes);
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**

@@ -28,48 +28,53 @@
 #include <libreadconfig.h>
 #include <libreadconfig_hdf5.h>
 
-#define TASK_SUCCESS 0
-#define CORE_ICE 112
-#define CORE_SETUP_HELP 212
-#define CORE_SETUP_USAGE 213
+#define SUCCESS 0 /**< The success return code */
+#define CORE_ICE 112 /**< The core emergency return code */
+#define CORE_SETUP_HELP 212 /**< The core help message return code */
+#define CORE_SETUP_USAGE 213 /**< The core usage message return code */
 
 /* Error codes */
-#define CORE_ERR_CORE 901
-#define CORE_ERR_MPI 911
-#define CORE_ERR_HDF 912
-#define CORE_ERR_MODULE 913
-#define CORE_ERR_SETUP 914
-#define CORE_ERR_MEM 915
-#define CORE_ERR_CHECKPOINT 916
-#define CORE_ERR_STORAGE 917
-#define CORE_ERR_OTHER 999
+#define CORE_ERR_CORE 901 /**< The core-related error */
+#define CORE_ERR_MPI 911 /**< The core MPI-related error */
+#define CORE_ERR_HDF 912 /**< The core HDF-related error */
+#define CORE_ERR_MODULE 913 /**< The core module-related error */
+#define CORE_ERR_SETUP 914 /**< The core setup-related error */
+#define CORE_ERR_MEM 915 /**< The core memory-related error */
+#define CORE_ERR_CHECKPOINT 916 /**< The core checkpoint-related error */
+#define CORE_ERR_STORAGE 917 /**< The core storage-related error */
+#define CORE_ERR_OTHER 999 /**< The core any other error */
 
-#define MODULE_ERR_MPI 811
-#define MODULE_ERR_HDF 812
-#define MODULE_ERR_MODULE 813
-#define MODULE_ERR_SETUP 814
-#define MODULE_ERR_MEM 815
-#define MODULE_ERR_CHECKPOINT 816
-#define MODULE_ERR_OTHER 888
+#define MODULE_ERR_MPI 811 /**< The module MPI-related error */
+#define MODULE_ERR_HDF 812 /**< The module HDF-related error */
+#define MODULE_ERR_SETUP 814 /**< The module setup-related error */
+#define MODULE_ERR_MEM 815 /**< The module memory-related errot*/
+#define MODULE_ERR_CHECKPOINT 816 /**< The module checkpoint-related error */
+#define MODULE_ERR_OTHER 888 /**< The module any other error */
 
 /* Pool */
-#define POOL_FINALIZE 1001
-#define POOL_RESET 1002
-#define POOL_CREATE_NEW 1003
+#define POOL_FINALIZE 1001 /**< The pool finalize return code */
+#define POOL_RESET 1002 /**< The pool reset return code */
+#define POOL_CREATE_NEW 1003 /**< The pool create new return code */
 
 /* Storage */
-#define MAX_RANK 2
-#define STORAGE_BASIC 11
-#define STORAGE_PM3D 12
-#define STORAGE_BOARD 13
-#define STORAGE_LIST 14
+#define MAX_RANK 2 /**< The maximum dataset rank */
+#define STORAGE_BASIC 11 /**< The basic data storage type */
+#define STORAGE_PM3D 12 /**< The pm3d data storage type */
+#define STORAGE_BOARD 13 /**< The board data storage type */
+#define STORAGE_LIST 14 /**< The list data storage type */
 
 /* Task */
-#define TASK_EMPTY -88
-#define TASK_FINISHED 1
-#define TASK_AVAILABLE 0
-#define TASK_IN_USE -1
-#define NO_MORE_TASKS -99
+#define TASK_EMPTY -88 /**< The task empty return code */
+#define TASK_FINISHED 1 /**< The task finished return code */
+#define TASK_AVAILABLE 0 /**< The task available return code */
+#define TASK_IN_USE -1 /**< The task in use return code */
+#define NO_MORE_TASKS -99 /**< No more tasks return code */
+
+#define MASTER 0 /**< The master node */
+#define NORMAL_MODE 600 /**< The normal operation mode */
+#define RESTART_MODE 601 /**< The restart mode */
+
+#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
 
 /**
  * @struct init
@@ -174,21 +179,14 @@ typedef struct {
  * The types of messages
  */
 typedef enum {
-  MESSAGE_INFO,
-  MESSAGE_ERR,
-  MESSAGE_IERR,
-  MESSAGE_CONT,
-  MESSAGE_CONT2,
-  MESSAGE_WARN,
-	MESSAGE_DEBUG
+  MESSAGE_INFO, /**< The message info type */
+  MESSAGE_ERR, /**< The message error type (only the message) */
+  MESSAGE_WARN, /**< The warning message type */
+	MESSAGE_DEBUG, /**< The debug message type */
+  MESSAGE_OUTPUT, /**< The clear output message type */
+  MESSAGE_COMMENT, /**< The comment message type */
 } MessageType;
 
 void Message(int type, char* message, ...);
-
-#define MASTER 0
-#define NORMAL_MODE 600
-#define RESTART_MODE 601
-
-#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1}
 
 #endif

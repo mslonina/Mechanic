@@ -14,7 +14,7 @@ int Init(init *i) {
   i->options = 123;
   i->pools = 61;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -35,7 +35,7 @@ int Setup(setup *s) {
     .description="The pool size"};
   s->options[4] = (LRC_configDefaults) LRC_OPTIONS_END;
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -71,7 +71,7 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_LIST,
   };
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -90,7 +90,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
     }
   }
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -126,7 +126,7 @@ int TaskPrepare(pool *p, task *t, setup *s) {
     }
   }
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -137,7 +137,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   nbody();
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
 /**
@@ -153,6 +153,6 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
     //c->data[i] = c->data[i] + 1;
 //  }
 
-  return TASK_SUCCESS;
+  return SUCCESS;
 }
 
