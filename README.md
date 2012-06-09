@@ -30,6 +30,8 @@ Key features
 - **The pool-based simulations.** Each pool may have different number of task to compute
   (the task loop follows the MPI Task Farm model), and data from all pools may be used at
   the every stage of the simulation
+- **MPI Task Farm** model (master -- worker relationships between nodes in a computing
+  pool)
 - **MPI non-blocking communication**
 - **HDF5 data storage layout**
 - **Automatic backup of data files and restart mode**
@@ -42,7 +44,7 @@ Key features
 Example usage
 -------------
 
-- **Efficient creating of dynamical maps.** Each pixel of the map is mapped into
+- **Efficient creation of dynamical maps.** Each pixel of the map is mapped into
   standalone numerical task
 - **Genetic algorithms.** Each pool of tasks may be treated as a generation in the
   language of GAs
