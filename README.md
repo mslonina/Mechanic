@@ -23,9 +23,9 @@ modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 Key features
 ------------
 
-- **The numerical part of the code is fully separated from the setup and storage.** You may
+- **The numerical part of the code is fully separated from the setup and storage phase.** You may
   use the user API to adjust the storage layout and configuration options
-- **Storage of data and configuration.** The core code takes care on your data and
+- **Storage of data and configuration.** The core code takes care on the data storage and
   configuration
 - **The pool-based simulations.** Each pool may have different number of task to compute
   (the task loop follows the MPI Task Farm model), and data from all pools may be used at
@@ -35,7 +35,7 @@ Key features
 - **Automatic backup of data files and restart mode**
 - **Configuration command line.** All configuration options defined through API are
   automatically available in the command line
-- **Different storage modes** which allows to design the storage layout that best fits
+- **Different storage modes** which allows to design the storage layout that fits best
   the user needs (i.e. for processing with Gnuplot or Matplotlib)
 - **Linux and MAC OS X** supported
 
@@ -78,6 +78,13 @@ Publications
 - Slonina M., Gozdziewski K., Migaszewski C., Rozenkiewicz A., 2012arXiv1205.1341S
 - Slonina M., Gozdziewski K., Migaszewski C., Astrophysics Source Code Library, record
 ascl:1205.001
+
+Posters
+-------
+
+- Slonina M., Gozdziewski K., Migaszewski C., Simtech2011 (Stuttgart, June 2011)
+- Slonina M., Gozdziewski K., Migaszewski C., Orbital Couples: "Pas de Deux" in the Solar
+  System and the Milky Way(Paris, October 2011)
 
 Acknowledgments
 ---------------
