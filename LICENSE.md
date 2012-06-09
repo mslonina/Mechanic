@@ -8,7 +8,7 @@ tools for improving scalability and functionality of the code. MECHANIC was
 released in belief it will be useful. If you are going to use this code, or
 its parts, please consider referring to the Authors by the following paper:
 
-Slonina M., Gozdziewski K., Migaszewski C., Rozenkiewicz A, 2012
+Slonina M., Gozdziewski K., Migaszewski C., Rozenkiewicz A, MNRAS 2012
 
 http://git.astri.umk.pl/projects/mechanic
 
