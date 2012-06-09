@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The setup interface header
+ */
 #ifndef MECHANIC_SETUP_H
 #define MECHANIC_SETUP_H
 

@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The Pool interface header
+ */
 #ifndef MECHANIC_POOL_H
 #define MECHANIC_POOL_H
 

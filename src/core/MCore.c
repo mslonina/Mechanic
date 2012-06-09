@@ -1,12 +1,12 @@
 /**
  * @file
- * The core-related functions.
+ * The core-related functions
  */
 #include "MCore.h"
 
 /**
  * @function
- * The Welcome message
+ * @brief The Welcome message
  */
 void Welcome() {
   Message(MESSAGE_INFO, "This is Mechanic2.\n");
@@ -14,7 +14,11 @@ void Welcome() {
 
 /**
  * @function
- * The Prepare hook
+ * @brief The Prepare hook
+ *
+ * @param m The module pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int Prepare(module *m) {
   int mstat = 0;
@@ -31,7 +35,11 @@ int Prepare(module *m) {
 
 /**
  * @function
- * The Process hook
+ * @brief The Process hook
+ *
+ * @param m The module pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int Process(module *m) {
   int mstat = 0;

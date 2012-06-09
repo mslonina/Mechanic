@@ -12,20 +12,6 @@
 /**
  * @mainpage
  *
- * ## Overview Overview
- *
- * What is all about
- *
- * ## Key features
- *
- * - Task farm based approach
- *
- * @page Installation
- *
- * [TOC]
- *
- * Some installation notes
- *
  * @section Requirements Requirements
  *
  * - C compiler (GCC 4.6, Intel 12)
@@ -44,22 +30,18 @@
  *     CC=mpicc cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/install/prefix/path
  *     make
  *     make install
- *
- *
- * @page Publications
- *
- * List of publications
- *
- * @page Test
- *
- * [TOC]
- *
- * @section SectionOne Section One
- *
- * @section SectionTwo Section Two
  */
 #include "MMain.h"
 
+/**
+ * @function
+ * @brief The Main function
+ *
+ * @param argc The command line argc table
+ * @param argv The command line argv table
+ *
+ * @return EXIT_SUCCESS on success, error code otherwise
+ */
 int main(int argc, char** argv) {
   int mpi_rank, mpi_size, node;
   module core, module, fallback;

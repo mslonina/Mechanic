@@ -6,7 +6,12 @@
 
 /**
  * @function
- * Performs master node operations
+ * @brief Performs master node operations
+ *
+ * @param The module pointer
+ * @param The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int Master(module *m, pool *p) {
   int mstat = 0;

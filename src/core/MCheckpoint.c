@@ -1,12 +1,18 @@
 /**
- * @function
- * The checkpoint
+ * @file
+ * The checkpoint interface
  */
 #include "MCheckpoint.h"
 
 /**
  * @function
- * Load the checkpoint
+ * @brief Load the checkpoint
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param cid The current checkpoint id
+ *
+ * @return The checkpoint pointer, NULL otherwise
  */
 checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   checkpoint *c = NULL;
@@ -48,7 +54,13 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
 
 /**
  * @function
- * Prepare the checkpoint
+ * @brief Prepare the checkpoint
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param c The current checkpoint pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
@@ -65,7 +77,13 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
 
 /**
  * @function
- * Process the checkpoint
+ * @brief Process the checkpoint
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param c The current checkpoint pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = 0;
@@ -193,7 +211,12 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
 /**
  * @function
- * Reset the checkpoint
+ * @brief Reset the checkpoint pointer and update the checkpoint id
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param c The current checkpoint pointer
+ * @param cid The checkpoint id to use
  */
 void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
   int i = 0;
@@ -208,7 +231,11 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
 
 /**
  * @function
- * Finalize the checkpoint
+ * @brief Finalize the checkpoint
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param c The checkpoint pointer
  */
 void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
   if (c->storage->data) FreeBuffer(c->storage->data);
@@ -217,7 +244,12 @@ void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
 
 /**
  * @function
- * Creates incremental backup
+ * @brief Create incremental backup
+ *
+ * @param m The module pointer
+ * @param s The setup pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int Backup(module *m, setup *s) {
   int i = 0, b = 0, mstat = 0;

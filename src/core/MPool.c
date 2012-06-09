@@ -6,7 +6,12 @@
 
 /**
  * @function
- * Load the task pool
+ * @brief Load the task pool
+ *
+ * @param m The module pointer
+ * @param pid The pool ID
+ *
+ * @return The pool pointer, NULL otherwise
  */
 pool* PoolLoad(module *m, int pid) {
   pool *p = NULL;
@@ -53,7 +58,13 @@ pool* PoolLoad(module *m, int pid) {
 
 /**
  * @function
- * Prepare the pool
+ * @brief Prepare the pool
+ *
+ * @param m The module pointer
+ * @param all The pointer to pool array (all pools)
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = 0, i = 0, size = 0;
@@ -113,7 +124,13 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
 /**
  * @function
- * Process the pool
+ * @brief Process the pool
+ *
+ * @param m The module pointer
+ * @param all The pointer to pool array (all pools)
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int PoolProcess(module *m, pool **all, pool *p) {
   int pool_create = 0;
@@ -145,7 +162,12 @@ int PoolProcess(module *m, pool **all, pool *p) {
 
 /**
  * @function
- * Reset the pool
+ * @brief Reset the current pool
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int PoolReset(module *m, pool *p) {
   int mstat = 0;
@@ -175,7 +197,10 @@ int PoolReset(module *m, pool *p) {
 }
 /**
  * @function
- * Finalize the pool
+ * @brief Finalize the pool
+ *
+ * @param m The module pointer
+ * @param p The pool pointer to finalize
  */
 void PoolFinalize(module *m, pool *p) {
   int i = 0;
@@ -212,3 +237,4 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p) free(p);
 }
+

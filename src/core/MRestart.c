@@ -1,11 +1,18 @@
 /**
- * The restart mode
+ * @file
+ * The restart mode interface
  */
 #include "MRestart.h"
 
 /**
  * @function
- * Performs restart-related tasks
+ * @brief Performs restart-related tasks
+ *
+ * @param m The module pointer
+ * @param pools The pointer to all pools data
+ * @param pool_counter The pool_counter used during recreating the storage layout
+ *
+ * @return 0 on success, error code otherwise
  */
 int Restart(module *m, pool **pools, int *pool_counter) {
   int mstat = 0;
@@ -102,3 +109,4 @@ int Restart(module *m, pool **pools, int *pool_counter) {
 
   return mstat;
 }
+

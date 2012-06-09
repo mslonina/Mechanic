@@ -6,7 +6,12 @@
 
 /**
  * @function
- * Build MPI derived type for LRC_configDefaults
+ * @brief Build MPI derived type for LRC_configDefaults
+ *
+ * @param c The input LRC defaults structure
+ * @param mpi_t The output MPI derived type
+ *
+ * @return 0 on success, error code otherwise
  */
 int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
   int mstat = 0, i = 0;
@@ -44,7 +49,15 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
 
 /**
  * @function
- * Pack the task data to 1D contigous array
+ * @brief Pack the task data into 1D contigous array
+ *
+ * @param m The module pointer
+ * @param buffer The output pack buffer
+ * @param p The current pool pointer
+ * @param t The input task pointer
+ * @param tag The MPI message tag
+ *
+ * @return 0 on success, error code otherwise
  */
 int Pack(module *m, double *buffer, pool *p, task *t, int tag) {
   int mstat = 0;
@@ -84,7 +97,15 @@ int Pack(module *m, double *buffer, pool *p, task *t, int tag) {
 
 /**
  * @function
- * Unpack the 1D-contigous array to task
+ * @brief Unpack the 1D-contigous array into task structure
+ *
+ * @param m The module pointer
+ * @param buffer The input pack buffer
+ * @param p The current pool pointer
+ * @param t The output task pointer
+ * @param tag The MPI message tag
+ *
+ * @return 0 on success, error code otherwise
  */
 int Unpack(module *m, double *buffer, pool *p, task *t, int *tag) {
   int mstat = 0;

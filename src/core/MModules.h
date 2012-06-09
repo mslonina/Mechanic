@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The module interface header
+ */
 #ifndef MECHANIC_MODULES_H
 #define MECHANIC_MODULES_H
 

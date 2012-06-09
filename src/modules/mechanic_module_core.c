@@ -1,6 +1,26 @@
 /**
  * @file
  * Core Mechanic module, implementation of all API functions
+ *
+ * @todo provide hook examples
+ */
+
+/**
+ * @defgroup all_nodes Hooks called on all nodes
+ * @{
+ * }@
+ */
+
+/**
+ * @defgroup master_only Hooks called on the master node
+ * @{
+ * }@
+ */
+
+/**
+ * @defgroup worker_only Hooks called on worker nodes
+ * @{
+ * }@
  */
 
 /**
@@ -12,12 +32,63 @@
 #include "mechanic_module_core.h"
 
 /**
- * @function
- * @brief Initializes critical core variables
+ * @page user_guide Mechanic2 short user guide
  *
- * At least the core module implements this function. The user may override the core
- * defaults in a custom module -- in such a case, the module variables will be merged with
- * core.
+ * ## Main features
+ *
+ * - The Pool-oriented task management, you may define as many task pools as needed, on
+ *   the fly (@see PoolProcess())
+ * - Custom setup, both for core and the module, only one config file is used (@see
+ *   Setup()), all setup stored in the master datafile
+ * - Custom storage, both for core and the module (@see Storage())
+ * - No MPI and HDF5 knowledge required (i.e. @see PoolPrepare() does MPI_Broadcast under
+ *   the hood)
+ * - Non-blocking communication between nodes
+ *
+ *
+ * ## The Pool Loop explained
+ *
+ * After the core and the module are bootstrapped, the Mechanic enters the four-step pool
+ * loop:
+ *
+ *  1. PoolPrepare()
+ *    All nodes enter the PoolPrepare(). Data of all previous pools is passed to this
+ *    function, so that we may use them to prepare data for the current pool. The current pool
+ *    data is broadcasted to all nodes and stored in the master datafile.
+ *  2. The Task Loop
+ *    All nodes enter the task loop. The master node prepares the task during
+ *    TaskPrepare(). Each worker receives a task, and calls the TaskProcess(). The task
+ *    data, marked with use_hdf = 1 are received by the master node after the
+ *    TaskProcess() is finished and stored during the CheckpointProcess().
+ *  3. The Checkpoint
+ *    The CheckpointPrepare() function might be used to adjust the received data (2D array
+ *    of packed data, each row is a separate task). The pool data might be adjusted here
+ *    as well, the data is stored again during CheckpointProcess().
+ *  4. PoolProcess()
+ *    After the task loop is finished, the PoolProcess() is used to decide whether to
+ *    continue the pool loop or not. The data of all pools is passed to this function. 
+ */
+
+/**
+ * @function
+ * @brief Initialize critical core variables
+ *
+ * This function is used to initialize critical core variables, such as number of
+ * configuration options, maximum number of task pools and the number of memory banks per
+ * task and per pool. These variables are used to allocate the memory during the
+ * simulation.
+ *
+ * The core module must implement this function, so that some sensible defaults are set.
+ *
+ * If the Init() hook is present in a custom module, the variables will be merged with
+ * the core defaults, i.e.:
+ *
+ *     int Init(init *i) {
+ *       i->options = 128;
+ *       i->pools = 12;
+ *     }
+ *
+ * @ingroup all_nodes
  *
  * @param i The init structure
  * @return TASK_SUCCESS on success, error code otherwise
@@ -34,16 +105,81 @@ int Init(init *i) {
 
 /**
  * @function
- * @brief Define the default configuration options
+ * @brief Define the configuration options
  *
- * This is an implementation of the LRC API. We initialize here default options.
- * If the user-supplied module implements this function, the setup options will be merged
- * with the core. All options will be available in the setup->head linked list.
+ * This function is used to define configuration options. The LRC user API is used here.
+ * Configuration options are automatically available in the command line.
  *
- * Configuration options are automatically added to the Popt arg table, so that, you may
- * override the defaults with the command line.
+ * If the Setup() hook is present in a custom module, the options are merged with the core
+ * options. It is not possible to override core defaults from this hook. The only way to
+ * do this is to use command line or configuration file.
+ *
+ * The configuration is stored in the master datafile. Only the master node reads the
+ * configuration file and parser the command line. The configuration is broadcasted to all
+ * worker nodes.
+ *
+ * To obtain all available options, try the --help or --usage flag:
+ * mpirun -np 2 mechanic2 -p mymodule --help
+ *
+ * ### Defining options
+ *
+ * The LRC API allows any kind of C99 struct initialization to be used, i.e.:
+ *
+ *     s->options[0] = (LRC_configDefaults) {
+ *       .space="NAMESPACE",
+ *       .name="VARIABLE",
+ *       .shortName="V",
+ *       .value="DEFAULT_VALUE",
+ *       .type=TYPE,
+ *       .description="SHORT DESCRIPTION"
+ *     };
+ *
+ * where
+ *
+ * - space - the name of the configuration namespace (char string)
+ * - name - the name of the variable (char string)
+ * - shortName - the short name of the variable (char string), used in command line args,
+ *   may be '\0 (no short option)
+ * - value - the default value (char string)
+ * - description - description for the variable (char string), used in command line args
+ * - type - the variable type:
+ *   - LRC_INT - integer variable
+ *   - LRC_FLOAT - float variable
+ *   - LRC_DOUBLE - double variable
+ *   - LRC_STRING - char variable
+ *   - LRC_VAL - variable that only updates its value (i.e. boolean)
+ *
+ * The options table must finish with LRC_OPTIONS_END:
+ *
+ *     s->options[13] = (LRC_configDefaults) LRC_OPTIONS_END;
+ *
+ * ### The config file
+ *
+ * The configuration file may be used, in a sample form (only one configuration
+ * file both for core and the module):
+ *
+ *     [core] # namespace defined through .space="NAMESPACE"
+ *     name = arnoldweb
+ *     xres = 2048 # p->board->layout.dim[1]
+ *     yres = 2048 # p->board->layout.dim[0]
+ *     checkpoint = 4 # checkpoint_size = checkpoint * (mpi_size-1)
+ *
+ *     [arnold]
+ *     step = 0.3
+ *     tend = 2000.0
+ *     xmin = 0.95
+ *     xmax = 1.05
+ *     ymin = 0.95
+ *     ymax = 1.05
+ *     driver = 2
+ *     eps = 0.0
+ *     epsmax = 0.1
+ *     eps_interval = 0.02
+ *
+ * @ingroup all_nodes
  *
  * @param s The setup structure
+ *
  * @return TASK_SUCCESS on success, error code otherwise
  */
 int Setup(setup *s) {
@@ -111,7 +247,6 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Disable the initial master file backup"
   };
-
   s->options[8] = (LRC_configDefaults) {
     .space="core",
     .name="restart-mode",
@@ -161,31 +296,65 @@ int Setup(setup *s) {
  * @function
  * @brief Define the pool storage layout
  *
- * If the user-supplied module implements this function, the layout will be merged with
- * the core. You may change the layout per pool.
+ * This function is used to define the storage layout. The layout may be defined per pool
+ * (different storage layout during different task pools).
  *
- * ## POOL STORAGE
+ * If the Storage() hook is present in a custom module, the storage layout will be
+ * merged with the core storage layout.
  *
- * The Pool will store its global data in the /Pools/pool-ID. The task data will be stored
- * in /Pools/pool-ID/Tasks.
+ * To define the dataset, any C99 struct initialization is allowed. i.e.:
+ *
+ *     p->storage[0].layout = (schema) {
+ *       .path = "pool-data",
+ *       .rank = 2,
+ *       .dim[0] = 1, // horizontal size
+ *       .dim[1] = 6, // vertical size
+ *       .use_hdf = 1,
+ *       .storage_type = STORAGE_BASIC,
+ *       .sync = 1,
+ *       .dataspace_type = H5S_SIMPLE,
+ *       .datatype = H5T_NATIVE_DOUBLE,
+ *     };
+ *
+ * where:
+ * - path - the dataset name (char string)
+ * - rank - the rank of the dataset (max 2)
+ * - dim - the dimensions of the dataset
+ * - use_hdf - whether to store dataset in the master file or not
+ * - storage_type - the type of the storage to use (see below)
+ * - sync - whether to broadcast the data to all computing pool
+ * - dataspace_type - HDF5 dataspace type (for future development)
+ * - datatype - HDF5 datatype (for future development)
+ *
+ * Note: The datatype is set to H5T_NATIVE_DOUBLE, the dataspace type is H5S_SIMPLE, and the max rank is 2.
+ *
+ * You can adjust the number of available memory/storage banks by implementing the Init()
+ * hook (banks_per_pool, banks_per_task).
+ *
+ * ## The Pool storage
+ *
+ * The Pool will store its global data in the /Pools/pool-ID group, where the ID is the unique pool identifier.
+ * The task data will be stored in /Pools/pool-ID/Tasks group.
  *
  * The size of the storage dataset and the memory is the same. In the case of pool, whole
  * memory block is stored at once, if use_hdf = 1.
  *
- * The Pool data is broadcasted right after PoolPrepare() and saved to the master
+ * The Pool data is broadcasted right after the PoolPrepare() and saved to the master
  * datafile.
  *
  * Note: All global pool datasets must use STORAGE_BASIC storage_type.
  *
- * ## TASK STORAGE
+ * ## The task storage
  *
- * The task data is stored inside /Pools/pool-ID/Tasks group. There are four available
- * methods to store the task result:
+ * The task data is stored inside /Pools/pool-ID/Tasks group. The memory banks defined for
+ * the task storage are synchronized between master and worker after the TaskProcess().
+ *
+ * There are four available methods to store the task result:
  *
  * ### STORAGE_BASIC
  *
  * The whole memory block is stored in a dataset inside /Tasks/task-ID
- * group, i.e., for a dataset defined similar to:
+ * group (the ID is the unique task indentifier), i.e., for a dataset defined similar to:
  *
  *     p->task->storage[0].layout.path = "basic-dataset";
  *     p->task->storage[0].layout.dim[0] = 2;
@@ -197,7 +366,6 @@ int Setup(setup *s) {
  *
  *     9 9 9 9 9 9
  *     9 9 9 9 9 9
- *
  *
  * ### STORAGE_PM3D
  *
@@ -228,6 +396,8 @@ int Setup(setup *s) {
  *     7 7 7 7 7 7 7
  *     ...
  *
+ * The size of the final dataset is pool_size * dim[1].
+ *
  * ### STORAGE_LIST
  *
  * The memory block is stored in a dataset with a task-ID offset, This is
@@ -251,6 +421,8 @@ int Setup(setup *s) {
  *     4 4 4 4 4 4 4
  *     4 4 4 4 4 4 4
  *     ...
+ *
+ * The size of the final dataset is pool_size * dim[1].
  *
  * ### STORAGE_BOARD
  *
@@ -276,17 +448,28 @@ int Setup(setup *s) {
  *     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
  *     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
  *
+ * The size of the final dataset is pool_dim[0] * taks_dim[0] x pool_dim[1] * task_dim[1].
  *
- * ## CHECKPOINT
+ * ## Accessing the data
  *
- * The checkpoint is defined as a multiply of the MPI_COMM_WORLD-1, minimum = 1. It
+ * All data my be accessed directly (the storage index follows the definition of the
+ * datasets):
+ *
+ * - p->task->storage[0].data[0][0] for task datasets with storage_type STORAGE_PM3D,
+ *   STORAGE_LIST, STORAGE_BOARD
+ * - p->tasks[TID]->storage[1].data[0][0] for task datasets with storage_type STORAGE_BASIC.
+ *   The TID is the task ID
+ * - p->storage[0].data[0][0] for pool datasets
+ *
+ *
+ * ## Checkpoint
+ *
+ * The checkpoint is defined as a multiplication of the MPI_COMM_WORLD-1, minimum = 1. It
  * contains the results from tasks that have been processed and received. When the
- * checkpoint is full, the result is stored in the master datafile, according to the
+ * checkpoint is filled up, the result is stored in the master datafile, according to the
  * storage information provided in the module.
  *
- * You can adjust the number of available memory/storage banks by implementing the Init
- * function and using banks_per_pool and banks_per_task variables.
- *
+ * @ingroup all_nodes
  * @param p The pool structure
  * @param s The setup structure
  *
@@ -311,13 +494,22 @@ int Storage(pool *p, setup *s) {
 
 /**
  * @function
- * @brief Prepares the pool
+ * @brief Prepare the task pool
  *
- * This is a perfect place to read additional configuration, input files and assign values
- * to pool data tables. The data stored in the pool is broadcasted to all nodes, right
- * after the function is performed, as well as hdf storage for all datasets with use_hdf =
- * 1
+ * This function is used to prepare the task pool. All memory banks defined in Storage()
+ * hook are available for usage. This hook is followed by an automatic broadcast of all
+ * memory banks with flag sync = 1 and storage (when use_hdf = 1).
  *
+ * Example usage:
+ * - reading additional configuration, input files etc.
+ * - assign default values, preparing global data etc.
+ *
+ * During the task pool loop, the data from all previous pools is available in allpools.
+ *
+ * If the PoolPrepare() hook is present in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup master_only
  * @param allpools The pointer to all pools
  * @param p The current pool structure
  * @param s The setup structure
@@ -332,9 +524,12 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  * @function
  * @brief Process the pool
  *
- * @param allpools The pointer to all pools
- * @param p The current pool structure
- * @param s The setup structure
+ * This function is used to process the task pool after the task loop is finished and
+ * decide whether to continue the pool loop or finish the overall simulation. The data of
+ * current pool as well as all previous pools is available.
+ *
+ * If the PoolProcess() hook is present in a custom module, it will be used instead of the
+ * core hook.
  *
  * ### Return values
  *
@@ -360,9 +555,12 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  *       return POOL_FINALIZE;
  *     }
  *
+ * @ingroup master_only
+ * @param allpools The pointer to all pools
+ * @param p The current pool structure
+ * @param s The setup structure
  *
- * @return
- * POOL_FINALIZE, POOL_CREATE_NEW, POOL_RESET
+ * @return POOL_FINALIZE, POOL_CREATE_NEW, POOL_RESET
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
   return POOL_FINALIZE;
@@ -372,24 +570,36 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
  * @function
  * @brief Maps tasks
  *
+ * The default task mapping follows the HDF5 storage scheme.
  * The mapping starts from the top left corner:
  *
+ *           -- dim[1] --
  *     (0,0) (0,1) (0,2) (0,3) ...
- *     (1,0) (1,1) (1,2) (1,3)
+ *     (1,0) (1,1) (1,2) (1,3)     | dim[0]
  *     (2,0) (2,1) (2,2) (2,3)
  *     ...
  *
- *  This follows the hdf5 storage, row by row:
+ *  which will result, row by row:
  *
  *      0  1  2  3
  *      4  5  6  7
  *      8  9 10 11
  *
- *  @param p
- *  @param t
- *  @param s
+ * The current task location is available at t->location array. The pool resolution
+ * is available at p->board->layout.dim array. The pool_size is a multiplication of
+ * p->board->layout.dim[i], where i < p->board->layout.rank.
  *
- *  @return
+ * This function is called during the TaskPrepare() phase.
+ *
+ * If the TaskMapping() hook is present in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup master_only
+ * @param p The current pool structure
+ * @param t The current task structure
+ * @param s The setup structure
+ *
+ * @return TASK_SUCCESS or error code otherwise
  */
 int TaskMapping(pool *p, task *t, setup *s) {
   int px, vert;
@@ -411,13 +621,25 @@ int TaskMapping(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * @brief Prepares the task
+ * @brief Prepare the task
  *
- * @param p
- * @param t
- * @param s
+ * This function is used to do any task-specific preparation, i.e. changing initial
+ * conditions according to the current task location. The task ID and task location, as
+ * well as global pool data and setup is available, i.e.:
  *
- * @return
+ * - t->tid - the ID of the current task
+ * - t->location[0] - the horizontal position of the current task
+ * - t->location[1] - the vertical position of the current task
+ *
+ * If the TaskPrepare() is present in a custom module, it will be used instead of the core
+ * hook.
+ *
+ * @ingroup master_only
+ * @param p The current pool structure
+ * @param t The current task structure
+ * @param s The setup structure
+ *
+ * @return TASK_SUCCESS on success of error code otherwise
  */
 int TaskPrepare(pool *p, task *t, setup *s) {
   return TASK_SUCCESS;
@@ -427,11 +649,18 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * @function
  * @brief Process the task
  *
- * @param p
- * @param t
- * @param s
+ * This function is used to process the current task, i.e. to perform main computations.
+ * The data for the current task may be prepared in the TaskPrepare() hook.
  *
- * @return
+ * If the TaskProcess() is present in a custom module, it will be used instead of the core
+ * hook.
+ *
+ * @ingroup worker_only
+ * @param p The current pool structure
+ * @param t The current task structure
+ * @param s The setup structure
+ *
+ * @return TASK_SUCCESS on success or error code otherwise
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   return TASK_SUCCESS;
@@ -439,14 +668,34 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
 /**
  * @function
- * @brief Prepares the checkpoint
+ * @brief Prepare the checkpoint
  *
- * @param p
- * @param c
- * @param s
+ * This function is used to prepare the checkpoint. You may do some data-related
+ * operations. The data for the current checkpoint may be accessed through the current
+ * 2D checkpoint pointer:
  *
- * @return
+ *     c->storage->data[][]
  *
+ * where the first index is the checkpoint memory bank (0 to checkpoint_size) and
+ * the second index contains one-dimensional (flat) data from the received task (all
+ * task memory banks packed into one array), i.e.
+ *
+ *    c->storage->data[0][0] - the MPI message tag
+ *    c->storage->data[0][1] - the received task ID
+ *    c->storage->data[0][2] - the received task status (TASK_FINISHED)
+ *    c->storage->data[0][3] - the received task location[0]
+ *    c->storage->data[0][4] - the received task location[1]
+ *    c->storage->data[0][5] - the received task data begins here
+ *
+ * This hook should not be normally used, if is present in a custom module, it will be
+ * used instead the core hook.
+ *
+ * @ingroup master_only
+ * @param p The current pool structure
+ * @param c The current checkpoint structrue
+ * @param s The setup structure
+ *
+ * @return TASK_SUCCESS or error code otherwise
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
   return TASK_SUCCESS;
@@ -456,7 +705,17 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
  * @function
  * @brief The prepare hook
  *
- * This hook is called right before the pool starts
+ * This function is used to do any simulation-related prepare operations. It is called
+ * before the pool loop starts.
+ *
+ * If the Prepare() hook is present in a custom module, it will be used instead the core
+ * hook.
+ *
+ * @ingroup master_only
+ * @param masterfile The name of the master data file
+ * @setup The setup structure
+ *
+ * @return TASK_SUCCESS or error code otherwise
  */
 int Prepare(char *masterfile, setup *s) {
   return TASK_SUCCESS;
@@ -466,9 +725,17 @@ int Prepare(char *masterfile, setup *s) {
  * @function
  * @brief The process hook
  *
- * This hook is called after the pool loop finishes.
- * Example:
- * - You may do some specific data file postprocessing here
+ * This function is used to perform any simulation post operations, such as specific data
+ * manipulation in the master data file. It is called after the pool loop is finished.
+ *
+ * If the Process() hook is present in a custom module, it will be used instead the core
+ * hook.
+ *
+ * @ingroup master_only
+ * @param masterfile The name of the master data file
+ * @setup The setup structure
+ *
+ * @return TASK_SUCCESS or error code otherwise
  */
 int Process(char *masterfile, setup *s) {
   return TASK_SUCCESS;

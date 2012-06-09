@@ -1,5 +1,12 @@
 Mechanic
+--------
 
+The aim of the Mechanic is to help in massive numerical simulations by providing powerful
+and flexible user API with unified data storage and management. Such simulations may rely
+on testing a huge range of intitial conditions, while each test (single simulation run)
+may be computed as a standalone numerical task, either on one, or a group of CPUs.
+
+@rewrite this section
 We develop the Mechanic package, which is a flexible numerical framework to
 handle and automate massive numerical simulations. We assume that these computations rely
 on testing a huge range of initial conditions, while each test (single simulation run) may
@@ -42,3 +49,9 @@ framework is ongoing.
 Mechanic is BSD-licensed. The source code package comes with few example
 modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 
+Acknowledgments
+---------------
+
+This project is supported by the Polish Ministry of Science and Higher Education through
+the grant N/N203/402739. This work is conducted within the POWIEW project of the European
+Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08.

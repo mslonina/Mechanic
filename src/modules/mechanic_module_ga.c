@@ -7,18 +7,18 @@
  *
  * Note:
  * The result of the GA depends on the number of organisms. For a goo test try:
- * 
+ *
  *    mpirun -np 4 mechanic2 -p ga -x 10 -y 10
  *
  * which will use 100 organisms and should result with:
- *    
+ *
  *    Generation 42 with fitness 1681
  *
  * The maximum number of generations is arbitrary, and i.e. for default 5x5 task board
  * this limit will be reached (in fact, the original code ends with over 10000
- * generations). 
+ * generations).
  *
- * The maxium number of generations clearly depends on the available memory (number of
+ * The maximum number of generations clearly depends on the available memory (number of
  * task pools that can be allocated on each node).
  *
  */
@@ -38,6 +38,11 @@ int ProduceNextGeneration(pool *p, int genes, int alleles, double mutation_rate)
 int EvaluateOrganisms(pool *p, int max_fitness);
 int Fitness(pool *p, task *t, int genes);
 int SelectOneOrganism(pool *p);
+
+/**
+ * @defgroup ga The GA module
+ * @{
+ */
 
 /**
  * @function
@@ -89,8 +94,6 @@ int Storage(pool *p, setup *s) {
   /**
    * Path: /Pools/pool-ID/population
    * Current population
-   *
-   * The STORAGE_BASIC will store the whole dataset at once
    */
   p->storage[0].layout = (schema) {
     .path = "population",
@@ -147,9 +150,6 @@ int Storage(pool *p, setup *s) {
    * Path: /Pools/pool-ID/Tasks/fitness
    * The fitness of the each organism of the population
    * (How far we are from the model one)
-   *
-   * The STORAGE_LIST will store the fitness in the same order as the population organisms
-   * are stored in the /Pools/pool-ID/population (one-by-one task mapping)
    */
   p->task->storage[0].layout = (schema) {
     .path = "fitness",
@@ -172,7 +172,7 @@ int Storage(pool *p, setup *s) {
  * population is accessed through **all pointer.
  */
 int PoolPrepare(pool **all, pool *p, setup *s) {
-  int i, j, genes, alleles;  
+  int i, j, genes, alleles;
 
   genes = LRC_option2int("ga", "genes", s->head);
   alleles = LRC_option2int("ga", "alleles", s->head);
@@ -187,14 +187,14 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
           p->storage[0].data[i][j] = all[p->pid-1]->storage[3].data[i][j];
         }
       }
-      
+
       /* Copy the model */
       for (j = 0; j < genes; j++) {
         p->storage[1].data[0][j] = all[p->pid-1]->storage[1].data[0][j];
       }
     }
   }
-  
+
   return TASK_SUCCESS;
 }
 
@@ -207,7 +207,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   int genes;
-  
+
   genes = LRC_option2int("ga", "genes", s->head);
 
   t->storage[0].data[0][0] = Fitness(p, t, genes);
@@ -220,27 +220,22 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * Implements PoolProcess()
  *
  * We decide here, whether the model has been reached or not. When the model is not
- * reached, we generate the next population (children of the current population). 
+ * reached, we generate the next population (children of the current population).
  */
 int PoolProcess(pool **all, pool *p, setup *s) {
   int perfectGeneration = 0;
   int maxgen, max_fitness, genes, alleles;
   double mutation_rate;
 
-  /*if (p->rid < 3) {
-    printf("Generation %d, reset %d\n", p->pid, p->rid);
-    return POOL_RESET;
-  }*/
-
   maxgen = LRC_option2int("ga", "max-generations", s->head);
   max_fitness = LRC_option2int("ga", "max-fitness", s->head);
   genes = LRC_option2int("ga", "genes", s->head);
   alleles = LRC_option2int("ga", "alleles", s->head);
   mutation_rate = LRC_option2double("ga", "mutation-rate", s->head);
-  
+
   /* Has the model organism been reached? */
   perfectGeneration = EvaluateOrganisms(p, max_fitness);
-  
+
   if (perfectGeneration) {
     printf("Generation %d with fitness %d\n", p->pid+1, (int)p->storage[2].data[0][0]);
     return POOL_FINALIZE;
@@ -257,8 +252,10 @@ int PoolProcess(pool **all, pool *p, setup *s) {
   return POOL_CREATE_NEW;
 }
 
+/** }@ */
+
 /**
- * geneticAlgorithm1.c based functions
+ * @defgroup ga_functions geneticAlgorithm1.c based functions
  */
 
 /**
@@ -289,13 +286,13 @@ int InitializeOrganisms(pool *p, int genes, int alleles) {
  */
 int Fitness(pool *p, task *t, int genes) {
   int i = 0, fit = 0;
-    
+
   for (i = 0; i < genes; i++) {
     if ((int)p->storage[0].data[t->tid][i] == (int)p->storage[1].data[0][i]) {
       fit++;
     }
   }
-    
+
   return fit;
 }
 
@@ -305,7 +302,7 @@ int Fitness(pool *p, task *t, int genes) {
  */
 int EvaluateOrganisms(pool *p, int max_fitness) {
   int i;
-  
+
   p->storage[2].data[0][0] = 0;
 
   /* Total fitness */
@@ -361,7 +358,7 @@ int ProduceNextGeneration(pool *p, int genes, int alleles, double mutation_rate)
  */
 int SelectOneOrganism(pool *p) {
   int i = 0, t = 0, r = 0;
-  
+
   r = rand() % ((int)p->storage[2].data[0][0] + 1);
 
   for (i = 0; i < p->pool_size; i++) {
@@ -373,3 +370,4 @@ int SelectOneOrganism(pool *p) {
   return 0;
 }
 
+/** }@ */

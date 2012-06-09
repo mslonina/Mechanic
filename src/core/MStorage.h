@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The storage interface header
+ */
 #ifndef MECHANIC_STORAGE_H
 #define MECHANIC_STORAGE_H
 

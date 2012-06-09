@@ -6,10 +6,17 @@
 
 /**
  * @function
- * Wrapper to dlsym()
+ * @brief Wrapper to dlsym()
  *
- * @return
- * Function handler
+ * This function loads the specified function from the module. By default the core module
+ * is queried at first, and then the user specified module (LOAD_DEFAULT flag). If the
+ * core module has to be loaded only, use FALLBACK_ONLY flag.
+ *
+ * @param m The module pointer
+ * @param function The function to load
+ * @param flag One of the flags: LOAD_DEFAULT or FALLBACK_ONLY
+ *
+ * @return The function handler
  */
 query* LoadSym(module *m, char* function, int flag) {
   query* q = NULL;

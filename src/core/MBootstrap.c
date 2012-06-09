@@ -22,12 +22,14 @@
 /**
  * @file
  * The Bootstrap stage
+ *
+ * @todo Expand docs and explain all Boostrap stages
  */
 #include "MBootstrap.h"
 
 /**
  * @function
- * Bootstraps the layer
+ * @brief Bootstraps the layer
  *
  * The Mechanic works upon two module layers: the core, and the user-supplied module. All
  * functions that can be specified within the module API are used by the core. This means,
@@ -38,6 +40,15 @@
  * - Allocates the memory
  * - Loads the Setup function, if present
  * - Boots LRC API
+ *
+ * @param node The current node ID
+ * @param mpi_size The MPI_COMM_WORLD size
+ * @param argc The command line argc table
+ * @param argv The command line argv table
+ * @param name The name of the module to load
+ * @param f The fallback module pointer
+ *
+ * @return The module pointer, NULL otherwise
  */
 module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, module *f) {
   module m;
@@ -69,7 +80,11 @@ module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, modu
 
 /**
  * @function
- * Wrapper to dlopen()
+ * @brief Wrapper to dlopen()
+ *
+ * @param name The name of the module to load
+ *
+ * @return The module pointer, NULL otherwise
  */
 module ModuleLoad(char *name) {
   module m;
@@ -96,10 +111,14 @@ module ModuleLoad(char *name) {
 
 /**
  * @function
- * Allocates initial memory for the Layer
+ * @brief Allocates initial memory for the Layer
  *
  * - Load fallback layer function
  * - If the layer function exists, overwrite fallback
+ *
+ * @param m The module pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int ModuleInit(module *m) {
   query *q = NULL;
@@ -145,12 +164,18 @@ int ModuleInit(module *m) {
 
 /**
  * @function
- * Initializes the Setup
+ * @brief Initializes the Setup
  *
  * This function calls the Setup() from the module to initialize the LRC default option
  * structure. It merges with the fallback structure, so that all setup is available in one
  * layer (and only one config file can be used, with i.e. core setup included, but not
  * necessary).
+ *
+ * @param m The module pointer
+ * @param argc The command line argc table
+ * @param argv The command line argv table
+ *
+ * @return 0 on success, error code otherwise
  */
 int ModuleSetup(module *m, int argc, char **argv) {
   query *q = NULL;
@@ -184,7 +209,9 @@ int ModuleSetup(module *m, int argc, char **argv) {
 
 /**
  * @function
- * Finalizes the layer
+ * @brief Finalize the layer
+ *
+ * @param The layer pointer to finalize
  */
 void FinalizeLayer(layer *l) {
   if (l->handler) dlclose(l->handler);
@@ -200,7 +227,9 @@ void FinalizeLayer(layer *l) {
 
 /**
  * @function
- * Finalizes the module
+ * @brief Finalize the module
+ *
+ * @param The module pointer to finalize
  */
 void ModuleFinalize(module* m) {
   if (m->layer.handler) FinalizeLayer(&m->layer);

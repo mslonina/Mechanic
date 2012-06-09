@@ -6,7 +6,12 @@
 
 /**
  * @function
- * Performs worker node operations
+ * @brief Performs worker node operations
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int Worker(module *m, pool *p) {
   int mstat = 0;

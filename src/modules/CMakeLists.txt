@@ -9,11 +9,7 @@ install (TARGETS mechanic_module_core DESTINATION lib${LIB_SUFFIX})
 #target_link_libraries(mechanic_module_test readconfig mpi hdf5 m)
 #install (TARGETS mechanic_module_test DESTINATION lib${LIB_SUFFIX})
 
-add_library (mechanic_module_web SHARED mechanic_module_web.c mechanic_module_web_lib.c)
-target_link_libraries(mechanic_module_web readconfig mpi hdf5 m)
-install (TARGETS mechanic_module_web DESTINATION lib${LIB_SUFFIX})
-
-add_library (mechanic_module_aweb SHARED mechanic_module_aweb.c mechanic_module_web_lib.c)
+add_library (mechanic_module_aweb SHARED mechanic_module_aweb.c mechanic_module_aweb_lib.c)
 target_link_libraries(mechanic_module_aweb readconfig mpi hdf5 m)
 install (TARGETS mechanic_module_aweb DESTINATION lib${LIB_SUFFIX})
 

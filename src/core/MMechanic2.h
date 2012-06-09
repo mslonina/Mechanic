@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The Mechanic2 public API
+ */
 #ifndef MECHANIC_MECHANIC_H
 #define MECHANIC_MECHANIC_H
 
@@ -66,10 +70,6 @@
 #define TASK_AVAILABLE 0
 #define TASK_IN_USE -1
 #define NO_MORE_TASKS -99
-
-/* Runtime modes */
-#define MODE_NORMAL 600
-#define MODE_RESTART 601
 
 /**
  * @struct
@@ -168,6 +168,22 @@ typedef struct {
   int node; /**< The node ID */
   int mpi_size; /**< The MPI COMM size */
 } pool;
+
+enum {
+  MESSAGE_INFO,
+  MESSAGE_ERR,
+  MESSAGE_IERR,
+  MESSAGE_CONT,
+  MESSAGE_CONT2,
+  MESSAGE_WARN,
+	MESSAGE_DEBUG
+} MessageType;
+
+void Message(int type, char* message, ...);
+
+#define MASTER 0
+#define NORMAL_MODE 600
+#define RESTART_MODE 601
 
 #define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1}
 

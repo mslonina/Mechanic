@@ -6,23 +6,18 @@
 
 /**
  * @function
- * The Setup
+ * @brief The Setup
  *
- * @brief
- * This function reads the configuration file on the master node and broadcasts it to all
- * MPI_COMM_WORLD.
+ * This function reads the configuration on the master node and broadcasts it to all
+ * MPI_COMM_WORLD. Use the CORE_SETUP for core, and MODULE_SETUP for module configuration. 
  *
- * @param int
- *  The node id
- * @param char*
- *  The filename to read
- * @param module*
- *  The module used, must be allocated and checked before
- * @param int
- *  The runtime mode
+ * @param m The module pointer
+ * @param filename The filename to read
+ * @param argc The command line argc table
+ * @param argv The command line argv table
+ * @param flag On of the flags: CORE_SETUP, MODULE_SETUP
  *
- * @return
- *  The error code, 0 otherwise
+ * @return 0 on success, error code otherwise
  */
 int Setup(module *m, char *filename, int argc, char** argv, int flag) {
   int mstat = 0, opts = 0, i = 0, n = 0;
@@ -95,7 +90,13 @@ int Setup(module *m, char *filename, int argc, char** argv, int flag) {
 
 /**
  * @function
- * Reads the configuration file
+ * @brief Reads the configuration file
+ *
+ * @param m The module pointer
+ * @param filename The name of the configuration file
+ * @param head The LRC linked list pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
   int mstat = 0;
@@ -123,7 +124,14 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head) {
 
 /**
  * @function
- * Popt command line parser
+ * @brief Popt command line parser
+ *
+ * @param m The module pointer
+ * @param argc The command line argc table
+ * @param argv The command line argv table
+ * @param s The setup pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int Popt(module *m, int argc, char** argv, setup *s) {
   int rc, mstat = 0;
@@ -155,7 +163,12 @@ int Popt(module *m, int argc, char** argv, setup *s) {
 
 /**
  * @function
- * Initialize the popt tables according to the Setup()
+ * @brief Initialize the popt tables according to the Setup()
+ *
+ * @param m The module pointer
+ * @param s The setup pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int PoptOptions(module *m, setup *s) {
   int mstat = 0, i = 0;
@@ -200,7 +213,11 @@ int PoptOptions(module *m, setup *s) {
 
 /**
  * @function
- * Updates the LRC options table with popt values
+ * @brief Updates the LRC options table with popt values
+ *
+ * @param s The setup pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int LRCUpdate(setup *s) {
   int i = 0, mstat = 0;
@@ -231,3 +248,4 @@ int LRCUpdate(setup *s) {
   }
   return mstat;
 }
+

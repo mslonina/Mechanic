@@ -6,7 +6,13 @@
 
 /**
  * @function
- * Load the task
+ * @brief Load the task
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param tid The task id to load
+ *
+ * @return The task object, NULL otherwise
  */
 task* TaskLoad(module *m, pool *p, int tid) {
   task* t = NULL;
@@ -63,7 +69,13 @@ task* TaskLoad(module *m, pool *p, int tid) {
 
 /**
  * @function
- * Prepare the task
+ * @brief Prepare the task
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param t The current task pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int TaskPrepare(module *m, pool *p, task *t) {
   int mstat = 0;
@@ -102,7 +114,13 @@ int TaskPrepare(module *m, pool *p, task *t) {
 
 /**
  * @function
- * Process the task
+ * @brief Process the task
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param t The current task pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int TaskProcess(module *m, pool *p, task *t) {
   int mstat = 0;
@@ -117,6 +135,12 @@ int TaskProcess(module *m, pool *p, task *t) {
 
 /**
  * @function
+ * @brief Reset the task, change the task ID
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param t The task to reset
+ * @param tid The task new id
  */
 void TaskReset(module *m, pool *p, task *t, int tid) {
   t->tid = TASK_EMPTY;
@@ -125,7 +149,11 @@ void TaskReset(module *m, pool *p, task *t, int tid) {
 
 /**
  * @function
- * Finalize the task
+ * @brief Finalize the task
+ *
+ * @param m The module pointer
+ * @param p The pool pointer
+ * @param t The task pointer to be freed
  */
 void TaskFinalize(module *m, pool *p, task *t) {
   int i = 0;

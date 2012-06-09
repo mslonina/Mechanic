@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The restart mode header
+ */
 #ifndef MECHANIC_RESTART_H
 #define MECHANIC_RESTART_H
 

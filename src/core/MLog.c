@@ -1,6 +1,6 @@
 /**
  * @file
- * The logging interface.
+ * The logging interface
  */
 #include "MLog.h"
 

@@ -6,6 +6,12 @@
 
 /**
  * @function
+ * @brief Create the storage layout for the pool
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int Storage(module *m, pool *p) {
   int mstat = 0;
@@ -47,7 +53,6 @@ int Storage(module *m, pool *p) {
   CommitMemoryLayout(m->pool_banks, p->storage);
 
   /* Commit memory for task banks (whole datasets) */
-  // @todo implement STORAGE_BASIC for task groups
   for (i = 0; i < m->task_banks; i++) {
     if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) task_groups = 1;
     if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
@@ -93,7 +98,12 @@ int Storage(module *m, pool *p) {
 
 /**
  * @function
- * Checks inconsistencies in the storage layout
+ * @brief Check for any inconsistencies in the storage layout
+ *
+ * @param banks The number of memory/storage banks
+ * @param s The storage structure to check
+ *
+ * @return 0 on success, error code otherwise
  */
 int CheckLayout(int banks, storage *s) {
   int i = 0, mstat = 0;
@@ -130,10 +140,16 @@ int CheckLayout(int banks, storage *s) {
 
 /**
  * @function
- * Commits the memory layout
+ * @brief Commits the memory layout
  *
  * This function must run on every node -- the size of data arrays shared between nodes
  * depends on the memory layout.
+ *
+ * @param banks The number of memory/storage banks
+ * @param s The storage structure
+ *
+ * @return 0 on success, error code otherwise
+ *
  */
 int CommitMemoryLayout(int banks, storage *s) {
   int mstat = 0, i = 0;
@@ -147,7 +163,10 @@ int CommitMemoryLayout(int banks, storage *s) {
 
 /**
  * @function
- * Frees the memory
+ * @brief Frees the memory layout
+ *
+ * @param banks The number of memory/storage banks
+ * @param s The storage structure to free
  */
 void FreeMemoryLayout(int banks, storage *s) {
   int i = 0;
@@ -161,7 +180,12 @@ void FreeMemoryLayout(int banks, storage *s) {
 
 /**
  * @function
- * Commit the storage layout
+ * @brief Commit the storage layout
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int CommitStorageLayout(module *m, pool *p) {
   int mstat = 0, i = 0, j = 0;
@@ -227,7 +251,14 @@ int CommitStorageLayout(module *m, pool *p) {
 
 /**
  * @function
- * Creates dataset
+ * @brief Create a dataset
+ *
+ * @param h5location The HDF5 location id
+ * @param s The storage structure
+ * @param m The module pointer
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   int mstat = 0;
@@ -265,7 +296,12 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
 
 /**
  * @function
- * Gets the number of used memory banks.
+ * @brief Get the number of used memory banks
+ *
+ * @param allocated_banks Number of allocated memory/storage banks
+ * @param s The storage structure
+ *
+ * @return The number of memory/storage banks in use, 0 otherwise
  */
 int GetBanks(int allocated_banks, storage *s) {
   int banks_in_use = 0;
@@ -282,7 +318,13 @@ int GetBanks(int allocated_banks, storage *s) {
 
 /**
  * @function
- * Commits data to the master file
+ * @brief Commit the data to the master file
+ *
+ * @param h5location The HDF5 location id
+ * @param banks Number of memory banks to store
+ * @param s The storage structure
+ *
+ * @return 0 on success, error code otherwise
  */
 int CommitData(hid_t h5location, int banks, storage *s) {
   int mstat = 0, i = 0;
@@ -328,7 +370,13 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
 /**
  * @function
- * Read the dataset
+ * @brief Read the dataset data
+ *
+ * @param h5location The HDF5 location id
+ * @param banks Number of memory banks to read
+ * @param s The storage structure
+ *
+ * @return 0 on success, error code otherwise
  */
 int ReadData(hid_t h5location, int banks, storage *s) {
   int mstat = 0, i = 0;
@@ -345,3 +393,4 @@ int ReadData(hid_t h5location, int banks, storage *s) {
 
   return mstat;
 }
+

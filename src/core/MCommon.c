@@ -6,10 +6,16 @@
 
 /**
  * @function
- * Creates name
+ * @brief Creates name
  *
- * @in_group
- * Helpers
+ * @in_group Helpers
+ * @param prefix The prefix for the name
+ * @param name The name
+ * @param suffix The suffix for the name
+ * @param extension The extension for the name
+ *
+ * @return The allocated char array with the name built with prefix, name, suffix and
+ * extension values. It must be freed after usage.
  */
 char* Name(char *prefix, char* name, char *suffix, char *extension) {
   char* fname;
@@ -42,7 +48,10 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
 
 /**
  * @function
- * Common messaging interface
+ * @brief Common messaging interface
+ *
+ * @param type The type of the message
+ * @param message The message to display
  */
 void Message(int type, char *message, ...) {
   static char message2[2048];
@@ -61,7 +70,9 @@ void Message(int type, char *message, ...) {
 
 /**
  * @function
- * Common error handler
+ * @brief Common error handler
+ *
+ * @param errcode The error code to use
  */
 void Error(int errcode) {
   Abort(errcode);
@@ -69,7 +80,9 @@ void Error(int errcode) {
 
 /**
  * @function
- * Wrapper to MPI_Abort
+ * @brief Wrapper to MPI_Abort
+ *
+ * @param errcode The error code to use
  */
 void Abort(int errcode) {
   MPI_Abort(MPI_COMM_WORLD, errcode);
@@ -77,7 +90,9 @@ void Abort(int errcode) {
 
 /**
  * @function
- * Common status check
+ * @brief Common status check
+ *
+ * @param status The status code to check for
  */
 void CheckStatus(int status) {
   if (status >= CORE_ERR_CORE) Error(status);
@@ -85,10 +100,15 @@ void CheckStatus(int status) {
 
 /**
  * @function
- * Allocate memory buffer
+ * @brief Allocate memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
+ *
+ * @param rank The rank of the array to allocate
+ * @param dims The dimensions of the array to allocate
+ *
+ * @return Allocated array, NULL otherwise
  */
 double** AllocateBuffer(int rank, int *dims) {
   double** array = NULL;
@@ -109,9 +129,11 @@ double** AllocateBuffer(int rank, int *dims) {
 
 /**
  * @function
- * Free memory buffer
+ * @brief Free memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
+ *
+ * @param array The array pointer to free
  */
 void FreeBuffer(double **array) {
   if (array[0]) free(array[0]);
@@ -120,7 +142,12 @@ void FreeBuffer(double **array) {
 
 /**
  * @function
- * Gets the size
+ * @brief Get the 1D size of the array
+ *
+ * @param rank The rank of the array
+ * @param dims The dimensions of the array
+ *
+ * @return The 1D size of the array
  */
 int GetSize(int rank, int *dims){
   int i = 0, size = 0;
@@ -135,7 +162,12 @@ int GetSize(int rank, int *dims){
 
 /**
  * @function
- * Copies array to vector
+ * @brief Copies array to vector
+ *
+ * @param vec The output vector
+ * @param array The input array
+ * @param rank The rank of the array
+ * @param dims The dimensions of the array
  */
 void Array2Vec(double *vec, double **array, int rank, int *dims) {
   int i = 0, j = 0, k = 0;
@@ -150,7 +182,12 @@ void Array2Vec(double *vec, double **array, int rank, int *dims) {
 
 /**
  * @function
- * Copies vector to array
+ * @brief Copies vector to array
+ *
+ * @param vec The input vector
+ * @param array The output array
+ * @param rank The rank of the array
+ * @param dims The dimensions of the array
  */
 void Vec2Array(double *vec, double **array, int rank, int *dims) {
   int i = 0, j = 0, k = 0;
@@ -165,7 +202,12 @@ void Vec2Array(double *vec, double **array, int rank, int *dims) {
 
 /**
  * @function
- * Copies files
+ * @brief Copy files
+ *
+ * @param in The input filename
+ * @param out The output filename
+ *
+ * @return 0 on success, error code otherwise
  */
 int Copy(char* in, char* out) {
   int input;
@@ -224,11 +266,16 @@ int Copy(char* in, char* out) {
 
 /**
  * @function
- * Validate the checkpoint file
+ * @brief Validate the checkpoint file
  *
  * @todo
- * Write module_name as an attribute, so that we could validate the restart file
- * Maybe write some other attributes?
+ * - Write this function
+ * - Write module_name as an attribute, so that we could validate the restart file
+ * - Maybe write some other attributes?
+ *
+ * @param filename The name of the file to be validated
+ *
+ * @return 0 on success, error code otherwise
  */
 int Validate(char *filename) {
   return 0;

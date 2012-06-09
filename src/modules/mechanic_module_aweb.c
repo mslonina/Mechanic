@@ -2,7 +2,7 @@
  * @file
  * The Arnold Web module for Mechanic: The Mechanic part
  *
- * Working code for the Mechanic-0.13 master branch
+ * Working code for the Mechanic2
  */
 
 /**
@@ -21,7 +21,7 @@
 /**
  * Include module-related stuff
  */
-#include "mechanic_module_web.h"
+#include "mechanic_module_aweb.h"
 
 /**
  * @function

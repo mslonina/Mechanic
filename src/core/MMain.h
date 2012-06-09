@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The Main function header
+ */
 #ifndef MECHANIC_MAIN_H
 #define MECHANIC_MAIN_H
 

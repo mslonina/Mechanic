@@ -1,3 +1,7 @@
+/**
+ * @file
+ * Internal datatypes and function prototypes
+ */
 #ifndef MECHANIC_TYPES_H
 #define MECHANIC_TYPES_H
 

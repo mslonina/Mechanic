@@ -6,6 +6,11 @@
 
 /**
  * @function
+ * @brief The MPI Task Farm main function
+ *
+ * @param m The module pointer
+ *
+ * @return 0 on success, error code otherwise
  */
 int Taskfarm(module *m) {
   int mstat = 0;
@@ -13,10 +18,11 @@ int Taskfarm(module *m) {
   pool **p = NULL;
   int pool_create;
 
+  /* Prepare the simulation */
   Prepare(m);
 
   /**
-   * Initialize the pool bank
+   * (A) Initialize the pool bank
    */
   p = calloc(m->layer.init.pools * sizeof(pool*), sizeof(pool*));
   if (!p) Error(CORE_ERR_MEM);
@@ -29,7 +35,7 @@ int Taskfarm(module *m) {
   pool_create = POOL_CREATE_NEW;
 
   /**
-   * The Restart mode
+   * (B) The Restart mode
    * We try to recreate the memory layout for each pool and read stored data
    */
   if (m->mode == RESTART_MODE) {
@@ -40,7 +46,7 @@ int Taskfarm(module *m) {
   }
 
   /**
-   * The Pool loop
+   * (C) The Pool loop
    */
   do {
 
@@ -84,6 +90,7 @@ int Taskfarm(module *m) {
   }
   free(p);
 
+  /* Process the simulation */
   Process(m);
 
   return mstat;
