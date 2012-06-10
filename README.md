@@ -45,7 +45,7 @@ modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 ### Example usage
 
 - **Efficient creation of dynamical maps.** Each pixel of the map is mapped into
-  standalone numerical task
+  a standalone numerical task
 - **Genetic algorithms.** Each pool of tasks may be treated as a generation in the
   language of GAs
 - **Data processing.** Think about processing huge number of astronomical observations
@@ -68,7 +68,7 @@ create a `mechanic_module_map.c` file and put in it the following code:
     int Storage(pool *p, setup *s) {
       p->task->storage[0].layout = (schema) {
         .path = "result", // the name of the output dataset
-        .rank = 2, // the rank of the dataset (only rank = 2 currently)
+        .rank = 2, // the rank of the dataset (only rank = 2 is currently supported)
         .dim[0] = 1, // the horizontal dimension of the result array (not the dataset)
         .dim[1] = 3, // the vertical dimension of the result array (not the dataset)
         .use_hdf = 1, // whether to store the result in the master data file
@@ -86,20 +86,24 @@ The second step is to create the TaskProcess() function, in which we will comput
 state of the system:
 
     int TaskProcess(pool *p, task *t, setup *s) {
-      t->storage[0].data[0][0] = t->location[0]; // the horizontal position of the pixel
-      t->storage[0].data[0][1] = t->location[1]; // the vertical position of the pixel
+      t->storage[0].data[0][0] = t->location[0]; // the horizontal position of the current task
+      t->storage[0].data[0][1] = t->location[1]; // the vertical position of the current task
       t->storage[0].data[0][2] = t->tid; // task id represents the state of the system
 
       return SUCCESS;
     }
 
+The `data` array is automatically allocated using the information provided in the
+`Storage()` hook.
+
 Our state of the system is represented here by the unique task ID (you may use of course
 any numerical function here to get the result). The task location is filled up
-automatically during the task preparation phase.
+automatically during the task preparation phase. Each worker node receives a unique task
+to compute. 
 
-We should now compile our code:
+We should now compile our code to a shared library:
 
-    mpicc -fPIC -Dpic mechanic_module_map.c -o libmechanic_module_map.so
+    mpicc -fPIC -Dpic -shared mechanic_module_map.c -o libmechanic_module_map.so
 
 After all, we may run the code for a 10x10px map, using four MPI threads, one master and three workers:
 
@@ -126,9 +130,9 @@ The result is stored in the `mechanic-master-00.h5` file and may be accessed i.e
 
 And our result:
 
-    # h5dump -d/Pools/last/Tasks/result mechanic-master-00.h5
+    # h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
 
-    DATASET "/Pools/last/Tasks/result" {
+    DATASET "/Pools/pool-0000/Tasks/result" {
        DATATYPE  H5T_IEEE_F64LE
        DATASPACE  SIMPLE { ( 100, 3 ) / ( 100, 3 ) }
        DATA {
@@ -145,9 +149,6 @@ And our result:
 
        (... the output cutted off)
     }
-
-
-
 
 ### Differences to other task management systems
 
