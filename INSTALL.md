@@ -9,14 +9,14 @@ maintained), if following requirements are met:
 - CMake >= 2.8
 - MPI2 implementation (optional: Fortran support) (we favour OpenMPI)
 - HDF5 >= 1.8
-- Popt library
-- Libreadconfig with HDF5 support (see http://git.astri.umk.pl/projects/lrc)
+- Popt library >= 1.14
+- Libreadconfig >= 0.12.4 with HDF5 support (see http://git.astri.umk.pl/projects/lrc)
 
 Compilation
 -----------
 
-    tar -xvvf mechanic-VERSION.tar.gz
-    cd mechanic-VERSION
+    tar -xvvf mechanic-0.12.7-src.tar.gz
+    cd mechanic-0.12.7
     mkdir build
     cd build
     CC=mpicc FC=mpif90 cmake ..
@@ -42,3 +42,11 @@ Additional modules
 
 All but core module have been moved to separate project.
 See http://git.astri.umk.pl/projects/mechanic_modules
+
+Gentoo users
+------------
+
+There is a mechanic-overlay prepared for Gentoo/Gentoo Prefix users, see
+http://github.com/mslonina/mechanic-overlay. After you install the overlay, you may use:
+
+    emerge =mechanic-0.12.7

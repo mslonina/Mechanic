@@ -1,0 +1,11 @@
+Core developers
+---------------
+
+- Mariusz Slonina, slonina@astri.umk.pl
+- Kacper Kowalik, kowalik@astri.umk.pl
+
+Scientific modules developers
+-----------------------------
+
+- Krzysztof Gozdziewski, chris@astri.umk.pl
+- Cezary Migaszewski, cmigaszewski@astri.umk.pl

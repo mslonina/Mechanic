@@ -1,4 +1,7 @@
 Mechanic
+--------
+
+### Overview
 
 We develop the Mechanic package, which is a flexible numerical framework to
 handle and automate massive numerical simulations. We assume that these computations rely
@@ -35,10 +38,25 @@ bindings. It was developed and tested to work equally well in fake-MPI mode
 
 Although the framework remains in early alpha stage, some existing Fortran77 and C codes
 were successfully ported and ran with Mechanic, showing huge potential of the code, as
-well as number of features to improve and develop. In this work we demonstrate that on
-some problems in the field of dynamical astronomy. The development and testing the
+well as number of features to improve and develop. The development and testing the
 framework is ongoing.
 
 Mechanic is BSD-licensed. The source code package comes with few example
 modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 
+### Publications
+
+- Slonina M., Gozdziewski K., Migaszewski C., 2012arXiv1202.6513S
+- Migaszewski C., Slonina M., Gozdziewski K., 2012arXiv1205.0822M
+- Gozdziewski K. et al, 2012arXiv1205.4164G
+- Slonina M., Gozdziewski K., Migaszewski C., Rozenkiewicz A., 2012arXiv1205.1341S
+- Slonina M., Gozdziewski K., Migaszewski C., Astrophysics Source Code Library, record ascl:1205.001
+
+### Posters
+
+- Slonina M., Gozdziewski K., Migaszewski C., Simtech2011 (Stuttgart, June 2011)
+- Slonina M., Gozdziewski K., Migaszewski C., Orbital Couples: "Pas de Deux" in the Solar System and the Milky Way (Paris, October 2011)
+
+### Acknowledgments
+
+This project is supported by the Polish Ministry of Science and Higher Education through the grant N/N203/402739. This work is conducted within the POWIEW project of the European Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08.
