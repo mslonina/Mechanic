@@ -51,6 +51,7 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
  * @param errcode The error code to use
  */
 void Error(int errcode) {
+  // Abort on any error code
   Abort(errcode);
 }
 
@@ -69,7 +70,8 @@ void Abort(int errcode) {
  * @param status The status code to check for
  */
 void CheckStatus(int status) {
-  if (status >= CORE_ERR_CORE) Error(status);
+  // Exception on any error code
+  if (status >= MODULE_ERR_CORE && status <= CORE_ERR_OTHER) Error(status);
 }
 
 /**

@@ -44,10 +44,11 @@
 #define CORE_ERR_STORAGE 917 /**< The core storage-related error */
 #define CORE_ERR_OTHER 999 /**< The core any other error */
 
+#define MODULE_ERR_CORE 801 /**< The module-related error */
 #define MODULE_ERR_MPI 811 /**< The module MPI-related error */
 #define MODULE_ERR_HDF 812 /**< The module HDF-related error */
 #define MODULE_ERR_SETUP 814 /**< The module setup-related error */
-#define MODULE_ERR_MEM 815 /**< The module memory-related errot*/
+#define MODULE_ERR_MEM 815 /**< The module memory-related error */
 #define MODULE_ERR_CHECKPOINT 816 /**< The module checkpoint-related error */
 #define MODULE_ERR_OTHER 888 /**< The module any other error */
 
