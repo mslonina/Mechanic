@@ -8,7 +8,7 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared mechanic_module_chpoollayout.c -o
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_chpoollayout.c -o
  *     libmechanic_module_chpoollayout.so
  *
  * Using the module
