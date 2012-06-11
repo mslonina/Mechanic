@@ -174,14 +174,14 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
               t->storage[j].layout.rank, t->storage[j].layout.dim);
 
           /* Commit data to the pool */
-          p->tasks[t->tid].tid = t->tid;
-          p->tasks[t->tid].status = t->status;
-          p->tasks[t->tid].location[0] = t->location[0];
-          p->tasks[t->tid].location[1] = t->location[1];
+          p->tasks[t->tid]->tid = t->tid;
+          p->tasks[t->tid]->status = t->status;
+          p->tasks[t->tid]->location[0] = t->location[0];
+          p->tasks[t->tid]->location[1] = t->location[1];
 
           for (k = 0; k < t->storage[j].layout.dim[0]; k++) {
             for (l = 0; l < t->storage[j].layout.dim[1]; l++) {
-              p->tasks[t->tid].storage[j].data[k][l] =
+              p->tasks[t->tid]->storage[j].data[k][l] =
                 t->storage[j].data[k][l];
             }
           }

@@ -80,7 +80,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
             if (size > 0) {
               sprintf(task_path, TASK_PATH, k);
               task_id = H5Gopen(tasks, task_path, H5P_DEFAULT);
-              ReadData(task_id, 1, &(pools[i]->tasks[j].storage[k]));
+              ReadData(task_id, 1, &(pools[i]->tasks[j]->storage[k]));
               H5Gclose(task_id);
             }
           }

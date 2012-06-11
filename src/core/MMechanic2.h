@@ -167,7 +167,7 @@ typedef struct {
   storage *board; /**< The task board */
   storage *storage; /**< The global pool storage scheme */
   task *task; /**< The task scheme */
-  task *tasks; /**< All tasks */
+  task **tasks; /**< All tasks */
   int checkpoint_size; /**< The checkpoint size multiplier */
   int pool_size; /**< The pool size (number of tasks to do) */
   int node; /**< The node ID */

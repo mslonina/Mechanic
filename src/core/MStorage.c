@@ -15,7 +15,6 @@
 int Storage(module *m, pool *p) {
   int mstat = 0;
   int i, j, dims[MAX_RANK];
-  int task_groups = 0;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -53,7 +52,11 @@ int Storage(module *m, pool *p) {
 
   /* Commit memory for task banks (whole datasets) */
   for (i = 0; i < m->task_banks; i++) {
-    if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) task_groups = 1;
+    if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) {
+      dims[0] = p->task->storage[i].layout.dim[0];
+      dims[1] = p->task->storage[i].layout.dim[1];
+      p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
+    }
     if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
       p->task->storage[i].layout.storage_type == STORAGE_LIST) {
       dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
@@ -81,14 +84,6 @@ int Storage(module *m, pool *p) {
       for (j = 0; j < p->board->layout.dim[1]; j++) {
         p->board->data[i][j] = TASK_AVAILABLE;
       }
-    }
-  }
-
-  /* TaskID groups */
-  if (task_groups) {
-    p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
-    for (i = 0; i < p->pool_size; i++) {
-      p->tasks[i] = *TaskLoad(m, p, i);
     }
   }
 

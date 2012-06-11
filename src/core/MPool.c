@@ -65,7 +65,7 @@ pool* PoolLoad(module *m, int pid) {
  * @return 0 on success, error code otherwise
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
-  int mstat = 0, i = 0, size = 0;
+  int mstat = 0, i = 0, size = 0, task_groups = 0;
   query *q;
   setup *s = &(m->layer.setup);
   hid_t h5location, group, attribute_id, attrspace_id;
@@ -75,6 +75,18 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
   /* Number of tasks to do */
   p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
+
+  /* Allocate the tasks group,
+   * We cannot do it earlier, since we don't know the size of the pool */
+  for (i = 0; i < m->task_banks; i++) {
+    if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) task_groups = 1;
+  }
+  if (task_groups) {
+    p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
+    for (i = 0; i < p->pool_size; i++) {
+      p->tasks[i] = TaskLoad(m, p, i);
+    }
+  }
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
@@ -213,12 +225,13 @@ void PoolFinalize(module *m, pool *p) {
       }
     }
     if (p->task->storage) free(p->task->storage);
+
     free(p->task);
   }
 
   if (p->tasks) {
     for (i = 0; i < p->pool_size; i++) {
-      TaskFinalize(m, p, &(p->tasks[i]));
+      TaskFinalize(m, p, p->tasks[i]);
     }
     free(p->tasks);
   }
