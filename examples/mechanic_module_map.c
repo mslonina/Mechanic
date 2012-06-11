@@ -1,5 +1,6 @@
 /**
  * Sample dynamical map
+ * ====================
  *
  * Compilation
  * -----------

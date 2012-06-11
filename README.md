@@ -22,6 +22,28 @@ actively maintained).
 Mechanic is BSD-licensed. The source code package comes with few example
 modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 
+### How does it work?
+
+Consider an example of generation of an image (sets of points). In a single-threaded software,
+it requires a loop over all points:
+
+    for (i = 0; i < xdim; i++) {
+      for (j = 0; j < ydim; j++) {
+        result = PixelCompute(i, j);
+      }
+    }
+
+It works well, however, the problem arises, when the `PixelCompute()` function takes a long
+time to finish (especially in dynamical astronomy, the field the Mechanic came from).
+Since each `PixelCompute()` call is independent, we may try to split the workload by using
+some parallel techniques. In such a case, we will loop over all tasks to do, this time,
+however, each parallel thread receives a single task, and return the result to the master thread. 
+This is what Mechanic does. It sends a single `PixelCompute()` task to each worker node in
+the computing pool (say CPU cluster) and combine the results (this is the so-called _MPI
+Task Farm model_). Under the hood the Mechanic is independent from the numerical problem
+itself -- it provides a unified way to create and access data files, setup,
+node-communication etc.
+
 ### Key features
 
 - **The numerical part of the code is fully separated from the setup and storage phase.** You may
@@ -41,6 +63,11 @@ modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 - **Different storage modes** which allows to design the storage layout that fits best
   the user needs (i.e. for processing with Gnuplot or Matplotlib)
 - **Linux and MAC OS X** supported
+
+### Current limitations
+
+- The data is stored with H5T_NATIVE_DOUBLE datatype, and datasets are H5S_SIMPLE-type
+- Only rank 2 datasets are supported right now
 
 ### Example usage
 
