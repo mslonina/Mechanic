@@ -16,16 +16,23 @@
 int Restart(module *m, pool **pools, int *pool_counter) {
   int mstat = 0;
   int i, j, k, size;
-  hid_t h5location, group, tasks, task_id, attr_id;
+  hid_t h5location, group, tasks, task_id, attr_id, hstat;
   char path[LRC_CONFIG_LEN], task_path[LRC_CONFIG_LEN];
 
   if (m->node == MASTER) {
     h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+    H5CheckStatus(h5location);
 
     /* (A) Get the last pool ID and set the pool counter */
     group = H5Gopen(h5location, LAST_GROUP, H5P_DEFAULT);
+    H5CheckStatus(group);
+
     attr_id = H5Aopen_name(group, "Id");
-    H5Aread(attr_id, H5T_NATIVE_INT, pool_counter);
+    H5CheckStatus(attr_id);
+
+    hstat = H5Aread(attr_id, H5T_NATIVE_INT, pool_counter);
+    H5CheckStatus(hstat);
+
     H5Aclose(attr_id);
     H5Gclose(group);
 
@@ -44,6 +51,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
     for (i = 0; i <= *pool_counter; i++) {
       sprintf(path, POOL_PATH, pools[i]->pid);
       group = H5Gopen(h5location, path, H5P_DEFAULT);
+      H5CheckStatus(group);
 
       /* Read pool board */
       ReadData(group, 1, pools[i]->board);
@@ -58,6 +66,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
 
       /* Read task data */
       tasks = H5Gopen(group, "Tasks", H5P_DEFAULT);
+      H5CheckStatus(tasks);
 
       /* Read simple datasets */
       for (j = 0; j < m->task_banks; j++) {
@@ -80,6 +89,8 @@ int Restart(module *m, pool **pools, int *pool_counter) {
             if (size > 0) {
               sprintf(task_path, TASK_PATH, k);
               task_id = H5Gopen(tasks, task_path, H5P_DEFAULT);
+              H5CheckStatus(task_id);
+
               ReadData(task_id, 1, &(pools[i]->tasks[j]->storage[k]));
               H5Gclose(task_id);
             }

@@ -69,6 +69,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   query *q;
   setup *s = &(m->layer.setup);
   hid_t h5location, group, attribute_id, attrspace_id;
+  hid_t hstat;
   hsize_t adims;
   int attr_id;
   char path[LRC_CONFIG_LEN];
@@ -94,23 +95,34 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
     /* Write pool data */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    H5CheckStatus(h5location);
+
     sprintf(path, POOL_PATH, p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
+    H5CheckStatus(group);
+
     mstat = CommitData(group, m->pool_banks, p->storage);
 
     /* Create "latest" link */
     if (H5Lexists(h5location, LAST_GROUP, H5P_DEFAULT)) {
       H5Ldelete(h5location, LAST_GROUP, H5P_DEFAULT);
     }
-    H5Lcreate_hard(group, path, h5location, LAST_GROUP, H5P_DEFAULT, H5P_DEFAULT);
+    hstat = H5Lcreate_hard(group, path, h5location, LAST_GROUP, H5P_DEFAULT, H5P_DEFAULT);
+    H5CheckStatus(hstat);
 
     /* Create attributes */
     if (p->rid == 0 && m->mode != RESTART_MODE) {
       adims = 1;
       attr_id = p->pid;
       attrspace_id = H5Screate_simple(1, &adims, NULL);
+      H5CheckStatus(attrspace_id);
+
       attribute_id = H5Acreate(group, "Id", H5T_NATIVE_INT, attrspace_id, H5P_DEFAULT, H5P_DEFAULT);
-      H5Awrite(attribute_id, H5T_NATIVE_INT, &attr_id);
+      H5CheckStatus(attribute_id);
+
+      hstat = H5Awrite(attribute_id, H5T_NATIVE_INT, &attr_id);
+      H5CheckStatus(hstat);
+
       H5Aclose(attribute_id);
       H5Sclose(attrspace_id);
     }
@@ -154,14 +166,16 @@ int PoolProcess(module *m, pool **all, pool *p) {
 
     /* Write pool data */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    H5CheckStatus(h5location);
+
     sprintf(path, POOL_PATH, p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
+    H5CheckStatus(group);
 
     CommitData(group, m->pool_banks, p->storage);
 
     H5Gclose(group);
     H5Fclose(h5location);
-
   }
 
   MPI_Bcast(&pool_create, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
@@ -193,8 +207,12 @@ int PoolReset(module *m, pool *p) {
 
     /* Reset the board storage banks */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    H5CheckStatus(h5location);
+
     sprintf(path, POOL_PATH, p->pid);
     group = H5Gopen(h5location, path, H5P_DEFAULT);
+    H5CheckStatus(group);
+
     mstat = CommitData(group, 1, p->board);
 
     H5Gclose(group);

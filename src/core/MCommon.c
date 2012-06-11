@@ -75,6 +75,15 @@ void CheckStatus(int status) {
 }
 
 /**
+ * @brief HDF5 status check
+ *
+ * @param status The status code to check for
+ */
+void H5CheckStatus(hid_t status) {
+  if (status < 0) Error(CORE_ERR_HDF);
+}
+
+/**
  * @brief Allocate memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c

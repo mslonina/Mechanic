@@ -183,17 +183,21 @@ int CommitStorageLayout(module *m, pool *p) {
   char path[LRC_CONFIG_LEN];
 
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+  H5CheckStatus(h5location);
 
   /* The Pools */
   if (!H5Lexists(h5location, POOLS_GROUP, H5P_DEFAULT)) {
     h5pools = H5Gcreate(h5location, POOLS_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5CheckStatus(h5pools);
   } else {
     h5pools = H5Gopen(h5location, POOLS_GROUP, H5P_DEFAULT);
+    H5CheckStatus(h5pools);
   }
 
   /* The Pool-ID group */
   sprintf(path, POOL_PATH, p->pid);
   h5group = H5Gcreate(h5pools, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  H5CheckStatus(h5group);
 
   /* The Pool-ID task board */
   CreateDataset(h5group, p->board, m, p);
@@ -207,6 +211,7 @@ int CommitStorageLayout(module *m, pool *p) {
 
   /* The Tasks group */
   h5tasks = H5Gcreate(h5group, TASKS_GROUP, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  H5CheckStatus(h5tasks);
 
   /* The task datasets */
   for (i = 0; i < m->task_banks; i++) {
@@ -221,8 +226,10 @@ int CommitStorageLayout(module *m, pool *p) {
           sprintf(path, TASK_PATH, j);
           if (!H5Lexists(h5group, path, H5P_DEFAULT)) {
             h5task = H5Gcreate(h5tasks, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+            H5CheckStatus(h5task);
           } else {
             h5task = H5Gopen(h5tasks, path, H5P_DEFAULT);
+            H5CheckStatus(h5task);
           }
           CreateDataset(h5task, &p->task->storage[i], m, p);
           H5Gclose(h5task);
@@ -256,6 +263,7 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   herr_t h5status;
 
   h5dataspace = H5Screate(s->layout.dataspace_type);
+  H5CheckStatus(h5dataspace);
   if (s->layout.dataspace_type == H5S_SIMPLE) {
     if (s->layout.storage_type == STORAGE_BASIC) {
       dims[0] = s->layout.dim[0];
@@ -271,11 +279,12 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
       dims[1] = s->layout.dim[1] * p->board->layout.dim[1];
     }
     h5status = H5Sset_extent_simple(h5dataspace, s->layout.rank, dims, NULL);
-    if (h5status < 0) return CORE_ERR_HDF;
+    H5CheckStatus(h5status);
   }
 
   h5dataset = H5Dcreate(h5location, s->layout.path, s->layout.datatype, h5dataspace,
       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  H5CheckStatus(h5dataset);
 
   H5Dclose(h5dataset);
   H5Sclose(h5dataspace);
@@ -323,13 +332,15 @@ int CommitData(hid_t h5location, int banks, storage *s) {
     if (s[i].layout.use_hdf) {
 
       dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
+      H5CheckStatus(dataset);
       dataspace = H5Dget_space(dataset);
+      H5CheckStatus(dataspace);
 
       /* Whole dataset at once */
       if (s[i].layout.storage_type == STORAGE_BASIC) {
         hdf_status = H5Dwrite(dataset, s[i].layout.datatype,
             H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
-        if (hdf_status < 0) mstat = CORE_ERR_HDF;
+        H5CheckStatus(hdf_status);
       } else {
         dims[0] = s[i].layout.dim[0];
         dims[1] = s[i].layout.dim[1];
@@ -339,7 +350,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
         H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, dims, NULL);
         hdf_status = H5Dwrite(dataset, s[i].layout.datatype,
             memspace, dataspace, H5P_DEFAULT, &(s[i].data[0][0]));
-        if (hdf_status < 0) mstat = CORE_ERR_HDF;
+        H5CheckStatus(hdf_status);
 
         H5Sclose(memspace);
       }
@@ -349,8 +360,6 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
     }
   }
-
-  if (hdf_status < 0) mstat = CORE_ERR_HDF;
 
   return mstat;
 }
@@ -367,12 +376,14 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 int ReadData(hid_t h5location, int banks, storage *s) {
   int mstat = 0, i = 0;
   hid_t dataset;
+  herr_t hstat;
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
       Message(MESSAGE_DEBUG, "Read Data storage path: %s\n", s[i].layout.path);
       dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
-      H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
+      hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
+      H5CheckStatus(hstat);
       H5Dclose(dataset);
     }
   }

@@ -28,6 +28,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
   if (m->node == MASTER) {
     if (m->mode == RESTART_MODE) {
       h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+      H5CheckStatus(h5location);
 
       if (setup_mode == CORE_SETUP) {
         LRC_HDF5Parser(h5location, "/config/core", m->layer.setup.head);

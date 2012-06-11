@@ -17,6 +17,7 @@ char* Name(char *prefix, char *name, char *suffix, char *extension);
 void Error(int status);
 void Abort(int status);
 void CheckStatus(int status);
+void H5CheckStatus(hid_t status);
 
 double** AllocateBuffer(int rank, int *dims);
 void FreeBuffer(double **array);

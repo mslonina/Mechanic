@@ -66,6 +66,7 @@ int main(int argc, char** argv) {
   hid_t h5location;
 
   int mstat = 0;
+  hid_t hstat;
 
   /**
    * (A) Initialize MPI
@@ -78,8 +79,8 @@ int main(int argc, char** argv) {
   /**
    * (B) Initialize HDF
    */
-  mstat = H5open();
-  CheckStatus(mstat);
+  hstat = H5open();
+  H5CheckStatus(hstat);
 
   if (node == MASTER) Welcome();
 
@@ -212,6 +213,8 @@ int main(int argc, char** argv) {
       "-master", "-00", ".h5");
 
     h5location = H5Fcreate(module.filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    H5CheckStatus(h5location);
+
     LRC_HDF5Writer(h5location, "/config/core", core.layer.setup.head);
     LRC_HDF5Writer(h5location, "/config/module", module.layer.setup.head);
     H5Fclose(h5location);
