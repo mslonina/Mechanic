@@ -189,5 +189,9 @@ typedef enum {
 } MessageType;
 
 void Message(int type, char* message, ...);
+void PrintDataset(int type, hid_t dataset);
+double** AllocateBuffer(int rank, int *dims);
+void FreeBuffer(double **array);
+int GetSize(int rank, int *dims);
 
 #endif

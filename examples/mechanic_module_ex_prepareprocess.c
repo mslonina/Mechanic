@@ -83,6 +83,7 @@ int Process(char *masterfile, setup *s) {
     }
     Message(MESSAGE_OUTPUT, "\n");
   }
+  //PrintDataset(MESSAGE_COMMENT, dataset);
 
   // Release the resources
   H5Dclose(dataset);
