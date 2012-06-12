@@ -6,9 +6,10 @@ List of examples:
 - Creating a new task pool
 - Different storage layout per task pool (basic)
 - Different storage layout per task pool (advanced)
-- Using Prepare/Process hooks
+- Using Prepare() and Process() hooks
+- Using Init() and Setup() hooks
 
 Compilation
 -----------
 
-    mpicc -fPIC -Dpic -shared -lmechanic2 -lreadconfig mechanic_module_example.c -o libmechanic_module_example.so
+    mpicc -fPIC -Dpic -shared -lhdf5 -lmechanic2 -lreadconfig mechanic_module_example.c -o libmechanic_module_example.so
