@@ -1,19 +1,19 @@
 /**
- * Creation of a new task pool
- * ===========================
+ * Change the storage layout for a specific task pool
+ * ==================================================
  *
- * In this example we create new task pools during the simulation
+ * In this example we create new task pools during the simulation, and we change the
+ * storage layout for one of them.
  *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_createpool.c -o
- *     libmechanic_module_createpool.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_chpoollayout.c -o libmechanic_module_chpoollayout.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p createpool -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p chpoollayout -x 10 -y 20
  *
  * Listing the contents of the data file
  * -------------------------------------
@@ -47,6 +47,11 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_PM3D,
   };
 
+  // Change the layout at the pool-0004
+  if (p->pid == 4) {
+    p->task->storage[0].layout.dim[1] = 5;
+  }
+
   return SUCCESS;
 }
 
@@ -65,6 +70,12 @@ int TaskProcess(pool *p, task *t, setup *s) {
   // The state of the system
   t->storage[0].data[0][2] = t->tid;
 
+  // We are at pool-0004
+  if (p->pid == 4) {
+    t->storage[0].data[0][3] = t->tid + 3.0;
+    t->storage[0].data[0][4] = t->tid + 4.0;
+  }
+
   return SUCCESS;
 }
 
@@ -75,5 +86,4 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   if (current->pid < 5) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }
-
 

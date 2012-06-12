@@ -1,11 +1,11 @@
 /**
- * Sample dynamical map
- * ====================
+ * Sample map or image
+ * ===================
  *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_map.c -o libmechanic_module_map.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 -lreadocnfig mechanic_module_map.c -o libmechanic_module_map.so
  *
  * Using the module
  * ----------------
@@ -60,5 +60,4 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   return SUCCESS;
 }
-
 
