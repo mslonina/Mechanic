@@ -11,11 +11,16 @@ dir=`pwd`
 mdir=${dir}/mechanic-opt
 
 # Your compilers
-CC=icc
-CXX=icpc
-F77=ifort
-FC=ifort
-VERSION=2.0.0_rc5
+CC=gcc #icc
+CXX=g++ #icpc
+F77=gfortran #ifort
+FC=gfortran #ifort
+
+# software versions
+MECHANIC=2.0.0_rc5
+HDF=1.8.9
+MPI=1.5.5
+LRC=0.12.4
 
 # make opts
 opts=-j4
@@ -35,12 +40,12 @@ cd $mdir
 mkdir -p src && cd src
 
 # Download the OpenMPI and HDF5
-curl http://www.open-mpi.org/software/ompi/v1.5/downloads/openmpi-1.5.5.tar.bz2 -o openmpi-1.5.5.tar.bz2
-curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.8.tar.bz2 -o hdf5-1.8.8.tar.bz2
+curl http://www.open-mpi.org/software/ompi/v1.5/downloads/openmpi-${MPI}.tar.bz2 -o openmpi-${MPI}.tar.bz2
+curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF}.tar.bz2 -o hdf5-${HDF}.tar.bz2
 
 # Download the Mechanic environment
-curl -L https://github.com/mslonina/LibReadConfig/tarball/0.12.4 -o libreadconfig-0.12.4.tar.gz
-curl -L https://github.com/mslonina/Mechanic/tarball/${VERSION} -o mechanic-${VERSION}.tar.gz
+curl -L https://github.com/mslonina/LibReadConfig/tarball/${LRC} -o libreadconfig-${LRC}.tar.gz
+curl -L https://github.com/mslonina/Mechanic/tarball/${MECHANIC} -o mechanic-${MECHANIC}.tar.gz
 
 export CC=${CC}
 export CXX=${CXX}
@@ -48,24 +53,24 @@ export FC=${FC}
 export F77=${F77}
 
 # Install Openmpi
-tar -xvvf openmpi-1.5.5.tar.bz2
-cd openmpi-1.5.5
+tar -xvvf openmpi-${MPI}.tar.bz2
+cd openmpi-${MPI}
 ./configure --prefix=$mdir
 make $opts && make install
 
 # Install HDF5
 cd ..
-tar -xvvf hdf5-1.8.8.tar.bz2
-cd hdf5-1.8.8
+tar -xvvf hdf5-${HDF}.tar.bz2
+cd hdf5-${HDF}
 ./configure --prefix=$mdir
 #./configure CC=icc CXX=icpc F77=ifort FC=ifort --enable-fortran --prefix=$mdir
 make $opts && make install
 
 # Install LRC
 cd ..
-mkdir libreadconfig-0.12.4
-tar -zxvf libreadconfig-0.12.4.tar.gz -C libreadconfig-0.12.4 --strip-components=1
-cd libreadconfig-0.12.4/
+mkdir libreadconfig-${LRC}
+tar -zxvf libreadconfig-${LRC}.tar.gz -C libreadconfig-${LRC} --strip-components=1
+cd libreadconfig-${LRC}/
 mkdir build
 cd build
 
@@ -74,9 +79,9 @@ make $opts && make install
 
 # Install Mechanic
 cd ../../
-mkdir mechanic-${VERSION}
-tar -zxvf mechanic-${VERSION}.tar.gz -C mechanic-${VERSION} --strip-components=1
-cd mechanic-${VERSION}/
+mkdir mechanic-${MECHANIC}
+tar -zxvf mechanic-${MECHANIC}.tar.gz -C mechanic-${MECHANIC} --strip-components=1
+cd mechanic-${MECHANIC}/
 mkdir build
 cd build
 
