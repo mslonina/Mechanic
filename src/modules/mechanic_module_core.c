@@ -695,13 +695,14 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
  * If the Prepare() hook is present in a custom module, it will be used instead the core
  * hook.
  *
- * @ingroup master_only
+ * @ingroup all_nodes
+ * @param node The node id
  * @param masterfile The name of the master data file
  * @param s The setup structure
  *
  * @return SUCCESS or error code otherwise
  */
-int Prepare(char *masterfile, setup *s) {
+int Prepare(int node, char *masterfile, setup *s) {
   return SUCCESS;
 }
 
@@ -714,13 +715,14 @@ int Prepare(char *masterfile, setup *s) {
  * If the Process() hook is present in a custom module, it will be used instead the core
  * hook.
  *
- * @ingroup master_only
+ * @ingroup all_nodes
+ * @param node The node id
  * @param masterfile The name of the master data file
  * @param s The setup structure
  *
  * @return SUCCESS or error code otherwise
  */
-int Process(char *masterfile, setup *s) {
+int Process(int node, char *masterfile, setup *s) {
   return SUCCESS;
 }
 /** @} */

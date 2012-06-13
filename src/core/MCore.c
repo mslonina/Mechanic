@@ -28,11 +28,9 @@ int Prepare(module *m) {
   setup *s = &(m->layer.setup);
   query *q;
 
-  if (m->node == MASTER) {
-    q = LoadSym(m, "Prepare", LOAD_DEFAULT);
-    if (q) mstat = q(m->filename, s);
-    CheckStatus(mstat);
-  }
+  q = LoadSym(m, "Prepare", LOAD_DEFAULT);
+  if (q) mstat = q(m->node, m->filename, s);
+  CheckStatus(mstat);
 
   return mstat;
 }
@@ -49,11 +47,9 @@ int Process(module *m) {
   setup *s = &(m->layer.setup);
   query *q;
 
-  if (m->node == MASTER) {
-    q = LoadSym(m, "Process", LOAD_DEFAULT);
-    if (q) mstat = q(m->filename, s);
-    CheckStatus(mstat);
-  }
+  q = LoadSym(m, "Process", LOAD_DEFAULT);
+  if (q) mstat = q(m->node, m->filename, s);
+  CheckStatus(mstat);
 
   return mstat;
 }
