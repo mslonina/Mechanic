@@ -153,7 +153,7 @@ int Setup(setup *s) {
 /**
  * Implements Prepare()
  */
-int Prepare(char *masterfile, setup *s) {
+int Prepare(int node, char *masterfile, setup *s) {
   int max_pools, ilimit, debug;
   double dlimit;
 
@@ -162,13 +162,15 @@ int Prepare(char *masterfile, setup *s) {
   debug = LRC_option2int("mymodule", "debug", s->head);
   dlimit = LRC_option2double("mymodule", "dlimit", s->head);
 
-  Message(MESSAGE_COMMENT, "Options are: \n");
-  Message(MESSAGE_COMMENT, "--max-pools = %d\n", max_pools);
-  Message(MESSAGE_COMMENT, "--ilimit = %d\n", ilimit);
-  Message(MESSAGE_COMMENT, "--debug = %d\n", debug);
-  Message(MESSAGE_COMMENT, "--dlimit = %f\n", dlimit);
-  Message(MESSAGE_COMMENT, "--host = %s\n", LRC_getOptionValue("mymodule", "host", s->head));
-  Message(MESSAGE_COMMENT, "\n");
+  if (node == MASTER) {
+    Message(MESSAGE_COMMENT, "Options are: \n");
+    Message(MESSAGE_COMMENT, "--max-pools = %d\n", max_pools);
+    Message(MESSAGE_COMMENT, "--ilimit = %d\n", ilimit);
+    Message(MESSAGE_COMMENT, "--debug = %d\n", debug);
+    Message(MESSAGE_COMMENT, "--dlimit = %f\n", dlimit);
+    Message(MESSAGE_COMMENT, "--host = %s\n", LRC_getOptionValue("mymodule", "host", s->head));
+    Message(MESSAGE_COMMENT, "\n");
+  }
 
   return SUCCESS;
 }
