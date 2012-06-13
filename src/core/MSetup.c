@@ -19,7 +19,7 @@
  * @return 0 on success, error code otherwise
  */
 int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
-  int mstat = 0, opts = 0, i = 0, n = 0;
+  int mstat = SUCCESS, opts = 0, i = 0, n = 0;
   MPI_Datatype mpi_t;
   MPI_Status mpi_status;
   hid_t h5location;
@@ -41,6 +41,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
       H5Fclose(h5location);
     } else {
       mstat = ReadConfig(m, filename, m->layer.setup.head, setup_mode);
+      CheckStatus(mstat);
     }
   }
 
@@ -60,6 +61,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
 
   /* Broadcast new configuration */
   mstat = LRC_datatype(m->layer.setup.options[0], &mpi_t);
+  CheckStatus(mstat);
 
   for (i = 0; i < opts; i++) {
     if (m->node == MASTER) {
@@ -99,7 +101,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
  * @return 0 on success, error code otherwise
  */
 int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_mode) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   FILE *inif;
 
   if (filename == NULL || filename[0] == LRC_NULL) {
@@ -113,6 +115,7 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_m
     if (setup_mode == MODULE_SETUP)
       Message(MESSAGE_INFO, "Configuration file to use: '%s'\n", filename);
     mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
+    CheckStatus(mstat);
     fclose(inif);
   } else if (inif == NULL) {
     if (strcmp(filename, LRC_getOptionValue("core", "config", m->layer.setup.head)) != 0) {
@@ -138,7 +141,7 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_m
  * @return 0 on success, error code otherwise
  */
 int Popt(module *m, int argc, char** argv, setup *s, int setup_mode) {
-  int rc, mstat = 0;
+  int rc, mstat = SUCCESS;
 
   /* Get the command line args */
   s->popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, s->popt->popt, 0);
@@ -174,7 +177,7 @@ int Popt(module *m, int argc, char** argv, setup *s, int setup_mode) {
  * @return 0 on success, error code otherwise
  */
 int PoptOptions(module *m, setup *s) {
-  int mstat = 0, i = 0;
+  int mstat = SUCCESS, i = 0;
   char* garbage;
 
   /* Module options */
@@ -222,7 +225,7 @@ int PoptOptions(module *m, setup *s) {
  * @return 0 on success, error code otherwise
  */
 int LRCUpdate(setup *s) {
-  int i = 0, mstat = 0;
+  int i = 0, mstat = SUCCESS;
   size_t len;
 
   while (s->options[i].name[0] != LRC_NULL) {

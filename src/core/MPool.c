@@ -65,7 +65,7 @@ pool* PoolLoad(module *m, int pid) {
  * @return 0 on success, error code otherwise
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
-  int mstat = 0, i = 0, size = 0, task_groups = 0;
+  int mstat = SUCCESS, i = 0, size = 0, task_groups = 0;
   query *q;
   setup *s = &(m->layer.setup);
   hid_t h5location, group, attribute_id, attrspace_id;
@@ -92,6 +92,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(all, p, s);
+    CheckStatus(mstat);
 
     /* Write pool data */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -102,6 +103,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     H5CheckStatus(group);
 
     mstat = CommitData(group, m->pool_banks, p->storage);
+    CheckStatus(mstat);
 
     /* Create "latest" link */
     if (H5Lexists(h5location, LAST_GROUP, H5P_DEFAULT)) {
@@ -154,6 +156,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
  * @return 0 on success, error code otherwise
  */
 int PoolProcess(module *m, pool **all, pool *p) {
+  int mstat = SUCCESS;
   int pool_create = 0;
   setup *s = &(m->layer.setup);
   query *q;
@@ -172,7 +175,8 @@ int PoolProcess(module *m, pool **all, pool *p) {
     group = H5Gopen(h5location, path, H5P_DEFAULT);
     H5CheckStatus(group);
 
-    CommitData(group, m->pool_banks, p->storage);
+    mstat = CommitData(group, m->pool_banks, p->storage);
+    CheckStatus(mstat);
 
     H5Gclose(group);
     H5Fclose(h5location);
@@ -192,7 +196,7 @@ int PoolProcess(module *m, pool **all, pool *p) {
  * @return 0 on success, error code otherwise
  */
 int PoolReset(module *m, pool *p) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   int i,j;
   hid_t h5location, group;
   char path[LRC_CONFIG_LEN];
@@ -214,6 +218,7 @@ int PoolReset(module *m, pool *p) {
     H5CheckStatus(group);
 
     mstat = CommitData(group, 1, p->board);
+    CheckStatus(mstat);
 
     H5Gclose(group);
     H5Fclose(h5location);

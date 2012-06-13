@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
   struct stat file;
   hid_t h5location;
 
-  int mstat = 0;
+  int mstat = SUCCESS;
   hid_t hstat;
 
   /**

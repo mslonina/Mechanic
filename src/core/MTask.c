@@ -76,7 +76,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
  * @return 0 on success, error code otherwise
  */
 int TaskPrepare(module *m, pool *p, task *t) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   int x, y;
   query *q;
   setup *s = &(m->layer.setup);
@@ -89,6 +89,7 @@ int TaskPrepare(module *m, pool *p, task *t) {
 
       q = LoadSym(m, "TaskMapping", LOAD_DEFAULT);
       if (q) mstat = q(p, t, s);
+      CheckStatus(mstat);
 
       x = t->location[0];
       y = t->location[1];
@@ -105,6 +106,7 @@ int TaskPrepare(module *m, pool *p, task *t) {
 
     q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
     if (q) mstat = q(p, t, s);
+    CheckStatus(mstat);
   }
 
   return mstat;
@@ -120,12 +122,13 @@ int TaskPrepare(module *m, pool *p, task *t) {
  * @return 0 on success, error code otherwise
  */
 int TaskProcess(module *m, pool *p, task *t) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   query *q;
   setup *s = &(m->layer.setup);
 
   q = LoadSym(m, "TaskProcess", LOAD_DEFAULT);
   if (q) mstat = q(p, t, s);
+  CheckStatus(mstat);
 
   return mstat;
 }

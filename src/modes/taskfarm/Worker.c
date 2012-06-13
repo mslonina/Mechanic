@@ -13,7 +13,7 @@
  * @return 0 on success, error code otherwise
  */
 int Worker(module *m, pool *p) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   int node, tag, intag;
 
   MPI_Status recv_status, send_status;

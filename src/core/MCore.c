@@ -24,13 +24,14 @@ void Welcome() {
  * @return 0 on success, error code otherwise
  */
 int Prepare(module *m) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   setup *s = &(m->layer.setup);
   query *q;
 
   if (m->node == MASTER) {
     q = LoadSym(m, "Prepare", LOAD_DEFAULT);
     if (q) mstat = q(m->filename, s);
+    CheckStatus(mstat);
   }
 
   return mstat;
@@ -44,13 +45,14 @@ int Prepare(module *m) {
  * @return 0 on success, error code otherwise
  */
 int Process(module *m) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   setup *s = &(m->layer.setup);
   query *q;
 
   if (m->node == MASTER) {
     q = LoadSym(m, "Process", LOAD_DEFAULT);
     if (q) mstat = q(m->filename, s);
+    CheckStatus(mstat);
   }
 
   return mstat;

@@ -13,7 +13,7 @@
  * @return 0 on success, error code otherwise
  */
 int Master(module *m, pool *p) {
-  int mstat = 0;
+  int mstat = SUCCESS;
 
   storage *send_buffer, *recv_buffer;
   int i = 0, k = 0, cid = 0, terminated_nodes = 0;
@@ -71,6 +71,7 @@ int Master(module *m, pool *p) {
   /* Send initial tasks to all workers */
   for (i = 1; i < m->mpi_size; i++) {
     mstat = TaskPrepare(m, p, t);
+    CheckStatus(mstat);
 
     if (mstat != NO_MORE_TASKS) {
       mstat = Pack(m, &send_buffer->data[i-1][0], p, t, TAG_DATA);
@@ -125,6 +126,7 @@ int Master(module *m, pool *p) {
       c->counter++;
 
       mstat = TaskPrepare(m, p, t);
+      CheckStatus(mstat);
       if (mstat != NO_MORE_TASKS) {
 
         mstat = Pack(m, &send_buffer->data[index][0], p, t, TAG_DATA);

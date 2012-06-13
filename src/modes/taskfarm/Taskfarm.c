@@ -12,13 +12,14 @@
  * @return 0 on success, error code otherwise
  */
 int Taskfarm(module *m) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   int pid = 0;
   pool **p = NULL;
   int pool_create;
 
   /* Prepare the simulation */
-  Prepare(m);
+  mstat = Prepare(m);
+  CheckStatus(mstat);
 
   /**
    * (A) Initialize the pool bank
@@ -42,6 +43,7 @@ int Taskfarm(module *m) {
       Message(MESSAGE_INFO, "Recreating the pool loop\n");
     }
     mstat = Restart(m, p, &pid);
+    CheckStatus(mstat);
   }
 
   /**
@@ -66,8 +68,10 @@ int Taskfarm(module *m) {
        */
       if (m->node == MASTER) {
         mstat = Master(m, p[pid]);
+        CheckStatus(mstat);
       } else {
         mstat = Worker(m, p[pid]);
+        CheckStatus(mstat);
       }
 
       pool_create = PoolProcess(m, p, p[pid]);
@@ -90,7 +94,8 @@ int Taskfarm(module *m) {
   free(p);
 
   /* Process the simulation */
-  Process(m);
+  mstat = Process(m);
+  CheckStatus(mstat);
 
   return mstat;
 }

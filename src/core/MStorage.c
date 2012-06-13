@@ -13,7 +13,7 @@
  * @return 0 on success, error code otherwise
  */
 int Storage(module *m, pool *p) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   int i, j, dims[MAX_RANK];
   query *q;
 
@@ -99,7 +99,7 @@ int Storage(module *m, pool *p) {
  * @return 0 on success, error code otherwise
  */
 int CheckLayout(int banks, storage *s) {
-  int i = 0, mstat = 0;
+  int i = 0, mstat = SUCCESS;
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.rank <= 0) {
@@ -144,7 +144,7 @@ int CheckLayout(int banks, storage *s) {
  *
  */
 int CommitMemoryLayout(int banks, storage *s) {
-  int mstat = 0, i = 0;
+  int mstat = SUCCESS, i = 0;
 
   for (i = 0; i < banks; i++) {
     s[i].data = AllocateBuffer(s[i].layout.rank, s[i].layout.dim);
@@ -178,7 +178,7 @@ void FreeMemoryLayout(int banks, storage *s) {
  * @return 0 on success, error code otherwise
  */
 int CommitStorageLayout(module *m, pool *p) {
-  int mstat = 0, i = 0, j = 0;
+  int mstat = SUCCESS, i = 0, j = 0;
   hid_t h5location, h5group, h5pools, h5tasks, h5task;
   char path[LRC_CONFIG_LEN];
 
@@ -257,7 +257,7 @@ int CommitStorageLayout(module *m, pool *p) {
  * @return 0 on success, error code otherwise
  */
 int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   hid_t h5dataset, h5dataspace;
   hsize_t dims[MAX_RANK];
   herr_t h5status;
@@ -323,7 +323,7 @@ int GetBanks(int allocated_banks, storage *s) {
  * @return 0 on success, error code otherwise
  */
 int CommitData(hid_t h5location, int banks, storage *s) {
-  int mstat = 0, i = 0;
+  int mstat = SUCCESS, i = 0;
   hid_t dataspace, dataset, memspace;
   herr_t hdf_status = 0;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
@@ -374,7 +374,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
  * @return 0 on success, error code otherwise
  */
 int ReadData(hid_t h5location, int banks, storage *s) {
-  int mstat = 0, i = 0;
+  int mstat = SUCCESS, i = 0;
   hid_t dataset;
   herr_t hstat;
 

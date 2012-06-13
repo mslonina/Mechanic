@@ -61,13 +61,14 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
  * @return 0 on success, error code otherwise
  */
 int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   query *q = NULL;
   setup *s = &(m->layer.setup);
 
   if (m->node == MASTER) {
     q = LoadSym(m, "CheckpointPrepare", LOAD_DEFAULT);
     if (q) mstat = q(p, c, s);
+    CheckStatus(mstat);
   }
 
   return mstat;
@@ -83,7 +84,7 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
  * @return 0 on success, error code otherwise
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   int i = 0, j = 0, k = 0, l = 0;
   hid_t h5location, group, tasks, datapath;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
@@ -102,10 +103,12 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   group = H5Gopen(h5location, path, H5P_DEFAULT);
   H5CheckStatus(group);
 
-  CommitData(group, 1, p->board);
+  mstat = CommitData(group, 1, p->board);
+  CheckStatus(mstat);
 
   /* Update pool data */
-  CommitData(group, m->pool_banks, p->storage);
+  mstat = CommitData(group, m->pool_banks, p->storage);
+  CheckStatus(mstat);
 
   tasks = H5Gopen(group, TASKS_GROUP, H5P_DEFAULT);
   H5CheckStatus(tasks);
@@ -160,7 +163,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           }
 
           /* Commit data to master datafile */
-          CommitData(tasks, 1, &t->storage[j]);
+          mstat =CommitData(tasks, 1, &t->storage[j]);
+          CheckStatus(mstat);
         }
       }
     }
@@ -195,7 +199,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           }
 
           /* Commit data to master datafile */
-          CommitData(datapath, 1, &t->storage[j]);
+          mstat = CommitData(datapath, 1, &t->storage[j]);
+          CheckStatus(mstat);
 
           H5Gclose(datapath);
         }
@@ -254,7 +259,7 @@ void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
  * @return 0 on success, error code otherwise
  */
 int Backup(module *m, setup *s) {
-  int i = 0, b = 0, mstat = 0;
+  int i = 0, b = 0, mstat = SUCCESS;
   char *current_name, *backup_name, iter[4];
   struct stat current;
   struct stat backup;

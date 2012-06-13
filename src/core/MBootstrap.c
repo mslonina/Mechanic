@@ -120,7 +120,7 @@ module ModuleLoad(char *name) {
 int ModuleInit(module *m) {
   query *q = NULL;
   int opts = 0;
-  int mstat = 0;
+  int mstat = SUCCESS;
 
   /* Load fallback layer, at least core module must implement this */
   if (m->fallback.handler) {
@@ -175,7 +175,7 @@ int ModuleInit(module *m) {
  */
 int ModuleSetup(module *m, int argc, char **argv) {
   query *q = NULL;
-  int mstat = 0;
+  int mstat = SUCCESS;
 
   q = LoadSym(m, "Setup", NO_FALLBACK);
   if (q) {
@@ -188,6 +188,7 @@ int ModuleSetup(module *m, int argc, char **argv) {
      */
     if (m->fallback.handler) {
       mstat = LRC_mergeDefaults(m->layer.setup.options, m->fallback.setup.options);
+      CheckStatus(mstat);
     }
   }
 
@@ -195,6 +196,7 @@ int ModuleSetup(module *m, int argc, char **argv) {
 
   /* Popt options */
   mstat = PoptOptions(m, &m->layer.setup);
+  CheckStatus(mstat);
   m->layer.setup.popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, m->layer.setup.popt->popt, 0);
   poptGetNextOpt(m->layer.setup.popt->poptcontext);
 

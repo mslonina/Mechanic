@@ -14,7 +14,7 @@
  * @return 0 on success, error code otherwise
  */
 int Restart(module *m, pool **pools, int *pool_counter) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   int i, j, k, size;
   hid_t h5location, group, tasks, task_id, attr_id, hstat;
   char path[LRC_CONFIG_LEN], task_path[LRC_CONFIG_LEN];

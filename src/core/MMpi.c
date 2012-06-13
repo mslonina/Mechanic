@@ -13,7 +13,7 @@
  * @return 0 on success, error code otherwise
  */
 int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
-  int mstat = 0, i = 0;
+  int mstat = SUCCESS, i = 0;
   int block_lengths[4];
   MPI_Aint displacements[4];
   MPI_Datatype types[4];
@@ -38,10 +38,10 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
   }
 
   mstat = MPI_Type_struct(4, block_lengths, displacements, types, mpi_t);
-  CheckStatus(mstat);
+  if (mstat != MPI_SUCCESS) Error(CORE_ERR_MPI);
 
   mstat = MPI_Type_commit(mpi_t);
-  CheckStatus(mstat);
+  if (mstat != MPI_SUCCESS) Error(CORE_ERR_MPI);
 
   return mstat;
 }
@@ -58,7 +58,7 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
  * @return 0 on success, error code otherwise
  */
 int Pack(module *m, double *buffer, pool *p, task *t, int tag) {
-  int mstat = 0;
+  int mstat = SUCCESS;
   int position = 0;
   int i = 0;
   int size = 0;
