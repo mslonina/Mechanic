@@ -241,7 +241,7 @@ int LRCUpdate(setup *s) {
       sprintf(s->options[i].value,"%d",s->popt->int_args[i]);
     }
     if (s->options[i].type == LRC_DOUBLE) {
-      sprintf(s->options[i].value,"%f",s->popt->double_args[i]);
+      sprintf(s->options[i].value,"%.19E",s->popt->double_args[i]);
     }
     LRC_modifyOption(s->options[i].space, s->options[i].name,
         s->options[i].value, s->options[i].type, s->head);

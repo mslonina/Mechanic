@@ -25,6 +25,9 @@
  * Each worker will return 1x3 result array. The master node will combine the worker
  * result arrays into one dataset suitable to process with Gnuplot PM3D. The final dataset
  * will be available at /Pools/pool-0000/Tasks/result.
+ *
+ * By default, we have 8 memory/storage banks per each task pool + 8 memory/storage banks
+ * per task available. You may change the defaults by using the Init() hook.
  */
 int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
