@@ -34,7 +34,7 @@ fi
 h5dump -d ${SET} -m '%.16f' -y -w 65000 -o tmp_commas.dat ${FILE}
 
 if [ ${RES} -eq 0 ]; then
-  sed -e 's/,/ /g' tmp_commas.dat > ${OUT}.dat
+  sed -e 's/,/ /g' tmp_commas.dat > ${OUT}
 else
   PATTERN=""
   for (( i = 1; i < ${RES}; i++ )); do
