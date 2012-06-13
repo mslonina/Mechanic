@@ -5,12 +5,12 @@
 # Example:
 # 
 # 1) To create a gnuplot pm3d-ready file for a 512x1024 dynamical map:
-# > h52ascii mechanic-master-00.h5 1024 /Pools/pool-0000/Tasks/result
+# > h52ascii mechanic-master-00.h5 1024 /Pools/pool-0000/Tasks/result output.dat
 # 
 # The script will create mechanic-master-00.dat ASCII file with data in 1024-line blocks.
 #
 # 2) To dump HDF5 without pm3d, try:
-# > h52ascii mechanic-master-00.h5 0 /Pools/pool-0000/Tasks/result
+# > h52ascii mechanic-master-00.h5 0 /Pools/pool-0000/Tasks/result output.dat
 #
 
 FILE=$1
