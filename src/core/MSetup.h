@@ -19,7 +19,7 @@
 
 int Setup(module *m, char *filename, int argc, char **argv, int setup_mode);
 int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_mode);
-int Popt(module *m, int argc, char** argv, setup *s);
+int Popt(module *m, int argc, char** argv, setup *s, int setup_mode);
 int PoptOptions(module *m, setup *s);
 int LRCUpdate(setup *s);
 

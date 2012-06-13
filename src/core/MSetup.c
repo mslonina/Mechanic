@@ -51,7 +51,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
   PoptOptions(m, &m->layer.setup);
 
   /* Read popt options and overwrite the config file */
-  mstat = Popt(m, argc, argv, &m->layer.setup);
+  mstat = Popt(m, argc, argv, &m->layer.setup, setup_mode);
   if (mstat != 0) return mstat;
 
   if (m->mode != RESTART_MODE) {
@@ -133,17 +133,18 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_m
  * @param argc The command line argc table
  * @param argv The command line argv table
  * @param s The setup pointer
+ * @param setup_mode The setup mode (CORE_SETUP, MODULE_SETUP)
  *
  * @return 0 on success, error code otherwise
  */
-int Popt(module *m, int argc, char** argv, setup *s) {
+int Popt(module *m, int argc, char** argv, setup *s, int setup_mode) {
   int rc, mstat = 0;
 
   /* Get the command line args */
   s->popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, s->popt->popt, 0);
   rc = poptGetNextOpt(s->popt->poptcontext);
   if (rc < -1) {
-    if (m->node == MASTER) {
+    if (m->node == MASTER && setup_mode == MODULE_SETUP) {
       Message(MESSAGE_WARN,"%s: %s\n", poptBadOption(s->popt->poptcontext, POPT_BADOPTION_NOALIAS),
           poptStrerror(rc));
     }
