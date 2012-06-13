@@ -96,8 +96,8 @@ create a `mechanic_module_map.c` file and put in it the following code:
       p->task->storage[0].layout = (schema) {
         .path = "result", // the name of the output dataset
         .rank = 2, // the rank of the dataset (only rank = 2 is currently supported)
-        .dim[0] = 1, // the horizontal dimension of the result array (not the dataset)
-        .dim[1] = 3, // the vertical dimension of the result array (not the dataset)
+        .dim[0] = 1, // the vertical dimension of the result array (not the dataset)
+        .dim[1] = 3, // the horizontal dimension of the result array (not the dataset)
         .use_hdf = 1, // whether to store the result in the master data file
         .storage_type = STORAGE_PM3D, // storage type, which is suitable to process with Gnuplot PM3D
       };
@@ -113,8 +113,8 @@ The second step is to create the TaskProcess() function, in which we will comput
 state of the system:
 
     int TaskProcess(pool *p, task *t, setup *s) {
-      t->storage[0].data[0][0] = t->location[0]; // the horizontal position of the current task
-      t->storage[0].data[0][1] = t->location[1]; // the vertical position of the current task
+      t->storage[0].data[0][0] = t->location[1]; // the horizontal position of the current task
+      t->storage[0].data[0][1] = t->location[0]; // the vertical position of the current task
       t->storage[0].data[0][2] = t->tid; // task id represents the state of the system
 
       return SUCCESS;
