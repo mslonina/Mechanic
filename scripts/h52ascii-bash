@@ -5,23 +5,24 @@
 # Example:
 # 
 # 1) To create a gnuplot pm3d-ready file for a 512x1024 dynamical map:
-# > h52ascii mechanic-master-00.h5 1024 /data/master
+# > h52ascii mechanic-master-00.h5 1024 /Pools/pool-0000/Tasks/result
 # 
 # The script will create mechanic-master-00.dat ASCII file with data in 1024-line blocks.
 #
 # 2) To dump HDF5 without pm3d, try:
-# > h52ascii mechanic-master-00.h5 0 /data/master
+# > h52ascii mechanic-master-00.h5 0 /Pools/pool-0000/Tasks/result
 #
 
 FILE=$1
 RES=$2
 SET=$3
+OUT=$4
 NAME=`basename $FILE .h5`
-EXPECTED_ARGS=3
+EXPECTED_ARGS=4
 E_BADARGS=65
 
 if [ $# -ne $EXPECTED_ARGS ]; then
-  echo "Usage: h52ascii filename vertical_res dataset"
+  echo "Usage: h52ascii filename.h5 vertical_res dataset output-file.ext"
   exit $E_BADARGS
 fi
 
@@ -33,14 +34,14 @@ fi
 h5dump -d ${SET} -m '%.16f' -y -w 65000 -o tmp_commas.dat ${FILE}
 
 if [ ${RES} -eq 0 ]; then
-  sed -e 's/,/ /g' tmp_commas.dat > ${NAME}.dat
+  sed -e 's/,/ /g' tmp_commas.dat > ${OUT}.dat
 else
   PATTERN=""
   for (( i = 1; i < ${RES}; i++ )); do
     PATTERN="${PATTERN}n;"
   done
 
-  sed -e 's/,/ /g' tmp_commas.dat | sed "${PATTERN}G;" > ${NAME}.dat
+  sed -e 's/,/ /g' tmp_commas.dat | sed "${PATTERN}G;" > ${OUT}
 fi
 
 rm -f tmp_commas.dat
