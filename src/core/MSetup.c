@@ -40,8 +40,10 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
 
       H5Fclose(h5location);
     } else {
-      mstat = ReadConfig(m, filename, m->layer.setup.head, setup_mode);
-      CheckStatus(mstat);
+      if (setup_mode == MODULE_SETUP) {
+        mstat = ReadConfig(m, filename, m->layer.setup.head, setup_mode);
+        CheckStatus(mstat);
+      }
     }
   }
 
@@ -104,7 +106,6 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_m
   int mstat = SUCCESS;
   FILE *inif;
 
-  printf("filename = %s\n", filename);
   if (filename == NULL || filename[0] == LRC_NULL) {
     Message(MESSAGE_ERR, "Option -c|--config specified but no valid configuration file present\n");
     Error(CORE_ERR_SETUP);

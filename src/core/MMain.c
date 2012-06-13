@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
   /**
    * (G) Configure the module
    */
-  filename = Name(LRC_getOptionValue("core", "config", core.layer.setup.head), "", "", "");
+  filename = Name(LRC_getOptionValue("core", "config", module.layer.setup.head), "", "", "");
 
   mstat = Setup(&module, filename, argc, argv, MODULE_SETUP);
   CheckStatus(mstat);
