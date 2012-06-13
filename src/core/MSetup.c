@@ -104,6 +104,7 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_m
   int mstat = SUCCESS;
   FILE *inif;
 
+  printf("filename = %s\n", filename);
   if (filename == NULL || filename[0] == LRC_NULL) {
     Message(MESSAGE_ERR, "Option -c|--config specified but no valid configuration file present\n");
     Error(CORE_ERR_SETUP);

@@ -152,8 +152,8 @@ int Init(init *i) {
  *
  *     [core] # namespace defined through .space="NAMESPACE"
  *     name = arnoldweb
- *     xres = 2048 # p->board->layout.dim[1]
- *     yres = 2048 # p->board->layout.dim[0]
+ *     xres = 2048 # p->board->layout.dim[1], horizontal dim
+ *     yres = 2048 # p->board->layout.dim[0], vertical dim
  *     checkpoint = 4 # checkpoint_size = checkpoint * (mpi_size-1)
  *
  *     [arnold]
@@ -472,8 +472,8 @@ int Storage(pool *p, setup *s) {
   p->board->layout = (schema) {
     .path = "board",
     .rank = 2, // pool rank
-    .dim[0] = LRC_option2int("core", "xres", s->head), // vertical res
-    .dim[1] = LRC_option2int("core", "yres", s->head), // horizontal res
+    .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
+    .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
     .use_hdf = 1,
     .storage_type = STORAGE_BASIC,
   };
