@@ -113,10 +113,11 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_m
 
   inif = fopen(filename, "ro");
   if (inif) {
-    if (setup_mode == MODULE_SETUP)
+    if (setup_mode == MODULE_SETUP) {
       Message(MESSAGE_INFO, "Configuration file to use: '%s'\n", filename);
-    mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
-    CheckStatus(mstat);
+      mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
+      CheckStatus(mstat);
+    }
     fclose(inif);
   } else if (inif == NULL) {
     if (strcmp(filename, LRC_getOptionValue("core", "config", m->layer.setup.head)) != 0) {
