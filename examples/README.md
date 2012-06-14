@@ -1,13 +1,15 @@
 Mechanic 2.x examples
 =====================
 
-List of examples:
+List of examples
+----------------
+
 - Generation of a simple map or image
 - Creating a new task pool
 - Different storage layout per task pool (basic)
 - Different storage layout per task pool (advanced)
-- Using Prepare() and Process() hooks
-- Using Init() and Setup() hooks
+- Using `Prepare()` and `Process()` hooks
+- Using `Init()` and `Setup()` hooks
 
 Compilation
 -----------
