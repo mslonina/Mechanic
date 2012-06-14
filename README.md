@@ -3,6 +3,8 @@ Mechanic
 
 > Numerical framework and task management system
 
+:with_toc_data
+
 Overview
 --------
 
