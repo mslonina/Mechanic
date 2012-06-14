@@ -27,7 +27,7 @@ actively maintained).
 Mechanic is BSD-licensed. The source code package comes with few example
 modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 
-How does it work?
+How does it work? {#howdoesitwork}
 -----------------
 
 Consider generation of an image (sets of points). In a single-threaded software,
@@ -50,7 +50,7 @@ Task Farm_ model). Under the hood, the Mechanic is independent from the numerica
 itself -- it provides a unified way to create and access data files, setup,
 node-communication etc.
 
-Key features
+Key features {#keyfeatures}
 ------------
 
 - **The numerical part of the code is fully separated from the setup and storage phase.** You may
@@ -71,13 +71,13 @@ Key features
   the user needs (i.e. for processing with Gnuplot or Matplotlib)
 - **Linux and MAC OS X** supported
 
-Current limitations
+Current limitations {#limits}
 -------------------
 
 - The datasets are stored with H5T_NATIVE_DOUBLE datatype, and are H5S_SIMPLE-type
 - Only rank 2 datasets are supported right now
 
-Example usage
+Example usage {#examples}
 -------------
 
 - **Efficient creation of dynamical maps.** Each pixel of the map is mapped into
@@ -86,7 +86,7 @@ Example usage
   language of GAs, and each task as a member of current population
 - **Data processing.** Think about processing huge number of astronomical observations
 
-Quick start
+Quick start {#starter}
 -----------
 
 As a quick and simple example consider creating a dynamical map (similar to image
@@ -189,7 +189,7 @@ in the dataset `/Pools/pool-0000/Tasks/result`:
        (... the full output is cutted off)
     }
 
-Differences to other task management systems
+Differences to other task management systems {#others}
 --------------------------------------------
 
 The Mechanic differs significantly from other task management systems, such as Condor or
@@ -199,7 +199,7 @@ focus only on the numerical part of the task, and not its setup or storage. The 
 storage layer provides unified way to access the data by a number of different
 applications (not to mention C/Fortran codes only, but also Python software)
 
-Short history of Mechanic
+Short history of Mechanic {#history}
 -------------------------
 
 The idea of creating the Mechanic came from the problem of efficient computing of dynamical maps of
@@ -211,7 +211,7 @@ Słonina, as a part of his PHD thesis. The very first branch of the Mechanic, th
 proof-of-concept 0.12.x, was successfully used on several
 clusters and became a good starting point for the full featured software.
 
-Publications
+Publications {#publications}
 ------------
 
 - Slonina M., Gozdziewski K., Migaszewski C., 2012arXiv1202.6513S
@@ -221,14 +221,14 @@ Publications
 - Slonina M., Gozdziewski K., Migaszewski C., Astrophysics Source Code Library, record
 ascl:1205.001
 
-Posters
+Posters {#posters}
 -------
 
 - Slonina M., Gozdziewski K., Migaszewski C., Simtech2011 (Stuttgart, June 2011)
 - Slonina M., Gozdziewski K., Migaszewski C., Orbital Couples: "Pas de Deux" in the Solar
   System and the Milky Way (Paris, October 2011)
 
-Acknowledgments
+Acknowledgments {#ackn}
 ---------------
 
 This project is supported by the Polish Ministry of Science and Higher Education through
