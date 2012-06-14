@@ -1,12 +1,15 @@
+Mechanic 2.x installation guide
+===============================
+
 Requirements
 ------------
 
-Mechanic should run on Unix-like platforms (Linux and MacOSX are actively
+Mechanic should run on any Unix-like platforms (Linux and MacOSX are actively
 maintained), if the following requirements are met:
 
 - gcc >= 4.6 or ifort >= 11.0
 - CMake >= 2.8
-- MPI2 implementation
+- MPI2 implementation (in favour of OpenMPI)
 - HDF5 >= 1.8
 - Popt library >= 1.14
 - Libreadconfig with HDF5 support >= 0.12.4 (see http://git.astri.umk.pl/projects/lrc)
@@ -22,19 +25,19 @@ Compilation
     make
     make install
 
-By default, Cmake installs to /usr/local. You can change this by setting
+By default, Cmake installs to `/usr/local`. You can change the installation path by setting
     
     -DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
 
 Using the installation script
 -----------------------------
 
-We provide simple install shell script to help in installation of requirements (such as
+We provide very simple install shell script to help in installation of requirements (such as
 HDF, MPI, Libreadconfig). By default, the script will install all dependencies and the
 Mechanic in the `mechanic-opt` directory under the current working dir. You may edit the
 file and change some default settings, such as installation path or compilers.
 
-The script requires curl and cmake to be installed on your system.
+The script requires wget/curl and cmake to be installed on your system.
 
     # edit the install_mechanic.sh
     # change CC, CXX, FC, F77 to point to your compilers, i.e.

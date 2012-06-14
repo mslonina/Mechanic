@@ -1,4 +1,5 @@
-MECHANIC
+Mechanic, the numerical framework and task managment system
+===========================================================
 
 Copyright (c) 2010-2012, Authors (Torun Centre for Astronomy / Nicolaus Copernicus University)
 All rights reserved.

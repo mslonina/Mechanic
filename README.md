@@ -4,9 +4,9 @@ Mechanic
 ### Overview
 
 The Mechanic is a task management system and host software framework developed to help in
-massive numerical simulations. It provides powerful and flexible user API with unified
+conducting massive numerical simulations. It provides powerful and flexible user API with unified
 data storage and management. It relies on the core-module approach, which allows to
-separate the numerical problem from the common programming tasks, such as setup, storage,
+separate numerical problem from the common programming tasks, such as setup, storage,
 task management, splitting the workload, checkpointing etc. From this point of view it
 allows the user to focus on the numerical part of the scientific problem only, without
 digging into MPI or advanced data storage. Since the user API is written in plain C, it
@@ -14,8 +14,8 @@ allows to easily adapt any code developed with a C-interoperable programming lan
 such as C++, Fortran2003+, OpenCL, CUDA etc.
 
 The core code is based on the MPI Task Farm model and the HDF5 data storage specification.
-It may be installed system-wide and become a helper tools for users, who need to perform a
-large number of computations. The code has been tested on large CPU-clusters, as well as
+It may be installed system-wide and become a helper tool for users, who need to perform a
+large number of serial computations. The code has been tested on large CPU-clusters, as well as
 desktop computers and works equally well (the Linux and MAC OS X operating systems are
 actively maintained).
 
@@ -24,8 +24,8 @@ modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 
 ### How does it work?
 
-Consider an example of generation of an image (sets of points). In a single-threaded software,
-it requires a loop over all points:
+Consider generation of an image (sets of points). In a single-threaded software,
+it requires a loop over all points (pixels):
 
     for (i = 0; i < xdim; i++) {
       for (j = 0; j < ydim; j++) {
@@ -34,13 +34,13 @@ it requires a loop over all points:
     }
 
 It works well, however, the problem arises, when the `PixelCompute()` function takes a long
-time to finish (especially in dynamical astronomy, the field the Mechanic came from).
+time to finish (especially in dynamical astronomy, the research field the Mechanic came from).
 Since each `PixelCompute()` call is independent, we may try to split the workload by using
 some parallel techniques. In such a case, we will loop over all tasks to do, this time,
-however, each parallel thread receives a single task, and return the result to the master thread. 
+however, each parallel thread will receive a single task, and return the result to the master thread. 
 This is what Mechanic does. It sends a single `PixelCompute()` task to each worker node in
-the computing pool (say CPU cluster) and combine the results (this is the so-called _MPI
-Task Farm model_). Under the hood the Mechanic is independent from the numerical problem
+the computing pool (say CPU cluster) and combine the results (the so-called _MPI
+Task Farm_ model). Under the hood, the Mechanic is independent from the numerical problem
 itself -- it provides a unified way to create and access data files, setup,
 node-communication etc.
 
@@ -50,11 +50,11 @@ node-communication etc.
   use the user API to adjust the storage layout and configuration options
 - **Storage of data and configuration.** The core code takes care on the data storage and
   configuration
-- **The pool-based simulations.** Each pool may have different number of task to compute
-  (the task loop follows the MPI Task Farm model), and data from all pools may be used at
-  the every stage of the simulation
 - **MPI Task Farm** model (master -- worker relationships between nodes in a computing
   pool)
+- **The pool-based simulations.** Each pool may have different number of tasks to compute
+  (the task loop follows the _MPI Task Farm_ model), and data from all pools may be used at
+  the every stage of the simulation
 - **MPI non-blocking communication**
 - **HDF5 data storage layout**
 - **Automatic backup of data files and restart mode**
@@ -66,7 +66,7 @@ node-communication etc.
 
 ### Current limitations
 
-- The data is stored with H5T_NATIVE_DOUBLE datatype, and datasets are H5S_SIMPLE-type
+- The datasets are stored with H5T_NATIVE_DOUBLE datatype, and are H5S_SIMPLE-type
 - Only rank 2 datasets are supported right now
 
 ### Example usage
@@ -74,19 +74,19 @@ node-communication etc.
 - **Efficient creation of dynamical maps.** Each pixel of the map is mapped into
   a standalone numerical task
 - **Genetic algorithms.** Each pool of tasks may be treated as a generation in the
-  language of GAs
+  language of GAs, and each task as a member of current population
 - **Data processing.** Think about processing huge number of astronomical observations
 
 ### Quick start
 
-As an quick and simple example consider creating a dynamical map. A dynamical map helps to
-obtain global information of the dynamics of the dynamical system. We would like to know
-the state of the system when we move from the nominal solution (i.e. in the range of
-uncertainity of observations). To do so, we create a grid of initial conditions (a map),
-close to the nominal solution. Each point of the map is a standalone numerical simulation,
-and we may speed the computations by splitting the workload in a farm model.  
+As a quick and simple example consider creating a dynamical map (similar to image
+processing). A dynamical map helps to obtain global information of the dynamics of the dynamical system. 
+We would like to know the state of the system when we move from the nominal solution (i.e. in the range of
+observations' uncertaintites). To do so, we create a grid of initial conditions (a map),
+which is close to the nominal solution. Each point of the map is a standalone numerical simulation,
+and we may speed the computations by splitting the workload within the farm model.  
 
-First, we would like to define some sensible storage layout for the result. We will store
+First, we would like to define some sensible storage layout for the result data. We will store
 the location of the point of the map and the state of the system (1x3 array). Let us
 create a `mechanic_module_map.c` file and put in it the following code:
 
@@ -105,16 +105,17 @@ create a `mechanic_module_map.c` file and put in it the following code:
       return SUCCESS;
     }
 
-Each worker node will return such 1x3 array. The master node will receive these arrays and
-combine them into one result dataset. We tell the Mechanic, that the output dataset should
+Each worker node will return such 1x3 array. The master node will receive those arrays and
+combine them into one result dataset.  We tell the Mechanic, that the output dataset should
 be suitable to be processed with Gnuplot PM3D (STORAGE_PM3D flag). 
+The size of the output dataset in this case will be task_pool_size x 3.
 
-The second step is to create the TaskProcess() function, in which we will compute the
+The second step is to create the `TaskProcess()` function, in which we will compute the
 state of the system:
 
     int TaskProcess(pool *p, task *t, setup *s) {
-      t->storage[0].data[0][0] = t->location[1]; // the horizontal position of the current task
-      t->storage[0].data[0][1] = t->location[0]; // the vertical position of the current task
+      t->storage[0].data[0][0] = t->location[1]; // the vertical position of the current task
+      t->storage[0].data[0][1] = t->location[0]; // the horizontal position of the current task
       t->storage[0].data[0][2] = t->tid; // task id represents the state of the system
 
       return SUCCESS;
@@ -123,8 +124,8 @@ state of the system:
 The `data` array is automatically allocated using the information provided in the
 `Storage()` hook.
 
-Our state of the system is represented here by the unique task ID (you may use of course
-any numerical function here to get the result). The task location is filled up
+Our state of the system is represented here by the unique task ID (you may use
+any numerical function here to get the result, of course). The task location is filled up
 automatically during the task preparation phase. Each worker node receives a unique task
 to compute. 
 
@@ -137,7 +138,7 @@ After all, we may run the code for a 10x10px map, using four MPI threads, one ma
     mpirun -np 4 mechanic2 -p map -x 10 -y 10
 
 The result is stored in the `mechanic-master-00.h5` file and may be accessed i.e. through
-`h5dump` utility. The list the contents of the file, try
+`h5dump` utility. To list the contents of the file, try
 
     # h5ls -r mechanic-master-00.h5
 
@@ -155,7 +156,8 @@ The result is stored in the `mechanic-master-00.h5` file and may be accessed i.e
     /config/module           Group
     /config/module/core      Dataset {13}
 
-And our result:
+Our result is stored in the first task pool (only one task pool has been computed so far),
+in the dataset `/Pools/pool-0000/Tasks/result`:
 
     # h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
 
@@ -174,13 +176,13 @@ And our result:
        (8,0): 8, 0, 80,
        (9,0): 9, 0, 90,
 
-       (... the output cutted off)
+       (... the full output is cutted off)
     }
 
 ### Differences to other task management systems
 
 The Mechanic differs significantly from other task management systems, such as Condor or
-Workqueue, in terms of user API: the code does not use the executable of user's serial
+Workqueue, in terms of user API: our code does not use the executable of user's serial
 code. Instead, the user's code should be rewritten within the provided API. In such a way, we
 focus only on the numerical part of the task, and not its setup or storage. The HDF5
 storage layer provides unified way to access the data by a number of different
@@ -192,8 +194,9 @@ The idea of creating the Mechanic came from the problem of efficient computing o
 planetary systems. Such maps consist of many many independent numerical simulations which
 may take a long time (from seconds to weeks). Efficient splitting of such workload was
 neccessary to determine the global dynamics of exo-planets. The MPI-software-skeleton-kind idea
-that came once to K. Goździewski mind was expanded and developed by his PhD student, M.
-Słonina. The very first branch of the Mechanic, proof-of-concept 0.12 was successfully used on several
+that came once to K. Goździewski's mind was expanded and developed by his PhD student, M.
+Słonina, as a part of his PHD thesis. The very first branch of the Mechanic, the
+proof-of-concept 0.12.x, was successfully used on several
 clusters and became a good starting point for the full featured software.
 
 ### Publications
