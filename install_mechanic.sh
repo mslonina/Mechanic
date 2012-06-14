@@ -3,7 +3,7 @@
 # Helper script to install the Mechanic environment,
 # including installation of OpenMPI and HDF5
 #
-# Requirements: curl, cmake
+# Requirements: wget/curl, cmake
 #
 
 # Your setting goes here
@@ -17,7 +17,7 @@ F77=gfortran #ifort
 FC=gfortran #ifort
 
 # software versions
-MECHANIC=2.0.0
+MECHANIC=2.0.0_rc5
 HDF=1.8.9
 MPI=1.5.5
 LRC=0.12.4
@@ -28,6 +28,28 @@ opts=-j4
 #
 # Do not touch unless you know what're doing ;)
 #
+
+USE_WGET=1
+USE_CURL=1
+
+DWN="curl -L"
+DWNO=-o
+
+command -v curl || USE_CURL=0
+if [[ ${USE_CURL} -eq 0 ]]; then
+  command -v wget || USE_WGET=0
+  if [[ ${USE_WGET} -eq 0 ]]; then
+    echo "Neither curl or wget found in your system. Aborting"
+    exit
+  fi
+
+  if [[ ${USE_WGET} -eq 1 ]]; then
+    echo "Using wget"
+    DWN="wget --no-check-certificate"
+    DWNO=-O
+  fi
+fi
+
 
 # Create the mechanic-opt dir for local installation
 mkdir -p ${mdir}
@@ -40,12 +62,12 @@ cd $mdir
 mkdir -p src && cd src
 
 # Download the OpenMPI and HDF5
-curl http://www.open-mpi.org/software/ompi/v1.5/downloads/openmpi-${MPI}.tar.bz2 -o openmpi-${MPI}.tar.bz2
-curl http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF}.tar.bz2 -o hdf5-${HDF}.tar.bz2
+${DWN} http://www.open-mpi.org/software/ompi/v1.5/downloads/openmpi-${MPI}.tar.bz2 ${DWNO} openmpi-${MPI}.tar.bz2
+${DWN} http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF}.tar.bz2 ${DWNO} hdf5-${HDF}.tar.bz2
 
 # Download the Mechanic environment
-curl -L https://github.com/mslonina/LibReadConfig/tarball/${LRC} -o libreadconfig-${LRC}.tar.gz
-curl -L https://github.com/mslonina/Mechanic/tarball/${MECHANIC} -o mechanic-${MECHANIC}.tar.gz
+${DWN} https://github.com/mslonina/LibReadConfig/tarball/${LRC} ${DWNO} libreadconfig-${LRC}.tar.gz
+${DWN} https://github.com/mslonina/Mechanic/tarball/${MECHANIC} ${DWNO} mechanic-${MECHANIC}.tar.gz
 
 export CC=${CC}
 export CXX=${CXX}
