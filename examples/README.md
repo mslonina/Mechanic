@@ -10,6 +10,7 @@ List of examples
 - Different storage layout per task pool (advanced)
 - Using `Prepare()` and `Process()` hooks
 - Using `Init()` and `Setup()` hooks
+- The Mandelbrot set
 
 Compilation
 -----------

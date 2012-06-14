@@ -5,7 +5,7 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 -lreadocnfig mechanic_module_map.c -o libmechanic_module_map.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 -lreadconfig mechanic_module_map.c -o libmechanic_module_map.so
  *
  * Using the module
  * ----------------
