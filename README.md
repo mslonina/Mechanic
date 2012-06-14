@@ -3,9 +3,6 @@ Mechanic
 
 > Numerical framework and task management system
 
-* Auto-generated toc:
-{:toc}
-
 Overview
 --------
 
@@ -27,6 +24,18 @@ actively maintained).
 
 Mechanic is BSD-licensed. The source code package comes with few example
 modules and is freely available at http://git.astri.umk.pl/projects/mechanic
+
+- [How does it work?](#how-does-it-work)
+- [Key features](#key-features)
+- [Current limitations](#current-limitations)
+- [Example usage](#example-usage)
+- [Quick start](#quick-start)
+- [Differences to other task management systems](#differences-to-other-task-management-systems)
+- [Short history of Mechanic](#short-history-of-mechanic)
+- [Publications](#publications)
+- [Posters](#posters)
+- [Acknowledgments](#acknowledgments)
+
 
 How does it work?
 -----------------
