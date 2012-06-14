@@ -63,8 +63,8 @@ and access data files, setup, node-communication etc.
 Key features
 ------------
 
-- **The numerical part of the code is fully separated from the setup and storage phase.
-  ** You may use the user API to adjust the storage layout and configuration options
+- **The numerical part of the code is fully separated from the setup and storage phase.** 
+  You may use the user API to adjust the storage layout and configuration options
 - **Storage of data and configuration.** The core code takes care on the data storage 
   and configuration
 - **MPI Task Farm** model (master -- worker relationships between nodes in a computing
