@@ -60,11 +60,10 @@ int Storage(pool *p, setup *s) {
  */
 int TaskProcess(pool *p, task *t, setup *s) {
 
-  // The horizontal position of the pixel
+  // The vertical position of the pixel
   t->storage[0].data[0][0] = t->location[0];
 
-  // The vertical position of the pixel
-
+  // The horizontal position of the pixel
   t->storage[0].data[0][1] = t->location[1];
 
   // The state of the system
