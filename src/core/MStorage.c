@@ -126,7 +126,8 @@ int CheckLayout(int banks, storage *s) {
         Error(CORE_ERR_STORAGE);
       }
       if (s[i].layout.sync != 1) {
-        Message(MESSAGE_WARN, "The sync must be enabled for use_hdf. Fixing\n");
+        Message(MESSAGE_WARN, "The sync flag for '%s' must be enabled for use_hdf. Fixing\n",
+          s[i].layout.path);
         s[i].layout.sync = 1;
       }
     }
