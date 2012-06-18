@@ -42,6 +42,7 @@ int Storage(pool *p, setup *s) {
     .rank = 2,
     .dim[0] = 1,
     .dim[1] = 3,
+    .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_PM3D,
   };

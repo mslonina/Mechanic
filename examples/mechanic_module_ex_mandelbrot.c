@@ -30,6 +30,7 @@ int Storage(pool *p, setup *s) {
     .rank = 2,
     .dim[0] = 1,
     .dim[1] = 3,
+    .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_PM3D,
   };
@@ -48,7 +49,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   real_min = -2.0;
   real_max = 2.0;
   imag_min = -2.0;
-  imag_max = 2.0;
+  imag_max = -2.0;
   c = 4.0;
 
   xres = p->board->layout.dim[1];
