@@ -720,11 +720,12 @@ int Prepare(int node, char *masterfile, setup *s) {
  * @ingroup all_nodes
  * @param node The node id
  * @param masterfile The name of the master data file
+ * @param all The pointer to all pools 
  * @param s The setup structure
  *
  * @return SUCCESS or error code otherwise
  */
-int Process(int node, char *masterfile, setup *s) {
+int Process(int node, char *masterfile, pool **all, setup *s) {
   return SUCCESS;
 }
 /** @} */

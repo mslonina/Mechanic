@@ -87,15 +87,15 @@ int Taskfarm(module *m) {
     if (m->mode == RESTART_MODE && pool_create == POOL_CREATE_NEW) m->mode = NORMAL_MODE;
   } while (pool_create != POOL_FINALIZE);
 
+  /* Process the simulation */
+  mstat = Process(m, p);
+  CheckStatus(mstat);
+
   /* Finalize the pool bank */
   for (pid = 0; pid < m->layer.init.pools; pid++) {
     PoolFinalize(m, p[pid]);
   }
   free(p);
-
-  /* Process the simulation */
-  mstat = Process(m);
-  CheckStatus(mstat);
 
   return mstat;
 }

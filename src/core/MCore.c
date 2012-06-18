@@ -42,13 +42,13 @@ int Prepare(module *m) {
  *
  * @return 0 on success, error code otherwise
  */
-int Process(module *m) {
+int Process(module *m, pool **p) {
   int mstat = SUCCESS;
   setup *s = &(m->layer.setup);
   query *q;
 
   q = LoadSym(m, "Process", LOAD_DEFAULT);
-  if (q) mstat = q(m->node, m->filename, s);
+  if (q) mstat = q(m->node, m->filename, p, s);
   CheckStatus(mstat);
 
   return mstat;

@@ -14,6 +14,6 @@
 
 void Welcome();
 int Prepare(module *m);
-int Process(module *m);
+int Process(module *m, pool **all);
 
 #endif

@@ -65,7 +65,7 @@ int Prepare(int node, char *masterfile, setup *s) {
  * Example:
  * We open here the master file and read sample data
  */
-int Process(int node, char *masterfile, setup *s) {
+int Process(int node, char *masterfile, pool **all, setup *s) {
   hid_t h5location, dataspace, dataset;
   double data[DIM0][DIM1];
   int i, j;
