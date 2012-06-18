@@ -110,8 +110,12 @@ int CheckLayout(int banks, storage *s) {
     s[i].layout.rank = MAX_RANK;
     s[i].layout.datatype = H5T_NATIVE_DOUBLE;
 
+    if (s[i].layout.storage_type < 0) {
+      Message(MESSAGE_ERR, "The storage type is missing\n");
+      Error(CORE_ERR_STORAGE);
+    }
+
     if (s[i].layout.use_hdf) {
-      /* Common fixes before future development */
       s[i].layout.dataspace_type = H5S_SIMPLE;
       s[i].layout.offset[0] = 0; // Offsets calculated automatically
       s[i].layout.offset[1] = 0;
@@ -121,9 +125,9 @@ int CheckLayout(int banks, storage *s) {
         Message(MESSAGE_ERR, "The storage path is required when use_hdf\n");
         Error(CORE_ERR_STORAGE);
       }
-      if (s[i].layout.storage_type < 0) {
-        Message(MESSAGE_ERR, "The storage type is missing\n");
-        Error(CORE_ERR_STORAGE);
+      if (s[i].layout.sync != 1) {
+        Message(MESSAGE_WARN, "The sync must be enabled for use_hdf. Fixing\n");
+        s[i].layout.sync = 1;
       }
     }
   }
