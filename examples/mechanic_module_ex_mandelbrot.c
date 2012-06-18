@@ -49,7 +49,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   real_min = -2.0;
   real_max = 2.0;
   imag_min = -2.0;
-  imag_max = -2.0;
+  imag_max = 2.0;
   c = 4.0;
 
   xres = p->board->layout.dim[1];
