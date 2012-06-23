@@ -31,6 +31,16 @@
  */
 int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
+    .path = "input",
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = 3,
+    .sync = 0,
+    .use_hdf = 0,
+    .storage_type = STORAGE_PM3D,
+  };
+
+  p->task->storage[1].layout = (schema) {
     .path = "result",
     .rank = 2,
     .dim[0] = 1,
@@ -39,7 +49,6 @@ int Storage(pool *p, setup *s) {
     .use_hdf = 1,
     .storage_type = STORAGE_PM3D,
   };
-
   return SUCCESS;
 }
 
@@ -53,13 +62,13 @@ int Storage(pool *p, setup *s) {
 int TaskProcess(pool *p, task *t, setup *s) {
 
   // The vertical position of the pixel
-  t->storage[0].data[0][0] = t->location[0];
+  t->storage[1].data[0][0] = t->location[0];
 
   // The horizontal position of the pixel
-  t->storage[0].data[0][1] = t->location[1];
+  t->storage[1].data[0][1] = t->location[1];
 
   // The state of the system
-  t->storage[0].data[0][2] = t->tid;
+  t->storage[1].data[0][2] = t->tid;
 
   return SUCCESS;
 }

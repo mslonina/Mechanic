@@ -81,9 +81,9 @@ int Pack(module *m, double *buffer, pool *p, task *t, int tag) {
       if (t->storage[i].layout.sync) {
         Array2Vec(buffer+position, t->storage[i].data,
           t->storage[i].layout.rank, t->storage[i].layout.dim);
-        size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
-        position = position + size;
       }
+      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
+      position = position + size;
     }
 
     /* Mark the task on board */
@@ -130,9 +130,9 @@ int Unpack(module *m, double *buffer, pool *p, task *t, int *tag) {
       if (t->storage[i].layout.sync) {
         Vec2Array(buffer+position, t->storage[i].data,
           t->storage[i].layout.rank, t->storage[i].layout.dim);
-        size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
-        position = position + size;
       }
+      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
+      position = position + size;
     }
 
     /* Mark the task on board */
