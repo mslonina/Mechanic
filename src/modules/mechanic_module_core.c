@@ -623,7 +623,7 @@ int TaskMapping(pool *p, task *t, setup *s) {
  * If the TaskPrepare() is present in a custom module, it will be used instead of the core
  * hook.
  *
- * @ingroup master_only
+ * @ingroup worker_only
  * @param p The current pool structure
  * @param t The current task structure
  * @param s The setup structure

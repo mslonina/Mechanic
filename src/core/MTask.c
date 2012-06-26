@@ -103,7 +103,7 @@ int TaskPrepare(module *m, pool *p, task *t) {
       t->tid++;
 
     }
-
+  } else {
     q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
     if (q) mstat = q(p, t, s);
     CheckStatus(mstat);
