@@ -1,7 +1,7 @@
 #ifndef MECHANIC_CHECKPOINT_H
 #define MECHANIC_CHECKPOINT_H
 
-#include "MMechanic2.h"
+#include "Mechanic2.h"
 #include "MCommon.h"
 #include "MModules.h"
 #include "MLog.h"

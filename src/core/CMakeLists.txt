@@ -1,7 +1,7 @@
 include_directories(. .. ../modes/taskfarm ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
   ${PROJECT_BINARY_DIR}/src/modes/taskfarm)
 set (coresources
-    MTypes.h MMechanic2.h
+    MTypes.h Mechanic2.h
     MCommon.c MCommon.h
     MBootstrap.c MBootstrap.h
     MCore.c MCore.h
@@ -18,7 +18,7 @@ set (coresources
 set (mainsources
     MMain.c
     )
-set (libsources MPublic.c MMechanic2.h)
+set (libsources MPublic.c Mechanic2.h)
 
 add_library(libmechanic2 SHARED ${libsources})
 set_target_properties(libmechanic2 PROPERTIES OUTPUT_NAME mechanic2)
@@ -32,4 +32,4 @@ target_link_libraries(mechanic2 core taskfarm popt readconfig mpi hdf5 m libmech
 
 install (TARGETS libmechanic2 DESTINATION lib)
 install (TARGETS mechanic2 DESTINATION bin)
-install (FILES MMechanic2.h DESTINATION include)
+install (FILES Mechanic2.h DESTINATION include)

@@ -9,7 +9,6 @@ Programming style
 - CamelCase for functions
 - Doxygen-style + Markdown for documenting the API
 
-
 VIM users
 ---------
 

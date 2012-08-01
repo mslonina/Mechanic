@@ -111,7 +111,7 @@ First, we would like to define some sensible storage layout for the result data.
 store the location of the point of the map and the state of the system (1x3 array). Let us
 create a `mechanic_module_map.c` file and put in it the following code:
 
-    #include "MMechanic2.h"
+    #include "Mechanic2.h"
 
     int Storage(pool *p, setup *s) {
       p->task->storage[0].layout = (schema) {

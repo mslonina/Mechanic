@@ -28,7 +28,7 @@
  *    h5dump -d/Pools/pool-0002/Tasks/result mechanic-master-00.h5
  *    h5dump -d/Pools/pool-0003/Tasks/result mechanic-master-00.h5
  */
-#include "MMechanic2.h"
+#include "Mechanic2.h"
 
 /**
  * Implements Storage()

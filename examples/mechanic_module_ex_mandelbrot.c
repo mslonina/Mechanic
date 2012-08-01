@@ -17,7 +17,7 @@
  *
  *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
  */
-#include "MMechanic2.h"
+#include "Mechanic2.h"
 
 int fractal(double a, double b, double c);
 

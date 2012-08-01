@@ -29,7 +29,9 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
 
   c->cid = cid;
   c->counter = 0;
-  c->size = p->checkpoint_size * (m->mpi_size-1);
+  c->size = p->checkpoint_size / (m->mpi_size-1);
+  c->size = c->size * (m->mpi_size-1);
+  if (c->size == 0) c->size = m->mpi_size-1;
 
   /* The storage buffer */
   c->storage->layout.rank = 2;

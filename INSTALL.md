@@ -17,7 +17,7 @@ maintained), if the following requirements are met:
 Compilation
 -----------
 
-    tar -xvvf mechanic-2.0.0-src.tar.gz
+    tar -xvvf mechanic-2.0.0.tar.gz
     cd mechanic-2.0.0
     mkdir build
     cd build
@@ -66,7 +66,7 @@ There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
 http://github.com/mslonina/mechanic-overlay. This is the preferred way of installing the
 Mechanic and its dependencies. After you install the overlay, you may use:
 
-    emerge =mechanic-2.0.0_rc5
+    emerge =mechanic-2.0.0
 
 Additional modules
 ------------------

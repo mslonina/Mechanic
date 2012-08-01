@@ -1,7 +1,7 @@
 #ifndef MECHANIC_COMMON_H
 #define MECHANIC_COMMON_H
 
-#include "MMechanic2.h"
+#include "Mechanic2.h"
 
 #if HAVE_CONFIG_H
   #include <config.h>

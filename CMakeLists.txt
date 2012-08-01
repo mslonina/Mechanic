@@ -3,7 +3,7 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 2)
 set (Mechanic_VERSION_MINOR 0)
-set (Mechanic_VERSION_PATCH 0_rc7)
+set (Mechanic_VERSION_PATCH 0)
 set (Mechanic_VERSION_API 0200)
 
 set (package_version
@@ -27,8 +27,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set (platform_darwin 0)
   set (platform_linux 1)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-
-option (BUILD_DOCS "Build documentation" off)
 
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
@@ -92,7 +90,7 @@ SET (CPACK_PACKAGE_VERSION_MINOR "${Mechanic_VERSION_MINOR}")
 SET (CPACK_PACKAGE_VERSION_PATCH "${Mechanic_VERSION_PATCH}")
 SET (CPACK_PACKAGE_INSTALL_DIRECTORY "/usr/local")
 SET (CPACK_SOURCE_PACKAGE_FILE_NAME
-  "${CMAKE_PROJECT_NAME}-${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}-src")
+  "${CMAKE_PROJECT_NAME}-${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}")
 SET (CPACK_SOURCE_IGNORE_FILES
   "/build/;/.DS_Store;/.gitignore;/.git/;~$;${CPACK_SOURCE_IGNORE_FILES}")
 

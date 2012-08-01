@@ -2,7 +2,7 @@
  * @file
  * The Mechanic2 public interface
  */
-#include "MMechanic2.h"
+#include "Mechanic2.h"
 
 /**
  * @brief Common messaging interface

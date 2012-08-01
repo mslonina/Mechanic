@@ -1,7 +1,7 @@
 #ifndef MECHANIC_BOOTSTRAP_H
 #define MECHANIC_BOOTSTRAP_H
 
-#include "MMechanic2.h"
+#include "Mechanic2.h"
 #include "MTypes.h"
 #include "MCommon.h"
 #include "MModules.h"

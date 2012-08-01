@@ -26,7 +26,7 @@
 
 /** @} */
 
-#include "MMechanic2.h"
+#include "Mechanic2.h"
 #include "mechanic_module_core.h"
 
 /**
@@ -154,7 +154,7 @@ int Init(init *i) {
  *     name = arnoldweb
  *     xres = 2048 # p->board->layout.dim[1], horizontal dim
  *     yres = 2048 # p->board->layout.dim[0], vertical dim
- *     checkpoint = 4 # checkpoint_size = checkpoint * (mpi_size-1)
+ *     checkpoint = 1024 # number of finished task to store 
  *
  *     [arnold]
  *     step = 0.3
@@ -203,9 +203,9 @@ int Setup(setup *s) {
     .space="core",
     .name="checkpoint",
     .shortName='d',
-    .value="2",
+    .value="2048",
     .type=LRC_INT,
-    .description="The checkpoint size (value is multiplied by mpi_size - 1)"
+    .description="The checkpoint size"
   };
   s->options[4] = (LRC_configDefaults) {
     .space="core",
@@ -455,8 +455,7 @@ int Setup(setup *s) {
  *
  * ## Checkpoint
  *
- * The checkpoint is defined as a multiplication of the MPI_COMM_WORLD-1, minimum = 1. It
- * contains the results from tasks that have been processed and received. When the
+ * The checkpoint contains the results from tasks that have been processed and received. When the
  * checkpoint is filled up, the result is stored in the master datafile, according to the
  * storage information provided in the module.
  *

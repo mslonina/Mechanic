@@ -81,7 +81,7 @@
  *     mpirun -np 2 mechanic2 -p setup --config=myconfigfile
  */
 
-#include "MMechanic2.h"
+#include "Mechanic2.h"
 
 /**
  * Implements Init()
