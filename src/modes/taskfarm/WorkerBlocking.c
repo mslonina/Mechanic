@@ -14,17 +14,15 @@
  */
 int WorkerBlocking(module *m, pool *p) {
   int mstat = SUCCESS;
-  int node, tag, intag;
+  int node, tag;
 
-  MPI_Status recv_status, send_status;
-  MPI_Request send_request, recv_request;
+  MPI_Status recv_status;
 
   task *t = NULL;
   checkpoint *c = NULL;
   storage *send_buffer = NULL, *recv_buffer = NULL;
 
   node = m->node;
-  intag = node;
 
   /* Initialize the task and checkpoint */
   t = TaskLoad(m, p, 0);
@@ -52,14 +50,15 @@ int WorkerBlocking(module *m, pool *p) {
 
   while (1) {
 
-    MPI_Irecv(&recv_buffer->data[0][0], recv_buffer->layout.dim[1], MPI_DOUBLE,
-        MASTER, intag, MPI_COMM_WORLD, &recv_request);
-    MPI_Wait(&recv_request, &recv_status);
+    MPI_Recv(&recv_buffer->data[0][0], recv_buffer->layout.dim[1], MPI_DOUBLE,
+        MASTER, MPI_ANY_TAG, MPI_COMM_WORLD, &recv_status);
 
     mstat = Unpack(m, &recv_buffer->data[0][0], p, t, &tag);
     CheckStatus(mstat);
 
-    if (tag != TAG_TERMINATE) {
+    if (tag == TAG_TERMINATE) {
+      break;
+    } else {
 
       mstat = TaskPrepare(m, p, t);
       CheckStatus(mstat);
@@ -67,18 +66,15 @@ int WorkerBlocking(module *m, pool *p) {
       mstat = TaskProcess(m, p, t);
       CheckStatus(mstat);
 
+      t->status = TASK_FINISHED;
+
+      mstat = Pack(m, &send_buffer->data[0][0], p, t, tag);
+      CheckStatus(mstat);
+
+      MPI_Send(&send_buffer->data[0][0], send_buffer->layout.dim[1], MPI_DOUBLE,
+          MASTER, TAG_DATA, MPI_COMM_WORLD);
+
     }
-
-    t->status = TASK_FINISHED;
-
-    mstat = Pack(m, &send_buffer->data[0][0], p, t, tag);
-    CheckStatus(mstat);
-
-    MPI_Isend(&send_buffer->data[0][0], send_buffer->layout.dim[1], MPI_DOUBLE,
-        MASTER, intag, MPI_COMM_WORLD, &send_request);
-    MPI_Wait(&send_request, &send_status);
-
-    if (tag == TAG_TERMINATE) break;
   }
 
   /* Finalize */

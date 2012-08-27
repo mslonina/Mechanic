@@ -18,30 +18,11 @@ int MasterBlocking(module *m, pool *p) {
   storage *send_buffer, *recv_buffer;
   int i = 0, k = 0, cid = 0, terminated_nodes = 0;
 
-  MPI_Status *send_status, *recv_status, mpi_status;
-  MPI_Request *send_request, *recv_request;
-  int *intags, index = 0, req_flag, send_node;
+  MPI_Status mpi_status;
+  int completed = 0, send_node;
 
   task *t = NULL;
   checkpoint *c = NULL;
-
-  Message(MESSAGE_INFO, "Blocking communication type in use.\n");
-
-  /* Message buffers */
-  intags = calloc(m->mpi_size * sizeof(uintptr_t), sizeof(uintptr_t));
-  if (!intags) Error(CORE_ERR_MEM);
-
-  send_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
-  if (!send_status) Error(CORE_ERR_MEM);
-
-  send_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
-  if (!send_request) Error(CORE_ERR_MEM);
-
-  recv_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
-  if (!recv_status) Error(CORE_ERR_MEM);
-
-  recv_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
-  if (!recv_request) Error(CORE_ERR_MEM);
 
   /* Data buffers */
   send_buffer = calloc(sizeof(storage), sizeof(storage));
@@ -50,22 +31,19 @@ int MasterBlocking(module *m, pool *p) {
   recv_buffer = calloc(sizeof(storage), sizeof(storage));
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
-  /* Initialize message tags */
-  for (i = 0; i < m->mpi_size; i++) intags[i] = i;
-
   /* Initialize the task and checkpoint */
   t = TaskLoad(m, p, 0);
   c = CheckpointLoad(m, p, 0);
 
   /* Initialize data buffers */
   send_buffer->layout.rank = c->storage->layout.rank;
-  send_buffer->layout.dim[0] = m->mpi_size - 1;
+  send_buffer->layout.dim[0] = 1;
   send_buffer->layout.dim[1] = c->storage->layout.dim[1];
   send_buffer->data = AllocateBuffer(send_buffer->layout.rank, send_buffer->layout.dim);
   if (!send_buffer->data) Error(CORE_ERR_MEM);
 
   recv_buffer->layout.rank = c->storage->layout.rank;
-  recv_buffer->layout.dim[0] = m->mpi_size - 1;
+  recv_buffer->layout.dim[0] = 1;
   recv_buffer->layout.dim[1] = c->storage->layout.dim[1];
   recv_buffer->data = AllocateBuffer(recv_buffer->layout.rank, recv_buffer->layout.dim);
   if (!recv_buffer->data) Error(CORE_ERR_MEM);
@@ -76,73 +54,64 @@ int MasterBlocking(module *m, pool *p) {
     CheckStatus(mstat);
 
     if (mstat != NO_MORE_TASKS) {
-      mstat = Pack(m, &send_buffer->data[i-1][0], p, t, TAG_DATA);
+      mstat = Pack(m, &send_buffer->data[0][0], p, t, TAG_DATA);
       CheckStatus(mstat);
     } else {
-      send_buffer->data[i-1][0] = (double) TAG_TERMINATE;
+      send_buffer->data[0][0] = (double) TAG_TERMINATE;
       terminated_nodes++;
     }
 
-    MPI_Isend(&send_buffer->data[i-1][0], send_buffer->layout.dim[1], MPI_DOUBLE,
-        i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
-    MPI_Irecv(&recv_buffer->data[i-1][0], recv_buffer->layout.dim[1], MPI_DOUBLE,
-        i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
+    MPI_Send(&send_buffer->data[0][0], send_buffer->layout.dim[1], MPI_DOUBLE,
+        i, TAG_DATA, MPI_COMM_WORLD);
   }
-  MPI_Waitall(m->mpi_size - 1, send_request, send_status);
 
-  /* The task farm loop (Non-blocking communication) */
+  /* The task farm loop (Blocking communication) */
   while (1) {
 
-    /* Test for any completed request */
-    MPI_Testany(m->mpi_size-1, recv_request, &index, &req_flag, &mpi_status);
-
-    if (!req_flag) {
-
-      /* Flush checkpoint buffer and write data, reset counter */
-      if (c->counter > (c->size-1)) {
-        mstat = CheckpointPrepare(m, p, c);
-        CheckStatus(mstat);
-
-        mstat = CheckpointProcess(m, p, c);
-        CheckStatus(mstat);
-
-        cid++;
-
-        /* Reset the checkpoint */
-        CheckpointReset(m, p, c, cid);
-      }
-
-      /* Wait for any operation to complete */
-      MPI_Waitany(m->mpi_size-1, recv_request, &index, &mpi_status);
-      send_node = index+1;
-
-      /* Copy data to the checkpoint buffer */
-      for (k = 0; k < recv_buffer->layout.dim[1]; k++) {
-        c->storage->data[c->counter][k] = recv_buffer->data[index][k];
-      }
-      p->board->
-        data[(int)c->storage->data[c->counter][3]]
-            [(int)c->storage->data[c->counter][4]]
-        = c->storage->data[c->counter][2];
-
-      c->counter++;
-
-      mstat = TaskPrepare(m, p, t);
+    /* Flush checkpoint buffer and write data, reset counter */
+    if (c->counter > (c->size-1)) {
+      mstat = CheckpointPrepare(m, p, c);
       CheckStatus(mstat);
-      if (mstat != NO_MORE_TASKS) {
 
-        mstat = Pack(m, &send_buffer->data[index][0], p, t, TAG_DATA);
-        CheckStatus(mstat);
+      mstat = CheckpointProcess(m, p, c);
+      CheckStatus(mstat);
 
-        MPI_Isend(&send_buffer->data[index][0], send_buffer->layout.dim[1], MPI_DOUBLE,
-            send_node, intags[send_node], MPI_COMM_WORLD, &send_request[index]);
-        MPI_Irecv(&recv_buffer->data[index][0], recv_buffer->layout.dim[1], MPI_DOUBLE,
-            send_node, intags[send_node], MPI_COMM_WORLD, &recv_request[index]);
+      cid++;
 
-        MPI_Wait(&send_request[index], &send_status[index]);
-      }
+      /* Reset the checkpoint */
+      CheckpointReset(m, p, c, cid);
     }
-    if (index == MPI_UNDEFINED) break;
+
+    /* Wait for any operation to complete */
+    MPI_Recv(&recv_buffer->data[0][0], recv_buffer->layout.dim[1], MPI_DOUBLE,
+      MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
+
+      send_node = mpi_status.MPI_SOURCE;
+
+    /* Copy data to the checkpoint buffer */
+    for (k = 0; k < recv_buffer->layout.dim[1]; k++) {
+      c->storage->data[c->counter][k] = recv_buffer->data[0][k];
+    }
+    p->board->
+      data[(int)c->storage->data[c->counter][3]]
+          [(int)c->storage->data[c->counter][4]]
+      = c->storage->data[c->counter][2];
+
+    c->counter++;
+    completed++;
+
+    mstat = TaskPrepare(m, p, t);
+    CheckStatus(mstat);
+    if (mstat != NO_MORE_TASKS) {
+
+      mstat = Pack(m, &send_buffer->data[0][0], p, t, TAG_DATA);
+      CheckStatus(mstat);
+
+      MPI_Send(&send_buffer->data[0][0], send_buffer->layout.dim[1], MPI_DOUBLE,
+          send_node, TAG_DATA, MPI_COMM_WORLD);
+
+    }
+    if (completed == p->pool_size) break;
   }
 
   mstat = CheckpointPrepare(m, p, c);
@@ -151,50 +120,28 @@ int MasterBlocking(module *m, pool *p) {
   mstat = CheckpointProcess(m, p, c);
   CheckStatus(mstat);
 
-  cid++;
+  /*cid++;
   CheckpointReset(m, p, c, cid);
-
-  /* Receive outstanding data */
-  MPI_Waitall(m->mpi_size - 1, send_request, send_status);
-  MPI_Waitall(m->mpi_size - 1, recv_request, recv_status);
 
   for (i = 0; i < m->mpi_size - 1; i++) {
     for (k = 0; k < recv_buffer->layout.dim[1]; k++) {
       c->storage->data[i][k] = recv_buffer->data[i][k];
     }
     p->board->data[(int)c->storage->data[i][3]][(int)c->storage->data[i][4]] = c->storage->data[i][2];
-  }
-
-  /* Process the last checkpoint */
-  mstat = CheckpointPrepare(m, p, c);
-  CheckStatus(mstat);
-
-  mstat = CheckpointProcess(m, p, c);
-  CheckStatus(mstat);
+  }*/
 
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
-    send_buffer->data[i-1][0] = (double) TAG_TERMINATE;
+    send_buffer->data[0][0] = (double) TAG_TERMINATE;
 
-    MPI_Isend(&send_buffer->data[i-1][0], send_buffer->layout.dim[1], MPI_DOUBLE,
-        i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
-    MPI_Irecv(&recv_buffer->data[i-1][0], recv_buffer->layout.dim[1], MPI_DOUBLE,
-        i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
+    MPI_Send(&send_buffer->data[0][0], send_buffer->layout.dim[1], MPI_DOUBLE,
+        i, TAG_DATA, MPI_COMM_WORLD);
 
   }
-
-  MPI_Waitall(m->mpi_size - 1, send_request, send_status);
-  MPI_Waitall(m->mpi_size - 1, recv_request, recv_status);
 
   /* Finalize */
   CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
-
-  if (intags) free(intags);
-  if (send_status) free(send_status);
-  if (send_request) free(send_request);
-  if (recv_status) free(recv_status);
-  if (recv_request) free(recv_request);
 
   if (send_buffer) {
     if (send_buffer->data) FreeBuffer(send_buffer->data);
