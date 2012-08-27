@@ -14,15 +14,13 @@
  */
 int WorkerBlocking(module *m, pool *p) {
   int mstat = SUCCESS;
-  int node, tag;
+  int tag;
 
   MPI_Status recv_status;
 
   task *t = NULL;
   checkpoint *c = NULL;
   storage *send_buffer = NULL, *recv_buffer = NULL;
-
-  node = m->node;
 
   /* Initialize the task and checkpoint */
   t = TaskLoad(m, p, 0);

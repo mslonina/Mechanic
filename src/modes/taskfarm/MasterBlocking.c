@@ -102,6 +102,7 @@ int MasterBlocking(module *m, pool *p) {
 
     mstat = TaskPrepare(m, p, t);
     CheckStatus(mstat);
+
     if (mstat != NO_MORE_TASKS) {
 
       mstat = Pack(m, &send_buffer->data[0][0], p, t, TAG_DATA);
@@ -111,6 +112,7 @@ int MasterBlocking(module *m, pool *p) {
           send_node, TAG_DATA, MPI_COMM_WORLD);
 
     }
+
     if (completed == p->pool_size) break;
   }
 
@@ -119,16 +121,6 @@ int MasterBlocking(module *m, pool *p) {
 
   mstat = CheckpointProcess(m, p, c);
   CheckStatus(mstat);
-
-  /*cid++;
-  CheckpointReset(m, p, c, cid);
-
-  for (i = 0; i < m->mpi_size - 1; i++) {
-    for (k = 0; k < recv_buffer->layout.dim[1]; k++) {
-      c->storage->data[i][k] = recv_buffer->data[i][k];
-    }
-    p->board->data[(int)c->storage->data[i][3]][(int)c->storage->data[i][4]] = c->storage->data[i][2];
-  }*/
 
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
