@@ -15,5 +15,7 @@
 int Taskfarm(module *m);
 int Master(module *m, pool *p);
 int Worker(module *m, pool *p);
+int MasterBlocking(module *m, pool *p);
+int WorkerBlocking(module *m, pool *p);
 
 #endif

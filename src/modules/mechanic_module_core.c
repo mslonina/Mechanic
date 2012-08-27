@@ -257,13 +257,21 @@ int Setup(setup *s) {
   };
   s->options[10] = (LRC_configDefaults) {
     .space="core",
+    .name="blocking",
+    .shortName='\0',
+    .value="0",
+    .type=LRC_VAL,
+    .description="Switch to the blocking communication mode"
+  };
+  s->options[11] = (LRC_configDefaults) {
+    .space="core",
     .name="print-defaults",
     .shortName='\0',
     .value="0",
     .type=LRC_VAL,
     .description="Print default settings"
   };
-  s->options[11] = (LRC_configDefaults) {
+  s->options[12] = (LRC_configDefaults) {
     .space="core",
     .name="help",
     .shortName='?',
@@ -271,7 +279,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Show this help message"
   };
-  s->options[12] = (LRC_configDefaults) {
+  s->options[13] = (LRC_configDefaults) {
     .space="core",
     .name="usage",
     .shortName='\0',
@@ -279,7 +287,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Display brief message"
   };
-  s->options[13] = (LRC_configDefaults) LRC_OPTIONS_END;
+  s->options[14] = (LRC_configDefaults) LRC_OPTIONS_END;
 
   return SUCCESS;
 }

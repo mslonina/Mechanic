@@ -155,6 +155,7 @@ int ModuleInit(module *m) {
   m->layer.setup.head = NULL;
   m->layer.setup.popt->poptcontext = NULL;
   m->filename = NULL;
+  m->communication_type = MPI_NONBLOCKING;
 
   return mstat;
 }

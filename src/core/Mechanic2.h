@@ -75,6 +75,10 @@
 #define NORMAL_MODE 600 /**< The normal operation mode */
 #define RESTART_MODE 601 /**< The restart mode */
 
+/* MPI Communication type */
+#define MPI_NONBLOCKING 303 /**< Non-blocking communication mode */
+#define MPI_BLOCKING 333 /**< Blocking communication mode */
+
 #define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
 
 /**

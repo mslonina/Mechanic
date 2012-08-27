@@ -28,6 +28,7 @@ typedef struct {
   int pool_banks; /**< The number of pool memory banks */
   int task_banks; /**< The number of task memory banks */
   int mode; /**< The running mode */
+  int communication_type; /**< MPI communication type */
   layer layer; /**< The layer pointer */
   layer fallback; /**< The fallback layer pointer */
 } module;

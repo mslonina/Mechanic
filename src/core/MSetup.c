@@ -168,6 +168,10 @@ int Popt(module *m, int argc, char** argv, setup *s, int setup_mode) {
     return CORE_SETUP_USAGE;
   }
 
+  if (LRC_option2int("core", "blocking", s->head)) {
+    m->communication_type = MPI_BLOCKING;
+  }
+
   return mstat;
 }
 

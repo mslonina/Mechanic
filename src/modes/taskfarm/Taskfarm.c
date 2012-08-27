@@ -67,10 +67,18 @@ int Taskfarm(module *m) {
        * The Task loop
        */
       if (m->node == MASTER) {
-        mstat = Master(m, p[pid]);
+        if (m->communication_type == MPI_BLOCKING) {
+          mstat = MasterBlocking(m, p[pid]);
+        } else {
+          mstat = Master(m, p[pid]);
+        }
         CheckStatus(mstat);
       } else {
-        mstat = Worker(m, p[pid]);
+        if (m->communication_type == MPI_BLOCKING) {
+          mstat = WorkerBlocking(m, p[pid]);
+        } else {
+          mstat = Worker(m, p[pid]);
+        }
         CheckStatus(mstat);
       }
 

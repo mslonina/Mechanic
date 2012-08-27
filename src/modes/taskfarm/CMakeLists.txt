@@ -3,6 +3,8 @@ set (farmsources
     Taskfarm.c Taskfarm.h
     Master.c
     Worker.c
+    MasterBlocking.c
+    WorkerBlocking.c
     )
 
 add_library(taskfarm ${farmsources})
