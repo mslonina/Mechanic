@@ -19,6 +19,7 @@ void Message(int type, char *message, ...) {
     if (type == MESSAGE_INFO)    printf("-- %s", message2);
     if (type == MESSAGE_COMMENT) printf("#  %s", message2);
     if (type == MESSAGE_OUTPUT) printf("   %s", message2);
+    if (type == MESSAGE_RESULT) printf(" > %s", message2);
     if (type == MESSAGE_ERR) printf("!! %s", message2);
 		if (type == MESSAGE_WARN) printf(".. %s", message2);
   va_end(args);

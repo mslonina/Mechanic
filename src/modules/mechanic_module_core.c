@@ -681,7 +681,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  *    c->storage->data[0][4] - the received task location[1]
  *    c->storage->data[0][5] - the received task data begins here
  *
- * This hook should not be normally used, if is present in a custom module, it will be
+ * This hook should not be normally used, if it is present in a custom module, it will be
  * used instead the core hook.
  *
  * @ingroup master_only
@@ -702,7 +702,7 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
  * This function is used to do any simulation-related prepare operations. It is called
  * before the pool loop starts.
  *
- * If the Prepare() hook is present in a custom module, it will be used instead the core
+ * If the Prepare() hook is present in a custom module, it will be used instead of the core
  * hook.
  *
  * @ingroup all_nodes
@@ -722,7 +722,7 @@ int Prepare(int node, char *masterfile, setup *s) {
  * This function is used to perform any simulation post operations, such as specific data
  * manipulation in the master data file. It is called after the pool loop is finished.
  *
- * If the Process() hook is present in a custom module, it will be used instead the core
+ * If the Process() hook is present in a custom module, it will be used instead of the core
  * hook.
  *
  * @ingroup all_nodes
