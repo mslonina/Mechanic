@@ -68,10 +68,10 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = SUCCESS, i = 0, size = 0, task_groups = 0;
   query *q;
   setup *s = &(m->layer.setup);
-  hid_t h5location, group, attribute_id, attrspace_id;
+  hid_t h5location, group;
   hid_t hstat;
   hsize_t adims;
-  int attr_id;
+  int attr_data[1];
   char path[LRC_CONFIG_LEN];
 
   /* Number of tasks to do */
@@ -115,18 +115,13 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     /* Create attributes */
     if (p->rid == 0 && m->mode != RESTART_MODE) {
       adims = 1;
-      attr_id = p->pid;
-      attrspace_id = H5Screate_simple(1, &adims, NULL);
-      H5CheckStatus(attrspace_id);
-
-      attribute_id = H5Acreate(group, "Id", H5T_NATIVE_INT, attrspace_id, H5P_DEFAULT, H5P_DEFAULT);
-      H5CheckStatus(attribute_id);
-
-      hstat = H5Awrite(attribute_id, H5T_NATIVE_INT, &attr_id);
+      attr_data[0] = p->pid;
+      hstat = H5LTset_attribute_int(group, "board", "Id", attr_data, adims);
       H5CheckStatus(hstat);
-
-      H5Aclose(attribute_id);
-      H5Sclose(attrspace_id);
+      
+      attr_data[0] = 0;
+      hstat = H5LTset_attribute_int(group, "board", "Status", attr_data, adims);
+      H5CheckStatus(hstat);
     }
 
     H5Gclose(group);
@@ -161,7 +156,10 @@ int PoolProcess(module *m, pool **all, pool *p) {
   setup *s = &(m->layer.setup);
   query *q;
   hid_t h5location, group;
+  hid_t hstat;
+  hsize_t adims;
   char path[LRC_CONFIG_LEN];
+  int attr_data[1];
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolProcess", LOAD_DEFAULT);
@@ -177,6 +175,13 @@ int PoolProcess(module *m, pool **all, pool *p) {
 
     mstat = CommitData(group, m->pool_banks, p->storage);
     CheckStatus(mstat);
+
+    /* Write attributes */
+    adims = 1;
+    attr_data[0] = 1;
+
+    hstat = H5LTset_attribute_int(group, "board", "Status", attr_data, adims);
+    H5CheckStatus(hstat);
 
     H5Gclose(group);
     H5Fclose(h5location);

@@ -25,6 +25,7 @@
 
 #include <mpi.h>
 #include <hdf5.h>
+#include <hdf5_hl.h>
 #include <libreadconfig.h>
 #include <libreadconfig_hdf5.h>
 

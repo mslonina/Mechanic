@@ -22,13 +22,13 @@ set (libsources MPublic.c Mechanic2.h)
 
 add_library(libmechanic2 SHARED ${libsources})
 set_target_properties(libmechanic2 PROPERTIES OUTPUT_NAME mechanic2)
-target_link_libraries(libmechanic2 hdf5 m mpi readconfig)
+target_link_libraries(libmechanic2 hdf5 hdf5_hl m mpi readconfig)
 
 add_library(core ${coresources})
-target_link_libraries(core hdf5 m mpi readconfig libmechanic2)
+target_link_libraries(core hdf5 hdf5_hl m mpi readconfig libmechanic2)
 
 add_executable(mechanic2 ${mainsources})
-target_link_libraries(mechanic2 core taskfarm popt readconfig mpi hdf5 m libmechanic2)
+target_link_libraries(mechanic2 core taskfarm popt readconfig mpi hdf5 hdf5_hl m libmechanic2)
 
 install (TARGETS libmechanic2 DESTINATION lib)
 install (TARGETS mechanic2 DESTINATION bin)
