@@ -295,7 +295,23 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The y-axis maximum"
   };
+  s->options[13] = (LRC_configDefaults) {
+    .space="core",
+    .name="xorigin",
+    .shortName='\0',
+    .value="0.5",
+    .type=LRC_DOUBLE,
+    .description="The x-axis origin"
+  };
   s->options[14] = (LRC_configDefaults) {
+    .space="core",
+    .name="yorigin",
+    .shortName='\0',
+    .value="0.5",
+    .type=LRC_DOUBLE,
+    .description="The y-axis origin"
+  };
+  s->options[15] = (LRC_configDefaults) {
     .space="core",
     .name="print-defaults",
     .shortName='\0',
@@ -303,7 +319,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Print default settings"
   };
-  s->options[15] = (LRC_configDefaults) {
+  s->options[16] = (LRC_configDefaults) {
     .space="core",
     .name="help",
     .shortName='?',
@@ -311,7 +327,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Show this help message"
   };
-  s->options[16] = (LRC_configDefaults) {
+  s->options[17] = (LRC_configDefaults) {
     .space="core",
     .name="usage",
     .shortName='\0',
@@ -319,7 +335,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Display brief message"
   };
-  s->options[17] = (LRC_configDefaults) LRC_OPTIONS_END;
+  s->options[18] = (LRC_configDefaults) LRC_OPTIONS_END;
 
   return SUCCESS;
 }
