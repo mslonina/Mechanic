@@ -357,7 +357,7 @@ int Setup(setup *s) {
  *       .dim[0] = 1, // horizontal size
  *       .dim[1] = 6, // vertical size
  *       .use_hdf = 1,
- *       .storage_type = STORAGE_BASIC,
+ *       .storage_type = STORAGE_GROUP,
  *       .sync = 1,
  *       .dataspace_type = H5S_SIMPLE,
  *       .datatype = H5T_NATIVE_DOUBLE,
@@ -389,7 +389,7 @@ int Setup(setup *s) {
  * The Pool data is broadcasted right after the PoolPrepare() and saved to the master
  * datafile.
  *
- * Note: All global pool datasets must use STORAGE_BASIC storage_type.
+ * Note: All global pool datasets must use STORAGE_GROUP storage_type.
  *
  * ## The task storage
  *
@@ -398,7 +398,7 @@ int Setup(setup *s) {
  *
  * There are four available methods to store the task result:
  *
- * ### STORAGE_BASIC
+ * ### STORAGE_GROUP
  *
  * The whole memory block is stored in a dataset inside /Tasks/task-ID
  * group (the ID is the unique task indentifier), i.e., for a dataset defined similar to:
@@ -406,7 +406,7 @@ int Setup(setup *s) {
  *     p->task->storage[0].layout.path = "basic-dataset";
  *     p->task->storage[0].layout.dim[0] = 2;
  *     p->task->storage[0].layout.dim[1] = 6;
- *     p->task->storage[0].layout.storage_type = STORAGE_BASIC;
+ *     p->task->storage[0].layout.storage_type = STORAGE_GROUP;
  *     p->task->storage[0].layout.use_hdf = 1;
  *
  * The output is stored in /Pools/pool-ID/Tasks/task-ID/basic-dataset:
@@ -504,7 +504,7 @@ int Setup(setup *s) {
  *
  * - p->task->storage[0].data[0][0] for task datasets with storage_type STORAGE_PM3D,
  *   STORAGE_LIST, STORAGE_BOARD
- * - p->tasks[TID]->storage[1].data[0][0] for task datasets with storage_type STORAGE_BASIC.
+ * - p->tasks[TID]->storage[1].data[0][0] for task datasets with storage_type STORAGE_GROUP.
  *   The TID is the task ID
  * - p->storage[0].data[0][0] for pool datasets
  *
@@ -531,7 +531,7 @@ int Storage(pool *p, setup *s) {
     .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
     .sync = 1,
     .use_hdf = 1,
-    .storage_type = STORAGE_BASIC,
+    .storage_type = STORAGE_GROUP,
   };
 
   p->checkpoint_size = LRC_option2int("core", "checkpoint", s->head);

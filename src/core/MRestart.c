@@ -84,7 +84,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
       for (j = 0; j < pools[i]->pool_size; j++) {
         for (k = 0; k < m->task_banks; k++) {
           if (pools[i]->task->storage[k].layout.use_hdf
-              && pools[i]->task->storage[k].layout.storage_type == STORAGE_BASIC) {
+              && pools[i]->task->storage[k].layout.storage_type == STORAGE_GROUP) {
             size = GetSize(pools[i]->task->storage[k].layout.rank, pools[i]->task->storage[k].layout.dim);
             if (size > 0) {
               sprintf(task_path, TASK_PATH, k);

@@ -70,7 +70,7 @@ int Storage(pool *p, setup *s) {
     p->task->storage[0].layout.dim[1] = 5;
     // Each task will have its own result dataset
     // /Pools/pool-0004/Tasks/task-ID/result
-    p->task->storage[0].layout.storage_type = STORAGE_BASIC;
+    p->task->storage[0].layout.storage_type = STORAGE_GROUP;
   }
 
   return SUCCESS;
@@ -114,7 +114,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
   int i,j;
-  // Access the stored data in the current pool for STORAGE_BASIC
+  // Access the stored data in the current pool for STORAGE_GROUP
   if (current->pid == 4) {
     for (i = 0; i < current->pool_size; i++) {
       Message(MESSAGE_OUTPUT, "task[%d] = [%d %d %d]\n",

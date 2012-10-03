@@ -42,7 +42,7 @@ int Storage(module *m, pool *p) {
 
   /* Right now, there is no support for different storage types of pool datasets */
   for (i = 0; i < m->pool_banks; i++) {
-    p->storage[i].layout.storage_type = STORAGE_BASIC;
+    p->storage[i].layout.storage_type = STORAGE_GROUP;
   }
 
   CheckLayout(m->task_banks, p->task->storage);
@@ -54,7 +54,7 @@ int Storage(module *m, pool *p) {
   if (m->node == MASTER) {
     /* Commit memory for task banks (whole datasets) */
     for (i = 0; i < m->task_banks; i++) {
-      if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
         dims[0] = p->task->storage[i].layout.dim[0];
         dims[1] = p->task->storage[i].layout.dim[1];
         p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
@@ -229,7 +229,7 @@ int CommitStorageLayout(module *m, pool *p) {
         p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
           CreateDataset(h5tasks, &p->task->storage[i], m, p);
       }
-      if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
         for (j = 0; j < p->pool_size; j++) {
           sprintf(path, TASK_PATH, j);
           if (!H5Lexists(h5group, path, H5P_DEFAULT)) {
@@ -273,7 +273,7 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   h5dataspace = H5Screate(s->layout.dataspace_type);
   H5CheckStatus(h5dataspace);
   if (s->layout.dataspace_type == H5S_SIMPLE) {
-    if (s->layout.storage_type == STORAGE_BASIC) {
+    if (s->layout.storage_type == STORAGE_GROUP) {
       dims[0] = s->layout.dim[0];
       dims[1] = s->layout.dim[1];
     }
@@ -345,7 +345,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
       H5CheckStatus(dataspace);
 
       /* Whole dataset at once */
-      if (s[i].layout.storage_type == STORAGE_BASIC) {
+      if (s[i].layout.storage_type == STORAGE_GROUP) {
         hdf_status = H5Dwrite(dataset, s[i].layout.datatype,
             H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
         H5CheckStatus(hdf_status);

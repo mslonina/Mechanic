@@ -173,7 +173,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
       }
     }
 
-    if (p->task->storage[j].layout.storage_type == STORAGE_BASIC) {
+    if (p->task->storage[j].layout.storage_type == STORAGE_GROUP) {
       for (i = 0; i < c->size; i++) {
         t->tid = c->storage->data[i][1];
         t->status = c->storage->data[i][2];

@@ -75,22 +75,26 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   char path[LRC_CONFIG_LEN];
 
   /* Number of tasks to do */
-  p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
+  if (m->node == MASTER) {
+    p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
+  }
+  MPI_Bcast(&(p->pool_size), 1, MPI_INT, MASTER, MPI_COMM_WORLD);
 
   /* Allocate the tasks group,
    * We cannot do it earlier, since we don't know the size of the pool */
-  for (i = 0; i < m->task_banks; i++) {
-    if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) task_groups = 1;
-  }
-
-  if (task_groups && m->node == MASTER) {
-    p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
-    for (i = 0; i < p->pool_size; i++) {
-      p->tasks[i] = TaskLoad(m, p, i);
-    }
-  }
-
   if (m->node == MASTER) {
+    for (i = 0; i < m->task_banks; i++) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) task_groups = 1;
+    }
+
+    /* FIX IT! THIS PART IS TRAGIC FOR MEMORY ALLOCATION IN HUGE RUNS */
+    if (task_groups) {
+      p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
+      for (i = 0; i < p->pool_size; i++) {
+        p->tasks[i] = TaskLoad(m, p, i);
+      }
+    }
+
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(all, p, s);
     CheckStatus(mstat);
@@ -127,6 +131,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
     H5Gclose(group);
     H5Fclose(h5location);
+  
   }
 
   /* Broadcast pool data */

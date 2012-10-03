@@ -61,7 +61,7 @@
 
 /* Storage */
 #define MAX_RANK 2 /**< The maximum dataset rank */
-#define STORAGE_BASIC 11 /**< The basic data storage type */
+#define STORAGE_GROUP 11 /**< The basic data storage type */
 #define STORAGE_PM3D 12 /**< The pm3d data storage type */
 #define STORAGE_BOARD 13 /**< The board data storage type */
 #define STORAGE_LIST 14 /**< The list data storage type */
@@ -127,7 +127,7 @@ typedef struct {
   int offset[MAX_RANK]; /**< The offsets (calculated automatically) */
   int use_hdf; /**< Enables HDF5 storage for the memory block */
   int sync; /**< Whether to synchronize memory bank between master and worker */
-  int storage_type; /**< The storage type: STORAGE_BASIC, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
+  int storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
   H5S_class_t dataspace_type; /**< The type of the HDF5 dataspace (H5S_SIMPLE) */
   hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
 } schema;
