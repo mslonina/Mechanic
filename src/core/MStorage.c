@@ -50,39 +50,42 @@ int Storage(module *m, pool *p) {
   /* Commit memory layout used during the task pool */
   CommitMemoryLayout(m->pool_banks, p->storage);
 
-  /* Commit memory for task banks (whole datasets) */
-  for (i = 0; i < m->task_banks; i++) {
-    if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) {
-      dims[0] = p->task->storage[i].layout.dim[0];
-      dims[1] = p->task->storage[i].layout.dim[1];
-      p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
+  /* Master only memory/storage operations */
+  if (m->node == MASTER) {
+    /* Commit memory for task banks (whole datasets) */
+    for (i = 0; i < m->task_banks; i++) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) {
+        dims[0] = p->task->storage[i].layout.dim[0];
+        dims[1] = p->task->storage[i].layout.dim[1];
+        p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
+      }
+      if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
+        p->task->storage[i].layout.storage_type == STORAGE_LIST) {
+        dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
+        dims[1] = p->task->storage[i].layout.dim[1];
+        p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
+      }
+      if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
+        dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
+        dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
+        p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
+      }
+      p->task->storage[i].layout.offset[0] = 0;
+      p->task->storage[i].layout.offset[1] = 0;
     }
-    if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
-      p->task->storage[i].layout.storage_type == STORAGE_LIST) {
-      dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
-      dims[1] = p->task->storage[i].layout.dim[1];
-      p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
-    }
-    if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
-      dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
-      dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
-      p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
-    }
-    p->task->storage[i].layout.offset[0] = 0;
-    p->task->storage[i].layout.offset[1] = 0;
-  }
 
-  /* Commit the storage layout (only the Master node) */
-  if (m->node == MASTER && m->mode != RESTART_MODE) {
-    CommitStorageLayout(m, p);
-  }
+    /* Commit the storage layout */
+    if (m->mode != RESTART_MODE) {
+      CommitStorageLayout(m, p);
+    }
 
-  /* Commit Board */
-  p->board->data = AllocateBuffer(p->board->layout.rank, p->board->layout.dim);
-  if (m->mode != RESTART_MODE) {
-    for (i = 0; i < p->board->layout.dim[0]; i++) {
-      for (j = 0; j < p->board->layout.dim[1]; j++) {
-        p->board->data[i][j] = TASK_AVAILABLE;
+    /* Commit Board */
+    p->board->data = AllocateBuffer(p->board->layout.rank, p->board->layout.dim);
+    if (m->mode != RESTART_MODE) {
+      for (i = 0; i < p->board->layout.dim[0]; i++) {
+        for (j = 0; j < p->board->layout.dim[1]; j++) {
+          p->board->data[i][j] = TASK_AVAILABLE;
+        }
       }
     }
   }

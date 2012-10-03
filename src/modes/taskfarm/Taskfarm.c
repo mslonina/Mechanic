@@ -94,7 +94,7 @@ int Taskfarm(module *m) {
       time_out = clock();
       cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
       if (m->node == MASTER) {
-        Message(MESSAGE_INFO, "Pool %04d computed. CPU time: %f\n", cpu_time);
+        Message(MESSAGE_INFO, "Pool %04d computed. CPU time: %f\n", p[pid]->pid, cpu_time);
       }
     } while (pool_create == POOL_RESET);
 

@@ -82,7 +82,8 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   for (i = 0; i < m->task_banks; i++) {
     if (p->task->storage[i].layout.storage_type == STORAGE_BASIC) task_groups = 1;
   }
-  if (task_groups) {
+
+  if (task_groups && m->node == MASTER) {
     p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
     for (i = 0; i < p->pool_size; i++) {
       p->tasks[i] = TaskLoad(m, p, i);
@@ -257,7 +258,7 @@ void PoolFinalize(module *m, pool *p) {
     free(p->task);
   }
 
-  if (p->tasks) {
+  if (p->tasks && m->node == MASTER) {
     for (i = 0; i < p->pool_size; i++) {
       TaskFinalize(m, p, p->tasks[i]);
     }
