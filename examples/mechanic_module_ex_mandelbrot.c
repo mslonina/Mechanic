@@ -29,10 +29,10 @@ int Storage(pool *p, setup *s) {
     .path = "result",
     .rank = 2,
     .dim[0] = 1,
-    .dim[1] = 3,
+    .dim[1] = 1,
     .sync = 1,
     .use_hdf = 1,
-    .storage_type = STORAGE_PM3D,
+    .storage_type = STORAGE_BOARD,
   };
 
   return SUCCESS;
@@ -45,6 +45,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   double real_min, real_max, imag_min, imag_max;
   double scale_real, scale_imag;
   double c, xres, yres;
+  double x,y;
 
   real_min = -2.0;
   real_max = 2.0;
@@ -60,13 +61,13 @@ int TaskProcess(pool *p, task *t, setup *s) {
   scale_imag = (imag_max - imag_min) / ((double) yres - 1.0);
 
   // The vertical (Im) position of the pixel
-  t->storage[0].data[0][0] = imag_min + t->location[0] * scale_imag;
+  x = imag_min + t->location[0] * scale_imag;
 
   // The horizontal (Re) position of the pixel
-  t->storage[0].data[0][1] = real_min + t->location[1] * scale_real;
+  y = real_min + t->location[1] * scale_real;
 
   // The state of the system
-  t->storage[0].data[0][2] = fractal(t->storage[0].data[0][1], t->storage[0].data[0][0], c);
+  t->storage[0].data[0][0] = fractal(x, y, c);
 
   return SUCCESS;
 }
