@@ -563,7 +563,6 @@ int Storage(pool *p, setup *s) {
  * @return SUCCESS on success, error code otherwise
  */
 int PoolPrepare(pool **allpools, pool *current, setup *s) {
-  Message(MESSAGE_COMMENT, "Entering the pool %04d\n", current->pid);
   return SUCCESS;
 }
 

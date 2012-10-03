@@ -16,6 +16,9 @@ int Taskfarm(module *m) {
   int pid = 0;
   pool **p = NULL;
   int pool_create;
+  
+  double cpu_time;
+  clock_t time_in, time_out;
 
   /* Prepare the simulation */
   mstat = Prepare(m);
@@ -55,6 +58,10 @@ int Taskfarm(module *m) {
     if (m->mode != RESTART_MODE) Storage(m, p[pid]);
 
     do {
+      if (m->node == MASTER) {
+        Message(MESSAGE_INFO, "Entering the pool %04d\n", p[pid]->pid);
+      }
+      time_in = clock();
       if (m->mode != RESTART_MODE) {
         mstat = PoolReset(m, p[pid]);
         CheckStatus(mstat);
@@ -84,6 +91,11 @@ int Taskfarm(module *m) {
 
       pool_create = PoolProcess(m, p, p[pid]);
       p[pid]->rid++;
+      time_out = clock();
+      cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
+      if (m->node == MASTER) {
+        Message(MESSAGE_INFO, "Pool %04d computed. CPU time: %f\n", cpu_time);
+      }
     } while (pool_create == POOL_RESET);
 
     pid++;

@@ -22,6 +22,7 @@
 #include <math.h>
 #include <popt.h>
 #include <dlfcn.h>
+#include <time.h>
 
 #include <mpi.h>
 #include <hdf5.h>
