@@ -141,6 +141,10 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_m
  * @param s The setup pointer
  * @param setup_mode The setup mode (CORE_SETUP, MODULE_SETUP)
  *
+ * Note:
+ * Since Popt tables does not hold the option namespace, options must have unique name
+ * (i.e. it is not possible to have same options in different LRC namespaces)
+ *
  * @return 0 on success, error code otherwise
  */
 int Popt(module *m, int argc, char** argv, setup *s, int setup_mode) {
