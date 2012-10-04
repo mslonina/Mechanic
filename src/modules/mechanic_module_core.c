@@ -92,6 +92,7 @@ int Init(init *i) {
   i->pools = 64;
   i->banks_per_pool = 8;
   i->banks_per_task = 8;
+  i->attr_per_dataset = 8;
 
   return SUCCESS;
 }
@@ -781,6 +782,32 @@ int Prepare(int node, char *masterfile, setup *s) {
  * @return SUCCESS or error code otherwise
  */
 int Process(int node, char *masterfile, pool **all, setup *s) {
+  return SUCCESS;
+}
+
+/**
+ * @brief The dataset prepare hook
+ *
+ * This function may be used to prepare given dataset. The HDF5 dataset pointer is passed,
+ * as well as top level group/file pointer. It is called right after the dataset is
+ * created in the master data file, only one the master node. 
+ *
+ * As an example, you may write any initial data to the dataset, as well as different
+ * attributes.
+ *
+ * If the DatasetPrepare() hook is used in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup master_only
+ * @param h5location The top level location pointer according to the current dataset
+ * @param h5dataset The dataset pointer
+ * @param p The current pool pointer
+ * @param d The current dataset storage pointer
+ * @param s The setup pointer
+ *
+ * @return SUCCESS or error code otherwise
+ */
+int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
   return SUCCESS;
 }
 /** @} */

@@ -87,7 +87,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) task_groups = 1;
     }
 
-    /* FIX IT! THIS PART IS TRAGIC FOR MEMORY ALLOCATION IN HUGE RUNS */
+    /* @todo FIX IT! THIS PART IS TRAGIC FOR MEMORY ALLOCATION IN HUGE RUNS */
     if (task_groups) {
       p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
       for (i = 0; i < p->pool_size; i++) {
@@ -237,6 +237,7 @@ int PoolReset(module *m, pool *p) {
 
   return mstat;
 }
+
 /**
  * @brief Finalize the pool
  *

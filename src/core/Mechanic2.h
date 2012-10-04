@@ -92,6 +92,7 @@ typedef struct {
   int pools; /**< The maximum size of the pools array */
   int banks_per_pool; /**< The maximum number of memory/storage banks per pool */
   int banks_per_task; /**< The maximum number of memory/storage banks per task */
+  int attr_per_dataset; /**< The maximum number of attributes per dataset */
 } init;
 
 /**
@@ -132,6 +133,11 @@ typedef struct {
   hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
 } schema;
 
+typedef struct {
+  schema layout;
+  double **data;
+} attr;
+
 /**
  * @struct storage
  * The storage structure
@@ -139,6 +145,7 @@ typedef struct {
 typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   double **data; /**< The data pointer */
+  attr *attr; /**< The dataset attributes */
 } storage;
 
 /**

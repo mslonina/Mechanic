@@ -73,3 +73,37 @@ int TaskProcess(pool *p, task *t, setup *s) {
   return SUCCESS;
 }
 
+/**
+ * Implements DatasetPrepare()
+ *
+ * We use this hook to write some simple attributes useful for postprocessing in i.e.
+ * matplotlib. You may use here standard HDF5 API, as well as HDF5_HL API.
+ */
+int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
+  double xmin, xmax, ymin, ymax;
+  hsize_t adims;
+  hid_t hstat;
+  double attr_data[1];
+
+  if (strcmp(d->layout.path, "result") == 0) {
+    xmin = LRC_option2double("core", "xmin", s->head);
+    xmax = LRC_option2double("core", "xmax", s->head);
+    ymin = LRC_option2double("core", "ymin", s->head);
+    ymax = LRC_option2double("core", "ymax", s->head);
+
+    adims = 1;
+    attr_data[0] = xmin;
+    hstat = H5LTset_attribute_double(h5location, d->layout.path, "xmin", attr_data, adims);
+    
+    attr_data[0] = xmax;
+    hstat = H5LTset_attribute_double(h5location, d->layout.path, "xmax", attr_data, adims);
+    
+    attr_data[0] = ymin;
+    hstat = H5LTset_attribute_double(h5location, d->layout.path, "ymin", attr_data, adims);
+    
+    attr_data[0] = ymax;
+    hstat = H5LTset_attribute_double(h5location, d->layout.path, "ymax", attr_data, adims);
+  }
+
+  return SUCCESS;
+}

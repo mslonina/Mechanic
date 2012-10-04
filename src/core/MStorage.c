@@ -266,6 +266,8 @@ int CommitStorageLayout(module *m, pool *p) {
  */
 int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   int mstat = SUCCESS;
+  query *q;
+  setup *o = &(m->layer.setup);
   hid_t h5dataset, h5dataspace;
   hsize_t dims[MAX_RANK];
   herr_t h5status;
@@ -293,6 +295,10 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   h5dataset = H5Dcreate(h5location, s->layout.path, s->layout.datatype, h5dataspace,
       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5CheckStatus(h5dataset);
+
+  q = LoadSym(m, "DatasetPrepare", LOAD_DEFAULT);
+  if (q) mstat = q(h5location, h5dataset, p, s, o);
+  CheckStatus(mstat);
 
   H5Dclose(h5dataset);
   H5Sclose(h5dataspace);
