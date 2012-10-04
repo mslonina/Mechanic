@@ -121,11 +121,11 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     if (p->rid == 0 && m->mode != RESTART_MODE) {
       adims = 1;
       attr_data[0] = p->pid;
-      hstat = H5LTset_attribute_int(group, "board", "Id", attr_data, adims);
+      hstat = H5LTset_attribute_int(h5location, path, "Id", attr_data, adims);
       H5CheckStatus(hstat);
       
       attr_data[0] = 0;
-      hstat = H5LTset_attribute_int(group, "board", "Status", attr_data, adims);
+      hstat = H5LTset_attribute_int(h5location, path, "Status", attr_data, adims);
       H5CheckStatus(hstat);
     }
 
@@ -158,10 +158,10 @@ int PoolPrepare(module *m, pool **all, pool *p) {
  */
 int PoolProcess(module *m, pool **all, pool *p) {
   int mstat = SUCCESS;
-  int pool_create = 0;
+  int pool_create = 0, i = 0, j = 0, task_groups = 0;
   setup *s = &(m->layer.setup);
   query *q;
-  hid_t h5location, group;
+  hid_t h5location, h5pool, h5tasks, h5task, h5dataset;
   hid_t hstat;
   hsize_t adims;
   char path[LRC_CONFIG_LEN];
@@ -176,20 +176,79 @@ int PoolProcess(module *m, pool **all, pool *p) {
     H5CheckStatus(h5location);
 
     sprintf(path, POOL_PATH, p->pid);
-    group = H5Gopen(h5location, path, H5P_DEFAULT);
-    H5CheckStatus(group);
+    h5pool = H5Gopen(h5location, path, H5P_DEFAULT);
+    H5CheckStatus(h5pool);
 
-    mstat = CommitData(group, m->pool_banks, p->storage);
+    mstat = CommitData(h5pool, m->pool_banks, p->storage);
     CheckStatus(mstat);
 
     /* Write attributes */
     adims = 1;
     attr_data[0] = 1;
 
-    hstat = H5LTset_attribute_int(group, "board", "Status", attr_data, adims);
+    hstat = H5LTset_attribute_int(h5location, path, "Status", attr_data, adims);
     H5CheckStatus(hstat);
 
-    H5Gclose(group);
+    /* Process all datasets in the current pool */
+    for (i = 0; i < m->pool_banks; i++) {
+      if (p->storage[i].layout.use_hdf) {
+        h5dataset = H5Dopen(h5pool, p->storage[i].layout.path, H5P_DEFAULT);
+        H5CheckStatus(h5dataset);
+
+        q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
+        if (q) mstat = q(h5pool, h5dataset, p, &(p->storage[i]), s);
+        CheckStatus(mstat);
+
+        H5Dclose(h5dataset);
+      }
+    }
+
+    h5tasks = H5Gopen(h5pool, TASKS_GROUP, H5P_DEFAULT);
+
+    /* Process all task datasets in the current pool */
+    for (i = 0; i < m->task_banks; i++) {
+      if (p->task->storage[i].layout.use_hdf) {
+        if (p->task->storage[i].layout.storage_type != STORAGE_GROUP) {
+          h5dataset = H5Dopen(h5tasks, p->task->storage[i].layout.path, H5P_DEFAULT);
+          H5CheckStatus(h5dataset);
+
+          q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
+          if (q) mstat = q(h5tasks, h5dataset, p, &(p->task->storage[i]), s);
+          CheckStatus(mstat);
+
+          H5Dclose(h5dataset);
+        } else {
+          task_groups = 1;
+        }
+      }
+    }
+
+    /* This may be memory heavy */
+    if (task_groups) {
+      for (i = 0; i < p->pool_size; i++) {
+        sprintf(path, TASK_PATH, i);
+        h5task = H5Gopen(h5tasks, path, H5P_DEFAULT);
+
+        for (j = 0; j < m->task_banks; j++) {
+          if (p->task->storage[j].layout.use_hdf && 
+              p->task->storage[j].layout.storage_type == STORAGE_GROUP) {
+           
+            h5dataset = H5Dopen(h5task, p->task->storage[j].layout.path, H5P_DEFAULT);
+            H5CheckStatus(h5dataset);
+
+            q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
+            if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]), s);
+            CheckStatus(mstat);
+
+            H5Dclose(h5dataset);
+          }
+        }
+        H5Gclose(h5task);
+      }
+    }
+
+    H5Gclose(h5tasks);
+    H5Gclose(h5pool);
     H5Fclose(h5location);
   }
 

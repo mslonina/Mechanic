@@ -378,6 +378,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
   return mstat;
 }
 
+
 /**
  * @brief Read the dataset data
  *

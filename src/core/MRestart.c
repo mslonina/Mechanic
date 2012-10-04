@@ -27,7 +27,6 @@ int Restart(module *m, pool **pools, int *pool_counter) {
     group = H5Gopen(h5location, LAST_GROUP, H5P_DEFAULT);
     H5CheckStatus(group);
 
-    /* @todo Fix it for new attributes handling */
     attr_id = H5Aopen_name(group, "Id");
     H5CheckStatus(attr_id);
 

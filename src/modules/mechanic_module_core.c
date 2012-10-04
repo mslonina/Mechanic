@@ -810,4 +810,31 @@ int Process(int node, char *masterfile, pool **all, setup *s) {
 int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
   return SUCCESS;
 }
+
+/**
+ * @brief The dataset process hook
+ *
+ * This function may be used to process given dataset. The HDF5 dataset pointer is passed,
+ * as well as top level group/file pointer. It is called during PoolProcess(), 
+ * only one the master node. 
+ *
+ * As an example, you may process any data in the dataset, as well as different
+ * attributes.
+ *
+ * If the DatasetProcess() hook is used in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup master_only
+ * @param h5location The top level location pointer according to the current dataset
+ * @param h5dataset The dataset pointer
+ * @param p The current pool pointer
+ * @param d The current dataset storage pointer
+ * @param s The setup pointer
+ *
+ * @return SUCCESS or error code otherwise
+ */
+
+int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
+  return SUCCESS;
+}
 /** @} */

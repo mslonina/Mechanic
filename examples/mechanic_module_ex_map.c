@@ -107,3 +107,11 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
 
   return SUCCESS;
 }
+
+/**
+ * Implements DatasetProcess()
+ */
+int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
+  Message(MESSAGE_INFO, "path: %s\n", d->layout.path);
+  return SUCCESS;
+}
