@@ -17,8 +17,8 @@ maintained), if the following requirements are met:
 Compilation
 -----------
 
-    tar -xvvf mechanic-2.0.0.tar.gz
-    cd mechanic-2.0.0
+    tar -xvvf mechanic-2.1.0.tar.gz
+    cd mechanic-2.1.0
     mkdir build
     cd build
     CC=mpicc cmake ..
@@ -57,7 +57,7 @@ point to the Mechanic environment, i.e.
     export PATH=/path/to/mechanic-opt/bin:$PATH
     export LD_LIBRARY_PATH=/path/to/mechanic-opt/lib:$LD_LIBRARY_PATH
 
-Note: MAC users need to adjust `DYLD_LIBRARY_PATH`
+Note: Mac OS X users need to adjust `DYLD_LIBRARY_PATH`
 
 Gentoo users
 ------------
@@ -66,7 +66,7 @@ There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
 http://github.com/mslonina/mechanic-overlay. This is the preferred way of installing the
 Mechanic and its dependencies. After you install the overlay, you may use:
 
-    emerge =mechanic-2.0.0
+    emerge =mechanic-2.1.0
 
 Additional modules
 ------------------

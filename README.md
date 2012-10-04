@@ -19,7 +19,7 @@ such as C++, Fortran2003+, OpenCL, CUDA etc.
 The core code is based on the MPI Task Farm model and the HDF5 data storage specification.
 It may be installed system-wide and become a helper tool for users, who need to perform 
 a large number of serial computations. The code has been tested on large CPU-clusters, 
-as well as desktop computers and works equally well (the Linux and MAC OS X operating 
+as well as desktop computers and works equally well (the Linux and Mac OS X operating 
 systems are actively maintained).
 
 Mechanic is BSD-licensed. The source code package comes with few example

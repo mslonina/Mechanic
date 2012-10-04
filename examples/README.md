@@ -15,4 +15,4 @@ List of examples
 Compilation
 -----------
 
-    mpicc -fPIC -Dpic -shared -lhdf5 -lmechanic2 -lreadconfig mechanic_module_example.c -o libmechanic_module_example.so
+    mpicc -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 -lreadconfig mechanic_module_example.c -o libmechanic_module_example.so

@@ -1,8 +1,8 @@
 Mechanic short changelog
-------------------------
+========================
 
 2.1
-===
+---
 
 - The MPI Blocking communication mode (--blocking option)
 - New hooks: DatasetPrepare() and DatasetProcess(), which may be used for advanced stuff
@@ -11,7 +11,7 @@ Mechanic short changelog
 - Better memory management and smaller memory footprint
 
 2.0
-===
+---
 
 - Pool based simulations
 - MPI Nonblocking communication mode
