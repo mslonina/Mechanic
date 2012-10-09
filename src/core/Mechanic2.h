@@ -212,6 +212,7 @@ int GetSize(int rank, int *dims);
 
 int Allocate(storage *s); /**< Memory allocator */
 void Free(storage *s); /**< Garbage cleaner */
-int SetData(storage *s, void* data); /**< Copy data buffers to memory */
+int SetData(storage *s, void* data); /**< Copy local data buffers to memory */
+int GetData(storage *s, void* data); /**< Copy memory buffers to local data buffers */
 
 #endif
