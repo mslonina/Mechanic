@@ -144,6 +144,8 @@ typedef struct {
  */
 typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
+  size_t size; /**< The size of the memory block */
+  char *memory; /**< The memory block */
   double **data; /**< The data pointer */
   attr *attr; /**< The dataset attributes */
 } storage;
@@ -207,5 +209,9 @@ void PrintDataset(int type, hid_t dataset);
 double** AllocateBuffer(int rank, int *dims);
 void FreeBuffer(double **array);
 int GetSize(int rank, int *dims);
+
+int Allocate(storage *s); /**< Memory allocator */
+void Free(storage *s); /**< Garbage cleaner */
+int SetData(storage *s, void* data); /**< Copy data buffers to memory */
 
 #endif

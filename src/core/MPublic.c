@@ -82,7 +82,7 @@ int GetSize(int rank, int *dims){
   return size;
 }
 /**
- * @brief Allocate memory buffer
+ * @brief Allocate 2D memory buffer (double)
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
@@ -91,7 +91,6 @@ int GetSize(int rank, int *dims){
  * @param dims The dimensions of the array to allocate
  *
  * @return Allocated array, NULL otherwise
- * @todo A generic approach?
  */
 double** AllocateBuffer(int rank, int *dims) {
   double** array = NULL;
@@ -111,7 +110,7 @@ double** AllocateBuffer(int rank, int *dims) {
 }
 
 /**
- * @brief Free memory buffer
+ * @brief Free 2D memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  *
@@ -122,3 +121,63 @@ void FreeBuffer(double **array) {
   if (array) free(array);
 }
 
+/**
+ * @brief Allocates the memory buffer
+ *
+ * @param s The storage object
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int Allocate(storage *s) {
+
+  s->memory = NULL;
+
+  s->size = (size_t) GetSize(s->layout.rank, s->layout.dim) * H5Tget_size(s->layout.datatype);
+
+  if (s->size > 0) {
+    s->memory = calloc(s->size, sizeof(s->layout.datatype));
+  }
+  if (!s->memory) return CORE_ERR_MEM;
+  return SUCCESS;
+}
+
+/**
+ * @brief Free the memory buffer
+ *
+ * @param s The storage object
+ */
+void Free(storage *s) {
+  if (s->memory) free(s->memory);
+}
+
+/**
+ * @brief Copies data from local buffer to the memory buffer
+ *
+ * @param s The storage object
+ * @param data The data pointer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int SetData(storage *s, void *data) {
+  if (!s->memory) return CORE_ERR_MEM;
+  if (!data) return CORE_ERR_MEM;
+
+  memcpy(s->memory, data, s->size);
+  return SUCCESS;
+}
+
+/**
+ * @brief Copies data from the memory buffer to the local storage
+ *
+ * @param s The storage object
+ * @param data The data pointer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int GetData(storage *s, void *data) {
+  if (!s->memory) return CORE_ERR_MEM;
+  if (!data) return CORE_ERR_MEM;
+
+  memcpy(data, s->memory, s->size);
+  return SUCCESS;
+}
