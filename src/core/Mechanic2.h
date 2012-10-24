@@ -81,7 +81,7 @@
 #define MPI_NONBLOCKING 303 /**< Non-blocking communication mode */
 #define MPI_BLOCKING 333 /**< Blocking communication mode */
 
-#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .rank = 0, .dim = {0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
+#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0}, .offset ={0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
 
 /**
  * @struct init
@@ -131,6 +131,7 @@ typedef struct {
   int storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
   H5S_class_t dataspace_type; /**< The type of the HDF5 dataspace (H5S_SIMPLE) */
   hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
+  MPI_Datatype mpi_datatype; /**< The MPI datatype of the dataset */
 } schema;
 
 typedef struct {

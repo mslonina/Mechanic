@@ -1,7 +1,8 @@
 include_directories(. .. ../modes/taskfarm ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
   ${PROJECT_BINARY_DIR}/src/modes/taskfarm)
 set (coresources
-    MTypes.h Mechanic2.h
+    Mechanic2.h
+    MTypes.c MTypes.h
     MCommon.c MCommon.h
     MBootstrap.c MBootstrap.h
     MCore.c MCore.h

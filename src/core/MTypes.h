@@ -39,4 +39,6 @@ typedef struct {
  */
 typedef int (query) ();
 
+MPI_Datatype GetMpiDatatype(hid_t h5type);
+
 #endif
