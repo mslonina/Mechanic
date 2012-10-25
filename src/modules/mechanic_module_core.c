@@ -530,12 +530,70 @@ int Storage(pool *p, setup *s) {
     .rank = 2, // pool rank
     .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
     .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
+    .datatype = H5T_NATIVE_DOUBLE,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,
   };
 
   p->checkpoint_size = LRC_option2int("core", "checkpoint", s->head);
+
+  p->storage[0].layout = (schema) {
+    .path = "integer-datatype",
+    .rank = 2,
+    .dim[0] = 3,
+    .dim[1] = 4,
+    .datatype = H5T_NATIVE_INT,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_GROUP,
+  };
+
+  p->storage[1].layout = (schema) {
+    .path = "double-datatype",
+    .rank = 2,
+    .dim[0] = 3,
+    .dim[1] = 4,
+    .datatype = H5T_NATIVE_DOUBLE,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_GROUP,
+  };
+
+  p->storage[2].layout = (schema) {
+    .path = "float-datatype",
+    .rank = 2,
+    .dim[0] = 3,
+    .dim[1] = 4,
+    .datatype = H5T_NATIVE_FLOAT,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_GROUP,
+  };
+
+  p->task->storage[0].layout = (schema) {
+    .path = "double-datatype",
+    .rank = 2,
+    .dim[0] = 3,
+    .dim[1] = 3,
+    .datatype = H5T_NATIVE_DOUBLE,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_BOARD,
+  };
+
+  p->task->storage[1].layout = (schema) {
+    .path = "integer-datatype",
+    .rank = 2,
+    .dim[0] = 3,
+    .dim[1] = 3,
+    .datatype = H5T_NATIVE_INT,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_BOARD,
+  };
+
+
 
   return SUCCESS;
 }
@@ -564,6 +622,23 @@ int Storage(pool *p, setup *s) {
  * @return SUCCESS on success, error code otherwise
  */
 int PoolPrepare(pool **allpools, pool *current, setup *s) {
+  int data[6][8];
+  double buff[6][8];
+  float floa[6][8];
+  int i,j;
+
+  for (i = 0; i < 6; i++) {
+    for (j = 0; j < 8; j++) {
+      data[i][j] = i + j;
+      buff[i][j] = 47.13 + i + j;
+      floa[i][j] = 80.23 + i + j;
+    }
+  }
+
+  SetData(&(current->storage[0]), data);
+  SetData(&(current->storage[1]), buff);
+  SetData(&(current->storage[2]), floa);
+
   return SUCCESS;
 }
 
@@ -706,6 +781,18 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * @return SUCCESS on success or error code otherwise
  */
 int TaskProcess(pool *p, task *t, setup *s) {
+  double data[3][3];
+  int idata[3][3];
+  int i,j;
+
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 3; j++) {
+      data[i][j] = t->tid+1.1;
+      idata[i][j] = t->tid+1;
+    }
+  }
+  SetData(&t->storage[0], data);
+  SetData(&t->storage[1], idata);
   return SUCCESS;
 }
 

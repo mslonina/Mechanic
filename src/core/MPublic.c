@@ -124,19 +124,20 @@ void FreeBuffer(double **array) {
 /**
  * @brief Allocates the memory buffer
  *
- * @param s The storage object
+ * @param buffer The memory buffer to allocate
+ * @param size The size of the memory buffer
+ * @param datatype The size of the datatype
  *
  * @return SUCCESS on success, error code otherwise
  */
-int Allocate(storage *s) {
+int Allocate(storage *s, size_t size, size_t datatype) {
 
-  s->memory = NULL;
+ // buffer = NULL;
 
-  s->size = (size_t) GetSize(s->layout.rank, s->layout.dim) * H5Tget_size(s->layout.datatype);
-
-  if (s->size > 0) {
-    s->memory = calloc(s->size, sizeof(s->layout.datatype));
-  }
+  //if (size > 0) {
+  //printf("calloc size = %d, type = %d\n", (int)size,  (int)datatype);
+    s->memory = calloc(size, datatype);
+  //}
   if (!s->memory) return CORE_ERR_MEM;
   return SUCCESS;
 }
@@ -162,7 +163,7 @@ int SetData(storage *s, void *data) {
   if (!s->memory) return CORE_ERR_MEM;
   if (!data) return CORE_ERR_MEM;
 
-  memcpy(s->memory, data, s->size);
+  memcpy(s->memory, data, s->layout.size);
   return SUCCESS;
 }
 
@@ -178,6 +179,6 @@ int GetData(storage *s, void *data) {
   if (!s->memory) return CORE_ERR_MEM;
   if (!data) return CORE_ERR_MEM;
 
-  memcpy(data, s->memory, s->size);
+  memcpy(data, s->memory, s->layout.size);
   return SUCCESS;
 }

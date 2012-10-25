@@ -32,22 +32,12 @@ task* TaskLoad(module *m, pool *p, int tid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     t->storage[i].layout = (schema) STORAGE_END;
     t->storage[i].data = NULL;
+    t->storage[i].memory = NULL;
   }
 
   /* Initialize the task */
   for (i = 0; i < m->task_banks; i++) {
-    t->storage[i].layout.dataspace_type = p->task->storage[i].layout.dataspace_type;
-    t->storage[i].layout.datatype = p->task->storage[i].layout.datatype;
-    t->storage[i].layout.rank = p->task->storage[i].layout.rank;
     t->storage[i].layout.use_hdf = p->task->storage[i].layout.use_hdf;
-    t->storage[i].layout.sync = p->task->storage[i].layout.sync;
-    t->storage[i].layout.storage_type = p->task->storage[i].layout.storage_type;
-
-    /* Memory size */
-    for (j = 0; j < t->storage[i].layout.rank; j++) {
-      t->storage[i].layout.dim[j] = p->task->storage[i].layout.dim[j];
-    }
-
     /* Setup path, we need this only when use_hdf = 1 */
     if (t->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.path != NULL) {
@@ -59,6 +49,22 @@ task* TaskLoad(module *m, pool *p, int tid) {
         t->storage[i].layout.path[len] = LRC_NULL;
       }
     }
+
+    t->storage[i].layout.rank = p->task->storage[i].layout.rank;
+
+    /* Memory size */
+    for (j = 0; j < t->storage[i].layout.rank; j++) {
+      t->storage[i].layout.dim[j] = p->task->storage[i].layout.dim[j];
+    }
+
+    t->storage[i].layout.sync = p->task->storage[i].layout.sync;
+    t->storage[i].layout.storage_type = p->task->storage[i].layout.storage_type;
+    t->storage[i].layout.dataspace_type = p->task->storage[i].layout.dataspace_type;
+    t->storage[i].layout.datatype = p->task->storage[i].layout.datatype;
+    t->storage[i].layout.mpi_datatype = p->task->storage[i].layout.mpi_datatype;
+    t->storage[i].layout.size = p->task->storage[i].layout.size;
+    t->storage[i].layout.elements = p->task->storage[i].layout.elements;
+    t->storage[i].layout.datatype_size = p->task->storage[i].layout.datatype_size;
   }
 
   CommitMemoryLayout(m->task_banks, t->storage);

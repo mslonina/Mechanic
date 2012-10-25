@@ -57,32 +57,47 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
  *
  * @return 0 on success, error code otherwise
  */
-int Pack(module *m, double *buffer, pool *p, task *t, int tag) {
+int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
   int mstat = SUCCESS;
-  int position = 0;
+  size_t position = 0;
   int i = 0;
-  int size = 0;
+  size_t size = 0;
+  int header[HEADER_SIZE];
 
-  buffer[0] = (double) tag; /* Message tag */
-  position++;
+  header[0] = tag;
+  header[1] = t->tid;
+  header[2] = t->status;
+  header[3] = t->location[0];
+  header[4] = t->location[1];
+
+  //buffer[0] = (double) tag; /* Message tag */
+  //position++;
+  position = sizeof(int)*(HEADER_SIZE);
+  memcpy(buffer, header, position);
 
   if (tag != TAG_TERMINATE) {
-    buffer[1] = (double) t->tid; position++; /* Task ID */
-    buffer[2] = (double) t->status; position++; /* Task status */
+    //buffer[1] = (double) t->tid; position++; /* Task ID */
+    //buffer[2] = (double) t->status; position++; /* Task status */
+    //memcpy(buffer+1, t->tid, sizeof(int));
+    //memcpy(buffer+2, t->status, sizeof(int));
 
     /* Task location in the pool */
-    for (i = 0; i < p->board->layout.rank; i++) {
+    /*for (i = 0; i < p->board->layout.rank; i++) {
       buffer[i+position] = t->location[i];
     }
     position = position + p->board->layout.rank;
+*/
+    //memcpy(buffer+3, t->location, p->board->layout.rank*sizeof(int));
 
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {
+      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim)*t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
-        Array2Vec(buffer+position, t->storage[i].data,
-          t->storage[i].layout.rank, t->storage[i].layout.dim);
+        memcpy(buffer+position, t->storage[i].memory, size);
+//        Array2Vec(buffer+position, t->storage[i].data,
+//          t->storage[i].layout.rank, t->storage[i].layout.dim);
       }
-      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
+//      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
       position = position + size;
     }
 
@@ -106,32 +121,64 @@ int Pack(module *m, double *buffer, pool *p, task *t, int tag) {
  *
  * @return 0 on success, error code otherwise
  */
-int Unpack(module *m, double *buffer, pool *p, task *t, int *tag) {
+int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
   int mstat = 0;
-  int position = 0;
-  int i = 0;
-  int size = 0;
+  size_t position = 0;
+  int i = 0, k = 0, j = 0;
+  size_t size = 0;
+  int header[HEADER_SIZE];
 
-  *tag = (int)buffer[0]; /* Message tag */
-  position++;
+  int ibuff[3][3];
+  double dbuff[3][3];
+
+  //*tag = (int)buffer[0]; /* Message tag */
+  //position++;
+  position = sizeof(int)*(HEADER_SIZE);
+  memcpy(header, buffer, position);
+
+  *tag = header[0];
+  t->tid = header[1];
+  t->status = header[2];
+  t->location[0]= header[3];
+  t->location[1] = header[4];
 
   if (*tag != TAG_TERMINATE) {
-    t->tid = (int)buffer[1]; position++; /* Task ID*/
-    t->status = (int)buffer[2]; position++; /* Task status */
+    //t->tid = (int)buffer[1]; position++; /* Task ID*/
+    //t->status = (int)buffer[2]; position++; /* Task status */
 
     /* Task location in the pool */
-    for (i = 0; i < p->board->layout.rank; i++) {
-      t->location[i] = buffer[i+position];
-    }
-    position = position + p->board->layout.rank;
+    //for (i = 0; i < p->board->layout.rank; i++) {
+    //  t->location[i] = buffer[i+position];
+    //}
+    //position = position + p->board->layout.rank;
 
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {
+      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim)*t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
-        Vec2Array(buffer+position, t->storage[i].data,
-          t->storage[i].layout.rank, t->storage[i].layout.dim);
+        memcpy(t->storage[i].memory, buffer+position, size);
+
+        if (m->node != MASTER) {
+//        printf("task [%04d %02d %02d] getting data from %s, size %d\n", t->tid, t->location[0], t->location[1],
+//            t->storage[i].layout.path, (int)t->storage[i].layout.size);
+        if (t->storage[i].layout.datatype == H5T_NATIVE_INT) GetData(&t->storage[i], &ibuff);
+        if (t->storage[i].layout.datatype == H5T_NATIVE_DOUBLE) GetData(&t->storage[i], &dbuff);
+
+        // test output
+        /*for (k =0; k < t->storage[i].layout.dim[0]; k++) {
+          for (j =0; j < t->storage[i].layout.dim[1]; j++) {
+            if (t->storage[i].layout.datatype == H5T_NATIVE_INT) printf("%d ", ibuff[k][j]);
+            if (t->storage[i].layout.datatype == H5T_NATIVE_DOUBLE) printf("%f ", dbuff[k][j]);
+          }
+          printf("\n");
+        }
+        */
+        }
+
+        //Vec2Array(buffer+position, t->storage[i].data,
+        //  t->storage[i].layout.rank, t->storage[i].layout.dim);
       }
-      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
+      //size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim);
       position = position + size;
     }
 

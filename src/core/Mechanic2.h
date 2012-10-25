@@ -81,7 +81,10 @@
 #define MPI_NONBLOCKING 303 /**< Non-blocking communication mode */
 #define MPI_BLOCKING 333 /**< Blocking communication mode */
 
-#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = H5T_NATIVE_DOUBLE, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0}, .offset ={0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
+/* Data */
+#define HEADER_SIZE 3+MAX_RANK /**< The data header size */
+
+#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0}, .offset ={0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
 
 /**
  * @struct init
@@ -132,11 +135,15 @@ typedef struct {
   H5S_class_t dataspace_type; /**< The type of the HDF5 dataspace (H5S_SIMPLE) */
   hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
   MPI_Datatype mpi_datatype; /**< The MPI datatype of the dataset */
+  size_t size; /**< The size of the memory block */
+  size_t datatype_size; /** The size of the datatype */
+  int elements; /**< Number of data elements in the memory block */
 } schema;
 
 typedef struct {
   schema layout;
   double **data;
+  char* memory;
 } attr;
 
 /**
@@ -145,7 +152,6 @@ typedef struct {
  */
 typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
-  size_t size; /**< The size of the memory block */
   char *memory; /**< The memory block */
   double **data; /**< The data pointer */
   attr *attr; /**< The dataset attributes */
@@ -211,7 +217,7 @@ double** AllocateBuffer(int rank, int *dims);
 void FreeBuffer(double **array);
 int GetSize(int rank, int *dims);
 
-int Allocate(storage *s); /**< Memory allocator */
+int Allocate(storage *s, size_t size, size_t datatype); /**< Memory allocator */
 void Free(storage *s); /**< Garbage cleaner */
 int SetData(storage *s, void* data); /**< Copy local data buffers to memory */
 int GetData(storage *s, void* data); /**< Copy memory buffers to local data buffers */

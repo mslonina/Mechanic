@@ -27,13 +27,16 @@ pool* PoolLoad(module *m, int pid) {
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
     p->storage[i].layout = (schema) STORAGE_END;
     p->storage[i].data = NULL;
+    p->storage[i].memory = NULL;
   }
 
   /* Allocate task board pointer */
   p->board = calloc(sizeof(storage), sizeof(storage));
   if (!p->board) Error(CORE_ERR_MEM);
+
   p->board->layout = (schema) STORAGE_END;
   p->board->data = NULL;
+  p->board->memory = NULL;
 
   /* Allocate task pointer */
   p->task = calloc(sizeof(task), sizeof(task));
@@ -45,6 +48,7 @@ pool* PoolLoad(module *m, int pid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     p->task->storage[i].layout = (schema) STORAGE_END;
     p->task->storage[i].data = NULL;
+    p->task->storage[i].memory = NULL;
   }
 
   p->pid = pid;
@@ -123,7 +127,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       attr_data[0] = p->pid;
       hstat = H5LTset_attribute_int(h5location, path, "Id", attr_data, adims);
       H5CheckStatus(hstat);
-      
+
       attr_data[0] = 0;
       hstat = H5LTset_attribute_int(h5location, path, "Status", attr_data, adims);
       H5CheckStatus(hstat);
@@ -131,15 +135,15 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
     H5Gclose(group);
     H5Fclose(h5location);
-  
+
   }
 
   /* Broadcast pool data */
   for (i = 0; i < m->pool_banks; i++) {
     if (p->storage[i].layout.sync) {
-      size = GetSize(p->storage[i].layout.rank, p->storage[i].layout.dim);
-      if (size > 0) {
-        MPI_Bcast(&(p->storage[i].data[0][0]), size, MPI_DOUBLE, MASTER, MPI_COMM_WORLD);
+      if ((int)p->storage[i].layout.elements > 0) {
+        MPI_Bcast(&(p->storage[i].memory[0]), p->storage[i].layout.elements,
+            p->storage[i].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
       }
     }
   }
@@ -230,9 +234,9 @@ int PoolProcess(module *m, pool **all, pool *p) {
         h5task = H5Gopen(h5tasks, path, H5P_DEFAULT);
 
         for (j = 0; j < m->task_banks; j++) {
-          if (p->task->storage[j].layout.use_hdf && 
+          if (p->task->storage[j].layout.use_hdf &&
               p->task->storage[j].layout.storage_type == STORAGE_GROUP) {
-           
+
             h5dataset = H5Dopen(h5task, p->task->storage[j].layout.path, H5P_DEFAULT);
             H5CheckStatus(h5dataset);
 
@@ -305,20 +309,17 @@ int PoolReset(module *m, pool *p) {
  */
 void PoolFinalize(module *m, pool *p) {
   int i = 0;
+
   if (p->storage) {
-    if (p->storage->data) {
-      FreeBuffer(p->storage->data);
-    }
+    FreeMemoryLayout(m->pool_banks, p->storage);
     free(p->storage);
   }
 
   if (p->task) {
-    for (i = 0; i < m->task_banks; i++) {
-      if (p->task->storage[i].data) {
-        FreeBuffer(p->task->storage[i].data);
-      }
+    if (p->task->storage) {
+      FreeMemoryLayout(m->task_banks, p->task->storage);
+      free(p->task->storage);
     }
-    if (p->task->storage) free(p->task->storage);
 
     free(p->task);
   }
@@ -327,6 +328,7 @@ void PoolFinalize(module *m, pool *p) {
     for (i = 0; i < p->pool_size; i++) {
       TaskFinalize(m, p, p->tasks[i]);
     }
+
     free(p->tasks);
   }
 
@@ -334,6 +336,7 @@ void PoolFinalize(module *m, pool *p) {
     if (p->board->data) {
       FreeBuffer(p->board->data);
     }
+
     free(p->board);
   }
 

@@ -223,28 +223,33 @@ int main(int argc, char** argv) {
     H5Fclose(h5location);
   }
 
-
   /**
    * (J) Modes
    */
+  if (mpi_size <= 1) {
+    Message(MESSAGE_WARN, "You must use min. two MPI threads to run Mechanic.\n");
+    Message(MESSAGE_WARN, "Try: mpirun -np 2 mechanic2\n");
+    goto finalize;
+  }
+
+  time_in = clock();
+
   if (node == MASTER) {
     Message(MESSAGE_INFO, "Master file: %s\n", module.filename);
     Message(MESSAGE_INFO, "Entering the pool loop\n");
     Message(MESSAGE_OUTPUT, "\n");
   }
 
-  time_in = clock();
-
-  if (mpi_size > 1) {
-    mstat = Taskfarm(&module);
-    CheckStatus(mstat);
-  } else {
-    Message(MESSAGE_WARN, "You must use min. two MPI threads to run Mechanic.\n");
-    Message(MESSAGE_WARN, "Try: mpirun -np 2 mechanic2\n");
-  }
+  mstat = Taskfarm(&module);
+  CheckStatus(mstat);
 
   time_out = clock();
   cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
+
+  /**
+   * @todo
+   * Write global attributes here, such as master cpu_time and some statistics
+   */
 
   /**
    * (K) Finalize

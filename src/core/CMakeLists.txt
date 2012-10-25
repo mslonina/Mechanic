@@ -1,25 +1,33 @@
 include_directories(. .. ../modes/taskfarm ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
   ${PROJECT_BINARY_DIR}/src/modes/taskfarm)
-set (coresources
-    Mechanic2.h
-    MTypes.c MTypes.h
-    MCommon.c MCommon.h
-    MBootstrap.c MBootstrap.h
-    MCore.c MCore.h
-    MModules.c  MModules.h
-    MTask.c MTask.h
-    MPool.c MPool.h
-    MSetup.c MSetup.h
-    MMpi.c MMpi.h
-    MStorage.c MStorage.h
-    MLog.c MLog.h
-    MCheckpoint.c MCheckpoint.h
-    MRestart.c MRestart.h
-    )
-set (mainsources
-    MMain.c
-    )
-set (libsources MPublic.c Mechanic2.h)
+
+set (
+  coresources
+  Mechanic2.h
+  MTypes.c MTypes.h
+  MCommon.c MCommon.h
+  MBootstrap.c MBootstrap.h
+  MCore.c MCore.h
+  MModules.c  MModules.h
+  MTask.c MTask.h
+  MPool.c MPool.h
+  MSetup.c MSetup.h
+  MMpi.c MMpi.h
+  MStorage.c MStorage.h
+  MLog.c MLog.h
+  MCheckpoint.c MCheckpoint.h
+  MRestart.c MRestart.h
+)
+
+set (
+  mainsources
+  MMain.c
+)
+
+set (
+  libsources
+  MPublic.c Mechanic2.h
+)
 
 add_library(libmechanic2 SHARED ${libsources})
 set_target_properties(libmechanic2 PROPERTIES OUTPUT_NAME mechanic2)
