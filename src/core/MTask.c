@@ -31,7 +31,6 @@ task* TaskLoad(module *m, pool *p, int tid) {
   /* Initialize task banks */
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     t->storage[i].layout = (schema) STORAGE_END;
-    t->storage[i].data = NULL;
     t->storage[i].memory = NULL;
   }
 

@@ -159,7 +159,7 @@ void Free(storage *s) {
  *
  * @return SUCCESS on success, error code otherwise
  */
-int SetData(storage *s, void *data) {
+int WriteData(storage *s, void *data) {
   if (!s->memory) return CORE_ERR_MEM;
   if (!data) return CORE_ERR_MEM;
 
@@ -175,7 +175,7 @@ int SetData(storage *s, void *data) {
  *
  * @return SUCCESS on success, error code otherwise
  */
-int GetData(storage *s, void *data) {
+int ReadData(storage *s, void *data) {
   if (!s->memory) return CORE_ERR_MEM;
   if (!data) return CORE_ERR_MEM;
 

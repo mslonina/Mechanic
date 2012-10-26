@@ -54,13 +54,13 @@ int Restart(module *m, pool **pools, int *pool_counter) {
       H5CheckStatus(group);
 
       /* Read pool board */
-      ReadData(group, 1, pools[i]->board);
+      ReadDataset(group, 1, pools[i]->board);
 
       /* Read pool storage banks */
       for (j = 0; j < m->pool_banks; j++) {
         size = GetSize(pools[i]->storage[j].layout.rank, pools[i]->storage[j].layout.dim);
         if (size > 0 && pools[i]->storage[j].layout.use_hdf) {
-          ReadData(group, 1, &(pools[i]->storage[j]));
+          ReadDataset(group, 1, &(pools[i]->storage[j]));
         }
       }
 
@@ -75,7 +75,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
           if (pools[i]->task->storage[j].layout.storage_type == STORAGE_PM3D
             || pools[i]->task->storage[j].layout.storage_type == STORAGE_LIST
             || pools[i]->task->storage[j].layout.storage_type == STORAGE_BOARD) {
-            ReadData(tasks, 1, &(pools[i]->task->storage[j]));
+            ReadDataset(tasks, 1, &(pools[i]->task->storage[j]));
           }
         }
       }
@@ -91,7 +91,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
               task_id = H5Gopen(tasks, task_path, H5P_DEFAULT);
               H5CheckStatus(task_id);
 
-              ReadData(task_id, 1, &(pools[i]->tasks[j]->storage[k]));
+              ReadDataset(task_id, 1, &(pools[i]->tasks[j]->storage[k]));
               H5Gclose(task_id);
             }
           }

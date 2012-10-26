@@ -58,20 +58,20 @@ int Storage(module *m, pool *p) {
       if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
         dims[0] = p->task->storage[i].layout.dim[0];
         dims[1] = p->task->storage[i].layout.dim[1];
-        p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
+//        p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
         // @todo: mstat = Allocate(p->task->storage[i]);
       }
       if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[i].layout.storage_type == STORAGE_LIST) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
         dims[1] = p->task->storage[i].layout.dim[1];
-        p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
+  //      p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
         // @todo: mstat = Allocate(p->task->storage[i]);
       }
       if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
         dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
-        p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
+    //    p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
         // @todo: mstat = Allocate(p->task->storage[i]);
       }
       p->task->storage[i].layout.offset[0] = 0;
@@ -360,7 +360,6 @@ int CommitData(hid_t h5location, int banks, storage *s) {
   hid_t dataspace, dataset, memspace;
   herr_t hdf_status = 0;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
-
   void *buffer = NULL;
 
   for (i = 0; i < banks; i++) {
@@ -372,7 +371,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
       H5CheckStatus(dataspace);
 
       buffer = calloc((size_t)s[i].layout.elements, s[i].layout.datatype_size);
-      GetData(&s[i], buffer);
+      ReadData(&s[i], buffer);
 
       /* Whole dataset at once */
       if (s[i].layout.storage_type == STORAGE_GROUP) {
@@ -419,18 +418,24 @@ int CommitData(hid_t h5location, int banks, storage *s) {
  *
  * @return 0 on success, error code otherwise
  */
-int ReadData(hid_t h5location, int banks, storage *s) {
+int ReadDataset(hid_t h5location, int banks, storage *s) {
   int mstat = SUCCESS, i = 0;
+  void *buffer = NULL;
   hid_t dataset;
   herr_t hstat;
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
+      buffer = calloc((size_t)s[i].layout.elements, s[i].layout.datatype_size);
+
       Message(MESSAGE_DEBUG, "Read Data storage path: %s\n", s[i].layout.path);
       dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
-      hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(s[i].data[0][0]));
+      hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
       H5CheckStatus(hstat);
       H5Dclose(dataset);
+
+      WriteData(&s[i], buffer);
+      free(buffer);
     }
   }
 

@@ -26,7 +26,6 @@ pool* PoolLoad(module *m, int pid) {
 
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
     p->storage[i].layout = (schema) STORAGE_END;
-    p->storage[i].data = NULL;
     p->storage[i].memory = NULL;
   }
 
@@ -47,7 +46,6 @@ pool* PoolLoad(module *m, int pid) {
 
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     p->task->storage[i].layout = (schema) STORAGE_END;
-    p->task->storage[i].data = NULL;
     p->task->storage[i].memory = NULL;
   }
 
@@ -69,7 +67,7 @@ pool* PoolLoad(module *m, int pid) {
  * @return 0 on success, error code otherwise
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
-  int mstat = SUCCESS, i = 0, size = 0, task_groups = 0;
+  int mstat = SUCCESS, i = 0, task_groups = 0;
   query *q;
   setup *s = &(m->layer.setup);
   hid_t h5location, group;

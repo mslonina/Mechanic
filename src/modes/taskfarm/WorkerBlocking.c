@@ -15,13 +15,9 @@
 int WorkerBlocking(module *m, pool *p) {
   int mstat = SUCCESS;
   int tag;
-  int i = 0, k = 0;
+  int k = 0;
 
   MPI_Status recv_status;
-
-  // test
-  double dbuff[3][3];
-  int ibuff[3][3];
 
   task *t = NULL;
   checkpoint *c = NULL;
@@ -39,24 +35,12 @@ int WorkerBlocking(module *m, pool *p) {
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
   /* Initialize data buffers */
-  send_buffer->layout.rank = 2;
-  send_buffer->layout.dim[0] = 1;
-  send_buffer->layout.dim[1] = c->storage->layout.dim[1];
-  send_buffer->data = AllocateBuffer(send_buffer->layout.rank, send_buffer->layout.dim);
-  if (!send_buffer->data) Error(CORE_ERR_MEM);
-
   send_buffer->layout.size = sizeof(int) * (HEADER_SIZE);
   for (k = 0; k < m->task_banks; k++) {
     send_buffer->layout.size +=
       GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
   }
   mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
-
-  recv_buffer->layout.rank = 2;
-  recv_buffer->layout.dim[0] = 1;
-  recv_buffer->layout.dim[1] = c->storage->layout.dim[1];
-  recv_buffer->data = AllocateBuffer(recv_buffer->layout.rank, recv_buffer->layout.dim);
-  if (!recv_buffer->data) Error(CORE_ERR_MEM);
 
   recv_buffer->layout.size = send_buffer->layout.size;
   mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
@@ -95,13 +79,11 @@ int WorkerBlocking(module *m, pool *p) {
   TaskFinalize(m, p, t);
 
   if (send_buffer) {
-    if (send_buffer->data) FreeBuffer(send_buffer->data);
     if (send_buffer->memory) Free(send_buffer);
     free(send_buffer);
   }
 
   if (recv_buffer) {
-    if (recv_buffer->data) FreeBuffer(recv_buffer->data);
     if (recv_buffer->memory) Free(recv_buffer);
     free(recv_buffer);
   }

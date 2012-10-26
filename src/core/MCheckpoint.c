@@ -50,14 +50,9 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
 
   }
 
-  c->storage->data = AllocateBuffer(c->storage->layout.rank, c->storage->layout.dim);
-
   Allocate(c->storage, c->storage->layout.size * c->size, sizeof(char));
 
-  for (i = 0; i < c->size; i++) {
-    c->storage->data[i][1] = TASK_EMPTY; // t->tid
-    c->storage->data[i][2] = TASK_EMPTY; // t->status
-  }
+  CheckpointReset(m, p, c, 0);
 
   return c;
 }
@@ -140,10 +135,6 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
       dims[1] = p->board->layout.dim[1];
 
       for (i = 0; i < c->size; i++) {
-        t->tid = c->storage->data[i][1];
-        t->status = c->storage->data[i][2];
-        t->location[0] = c->storage->data[i][3];
-        t->location[1] = c->storage->data[i][4];
 
         /* Get the data header */
         c_offset = (int)c->storage->layout.size * i;
@@ -175,7 +166,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           t->storage[j].layout.offset[0] = offsets[0];
           t->storage[j].layout.offset[1] = offsets[1];
 
-          c_offset = i * c->storage->layout.size + (int)sizeof(int)*(HEADER_SIZE);
+          c_offset = (int)c->storage->layout.size*i + (int)sizeof(int)*(HEADER_SIZE);
           memcpy(t->storage[j].memory, c->storage->memory+c_offset+d_offset, t->storage[j].layout.size);
 
           /* Commit data to the pool */
@@ -195,21 +186,27 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
       }
     }
 
-    /*if (p->task->storage[j].layout.storage_type == STORAGE_GROUP) {
+    if (p->task->storage[j].layout.storage_type == STORAGE_GROUP) {
       for (i = 0; i < c->size; i++) {
-        t->tid = c->storage->data[i][1];
-        t->status = c->storage->data[i][2];
-        t->location[0] = c->storage->data[i][3];
-        t->location[1] = c->storage->data[i][4];
+
+        /* Get the data header */
+        c_offset = (int)c->storage->layout.size * i;
+        memcpy(header, c->storage->memory+c_offset, sizeof(int)*(HEADER_SIZE));
+        t->tid = header[1];
+        t->status = header[2];
+        t->location[0] = header[3];
+        t->location[1] = header[4];
+
         t->storage[j].layout.offset[0] = 0;
         t->storage[j].layout.offset[1] = 0;
+
         if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
 
-          Vec2Array(&c->storage->data[i][position], t->storage[j].data,
-              t->storage[j].layout.rank, t->storage[j].layout.dim);
+          c_offset = (int)c->storage->layout.size*i + (int)sizeof(int)*(HEADER_SIZE);
+          memcpy(t->storage[j].memory, c->storage->memory+c_offset+d_offset, t->storage[j].layout.size);
 
           // Commit data to the pool 
-          p->tasks[t->tid]->tid = t->tid;
+/*          p->tasks[t->tid]->tid = t->tid;
           p->tasks[t->tid]->status = t->status;
           p->tasks[t->tid]->location[0] = t->location[0];
           p->tasks[t->tid]->location[1] = t->location[1];
@@ -220,7 +217,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
                 t->storage[j].data[k][l];
             }
           }
-
+*/
           // Commit data to master datafile 
           if (p->task->storage[j].layout.use_hdf) {
             sprintf(path, TASK_PATH, t->tid);
@@ -232,7 +229,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           }
         }
       }
-    }*/
+    }
+
     d_offset += (int)p->task->storage[j].layout.size;
   }
 
@@ -254,13 +252,17 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
  * @param cid The checkpoint id to use
  */
 void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
-  int i = 0;
+  int header[HEADER_SIZE] = HEADER_INIT;
+  int i = 0, c_offset = 0;
+
   c->cid = cid;
   c->counter = 0;
 
+  memset(c->storage->memory, 0, sizeof(char));
+
   for (i = 0; i < c->size; i++) {
-    c->storage->data[i][1] = TASK_EMPTY;
-    c->storage->data[i][2] = TASK_EMPTY;
+    c_offset = (int)c->storage->layout.size * i;
+    memcpy(c->storage->memory + c_offset, header, sizeof(int)*(HEADER_SIZE));
   }
 }
 
@@ -272,7 +274,6 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
  * @param c The checkpoint pointer
  */
 void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
-  if (c->storage->data) FreeBuffer(c->storage->data);
   if (c->storage->memory) Free(c->storage);
   if (c) free(c);
 }

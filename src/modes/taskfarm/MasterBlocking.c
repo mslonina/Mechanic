@@ -39,24 +39,12 @@ int MasterBlocking(module *m, pool *p) {
   c = CheckpointLoad(m, p, 0);
 
   /* Initialize data buffers */
-  send_buffer->layout.rank = c->storage->layout.rank;
-  send_buffer->layout.dim[0] = 1;
-  send_buffer->layout.dim[1] = c->storage->layout.dim[1];
-  send_buffer->data = AllocateBuffer(send_buffer->layout.rank, send_buffer->layout.dim);
-  if (!send_buffer->data) Error(CORE_ERR_MEM);
-
   send_buffer->layout.size = sizeof(int) * (HEADER_SIZE);
   for (k = 0; k < m->task_banks; k++) {
     send_buffer->layout.size +=
       GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
   }
   mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
-
-  recv_buffer->layout.rank = c->storage->layout.rank;
-  recv_buffer->layout.dim[0] = 1;
-  recv_buffer->layout.dim[1] = c->storage->layout.dim[1];
-  recv_buffer->data = AllocateBuffer(recv_buffer->layout.rank, recv_buffer->layout.dim);
-  if (!recv_buffer->data) Error(CORE_ERR_MEM);
 
   recv_buffer->layout.size = send_buffer->layout.size;
   mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
@@ -108,6 +96,7 @@ int MasterBlocking(module *m, pool *p) {
     c_offset = c->counter*(int)recv_buffer->layout.size;
     memcpy(c->storage->memory + c_offset, recv_buffer->memory, recv_buffer->layout.size);
 
+    // @todo: do sth with board
     p->board->data[header[3]][header[4]] = (double)header[2];
 
     c->counter++;
@@ -137,7 +126,6 @@ int MasterBlocking(module *m, pool *p) {
 
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
-    send_buffer->data[0][0] = (double) TAG_TERMINATE;
     tag = TAG_TERMINATE;
     memcpy(send_buffer->memory, &tag, sizeof(int));
 
@@ -151,13 +139,11 @@ int MasterBlocking(module *m, pool *p) {
   TaskFinalize(m, p, t);
 
   if (send_buffer) {
-    if (send_buffer->data) FreeBuffer(send_buffer->data);
     if (send_buffer->memory) Free(send_buffer);
     free(send_buffer);
   }
 
   if (recv_buffer) {
-    if (recv_buffer->data) FreeBuffer(recv_buffer->data);
     if (recv_buffer->memory) Free(recv_buffer);
     free(recv_buffer);
   }

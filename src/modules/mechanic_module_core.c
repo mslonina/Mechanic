@@ -593,7 +593,16 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_BOARD,
   };
 
-
+  p->task->storage[2].layout = (schema) {
+    .path = "integer-datatype",
+    .rank = 2,
+    .dim[0] = 3,
+    .dim[1] = 3,
+    .datatype = H5T_NATIVE_INT,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_GROUP,
+  };
 
   return SUCCESS;
 }
@@ -635,9 +644,9 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
     }
   }
 
-  SetData(&(current->storage[0]), data);
-  SetData(&(current->storage[1]), buff);
-  SetData(&(current->storage[2]), floa);
+  WriteData(&(current->storage[0]), data);
+  WriteData(&(current->storage[1]), buff);
+  WriteData(&(current->storage[2]), floa);
 
   return SUCCESS;
 }
@@ -791,8 +800,10 @@ int TaskProcess(pool *p, task *t, setup *s) {
       idata[i][j] = t->tid+1;
     }
   }
-  SetData(&t->storage[0], data);
-  SetData(&t->storage[1], idata);
+
+  WriteData(&t->storage[0], data);
+  WriteData(&t->storage[1], idata);
+  WriteData(&t->storage[2], idata);
   return SUCCESS;
 }
 
