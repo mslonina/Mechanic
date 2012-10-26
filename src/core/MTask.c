@@ -14,9 +14,9 @@
  * @return The task object, NULL otherwise
  */
 task* TaskLoad(module *m, pool *p, int tid) {
-  task* t = NULL;
   int i = 0, j = 0;
   size_t len;
+  task* t = NULL;
 
   /* Allocate the task pointer */
   t = calloc(sizeof(task), sizeof(task));
@@ -71,13 +71,22 @@ task* TaskLoad(module *m, pool *p, int tid) {
   return t;
 }
 
+/**
+ * @brief Gets the ID of the available task
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param t The current task pointer
+ * @param board_buffer The task board buffer
+ *
+ * @return 0 on success or NO_MORE_TASKS when the task board is finished
+ */
 int GetNewTask(module *m, pool *p, task *t, int **board_buffer) {
   int mstat = SUCCESS;
-  int x,y;
+  int x, y;
   query *q;
   setup *s = &(m->layer.setup);
 
-  /* Get the ID of the available task */
   while(1) {
     if (t->tid >= p->pool_size) return NO_MORE_TASKS;
 

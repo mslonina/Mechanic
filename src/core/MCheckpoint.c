@@ -14,8 +14,8 @@
  * @return The checkpoint pointer, NULL otherwise
  */
 checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
+  int mstat = SUCCESS, i = 0;
   checkpoint *c = NULL;
-  int i = 0;
 
   /* Allocate checkpoint pointer */
   c = calloc(sizeof(checkpoint), sizeof(checkpoint));
@@ -40,6 +40,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
 
   c->storage->layout.size = sizeof(int) * (HEADER_SIZE);
   c->storage->layout.elements = HEADER_SIZE;
+
   for (i = 0; i < m->task_banks; i++) {
     c->storage->layout.dim[1] +=
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
@@ -47,10 +48,10 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim)*p->task->storage[i].layout.datatype_size;
     c->storage->layout.elements +=
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
-
   }
 
-  Allocate(c->storage, c->storage->layout.size * c->size, sizeof(char));
+  mstat = Allocate(c->storage, c->storage->layout.size * c->size, sizeof(char));
+  CheckStatus(mstat);
 
   CheckpointReset(m, p, c, 0);
 
@@ -92,13 +93,12 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
   int i = 0, j = 0, k = 0, l = 0;
-  hid_t h5location, group, tasks, datapath;
-  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char path[LRC_CONFIG_LEN];
-  task *t;
-  size_t size, position;
   int header[HEADER_SIZE];
   int c_offset = 0, d_offset = 0;
+  task *t;
+  hid_t h5location, group, tasks, datapath;
+  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
 
   Backup(m, &m->layer.setup);
 
@@ -205,12 +205,12 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           c_offset = (int)c->storage->layout.size*i + (int)sizeof(int)*(HEADER_SIZE);
           memcpy(t->storage[j].memory, c->storage->memory+c_offset+d_offset, t->storage[j].layout.size);
 
-          // Commit data to the pool 
-/*          p->tasks[t->tid]->tid = t->tid;
+          // Commit data to the pool
+          p->tasks[t->tid]->tid = t->tid;
           p->tasks[t->tid]->status = t->status;
           p->tasks[t->tid]->location[0] = t->location[0];
           p->tasks[t->tid]->location[1] = t->location[1];
-
+/*
           for (k = 0; k < t->storage[j].layout.dim[0]; k++) {
             for (l = 0; l < t->storage[j].layout.dim[1]; l++) {
               p->tasks[t->tid]->storage[j].data[k][l] =
@@ -218,7 +218,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             }
           }
 */
-          // Commit data to master datafile 
+          // Commit data to master datafile
           if (p->task->storage[j].layout.use_hdf) {
             sprintf(path, TASK_PATH, t->tid);
             datapath = H5Gopen(tasks, path, H5P_DEFAULT);
@@ -321,3 +321,4 @@ int Backup(module *m, setup *s) {
 
   return mstat;
 }
+

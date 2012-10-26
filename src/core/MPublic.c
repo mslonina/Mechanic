@@ -34,11 +34,11 @@ void Message(int type, char *message, ...) {
  * @todo Do it better (i.e. for other datatypes)
  */
 void PrintDataset(int type, hid_t dataset) {
-  hid_t dataspace, datatype;
-  hsize_t dimsf[2], maxdims[2];
   int dims[MAX_RANK];
   int i, j;
   double **buffer;
+  hid_t dataspace, datatype;
+  hsize_t dimsf[2], maxdims[2];
 
   dataspace = H5Dget_space(dataset);
   datatype = H5Dget_type(dataset);
@@ -139,7 +139,7 @@ int** AllocateInt2D(int rank, int *dims) {
 }
 
 /**
- * @brief Free 2D memory buffer
+ * @brief Free 2D double memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  *
@@ -150,6 +150,13 @@ void FreeBuffer(double **array) {
   if (array) free(array);
 }
 
+/**
+ * @brief Free 2D int memory buffer
+ *
+ * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
+ *
+ * @param array The array pointer to free
+ */
 void FreeIntBuffer(int **array) {
   if (array[0]) free(array[0]);
   if (array) free(array);
@@ -166,12 +173,15 @@ void FreeIntBuffer(int **array) {
  */
 int Allocate(storage *s, size_t size, size_t datatype) {
 
- // buffer = NULL;
+  if (s->memory) {
+    Message(MESSAGE_ERR, "The buffer is already allocated\n");
+    return CORE_ERR_MEM;
+  }
 
-  //if (size > 0) {
-  //printf("calloc size = %d, type = %d\n", (int)size,  (int)datatype);
+  if (size > 0) {
     s->memory = calloc(size, datatype);
-  //}
+  }
+
   if (!s->memory) return CORE_ERR_MEM;
   return SUCCESS;
 }
@@ -216,3 +226,4 @@ int ReadData(storage *s, void *data) {
   memcpy(data, s->memory, s->layout.size);
   return SUCCESS;
 }
+

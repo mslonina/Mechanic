@@ -18,10 +18,10 @@
  * @return The function handler
  */
 query* LoadSym(module *m, char* function, int flag) {
-  query* q = NULL;
   char *err;
   void *handler;
   void *fallback;
+  query* q = NULL;
 
   /* Reset dlerror() */
   dlerror();
@@ -55,3 +55,4 @@ query* LoadSym(module *m, char* function, int flag) {
 
   return q;
 }
+

@@ -121,7 +121,7 @@ int CheckLayout(int banks, storage *s) {
 
     if (s[i].layout.use_hdf) {
       s[i].layout.dataspace_type = H5S_SIMPLE;
-      s[i].layout.offset[0] = 0; // Offsets calculated automatically
+      s[i].layout.offset[0] = 0; // Offsets are calculated automatically
       s[i].layout.offset[1] = 0;
 
       /* Check for mistakes */
@@ -163,6 +163,7 @@ int CommitMemoryLayout(int banks, storage *s) {
 
   for (i = 0; i < banks; i++) {
     mstat = Allocate(&s[i], (size_t)s[i].layout.elements, s[i].layout.datatype_size);
+    CheckStatus(mstat);
   }
 
   return mstat;
@@ -194,8 +195,8 @@ void FreeMemoryLayout(int banks, storage *s) {
  */
 int CommitStorageLayout(module *m, pool *p) {
   int mstat = SUCCESS, i = 0, j = 0;
-  hid_t h5location, h5group, h5pools, h5tasks, h5task;
   char path[LRC_CONFIG_LEN];
+  hid_t h5location, h5group, h5pools, h5tasks, h5task;
 
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
   H5CheckStatus(h5location);
@@ -395,7 +396,6 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
   return mstat;
 }
-
 
 /**
  * @brief Read the dataset data

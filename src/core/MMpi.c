@@ -47,7 +47,7 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
 }
 
 /**
- * @brief Pack the task data into 1D contigous array
+ * @brief Pack the task data into memory buffer 
  *
  * @param m The module pointer
  * @param buffer The output pack buffer
@@ -58,11 +58,9 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
  * @return 0 on success, error code otherwise
  */
 int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
-  int mstat = SUCCESS;
-  size_t position = 0;
-  int i = 0;
-  size_t size = 0;
-  int header[HEADER_SIZE];
+  int mstat = SUCCESS, i = 0;
+  int header[HEADER_SIZE] = HEADER_INIT;
+  size_t position = 0 ,size = 0;
 
   header[0] = tag;
   header[1] = t->tid;
@@ -90,7 +88,7 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
 }
 
 /**
- * @brief Unpack the 1D-contigous array into task structure
+ * @brief Unpack the memory buffer into task structure
  *
  * @param m The module pointer
  * @param buffer The input pack buffer
@@ -101,11 +99,9 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
  * @return 0 on success, error code otherwise
  */
 int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
-  int mstat = 0;
-  size_t position = 0;
-  int i = 0;
-  size_t size = 0;
-  int header[HEADER_SIZE];
+  int mstat = SUCCESS, i = 0;
+  int header[HEADER_SIZE] = HEADER_INIT;
+  size_t position = 0, size = 0;
 
   position = sizeof(int)*(HEADER_SIZE);
   memcpy(header, buffer, position);

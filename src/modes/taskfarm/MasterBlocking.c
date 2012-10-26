@@ -14,17 +14,15 @@
  */
 int MasterBlocking(module *m, pool *p) {
   int mstat = SUCCESS;
-
-  storage *send_buffer, *recv_buffer;
   int i = 0, k = 0, cid = 0, terminated_nodes = 0;
   int tag;
-  int header[HEADER_SIZE];
+  int header[HEADER_SIZE] = HEADER_INIT;
   int c_offset = 0;
   int **board_buffer;
-
-  MPI_Status mpi_status;
   int completed = 0, send_node;
 
+  MPI_Status mpi_status;
+  storage *send_buffer, *recv_buffer;
   task *t = NULL;
   checkpoint *c = NULL;
 

@@ -174,7 +174,6 @@ int main(int argc, char** argv) {
     goto finalize; // Special help message handling
   }
 
-
   /**
    * (H) Backup the master data file
    */
@@ -272,3 +271,4 @@ finalize:
 
   exit(EXIT_SUCCESS);
 }
+

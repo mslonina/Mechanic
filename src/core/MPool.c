@@ -13,8 +13,8 @@
  * @return The pool pointer, NULL otherwise
  */
 pool* PoolLoad(module *m, int pid) {
-  pool *p = NULL;
   int i = 0;
+  pool *p = NULL;
 
   /* Allocate pool pointer */
   p = calloc(sizeof(pool), sizeof(pool));
@@ -67,13 +67,13 @@ pool* PoolLoad(module *m, int pid) {
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = SUCCESS, i = 0, task_groups = 0;
+  int attr_data[1];
+  char path[LRC_CONFIG_LEN];
   query *q;
   setup *s = &(m->layer.setup);
   hid_t h5location, group;
   hid_t hstat;
   hsize_t adims;
-  int attr_data[1];
-  char path[LRC_CONFIG_LEN];
 
   /* Number of tasks to do */
   if (m->node == MASTER) {
@@ -136,6 +136,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   }
 
   /* Broadcast pool data */
+  // @todo: check if's conditions
   for (i = 0; i < m->pool_banks; i++) {
     if (p->storage[i].layout.sync) {
       if ((int)p->storage[i].layout.elements > 0) {
@@ -160,13 +161,13 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 int PoolProcess(module *m, pool **all, pool *p) {
   int mstat = SUCCESS;
   int pool_create = 0, i = 0, j = 0, task_groups = 0;
+  char path[LRC_CONFIG_LEN];
+  int attr_data[1];
   setup *s = &(m->layer.setup);
   query *q;
   hid_t h5location, h5pool, h5tasks, h5task, h5dataset;
   hid_t hstat;
   hsize_t adims;
-  char path[LRC_CONFIG_LEN];
-  int attr_data[1];
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolProcess", LOAD_DEFAULT);

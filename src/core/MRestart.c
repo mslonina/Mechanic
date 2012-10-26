@@ -16,8 +16,8 @@
 int Restart(module *m, pool **pools, int *pool_counter) {
   int mstat = SUCCESS;
   int i, j, k, size;
-  hid_t h5location, group, tasks, task_id, attr_id, hstat;
   char path[LRC_CONFIG_LEN], task_path[LRC_CONFIG_LEN];
+  hid_t h5location, group, tasks, task_id, attr_id, hstat;
 
   if (m->node == MASTER) {
     h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);

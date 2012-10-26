@@ -183,7 +183,7 @@ int Copy(char* in, char* out) {
     return CORE_ERR_HDF;
   }
 
-  return 0;
+  return SUCCESS;
 }
 
 /**
@@ -199,5 +199,6 @@ int Copy(char* in, char* out) {
  * @return 0 on success, error code otherwise
  */
 int Validate(char *filename) {
-  return 0;
+  return SUCCESS;
 }
+
