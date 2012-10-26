@@ -71,6 +71,36 @@ task* TaskLoad(module *m, pool *p, int tid) {
   return t;
 }
 
+int GetNewTask(module *m, pool *p, task *t, int **board_buffer) {
+  int mstat = SUCCESS;
+  int x,y;
+  query *q;
+  setup *s = &(m->layer.setup);
+
+  /* Get the ID of the available task */
+  while(1) {
+    if (t->tid >= p->pool_size) return NO_MORE_TASKS;
+
+    q = LoadSym(m, "TaskMapping", LOAD_DEFAULT);
+    if (q) mstat = q(p, t, s);
+    CheckStatus(mstat);
+
+    x = t->location[0];
+    y = t->location[1];
+
+    if (m->mode == RESTART_MODE) {
+      if (board_buffer[x][y] == TASK_AVAILABLE
+          || board_buffer[x][y] == TASK_IN_USE) break;
+    }
+
+    if (board_buffer[x][y] == TASK_AVAILABLE) break;
+    t->tid++;
+
+  }
+
+  return mstat;
+}
+
 /**
  * @brief Prepare the task
  *
@@ -82,37 +112,12 @@ task* TaskLoad(module *m, pool *p, int tid) {
  */
 int TaskPrepare(module *m, pool *p, task *t) {
   int mstat = SUCCESS;
-  int x, y;
   query *q;
   setup *s = &(m->layer.setup);
 
-  if (m->node == MASTER) {
-
-    /* Get the ID of the available task */
-    while(1) {
-      if (t->tid >= p->pool_size) return NO_MORE_TASKS;
-
-      q = LoadSym(m, "TaskMapping", LOAD_DEFAULT);
-      if (q) mstat = q(p, t, s);
-      CheckStatus(mstat);
-
-      x = t->location[0];
-      y = t->location[1];
-
-      if (m->mode == RESTART_MODE) {
-        if (p->board->data[x][y] == (double) TASK_AVAILABLE
-            || p->board->data[x][y] == (double) TASK_IN_USE) break;
-      }
-
-      if (p->board->data[x][y] == (double) TASK_AVAILABLE) break;
-      t->tid++;
-
-    }
-  } else {
-    q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
-    if (q) mstat = q(p, t, s);
-    CheckStatus(mstat);
-  }
+  q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
+  if (q) mstat = q(p, t, s);
+  CheckStatus(mstat);
 
   return mstat;
 }

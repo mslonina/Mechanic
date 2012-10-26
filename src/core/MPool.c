@@ -34,7 +34,6 @@ pool* PoolLoad(module *m, int pid) {
   if (!p->board) Error(CORE_ERR_MEM);
 
   p->board->layout = (schema) STORAGE_END;
-  p->board->data = NULL;
   p->board->memory = NULL;
 
   /* Allocate task pointer */
@@ -269,17 +268,12 @@ int PoolProcess(module *m, pool **all, pool *p) {
  */
 int PoolReset(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i,j;
   hid_t h5location, group;
   char path[LRC_CONFIG_LEN];
 
   /* Reset the board memory banks */
   if (m->node == MASTER) {
-    for (i = 0; i < p->board->layout.dim[0]; i++) {
-      for (j = 0; j < p->board->layout.dim[1]; j++) {
-        p->board->data[i][j] = TASK_AVAILABLE;
-      }
-    }
+    memset(p->board->memory, TASK_AVAILABLE, sizeof(int));
 
     /* Reset the board storage banks */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -331,10 +325,7 @@ void PoolFinalize(module *m, pool *p) {
   }
 
   if (p->board) {
-    if (p->board->data) {
-      FreeBuffer(p->board->data);
-    }
-
+    FreeMemoryLayout(1, p->board);
     free(p->board);
   }
 

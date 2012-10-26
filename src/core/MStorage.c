@@ -78,20 +78,14 @@ int Storage(module *m, pool *p) {
       p->task->storage[i].layout.offset[1] = 0;
     }
 
+    /* Commit Board */
+    mstat = CommitMemoryLayout(1, p->board);
+
     /* Commit the storage layout */
     if (m->mode != RESTART_MODE) {
       CommitStorageLayout(m, p);
     }
 
-    /* Commit Board */
-    p->board->data = AllocateBuffer(p->board->layout.rank, p->board->layout.dim);
-    if (m->mode != RESTART_MODE) {
-      for (i = 0; i < p->board->layout.dim[0]; i++) {
-        for (j = 0; j < p->board->layout.dim[1]; j++) {
-          p->board->data[i][j] = TASK_AVAILABLE;
-        }
-      }
-    }
   }
 
   return mstat;
@@ -168,9 +162,6 @@ int CommitMemoryLayout(int banks, storage *s) {
   int mstat = SUCCESS, i = 0;
 
   for (i = 0; i < banks; i++) {
-    if (s[i].layout.datatype == H5T_NATIVE_DOUBLE) {
-      s[i].data = AllocateBuffer(s[i].layout.rank, s[i].layout.dim);
-    }
     mstat = Allocate(&s[i], (size_t)s[i].layout.elements, s[i].layout.datatype_size);
   }
 
@@ -187,9 +178,6 @@ void FreeMemoryLayout(int banks, storage *s) {
   int i = 0;
 
   for (i = 0; i < banks; i++) {
-    if (s[i].data && s[i].layout.datatype == H5T_NATIVE_DOUBLE) {
-      FreeBuffer(s[i].data);
-    }
     if (s[i].memory) {
       Free(&s[i]);
     }

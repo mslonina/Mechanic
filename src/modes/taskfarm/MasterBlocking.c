@@ -20,12 +20,19 @@ int MasterBlocking(module *m, pool *p) {
   int tag;
   int header[HEADER_SIZE];
   int c_offset = 0;
+  int **board_buffer;
 
   MPI_Status mpi_status;
   int completed = 0, send_node;
 
   task *t = NULL;
   checkpoint *c = NULL;
+
+  /* Initialize the temporary task board buffer */
+  board_buffer = AllocateInt2D(p->board->layout.rank, p->board->layout.dim);
+  if (m->mode != RESTART_MODE) {
+    memset(board_buffer[0], TASK_AVAILABLE, p->pool_size*sizeof(int));
+  }
 
   /* Data buffers */
   send_buffer = calloc(sizeof(storage), sizeof(storage));
@@ -51,12 +58,13 @@ int MasterBlocking(module *m, pool *p) {
 
   /* Send initial tasks to all workers */
   for (i = 1; i < m->mpi_size; i++) {
-    mstat = TaskPrepare(m, p, t);
+    mstat = GetNewTask(m, p, t, board_buffer);
     CheckStatus(mstat);
 
     if (mstat != NO_MORE_TASKS) {
       mstat = Pack(m, send_buffer->memory, p, t, TAG_DATA);
       CheckStatus(mstat);
+      board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
     } else {
       tag = TAG_TERMINATE;
       memcpy(&send_buffer->memory, &tag, sizeof(int));
@@ -72,6 +80,8 @@ int MasterBlocking(module *m, pool *p) {
 
     /* Flush checkpoint buffer and write data, reset counter */
     if (c->counter > (c->size-1)) {
+
+      WriteData(p->board, board_buffer[0]);
       mstat = CheckpointPrepare(m, p, c);
       CheckStatus(mstat);
 
@@ -91,24 +101,25 @@ int MasterBlocking(module *m, pool *p) {
       send_node = mpi_status.MPI_SOURCE;
 
     /* Get the data header */
-    memcpy(header, recv_buffer->memory, HEADER_SIZE*sizeof(int));
+    memcpy(header, recv_buffer->memory, sizeof(int) * (HEADER_SIZE));
 
     c_offset = c->counter*(int)recv_buffer->layout.size;
     memcpy(c->storage->memory + c_offset, recv_buffer->memory, recv_buffer->layout.size);
 
-    // @todo: do sth with board
-    p->board->data[header[3]][header[4]] = (double)header[2];
+    board_buffer[header[3]][header[4]] = header[2];
 
     c->counter++;
     completed++;
 
-    mstat = TaskPrepare(m, p, t);
+    mstat = GetNewTask(m, p, t, board_buffer);
     CheckStatus(mstat);
 
     if (mstat != NO_MORE_TASKS) {
 
       mstat = Pack(m, send_buffer->memory, p, t, TAG_DATA);
       CheckStatus(mstat);
+
+      board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
 
       MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
           send_node, TAG_DATA, MPI_COMM_WORLD);
@@ -118,6 +129,7 @@ int MasterBlocking(module *m, pool *p) {
     if (completed == p->pool_size) break;
   }
 
+  WriteData(p->board, board_buffer[0]);
   mstat = CheckpointPrepare(m, p, c);
   CheckStatus(mstat);
 
@@ -146,6 +158,10 @@ int MasterBlocking(module *m, pool *p) {
   if (recv_buffer) {
     if (recv_buffer->memory) Free(recv_buffer);
     free(recv_buffer);
+  }
+
+  if (board_buffer) {
+    FreeIntBuffer(board_buffer);
   }
 
   return mstat;

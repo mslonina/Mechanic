@@ -47,7 +47,7 @@ void PrintDataset(int type, hid_t dataset) {
   dims[0] = (int)dimsf[0];
   dims[1] = (int)dimsf[1];
 
-  buffer = AllocateBuffer(2, dims);
+  buffer = AllocateDouble2D(2, dims);
   H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer[0][0]);
 
   // @todo do it better
@@ -81,8 +81,9 @@ int GetSize(int rank, int *dims){
 
   return size;
 }
+
 /**
- * @brief Allocate 2D memory buffer (double)
+ * @brief Allocate 2D double-size memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
  * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
@@ -92,7 +93,7 @@ int GetSize(int rank, int *dims){
  *
  * @return Allocated array, NULL otherwise
  */
-double** AllocateBuffer(int rank, int *dims) {
+double** AllocateDouble2D(int rank, int *dims) {
   double** array = NULL;
   int i = 0, size = 0;
 
@@ -110,6 +111,34 @@ double** AllocateBuffer(int rank, int *dims) {
 }
 
 /**
+ * @brief Allocate 2D integer-size memory buffer
+ *
+ * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
+ * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
+ *
+ * @param rank The rank of the array to allocate
+ * @param dims The dimensions of the array to allocate
+ *
+ * @return Allocated array, NULL otherwise
+ */
+int** AllocateInt2D(int rank, int *dims) {
+  int** array = NULL;
+  int i = 0, size = 0;
+
+  size = GetSize(rank, dims);
+
+  if (size > 0) {
+    array = calloc(dims[0]*sizeof(int*), sizeof(int*));
+    if (array) {
+      array[0] = calloc(size*sizeof(int), sizeof(int));
+      for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
+    }
+  }
+
+  return array;
+}
+
+/**
  * @brief Free 2D memory buffer
  *
  * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
@@ -117,6 +146,11 @@ double** AllocateBuffer(int rank, int *dims) {
  * @param array The array pointer to free
  */
 void FreeBuffer(double **array) {
+  if (array[0]) free(array[0]);
+  if (array) free(array);
+}
+
+void FreeIntBuffer(int **array) {
   if (array[0]) free(array[0]);
   if (array) free(array);
 }

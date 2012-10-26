@@ -16,7 +16,7 @@ int Taskfarm(module *m) {
   int pid = 0;
   pool **p = NULL;
   int pool_create;
-  
+
   double cpu_time;
   clock_t time_in, time_out;
 

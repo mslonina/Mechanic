@@ -25,7 +25,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   if (!c->storage) Error(CORE_ERR_MEM);
 
   c->storage->layout = (schema) STORAGE_END;
-  c->storage->data = NULL;
+  c->storage->memory = NULL;
 
   c->cid = cid;
   c->counter = 0;

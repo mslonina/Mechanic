@@ -530,7 +530,7 @@ int Storage(pool *p, setup *s) {
     .rank = 2, // pool rank
     .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
     .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
-    .datatype = H5T_NATIVE_DOUBLE,
+    .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,

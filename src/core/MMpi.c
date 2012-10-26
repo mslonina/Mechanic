@@ -84,10 +84,6 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
       position = position + size;
     }
 
-    /* Mark the task on board */
-    if (m->node == MASTER) {
-      p->board->data[t->location[0]][t->location[1]] = TASK_IN_USE;
-    }
   }
 
   return mstat;
@@ -131,10 +127,6 @@ int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
       position = position + size;
     }
 
-    /* Mark the task on board */
-    if (m->node == MASTER) {
-      p->board->data[t->location[0]][t->location[1]] = t->status;
-    }
   }
 
   return mstat;

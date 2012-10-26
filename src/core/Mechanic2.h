@@ -155,7 +155,6 @@ typedef struct {
 typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   char *memory; /**< The memory block */
-  double **data; /**< The data pointer */
   attr *attr; /**< The dataset attributes */
 } storage;
 
@@ -215,8 +214,10 @@ typedef enum {
 
 void Message(int type, char* message, ...);
 void PrintDataset(int type, hid_t dataset);
-double** AllocateBuffer(int rank, int *dims);
+double** AllocateDouble2D(int rank, int *dims);
+int** AllocateInt2D(int rank, int *dims);
 void FreeBuffer(double **array);
+void FreeIntBuffer(int **array);
 int GetSize(int rank, int *dims);
 
 int Allocate(storage *s, size_t size, size_t datatype); /**< Memory allocator */
