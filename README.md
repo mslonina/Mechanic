@@ -75,6 +75,7 @@ Key features
 - **MPI non-blocking communication**
 - **HDF5 data storage layout**
 - **All HDF5/MPI basic datatypes are supported**
+- **Multidimensional datasets support (up to rank 4)**
 - **Automatic backup of data files and restart mode**
 - **Configuration command line.** All configuration options defined through API are
   automatically available in the command line
@@ -82,11 +83,11 @@ Key features
   the user needs (i.e. for processing with Gnuplot or Matplotlib)
 - **Linux and MAC OS X** supported
 
-Current limitations
--------------------
+Notes
+-----
 
 - The datasets are H5S_SIMPLE-type
-- Only rank 2 datasets are supported right now
+- The task board is rank 2
 
 Example usage
 -------------

@@ -1,6 +1,6 @@
 /**
  * @file
- * Core Mechanic module, implementation of all API functions
+ * The core Mechanic module, implementation of all API functions
  */
 
 /**

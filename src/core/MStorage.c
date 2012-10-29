@@ -115,7 +115,11 @@ int CheckLayout(int banks, storage *s) {
       Error(CORE_ERR_STORAGE);
     }
 
-    s[i].layout.rank = MAX_RANK;
+    if (s[i].layout.rank > MAX_RANK) {
+      Message(MESSAGE_ERR, "Rank must be <= %d\n", MAX_RANK);
+      Error(CORE_ERR_STORAGE);
+    }
+
     if ((int)s[i].layout.datatype <= 0) {
       Message(MESSAGE_ERR, "Datatype is missing\n");
       Error(CORE_ERR_STORAGE);
@@ -293,15 +297,21 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
     if (s->layout.storage_type == STORAGE_GROUP) {
       dims[0] = s->layout.dim[0];
       dims[1] = s->layout.dim[1];
+      dims[2] = s->layout.dim[2];
+      dims[3] = s->layout.dim[3];
     }
     if (s->layout.storage_type == STORAGE_PM3D ||
         s->layout.storage_type == STORAGE_LIST) {
       dims[0] = s->layout.dim[0] * p->pool_size;
       dims[1] = s->layout.dim[1];
+      dims[2] = s->layout.dim[2];
+      dims[3] = s->layout.dim[3];
     }
     if (s->layout.storage_type == STORAGE_BOARD) {
       dims[0] = s->layout.dim[0] * p->board->layout.dim[0];
       dims[1] = s->layout.dim[1] * p->board->layout.dim[1];
+      dims[2] = s->layout.dim[2];
+      dims[3] = s->layout.dim[3];
     }
     h5status = H5Sset_extent_simple(h5dataspace, s->layout.rank, dims, NULL);
     H5CheckStatus(h5status);
@@ -379,8 +389,12 @@ int CommitData(hid_t h5location, int banks, storage *s) {
       } else {
         dims[0] = s[i].layout.dim[0];
         dims[1] = s[i].layout.dim[1];
+        dims[2] = s[i].layout.dim[2];
+        dims[3] = s[i].layout.dim[3];
         offsets[0] = s[i].layout.offset[0];
         offsets[1] = s[i].layout.offset[1];
+        offsets[2] = s[i].layout.offset[2];
+        offsets[3] = s[i].layout.offset[3];
 
         memspace = H5Screate_simple(s[i].layout.rank, dims, NULL);
         H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, dims, NULL);
