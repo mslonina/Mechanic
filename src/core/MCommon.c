@@ -1,6 +1,6 @@
 /**
  * @file
- * Common functions
+ * Common functions and defines
  */
 #include "MCommon.h"
 
@@ -81,46 +81,6 @@ void CheckStatus(int status) {
  */
 void H5CheckStatus(hid_t status) {
   if (status < 0) Error(CORE_ERR_HDF);
-}
-
-
-
-/**
- * @brief Copies array to vector
- *
- * @param vec The output vector
- * @param array The input array
- * @param rank The rank of the array
- * @param dims The dimensions of the array
- */
-void Array2Vec(double *vec, double **array, int rank, int *dims) {
-  int i = 0, j = 0, k = 0;
-
-  for (i = 0; i < dims[0]; i++) {
-    k = i * dims[1];
-    for (j = 0; j < dims[1]; j++) {
-      vec[j+k] = array[i][j];
-    }
-  }
-}
-
-/**
- * @brief Copies vector to array
- *
- * @param vec The input vector
- * @param array The output array
- * @param rank The rank of the array
- * @param dims The dimensions of the array
- */
-void Vec2Array(double *vec, double **array, int rank, int *dims) {
-  int i = 0, j = 0, k = 0;
-
-  for (i = 0; i < dims[0]; i++) {
-    k = i * dims[1];
-    for (j = 0; j < dims[1]; j++) {
-      array[i][j] = vec[j+k];
-    }
-  }
 }
 
 /**

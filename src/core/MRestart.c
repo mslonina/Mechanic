@@ -19,8 +19,6 @@ int Restart(module *m, pool **pools, int *pool_counter) {
   char path[LRC_CONFIG_LEN], task_path[LRC_CONFIG_LEN];
   hid_t h5location, group, tasks, task_id, attr_id, hstat;
 
-  int ibuff[5][5], x, y;
-
   if (m->node == MASTER) {
     h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     H5CheckStatus(h5location);
@@ -57,14 +55,6 @@ int Restart(module *m, pool **pools, int *pool_counter) {
 
       /* Read pool board */
       ReadDataset(group, 1, pools[i]->board, 1);
-      ReadData(pools[i]->board, ibuff);
-
-      for (x = 0; x < 5; x++) {
-        for (y = 0; y < 5; y++) {
-          printf("%02d ", ibuff[x][y]);
-        }
-        printf("\n");
-      }
 
       /* Read pool storage banks */
       for (j = 0; j < m->pool_banks; j++) {

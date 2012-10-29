@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The Bootstrap stage
+ */
 #ifndef MECHANIC_BOOTSTRAP_H
 #define MECHANIC_BOOTSTRAP_H
 

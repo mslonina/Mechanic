@@ -8,43 +8,6 @@
  * @file
  * The Main function
  */
-
-/**
- * @mainpage
- *
- * @section Requirements Requirements
- *
- * - C compiler (GCC 4.6, Intel 12)
- * - MPI (we favor OpenMPI 1.5)
- * - CMake 2.8
- * - Popt 1.14
- * - LibReadConfig 0.12.4
- *
- * @section gentoo Gentoo Prefix
- *
- *     emerge mechanic
- *
- * @section manual Manual Installation
- *
- *     mkdir build && cd build
- *     CC=mpicc cmake .. -DCMAKE_INSTALL_PREFIX:PATH=/install/prefix/path
- *     make
- *     make install
- *
- * @section features Key features
- *
- * - The Pool-oriented task management, you may define as many task pools as needed, on
- *   the fly (PoolProcess())
- * - Custom setup, both for core and the module, only one config file is used (
- *   Setup()), all setup stored in the master datafile
- * - Custom storage, both for core and the module (Storage())
- * - No MPI and HDF5 knowledge required (i.e. PoolPrepare() does MPI_Broadcast under
- *   the hood)
- * - Non-blocking communication between nodes
- *
- * @section publications Publications
- *
- */
 #include "MMain.h"
 
 /**

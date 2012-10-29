@@ -37,7 +37,8 @@ task* TaskLoad(module *m, pool *p, int tid) {
   /* Initialize the task */
   for (i = 0; i < m->task_banks; i++) {
     t->storage[i].layout.use_hdf = p->task->storage[i].layout.use_hdf;
-    /* Setup path, we need this only when use_hdf = 1 */
+
+    /* The setup path, we need this only when use_hdf = 1 */
     if (t->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.path != NULL) {
         len = strlen(p->task->storage[i].layout.path);

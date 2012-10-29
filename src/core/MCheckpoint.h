@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The checkpoint subsystem header
+ */
 #ifndef MECHANIC_CHECKPOINT_H
 #define MECHANIC_CHECKPOINT_H
 

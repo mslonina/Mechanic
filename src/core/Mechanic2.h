@@ -143,10 +143,13 @@ typedef struct {
   int elements; /**< Number of data elements in the memory block */
 } schema;
 
+/**
+ * @struct attr
+ * Defines the attribute memory/storage schema
+ */
 typedef struct {
-  schema layout;
-  double **data;
-  char* memory;
+  schema layout; /**< The memory/storage schema, @see schema */
+  char* memory; /**< The memory block */
 } attr;
 
 /**

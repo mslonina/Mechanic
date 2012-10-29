@@ -382,8 +382,6 @@ int CommitData(hid_t h5location, int banks, storage *s) {
         offsets[0] = s[i].layout.offset[0];
         offsets[1] = s[i].layout.offset[1];
 
-        //memcpy(dims, s[i].layout.dim, MAX_RANK * sizeof(int));
-        //memcpy(offsets, s[i].layout.offset, MAX_RANK * sizeof(int));
         memspace = H5Screate_simple(s[i].layout.rank, dims, NULL);
         H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, dims, NULL);
         hdf_status = H5Dwrite(dataset, s[i].layout.datatype,

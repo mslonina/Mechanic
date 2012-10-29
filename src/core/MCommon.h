@@ -1,3 +1,7 @@
+/**
+ * @file
+ * Common functions and defines
+ */
 #ifndef MECHANIC_COMMON_H
 #define MECHANIC_COMMON_H
 
@@ -18,9 +22,6 @@ void Error(int status);
 void Abort(int status);
 void CheckStatus(int status);
 void H5CheckStatus(hid_t status);
-
-void Array2Vec(double *vec, double **array, int rank, int *dims);
-void Vec2Array(double *vec, double **array, int rank, int *dims);
 
 int Copy(char *in, char *out);
 int Validate(char *filename);

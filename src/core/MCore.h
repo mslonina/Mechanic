@@ -1,5 +1,6 @@
 /**
  * @file
+ * The core-only functions
  */
 #ifndef MECHANIC_CORE_H
 #define MECHANIC_CORE_H

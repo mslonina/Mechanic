@@ -22,8 +22,6 @@
 /**
  * @file
  * The Bootstrap stage
- *
- * @todo Expand docs and explain all Boostrap stages
  */
 #include "MBootstrap.h"
 

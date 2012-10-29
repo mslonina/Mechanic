@@ -1,6 +1,6 @@
 /**
  * @file
- * The checkpoint interface
+ * The checkpoint interface 
  */
 #include "MCheckpoint.h"
 

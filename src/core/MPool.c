@@ -119,7 +119,6 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   }
 
   /* Broadcast pool data */
-  // @todo: check if's conditions
   for (i = 0; i < m->pool_banks; i++) {
     if (p->storage[i].layout.sync) {
       if ((int)p->storage[i].layout.elements > 0) {
