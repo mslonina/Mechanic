@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i, j, dims[MAX_RANK];
+  int i, j, dims[MAX_RANK], task_groups;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -52,30 +52,37 @@ int Storage(module *m, pool *p) {
 
   /* Master only memory/storage operations */
   if (m->node == MASTER) {
+
     /* Commit memory for task banks (whole datasets) */
     for (i = 0; i < m->task_banks; i++) {
-      //memcpy(dims, p->task->storage[i].layout.dim, MAX_RANK*sizeof(int));
-      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
-        dims[0] = p->task->storage[i].layout.dim[0];
-        dims[1] = p->task->storage[i].layout.dim[1];
-//        p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
-        // @todo: mstat = Allocate(p->task->storage[i]);
-      }
+      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) task_groups = 1;
+
       if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[i].layout.storage_type == STORAGE_LIST) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
         dims[1] = p->task->storage[i].layout.dim[1];
-  //      p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
-        // @todo: mstat = Allocate(p->task->storage[i]);
+        mstat = Allocate(&(p->task->storage[i]), (size_t)(dims[0]*dims[1]),
+          p->task->storage[i].layout.datatype_size);
       }
+
       if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
         dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
-    //    p->task->storage[i].data = AllocateBuffer(p->task->storage[i].layout.rank, dims);
-        // @todo: mstat = Allocate(p->task->storage[i]);
+        mstat = Allocate(&(p->task->storage[i]), (size_t)(dims[0]*dims[1]),
+           p->task->storage[i].layout.datatype_size);
       }
+
       p->task->storage[i].layout.offset[0] = 0;
       p->task->storage[i].layout.offset[1] = 0;
+
+    }
+
+    /* @todo FIX IT! THIS PART IS TRAGIC FOR MEMORY ALLOCATION IN HUGE RUNS */
+    if (task_groups) {
+      p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
+      for (i = 0; i < p->pool_size; i++) {
+        p->tasks[i] = TaskLoad(m, p, i);
+      }
     }
 
     /* Commit Board */
@@ -418,7 +425,7 @@ int ReadDataset(hid_t h5location, int banks, storage *s) {
 
       Message(MESSAGE_DEBUG, "Read Data storage path: %s\n", s[i].layout.path);
       dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
-      hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
+      hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
       H5CheckStatus(hstat);
       H5Dclose(dataset);
 

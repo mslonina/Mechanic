@@ -95,7 +95,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int i = 0, j = 0, k = 0, l = 0;
   char path[LRC_CONFIG_LEN];
   int header[HEADER_SIZE];
-  int c_offset = 0, d_offset = 0;
+  int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0;
+  size_t elements;
   task *t;
   hid_t h5location, group, tasks, datapath;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
@@ -153,14 +154,23 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             offsets[0] = (t->location[0] + dims[0]*t->location[1])
               * t->storage[j].layout.dim[0];
             offsets[1] = 0;
+            
+            elements = t->storage[j].layout.dim[1] * t->storage[j].layout.datatype_size;
+            l_offset = elements;
           }
           if (t->storage[j].layout.storage_type == STORAGE_LIST) {
             offsets[0] = t->tid * t->storage[j].layout.dim[0];
             offsets[1] = 0;
+            
+            elements = t->storage[j].layout.dim[1] * t->storage[j].layout.datatype_size;
+            l_offset = elements;
           }
           if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
             offsets[0] = t->location[0] * t->storage[j].layout.dim[0];
             offsets[1] = t->location[1] * t->storage[j].layout.dim[1];
+            
+            elements = t->storage[j].layout.dim[1] * t->storage[j].layout.datatype_size;
+            l_offset = p->board->layout.dim[1] * elements;
           }
 
           t->storage[j].layout.offset[0] = offsets[0];
@@ -170,12 +180,14 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           memcpy(t->storage[j].memory, c->storage->memory+c_offset+d_offset, t->storage[j].layout.size);
 
           /* Commit data to the pool */
-          /*for (k = (int)offsets[0]; k < (int)offsets[0] + t->storage[j].layout.dim[0]; k++) {
-            for (l = (int)offsets[1]; l < (int)offsets[1] + t->storage[j].layout.dim[1]; l++) {
-              p->task->storage[j].data[k][l] =
-                t->storage[j].data[k-(int)offsets[0]][l-(int)offsets[1]];
-            }
-          }*/
+          for (k = 0; k < t->storage[j].layout.dim[0]; k++) {
+            k_offset = k * l_offset;
+            k_offset += t->storage[j].layout.offset[1] * t->storage[j].layout.datatype_size;
+            k_offset += t->storage[j].layout.offset[0] * l_offset;
+
+            e_offset = k * t->storage[j].layout.dim[1] * t->storage[j].layout.datatype_size;
+            memcpy(p->task->storage[j].memory + k_offset, t->storage[j].memory + e_offset, elements);
+          }
 
           /* Commit data to master datafile */
           if (p->task->storage[j].layout.use_hdf) {
@@ -210,14 +222,13 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           p->tasks[t->tid]->status = t->status;
           p->tasks[t->tid]->location[0] = t->location[0];
           p->tasks[t->tid]->location[1] = t->location[1];
-/*
+
           for (k = 0; k < t->storage[j].layout.dim[0]; k++) {
             for (l = 0; l < t->storage[j].layout.dim[1]; l++) {
-              p->tasks[t->tid]->storage[j].data[k][l] =
-                t->storage[j].data[k][l];
+              memcpy(p->tasks[t->tid]->storage[j].memory, t->storage[j].memory, t->storage[j].layout.size);
             }
           }
-*/
+
           // Commit data to master datafile
           if (p->task->storage[j].layout.use_hdf) {
             sprintf(path, TASK_PATH, t->tid);

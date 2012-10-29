@@ -91,7 +91,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
               task_id = H5Gopen(tasks, task_path, H5P_DEFAULT);
               H5CheckStatus(task_id);
 
-              ReadDataset(task_id, 1, &(pools[i]->tasks[j]->storage[k]));
+    //          ReadDataset(task_id, 1, &(pools[i]->tasks[j]->storage[k]));
               H5Gclose(task_id);
             }
           }

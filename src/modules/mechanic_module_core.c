@@ -575,7 +575,7 @@ int Storage(pool *p, setup *s) {
     .path = "double-datatype",
     .rank = 2,
     .dim[0] = 3,
-    .dim[1] = 3,
+    .dim[1] = 4,
     .datatype = H5T_NATIVE_DOUBLE,
     .sync = 1,
     .use_hdf = 1,
@@ -586,7 +586,7 @@ int Storage(pool *p, setup *s) {
     .path = "integer-datatype",
     .rank = 2,
     .dim[0] = 3,
-    .dim[1] = 3,
+    .dim[1] = 4,
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
@@ -597,11 +597,33 @@ int Storage(pool *p, setup *s) {
     .path = "integer-datatype",
     .rank = 2,
     .dim[0] = 3,
-    .dim[1] = 3,
+    .dim[1] = 4,
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,
+  };
+
+  p->task->storage[3].layout = (schema) {
+    .path = "integer-datatype-pm3d",
+    .rank = 2,
+    .dim[0] = 3,
+    .dim[1] = 4,
+    .datatype = H5T_NATIVE_INT,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_PM3D,
+  };
+
+  p->task->storage[4].layout = (schema) {
+    .path = "integer-datatype-list",
+    .rank = 2,
+    .dim[0] = 3,
+    .dim[1] = 4,
+    .datatype = H5T_NATIVE_INT,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_LIST,
   };
 
   return SUCCESS;
@@ -631,13 +653,13 @@ int Storage(pool *p, setup *s) {
  * @return SUCCESS on success, error code otherwise
  */
 int PoolPrepare(pool **allpools, pool *current, setup *s) {
-  int data[6][8];
-  double buff[6][8];
-  float floa[6][8];
+  int data[3][4];
+  double buff[3][4];
+  float floa[3][4];
   int i,j;
 
-  for (i = 0; i < 6; i++) {
-    for (j = 0; j < 8; j++) {
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 4; j++) {
       data[i][j] = i + j;
       buff[i][j] = 47.13 + i + j;
       floa[i][j] = 80.23 + i + j;
@@ -685,6 +707,9 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  *       return POOL_FINALIZE;
  *     }
  *
+ * int ibuff[3][3], i, j;
+ * ReadData(&current->tasks[24]->storage[2], &ibuff);
+ *
  * @ingroup master_only
  * @param allpools The pointer to all pools
  * @param current The current pool structure
@@ -693,6 +718,60 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  * @return POOL_FINALIZE, POOL_CREATE_NEW, POOL_RESET
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
+  int ibuff[3][4], i, j, k, l;
+  int idataset[75][4];
+  int odataset[15][20];
+  int itest[40];
+
+  /*ReadData(&current->tasks[24]->storage[2], ibuff);
+
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 4; j++) {
+      printf("%d ", ibuff[i][j]);
+    }
+    printf("\n");
+  }
+
+  for (i = 0; i < 15; i++) {
+    for (j = 0; j < 20; j++) {
+      idataset[i][j] = j;
+    }
+  }
+  */
+/*
+  for (i = 0; i < 25; i++) {
+    j = 20 * sizeof(int);
+    ReadData(&current->tasks[i]->storage[2], ibuff);
+    for (k = 0; k < 3; k++) {
+      l = k * 4 * sizeof(int);
+      j = k * 20 * sizeof(int);
+      memcpy(current->task->storage[1].memory + j, ibuff, 3*4*sizeof(int));
+    }
+  }*/
+
+//  WriteData(&current->task->storage[1], idataset);
+//  ReadData(&current->task->storage[1], &odataset[0][0]);
+  memcpy(odataset, current->task->storage[1].memory, 15*20*sizeof(int));
+  memcpy(idataset, current->task->storage[3].memory, 75*4*sizeof(int));
+ // memcpy(itest, current->task->storage[1].memory, 40*sizeof(int));
+
+  for (i = 0; i < 15; i++) {
+    for (j = 0; j < 20; j++) {
+      printf("%02d ", odataset[i][j]);
+    }
+    printf("\n");
+  }
+
+    printf("\n");
+  for (i = 0; i < 75; i++) {
+    for (j = 0; j < 4; j++) {
+      printf("%02d ", idataset[i][j]);
+    }
+    printf("\n");
+  }
+//  for (i = 0; i < 40; i++) printf("%02d ", itest[i]);
+//    printf("\n");
+
   return POOL_FINALIZE;
 }
 
@@ -790,12 +869,12 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * @return SUCCESS on success or error code otherwise
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  double data[3][3];
-  int idata[3][3];
+  double data[3][4];
+  int idata[3][4];
   int i,j;
 
   for (i = 0; i < 3; i++) {
-    for (j = 0; j < 3; j++) {
+    for (j = 0; j < 4; j++) {
       data[i][j] = t->tid+1.1;
       idata[i][j] = t->tid+1;
     }
@@ -804,6 +883,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
   WriteData(&t->storage[0], data);
   WriteData(&t->storage[1], idata);
   WriteData(&t->storage[2], idata);
+  WriteData(&t->storage[3], idata);
+  WriteData(&t->storage[4], idata);
   return SUCCESS;
 }
 
