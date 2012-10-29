@@ -74,6 +74,7 @@ Key features
   at the every stage of the simulation
 - **MPI non-blocking communication**
 - **HDF5 data storage layout**
+- All HDF5/MPI basic datatypes supported
 - **Automatic backup of data files and restart mode**
 - **Configuration command line.** All configuration options defined through API are
   automatically available in the command line
@@ -84,7 +85,7 @@ Key features
 Current limitations
 -------------------
 
-- The datasets are stored with H5T_NATIVE_DOUBLE datatype, and are H5S_SIMPLE-type
+- The datasets are H5S_SIMPLE-type
 - Only rank 2 datasets are supported right now
 
 Example usage
@@ -121,6 +122,7 @@ create a `mechanic_module_map.c` file and put in it the following code:
         .dim[1] = 3, // the horizontal dimension of the result array (not the dataset)
         .use_hdf = 1, // whether to store the result in the master data file
         .storage_type = STORAGE_PM3D, // storage type, which is suitable to process with Gnuplot PM3D
+        .datatype = H5T_NATIVE_DOUBLE, // the datatype
       };
 
       return SUCCESS;
@@ -135,9 +137,15 @@ The second step is to create the `TaskProcess()` function, in which we will comp
 state of the system:
 
     int TaskProcess(pool *p, task *t, setup *s) {
-      t->storage[0].data[0][0] = t->location[1]; // the vertical position of the current task
-      t->storage[0].data[0][1] = t->location[0]; // the horizontal position of the current task
-      t->storage[0].data[0][2] = t->tid; // task id represents the state of the system
+      double buff[1][3];
+
+      buff[0][0] = t->location[1]; // the vertical position of the current task
+      buff[0][1] = t->location[0]; // the horizontal position of the current task
+      buff[0][2] = t->tid; // task id represents the state of the system
+
+      // Write the buffer data to Mechanic's memory buffers
+      // The buff size must meet the t->storage[0] size (both dimensions and datatype)
+      WriteData(t->storage[0], buff);
 
       return SUCCESS;
     }
