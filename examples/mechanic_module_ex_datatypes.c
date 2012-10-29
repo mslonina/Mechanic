@@ -160,7 +160,86 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   int **ibuff_two;
   double **dbuff;
   int dims[2];
+  int three[2][3][4];
+  int one[24];
+  char* buffer;
 
+  l = 0;
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 3; j++) {
+      for (k = 0; k < 4; k++) {
+        three[i][j][k] = l++;
+      }
+    }
+  }
+
+  buffer = calloc(2*3*4*sizeof(int), sizeof(int));
+  memcpy(buffer, three, 24*sizeof(int));
+  memcpy(one,buffer,24*sizeof(int));
+
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 3; j++) {
+      printf("%02d ", three[i][j][0]);
+    }
+    printf("\n");
+  }
+
+  printf("\n");
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 4; j++) {
+      printf("%02d ", three[i][0][j]);
+    }
+    printf("\n");
+  }
+  
+  printf("\n");
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 4; j++) {
+      printf("%02d ", three[0][i][j]);
+    }
+    printf("\n");
+  }
+
+  printf("\n");
+  for (i = 0; i < 24; i++) printf("%02d ", one[i]);
+  printf("\n");
+  printf("\n");
+
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 3; j++) {
+      for (k = 0; k < 4; k++) {
+        three[i][j][k] = 0;
+      }
+    }
+  }
+
+  memcpy(three,buffer,24*sizeof(int));
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 3; j++) {
+      printf("%02d ", three[i][j][0]);
+    }
+    printf("\n");
+  }
+
+  printf("\n");
+  for (i = 0; i < 2; i++) {
+    for (j = 0; j < 4; j++) {
+      printf("%02d ", three[i][0][j]);
+    }
+    printf("\n");
+  }
+  
+  printf("\n");
+  for (i = 0; i < 3; i++) {
+    for (j = 0; j < 4; j++) {
+      printf("%02d ", three[0][i][j]);
+    }
+    printf("\n");
+  }
+
+  free(buffer);
+
+  return POOL_FINALIZE;
   /* Read dataset inside the Tasks/task-[i] group, we already know the buffer size */
   ReadData(&current->tasks[current->pool_size - 1]->storage[2], ibuff);
 

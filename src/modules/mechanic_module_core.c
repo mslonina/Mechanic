@@ -1,8 +1,6 @@
 /**
  * @file
  * Core Mechanic module, implementation of all API functions
- *
- * @todo provide hook examples
  */
 
 /**
@@ -88,11 +86,11 @@
  */
 
 int Init(init *i) {
-  i->options = 128;
-  i->pools = 64;
-  i->banks_per_pool = 8;
-  i->banks_per_task = 8;
-  i->attr_per_dataset = 8;
+  i->options = 128; /**< Maximum number of configurations option for the module */
+  i->pools = 64; /**< Maximum number of task pools */
+  i->banks_per_pool = 8; /**< Maximum number of memory bank per pool */
+  i->banks_per_task = 8; /**< Maximum number of memory banks per task */
+  i->attr_per_dataset = 8; /**< Maximum number of attributes that may be assigned to the dataset */
 
   return SUCCESS;
 }
@@ -100,7 +98,8 @@ int Init(init *i) {
 /**
  * @brief Define the configuration options
  *
- * This function is used to define configuration options. The LRC user API is used here.
+ * This function is used to define configuration options. 
+ * The [Libreadconfig API](http://github.com/mslonina/libreadconfig) is used here.
  * Configuration options are automatically available in the command line.
  *
  * If the Setup() hook is present in a custom module, the options are merged with the core
@@ -108,11 +107,12 @@ int Init(init *i) {
  * do this is to use command line or configuration file.
  *
  * The configuration is stored in the master datafile. Only the master node reads the
- * configuration file and parser the command line. The configuration is broadcasted to all
+ * configuration file and parses the command line. The configuration is broadcasted then to all
  * worker nodes.
  *
- * To obtain all available options, try the --help or --usage flag:
- * mpirun -np 2 mechanic2 -p mymodule --help
+ * To obtain all available options, try the `--help` or `--usage` flag:
+ *     
+ *     mpirun -np 2 mechanic2 -p mymodule --help
  *
  * ### Defining options
  *
@@ -146,7 +146,7 @@ int Init(init *i) {
  *
  *     s->options[13] = (LRC_configDefaults) LRC_OPTIONS_END;
  *
- * ### The config file
+ * ### The configuration file
  *
  * The configuration file may be used, in a sample form (only one configuration
  * file both for core and the module):
@@ -156,14 +156,14 @@ int Init(init *i) {
  *     xres = 2048 # p->board->layout.dim[1], horizontal dim
  *     yres = 2048 # p->board->layout.dim[0], vertical dim
  *     checkpoint = 1024 # number of finished task to store 
- *
- *     [arnold]
- *     step = 0.3
- *     tend = 2000.0
  *     xmin = 0.95
  *     xmax = 1.05
  *     ymin = 0.95
  *     ymax = 1.05
+ *
+ *     [arnold]
+ *     step = 0.3
+ *     tend = 2000.0
  *     driver = 2
  *     eps = 0.0
  *     epsmax = 0.1
@@ -342,7 +342,7 @@ int Setup(setup *s) {
 }
 
 /**
- * @brief Define the pool storage layout
+ * @brief Define the task pool storage layout
  *
  * This function is used to define the storage layout. The layout may be defined per pool
  * (different storage layout during different task pools).
@@ -372,34 +372,34 @@ int Setup(setup *s) {
  * - storage_type - the type of the storage to use (see below)
  * - sync - whether to broadcast the data to all computing pool
  * - dataspace_type - HDF5 dataspace type (for future development)
- * - datatype - HDF5 datatype (for future development)
+ * - datatype - HDF5 datatype 
  *
- * Note: The datatype is set to H5T_NATIVE_DOUBLE, the dataspace type is H5S_SIMPLE, and the max rank is 2.
+ * Note: The dataspace type is H5S_SIMPLE, and the max rank is 2.
  *
  * You can adjust the number of available memory/storage banks by implementing the Init()
  * hook (banks_per_pool, banks_per_task).
  *
- * ## The Pool storage
+ * ### The Pool storage
  *
- * The Pool will store its global data in the /Pools/pool-ID group, where the ID is the unique pool identifier.
- * The task data will be stored in /Pools/pool-ID/Tasks group.
+ * The Pool stores its global data in the /Pools/pool-ID group, where the ID is the unique pool identifier.
+ * The task data is stored in /Pools/pool-ID/Tasks group.
  *
  * The size of the storage dataset and the memory is the same. In the case of pool, whole
- * memory block is stored at once, if use_hdf = 1.
+ * memory block is stored at once, if use_hdf = 1 (only STORAGE_GROUP is supported).
  *
- * The Pool data is broadcasted right after the PoolPrepare() and saved to the master
+ * The Pool data is broadcasted right after the PoolPrepare() hook and stored in the master
  * datafile.
  *
  * Note: All global pool datasets must use STORAGE_GROUP storage_type.
  *
- * ## The task storage
+ * ### The task storage
  *
  * The task data is stored inside /Pools/pool-ID/Tasks group. The memory banks defined for
  * the task storage are synchronized between master and worker after the TaskProcess().
  *
  * There are four available methods to store the task result:
  *
- * ### STORAGE_GROUP
+ * #### STORAGE_GROUP
  *
  * The whole memory block is stored in a dataset inside /Tasks/task-ID
  * group (the ID is the unique task indentifier), i.e., for a dataset defined similar to:
@@ -409,13 +409,14 @@ int Setup(setup *s) {
  *     p->task->storage[0].layout.dim[1] = 6;
  *     p->task->storage[0].layout.storage_type = STORAGE_GROUP;
  *     p->task->storage[0].layout.use_hdf = 1;
+ *     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
  *
  * The output is stored in /Pools/pool-ID/Tasks/task-ID/basic-dataset:
  *
  *     9 9 9 9 9 9
  *     9 9 9 9 9 9
  *
- * ### STORAGE_PM3D
+ * #### STORAGE_PM3D
  *
  * The memory block is stored in a dataset with a column-offset, so that
  * the output is suitable to process with Gnuplot. Example: Suppose we have a 2x5 task
@@ -424,15 +425,16 @@ int Setup(setup *s) {
  *     1 2 3 4 5
  *     6 7 8 9 0
  *
- * While each worker returns the result of size 2x7. For a dataset defined similar to:
+ * while each worker returns the result of size 2x7. For a dataset defined similar to:
  *
  *     p->task->storage[0].layout.path = "pm3d-dataset";
  *     p->task->storage[0].layout.dim[0] = 2;
  *     p->task->storage[0].layout.dim[1] = 7;
  *     p->task->storage[0].layout.storage_type = STORAGE_PM3D;
  *     p->task->storage[0].layout.use_hdf = 1;
+ *     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
  *
- * We have: /Pools/pool-ID/Tasks/pm3d-dataset with:
+ * we have: /Pools/pool-ID/Tasks/pm3d-dataset with:
  *
  *     1 1 1 1 1 1 1
  *     1 1 1 1 1 1 1
@@ -446,7 +448,7 @@ int Setup(setup *s) {
  *
  * The size of the final dataset is pool_size * dim[1].
  *
- * ### STORAGE_LIST
+ * #### STORAGE_LIST
  *
  * The memory block is stored in a dataset with a task-ID offset, This is
  * similar to STORAGE_PM3D, this time however, there is no column-offset. For a dataset
@@ -457,8 +459,9 @@ int Setup(setup *s) {
  *     p->task->storage[0].layout.dim[1] = 7;
  *     p->task->storage[0].layout.storage_type = STORAGE_LIST;
  *     p->task->storage[0].layout.use_hdf = 1;
+ *     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
  *
- * The output is stored in /Pools/pool-ID/Tasks/list-dataset:
+ * the output is stored in /Pools/pool-ID/Tasks/list-dataset:
  *
  *     1 1 1 1 1 1 1
  *     1 1 1 1 1 1 1
@@ -472,7 +475,7 @@ int Setup(setup *s) {
  *
  * The size of the final dataset is pool_size * dim[1].
  *
- * ### STORAGE_BOARD
+ * #### STORAGE_BOARD
  *
  * The memory block is stored in a dataset with a {row,column}-offset
  * according to the board-location of the task. Suppose we have a dataset defined like
@@ -483,6 +486,7 @@ int Setup(setup *s) {
  *     p->task->storage[0].layout.dim[1] = 3;
  *     p->task->storage[0].layout.storage_type = STORAGE_BOARD;
  *     p->task->storage[0].layout.use_hdf = 1;
+ *     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
  *
  * For a 2x5 task pool:
  *
@@ -498,19 +502,64 @@ int Setup(setup *s) {
  *
  * The size of the final dataset is pool_dim[0] * taks_dim[0] x pool_dim[1] * task_dim[1].
  *
- * ## Accessing the data
+ * ### Datatypes
  *
- * All data my be accessed directly (the storage index follows the definition of the
- * datasets):
+ * All native HDF5 datatypes are supported:
  *
- * - p->task->storage[0].data[0][0] for task datasets with storage_type STORAGE_PM3D,
- *   STORAGE_LIST, STORAGE_BOARD
- * - p->tasks[TID]->storage[1].data[0][0] for task datasets with storage_type STORAGE_GROUP.
- *   The TID is the task ID
- * - p->storage[0].data[0][0] for pool datasets
+ * | C datatype             | MPI datatype           | HDF5 native datatype | HDF5 platform datatype           |
+ * |:-----------------------|:-----------------------|:---------------------|:---------------------------------|
+ * | signed char            | MPI_CHAR               | H5T_NATIVE_CHAR      | H5T_STD_I8BE or H5T_STD_I8LE     |
+ * | unsigned char          | MPI_UNSIGNED_CHAR      | H5T_NATIVE_UCHAR     | H5T_STD_U8BE or H5T_STD_U8LE     |
+ * | signed int             | MPI_INT                | H5T_NATIVE_INT       | H5T_STD_I32BE or H5T_STD_I32LE   |
+ * | signed short int       | MPI_SHORT              | H5T_NATIVE_SHORT     | H5T_STD_I16BE or H5T_STD_I16LE   |
+ * | signed long int        | MPI_LONG               | H5T_NATIVE_LONG      | H5T_STD_I32BE, H5T_STD_I32LE,    |
+ * |                        |                        |                      | H5T_STD_I64BE or H5T_STD_I64LE   |
+ * | signed long long int   | MPI_LONG_LONG          | H5T_NATIVE_LLONG     | H5T_STD_I64BE or H5T_STD_I64LE   |
+ * | unsigned int           | MPI_UNSIGNED           | H5T_NATIVE_UINT      | H5T_STD_U32BE or H5T_STD_U32LE   |
+ * | unsigned short int     | MPI_UNSIGNED_SHORT     | H5T_NATIVE_USHORT    | H5T_STD_U16BE or H5T_STD_U16LE   |
+ * | unsigned long long int | MPI_UNSIGNED_LONG_LONG | H5T_NATIVE_ULLONG    | H5T_STD_U64BE or H5T_STD_U64LE   |
+ * | float                  | MPI_FLOAT              | H5T_NATIVE_FLOAT     | H5T_IEEE_F32BE or H5T_IEEE_F32LE |
+ * | double                 | MPI_DOUBLE             | H5T_NATIVE_DOUBLE    | H5T_IEEE_F64BE or H5T_IEEE_F64LE |
  *
  *
- * ## Checkpoint
+ * ### Accessing the data
+ *
+ * All data is stored in flattened, one-dimensional arrays, which allows to use different
+ * datatypes and dimensionality of the memory blocks. The data may be accessed directly,
+ * by using the memory pointer:
+ *
+ *  p->task->storage[0].memory
+ *
+ * You may use ReadData() and WriteData() to manipulate the data. For example, suppose
+ * integer-type task dataset of dimensionality dims = {2,3} per task with storage type STORAGE_BOARD, and task board = {5,5}. 
+ * The allocated memory block is pool_size x dims x sizeof(integer). To access it, we need
+ * to copy the data:
+ *
+ *    int buffer[10][15]; // dims0: 2x5, dims1: 3x5
+ *    ...
+ *    ReadData(&p->task->storage[0], buffer);
+ *
+ * (the storage index follows the definition of the datasets).
+ * For a STORAGE_LIST or STORAGE_PM3D, we would have:
+ *    
+ *    int buffer[50][3]; // dims0: 2x5x5, dims1: 3x5
+ *    ...
+ *    ReadData(&p->task->storage[0], buffer);
+ *
+ * For a STORAGE_GROUP dataset, the size of the memory block follows the storage
+ * definition:
+ *
+ *    int buffer[2][3];
+ *    ...
+ *    // for a pool memory bank
+ *    ReadData(&p->storage[0], buffer);
+ *    
+ *    // or, for a task memory bank, where i is a
+ *    // unique task-ID
+ *    ReadData(&p->tasks[i]->storage[0], buffer);
+ *
+ *
+ * ### Checkpoint
  *
  * The checkpoint contains the results from tasks that have been processed and received. When the
  * checkpoint is filled up, the result is stored in the master datafile, according to the
@@ -583,6 +632,7 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  * - POOL_CREATE_NEW - if the pool loop should continue (the new pool will be created)
  * - POOL_RESET - reset the current pool: the task board will be reset. The task loop can
  *   be restarted within the same loop, i.e. from sligthly different startup values
+ *
  *   Hybrid Genetic Algoriths example:
  *   1. Compute first iteration of children
  *   2. Loop N-times in the children loop using POOL_RESET (and p->rid counter), to
@@ -715,24 +765,26 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * @todo Needs updating
  *
  * This function is used to prepare the checkpoint. You may do some data-related
- * operations. The data for the current checkpoint may be accessed through the current
- * 2D checkpoint pointer:
+ * operations. The data for the current checkpoint may be accessed by Read/WriteData()
+ * through the current checkpoint memory pointer:
  *
- *     c->storage->data[][]
+ *     c->storage->memory
  *
- * where the first index is the checkpoint memory bank (0 to checkpoint_size) and
- * the second index contains one-dimensional (flat) data from the received task (all
- * task memory banks packed into one array), i.e.
+ * which is a one-dimensional, flattened array, filled with c->size tasks, in a form:
  *
- *    c->storage->data[0][0] - the MPI message tag
- *    c->storage->data[0][1] - the received task ID
- *    c->storage->data[0][2] - the received task status (TASK_FINISHED)
- *    c->storage->data[0][3] - the received task location[0]
- *    c->storage->data[0][4] - the received task location[1]
- *    c->storage->data[0][5] - the received task data begins here
+ *    header | task 0 datasets | header | task 1 datasets | ...
  *
- * This hook should not be normally used, if it is present in a custom module, it will be
- * used instead the core hook.
+ * The header contains HEADER_SIZE integer elements:
+ *  - the MPI message tag
+ *  - the received task ID
+ *  - the received task status (TASK_FINISHED)
+ *  - the received task location (rank 2)
+ *
+ * It is best to keep this hook untouched, since the memory banks are used then to
+ * physically store the data in the HDF5 master datafile. This hook should not be normally
+ * used, unless you know what you are doing. You have been warned.
+ *
+ * If this hook is present in a custom module, it will be used instead the core one.
  *
  * @ingroup master_only
  * @param p The current pool structure
@@ -840,3 +892,4 @@ int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
   return SUCCESS;
 }
 /** @} */
+
