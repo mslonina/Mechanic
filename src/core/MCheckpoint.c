@@ -231,11 +231,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           p->tasks[t->tid]->location[0] = t->location[0];
           p->tasks[t->tid]->location[1] = t->location[1];
 
-//          for (k = 0; k < t->storage[j].layout.dim[0]; k++) {
-//            for (l = 0; l < t->storage[j].layout.dim[1]; l++) {
-              memcpy(p->tasks[t->tid]->storage[j].memory, t->storage[j].memory, t->storage[j].layout.size);
-//            }
-//          }
+          memcpy(p->tasks[t->tid]->storage[j].memory, t->storage[j].memory, t->storage[j].layout.size);
 
           // Commit data to master datafile
           if (p->task->storage[j].layout.use_hdf) {
