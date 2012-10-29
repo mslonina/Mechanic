@@ -74,7 +74,7 @@ Key features
   at the every stage of the simulation
 - **MPI non-blocking communication**
 - **HDF5 data storage layout**
-- All HDF5/MPI basic datatypes supported
+- **All HDF5/MPI basic datatypes are supported**
 - **Automatic backup of data files and restart mode**
 - **Configuration command line.** All configuration options defined through API are
   automatically available in the command line
@@ -145,7 +145,7 @@ state of the system:
 
       // Write the buffer data to Mechanic's memory buffers
       // The buff size must meet the t->storage[0] size (both dimensions and datatype)
-      WriteData(t->storage[0], buff);
+      WriteData(&t->storage[0], buff);
 
       return SUCCESS;
     }

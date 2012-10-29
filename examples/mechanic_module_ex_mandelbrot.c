@@ -33,6 +33,7 @@ int Storage(pool *p, setup *s) {
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_BOARD,
+    .datatype = H5T_NATIVE_DOUBLE
   };
 
   return SUCCESS;
@@ -46,6 +47,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   double scale_real, scale_imag;
   double c, xres, yres;
   double x,y;
+  double buffer[1][1];
 
   real_min = -2.0;
   real_max = 2.0;
@@ -67,7 +69,9 @@ int TaskProcess(pool *p, task *t, setup *s) {
   y = real_min + t->location[1] * scale_real;
 
   // The state of the system
-  t->storage[0].data[0][0] = fractal(x, y, c);
+  buffer[0][0] = fractal(x, y, c);
+
+  WriteData(&t->storage[0], buffer);
 
   return SUCCESS;
 }

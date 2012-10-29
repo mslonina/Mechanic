@@ -45,6 +45,7 @@ int Storage(pool *p, setup *s) {
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_PM3D,
+    .datatype = H5T_NATIVE_DOUBLE
   };
 
   return SUCCESS;
@@ -54,16 +55,19 @@ int Storage(pool *p, setup *s) {
  * Implements TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
+  double buffer_one[1][3];
 
   // The vertical position of the pixel
-  t->storage[0].data[0][0] = t->location[0];
+  buffer_one[0][0] = t->location[0];
 
   // The horizontal position of the pixel
-  t->storage[0].data[0][1] = t->location[1];
+  buffer_one[0][1] = t->location[1];
 
   // The state of the system
-  t->storage[0].data[0][2] = t->tid;
+  buffer_one[0][2] = t->tid;
 
+  WriteData(&t->storage[0], buffer_one);
+  
   return SUCCESS;
 }
 

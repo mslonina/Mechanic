@@ -86,7 +86,6 @@ int Process(int node, char *masterfile, pool **all, setup *s) {
       }
       Message(MESSAGE_OUTPUT, "\n");
     }
-    //PrintDataset(MESSAGE_COMMENT, dataset);
 
     // Release the resources
     H5Dclose(dataset);

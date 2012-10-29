@@ -47,6 +47,7 @@ int Storage(pool *p, setup *s) {
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_PM3D,
+    .datatype = H5T_NATIVE_DOUBLE
   };
 
   // At the pool-0002 we add some more datasets
@@ -62,6 +63,7 @@ int Storage(pool *p, setup *s) {
       .sync = 1,
       .use_hdf = 1,
       .storage_type = STORAGE_BOARD,
+      .datatype = H5T_NATIVE_DOUBLE
     };
   }
 
@@ -81,29 +83,41 @@ int Storage(pool *p, setup *s) {
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   int i,j;
+  double buffer_one[1][3];
+  double buffer_two[3][3];
+  double buffer_three[1][5];
 
   // The vertical position of the pixel
-  t->storage[0].data[0][0] = t->location[0];
+  buffer_one[0][0] = t->location[0];
 
   // The horizontal position of the pixel
-  t->storage[0].data[0][1] = t->location[1];
+  buffer_one[0][1] = t->location[1];
 
   // The state of the system
-  t->storage[0].data[0][2] = t->tid;
+  buffer_one[0][2] = t->tid;
+
 
   // We are at pool-0002
   if (p->pid == 2) {
     for (i = 0; i < t->storage[1].layout.dim[0]; i++) {
       for (j = 0; j < t->storage[1].layout.dim[1]; j++) {
-        t->storage[1].data[i][j] = i+j;
+        buffer_two[i][j] = i+j;
       }
     }
+    WriteData(&t->storage[1], buffer_two);
   }
 
   // We are at pool-0004
   if (p->pid == 4) {
-    t->storage[0].data[0][3] = t->tid + 3.0;
-    t->storage[0].data[0][4] = t->tid + 4.0;
+    buffer_three[0][0] = t->location[0];
+    buffer_three[0][1] = t->location[1];
+    buffer_three[0][2] = t->tid;
+    buffer_three[0][3] = t->tid + 3.1;
+    buffer_three[0][4] = t->tid + 4.1;
+
+    WriteData(&t->storage[0], buffer_three);
+  } else {
+    WriteData(&t->storage[0], buffer_one);
   }
 
   return SUCCESS;
@@ -114,17 +128,21 @@ int TaskProcess(pool *p, task *t, setup *s) {
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
   int i,j;
+  double buffer[1][5];
+
   // Access the stored data in the current pool for STORAGE_GROUP
   if (current->pid == 4) {
     for (i = 0; i < current->pool_size; i++) {
-      Message(MESSAGE_OUTPUT, "task[%d] = [%d %d %d]\n",
+      ReadData(&current->tasks[i]->storage[0], buffer);
+      Message(MESSAGE_OUTPUT, "task[%04d] = [%04d %04d %04d]\n",
        current->tasks[i]->tid,
-       (int)current->tasks[i]->storage[0].data[0][0],
-       (int)current->tasks[i]->storage[0].data[0][1],
-       (int)current->tasks[i]->storage[0].data[0][2]
+       (int)buffer[0][0],
+       (int)buffer[0][1],
+       (int)buffer[0][2]
       );
     }
   }
+
   if (current->pid < 5) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }
