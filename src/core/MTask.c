@@ -99,7 +99,7 @@ int GetNewTask(module *m, pool *p, task *t, int **board_buffer) {
 
     if (m->mode == RESTART_MODE) {
       if (board_buffer[x][y] == TASK_AVAILABLE
-          || board_buffer[x][y] == TASK_IN_USE) break;
+          || board_buffer[x][y] == TASK_TO_BE_RESTARTED) break;
     }
 
     if (board_buffer[x][y] == TASK_AVAILABLE) break;

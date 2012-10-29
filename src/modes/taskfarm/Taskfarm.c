@@ -48,8 +48,7 @@ int Taskfarm(module *m) {
     mstat = Restart(m, p, &pid);
     CheckStatus(mstat);
   }
-//  goto finalize;
-
+  
   /**
    * (C) The Pool loop
    */
@@ -108,7 +107,6 @@ int Taskfarm(module *m) {
     if (m->mode == RESTART_MODE && pool_create == POOL_CREATE_NEW) m->mode = NORMAL_MODE;
   } while (pool_create != POOL_FINALIZE);
 
-finalize:
   /* Process the simulation */
   mstat = Process(m, p);
   CheckStatus(mstat);

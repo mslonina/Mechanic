@@ -68,7 +68,7 @@ pool* PoolLoad(module *m, int pid) {
  * @return 0 on success, error code otherwise
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
-  int mstat = SUCCESS, i = 0, task_groups = 0;
+  int mstat = SUCCESS, i = 0;
   int attr_data[1];
   char path[LRC_CONFIG_LEN];
   query *q;

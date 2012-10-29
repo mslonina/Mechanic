@@ -24,7 +24,7 @@ int CheckLayout(int banks, storage *s);
 int CreateDataset(hid_t location, storage *s, module *m, pool *p);
 int CommitDataset(hid_t h5location, storage *s, double **data);
 int CommitData(hid_t h5location, int banks, storage *s);
-int ReadDataset(hid_t h5location, int banks, storage *s);
+int ReadDataset(hid_t h5location, int banks, storage *s, int size);
 
 int GetBanks(int allocated_banks, storage *s);
 

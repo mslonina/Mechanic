@@ -26,10 +26,26 @@ int MasterBlocking(module *m, pool *p) {
   task *t = NULL;
   checkpoint *c = NULL;
 
+  int x,y;
+
   /* Initialize the temporary task board buffer */
   board_buffer = AllocateInt2D(p->board->layout.rank, p->board->layout.dim);
   if (m->mode != RESTART_MODE) {
     memset(board_buffer[0], TASK_AVAILABLE, p->pool_size*sizeof(int));
+  } else {
+    ReadData(p->board, board_buffer[0]);
+
+    /* Prepare the task board */
+    for (x = 0; x < p->board->layout.dim[0]; x++) {
+      for (y = 0; y < p->board->layout.dim[1]; y++) {
+        if (board_buffer[x][y] == TASK_IN_USE) {
+          board_buffer[x][y] = TASK_TO_BE_RESTARTED;
+        }
+        if (board_buffer[x][y] == TASK_FINISHED) {
+          completed++;
+        }
+      }
+    }
   }
 
   /* Data buffers */

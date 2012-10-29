@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i, j, dims[MAX_RANK], task_groups;
+  int i, dims[MAX_RANK], task_groups;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -413,15 +413,20 @@ int CommitData(hid_t h5location, int banks, storage *s) {
  *
  * @return 0 on success, error code otherwise
  */
-int ReadDataset(hid_t h5location, int banks, storage *s) {
+int ReadDataset(hid_t h5location, int banks, storage *s, int size) {
   int mstat = SUCCESS, i = 0;
+  int elements;
   void *buffer = NULL;
   hid_t dataset;
   herr_t hstat;
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf) {
-      buffer = calloc((size_t)s[i].layout.elements, s[i].layout.datatype_size);
+      elements = s[i].layout.elements;
+      if (size > 1) {
+        elements *= size;
+      }
+      buffer = calloc((size_t)elements, s[i].layout.datatype_size);
 
       Message(MESSAGE_DEBUG, "Read Data storage path: %s\n", s[i].layout.path);
       dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);

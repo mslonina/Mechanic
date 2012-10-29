@@ -19,6 +19,8 @@ int Restart(module *m, pool **pools, int *pool_counter) {
   char path[LRC_CONFIG_LEN], task_path[LRC_CONFIG_LEN];
   hid_t h5location, group, tasks, task_id, attr_id, hstat;
 
+  int ibuff[5][5], x, y;
+
   if (m->node == MASTER) {
     h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     H5CheckStatus(h5location);
@@ -54,13 +56,21 @@ int Restart(module *m, pool **pools, int *pool_counter) {
       H5CheckStatus(group);
 
       /* Read pool board */
-      ReadDataset(group, 1, pools[i]->board);
+      ReadDataset(group, 1, pools[i]->board, 1);
+      ReadData(pools[i]->board, ibuff);
+
+      for (x = 0; x < 5; x++) {
+        for (y = 0; y < 5; y++) {
+          printf("%02d ", ibuff[x][y]);
+        }
+        printf("\n");
+      }
 
       /* Read pool storage banks */
       for (j = 0; j < m->pool_banks; j++) {
         size = GetSize(pools[i]->storage[j].layout.rank, pools[i]->storage[j].layout.dim);
         if (size > 0 && pools[i]->storage[j].layout.use_hdf) {
-          ReadDataset(group, 1, &(pools[i]->storage[j]));
+          ReadDataset(group, 1, &(pools[i]->storage[j]), 1);
         }
       }
 
@@ -75,7 +85,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
           if (pools[i]->task->storage[j].layout.storage_type == STORAGE_PM3D
             || pools[i]->task->storage[j].layout.storage_type == STORAGE_LIST
             || pools[i]->task->storage[j].layout.storage_type == STORAGE_BOARD) {
-            ReadDataset(tasks, 1, &(pools[i]->task->storage[j]));
+            ReadDataset(tasks, 1, &(pools[i]->task->storage[j]), pools[i]->pool_size);
           }
         }
       }
@@ -91,7 +101,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
               task_id = H5Gopen(tasks, task_path, H5P_DEFAULT);
               H5CheckStatus(task_id);
 
-    //          ReadDataset(task_id, 1, &(pools[i]->tasks[j]->storage[k]));
+              ReadDataset(task_id, 1, &(pools[i]->tasks[j]->storage[k]), 1);
               H5Gclose(task_id);
             }
           }

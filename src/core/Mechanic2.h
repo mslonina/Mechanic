@@ -71,6 +71,7 @@
 #define TASK_FINISHED 1 /**< The task finished return code */
 #define TASK_AVAILABLE 0 /**< The task available return code */
 #define TASK_IN_USE -1 /**< The task in use return code */
+#define TASK_TO_BE_RESTARTED -2 /**< The task to be restarted return code */
 #define NO_MORE_TASKS -99 /**< No more tasks return code */
 
 #define MASTER 0 /**< The master node */

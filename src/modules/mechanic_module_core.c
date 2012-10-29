@@ -751,10 +751,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 
 //  WriteData(&current->task->storage[1], idataset);
 //  ReadData(&current->task->storage[1], &odataset[0][0]);
-  memcpy(odataset, current->task->storage[1].memory, 15*20*sizeof(int));
-  memcpy(idataset, current->task->storage[3].memory, 75*4*sizeof(int));
+//  memcpy(odataset, current->task->storage[1].memory, 15*20*sizeof(int));
+//  memcpy(idataset, current->task->storage[3].memory, 75*4*sizeof(int));
  // memcpy(itest, current->task->storage[1].memory, 40*sizeof(int));
-
+/*
   for (i = 0; i < 15; i++) {
     for (j = 0; j < 20; j++) {
       printf("%02d ", odataset[i][j]);
@@ -771,7 +771,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   }
 //  for (i = 0; i < 40; i++) printf("%02d ", itest[i]);
 //    printf("\n");
-
+*/
   return POOL_FINALIZE;
 }
 
