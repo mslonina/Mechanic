@@ -75,7 +75,8 @@ Key features
 - **MPI non-blocking communication**
 - **HDF5 data storage layout**
 - **All HDF5/MPI basic datatypes are supported**
-- **Multidimensional datasets support (up to rank 4)**
+- **Multidimensional datasets support (rank 2-4)**
+- **Possibility of using HDF5 attributes**
 - **Automatic backup of data files and restart mode**
 - **Configuration command line.** All configuration options defined through API are
   automatically available in the command line
@@ -118,7 +119,7 @@ create a `mechanic_module_map.c` file and put in it the following code:
     int Storage(pool *p, setup *s) {
       p->task->storage[0].layout = (schema) {
         .path = "result", // the name of the output dataset
-        .rank = 2, // the rank of the dataset (only rank = 2 is currently supported)
+        .rank = 2, // the rank of the dataset
         .dim[0] = 1, // the vertical dimension of the result array (not the dataset)
         .dim[1] = 3, // the horizontal dimension of the result array (not the dataset)
         .use_hdf = 1, // whether to store the result in the master data file

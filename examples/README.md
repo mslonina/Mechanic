@@ -11,6 +11,7 @@ List of examples
 - Using `Prepare()` and `Process()` hooks
 - Defining and using configuration options (`Init()` and `Setup()` hooks)
 - Using different datatypes, reading and writing data to the memory banks
+- Using datasets of different datatypes and dimensionality
 - The Mandelbrot set
 
 Compilation
