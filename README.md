@@ -27,7 +27,7 @@ modules and is freely available at http://git.astri.umk.pl/projects/mechanic
 
 - [How does it work?](#how-does-it-work)
 - [Key features](#key-features)
-- [Current limitations](#current-limitations)
+- [Notes](#notes)
 - [Example usage](#example-usage)
 - [Quick start](#quick-start)
 - [Differences to other task management systems](#differences-to-other-task-management-systems)
