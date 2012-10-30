@@ -38,7 +38,7 @@
 int Storage(pool *p, setup *s) {
 
   p->storage[0].layout = (schema) {
-    .path = "3d-integer-datatype",
+    .path = "3d-integer-datatype-group",
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -50,7 +50,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->storage[1].layout = (schema) {
-    .path = "4d-double-datatype",
+    .path = "4d-double-datatype-group",
     .rank = 4,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -63,7 +63,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->storage[2].layout = (schema) {
-    .path = "2d-float-datatype",
+    .path = "2d-float-datatype-group",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -74,7 +74,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[0].layout = (schema) {
-    .path = "3d-double-datatype",
+    .path = "3d-double-datatype-board",
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -86,7 +86,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[1].layout = (schema) {
-    .path = "integer-datatype",
+    .path = "2d-integer-datatype-board",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -97,7 +97,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[2].layout = (schema) {
-    .path = "3d-integer-datatype",
+    .path = "3d-integer-datatype-group",
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -109,7 +109,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[3].layout = (schema) {
-    .path = "integer-datatype-pm3d",
+    .path = "2d-integer-datatype-pm3d",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -182,14 +182,20 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
   int three[DIM0][DIM1][DIM2];
+  int idata[5*DIM0][5*DIM1];
+  double data[5*DIM0][5*DIM1][DIM2];
   int i,j,k;
 
   /* Direct access to the memory block */
   printf("\n");
-  Message(MESSAGE_OUTPUT, "3D Integer dataset of STORAGE_GROUP\n");
+  Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XY slice-0)\n");
+  Message(MESSAGE_RESULT, "Direct access\n");
+  printf("\n");
+  
   memcpy(three, current->tasks[current->pool_size-2]->storage[2].memory, DIM0*DIM1*DIM2*sizeof(int));
 
   for (i = 0; i < DIM0; i++) {
+    printf("\t");
     for (j = 0; j < DIM1; j++) {
       printf("%02d ", three[i][j][0]);
     }
@@ -197,7 +203,12 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   }
 
   printf("\n");
+  Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XZ slice-0)\n");
+  Message(MESSAGE_RESULT, "Direct access\n");
+  printf("\n");
+
   for (i = 0; i < DIM0; i++) {
+    printf("\t");
     for (j = 0; j < DIM2; j++) {
       printf("%02d ", three[i][0][j]);
     }
@@ -205,25 +216,66 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   }
   
   printf("\n");
+  Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (YZ slice-0)\n");
+  Message(MESSAGE_RESULT, "Direct access\n");
+  printf("\n");
+  
   for (i = 0; i < DIM1; i++) {
+    printf("\t");
     for (j = 0; j < DIM2; j++) {
       printf("%02d ", three[0][i][j]);
     }
     printf("\n");
   }
-  printf("\n");
 
   /* Read dataset inside the Tasks/task-[i] group, we already know the buffer size */
-  Message(MESSAGE_OUTPUT, "3D Integer dataset of STORAGE_GROUP\n");
-  ReadData(&current->tasks[current->pool_size - 1]->storage[2], three);
+  printf("\n");
+  Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XY slice-0)\n");
+  Message(MESSAGE_RESULT, "Usage of ReadData()\n");
+  printf("\n");
 
+  ReadData(&current->tasks[current->pool_size - 1]->storage[2], three);
+  
   for (i = 0; i < DIM0; i++) {
+    printf("\t");
     for (j = 0; j < DIM1; j++) {
       printf("%02d ", three[i][j][0]);
     }
     printf("\n");
   }
 
+  /* Read whole dataset from the pool->task->storage[0] */
+  printf("\n");
+  Message(MESSAGE_RESULT, "3D Double dataset of STORAGE_BOARD (XY slice DIM2-1)\n");
+  Message(MESSAGE_RESULT, "Direct access\n");
+  printf("\n");
+
+  memcpy(data, current->task->storage[0].memory, 5*DIM0*5*DIM1*DIM2*sizeof(double));
+ 
+  for (i = 0; i < 5*DIM0; i++) {
+    printf("\t");
+    for (j = 0; j < 5*DIM1; j++) {
+      printf("%05.2f ", data[i][j][DIM2-1]);
+    }
+    printf("\n");
+  }
+
+  printf("\n");
+  Message(MESSAGE_RESULT, "2D Integer dataset of STORAGE_BOARD (XY only)\n");
+  Message(MESSAGE_RESULT, "Direct access\n");
+  printf("\n");
+
+  memcpy(idata, current->task->storage[1].memory, 5*DIM0*5*DIM1*sizeof(int));
+  
+  for (i = 0; i < 5*DIM0; i++) {
+    printf("\t");
+    for (j = 0; j < 5*DIM1; j++) {
+      printf("%04d ", idata[i][j]);
+    }
+    printf("\n");
+  }
+
+  printf("\n");
   return POOL_FINALIZE;
 }
 
@@ -248,7 +300,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
     for (j = 0; j < DIM1; j++) {
       for (k = 0; k < DIM2; k++) {
         cdata[i][j][k] = t->tid+1;
-        ddata[i][j][k] = t->tid;
+        ddata[i][j][k] = t->tid+k;
       }
     }
   }

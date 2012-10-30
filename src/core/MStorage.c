@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i, dims[MAX_RANK], task_groups;
+  int i, dims[MAX_RANK], task_groups, size;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -61,19 +61,25 @@ int Storage(module *m, pool *p) {
         p->task->storage[i].layout.storage_type == STORAGE_LIST) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
         dims[1] = p->task->storage[i].layout.dim[1];
-        mstat = Allocate(&(p->task->storage[i]), (size_t)(dims[0]*dims[1]),
-          p->task->storage[i].layout.datatype_size);
+        dims[2] = p->task->storage[i].layout.dim[2];
+        dims[3] = p->task->storage[i].layout.dim[3];
+        size = GetSize(p->task->storage[i].layout.rank, dims);
+        mstat = Allocate(&(p->task->storage[i]), (size_t)size, p->task->storage[i].layout.datatype_size);
       }
 
       if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
         dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
-        mstat = Allocate(&(p->task->storage[i]), (size_t)(dims[0]*dims[1]),
-           p->task->storage[i].layout.datatype_size);
+        dims[2] = p->task->storage[i].layout.dim[2];
+        dims[3] = p->task->storage[i].layout.dim[3];
+        size = GetSize(p->task->storage[i].layout.rank, dims);
+        mstat = Allocate(&(p->task->storage[i]), (size_t)size, p->task->storage[i].layout.datatype_size);
       }
 
       p->task->storage[i].layout.offset[0] = 0;
       p->task->storage[i].layout.offset[1] = 0;
+      p->task->storage[i].layout.offset[2] = 0;
+      p->task->storage[i].layout.offset[3] = 0;
 
     }
 
@@ -107,17 +113,24 @@ int Storage(module *m, pool *p) {
  * @return 0 on success, error code otherwise
  */
 int CheckLayout(int banks, storage *s) {
-  int i = 0, mstat = SUCCESS;
+  int i = 0, j = 0, mstat = SUCCESS;
 
   for (i = 0; i < banks; i++) {
-    if (s[i].layout.rank <= 0) {
-      Message(MESSAGE_ERR, "Rank must be > 0\n");
+    if (s[i].layout.rank <= 1) {
+      Message(MESSAGE_ERR, "Rank must be > 1\n");
       Error(CORE_ERR_STORAGE);
     }
 
     if (s[i].layout.rank > MAX_RANK) {
       Message(MESSAGE_ERR, "Rank must be <= %d\n", MAX_RANK);
       Error(CORE_ERR_STORAGE);
+    }
+
+    for (j = 0; j < s[i].layout.rank; j++) {
+      if (s[i].layout.dim[j] <= 0) {
+        Message(MESSAGE_ERR, "Invalid size for dimension %d = %d\n", i, s[i].layout.dim[j]);
+        Error(CORE_ERR_STORAGE);
+      }
     }
 
     if ((int)s[i].layout.datatype <= 0) {
@@ -134,6 +147,8 @@ int CheckLayout(int banks, storage *s) {
       s[i].layout.dataspace_type = H5S_SIMPLE;
       s[i].layout.offset[0] = 0; // Offsets are calculated automatically
       s[i].layout.offset[1] = 0;
+      s[i].layout.offset[2] = 0;
+      s[i].layout.offset[3] = 0;
 
       /* Check for mistakes */
       if (s[i].layout.path == NULL) {

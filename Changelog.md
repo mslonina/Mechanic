@@ -1,6 +1,15 @@
 Mechanic short changelog
 ========================
 
+2.2
+---
+
+- Support for all basic (native) datatypes
+- Multidimensional datasets (up to rank 4)
+- New memory handling, much more flexible and efficient
+- Several bug fixes and minor improvements
+- Documentation updates
+
 2.1
 ---
 

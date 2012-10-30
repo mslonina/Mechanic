@@ -92,10 +92,11 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
-  int i = 0, j = 0, k = 0, l = 0;
+  int i = 0, j = 0, k = 0;
   char path[LRC_CONFIG_LEN];
   int header[HEADER_SIZE];
   int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0;
+  int dim_offset = 0;
   size_t elements;
   task *t;
   hid_t h5location, group, tasks, datapath;
@@ -154,26 +155,36 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           offsets[2] = 0;
           offsets[3] = 0;
 
+          elements = 1;
+          for (k = 1; k < t->storage[j].layout.rank; k++) {
+            elements *= t->storage[j].layout.dim[k];
+          }
+          elements *= t->storage[j].layout.datatype_size;
+
+          dim_offset = 1;
+          for (k = 2; k < t->storage[j].layout.rank; k++) {
+            dim_offset *= t->storage[j].layout.dim[k];
+          }
+
           if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
             offsets[0] = (t->location[0] + dims[0]*t->location[1])
               * t->storage[j].layout.dim[0];
             offsets[1] = 0;
             
-            elements = t->storage[j].layout.dim[1] * t->storage[j].layout.datatype_size;
             l_offset = elements;
           }
+
           if (t->storage[j].layout.storage_type == STORAGE_LIST) {
             offsets[0] = t->tid * t->storage[j].layout.dim[0];
             offsets[1] = 0;
             
-            elements = t->storage[j].layout.dim[1] * t->storage[j].layout.datatype_size;
             l_offset = elements;
           }
+          
           if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
             offsets[0] = t->location[0] * t->storage[j].layout.dim[0];
             offsets[1] = t->location[1] * t->storage[j].layout.dim[1];
             
-            elements = t->storage[j].layout.dim[1] * t->storage[j].layout.datatype_size;
             l_offset = p->board->layout.dim[1] * elements;
           }
 
@@ -188,10 +199,10 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           /* Commit data to the pool */
           for (k = 0; k < t->storage[j].layout.dim[0]; k++) {
             k_offset = k * l_offset;
-            k_offset += t->storage[j].layout.offset[1] * t->storage[j].layout.datatype_size;
+            k_offset += t->storage[j].layout.offset[1] * dim_offset * t->storage[j].layout.datatype_size;
             k_offset += t->storage[j].layout.offset[0] * l_offset;
 
-            e_offset = k * t->storage[j].layout.dim[1] * t->storage[j].layout.datatype_size;
+            e_offset = k * elements;
             memcpy(p->task->storage[j].memory + k_offset, t->storage[j].memory + e_offset, elements);
           }
 
