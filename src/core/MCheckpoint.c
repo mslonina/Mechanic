@@ -50,7 +50,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
 
-  mstat = Allocate(c->storage, c->storage->layout.size * c->size, sizeof(char));
+  mstat = Allocate(c->storage, c->storage->layout.size * (c->size+1), sizeof(char));
   CheckStatus(mstat);
 
   CheckpointReset(m, p, c, 0);
@@ -284,7 +284,7 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
   c->cid = cid;
   c->counter = 0;
 
-  memset(c->storage->memory, 0, sizeof(char));
+  memset(&c->storage->memory, 0, sizeof(char));
 
   for (i = 0; i < c->size; i++) {
     c_offset = (int)c->storage->layout.size * i;

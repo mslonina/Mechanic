@@ -18,15 +18,16 @@ int MasterBlocking(module *m, pool *p) {
   int tag;
   int header[HEADER_SIZE] = HEADER_INIT;
   int c_offset = 0;
-  int **board_buffer;
+  int **board_buffer = NULL;
   int completed = 0, send_node;
+  int x, y;
 
   MPI_Status mpi_status;
+  
   storage *send_buffer, *recv_buffer;
+
   task *t = NULL;
   checkpoint *c = NULL;
-
-  int x,y;
 
   /* Initialize the temporary task board buffer */
   board_buffer = AllocateInt2D(p->board->layout.rank, p->board->layout.dim);

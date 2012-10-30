@@ -2,8 +2,8 @@ include_directories(. .. ../../core ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/
 set (
   farmsources
   Taskfarm.c Taskfarm.h
-  #Master.c
-  #Worker.c
+  Master.c
+  Worker.c
   MasterBlocking.c
   WorkerBlocking.c
 )
