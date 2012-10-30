@@ -1,0 +1,13 @@
+CC=mpicc -fPIC -Dpic -shared -lmechanic2 -lreadconfig -lhdf5 -lhdf5_hl
+EXT=so
+
+all:
+	${CC} mechanic_module_ex_map.c -o libmechanic_module_map.${EXT}	
+	${CC} mechanic_module_ex_mandelbrot.c -o libmechanic_module_mandelbrot.${EXT}	
+	${CC} mechanic_module_ex_setup.c -o libmechanic_module_setup.${EXT}	
+	${CC} mechanic_module_ex_prepareprocess.c -o libmechanic_module_prepareprocess.${EXT}	
+	${CC} mechanic_module_ex_createpool.c -o libmechanic_module_createpool.${EXT}		
+	${CC} mechanic_module_ex_changepoollayout.c -o libmechanic_module_chpoollayout.${EXT}		
+	${CC} mechanic_module_ex_changepoollayout2.c -o libmechanic_module_chpoollayout2.${EXT}		
+	${CC} mechanic_module_ex_datatypes.c -o libmechanic_module_datatypes.${EXT}	
+	${CC} mechanic_module_ex_dim.c -o libmechanic_module_dim.${EXT}	
