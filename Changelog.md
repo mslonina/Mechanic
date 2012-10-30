@@ -7,7 +7,7 @@ Mechanic short changelog
 - Support for all basic (native) datatypes
 - Multidimensional datasets (up to rank 4)
 - New memory handling, much more flexible and efficient
-- New advanced hooks: NodePrepare() and NodeProcess()
+- New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
 - Several bug fixes and minor improvements
 - Documentation updates
 

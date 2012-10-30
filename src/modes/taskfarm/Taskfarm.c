@@ -75,6 +75,9 @@ int Taskfarm(module *m) {
       mstat = PoolPrepare(m, p, p[pid]);
       CheckStatus(mstat);
 
+      mstat = LoopPrepare(m, p, p[pid]);
+      CheckStatus(mstat);
+      
       /**
        * The Task loop
        */
@@ -95,6 +98,9 @@ int Taskfarm(module *m) {
         CheckStatus(mstat);
       }
 
+      mstat = LoopProcess(m, p, p[pid]);
+      CheckStatus(mstat);
+      
       pool_create = PoolProcess(m, p, p[pid]);
       
       mstat = NodeProcess(m, p, p[pid]);

@@ -18,5 +18,7 @@ int Prepare(module *m);
 int Process(module *m, pool **all);
 int NodePrepare(module *m, pool **all, pool *current);
 int NodeProcess(module *m, pool **all, pool *current);
+int LoopPrepare(module *m, pool **all, pool *current);
+int LoopProcess(module *m, pool **all, pool *current);
 
 #endif

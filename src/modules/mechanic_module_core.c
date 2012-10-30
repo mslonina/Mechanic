@@ -900,7 +900,7 @@ int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
  * This hook is invoked before the PoolReset() and PoolPrepare(), after the Setup(),
  * Prepare() and Storage() hooks.
  *
- * If the NodeProcess() hook is used in a custom module, it will be used instead of the
+ * If the NodePrepare() hook is used in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup all_nodes
@@ -937,6 +937,55 @@ int NodePrepare(int mpi_size, int node, pool **all, pool *p, setup *s) {
  * @return SUCCESS or error code otherwise
  */
 int NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
+  return SUCCESS;
+} 
+
+/**
+ * @brief The task loop prepare hook
+ *
+ * This is an advanced hook. It allows to perform additional stuff, such as direct memory
+ * management or MPI communication. 
+ *
+ * This hook is invoked after the PoolReset() and PoolPrepare(), before entering the task
+ * loop.
+ *
+ * If the LoopProcess() hook is used in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup all_nodes
+ * @param mpi_size The MPI_COMM_WORLD size
+ * @param node The current node id
+ * @param all The pointer to the all pools array
+ * @param p The current pool pointer
+ * @param s The setup pointer
+ *
+ * @return SUCCESS or error code otherwise
+ */
+int LoopPrepare(int mpi_size, int node, pool **all, pool *p, setup *s) {
+  return SUCCESS;
+} 
+
+/**
+ * @brief The task loop process hook
+ *
+ * This is an advanced hook. It allows to perform additional stuff, such as direct memory
+ * management or MPI communication.
+ *
+ * This hook is invoked after the task loop is completed, before the PoolProcess().
+ *
+ * If the LoopProcess() hook is used in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup all_nodes
+ * @param mpi_size The MPI_COMM_WORLD size
+ * @param node The current node id
+ * @param all The pointer to the all pools array
+ * @param p The current pool pointer
+ * @param s The setup pointer
+ *
+ * @return SUCCESS or error code otherwise
+ */
+int LoopProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
   return SUCCESS;
 } 
 

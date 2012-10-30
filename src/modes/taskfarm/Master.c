@@ -17,7 +17,7 @@ int Master(module *m, pool *p) {
   int i = 0, k = 0, cid = 0, terminated_nodes = 0;
   int tag;
   int header[HEADER_SIZE] = HEADER_INIT;
-  int c_offset = 0, d_offset = 0;
+  int c_offset = 0;
   int **board_buffer = NULL;
   int completed = 0;
   int *intags, index = 0, req_flag, send_node;
