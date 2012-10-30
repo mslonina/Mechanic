@@ -16,5 +16,7 @@
 void Welcome();
 int Prepare(module *m);
 int Process(module *m, pool **all);
+int NodePrepare(module *m, pool **all, pool *current);
+int NodeProcess(module *m, pool **all, pool *current);
 
 #endif

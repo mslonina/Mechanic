@@ -61,7 +61,12 @@ int Taskfarm(module *m) {
       if (m->node == MASTER) {
         Message(MESSAGE_INFO, "Entering the pool %04d\n", p[pid]->pid);
       }
+      
       time_in = clock();
+      
+      mstat = NodePrepare(m, p, p[pid]);
+      CheckStatus(mstat);
+      
       if (m->mode != RESTART_MODE) {
         mstat = PoolReset(m, p[pid]);
         CheckStatus(mstat);
@@ -90,6 +95,10 @@ int Taskfarm(module *m) {
       }
 
       pool_create = PoolProcess(m, p, p[pid]);
+      
+      mstat = NodeProcess(m, p, p[pid]);
+      CheckStatus(mstat);
+      
       p[pid]->rid++;
       time_out = clock();
       cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;

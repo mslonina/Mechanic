@@ -54,3 +54,45 @@ int Process(module *m, pool **p) {
   return mstat;
 }
 
+/**
+ * @brief The Node prepare hook
+ *
+ * @param m The module pointer
+ * @param all The pointer to the all pools
+ * @param current The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
+ */
+int NodePrepare(module *m, pool **all, pool *current) {
+  int mstat = SUCCESS;
+  setup *s = &(m->layer.setup);
+  query *q;
+
+  q = LoadSym(m, "NodePrepare", LOAD_DEFAULT);
+  if (q) mstat = q(m->mpi_size, m->node, all, current, s);
+  CheckStatus(mstat);
+
+  return mstat;
+}
+
+/**
+ * @brief The Node process hook
+ *
+ * @param m The module pointer
+ * @param all The pointer to the all pools
+ * @param current The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
+ */
+int NodeProcess(module *m, pool **all, pool *current) {
+  int mstat = SUCCESS;
+  setup *s = &(m->layer.setup);
+  query *q;
+
+  q = LoadSym(m, "NodeProcess", LOAD_DEFAULT);
+  if (q) mstat = q(m->mpi_size, m->node, all, current, s);
+  CheckStatus(mstat);
+
+  return mstat;
+}
+

@@ -887,9 +887,58 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
  *
  * @return SUCCESS or error code otherwise
  */
-
 int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
   return SUCCESS;
 }
+
+/**
+ * @brief The node prepare hook
+ *
+ * This is an advanced hook. It allows to perform additional stuff, such as direct memory
+ * management or MPI communication. 
+ *
+ * This hook is invoked before the PoolReset() and PoolPrepare(), after the Setup(),
+ * Prepare() and Storage() hooks.
+ *
+ * If the NodeProcess() hook is used in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup all_nodes
+ * @param mpi_size The MPI_COMM_WORLD size
+ * @param node The current node id
+ * @param all The pointer to the all pools array
+ * @param p The current pool pointer
+ * @param s The setup pointer
+ *
+ * @return SUCCESS or error code otherwise
+ */
+int NodePrepare(int mpi_size, int node, pool **all, pool *p, setup *s) {
+  return SUCCESS;
+} 
+
+/**
+ * @brief The node process hook
+ *
+ * This is an advanced hook. It allows to perform additional stuff, such as direct memory
+ * management or MPI communication.
+ *
+ * This hook is invoked after the PoolProcess().
+ *
+ * If the NodeProcess() hook is used in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup all_nodes
+ * @param mpi_size The MPI_COMM_WORLD size
+ * @param node The current node id
+ * @param all The pointer to the all pools array
+ * @param p The current pool pointer
+ * @param s The setup pointer
+ *
+ * @return SUCCESS or error code otherwise
+ */
+int NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
+  return SUCCESS;
+} 
+
 /** @} */
 
