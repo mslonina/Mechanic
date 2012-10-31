@@ -22,6 +22,7 @@ src/old/*.*
 *.tgz
 *.mod
 *.so
+*.dylib
 *.pyc
 *.log
 *.aux
@@ -39,3 +40,4 @@ doxygen.sty
 gitlog2changelog.py
 *.h5
 !config.h.in
+layout.md
