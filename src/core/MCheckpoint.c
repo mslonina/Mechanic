@@ -18,10 +18,10 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   checkpoint *c = NULL;
 
   /* Allocate checkpoint pointer */
-  c = calloc(sizeof(checkpoint), sizeof(checkpoint));
+  c = calloc(1, sizeof(checkpoint));
   if (!c) Error(CORE_ERR_MEM);
 
-  c->storage = calloc(sizeof(storage), sizeof(storage));
+  c->storage = calloc(1, sizeof(storage));
   if (!c->storage) Error(CORE_ERR_MEM);
 
   c->storage->layout = (schema) STORAGE_END;
@@ -296,7 +296,7 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
  * @param c The checkpoint pointer
  */
 void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
-  if (c->storage->memory) Free(c->storage);
+  if (c->storage->memory) free(c->storage->memory);
   if (c) free(c);
 }
 

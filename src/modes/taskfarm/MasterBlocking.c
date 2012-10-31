@@ -24,7 +24,7 @@ int MasterBlocking(module *m, pool *p) {
 
   MPI_Status mpi_status;
   
-  storage *send_buffer, *recv_buffer;
+  storage *send_buffer = NULL, *recv_buffer = NULL;
 
   task *t = NULL;
   checkpoint *c = NULL;
@@ -50,10 +50,10 @@ int MasterBlocking(module *m, pool *p) {
   }
 
   /* Data buffers */
-  send_buffer = calloc(sizeof(storage), sizeof(storage));
+  send_buffer = calloc(1, sizeof(storage));
   if (!send_buffer) Error(CORE_ERR_MEM);
 
-  recv_buffer = calloc(sizeof(storage), sizeof(storage));
+  recv_buffer = calloc(1, sizeof(storage));
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
   /* Initialize the task and checkpoint */

@@ -132,22 +132,22 @@ int ModuleInit(module *m) {
   opts = m->layer.init.options;
   if (m->fallback.handler) opts = opts + m->fallback.init.options;
 
-  m->layer.setup.options = calloc(opts*sizeof(LRC_configDefaults), sizeof(LRC_configDefaults));
+  m->layer.setup.options = calloc(opts, sizeof(LRC_configDefaults));
   if (!m->layer.setup.options) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt = calloc(sizeof(popt), sizeof(popt));
+  m->layer.setup.popt = calloc(1, sizeof(popt));
   if (!m->layer.setup.popt) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->popt = calloc(3*opts*sizeof(struct poptOption), sizeof(struct poptOption));
+  m->layer.setup.popt->popt = calloc(3*opts, sizeof(struct poptOption));
   if (!m->layer.setup.popt->popt) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->string_args = calloc(3*opts*sizeof(char), sizeof(char));
+  m->layer.setup.popt->string_args = calloc(3*opts, sizeof(char));
   if (!m->layer.setup.popt->string_args) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->int_args = calloc(3*opts*sizeof(int), sizeof(int));
+  m->layer.setup.popt->int_args = calloc(3*opts, sizeof(int));
   if (!m->layer.setup.popt->int_args) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->double_args = calloc(3*opts*sizeof(double), sizeof(double));
+  m->layer.setup.popt->double_args = calloc(3*opts, sizeof(double));
   if (!m->layer.setup.popt->double_args) Error(CORE_ERR_MEM);
 
   m->layer.setup.head = NULL;

@@ -19,13 +19,13 @@ task* TaskLoad(module *m, pool *p, int tid) {
   task* t = NULL;
 
   /* Allocate the task pointer */
-  t = calloc(sizeof(task), sizeof(task));
+  t = calloc(1, sizeof(task));
   if (!t) Error(CORE_ERR_MEM);
 
   t->pid = p->pid;
   t->tid = tid;
 
-  t->storage = calloc(m->layer.init.banks_per_task * sizeof(storage), sizeof(storage));
+  t->storage = calloc(m->layer.init.banks_per_task, sizeof(storage));
   if (!t->storage) Error(CORE_ERR_MEM);
 
   /* Initialize task banks */
@@ -42,7 +42,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
     if (t->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.path != NULL) {
         len = strlen(p->task->storage[i].layout.path);
-        t->storage[i].layout.path = calloc((len+1) * sizeof(char), sizeof(char));
+        t->storage[i].layout.path = calloc(len+1, sizeof(char));
         if (!t->storage[i].layout.path) Error(CORE_ERR_MEM);
 
         strncpy(t->storage[i].layout.path, p->task->storage[i].layout.path, len);

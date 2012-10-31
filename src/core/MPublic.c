@@ -100,9 +100,9 @@ double** AllocateDouble2D(int rank, int *dims) {
   size = GetSize(rank, dims);
 
   if (size > 0) {
-    array = calloc(dims[0]*sizeof(double*), sizeof(double*));
+    array = calloc(dims[0], sizeof(double*));
     if (array) {
-      array[0] = calloc(size*sizeof(double), sizeof(double));
+      array[0] = calloc(size, sizeof(double));
       for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
     }
   }
@@ -128,9 +128,9 @@ int** AllocateInt2D(int rank, int *dims) {
   size = GetSize(rank, dims);
 
   if (size > 0) {
-    array = calloc(dims[0]*sizeof(int*), sizeof(int*));
+    array = calloc(dims[0], sizeof(int*));
     if (array) {
-      array[0] = calloc(size*sizeof(int), sizeof(int));
+      array[0] = calloc(size, sizeof(int));
       for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
     }
   }

@@ -31,6 +31,7 @@ int Master(module *m, pool *p) {
 
   task *t = NULL;
   checkpoint *c = NULL;
+  char *taddr = NULL;
 
   /* Initialize the temporary task board buffer */
   board_buffer = AllocateInt2D(p->board->layout.rank, p->board->layout.dim);
@@ -241,6 +242,12 @@ int Master(module *m, pool *p) {
   if (send_request) free(send_request);
   if (recv_status) free(recv_status);
   if (recv_request) free(recv_request);
+
+  //taddr = send_buffer[1].memory;
+  //memcpy(header, &taddr, sizeof(int) * (HEADER_SIZE));
+  //printf("header %d %d %d %d\n", header[0], header[1], header[2], header[3]);
+  //free(send_buffer[0].memory);
+  //free(send_buffer[1].memory);
 
   if (send_buffer) {
   //  for (i = 0; i < m->mpi_size; i++) {

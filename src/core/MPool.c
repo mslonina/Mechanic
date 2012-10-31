@@ -17,11 +17,11 @@ pool* PoolLoad(module *m, int pid) {
   pool *p = NULL;
 
   /* Allocate pool pointer */
-  p = calloc(sizeof(pool), sizeof(pool));
+  p = calloc(1, sizeof(pool));
   if (!p) Error(CORE_ERR_MEM);
 
   /* Allocate pool data banks */
-  p->storage = calloc(m->layer.init.banks_per_pool * sizeof(storage), sizeof(storage));
+  p->storage = calloc(m->layer.init.banks_per_pool, sizeof(storage));
   if (!p->storage) Error(CORE_ERR_MEM);
 
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
@@ -30,17 +30,17 @@ pool* PoolLoad(module *m, int pid) {
   }
 
   /* Allocate task board pointer */
-  p->board = calloc(sizeof(storage), sizeof(storage));
+  p->board = calloc(1, sizeof(storage));
   if (!p->board) Error(CORE_ERR_MEM);
 
   p->board->layout = (schema) STORAGE_END;
   p->board->memory = NULL;
 
   /* Allocate task pointer */
-  p->task = calloc(sizeof(task), sizeof(task));
+  p->task = calloc(1, sizeof(task));
   if (!p->task) Error(CORE_ERR_MEM);
 
-  p->task->storage = calloc(m->layer.init.banks_per_task * sizeof(storage), sizeof(storage));
+  p->task->storage = calloc(m->layer.init.banks_per_task, sizeof(storage));
   if (!p->task->storage) Error(CORE_ERR_MEM);
 
   for (i = 0; i < m->layer.init.banks_per_task; i++) {

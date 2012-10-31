@@ -89,7 +89,7 @@ int Storage(module *m, pool *p) {
 
     /* @todo FIX IT! THIS PART IS TRAGIC FOR MEMORY ALLOCATION IN HUGE RUNS */
     if (task_groups) {
-      p->tasks = calloc(p->pool_size * sizeof(task*), sizeof(task*));
+      p->tasks = calloc(p->pool_size, sizeof(task));
       for (i = 0; i < p->pool_size; i++) {
         p->tasks[i] = TaskLoad(m, p, i);
       }
@@ -394,7 +394,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
       dataspace = H5Dget_space(dataset);
       H5CheckStatus(dataspace);
 
-      buffer = calloc((size_t)s[i].layout.elements, s[i].layout.datatype_size);
+      buffer = calloc(s[i].layout.elements, s[i].layout.datatype_size);
       ReadData(&s[i], buffer);
 
       /* Whole dataset at once */
@@ -452,7 +452,7 @@ int ReadDataset(hid_t h5location, int banks, storage *s, int size) {
       if (size > 1) {
         elements *= size;
       }
-      buffer = calloc((size_t)elements, s[i].layout.datatype_size);
+      buffer = calloc(elements, s[i].layout.datatype_size);
 
       Message(MESSAGE_DEBUG, "Read Data storage path: %s\n", s[i].layout.path);
       dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
