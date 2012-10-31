@@ -64,6 +64,7 @@ int WorkerBlocking(module *m, pool *p) {
       CheckStatus(mstat);
 
       t->status = TASK_FINISHED;
+      tag = TAG_RESULT;
 
       mstat = Pack(m, send_buffer->memory, p, t, tag);
       CheckStatus(mstat);

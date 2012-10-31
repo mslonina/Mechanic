@@ -82,7 +82,7 @@ int MasterBlocking(module *m, pool *p) {
       board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
     } else {
       tag = TAG_TERMINATE;
-      memcpy(&send_buffer->memory, &tag, sizeof(int));
+      memcpy(send_buffer->memory, &tag, sizeof(int));
       terminated_nodes++;
     }
 
@@ -118,8 +118,10 @@ int MasterBlocking(module *m, pool *p) {
     /* Get the data header */
     memcpy(header, recv_buffer->memory, sizeof(int) * (HEADER_SIZE));
 
-    c_offset = c->counter*(int)recv_buffer->layout.size;
-    memcpy(c->storage->memory + c_offset, recv_buffer->memory, recv_buffer->layout.size);
+    if (header[0] == TAG_RESULT) {
+      c_offset = c->counter*(int)recv_buffer->layout.size;
+      memcpy(c->storage->memory + c_offset, recv_buffer->memory, recv_buffer->layout.size);
+    }
 
     board_buffer[header[3]][header[4]] = header[2];
 

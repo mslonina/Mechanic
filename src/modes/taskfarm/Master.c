@@ -22,6 +22,7 @@ int Master(module *m, pool *p) {
   int completed = 0;
   int *intags, index = 0, req_flag, send_node;
   int x, y;
+  int send_buffer_size = 0, recv_buffer_size = 0;
 
   storage *send_buffer, *recv_buffer;
 
@@ -82,17 +83,20 @@ int Master(module *m, pool *p) {
   c = CheckpointLoad(m, p, 0);
 
   /* Initialize data buffers */
+    
+  send_buffer[i].layout.size = sizeof(int) * (HEADER_SIZE);
+
+  send_buffer_size = sizeof(int)*(HEADER_SIZE);
+  for (k = 0; k < m->task_banks; k++) {
+    send_buffer_size +=
+      GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
+  }
+
+  recv_buffer_size = send_buffer_size;
   for (i = 0; i < m->mpi_size; i++) {
-    send_buffer[i].layout.size = sizeof(int) * (HEADER_SIZE);
-    for (k = 0; k < m->task_banks; k++) {
-      send_buffer[i].layout.size +=
-        GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
-    }
+    mstat = Allocate(&send_buffer[i], (size_t)send_buffer_size, sizeof(char));
 
-    mstat = Allocate(&send_buffer[i], send_buffer[i].layout.size * (m->mpi_size-1), sizeof(char));
-
-    recv_buffer[i].layout.size = send_buffer[i].layout.size;
-    mstat = Allocate(&recv_buffer[i], recv_buffer[i].layout.size * (m->mpi_size-1), sizeof(char));
+    mstat = Allocate(&recv_buffer[i], (size_t)recv_buffer_size, sizeof(char));
   }
 
   /* Send initial tasks to all workers */
@@ -106,13 +110,13 @@ int Master(module *m, pool *p) {
       board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
     } else {
       tag = TAG_TERMINATE;
-      memcpy(&send_buffer[i].memory[0], &tag, sizeof(int));
+      memcpy(&send_buffer[i].memory, &tag, sizeof(int));
       terminated_nodes++;
     }
 
-    MPI_Isend(&send_buffer[i].memory, send_buffer[i].layout.size, MPI_CHAR,
+    MPI_Isend(&send_buffer[i].memory, send_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
-    MPI_Irecv(&recv_buffer[i].memory, recv_buffer[i].layout.size, MPI_CHAR,
+    MPI_Irecv(&recv_buffer[i].memory, recv_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
   }
   
@@ -149,12 +153,15 @@ int Master(module *m, pool *p) {
       /* Get the data header */
       memcpy(header, &recv_buffer[send_node].memory, sizeof(int) * (HEADER_SIZE));
     
-      c_offset = c->counter*(int)recv_buffer[send_node].layout.size;
-      memcpy(c->storage->memory + c_offset, &recv_buffer[send_node].memory, recv_buffer[send_node].layout.size);
+      if (header[0] == TAG_RESULT) {
+        c_offset = c->counter*recv_buffer_size;
+        memcpy(c->storage->memory + c_offset, &recv_buffer[send_node].memory, (size_t)recv_buffer_size);
+      }
 
       board_buffer[header[3]][header[4]] = header[2];
 
       c->counter++;
+      completed++;
 
       mstat = GetNewTask(m, p, t, board_buffer);
       CheckStatus(mstat);
@@ -163,42 +170,47 @@ int Master(module *m, pool *p) {
 
         mstat = Pack(m, &send_buffer[send_node].memory, p, t, TAG_DATA);
         CheckStatus(mstat);
+        board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
 
-        MPI_Isend(&send_buffer[send_node].memory, send_buffer[send_node].layout.size, MPI_CHAR,
+        MPI_Isend(&send_buffer[send_node].memory, send_buffer_size, MPI_CHAR,
             send_node, intags[send_node], MPI_COMM_WORLD, &send_request[index]);
-        MPI_Irecv(&recv_buffer[send_node].memory, recv_buffer[send_node].layout.size, MPI_CHAR,
+        MPI_Irecv(&recv_buffer[send_node].memory, recv_buffer_size, MPI_CHAR,
             send_node, intags[send_node], MPI_COMM_WORLD, &recv_request[index]);
 
         MPI_Wait(&send_request[index], &send_status[index]);
       }
     }
+    
     if (index == MPI_UNDEFINED) break;
   }
-
+  
   WriteData(p->board, board_buffer[0]);
   mstat = CheckpointPrepare(m, p, c);
   CheckStatus(mstat);
 
   mstat = CheckpointProcess(m, p, c);
   CheckStatus(mstat);
+
+/*
+  goto finalize;
 
   cid++;
   CheckpointReset(m, p, c, cid);
 
-  /* Receive outstanding data */
+  // Receive outstanding data 
   MPI_Waitall(m->mpi_size - 1, send_request, send_status);
   MPI_Waitall(m->mpi_size - 1, recv_request, recv_status);
-
+  
   for (i = 1; i < m->mpi_size; i++) {
-    memcpy(header, &recv_buffer[i].memory, sizeof(int) * (HEADER_SIZE));
+    //memcpy(header, &recv_buffer[i].memory, sizeof(int) * (HEADER_SIZE));
     
-    c_offset = (i-1)*(int)recv_buffer[i].layout.size;
-    memcpy(c->storage->memory + c_offset, &recv_buffer[i].memory, recv_buffer[i].layout.size);
+    c_offset = (i-1)*recv_buffer_size;
+ //   memcpy(c->storage->memory + c_offset, &recv_buffer[i].memory, (size_t)recv_buffer_size);
 
     board_buffer[header[3]][header[4]] = header[2];
   }
 
-  /* Process the last checkpoint */
+  // Process the last checkpoint 
   WriteData(p->board, board_buffer[0]);
   mstat = CheckpointPrepare(m, p, c);
   CheckStatus(mstat);
@@ -206,17 +218,16 @@ int Master(module *m, pool *p) {
   mstat = CheckpointProcess(m, p, c);
   CheckStatus(mstat);
 
-  /* Terminate all workers */
+*/
   
+  /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
     tag = TAG_TERMINATE;
     memcpy(&send_buffer[i].memory, &tag, sizeof(int));
 
-//    MPI_Send(&send_buffer[1].memory, send_buffer->layout.size, MPI_CHAR,
-//        i, TAG_DATA, MPI_COMM_WORLD);
-    MPI_Isend(&send_buffer[i].memory, send_buffer[i].layout.size, MPI_CHAR,
+    MPI_Isend(&send_buffer[i].memory, send_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
-    MPI_Irecv(&recv_buffer[i].memory, recv_buffer[i].layout.size, MPI_CHAR,
+    MPI_Irecv(&recv_buffer[i].memory, recv_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
 
   }
@@ -234,20 +245,17 @@ int Master(module *m, pool *p) {
   if (recv_status) free(recv_status);
   if (recv_request) free(recv_request);
 
-  return mstat;
-  
   if (send_buffer) {
-    for (i = 0; i < m->mpi_size; i++) {
-      if (&(send_buffer[i].memory)) printf("freeing\n"); Free(&send_buffer[i]);
-    }
-  MPI_Barrier(MPI_COMM_WORLD);
+  //  for (i = 0; i < m->mpi_size; i++) {
+  //    if (send_buffer[i].memory) Free(&send_buffer[i]);
+  //  }
     free(send_buffer);
   }
 
   if (recv_buffer) {
-    for (i = 0; i < m->mpi_size; i++) {
-      if (recv_buffer[i].memory) Free(&recv_buffer[i]);
-    }
+  //  for (i = 0; i < m->mpi_size; i++) {
+  //    if (recv_buffer[i].memory) Free(&recv_buffer[i]);
+  //  }
     free(recv_buffer);
   }
 

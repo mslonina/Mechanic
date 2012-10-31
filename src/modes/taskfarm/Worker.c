@@ -66,9 +66,9 @@ int Worker(module *m, pool *p) {
       mstat = TaskProcess(m, p, t);
       CheckStatus(mstat);
 
+      t->status = TASK_FINISHED;
+      tag = TAG_RESULT;
     }
-
-    t->status = TASK_FINISHED;
 
     mstat = Pack(m, &send_buffer->memory, p, t, tag);
     CheckStatus(mstat);
@@ -77,33 +77,25 @@ int Worker(module *m, pool *p) {
         MASTER, intag, MPI_COMM_WORLD, &send_request);
     MPI_Wait(&send_request, &send_status);
 
-    if (tag == TAG_TERMINATE) {
-      printf("received terminate tag\n");
-      break;
-    }
+    if (tag == TAG_TERMINATE) break;
 
   }
-  printf("Worker %d while end\n", m->node);
 
   /* Finalize */
   CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
 
-  //free(&(send_buffer->memory[0]));
-  printf("Worker %d\n terminated\n", m->node);
-  return mstat;
-
   if (send_buffer) {
-    if (send_buffer->memory) free(send_buffer->memory); //Free(send_buffer);
+   // if (send_buffer->memory) free(send_buffer->memory); //Free(send_buffer);
     free(send_buffer);
   }
 
   if (recv_buffer) {
-    if (recv_buffer->memory) free(send_buffer->memory); //Free(recv_buffer);
+    //if (recv_buffer->memory) Free(recv_buffer);
+    //free(&(recv_buffer->memory));
     free(recv_buffer);
   }
 
-  printf("Worker %d\n terminated\n", m->node);
   return mstat;
 }
 
