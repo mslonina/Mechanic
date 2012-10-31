@@ -60,7 +60,7 @@
 #define POOL_CREATE_NEW 1003 /**< The pool create new return code */
 
 /* Storage */
-#define MAX_RANK 4 /**< The maximum dataset rank */
+#define MAX_RANK H5S_MAX_RANK /**< The maximum dataset rank */
 #define STORAGE_GROUP 11 /**< The basic data storage type */
 #define STORAGE_PM3D 12 /**< The pm3d data storage type */
 #define STORAGE_BOARD 13 /**< The board data storage type */

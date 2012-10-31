@@ -92,7 +92,7 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
-  int i = 0, j = 0, k = 0;
+  int i = 0, j = 0, k = 0, l = 0;
   char path[LRC_CONFIG_LEN];
   int header[HEADER_SIZE];
   int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0;
@@ -133,10 +133,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         p->task->storage[j].layout.storage_type == STORAGE_LIST ||
         p->task->storage[j].layout.storage_type == STORAGE_BOARD) {
 
-      dims[0] = p->board->layout.dim[0];
-      dims[1] = p->board->layout.dim[1];
-      dims[2] = p->board->layout.dim[2];
-      dims[3] = p->board->layout.dim[3];
+      for (l = 0; l < MAX_RANK; l++) {
+        dims[l] = p->board->layout.dim[l];
+      }
 
       for (i = 0; i < c->size; i++) {
 
@@ -150,10 +149,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
         if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
 
-          offsets[0] = 0;
-          offsets[1] = 0;
-          offsets[2] = 0;
-          offsets[3] = 0;
+          for (l = 0; l < MAX_RANK; l++) {
+            offsets[l] = 0;
+          }
 
           elements = 1;
           for (k = 1; k < t->storage[j].layout.rank; k++) {
@@ -188,10 +186,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             l_offset = p->board->layout.dim[1] * elements;
           }
 
-          t->storage[j].layout.offset[0] = offsets[0];
-          t->storage[j].layout.offset[1] = offsets[1];
-          t->storage[j].layout.offset[2] = offsets[2];
-          t->storage[j].layout.offset[3] = offsets[3];
+          for (l = 0; l < MAX_RANK; l++) {
+            t->storage[j].layout.offset[l] = offsets[l];
+          }
 
           c_offset = (int)c->storage->layout.size*i + (int)sizeof(int)*(HEADER_SIZE);
           memcpy(t->storage[j].memory, c->storage->memory+c_offset+d_offset, t->storage[j].layout.size);
@@ -226,10 +223,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[0] = header[3];
         t->location[1] = header[4];
 
-        t->storage[j].layout.offset[0] = 0;
-        t->storage[j].layout.offset[1] = 0;
-        t->storage[j].layout.offset[2] = 0;
-        t->storage[j].layout.offset[3] = 0;
+        for (l = 0; l < MAX_RANK; l++) {
+          t->storage[j].layout.offset[l] = 0;
+        }
 
         if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
 

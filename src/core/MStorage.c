@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i, dims[MAX_RANK], task_groups, size;
+  int i, j, dims[MAX_RANK], task_groups, size;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -60,9 +60,11 @@ int Storage(module *m, pool *p) {
       if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[i].layout.storage_type == STORAGE_LIST) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
-        dims[1] = p->task->storage[i].layout.dim[1];
-        dims[2] = p->task->storage[i].layout.dim[2];
-        dims[3] = p->task->storage[i].layout.dim[3];
+        
+        for (j = 1; j < MAX_RANK; j++) {
+          dims[j] = p->task->storage[i].layout.dim[j];
+        }
+        
         size = GetSize(p->task->storage[i].layout.rank, dims);
         mstat = Allocate(&(p->task->storage[i]), (size_t)size, p->task->storage[i].layout.datatype_size);
       }
@@ -70,16 +72,18 @@ int Storage(module *m, pool *p) {
       if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
         dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
         dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
-        dims[2] = p->task->storage[i].layout.dim[2];
-        dims[3] = p->task->storage[i].layout.dim[3];
+
+        for (j = 2; j < MAX_RANK; j++) {
+          dims[j] = p->task->storage[i].layout.dim[j];
+        }
+        
         size = GetSize(p->task->storage[i].layout.rank, dims);
         mstat = Allocate(&(p->task->storage[i]), (size_t)size, p->task->storage[i].layout.datatype_size);
       }
 
-      p->task->storage[i].layout.offset[0] = 0;
-      p->task->storage[i].layout.offset[1] = 0;
-      p->task->storage[i].layout.offset[2] = 0;
-      p->task->storage[i].layout.offset[3] = 0;
+      for (j = 0; j < MAX_RANK; j++) {
+        p->task->storage[i].layout.offset[j] = 0;
+      }
 
     }
 
@@ -145,10 +149,9 @@ int CheckLayout(int banks, storage *s) {
 
     if (s[i].layout.use_hdf) {
       s[i].layout.dataspace_type = H5S_SIMPLE;
-      s[i].layout.offset[0] = 0; // Offsets are calculated automatically
-      s[i].layout.offset[1] = 0;
-      s[i].layout.offset[2] = 0;
-      s[i].layout.offset[3] = 0;
+      for (j = 0; j < MAX_RANK; j++) {
+        s[i].layout.offset[j] = 0; // Offsets are calculated automatically
+      }
 
       /* Check for mistakes */
       if (s[i].layout.path == NULL) {
@@ -299,7 +302,7 @@ int CommitStorageLayout(module *m, pool *p) {
  * @return 0 on success, error code otherwise
  */
 int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
-  int mstat = SUCCESS;
+  int mstat = SUCCESS, i;
   query *q;
   setup *o = &(m->layer.setup);
   hid_t h5dataset, h5dataspace;
@@ -310,23 +313,23 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   H5CheckStatus(h5dataspace);
   if (s->layout.dataspace_type == H5S_SIMPLE) {
     if (s->layout.storage_type == STORAGE_GROUP) {
-      dims[0] = s->layout.dim[0];
-      dims[1] = s->layout.dim[1];
-      dims[2] = s->layout.dim[2];
-      dims[3] = s->layout.dim[3];
+      for (i = 0; i < MAX_RANK; i++) {
+        dims[i] = s->layout.dim[i];
+      }
     }
     if (s->layout.storage_type == STORAGE_PM3D ||
         s->layout.storage_type == STORAGE_LIST) {
       dims[0] = s->layout.dim[0] * p->pool_size;
-      dims[1] = s->layout.dim[1];
-      dims[2] = s->layout.dim[2];
-      dims[3] = s->layout.dim[3];
+      for (i = 1; i < MAX_RANK; i++) {
+        dims[i] = s->layout.dim[i];
+      }
     }
     if (s->layout.storage_type == STORAGE_BOARD) {
       dims[0] = s->layout.dim[0] * p->board->layout.dim[0];
       dims[1] = s->layout.dim[1] * p->board->layout.dim[1];
-      dims[2] = s->layout.dim[2];
-      dims[3] = s->layout.dim[3];
+      for (i = 2; i < MAX_RANK; i++) {
+        dims[i] = s->layout.dim[i];
+      }
     }
     h5status = H5Sset_extent_simple(h5dataspace, s->layout.rank, dims, NULL);
     H5CheckStatus(h5status);
@@ -377,7 +380,7 @@ int GetBanks(int allocated_banks, storage *s) {
  * @return 0 on success, error code otherwise
  */
 int CommitData(hid_t h5location, int banks, storage *s) {
-  int mstat = SUCCESS, i = 0;
+  int mstat = SUCCESS, i = 0, j = 0;
   hid_t dataspace, dataset, memspace;
   herr_t hdf_status = 0;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
@@ -402,14 +405,10 @@ int CommitData(hid_t h5location, int banks, storage *s) {
         H5CheckStatus(hdf_status);
 
       } else {
-        dims[0] = s[i].layout.dim[0];
-        dims[1] = s[i].layout.dim[1];
-        dims[2] = s[i].layout.dim[2];
-        dims[3] = s[i].layout.dim[3];
-        offsets[0] = s[i].layout.offset[0];
-        offsets[1] = s[i].layout.offset[1];
-        offsets[2] = s[i].layout.offset[2];
-        offsets[3] = s[i].layout.offset[3];
+        for (j = 0; j < MAX_RANK; j++) {
+          dims[j] = s[i].layout.dim[j];
+          offsets[j] = s[i].layout.offset[j];
+        }
 
         memspace = H5Screate_simple(s[i].layout.rank, dims, NULL);
         H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, dims, NULL);
