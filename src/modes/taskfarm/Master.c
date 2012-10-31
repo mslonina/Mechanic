@@ -256,6 +256,10 @@ int Master(module *m, pool *p) {
     free(recv_buffer);
   }
 
+  if (board_buffer) {
+    FreeIntBuffer(board_buffer);
+  }
+
   return mstat;
 }
 
