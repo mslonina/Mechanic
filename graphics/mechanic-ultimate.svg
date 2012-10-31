@@ -14,24 +14,12 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.2 r9819"
-   sodipodi:docname="mechanic-promoslide.svg"
-   inkscape:export-filename="/Volumes/Data/mechanic-promoslide.png"
+   sodipodi:docname="mechanic-ultimate.svg"
+   inkscape:export-filename="/Volumes/Data/mechanic-ultimate.png"
    inkscape:export-xdpi="300"
    inkscape:export-ydpi="300">
   <defs
      id="defs4">
-    <filter
-       inkscape:collect="always"
-       id="filter3920"
-       x="-0.0061892665"
-       width="1.0123785"
-       y="-0.196208"
-       height="1.392416">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="1.078163"
-         id="feGaussianBlur3922" />
-    </filter>
     <filter
        inkscape:collect="always"
        id="filter4144">
@@ -83,14 +71,14 @@
   </defs>
   <sodipodi:namedview
      id="base"
-     pagecolor="#00aad4"
+     pagecolor="#68a0d0"
      bordercolor="#666666"
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.47"
-     inkscape:cx="265.02294"
-     inkscape:cy="190.57348"
+     inkscape:zoom="1.26"
+     inkscape:cx="645.97532"
+     inkscape:cy="285.81158"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
