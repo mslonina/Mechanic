@@ -66,9 +66,10 @@ int MasterBlocking(module *m, pool *p) {
     send_buffer->layout.size +=
       GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
   }
-  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
 
   recv_buffer->layout.size = send_buffer->layout.size;
+  
+  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
   mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
 
   /* Send initial tasks to all workers */
@@ -86,7 +87,7 @@ int MasterBlocking(module *m, pool *p) {
       terminated_nodes++;
     }
 
-    MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
+    MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
   }
 
@@ -110,7 +111,7 @@ int MasterBlocking(module *m, pool *p) {
     }
 
     /* Wait for any operation to complete */
-    MPI_Recv(&(recv_buffer->memory[0]), recv_buffer->layout.size, MPI_CHAR,
+    MPI_Recv(&(recv_buffer->memory[0]), (int)recv_buffer->layout.size, MPI_CHAR,
       MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
 
       send_node = mpi_status.MPI_SOURCE;
@@ -138,7 +139,7 @@ int MasterBlocking(module *m, pool *p) {
 
       board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
 
-      MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
+      MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
           send_node, TAG_DATA, MPI_COMM_WORLD);
 
     }
@@ -158,7 +159,7 @@ int MasterBlocking(module *m, pool *p) {
     tag = TAG_TERMINATE;
     memcpy(send_buffer->memory, &tag, sizeof(int));
 
-    MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
+    MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
 
   }

@@ -83,9 +83,6 @@ int Master(module *m, pool *p) {
   c = CheckpointLoad(m, p, 0);
 
   /* Initialize data buffers */
-    
-  send_buffer[i].layout.size = sizeof(int) * (HEADER_SIZE);
-
   send_buffer_size = sizeof(int)*(HEADER_SIZE);
   for (k = 0; k < m->task_banks; k++) {
     send_buffer_size +=
@@ -93,9 +90,9 @@ int Master(module *m, pool *p) {
   }
 
   recv_buffer_size = send_buffer_size;
+
   for (i = 0; i < m->mpi_size; i++) {
     mstat = Allocate(&send_buffer[i], (size_t)send_buffer_size, sizeof(char));
-
     mstat = Allocate(&recv_buffer[i], (size_t)recv_buffer_size, sizeof(char));
   }
 
@@ -192,8 +189,8 @@ int Master(module *m, pool *p) {
   CheckStatus(mstat);
 
 /*
-  goto finalize;
-
+  // This part is marked for removal, I am not sure whether it is really needed now, some
+  // deep cluster testing is needed here
   cid++;
   CheckpointReset(m, p, c, cid);
 

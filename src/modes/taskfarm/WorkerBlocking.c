@@ -40,14 +40,15 @@ int WorkerBlocking(module *m, pool *p) {
     send_buffer->layout.size +=
       GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
   }
-  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
 
   recv_buffer->layout.size = send_buffer->layout.size;
+  
+  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
   mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
 
   while (1) {
 
-    MPI_Recv(&(recv_buffer->memory[0]), recv_buffer->layout.size, MPI_CHAR,
+    MPI_Recv(&(recv_buffer->memory[0]), (int)recv_buffer->layout.size, MPI_CHAR,
         MASTER, MPI_ANY_TAG, MPI_COMM_WORLD, &recv_status);
 
     mstat = Unpack(m, recv_buffer->memory, p, t, &tag);
@@ -69,7 +70,7 @@ int WorkerBlocking(module *m, pool *p) {
       mstat = Pack(m, send_buffer->memory, p, t, tag);
       CheckStatus(mstat);
 
-      MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
+      MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
           MASTER, TAG_DATA, MPI_COMM_WORLD);
 
     }

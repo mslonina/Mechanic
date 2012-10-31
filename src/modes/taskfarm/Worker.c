@@ -44,14 +44,15 @@ int Worker(module *m, pool *p) {
     send_buffer->layout.size +=
       GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
   }
-  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
 
   recv_buffer->layout.size = send_buffer->layout.size;
+  
+  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
   mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
 
   while (1) {
 
-    MPI_Irecv(&recv_buffer->memory, recv_buffer->layout.size, MPI_CHAR,
+    MPI_Irecv(&(recv_buffer->memory), (int)recv_buffer->layout.size, MPI_CHAR,
         MASTER, intag, MPI_COMM_WORLD, &recv_request);
     MPI_Wait(&recv_request, &recv_status);
 
@@ -73,7 +74,7 @@ int Worker(module *m, pool *p) {
     mstat = Pack(m, &send_buffer->memory, p, t, tag);
     CheckStatus(mstat);
 
-    MPI_Isend(&send_buffer->memory, send_buffer->layout.size, MPI_CHAR,
+    MPI_Isend(&(send_buffer->memory), (int)send_buffer->layout.size, MPI_CHAR,
         MASTER, intag, MPI_COMM_WORLD, &send_request);
     MPI_Wait(&send_request, &send_status);
 
@@ -92,7 +93,7 @@ int Worker(module *m, pool *p) {
 
   if (recv_buffer) {
     //if (recv_buffer->memory) Free(recv_buffer);
-    //free(&(recv_buffer->memory));
+    //free(&(recv_buffer->memory[0]));
     free(recv_buffer);
   }
 
