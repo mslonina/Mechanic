@@ -197,7 +197,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   for (i = 0; i < DIM0; i++) {
     printf("\t");
     for (j = 0; j < DIM1; j++) {
-      printf("%02d ", three[i][j][0]);
+      printf("%2d ", three[i][j][0]);
     }
     printf("\n");
   }
@@ -210,7 +210,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   for (i = 0; i < DIM0; i++) {
     printf("\t");
     for (j = 0; j < DIM2; j++) {
-      printf("%02d ", three[i][0][j]);
+      printf("%2d ", three[i][0][j]);
     }
     printf("\n");
   }
@@ -223,7 +223,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   for (i = 0; i < DIM1; i++) {
     printf("\t");
     for (j = 0; j < DIM2; j++) {
-      printf("%02d ", three[0][i][j]);
+      printf("%2d ", three[0][i][j]);
     }
     printf("\n");
   }
@@ -239,7 +239,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   for (i = 0; i < DIM0; i++) {
     printf("\t");
     for (j = 0; j < DIM1; j++) {
-      printf("%02d ", three[i][j][0]);
+      printf("%2d ", three[i][j][0]);
     }
     printf("\n");
   }
@@ -255,7 +255,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   for (i = 0; i < 5*DIM0; i++) {
     printf("\t");
     for (j = 0; j < 5*DIM1; j++) {
-      printf("%05.2f ", data[i][j][DIM2-1]);
+      printf("%5.2f ", data[i][j][DIM2-1]);
     }
     printf("\n");
   }
@@ -270,7 +270,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   for (i = 0; i < 5*DIM0; i++) {
     printf("\t");
     for (j = 0; j < 5*DIM1; j++) {
-      printf("%04d ", idata[i][j]);
+      printf("%4d ", idata[i][j]);
     }
     printf("\n");
   }

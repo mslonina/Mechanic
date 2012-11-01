@@ -227,3 +227,20 @@ int ReadData(storage *s, void *data) {
   return SUCCESS;
 }
 
+/**
+ * @brief Wrapper to memcpy
+ *
+ * @param in The input buffer
+ * @param out The output buffer
+ * @param size The size of the block to be copied
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int CopyData(void *in, void *out, size_t size) {
+  if (!in) return CORE_ERR_MEM;
+  if (!out) return CORE_ERR_MEM;
+
+  memcpy(out, in, size);
+  return SUCCESS;
+}
+

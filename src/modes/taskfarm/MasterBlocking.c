@@ -83,7 +83,8 @@ int MasterBlocking(module *m, pool *p) {
       board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
     } else {
       tag = TAG_TERMINATE;
-      memcpy(send_buffer->memory, &tag, sizeof(int));
+      mstat = CopyData(&tag, send_buffer->memory, sizeof(int));
+      CheckStatus(mstat);
       terminated_nodes++;
     }
 
@@ -117,11 +118,12 @@ int MasterBlocking(module *m, pool *p) {
       send_node = mpi_status.MPI_SOURCE;
 
     /* Get the data header */
-    memcpy(header, recv_buffer->memory, sizeof(int) * (HEADER_SIZE));
+    mstat = CopyData(recv_buffer->memory, header, sizeof(int) * (HEADER_SIZE));
+    CheckStatus(mstat);
 
     if (header[0] == TAG_RESULT) {
       c_offset = c->counter*(int)recv_buffer->layout.size;
-      memcpy(c->storage->memory + c_offset, recv_buffer->memory, recv_buffer->layout.size);
+      mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
     }
 
     board_buffer[header[3]][header[4]] = header[2];
@@ -157,11 +159,13 @@ int MasterBlocking(module *m, pool *p) {
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
     tag = TAG_TERMINATE;
-    memcpy(send_buffer->memory, &tag, sizeof(int));
+    mstat = CopyData(&tag, send_buffer->memory, sizeof(int));
+    CheckStatus(mstat);
 
     MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
 
+  //MPI_Barrier(MPI_COMM_WORLD);
   }
 
   /* Finalize */

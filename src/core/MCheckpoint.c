@@ -50,7 +50,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
 
-  mstat = Allocate(c->storage, c->storage->layout.size * (c->size+1), sizeof(char));
+  mstat = Allocate(c->storage, c->storage->layout.size * (c->size), sizeof(char));
   CheckStatus(mstat);
 
   CheckpointReset(m, p, c, 0);
@@ -141,7 +141,10 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
         /* Get the data header */
         c_offset = (int)c->storage->layout.size * i;
-        memcpy(header, c->storage->memory+c_offset, sizeof(int)*(HEADER_SIZE));
+
+        mstat = CopyData(c->storage->memory + c_offset, header, sizeof(int)*(HEADER_SIZE));
+        CheckStatus(mstat);
+        
         t->tid = header[1];
         t->status = header[2];
         t->location[0] = header[3];
@@ -191,7 +194,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           }
 
           c_offset = (int)c->storage->layout.size*i + (int)sizeof(int)*(HEADER_SIZE);
-          memcpy(t->storage[j].memory, c->storage->memory+c_offset+d_offset, t->storage[j].layout.size);
+          
+          mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
+          CheckStatus(mstat);
 
           /* Commit data to the pool */
           for (k = 0; k < t->storage[j].layout.dim[0]; k++) {
@@ -200,7 +205,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             k_offset += t->storage[j].layout.offset[0] * l_offset;
 
             e_offset = k * elements;
-            memcpy(p->task->storage[j].memory + k_offset, t->storage[j].memory + e_offset, elements);
+          
+            mstat = CopyData(t->storage[j].memory + e_offset, p->task->storage[j].memory + k_offset, elements);
+            CheckStatus(mstat);
           }
 
           /* Commit data to master datafile */
@@ -217,7 +224,10 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
         /* Get the data header */
         c_offset = (int)c->storage->layout.size * i;
-        memcpy(header, c->storage->memory+c_offset, sizeof(int)*(HEADER_SIZE));
+        
+        mstat = CopyData(c->storage->memory + c_offset, header, sizeof(int) * (HEADER_SIZE));
+        CheckStatus(mstat);
+
         t->tid = header[1];
         t->status = header[2];
         t->location[0] = header[3];
@@ -230,7 +240,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
 
           c_offset = (int)c->storage->layout.size*i + (int)sizeof(int)*(HEADER_SIZE);
-          memcpy(t->storage[j].memory, c->storage->memory+c_offset+d_offset, t->storage[j].layout.size);
+          mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
+          CheckStatus(mstat);
 
           // Commit data to the pool
           p->tasks[t->tid]->tid = t->tid;
@@ -238,7 +249,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           p->tasks[t->tid]->location[0] = t->location[0];
           p->tasks[t->tid]->location[1] = t->location[1];
 
-          memcpy(p->tasks[t->tid]->storage[j].memory, t->storage[j].memory, t->storage[j].layout.size);
+          mstat = CopyData(t->storage[j].memory, p->tasks[t->tid]->storage[j].memory, t->storage[j].layout.size);
+          CheckStatus(mstat);
 
           // Commit data to master datafile
           if (p->task->storage[j].layout.use_hdf) {
@@ -276,15 +288,15 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
   int header[HEADER_SIZE] = HEADER_INIT;
   int i = 0, c_offset = 0;
+  int mstat = SUCCESS;
 
   c->cid = cid;
   c->counter = 0;
 
-  memset(&c->storage->memory, 0, sizeof(char));
-
   for (i = 0; i < c->size; i++) {
-    c_offset = (int)c->storage->layout.size * i;
-    memcpy(c->storage->memory + c_offset, header, sizeof(int)*(HEADER_SIZE));
+    c_offset = i * (int)c->storage->layout.size;
+    mstat = CopyData(header, c->storage->memory + c_offset, sizeof(int) * (HEADER_SIZE));
+    CheckStatus(mstat);
   }
 }
 

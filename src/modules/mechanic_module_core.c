@@ -576,7 +576,7 @@ int Storage(pool *p, setup *s) {
   /* Path: /Pools/pool-ID/board */
   p->board->layout = (schema) {
     .path = "board",
-    .rank = 2, // pool rank
+    .rank = TASK_BOARD_RANK, // pool rank
     .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
     .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
     .datatype = H5T_NATIVE_INT,

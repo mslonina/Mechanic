@@ -32,10 +32,10 @@ int Worker(module *m, pool *p) {
   c = CheckpointLoad(m, p, 0);
 
   /* Data buffers */
-  send_buffer = calloc(sizeof(storage), sizeof(storage));
+  send_buffer = calloc(1, sizeof(storage));
   if (!send_buffer) Error(CORE_ERR_MEM);
 
-  recv_buffer = calloc(sizeof(storage), sizeof(storage));
+  recv_buffer = calloc(1, sizeof(storage));
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
   /* Initialize data buffers */

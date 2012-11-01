@@ -54,26 +54,28 @@ int Master(module *m, pool *p) {
   }
 
   /* Message buffers */
-  intags = calloc(m->mpi_size * sizeof(uintptr_t), sizeof(uintptr_t));
+  intags = calloc(m->mpi_size, sizeof(uintptr_t));
   if (!intags) Error(CORE_ERR_MEM);
 
-  send_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
+  send_status = calloc(m->mpi_size-1, sizeof(MPI_Status));
   if (!send_status) Error(CORE_ERR_MEM);
 
-  send_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
+  send_request = calloc(m->mpi_size-1, sizeof(MPI_Request));
   if (!send_request) Error(CORE_ERR_MEM);
 
-  recv_status = calloc((m->mpi_size-1) * sizeof(MPI_Status), sizeof(MPI_Status));
+  recv_status = calloc(m->mpi_size-1, sizeof(MPI_Status));
   if (!recv_status) Error(CORE_ERR_MEM);
 
-  recv_request = calloc((m->mpi_size-1) * sizeof(MPI_Request), sizeof(MPI_Request));
+  recv_request = calloc(m->mpi_size-1, sizeof(MPI_Request));
   if (!recv_request) Error(CORE_ERR_MEM);
 
   /* Data buffers */
   send_buffer = calloc(m->mpi_size*sizeof(storage), sizeof(storage));
+//  send_buffer = calloc(m->mpi_size, sizeof(storage));
   if (!send_buffer) Error(CORE_ERR_MEM);
 
   recv_buffer = calloc(m->mpi_size*sizeof(storage), sizeof(storage));
+  //recv_buffer = calloc(m->mpi_size, sizeof(storage));
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
   /* Initialize message tags */
@@ -108,13 +110,14 @@ int Master(module *m, pool *p) {
       board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
     } else {
       tag = TAG_TERMINATE;
-      memcpy(&send_buffer[i].memory, &tag, sizeof(int));
+      mstat = CopyData(&tag, &send_buffer[i].memory, sizeof(int));
+      CheckStatus(mstat);
       terminated_nodes++;
     }
 
-    MPI_Isend(&send_buffer[i].memory, send_buffer_size, MPI_CHAR,
+    MPI_Isend(&(send_buffer[i].memory), send_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
-    MPI_Irecv(&recv_buffer[i].memory, recv_buffer_size, MPI_CHAR,
+    MPI_Irecv(&(recv_buffer[i].memory), recv_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
   }
   
@@ -149,11 +152,13 @@ int Master(module *m, pool *p) {
       send_node = index+1;
     
       /* Get the data header */
-      memcpy(header, &recv_buffer[send_node].memory, sizeof(int) * (HEADER_SIZE));
+      mstat = CopyData(&recv_buffer[send_node].memory, header, sizeof(int) * (HEADER_SIZE));
+      CheckStatus(mstat);
     
       if (header[0] == TAG_RESULT) {
         c_offset = c->counter*recv_buffer_size;
-        memcpy(c->storage->memory + c_offset, &recv_buffer[send_node].memory, (size_t)recv_buffer_size);
+        mstat = CopyData(&recv_buffer[send_node].memory, c->storage->memory + c_offset, recv_buffer_size);
+        CheckStatus(mstat);
       }
 
       board_buffer[header[3]][header[4]] = header[2];
@@ -170,9 +175,9 @@ int Master(module *m, pool *p) {
         CheckStatus(mstat);
         board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
 
-        MPI_Isend(&send_buffer[send_node].memory, send_buffer_size, MPI_CHAR,
+        MPI_Isend(&(send_buffer[send_node].memory), send_buffer_size, MPI_CHAR,
             send_node, intags[send_node], MPI_COMM_WORLD, &send_request[index]);
-        MPI_Irecv(&recv_buffer[send_node].memory, recv_buffer_size, MPI_CHAR,
+        MPI_Irecv(&(recv_buffer[send_node].memory), recv_buffer_size, MPI_CHAR,
             send_node, intags[send_node], MPI_COMM_WORLD, &recv_request[index]);
 
         MPI_Wait(&send_request[index], &send_status[index]);
@@ -221,11 +226,12 @@ int Master(module *m, pool *p) {
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
     tag = TAG_TERMINATE;
-    memcpy(&send_buffer[i].memory, &tag, sizeof(int));
+    mstat = CopyData(&tag, &send_buffer[i].memory, sizeof(int));
+    CheckStatus(mstat);
 
-    MPI_Isend(&send_buffer[i].memory, send_buffer_size, MPI_CHAR,
+    MPI_Isend(&(send_buffer[i].memory), send_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
-    MPI_Irecv(&recv_buffer[i].memory, recv_buffer_size, MPI_CHAR,
+    MPI_Irecv(&(recv_buffer[i].memory), recv_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
 
   }

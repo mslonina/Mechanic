@@ -69,7 +69,8 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
   header[4] = t->location[1];
 
   position = sizeof(int)*(HEADER_SIZE);
-  memcpy(buffer, header, position);
+  mstat = CopyData(header, buffer, sizeof(int) * (HEADER_SIZE));
+  CheckStatus(mstat);
 
   if (tag != TAG_TERMINATE) {
 
@@ -77,7 +78,8 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
     for (i = 0; i < m->task_banks; i++) {
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim)*t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
-        memcpy(buffer+position, t->storage[i].memory, size);
+        mstat = CopyData(t->storage[i].memory, buffer + position, size);
+        CheckStatus(mstat);
       }
       position = position + size;
     }
@@ -104,7 +106,8 @@ int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
   size_t position = 0, size = 0;
 
   position = sizeof(int)*(HEADER_SIZE);
-  memcpy(header, buffer, position);
+  mstat = CopyData(buffer, header, sizeof(int) * (HEADER_SIZE));
+  CheckStatus(mstat);
 
   *tag = header[0];
   t->tid = header[1];
@@ -118,7 +121,8 @@ int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
     for (i = 0; i < m->task_banks; i++) {
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim)*t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
-        memcpy(t->storage[i].memory, buffer+position, size);
+        mstat = CopyData(buffer + position, t->storage[i].memory, size);
+        CheckStatus(mstat);
       }
       position = position + size;
     }
