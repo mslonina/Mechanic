@@ -76,8 +76,9 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
 
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {
-      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim)*t->storage[i].layout.datatype_size;
+      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim) * t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
+        printf("mpack %s of rank %d = %zu bytes\n", t->storage[i].layout.path, t->storage[i].layout.rank, size);
         mstat = CopyData(t->storage[i].memory, buffer + position, size);
         CheckStatus(mstat);
       }
@@ -119,7 +120,7 @@ int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
 
     /* Task data */
     for (i = 0; i < m->task_banks; i++) {
-      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim)*t->storage[i].layout.datatype_size;
+      size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim) * t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
         mstat = CopyData(buffer + position, t->storage[i].memory, size);
         CheckStatus(mstat);

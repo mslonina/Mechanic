@@ -13,6 +13,7 @@
 #include "MRestart.h"
 
 typedef struct {
+  int message_size;
   storage *storage;
 } mpi_message;
 

@@ -241,6 +241,7 @@ int CopyData(void *in, void *out, size_t size) {
   if (!in) return CORE_ERR_MEM;
   if (!out) return CORE_ERR_MEM;
 
+//  printf("trying to write %zu bytes\n", size);
   memcpy(out, in, size);
   return SUCCESS;
 }

@@ -22,6 +22,7 @@ int Worker(module *m, pool *p) {
   task *t = NULL;
   checkpoint *c = NULL;
   storage *send_buffer = NULL, *recv_buffer = NULL;
+  char *memory = NULL;
 
   node = m->node;
   intag = node;
@@ -46,19 +47,21 @@ int Worker(module *m, pool *p) {
 
   recv_buffer->layout.size = send_buffer->layout.size;
   
-  send_buffer->memory = malloc(send_buffer->layout.size);
-  if (!send_buffer->memory) Error(CORE_ERR_MEM);
+  memory = malloc(send_buffer->layout.size);
+  if (!memory) Error(CORE_ERR_MEM);
 
-  recv_buffer->memory = malloc(recv_buffer->layout.size);
-  if (!recv_buffer->memory) Error(CORE_ERR_MEM);
+  memory = malloc(recv_buffer->layout.size);
+  if (!memory) Error(CORE_ERR_MEM);
 
   while (1) {
 
-    MPI_Recv(&(recv_buffer->memory), (int)recv_buffer->layout.size, MPI_CHAR,
+    MPI_Recv(&(memory[0]), (int)recv_buffer->layout.size, MPI_CHAR,
         MASTER, intag, MPI_COMM_WORLD, &recv_status);
 
-    mstat = Unpack(m, &recv_buffer->memory, p, t, &tag);
+    mstat = Unpack(m, &memory, p, t, &tag);
     CheckStatus(mstat);
+    printf("worker received task %d %d %d\n",
+        t->tid, t->location[0], t->location[1]);
     
     if (tag == TAG_TERMINATE) {
       break;
@@ -73,10 +76,10 @@ int Worker(module *m, pool *p) {
       t->status = TASK_FINISHED;
       tag = TAG_RESULT;
 
-      mstat = Pack(m, &send_buffer->memory, p, t, tag);
+      mstat = Pack(m, &memory, p, t, tag);
       CheckStatus(mstat);
 
-      MPI_Send(&(send_buffer->memory), (int)send_buffer->layout.size, MPI_CHAR,
+      MPI_Send(&(memory), (int)send_buffer->layout.size, MPI_CHAR,
           MASTER, intag, MPI_COMM_WORLD);
     }
 

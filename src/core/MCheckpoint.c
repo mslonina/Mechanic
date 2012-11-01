@@ -52,7 +52,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
 
   printf("checkpoint size %d %d\n", c->size, c->size * (int)c->storage->layout.size);
 
-  c->storage->memory = malloc(c->size * c->storage->layout.size);
+  c->storage->memory = malloc(8 * c->size * c->storage->layout.size);
   if (!c->storage->memory) Error(CORE_ERR_MEM);
 
   CheckpointReset(m, p, c, 0);
