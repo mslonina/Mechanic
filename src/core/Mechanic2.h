@@ -75,6 +75,12 @@
 #define TASK_TO_BE_RESTARTED -2 /**< The task to be restarted return code */
 #define NO_MORE_TASKS -99 /**< No more tasks return code */
 
+/* Message tags */
+#define TAG_DATA 1337
+#define TAG_STANDBY 49
+#define TAG_RESULT 59
+#define TAG_TERMINATE 32763
+
 #define MASTER 0 /**< The master node */
 #define NORMAL_MODE 600 /**< The normal operation mode */
 #define RESTART_MODE 601 /**< The restart mode */
@@ -84,9 +90,9 @@
 #define MPI_BLOCKING 333 /**< Blocking communication mode */
 
 /* Data */
-#define TASK_NO_LOCATION -1
+#define TASK_NO_LOCATION -99
 #define HEADER_SIZE 3+TASK_BOARD_RANK /**< The data header size */
-#define HEADER_INIT {TASK_EMPTY,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION}
+#define HEADER_INIT {TAG_TERMINATE,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION}
 
 #define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
 

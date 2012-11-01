@@ -72,7 +72,6 @@ Key features
 - **The pool-based simulations.** Each pool may have different number of tasks to compute
   (the task loop follows the _MPI Task Farm_ model), and data from all pools may be used 
   at the every stage of the simulation
-- **MPI non-blocking communication**
 - **HDF5 data storage layout**
 - **All HDF5/MPI basic datatypes are supported**
 - **Multidimensional datasets support, with minimum rank 2 up to rank H5S_MAX_RANK (32)**

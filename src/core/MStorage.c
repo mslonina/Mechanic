@@ -384,7 +384,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
   hid_t dataspace, dataset, memspace;
   herr_t hdf_status = 0;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
-  void *buffer = NULL;
+  char *buffer = NULL;
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf && (int)s[i].layout.size > 0) {
@@ -410,6 +410,12 @@ int CommitData(hid_t h5location, int banks, storage *s) {
           offsets[j] = s[i].layout.offset[j];
         }
 
+/*        Message(MESSAGE_INFO, "Write Data storage path: %s of rank %d = ", s[i].layout.path, s[i].layout.rank);
+        for (j = 0; j < s[i].layout.rank; j++) printf(" %d ", (int)dims[j]);
+        printf(" and offsets = ");
+        for (j = 0; j < s[i].layout.rank; j++) printf(" %d ", (int)offsets[j]);
+        printf("\n");
+*/
         memspace = H5Screate_simple(s[i].layout.rank, dims, NULL);
         H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, dims, NULL);
         hdf_status = H5Dwrite(dataset, s[i].layout.datatype,

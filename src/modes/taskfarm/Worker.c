@@ -17,8 +17,7 @@ int Worker(module *m, pool *p) {
   int node, tag, intag;
   int k = 0;
 
-  MPI_Status recv_status, send_status;
-  MPI_Request send_request, recv_request;
+  MPI_Status recv_status;
 
   task *t = NULL;
   checkpoint *c = NULL;
@@ -47,19 +46,23 @@ int Worker(module *m, pool *p) {
 
   recv_buffer->layout.size = send_buffer->layout.size;
   
-  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
-  mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
+  send_buffer->memory = malloc(send_buffer->layout.size);
+  if (!send_buffer->memory) Error(CORE_ERR_MEM);
+
+  recv_buffer->memory = malloc(recv_buffer->layout.size);
+  if (!recv_buffer->memory) Error(CORE_ERR_MEM);
 
   while (1) {
 
-    MPI_Irecv(&(recv_buffer->memory), (int)recv_buffer->layout.size, MPI_CHAR,
-        MASTER, intag, MPI_COMM_WORLD, &recv_request);
-    MPI_Wait(&recv_request, &recv_status);
+    MPI_Recv(&(recv_buffer->memory), (int)recv_buffer->layout.size, MPI_CHAR,
+        MASTER, intag, MPI_COMM_WORLD, &recv_status);
 
     mstat = Unpack(m, &recv_buffer->memory, p, t, &tag);
     CheckStatus(mstat);
-
-    if (tag != TAG_TERMINATE) {
+    
+    if (tag == TAG_TERMINATE) {
+      break;
+    } else {
 
       mstat = TaskPrepare(m, p, t);
       CheckStatus(mstat);
@@ -69,18 +72,17 @@ int Worker(module *m, pool *p) {
 
       t->status = TASK_FINISHED;
       tag = TAG_RESULT;
+
+      mstat = Pack(m, &send_buffer->memory, p, t, tag);
+      CheckStatus(mstat);
+
+      MPI_Send(&(send_buffer->memory), (int)send_buffer->layout.size, MPI_CHAR,
+          MASTER, intag, MPI_COMM_WORLD);
     }
 
-    mstat = Pack(m, &send_buffer->memory, p, t, tag);
-    CheckStatus(mstat);
-
-    MPI_Isend(&(send_buffer->memory), (int)send_buffer->layout.size, MPI_CHAR,
-        MASTER, intag, MPI_COMM_WORLD, &send_request);
-    MPI_Wait(&send_request, &send_status);
-
-    if (tag == TAG_TERMINATE) break;
-
   }
+
+  MPI_Barrier(MPI_COMM_WORLD);
 
   /* Finalize */
   CheckpointFinalize(m, p, c);
@@ -88,6 +90,7 @@ int Worker(module *m, pool *p) {
 
   if (send_buffer) {
    // if (send_buffer->memory) free(send_buffer->memory); //Free(send_buffer);
+//    free(send_buffer->memory);
     free(send_buffer);
   }
 

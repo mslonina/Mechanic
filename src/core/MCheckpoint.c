@@ -14,7 +14,7 @@
  * @return The checkpoint pointer, NULL otherwise
  */
 checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
-  int mstat = SUCCESS, i = 0;
+  int i = 0;
   checkpoint *c = NULL;
 
   /* Allocate checkpoint pointer */
@@ -45,13 +45,13 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
     c->storage->layout.dim[1] +=
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
     c->storage->layout.size +=
-      GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim)*p->task->storage[i].layout.datatype_size;
+      GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim) * p->task->storage[i].layout.datatype_size;
     c->storage->layout.elements +=
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
 
-  mstat = Allocate(c->storage, c->storage->layout.size * (c->size), sizeof(char));
-  CheckStatus(mstat);
+  c->storage->memory = malloc(c->size * c->storage->layout.size);
+  if (!c->storage->memory) Error(CORE_ERR_MEM);
 
   CheckpointReset(m, p, c, 0);
 
@@ -140,7 +140,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
       for (i = 0; i < c->size; i++) {
 
         /* Get the data header */
-        c_offset = (int)c->storage->layout.size * i;
+        c_offset = i * c->storage->layout.size;
 
         mstat = CopyData(c->storage->memory + c_offset, header, sizeof(int)*(HEADER_SIZE));
         CheckStatus(mstat);
@@ -149,6 +149,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->status = header[2];
         t->location[0] = header[3];
         t->location[1] = header[4];
+
+        Message(MESSAGE_DEBUG, "TASK   %2d %2d %2d location %2d %2d\n", header[0], t->tid, t->status,
+            t->location[0], t->location[1]);
 
         if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
 
@@ -171,6 +174,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             offsets[0] = (t->location[0] + dims[0]*t->location[1])
               * t->storage[j].layout.dim[0];
             offsets[1] = 0;
+            Message(MESSAGE_DEBUG, "PM3D[%d] task %d %d %d with offsets %d %d\n", j, t->tid,
+                t->location[0], t->location[1], (int)offsets[0], (int)offsets[1]);
             
             l_offset = elements;
           }
@@ -178,6 +183,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           if (t->storage[j].layout.storage_type == STORAGE_LIST) {
             offsets[0] = t->tid * t->storage[j].layout.dim[0];
             offsets[1] = 0;
+            Message(MESSAGE_DEBUG, "LIST[%d] task %d %d %d with offsets %d %d\n", j, t->tid,
+                t->location[0], t->location[1], (int)offsets[0], (int)offsets[1]);
             
             l_offset = elements;
           }
@@ -185,6 +192,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
             offsets[0] = t->location[0] * t->storage[j].layout.dim[0];
             offsets[1] = t->location[1] * t->storage[j].layout.dim[1];
+            Message(MESSAGE_DEBUG, "BOARD[%d] task %d %d %d with offsets %d %d\n", j, t->tid,
+                t->location[0], t->location[1], (int)offsets[0], (int)offsets[1]);
             
             l_offset = p->board->layout.dim[1] * elements;
           }

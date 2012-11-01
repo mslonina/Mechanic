@@ -69,8 +69,10 @@ int MasterBlocking(module *m, pool *p) {
 
   recv_buffer->layout.size = send_buffer->layout.size;
   
-  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
-  mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
+//  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
+//  mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
+  send_buffer->memory = malloc(send_buffer->layout.size);
+  recv_buffer->memory = malloc(recv_buffer->layout.size);
 
   /* Send initial tasks to all workers */
   for (i = 1; i < m->mpi_size; i++) {
@@ -124,26 +126,26 @@ int MasterBlocking(module *m, pool *p) {
     if (header[0] == TAG_RESULT) {
       c_offset = c->counter*(int)recv_buffer->layout.size;
       mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
-    }
 
-    board_buffer[header[3]][header[4]] = header[2];
+      board_buffer[header[3]][header[4]] = header[2];
 
-    c->counter++;
-    completed++;
+      c->counter++;
+      completed++;
 
-    mstat = GetNewTask(m, p, t, board_buffer);
-    CheckStatus(mstat);
-
-    if (mstat != NO_MORE_TASKS) {
-
-      mstat = Pack(m, send_buffer->memory, p, t, TAG_DATA);
+      mstat = GetNewTask(m, p, t, board_buffer);
       CheckStatus(mstat);
 
-      board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
+      if (mstat != NO_MORE_TASKS) {
 
-      MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
-          send_node, TAG_DATA, MPI_COMM_WORLD);
+        mstat = Pack(m, send_buffer->memory, p, t, TAG_DATA);
+        CheckStatus(mstat);
 
+        board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
+
+        MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
+            send_node, TAG_DATA, MPI_COMM_WORLD);
+
+      }
     }
 
     if (completed == p->pool_size) break;
@@ -165,7 +167,6 @@ int MasterBlocking(module *m, pool *p) {
     MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
 
-  //MPI_Barrier(MPI_COMM_WORLD);
   }
 
   /* Finalize */
@@ -173,12 +174,12 @@ int MasterBlocking(module *m, pool *p) {
   TaskFinalize(m, p, t);
 
   if (send_buffer) {
-    if (send_buffer->memory) Free(send_buffer);
+    free(send_buffer->memory);
     free(send_buffer);
   }
 
   if (recv_buffer) {
-    if (recv_buffer->memory) Free(recv_buffer);
+    free(recv_buffer->memory);
     free(recv_buffer);
   }
 

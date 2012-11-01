@@ -43,8 +43,11 @@ int WorkerBlocking(module *m, pool *p) {
 
   recv_buffer->layout.size = send_buffer->layout.size;
   
-  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
-  mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
+  send_buffer->memory = malloc(send_buffer->layout.size);
+  if (!send_buffer->memory) Error(CORE_ERR_MEM);
+  
+  recv_buffer->memory = malloc(recv_buffer->layout.size);
+  if (!recv_buffer->memory) Error(CORE_ERR_MEM);
 
   while (1) {
 
@@ -81,12 +84,12 @@ int WorkerBlocking(module *m, pool *p) {
   TaskFinalize(m, p, t);
 
   if (send_buffer) {
-    if (send_buffer->memory) Free(send_buffer);
+    free(send_buffer->memory);
     free(send_buffer);
   }
 
   if (recv_buffer) {
-    if (recv_buffer->memory) Free(recv_buffer);
+    free(recv_buffer->memory);
     free(recv_buffer);
   }
 

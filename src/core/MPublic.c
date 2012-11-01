@@ -180,6 +180,7 @@ int Allocate(storage *s, size_t size, size_t datatype) {
 
   if (size > 0) {
     s->memory = calloc(size, datatype);
+    //s->memory = malloc(size);
   }
 
   if (!s->memory) return CORE_ERR_MEM;
