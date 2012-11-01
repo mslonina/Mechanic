@@ -12,6 +12,10 @@
 #include "MCore.h"
 #include "MRestart.h"
 
+typedef struct {
+  storage *storage;
+} mpi_message;
+
 int Taskfarm(module *m);
 int Master(module *m, pool *p);
 int Worker(module *m, pool *p);

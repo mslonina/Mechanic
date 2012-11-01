@@ -82,7 +82,7 @@ int Worker(module *m, pool *p) {
 
   }
 
-  MPI_Barrier(MPI_COMM_WORLD);
+//  MPI_Barrier(MPI_COMM_WORLD);
 
   /* Finalize */
   CheckpointFinalize(m, p, c);

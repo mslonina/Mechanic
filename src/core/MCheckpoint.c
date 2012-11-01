@@ -50,6 +50,8 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dim);
   }
 
+  printf("checkpoint size %d %d\n", c->size, c->size * (int)c->storage->layout.size);
+
   c->storage->memory = malloc(c->size * c->storage->layout.size);
   if (!c->storage->memory) Error(CORE_ERR_MEM);
 

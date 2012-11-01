@@ -25,6 +25,7 @@ int Master(module *m, pool *p) {
   int send_buffer_size = 0, recv_buffer_size = 0;
 
   storage *send_buffer, *recv_buffer;
+  mpi_message *sends, *recvs;
 
   MPI_Status *send_status, *recv_status, mpi_status;
   MPI_Request *send_request, *recv_request;
@@ -69,14 +70,16 @@ int Master(module *m, pool *p) {
   if (!recv_request) Error(CORE_ERR_MEM);
 
   /* Data buffers */
-  printf("storage = %d\n", (int)sizeof(storage));
-  send_buffer = calloc(m->mpi_size*sizeof(storage), sizeof(storage));
-  //send_buffer = calloc(m->mpi_size, sizeof(storage));
+  //send_buffer = calloc(m->mpi_size*sizeof(storage), sizeof(storage));
+  send_buffer = malloc((m->mpi_size-1)*sizeof(storage)*sizeof(storage));
   if (!send_buffer) Error(CORE_ERR_MEM);
 
-  recv_buffer = calloc(m->mpi_size*sizeof(storage), sizeof(storage));
-  //recv_buffer = calloc(m->mpi_size, sizeof(storage));
+  //recv_buffer = calloc(m->mpi_size*sizeof(storage), sizeof(storage));
+  recv_buffer = malloc((m->mpi_size-1)*sizeof(storage)*sizeof(storage));
   if (!recv_buffer) Error(CORE_ERR_MEM);
+
+  sends = calloc(m->mpi_size-1, sizeof(mpi_message));
+  recvs = calloc(m->mpi_size-1, sizeof(mpi_message));
 
   /* Initialize message tags */
   for (i = 0; i < m->mpi_size; i++) intags[i] = i;
@@ -93,12 +96,19 @@ int Master(module *m, pool *p) {
   }
 
   recv_buffer_size = send_buffer_size;
+  printf("buffer_size = %d\n", send_buffer_size);
 
-  for (i = 0; i < m->mpi_size; i++) {
+  for (i = 0; i < m->mpi_size-1; i++) {
     send_buffer[i].memory = malloc(send_buffer_size);
     if (!send_buffer[i].memory) Error(CORE_ERR_MEM);
     recv_buffer[i].memory = malloc(recv_buffer_size);
     if (!recv_buffer[i].memory) Error(CORE_ERR_MEM);
+
+    sends[i].storage = calloc(1, sizeof(storage));
+    sends[i].storage[0].memory = malloc(send_buffer_size);
+    
+    recvs[i].storage = calloc(1, sizeof(storage));
+    recvs[i].storage[0].memory = malloc(send_buffer_size);
   }
 
   /* Send initial tasks to all workers */
@@ -107,19 +117,19 @@ int Master(module *m, pool *p) {
     CheckStatus(mstat);
 
     if (mstat != NO_MORE_TASKS) {
-      mstat = Pack(m, &send_buffer[i].memory, p, t, TAG_DATA);
+      mstat = Pack(m, &send_buffer[i-1].memory, p, t, TAG_DATA);
       CheckStatus(mstat);
       board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
     } else {
       tag = TAG_TERMINATE;
-      mstat = CopyData(&tag, &send_buffer[i].memory, sizeof(int));
+      mstat = CopyData(&tag, &send_buffer[i-1].memory, sizeof(int));
       CheckStatus(mstat);
       terminated_nodes++;
     }
 
-    MPI_Isend(&(send_buffer[i].memory), send_buffer_size, MPI_CHAR,
+    MPI_Isend(&(send_buffer[i-1].memory), send_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
-    MPI_Irecv(&(recv_buffer[i].memory), recv_buffer_size, MPI_CHAR,
+    MPI_Irecv(&(recv_buffer[i-1].memory), recv_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &recv_request[i-1]);
   }
   
@@ -151,7 +161,7 @@ int Master(module *m, pool *p) {
       send_node = index+1;
 
       /* Get the data header */
-      mstat = CopyData(&recv_buffer[send_node].memory, header, sizeof(int) * (HEADER_SIZE));
+      mstat = CopyData(&recv_buffer[index].memory, header, sizeof(int) * (HEADER_SIZE));
       CheckStatus(mstat);
       
       Message(MESSAGE_DEBUG, "RECV   header %2d %2d %2d location = %2d %2d\n",
@@ -163,7 +173,7 @@ int Master(module *m, pool *p) {
             header[0], header[1], header[2], header[3], header[4]);
 
         c_offset = c->counter*recv_buffer_size;
-        mstat = CopyData(&recv_buffer[send_node].memory, c->storage->memory + c_offset, recv_buffer_size);
+        mstat = CopyData(&recv_buffer[index].memory, c->storage->memory + c_offset, recv_buffer_size);
         CheckStatus(mstat);
 
         board_buffer[header[3]][header[4]] = header[2];
@@ -176,13 +186,14 @@ int Master(module *m, pool *p) {
 
         if (mstat != NO_MORE_TASKS) {
 
-          mstat = Pack(m, &send_buffer[send_node].memory, p, t, TAG_DATA);
+          mstat = Pack(m, &send_buffer[index].memory, p, t, TAG_DATA);
           CheckStatus(mstat);
           board_buffer[t->location[0]][t->location[1]] = TASK_IN_USE;
 
-          MPI_Isend(&(send_buffer[send_node].memory), send_buffer_size, MPI_CHAR,
+          MPI_Isend(&(send_buffer[index].memory), send_buffer_size, MPI_CHAR,
               send_node, intags[send_node], MPI_COMM_WORLD, &send_request[index]);
-          MPI_Irecv(&(recv_buffer[send_node].memory), recv_buffer_size, MPI_CHAR,
+
+          MPI_Irecv(&(recv_buffer[index].memory), recv_buffer_size, MPI_CHAR,
               send_node, intags[send_node], MPI_COMM_WORLD, &recv_request[index]);
 
           MPI_Wait(&send_request[index], &send_status[index]);
@@ -203,17 +214,15 @@ int Master(module *m, pool *p) {
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
     tag = TAG_TERMINATE;
-    mstat = CopyData(&tag, &send_buffer[i].memory, sizeof(int));
+    mstat = CopyData(&tag, &send_buffer[i-1].memory, sizeof(int));
     CheckStatus(mstat);
 
-    MPI_Isend(&(send_buffer[i].memory), send_buffer_size, MPI_CHAR,
+    MPI_Isend(&(send_buffer[i-1].memory), send_buffer_size, MPI_CHAR,
         i, intags[i], MPI_COMM_WORLD, &send_request[i-1]);
 
   }
 
   MPI_Waitall(m->mpi_size - 1, send_request, send_status);
-
-  MPI_Barrier(MPI_COMM_WORLD);
 
   /* Finalize */
   CheckpointFinalize(m, p, c);
@@ -225,23 +234,34 @@ int Master(module *m, pool *p) {
   if (recv_status) free(recv_status);
   if (recv_request) free(recv_request);
 
-  if (send_buffer) {
+  //if (send_buffer) {
   //  for (i = 0; i < m->mpi_size; i++) {
   //    if (send_buffer[i].memory) Free(&send_buffer[i]);
   //  }
-    free(send_buffer);
-  }
+  //  free(send_buffer);
+  //}
 
-  if (recv_buffer) {
+  //if (recv_buffer) {
   //  for (i = 0; i < m->mpi_size; i++) {
   //    if (recv_buffer[i].memory) Free(&recv_buffer[i]);
   //  }
-    free(recv_buffer);
-  }
+  //  free(recv_buffer);
+  //}
 
   if (board_buffer) {
     FreeIntBuffer(board_buffer);
   }
+
+  for (i = 0; i < m->mpi_size - 1; i++) {
+    free(sends[i].storage[0].memory);
+    free(sends[i].storage);
+    
+    free(recvs[i].storage[0].memory);
+    free(recvs[i].storage);
+  }
+
+  free(sends);
+  free(recvs);
 
   return mstat;
 }

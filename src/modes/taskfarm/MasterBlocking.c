@@ -69,10 +69,11 @@ int MasterBlocking(module *m, pool *p) {
 
   recv_buffer->layout.size = send_buffer->layout.size;
   
-//  mstat = Allocate(send_buffer, send_buffer->layout.size, sizeof(char));
-//  mstat = Allocate(recv_buffer, recv_buffer->layout.size, sizeof(char));
   send_buffer->memory = malloc(send_buffer->layout.size);
+  if (!send_buffer->memory) Error(CORE_ERR_MEM);
+
   recv_buffer->memory = malloc(recv_buffer->layout.size);
+  if (!recv_buffer->memory) Error(CORE_ERR_MEM);
 
   /* Send initial tasks to all workers */
   for (i = 1; i < m->mpi_size; i++) {
@@ -117,14 +118,14 @@ int MasterBlocking(module *m, pool *p) {
     MPI_Recv(&(recv_buffer->memory[0]), (int)recv_buffer->layout.size, MPI_CHAR,
       MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
 
-      send_node = mpi_status.MPI_SOURCE;
+    send_node = mpi_status.MPI_SOURCE;
 
     /* Get the data header */
     mstat = CopyData(recv_buffer->memory, header, sizeof(int) * (HEADER_SIZE));
     CheckStatus(mstat);
 
     if (header[0] == TAG_RESULT) {
-      c_offset = c->counter*(int)recv_buffer->layout.size;
+      c_offset = c->counter * (int)recv_buffer->layout.size;
       mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
 
       board_buffer[header[3]][header[4]] = header[2];
