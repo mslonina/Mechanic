@@ -78,7 +78,8 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
     for (i = 0; i < m->task_banks; i++) {
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dim) * t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
-        printf("mpack %s of rank %d = %zu bytes\n", t->storage[i].layout.path, t->storage[i].layout.rank, size);
+        Message(MESSAGE_DEBUG, "[%s:%d] Packed dataset %s of rank %d = %zu bytes\n", __FILE__, __LINE__,
+            t->storage[i].layout.path, t->storage[i].layout.rank, size);
         mstat = CopyData(t->storage[i].memory, buffer + position, size);
         CheckStatus(mstat);
       }

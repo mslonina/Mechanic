@@ -106,7 +106,6 @@ int Copy(char* in, char* out) {
   }
 
   stat(in, &st);
-  Message(MESSAGE_DEBUG, "Input file size: %d\n", (int) st.st_size);
 
   output = open(out, O_RDWR | O_CREAT | O_TRUNC, 0644);
   if (output < 0) {

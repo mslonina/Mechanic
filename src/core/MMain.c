@@ -58,7 +58,10 @@ int main(int argc, char** argv) {
   fallback.layer.handler = NULL;
 
   core = Bootstrap(node, mpi_size, argc, argv, CORE_MODULE, &fallback);
-  if (!core.layer.handler) Error(CORE_ERR_CORE); // OOPS! At least Core module should be loaded
+  if (!core.layer.handler) {
+    Message(MESSAGE_ERR, "Something is screwed! At least Core module should be loaded");
+    Error(CORE_ERR_CORE);
+  }
 
   core.mode = NORMAL_MODE;
 

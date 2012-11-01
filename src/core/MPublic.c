@@ -18,10 +18,13 @@ void Message(int type, char *message, ...) {
     vsprintf(message2, message, args);
     if (type == MESSAGE_INFO)    printf("-- %s", message2);
     if (type == MESSAGE_COMMENT) printf("#  %s", message2);
-    if (type == MESSAGE_OUTPUT) printf("   %s", message2);
-    if (type == MESSAGE_RESULT) printf(" > %s", message2);
-    if (type == MESSAGE_ERR) printf("!! %s", message2);
-		if (type == MESSAGE_WARN) printf(".. %s", message2);
+    if (type == MESSAGE_OUTPUT)  printf("   %s", message2);
+    if (type == MESSAGE_RESULT)  printf(" > %s", message2);
+    if (type == MESSAGE_ERR)     printf("!! %s", message2);
+		if (type == MESSAGE_WARN)    printf(".. %s", message2);
+#ifdef WITH_DEBUG
+    if (type == MESSAGE_DEBUG)   printf("%s", message2);
+#endif
   va_end(args);
 }
 

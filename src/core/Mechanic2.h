@@ -30,6 +30,8 @@
 #include <libreadconfig.h>
 #include <libreadconfig_hdf5.h>
 
+#define WITH_DEBUG 1
+
 #define SUCCESS 0 /**< The success return code */
 #define CORE_ICE 112 /**< The core emergency return code */
 #define CORE_SETUP_HELP 212 /**< The core help message return code */

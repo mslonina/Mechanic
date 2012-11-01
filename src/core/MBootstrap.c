@@ -90,8 +90,6 @@ module ModuleLoad(char *name) {
 
   fname = Name(MECHANIC_MODULE_PREFIX, name, "", LIBEXT);
 
-  Message(MESSAGE_DEBUG, "Loading module '%s'\n", fname);
-
   m.layer.handler = dlopen(fname, RTLD_NOW|RTLD_GLOBAL);
   if (!m.layer.handler) {
     Message(MESSAGE_ERR, "Cannot load module '%s': %s\n", name, dlerror());
