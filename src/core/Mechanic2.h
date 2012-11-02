@@ -30,8 +30,6 @@
 #include <libreadconfig.h>
 #include <libreadconfig_hdf5.h>
 
-//#define WITH_DEBUG 1
-
 #define SUCCESS 0 /**< The success return code */
 #define CORE_ICE 112 /**< The core emergency return code */
 #define CORE_SETUP_HELP 212 /**< The core help message return code */
@@ -78,10 +76,10 @@
 #define NO_MORE_TASKS -99 /**< No more tasks return code */
 
 /* Message tags */
-#define TAG_DATA 1337
-#define TAG_STANDBY 49
-#define TAG_RESULT 59
-#define TAG_TERMINATE 32763
+#define TAG_DATA 1337 /**< Send/Receiving data tag */
+#define TAG_STANDBY 49 /**< Thoe node standby tag */
+#define TAG_RESULT 59 /**< The data result tag */
+#define TAG_TERMINATE 32763 /** The node terminate tag */
 
 #define MASTER 0 /**< The master node */
 #define NORMAL_MODE 600 /**< The normal operation mode */
@@ -92,7 +90,7 @@
 #define MPI_BLOCKING 333 /**< Blocking communication mode */
 
 /* Data */
-#define TASK_NO_LOCATION -99
+#define TASK_NO_LOCATION -99 /**< Task location defaults */
 #define HEADER_SIZE 3+TASK_BOARD_RANK /**< The data header size */
 #define HEADER_INIT {TAG_TERMINATE,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION}
 
@@ -228,34 +226,79 @@ typedef enum {
   MESSAGE_COMMENT, /**< The comment message type */
 } MessageType;
 
-void Message(int type, char* message, ...);
-
-int GetSize(int rank, int *dims);
-void GetDims(storage *s, int *dims);
-
+/**
+ * Memory allocation helpers
+ */
 int** AllocateInt2D(storage *s);
-float** AllocateFloat2D(storage *s);
-double** AllocateDouble2D(storage *s);
-
 void FreeInt2D(int **array);
+
+short** AllocateShort2D(storage *s);
+void FreeShort2D(short **array);
+
+long** AllocateLong2D(storage *s);
+void FreeLong2D(long **array);
+
+long long** AllocateLLong2D(storage *s);
+void FreeLLong2D(long long **array);
+
+unsigned int** AllocateUInt2D(storage *s);
+void FreeUInt2D(unsigned int **array);
+
+unsigned short** AllocateUShort2D(storage *s);
+void FreeUShort2D(unsigned short **array);
+
+unsigned long long** AllocateULLong2D(storage *s);
+void FreeULLong2D(unsigned long long **array);
+
+float** AllocateFloat2D(storage *s);
 void FreeFloat2D(float **array);
+
+double** AllocateDouble2D(storage *s);
 void FreeDouble2D(double **array);
 
 int*** AllocateInt3D(storage *s);
-float*** AllocateFloat3D(storage *s);
-double*** AllocateDouble3D(storage *s);
-
 void FreeInt3D(int ***array);
+
+short*** AllocateShort3D(storage *s);
+void FreeShort3D(short ***array);
+
+long*** AllocateLong3D(storage *s);
+void FreeLong3D(long ***array);
+
+long long*** AllocateLLong3D(storage *s);
+void FreeLLong3D(long long ***array);
+
+unsigned int*** AllocateUInt3D(storage *s);
+void FreeUInt3D(unsigned int ***array);
+
+unsigned short*** AllocateUShort3D(storage *s);
+void FreeUShort3D(unsigned short ***array);
+
+unsigned long long*** AllocateULLong3D(storage *s);
+void FreeULLong3D(unsigned long long ***array);
+
+float*** AllocateFloat3D(storage *s);
 void FreeFloat3D(float ***array);
+
+double*** AllocateDouble3D(storage *s);
 void FreeDouble3D(double ***array);
 
+/**
+ * Data read/write helpers
+ */
+int GetSize(int rank, int *dims); /**< Get the 1D size for given rank and dimensions */
+void GetDims(storage *s, int *dims); /**< Get the dimensions of the storage object */
 int WriteData(storage *s, void* data); /**< Copy local data buffers to memory */
 int ReadData(storage *s, void* data); /**< Copy memory buffers to local data buffers */
 int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
 
-void Error(int status);
-void Abort(int status);
-void CheckStatus(int status);
-void H5CheckStatus(hid_t status);
+/**
+ * Message and log helpers
+ */
+void Message(int type, char* message, ...);
+void Error(int status); /**< Error reporting */
+void Abort(int status); /**< Abort handler */
+void CheckStatus(int status); /**< Status checking utility*/
+void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
 
 #endif
