@@ -220,7 +220,7 @@ typedef enum {
   MESSAGE_INFO, /**< The message info type */
   MESSAGE_ERR, /**< The message error type (only the message) */
   MESSAGE_WARN, /**< The warning message type */
-	MESSAGE_DEBUG, /**< The debug message type */
+  MESSAGE_DEBUG, /**< The debug message type */
   MESSAGE_OUTPUT, /**< The clear output message type */
   MESSAGE_RESULT, /**< The result output message type */
   MESSAGE_COMMENT, /**< The comment message type */

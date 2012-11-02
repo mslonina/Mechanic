@@ -12,7 +12,7 @@
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p datatypes -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p dim -x 10 -y 20
  *
  * Listing the contents of the data file
  * -------------------------------------
@@ -37,6 +37,9 @@
  */
 int Storage(pool *p, setup *s) {
 
+  /**
+   * 3D integer dataset
+   */
   p->storage[0].layout = (schema) {
     .path = "3d-integer-datatype-group",
     .rank = 3,
@@ -49,6 +52,9 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_GROUP,
   };
 
+  /**
+   * 4D double dataset
+   */
   p->storage[1].layout = (schema) {
     .path = "4d-double-datatype-group",
     .rank = 4,
@@ -62,6 +68,9 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_GROUP,
   };
 
+  /**
+   * 2D float dataset
+   */
   p->storage[2].layout = (schema) {
     .path = "2d-float-datatype-group",
     .rank = 2,
@@ -73,6 +82,9 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_GROUP,
   };
 
+  /**
+   * 3D double dataset of type STORAGE_BOARD
+   */
   p->task->storage[0].layout = (schema) {
     .path = "3d-double-datatype-board",
     .rank = 3,
@@ -85,6 +97,9 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_BOARD,
   };
 
+  /**
+   * 2D integer dataset of type STORAGE_BOARD
+   */
   p->task->storage[1].layout = (schema) {
     .path = "2d-integer-datatype-board",
     .rank = 2,
@@ -96,6 +111,9 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_BOARD,
   };
 
+  /**
+   * 3D integer dataset of type STORAGE_GROUP
+   */
   p->task->storage[2].layout = (schema) {
     .path = "3d-integer-datatype-group",
     .rank = 3,
@@ -108,6 +126,9 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_GROUP,
   };
 
+  /**
+   * 2D integer dataset of type STORAGE_PM3D
+   */
   p->task->storage[3].layout = (schema) {
     .path = "2d-integer-datatype-pm3d",
     .rank = 2,
@@ -119,6 +140,9 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_PM3D,
   };
 
+  /**
+   * 3D integer dataset of type STORAGE_LIST
+   */
   p->task->storage[4].layout = (schema) {
     .path = "3d-integer-datatype-list",
     .rank = 3,
@@ -138,28 +162,30 @@ int Storage(pool *p, setup *s) {
  * Implements PoolPrepare()
  */
 int PoolPrepare(pool **allpools, pool *current, setup *s) {
-  int data[DIM0][DIM1][DIM2];
+  int ***data;
+  float **floa;
   double buff[DIM0][DIM1][DIM2][DIM3];
-  float floa[DIM0][DIM1];
   int i,j,k,l;
+  int dims[MAX_RANK];
 
-  // 2d float
-  for (i = 0; i < DIM0; i++) {
-    for (j = 0; j < DIM1; j++) {
-      floa[i][j] = 80.23 + i + j;
-    }
-  }
-
-  // 3d integer
-  for (i = 0; i < DIM0; i++) {
-    for (j = 0; j < DIM1; j++) {
-      for (k = 0; k < DIM2; k++) {
+  /**
+   * Allocate and fill the 3D integer dataset
+   */
+  GetDims(&current->storage[0], dims);
+  data = AllocateInt3D(&current->storage[0]);
+  for (i = 0; i < dims[0]; i++) {
+    for (j = 0; j < dims[1]; j++) {
+      for (k = 0; k < dims[2]; k++) {
         data[i][j][k] = i + j + k;
       }
     }
   }
 
-  // 4d double
+  WriteData(&(current->storage[0]), &data[0][0][0]);
+
+  /**
+   * Fill the 4D double dataset
+   */
   for (i = 0; i < DIM0; i++) {
     for (j = 0; j < DIM1; j++) {
       for (k = 0; k < DIM2; k++) {
@@ -170,9 +196,26 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
     }
   }
 
-  WriteData(&(current->storage[0]), data);
   WriteData(&(current->storage[1]), buff);
-  WriteData(&(current->storage[2]), floa);
+
+  /**
+   * Allocate and fill the 2D float dataset
+   */
+  GetDims(&current->storage[2], dims);
+  floa = AllocateFloat2D(&current->storage[2]);
+  for (i = 0; i < dims[0]; i++) {
+    for (j = 0; j < dims[1]; j++) {
+      floa[i][j] = 80.23 + i + j;
+    }
+  }
+
+  WriteData(&(current->storage[2]), &floa[0][0]);
+
+  /**
+   * Release the resources
+   */
+  FreeInt3D(data);
+  FreeFloat2D(floa);
 
   return SUCCESS;
 }
@@ -186,10 +229,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   int **idata, ***tp;
   double ***data;
 
-  /* Direct access to the memory block */
-  printf("\n");
-  Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XY slice-0)\n");
-  printf("\n");
+  Message(MESSAGE_OUTPUT, "\n3D Integer dataset of STORAGE_GROUP (XY slice-0)\n\n");
   
   tp = AllocateInt3D(&current->tasks[current->pool_size-2]->storage[2]);
   ReadData(&current->tasks[current->pool_size-2]->storage[2], &tp[0][0][0]);
@@ -203,10 +243,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-
-  printf("\n");
-  Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XZ slice-0)\n");
-  printf("\n");
+  Message(MESSAGE_OUTPUT, "\n3D Integer dataset of STORAGE_GROUP (XZ slice-0)\n\n");
 
   for (i = 0; i < dims[0]; i++) {
     printf("\t");
@@ -216,9 +253,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
   
-  printf("\n");
-  Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (YZ slice-0)\n");
-  printf("\n");
+  Message(MESSAGE_OUTPUT, "\n3D Integer dataset of STORAGE_GROUP (YZ slice-0)\n\n");
   
   for (i = 0; i < dims[1]; i++) {
     printf("\t");
@@ -227,12 +262,8 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     }
     printf("\n");
   }
-
   
-  /* Read dataset inside the Tasks/task-[i] group, we already know the buffer size */
-  printf("\n");
-  Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XY slice-0)\n");
-  printf("\n");
+  Message(MESSAGE_OUTPUT, "\n3D Integer dataset of STORAGE_GROUP (XY slice-0)\n\n");
 
   ReadData(&current->tasks[current->pool_size - 1]->storage[2], &tp[0][0][0]);
   
@@ -244,12 +275,9 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeInt3D(tp);
 
   /* Read whole dataset from the pool->task->storage[0] */
-  printf("\n");
-  Message(MESSAGE_RESULT, "3D Double dataset of STORAGE_BOARD (XY slice DIM2-1)\n");
-  printf("\n");
+  Message(MESSAGE_OUTPUT, "\n3D Double dataset of STORAGE_BOARD (XY slice DIM2-1)\n\n");
 
   GetDims(&current->task->storage[0], dims);
   data = AllocateDouble3D(&current->task->storage[0]);
@@ -263,11 +291,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeDouble3D(data);
-
-  printf("\n");
-  Message(MESSAGE_RESULT, "2D Integer dataset of STORAGE_BOARD (XY only)\n");
-  printf("\n");
+  Message(MESSAGE_OUTPUT, "\n2D Integer dataset of STORAGE_BOARD (XY only)\n\n");
 
   GetDims(&current->task->storage[1], dims);
   idata = AllocateInt2D(&current->task->storage[1]);
@@ -283,42 +307,108 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 
   printf("\n");
 
+  FreeInt3D(tp);
+  FreeDouble3D(data);
   FreeInt2D(idata);
+
   return POOL_FINALIZE;
 }
 
 /**
  * Implements TaskProcess()
+ *
+ * We use here dynamic allocation of buffer data with help of Allocate functions provided
+ * by the Mechanic2.
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  double data[DIM0][DIM1];
-  int idata[DIM0][DIM1];
-  int cdata[DIM0][DIM1][DIM2];
-  double ddata[DIM0][DIM1][DIM2];
-  int i,j,k,l,z;
+  int **idata;
+  int ***cdata;
+  double ***ddata;
+  int i,j,k;
   int dims[MAX_RANK];
 
-  for (i = 0; i < DIM0; i++) {
-    for (j = 0; j < DIM1; j++) {
-      data[i][j] = t->tid+1.1;
-      idata[i][j] = t->tid+1;
-    }
-  }
-
-  for (i = 0; i < DIM0; i++) {
-    for (j = 0; j < DIM1; j++) {
-      for (k = 0; k < DIM2; k++) {
-        cdata[i][j][k] = t->tid+1+i+j+k;
+  /**
+   * Allocate and fill the 3D double-type data buffer for t->storage[0]
+   * (see p->task->storage[0].layout in Storage())
+   * 
+   * Since this is STORAGE_BOARD-type storage, the data will be stored in one 
+   * dataset with offsets calculated automatically. Each task will return dims-size
+   * datablock.
+   */
+  GetDims(&t->storage[0], dims);
+  ddata = AllocateDouble3D(&t->storage[0]);
+  for (i = 0; i < dims[0]; i++) {
+    for (j = 0; j < dims[1]; j++) {
+      for (k = 0; k < dims[2]; k++) {
         ddata[i][j][k] = t->tid+k;
       }
     }
   }
+  
+  WriteData(&t->storage[0], &ddata[0][0][0]);
 
-  WriteData(&t->storage[0], ddata);
-  WriteData(&t->storage[1], idata);
-  WriteData(&t->storage[2], cdata);
-  WriteData(&t->storage[3], idata);
-  WriteData(&t->storage[4], cdata);
+  /**
+   * Allocate and fill the 2D integer-type data for t->storage[1]
+   * (see p->task->storage[1].layout in Storage())
+   *
+   * This is STORAGE_BOARD-type as well.
+   */
+  GetDims(&t->storage[1], dims);
+  idata = AllocateInt2D(&t->storage[1]);
+  for (i = 0; i < dims[0]; i++) {
+    for (j = 0; j < dims[1]; j++) {
+      idata[i][j] = t->tid+1;
+    }
+  }
+
+  WriteData(&t->storage[1], &idata[0][0]);
+
+  /**
+   * Allocate and fill the 3D integer-type data buffer
+   * (see p->task->storage[2].layout in Storage())
+   * 
+   * Since this is STORAGE_GROUP-type storage, the data will be stored in separated
+   * datasets per each task and available through p->tasks[task-ID]->storage[2] group.
+   */
+  GetDims(&t->storage[2], dims);
+  cdata = AllocateInt3D(&t->storage[2]);
+  for (i = 0; i < dims[0]; i++) {
+    for (j = 0; j < dims[1]; j++) {
+      for (k = 0; k < dims[2]; k++) {
+        cdata[i][j][k] = t->tid+1+i+j+k;
+      }
+    }
+  }
+
+  WriteData(&t->storage[2], &cdata[0][0][0]);
+
+  /**
+   * Fill the 2D integer-type data buffer for t->storage[3]
+   * (see p->task->storage[3].layout in Storage())
+   *
+   * We are reusing here data for t->storage[1], since they have the same size. Of course,
+   * it is possible to change the size dynamically, depending on the problem, right in
+   * Storage().
+   *
+   * The data will be stored as STORAGE_PM3D-type dataset.
+   */
+  WriteData(&t->storage[3], &idata[0][0]);
+
+  /**
+   * Again, we are reusing here data for t->storage[2], this time however we are storing
+   * them into STORAGE_LIST-type dataset.
+   * 
+   * (see p->task->storage[4].layout in Storage())
+   */
+  WriteData(&t->storage[4], &cdata[0][0][0]);
+
+
+  /**
+   * Release the resources
+   */
+  FreeDouble3D(ddata);
+  FreeInt3D(cdata);
+  FreeInt2D(idata);
 
   return SUCCESS;
 }
