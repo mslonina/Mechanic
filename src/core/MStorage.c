@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i, j, dims[MAX_RANK], task_groups, size;
+  int i, j, task_groups, size;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -29,9 +29,6 @@ int Storage(module *m, pool *p) {
   if (q) mstat = q(p, &m->layer.setup);
   CheckStatus(mstat);
 
-  /* The pool size */
-  p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
-
   /* Memory/Storage banks */
   m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
   m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
@@ -39,6 +36,9 @@ int Storage(module *m, pool *p) {
   /* Check and fix the memory/storage layout */
   CheckLayout(1, p->board);
   CheckLayout(m->pool_banks, p->storage);
+
+  /* The pool size */
+  p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
 
   /* Right now, there is no support for different storage types of pool datasets */
   for (i = 0; i < m->pool_banks; i++) {
@@ -59,25 +59,35 @@ int Storage(module *m, pool *p) {
 
       if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[i].layout.storage_type == STORAGE_LIST) {
-        dims[0] = p->task->storage[i].layout.dim[0] * p->pool_size;
+
+        p->task->storage[i].layout.storage_dim[0] =
+          p->task->storage[i].layout.dim[0] * p->pool_size;
         
         for (j = 1; j < MAX_RANK; j++) {
-          dims[j] = p->task->storage[i].layout.dim[j];
+          p->task->storage[i].layout.storage_dim[j] =
+            p->task->storage[i].layout.dim[j];
         }
         
-        size = GetSize(p->task->storage[i].layout.rank, dims);
+        size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
+        p->task->storage[i].layout.storage_elements = size;
+        p->task->storage[i].layout.storage_size = (size_t)size * p->task->storage[i].layout.datatype_size;
         mstat = Allocate(&(p->task->storage[i]), (size_t)size, p->task->storage[i].layout.datatype_size);
       }
 
       if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
-        dims[0] = p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
-        dims[1] = p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
+        p->task->storage[i].layout.storage_dim[0] =
+          p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
+        p->task->storage[i].layout.storage_dim[1] =
+          p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
 
         for (j = 2; j < MAX_RANK; j++) {
-          dims[j] = p->task->storage[i].layout.dim[j];
+          p->task->storage[i].layout.storage_dim[j] =
+            p->task->storage[i].layout.dim[j];
         }
         
-        size = GetSize(p->task->storage[i].layout.rank, dims);
+        size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
+        p->task->storage[i].layout.storage_elements = size;
+        p->task->storage[i].layout.storage_size = (size_t)size * p->task->storage[i].layout.datatype_size;
         mstat = Allocate(&(p->task->storage[i]), (size_t)size, p->task->storage[i].layout.datatype_size);
       }
 
@@ -135,6 +145,7 @@ int CheckLayout(int banks, storage *s) {
         Message(MESSAGE_ERR, "Invalid size for dimension %d = %d\n", i, s[i].layout.dim[j]);
         Error(CORE_ERR_STORAGE);
       }
+      s[i].layout.storage_dim[j] = s[i].layout.dim[j];
     }
 
     if ((int)s[i].layout.datatype <= 0) {
@@ -166,8 +177,12 @@ int CheckLayout(int banks, storage *s) {
     }
 
     s[i].layout.mpi_datatype = GetMpiDatatype(s[i].layout.datatype);
-    s[i].layout.elements = GetSize(s[i].layout.rank, s[i].layout.dim);
     s[i].layout.datatype_size = H5Tget_size(s[i].layout.datatype);
+    
+    s[i].layout.storage_elements = 
+      s[i].layout.elements = GetSize(s[i].layout.rank, s[i].layout.dim);
+
+    s[i].layout.storage_size = (size_t) s[i].layout.storage_elements * s[i].layout.datatype_size;
     s[i].layout.size = (size_t) s[i].layout.elements * s[i].layout.datatype_size;
 
   }
@@ -191,7 +206,7 @@ int CommitMemoryLayout(int banks, storage *s) {
   int mstat = SUCCESS, i = 0;
 
   for (i = 0; i < banks; i++) {
-    mstat = Allocate(&s[i], (size_t)s[i].layout.elements, s[i].layout.datatype_size);
+    mstat = Allocate(&s[i], (size_t)s[i].layout.storage_elements, s[i].layout.datatype_size);
     CheckStatus(mstat);
   }
 
@@ -312,25 +327,11 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   h5dataspace = H5Screate(s->layout.dataspace_type);
   H5CheckStatus(h5dataspace);
   if (s->layout.dataspace_type == H5S_SIMPLE) {
-    if (s->layout.storage_type == STORAGE_GROUP) {
-      for (i = 0; i < MAX_RANK; i++) {
-        dims[i] = s->layout.dim[i];
-      }
+    
+    for (i = 0; i < MAX_RANK; i++) {
+      dims[i] = s->layout.storage_dim[i];
     }
-    if (s->layout.storage_type == STORAGE_PM3D ||
-        s->layout.storage_type == STORAGE_LIST) {
-      dims[0] = s->layout.dim[0] * p->pool_size;
-      for (i = 1; i < MAX_RANK; i++) {
-        dims[i] = s->layout.dim[i];
-      }
-    }
-    if (s->layout.storage_type == STORAGE_BOARD) {
-      dims[0] = s->layout.dim[0] * p->board->layout.dim[0];
-      dims[1] = s->layout.dim[1] * p->board->layout.dim[1];
-      for (i = 2; i < MAX_RANK; i++) {
-        dims[i] = s->layout.dim[i];
-      }
-    }
+    
     h5status = H5Sset_extent_simple(h5dataspace, s->layout.rank, dims, NULL);
     H5CheckStatus(h5status);
   }
@@ -406,16 +407,10 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
       } else {
         for (j = 0; j < MAX_RANK; j++) {
-          dims[j] = s[i].layout.dim[j];
+          dims[j] = s[i].layout.storage_dim[j];
           offsets[j] = s[i].layout.offset[j];
         }
 
-/*        Message(MESSAGE_INFO, "Write Data storage path: %s of rank %d = ", s[i].layout.path, s[i].layout.rank);
-        for (j = 0; j < s[i].layout.rank; j++) printf(" %d ", (int)dims[j]);
-        printf(" and offsets = ");
-        for (j = 0; j < s[i].layout.rank; j++) printf(" %d ", (int)offsets[j]);
-        printf("\n");
-*/
         memspace = H5Screate_simple(s[i].layout.rank, dims, NULL);
         H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, dims, NULL);
         hdf_status = H5Dwrite(dataset, s[i].layout.datatype,

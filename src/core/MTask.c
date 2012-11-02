@@ -54,7 +54,9 @@ task* TaskLoad(module *m, pool *p, int tid) {
 
     /* Memory size */
     for (j = 0; j < t->storage[i].layout.rank; j++) {
-      t->storage[i].layout.dim[j] = p->task->storage[i].layout.dim[j];
+      t->storage[i].layout.storage_dim[j] = 
+        t->storage[i].layout.dim[j] = 
+        p->task->storage[i].layout.dim[j];
     }
 
     t->storage[i].layout.sync = p->task->storage[i].layout.sync;
@@ -63,7 +65,9 @@ task* TaskLoad(module *m, pool *p, int tid) {
     t->storage[i].layout.datatype = p->task->storage[i].layout.datatype;
     t->storage[i].layout.mpi_datatype = p->task->storage[i].layout.mpi_datatype;
     t->storage[i].layout.size = p->task->storage[i].layout.size;
+    t->storage[i].layout.storage_size = p->task->storage[i].layout.size;
     t->storage[i].layout.elements = p->task->storage[i].layout.elements;
+    t->storage[i].layout.storage_elements = p->task->storage[i].layout.elements;
     t->storage[i].layout.datatype_size = p->task->storage[i].layout.datatype_size;
   }
 

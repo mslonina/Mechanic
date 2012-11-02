@@ -183,7 +183,6 @@ int Allocate(storage *s, size_t size, size_t datatype) {
 
   if (size > 0) {
     s->memory = calloc(size, datatype);
-    //s->memory = malloc(size);
   }
 
   if (!s->memory) return CORE_ERR_MEM;
@@ -211,7 +210,7 @@ int WriteData(storage *s, void *data) {
   if (!s->memory) return CORE_ERR_MEM;
   if (!data) return CORE_ERR_MEM;
 
-  memcpy(s->memory, data, s->layout.size);
+  CopyData(data, s->memory, s->layout.storage_size);
   return SUCCESS;
 }
 
@@ -227,7 +226,7 @@ int ReadData(storage *s, void *data) {
   if (!s->memory) return CORE_ERR_MEM;
   if (!data) return CORE_ERR_MEM;
 
-  memcpy(data, s->memory, s->layout.size);
+  CopyData(s->memory, data, s->layout.storage_size);
   return SUCCESS;
 }
 
@@ -244,7 +243,6 @@ int CopyData(void *in, void *out, size_t size) {
   if (!in) return CORE_ERR_MEM;
   if (!out) return CORE_ERR_MEM;
 
-//  printf("trying to write %zu bytes\n", size);
   memcpy(out, in, size);
   return SUCCESS;
 }

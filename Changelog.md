@@ -5,7 +5,7 @@ Mechanic short changelog
 ---
 
 - Support for all basic (native) datatypes
-- Multidimensional datasets (up to rank 4)
+- Multidimensional datasets (up to max rank H5S_MAX_RANK)
 - New memory handling, much more flexible and efficient
 - New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
 - Several bug fixes and minor improvements

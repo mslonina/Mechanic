@@ -27,4 +27,3 @@
 #cmakedefine HAVE_POPT_H 1
 #cmakedefine HAVE_LRC_H 1
 #cmakedefine HAVE_LRC_HDF5_H 1
-#cmakedefine WITH_DEBUG 1

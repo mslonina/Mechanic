@@ -189,10 +189,9 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   /* Direct access to the memory block */
   printf("\n");
   Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XY slice-0)\n");
-  Message(MESSAGE_RESULT, "Direct access\n");
   printf("\n");
   
-  memcpy(three, current->tasks[current->pool_size-2]->storage[2].memory, DIM0*DIM1*DIM2*sizeof(int));
+  ReadData(&current->tasks[current->pool_size-2]->storage[2], three);
 
   for (i = 0; i < DIM0; i++) {
     printf("\t");
@@ -204,7 +203,6 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 
   printf("\n");
   Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XZ slice-0)\n");
-  Message(MESSAGE_RESULT, "Direct access\n");
   printf("\n");
 
   for (i = 0; i < DIM0; i++) {
@@ -217,7 +215,6 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   
   printf("\n");
   Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (YZ slice-0)\n");
-  Message(MESSAGE_RESULT, "Direct access\n");
   printf("\n");
   
   for (i = 0; i < DIM1; i++) {
@@ -231,7 +228,6 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   /* Read dataset inside the Tasks/task-[i] group, we already know the buffer size */
   printf("\n");
   Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XY slice-0)\n");
-  Message(MESSAGE_RESULT, "Usage of ReadData()\n");
   printf("\n");
 
   ReadData(&current->tasks[current->pool_size - 1]->storage[2], three);
@@ -247,10 +243,9 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   /* Read whole dataset from the pool->task->storage[0] */
   printf("\n");
   Message(MESSAGE_RESULT, "3D Double dataset of STORAGE_BOARD (XY slice DIM2-1)\n");
-  Message(MESSAGE_RESULT, "Direct access\n");
   printf("\n");
 
-  memcpy(data, current->task->storage[0].memory, 5*DIM0*5*DIM1*DIM2*sizeof(double));
+  ReadData(&current->task->storage[0], data);
  
   for (i = 0; i < 5*DIM0; i++) {
     printf("\t");
@@ -262,10 +257,9 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 
   printf("\n");
   Message(MESSAGE_RESULT, "2D Integer dataset of STORAGE_BOARD (XY only)\n");
-  Message(MESSAGE_RESULT, "Direct access\n");
   printf("\n");
 
-  memcpy(idata, current->task->storage[1].memory, 5*DIM0*5*DIM1*sizeof(int));
+  ReadData(&current->task->storage[1], idata);
   
   for (i = 0; i < 5*DIM0; i++) {
     printf("\t");

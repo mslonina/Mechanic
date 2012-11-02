@@ -30,7 +30,7 @@
 #include <libreadconfig.h>
 #include <libreadconfig_hdf5.h>
 
-#define WITH_DEBUG 1
+//#define WITH_DEBUG 1
 
 #define SUCCESS 0 /**< The success return code */
 #define CORE_ICE 112 /**< The core emergency return code */
@@ -139,17 +139,20 @@ typedef struct {
 typedef struct {
   char *path; /**< The name of the dataset */
   int rank; /**< The rank of the dataset */
-  int dim[MAX_RANK]; /**< The dimensions of the dataset */
-  int offset[MAX_RANK]; /**< The offsets (calculated automatically) */
+  int storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
   int use_hdf; /**< Enables HDF5 storage for the memory block */
   int sync; /**< Whether to synchronize memory bank between master and worker */
-  int storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
-  H5S_class_t dataspace_type; /**< The type of the HDF5 dataspace (H5S_SIMPLE) */
+  int dim[MAX_RANK]; /**< The dimensions of the memory dataset */
   hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
-  MPI_Datatype mpi_datatype; /**< The MPI datatype of the dataset */
-  size_t size; /**< The size of the memory block */
-  size_t datatype_size; /** The size of the datatype */
-  int elements; /**< Number of data elements in the memory block */
+  int storage_dim[MAX_RANK]; /**< @internal The dimensions of the storage dataset */
+  int offset[MAX_RANK]; /**< @internal The offsets (calculated automatically) */
+  H5S_class_t dataspace_type; /**< @internal The type of the HDF5 dataspace (H5S_SIMPLE) */
+  MPI_Datatype mpi_datatype; /**< @internal The MPI datatype of the dataset */
+  size_t size; /**< @internal The size of the memory block */
+  size_t storage_size; /**< @internal The size of the storage block */
+  size_t datatype_size; /** @internal The size of the datatype */
+  int elements; /**< @internal Number of data elements in the memory block */
+  int storage_elements; /**< @internal Number of data elements in the storage block */
 } schema;
 
 /**
