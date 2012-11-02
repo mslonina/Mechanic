@@ -53,7 +53,32 @@
  *  After the task loop is finished, the PoolProcess() is used to decide whether to
  *  continue the pool loop or not. The data of all pools is passed to this function. 
  *
- * @page task_loop The task loop explained
+ * ### Order of function hooks
+ *
+ *
+ *     Init()
+ *     Setup()
+ *
+ *     Prepare()
+ *        [Pool loop]
+ *    
+ *          Storage()
+ *          NodePrepare()
+ *          PoolPrepare()
+ *          LoopPrepare()
+ *    
+ *          [Task loop]
+ *            TaskMapping()
+ *            TaskPrepare()
+ *            TaskProcess()
+ *          [/Task loop]
+ *    
+ *          LoopProcess()
+ *          PoolProcess()
+ *          NodeProcess()
+ *    
+ *        [/Pool loop]
+ *     Process()
  */
 
 /**
@@ -810,7 +835,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  *  - the MPI message tag
  *  - the received task ID
  *  - the received task status (TASK_FINISHED)
- *  - the received task location (rank 2)
+ *  - the received task location (TASK_BOARD_RANK, currently 2)
  *
  * It is best to keep this hook untouched, since the memory banks are used then to
  * physically store the data in the HDF5 master datafile. This hook should not be normally
@@ -833,7 +858,7 @@ int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
 /**
  * @brief The prepare hook
  *
- * This function is used to do any simulation-related prepare operations. It is called
+ * This function is used to do any simulation-related prepare operations. It is invoked
  * before the pool loop starts.
  *
  * If the Prepare() hook is present in a custom module, it will be used instead of the core
@@ -854,7 +879,7 @@ int Prepare(int node, char *masterfile, setup *s) {
  * @brief The process hook
  *
  * This function is used to perform any simulation post operations, such as specific data
- * manipulation in the master data file. It is called after the pool loop is finished.
+ * manipulation in the master data file. It is invoked after the pool loop is finished.
  *
  * If the Process() hook is present in a custom module, it will be used instead of the core
  * hook.
@@ -875,7 +900,7 @@ int Process(int node, char *masterfile, pool **all, setup *s) {
  * @brief The dataset prepare hook
  *
  * This function may be used to prepare given dataset. The HDF5 dataset pointer is passed,
- * as well as top level group/file pointer. It is called right after the dataset is
+ * as well as top level group/file pointer. It is invoked right after the dataset is
  * created in the master data file, only one the master node. 
  *
  * As an example, you may write any initial data to the dataset, as well as different
@@ -901,7 +926,7 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
  * @brief The dataset process hook
  *
  * This function may be used to process given dataset. The HDF5 dataset pointer is passed,
- * as well as top level group/file pointer. It is called during PoolProcess(), 
+ * as well as top level group/file pointer. It is invoked during PoolProcess(), 
  * only one the master node. 
  *
  * As an example, you may process any data in the dataset, as well as different
