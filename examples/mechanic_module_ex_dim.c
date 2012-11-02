@@ -181,34 +181,37 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
-  int three[DIM0][DIM1][DIM2];
-  int idata[5*DIM0][5*DIM1];
-  double data[5*DIM0][5*DIM1][DIM2];
   int i,j,k;
+  int dims[MAX_RANK];
+  int **idata, ***tp;
+  double ***data;
 
   /* Direct access to the memory block */
   printf("\n");
   Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XY slice-0)\n");
   printf("\n");
   
-  ReadData(&current->tasks[current->pool_size-2]->storage[2], three);
+  tp = AllocateInt3D(&current->tasks[current->pool_size-2]->storage[2]);
+  ReadData(&current->tasks[current->pool_size-2]->storage[2], &tp[0][0][0]);
+  GetDims(&current->tasks[current->pool_size-2]->storage[2], dims);
 
-  for (i = 0; i < DIM0; i++) {
+  for (i = 0; i < dims[0]; i++) {
     printf("\t");
-    for (j = 0; j < DIM1; j++) {
-      printf("%2d ", three[i][j][0]);
+    for (j = 0; j < dims[1]; j++) {
+      printf("%2d ", tp[i][j][0]);
     }
     printf("\n");
   }
+
 
   printf("\n");
   Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XZ slice-0)\n");
   printf("\n");
 
-  for (i = 0; i < DIM0; i++) {
+  for (i = 0; i < dims[0]; i++) {
     printf("\t");
-    for (j = 0; j < DIM2; j++) {
-      printf("%2d ", three[i][0][j]);
+    for (j = 0; j < dims[2]; j++) {
+      printf("%2d ", tp[i][0][j]);
     }
     printf("\n");
   }
@@ -217,59 +220,70 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (YZ slice-0)\n");
   printf("\n");
   
-  for (i = 0; i < DIM1; i++) {
+  for (i = 0; i < dims[1]; i++) {
     printf("\t");
-    for (j = 0; j < DIM2; j++) {
-      printf("%2d ", three[0][i][j]);
+    for (j = 0; j < dims[2]; j++) {
+      printf("%2d ", tp[0][i][j]);
     }
     printf("\n");
   }
 
+  
   /* Read dataset inside the Tasks/task-[i] group, we already know the buffer size */
   printf("\n");
   Message(MESSAGE_RESULT, "3D Integer dataset of STORAGE_GROUP (XY slice-0)\n");
   printf("\n");
 
-  ReadData(&current->tasks[current->pool_size - 1]->storage[2], three);
+  ReadData(&current->tasks[current->pool_size - 1]->storage[2], &tp[0][0][0]);
   
-  for (i = 0; i < DIM0; i++) {
+  for (i = 0; i < dims[0]; i++) {
     printf("\t");
-    for (j = 0; j < DIM1; j++) {
-      printf("%2d ", three[i][j][0]);
+    for (j = 0; j < dims[1]; j++) {
+      printf("%2d ", tp[i][j][0]);
     }
     printf("\n");
   }
+
+  FreeInt3D(tp);
 
   /* Read whole dataset from the pool->task->storage[0] */
   printf("\n");
   Message(MESSAGE_RESULT, "3D Double dataset of STORAGE_BOARD (XY slice DIM2-1)\n");
   printf("\n");
 
-  ReadData(&current->task->storage[0], data);
+  GetDims(&current->task->storage[0], dims);
+  data = AllocateDouble3D(&current->task->storage[0]);
+  ReadData(&current->task->storage[0], &data[0][0][0]);
  
-  for (i = 0; i < 5*DIM0; i++) {
+  for (i = 0; i < dims[0]; i++) {
     printf("\t");
-    for (j = 0; j < 5*DIM1; j++) {
-      printf("%5.2f ", data[i][j][DIM2-1]);
+    for (j = 0; j < dims[1]; j++) {
+      printf("%5.2f ", data[i][j][dims[2]-1]);
     }
     printf("\n");
   }
+
+  FreeDouble3D(data);
 
   printf("\n");
   Message(MESSAGE_RESULT, "2D Integer dataset of STORAGE_BOARD (XY only)\n");
   printf("\n");
 
-  ReadData(&current->task->storage[1], idata);
+  GetDims(&current->task->storage[1], dims);
+  idata = AllocateInt2D(&current->task->storage[1]);
+  ReadData(&current->task->storage[1], &idata[0][0]);
   
-  for (i = 0; i < 5*DIM0; i++) {
+  for (i = 0; i < dims[0]; i++) {
     printf("\t");
-    for (j = 0; j < 5*DIM1; j++) {
+    for (j = 0; j < dims[1]; j++) {
       printf("%4d ", idata[i][j]);
     }
     printf("\n");
   }
 
   printf("\n");
+
+  FreeInt2D(idata);
   return POOL_FINALIZE;
 }
 
@@ -282,6 +296,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   int cdata[DIM0][DIM1][DIM2];
   double ddata[DIM0][DIM1][DIM2];
   int i,j,k,l,z;
+  int dims[MAX_RANK];
 
   for (i = 0; i < DIM0; i++) {
     for (j = 0; j < DIM1; j++) {
@@ -293,7 +308,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   for (i = 0; i < DIM0; i++) {
     for (j = 0; j < DIM1; j++) {
       for (k = 0; k < DIM2; k++) {
-        cdata[i][j][k] = t->tid+1;
+        cdata[i][j][k] = t->tid+1+i+j+k;
         ddata[i][j][k] = t->tid+k;
       }
     }

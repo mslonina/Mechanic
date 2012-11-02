@@ -154,23 +154,28 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
-  int ibuff[DIM0][DIM1], i, j, k, l;
-  int idataset[75][4];
-  double odataset[15][20];
-  int **ibuff_two;
+  int i, j, k, l;
+  int **ibuff;
   double **dbuff;
-  int dims[2];
+  int dims[MAX_RANK];
   
-  /* Read dataset inside the Tasks/task-[i] group, we already know the buffer size */
-  ReadData(&current->tasks[current->pool_size - 1]->storage[2], ibuff);
+  /**
+   * Read the dataset inside the Tasks/task-[i] group
+   */
+  ibuff = AllocateInt2D(&current->tasks[current->pool_size - 1]->storage[2]);
+  ReadData(&current->tasks[current->pool_size - 1]->storage[2], &ibuff[0][0]);
+
+  GetDims(&current->tasks[current->pool_size - 1]->storage[2], dims);
 
   Message(MESSAGE_OUTPUT, "Integer dataset of STORAGE_GROUP\n");
-  for (i = 0; i < DIM0; i++) {
-    for (j = 0; j < DIM1; j++) {
-      Message(MESSAGE_OUTPUT, "%d ", ibuff[i][j]);
+  for (i = 0; i < dims[0]; i++) {
+    for (j = 0; j < dims[1]; j++) {
+      Message(MESSAGE_OUTPUT, "%2d ", ibuff[i][j]);
     }
     printf("\n");
   }
+
+  FreeInt2D(ibuff);
 
   /**
    * Read the p->task->storage[0] dataset
@@ -179,12 +184,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[0].layout.dim[0] * p->board->layout.dim[0]
    * dims[1] = p->task->storage[0].layout.dim[1] * p->board->layout.dim[1]
    */
-  dims[0] = current->task->storage[0].layout.dim[0] * current->board->layout.dim[0];
-  dims[1] = current->task->storage[0].layout.dim[1] * current->board->layout.dim[1];
-  dbuff = AllocateDouble2D(2, dims);
+  dbuff = AllocateDouble2D(&current->task->storage[0]);
+  ReadData(&current->task->storage[0], &dbuff[0][0]);
 
-  //memcpy(odataset, current->task->storage[0].memory, dims[0]*dims[1]*current->task->storage[0].layout.datatype_size);
-  memcpy(&dbuff[0][0], current->task->storage[0].memory, dims[0]*dims[1]*current->task->storage[0].layout.datatype_size);
+  GetDims(&current->task->storage[0], dims);
 
   Message(MESSAGE_OUTPUT, "\nDouble dataset of STORAGE_BOARD\n");
   for (i = 0; i < dims[0]; i++) {
@@ -194,7 +197,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeBuffer(dbuff);
+  FreeDouble2D(dbuff);
 
   /**
    * Read the p->task->storage[1] dataset
@@ -203,21 +206,20 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[1].layout.dim[0] * p->board->layout.dim[0]
    * dims[1] = p->task->storage[1].layout.dim[1] * p->board->layout.dim[1]
    */
-  dims[0] = current->task->storage[1].layout.dim[0] * current->board->layout.dim[0];
-  dims[1] = current->task->storage[1].layout.dim[1] * current->board->layout.dim[1];
-  ibuff_two = AllocateInt2D(2, dims);
+  ibuff = AllocateInt2D(&current->task->storage[1]);
+  ReadData(&current->task->storage[1], &ibuff[0][0]);
 
-  memcpy(&ibuff_two[0][0], current->task->storage[1].memory, dims[0]*dims[1]*current->task->storage[1].layout.datatype_size);
+  GetDims(&current->task->storage[1], dims);
 
   Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_BOARD\n");
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
-      Message(MESSAGE_OUTPUT, "%02d ", ibuff_two[i][j]);
+      Message(MESSAGE_OUTPUT, "%2d ", ibuff[i][j]);
     }
     printf("\n");
   }
 
-  FreeIntBuffer(ibuff_two);
+  FreeInt2D(ibuff);
 
   /**
    * Read the p->task->storage[3] dataset
@@ -226,21 +228,20 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[3].layout.dim[0] * p->pool_size
    * dims[1] = p->task->storage[3].layout.dim[1] 
    */
-  dims[0] = current->task->storage[3].layout.dim[0] * current->pool_size;
-  dims[1] = current->task->storage[3].layout.dim[1];
-  ibuff_two = AllocateInt2D(2, dims);
-
-  memcpy(&ibuff_two[0][0], current->task->storage[3].memory, dims[0]*dims[1]*current->task->storage[3].layout.datatype_size);
+  ibuff = AllocateInt2D(&current->task->storage[3]);
+  ReadData(&current->task->storage[3], &ibuff[0][0]);
+  
+  GetDims(&current->task->storage[3], dims);
 
   Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_PM3D\n");
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
-      Message(MESSAGE_OUTPUT, "%02d ", ibuff_two[i][j]);
+      Message(MESSAGE_OUTPUT, "%2d ", ibuff[i][j]);
     }
     printf("\n");
   }
 
-  FreeIntBuffer(ibuff_two);
+  FreeInt2D(ibuff);
 
   /**
    * Read the p->task->storage[4] dataset
@@ -249,21 +250,20 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[3].layout.dim[0] * p->pool_size
    * dims[1] = p->task->storage[3].layout.dim[1] 
    */
-  dims[0] = current->task->storage[4].layout.dim[0] * current->pool_size;
-  dims[1] = current->task->storage[4].layout.dim[1];
-  ibuff_two = AllocateInt2D(2, dims);
-
-  memcpy(&ibuff_two[0][0], current->task->storage[4].memory, dims[0]*dims[1]*current->task->storage[4].layout.datatype_size);
+  ibuff = AllocateInt2D(&current->task->storage[4]);
+  ReadData(&current->task->storage[4], &ibuff[0][0]);
+  
+  GetDims(&current->task->storage[4], dims);
 
   Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_LIST\n");
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
-      Message(MESSAGE_OUTPUT, "%02d ", ibuff_two[i][j]);
+      Message(MESSAGE_OUTPUT, "%2d ", ibuff[i][j]);
     }
     printf("\n");
   }
 
-  FreeIntBuffer(ibuff_two);
+  FreeInt2D(ibuff);
 
   return POOL_FINALIZE;
 }

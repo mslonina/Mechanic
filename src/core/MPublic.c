@@ -5,6 +5,141 @@
 #include "Mechanic2.h"
 
 /**
+ * Generic-type macro for 2D allocation
+ *
+ * @brief Allocate 2D memory buffer
+ *
+ * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
+ * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
+ *
+ * @param s The storage object for which the array has to be allocated
+ *
+ * @return Allocated array, NULL otherwise
+ */
+#define ALLOCATE2D(y,x) \
+  x** y(storage *s) { \
+    x** array = NULL; \
+    int i = 0; \
+    if (s->layout.storage_size > 0) { \
+      array = calloc(s->layout.storage_dim[0], sizeof(x*)); \
+      if (array) { \
+        array[0] = calloc(s->layout.storage_size, sizeof(x)); \
+        if (array[0]) { \
+          for (i = 0; i < s->layout.storage_dim[0]; i++) { \
+            array[i] = array[0] + i * s->layout.storage_dim[1]; \
+          } \
+        } else { \
+          Error(CORE_ERR_MEM); \
+        } \
+      } else { \
+        Error(CORE_ERR_MEM); \
+      } \
+    } \
+    return array; \
+  } \
+
+#define FREE2D(y,x)\
+  void y(x **array) {\
+  if (array[0]) free(array[0]);\
+  if (array) free(array);\
+}\
+
+ALLOCATE2D(AllocateInt2D,int);
+ALLOCATE2D(AllocateFloat2D,float);
+ALLOCATE2D(AllocateDouble2D,double);
+
+FREE2D(FreeInt2D,int);
+FREE2D(FreeFloat2D,float);
+FREE2D(FreeDouble2D,double);
+
+/**
+ * Generic-type macro for 3D memory allocation
+ *
+ * @brief Allocate 3D memory buffer
+ *
+ * http://stackoverflow.com/questions/2306172/malloc-a-3-dimensional-array-in-c
+ *
+ * @param s The storage object for which the array has to be allocated
+ *
+ * @return Allocated array, NULL otherwise
+ */
+#define ALLOCATE3D(y,x)\
+  x*** y(storage *s) {\
+    x*** array = NULL;\
+    int i = 0, j = 0;\
+    int dim0, dim1, dim2;\
+    dim0 = s->layout.storage_dim[0];\
+    dim1 = s->layout.storage_dim[1];\
+    dim2 = s->layout.storage_dim[2];\
+    if (s->layout.storage_size > 0) {\
+      array = malloc((dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x)));\
+      if (array) {\
+        for(i = 0; i < dim0; i++) {\
+          array[i] = (x**)(array + dim0) + i * dim1;\
+          for(j = 0; j < dim1; j++) {\
+            array[i][j] = (x*)(array + dim0 + dim0*dim1) + i*dim1*dim2 + j*dim2;\
+          }\
+        }\
+      } else {\
+        Error(CORE_ERR_MEM);\
+      }\
+    }\
+    return array;\
+  }\
+
+#define FREE3D(y,x)\
+  void y(x ***array) {\
+    free(array);\
+  }\
+
+ALLOCATE3D(AllocateInt3D,int);
+ALLOCATE3D(AllocateFloat3D,float);
+ALLOCATE3D(AllocateDouble3D,double);
+
+FREE3D(FreeInt3D,int);
+FREE3D(FreeFloat3D,float);
+FREE3D(FreeDouble3D,double);
+
+/**
+ * @brief Common error handler
+ * 
+ * We abort on any error code
+ * @param errcode The error code to use
+ */
+void Error(int errcode) {
+  Abort(errcode);
+}
+
+/**
+ * @brief Wrapper to MPI_Abort
+ *
+ * @param errcode The error code to use
+ */
+void Abort(int errcode) {
+  MPI_Abort(MPI_COMM_WORLD, errcode);
+}
+
+/**
+ * @brief Common status check
+ *
+ * Throw an exception on any error code
+ *
+ * @param status The status code to check for
+ */
+void CheckStatus(int status) {
+  if (status >= MODULE_ERR_CORE && status <= CORE_ERR_OTHER) Error(status);
+}
+
+/**
+ * @brief HDF5 status check
+ *
+ * @param status The status code to check for
+ */
+void H5CheckStatus(hid_t status) {
+  if (status < 0) Error(CORE_ERR_HDF);
+}
+
+/**
  * @brief Common messaging interface
  *
  * @param type The type of the message
@@ -29,44 +164,6 @@ void Message(int type, char *message, ...) {
 }
 
 /**
- * @brief Prints the dataset
- *
- * @param type The output prefix type
- * @param dataset The HDF5 dataset handler
- *
- * @todo Do it better (i.e. for other datatypes)
- */
-void PrintDataset(int type, hid_t dataset) {
-  int dims[MAX_RANK];
-  int i, j;
-  double **buffer;
-  hid_t dataspace, datatype;
-  hsize_t dimsf[2], maxdims[2];
-
-  dataspace = H5Dget_space(dataset);
-  datatype = H5Dget_type(dataset);
-  H5Sget_simple_extent_dims(dataspace, dimsf, maxdims);
-
-  dims[0] = (int)dimsf[0];
-  dims[1] = (int)dimsf[1];
-
-  buffer = AllocateDouble2D(2, dims);
-  H5Dread(dataset, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer[0][0]);
-
-  // @todo do it better
-  for (i = 0; i < dims[0]; i++) {
-    for (j = 0; j < dims[1]; j++) {
-      Message(MESSAGE_OUTPUT, "%f ", buffer[i][j]);
-    }
-    Message(MESSAGE_OUTPUT, "\n");
-  }
-
-  FreeBuffer(buffer);
-
-  H5Sclose(dataspace);
-}
-
-/**
  * @brief Get the 1D size of the array
  *
  * @param rank The rank of the array
@@ -86,116 +183,19 @@ int GetSize(int rank, int *dims){
 }
 
 /**
- * @brief Allocate 2D double-size memory buffer
+ * @brief Get dimensions of the storage object
  *
- * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
- * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
- *
- * @param rank The rank of the array to allocate
- * @param dims The dimensions of the array to allocate
- *
- * @return Allocated array, NULL otherwise
- */
-double** AllocateDouble2D(int rank, int *dims) {
-  double** array = NULL;
-  int i = 0, size = 0;
-
-  size = GetSize(rank, dims);
-
-  if (size > 0) {
-    array = calloc(dims[0], sizeof(double*));
-    if (array) {
-      array[0] = calloc(size, sizeof(double));
-      for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
-    }
-  }
-
-  return array;
-}
-
-/**
- * @brief Allocate 2D integer-size memory buffer
- *
- * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
- * see http://stackoverflow.com/questions/5104847/mpi-bcast-a-dynamic-2d-array
- *
- * @param rank The rank of the array to allocate
- * @param dims The dimensions of the array to allocate
- *
- * @return Allocated array, NULL otherwise
- */
-int** AllocateInt2D(int rank, int *dims) {
-  int** array = NULL;
-  int i = 0, size = 0;
-
-  size = GetSize(rank, dims);
-
-  if (size > 0) {
-    array = calloc(dims[0], sizeof(int*));
-    if (array) {
-      array[0] = calloc(size, sizeof(int));
-      for (i = 0; i < dims[0]; i++) array[i] = array[0] + i*dims[1];
-    }
-  }
-
-  return array;
-}
-
-/**
- * @brief Free 2D double memory buffer
- *
- * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
- *
- * @param array The array pointer to free
- */
-void FreeBuffer(double **array) {
-  if (array[0]) free(array[0]);
-  if (array) free(array);
-}
-
-/**
- * @brief Free 2D int memory buffer
- *
- * see http://www.hdfgroup.org/ftp/HDF5/examples/misc-examples/h5_writedyn.c
- *
- * @param array The array pointer to free
- */
-void FreeIntBuffer(int **array) {
-  if (array[0]) free(array[0]);
-  if (array) free(array);
-}
-
-/**
- * @brief Allocates the memory buffer
- *
- * @param buffer The memory buffer to allocate
- * @param size The size of the memory buffer
- * @param datatype The size of the datatype
- *
- * @return SUCCESS on success, error code otherwise
- */
-int Allocate(storage *s, size_t size, size_t datatype) {
-
-  if (s->memory) {
-    Message(MESSAGE_ERR, "The buffer is already allocated\n");
-    return CORE_ERR_MEM;
-  }
-
-  if (size > 0) {
-    s->memory = calloc(size, datatype);
-  }
-
-  if (!s->memory) return CORE_ERR_MEM;
-  return SUCCESS;
-}
-
-/**
- * @brief Free the memory buffer
+ * The result array should be of rank 1 and length MAX_RANK
  *
  * @param s The storage object
+ * @param dims The result array
  */
-void Free(storage *s) {
-  if (s->memory) free(s->memory);
+void GetDims(storage *s, int *dims) {
+  int i = 0;
+
+  for (i = 0; i < s->layout.rank; i++) {
+    dims[i] = s->layout.storage_dim[i];
+  }
 }
 
 /**

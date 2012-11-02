@@ -53,7 +53,7 @@ int Master(module *m, pool *p) {
   checkpoint *c = NULL;
 
   /* Initialize the temporary task board buffer */
-  board_buffer = AllocateInt2D(p->board->layout.rank, p->board->layout.dim);
+  board_buffer = AllocateInt2D(p->board);
   if (m->mode != RESTART_MODE) {
     memset(board_buffer[0], TASK_AVAILABLE, p->pool_size*sizeof(int));
   } else {
@@ -265,7 +265,7 @@ MPI_Barrier(MPI_COMM_WORLD);
   //}
 
   if (board_buffer) {
-    FreeIntBuffer(board_buffer);
+    FreeInt2D(board_buffer);
   }
 
   for (i = 0; i < m->mpi_size - 1; i++) {

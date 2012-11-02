@@ -229,17 +229,33 @@ typedef enum {
 } MessageType;
 
 void Message(int type, char* message, ...);
-void PrintDataset(int type, hid_t dataset);
-double** AllocateDouble2D(int rank, int *dims);
-int** AllocateInt2D(int rank, int *dims);
-void FreeBuffer(double **array);
-void FreeIntBuffer(int **array);
-int GetSize(int rank, int *dims);
 
-int Allocate(storage *s, size_t size, size_t datatype); /**< Memory allocator */
-void Free(storage *s); /**< Garbage cleaner */
+int GetSize(int rank, int *dims);
+void GetDims(storage *s, int *dims);
+
+int** AllocateInt2D(storage *s);
+float** AllocateFloat2D(storage *s);
+double** AllocateDouble2D(storage *s);
+
+void FreeInt2D(int **array);
+void FreeFloat2D(float **array);
+void FreeDouble2D(double **array);
+
+int*** AllocateInt3D(storage *s);
+float*** AllocateFloat3D(storage *s);
+double*** AllocateDouble3D(storage *s);
+
+void FreeInt3D(int ***array);
+void FreeFloat3D(float ***array);
+void FreeDouble3D(double ***array);
+
 int WriteData(storage *s, void* data); /**< Copy local data buffers to memory */
 int ReadData(storage *s, void* data); /**< Copy memory buffers to local data buffers */
 int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
+
+void Error(int status);
+void Abort(int status);
+void CheckStatus(int status);
+void H5CheckStatus(hid_t status);
 
 #endif

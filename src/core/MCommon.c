@@ -44,45 +44,6 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
   return fname;
 }
 
-
-/**
- * @brief Common error handler
- *
- * @param errcode The error code to use
- */
-void Error(int errcode) {
-  // Abort on any error code
-  Abort(errcode);
-}
-
-/**
- * @brief Wrapper to MPI_Abort
- *
- * @param errcode The error code to use
- */
-void Abort(int errcode) {
-  MPI_Abort(MPI_COMM_WORLD, errcode);
-}
-
-/**
- * @brief Common status check
- *
- * @param status The status code to check for
- */
-void CheckStatus(int status) {
-  // Exception on any error code
-  if (status >= MODULE_ERR_CORE && status <= CORE_ERR_OTHER) Error(status);
-}
-
-/**
- * @brief HDF5 status check
- *
- * @param status The status code to check for
- */
-void H5CheckStatus(hid_t status) {
-  if (status < 0) Error(CORE_ERR_HDF);
-}
-
 /**
  * @brief Copy files
  *
@@ -160,4 +121,38 @@ int Copy(char* in, char* out) {
 int Validate(char *filename) {
   return SUCCESS;
 }
+
+/**
+ * @brief Allocates the memory buffer
+ *
+ * @param buffer The memory buffer to allocate
+ * @param size The size of the memory buffer
+ * @param datatype The size of the datatype
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int Allocate(storage *s, size_t size, size_t datatype) {
+
+  if (s->memory) {
+    Message(MESSAGE_ERR, "The buffer is already allocated\n");
+    return CORE_ERR_MEM;
+  }
+
+  if (size > 0) {
+    s->memory = calloc(size, datatype);
+  }
+
+  if (!s->memory) return CORE_ERR_MEM;
+  return SUCCESS;
+}
+
+/**
+ * @brief Free the memory buffer
+ *
+ * @param s The storage object
+ */
+void Free(storage *s) {
+  if (s->memory) free(s->memory);
+}
+
 

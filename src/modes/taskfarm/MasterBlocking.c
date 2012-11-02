@@ -30,7 +30,7 @@ int MasterBlocking(module *m, pool *p) {
   checkpoint *c = NULL;
 
   /* Initialize the temporary task board buffer */
-  board_buffer = AllocateInt2D(p->board->layout.rank, p->board->layout.dim);
+  board_buffer = AllocateInt2D(p->board);
   if (m->mode != RESTART_MODE) {
     memset(board_buffer[0], TASK_AVAILABLE, p->pool_size*sizeof(int));
   } else {
@@ -185,7 +185,7 @@ int MasterBlocking(module *m, pool *p) {
   }
 
   if (board_buffer) {
-    FreeIntBuffer(board_buffer);
+    FreeInt2D(board_buffer);
   }
 
   return mstat;

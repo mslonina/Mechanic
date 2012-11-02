@@ -18,12 +18,11 @@
 #define TASK_PATH "task-%04d"
 
 char* Name(char *prefix, char *name, char *suffix, char *extension);
-void Error(int status);
-void Abort(int status);
-void CheckStatus(int status);
-void H5CheckStatus(hid_t status);
 
 int Copy(char *in, char *out);
 int Validate(char *filename);
+
+int Allocate(storage *s, size_t size, size_t datatype); /**< Memory allocator */
+void Free(storage *s); /**< Garbage cleaner */
 
 #endif
