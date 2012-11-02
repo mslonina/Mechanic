@@ -229,6 +229,7 @@ typedef enum {
 /**
  * Memory allocation helpers
  */
+//2D
 int** AllocateInt2D(storage *s);
 void FreeInt2D(int **array);
 
@@ -256,6 +257,7 @@ void FreeFloat2D(float **array);
 double** AllocateDouble2D(storage *s);
 void FreeDouble2D(double **array);
 
+// 3D
 int*** AllocateInt3D(storage *s);
 void FreeInt3D(int ***array);
 
@@ -282,6 +284,35 @@ void FreeFloat3D(float ***array);
 
 double*** AllocateDouble3D(storage *s);
 void FreeDouble3D(double ***array);
+
+// 4D
+int**** AllocateInt4D(storage *s);
+void FreeInt4D(int ****array);
+
+short**** AllocateShort4D(storage *s);
+void FreeShort4D(short ****array);
+
+long**** AllocateLong4D(storage *s);
+void FreeLong4D(long ****array);
+
+long long**** AllocateLLong4D(storage *s);
+void FreeLLong4D(long long ****array);
+
+unsigned int**** AllocateUInt4D(storage *s);
+void FreeUInt4D(unsigned int ****array);
+
+unsigned short**** AllocateUShort4D(storage *s);
+void FreeUShort4D(unsigned short ****array);
+
+unsigned long long**** AllocateULLong4D(storage *s);
+void FreeULLong4D(unsigned long long ****array);
+
+float**** AllocateFloat4D(storage *s);
+void FreeFloat4D(float ****array);
+
+double**** AllocateDouble4D(storage *s);
+void FreeDouble4D(double ****array);
+
 
 /**
  * Data read/write helpers

@@ -164,7 +164,7 @@ int Storage(pool *p, setup *s) {
 int PoolPrepare(pool **allpools, pool *current, setup *s) {
   int ***data;
   float **floa;
-  double buff[DIM0][DIM1][DIM2][DIM3];
+  double ****buff;
   int i,j,k,l;
   int dims[MAX_RANK];
 
@@ -184,19 +184,21 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
   WriteData(&(current->storage[0]), &data[0][0][0]);
 
   /**
-   * Fill the 4D double dataset
+   * Allocate and fill the 4D double dataset
    */
-  for (i = 0; i < DIM0; i++) {
-    for (j = 0; j < DIM1; j++) {
-      for (k = 0; k < DIM2; k++) {
-        for (l = 0; l < DIM3; l++) {
-          buff[i][j][k][l] = i + j + k + l;
+  GetDims(&current->storage[1], dims);
+  buff = AllocateDouble4D(&current->storage[1]);
+  for (i = 0; i < dims[0]; i++) {
+    for (j = 0; j < dims[1]; j++) {
+      for (k = 0; k < dims[2]; k++) {
+        for (l = 0; l < dims[3]; l++) {
+          buff[i][j][k][l] = i+j+k+l;
         }
       }
     }
   }
 
-  WriteData(&(current->storage[1]), buff);
+  WriteData(&(current->storage[1]), &buff[0][0][0][0]);
 
   /**
    * Allocate and fill the 2D float dataset
@@ -216,6 +218,7 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
    */
   FreeInt3D(data);
   FreeFloat2D(floa);
+  FreeDouble4D(buff);
 
   return SUCCESS;
 }
@@ -274,7 +277,6 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     }
     printf("\n");
   }
-
 
   /* Read whole dataset from the pool->task->storage[0] */
   Message(MESSAGE_OUTPUT, "\n3D Double dataset of STORAGE_BOARD (XY slice DIM2-1)\n\n");

@@ -86,9 +86,9 @@ FREE2D(FreeDouble2D,double);
     if (s->layout.storage_size > 0) {\
       array = malloc((dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x)));\
       if (array) {\
-        for(i = 0; i < dim0; i++) {\
+        for (i = 0; i < dim0; i++) {\
           array[i] = (x**)(array + dim0) + i * dim1;\
-          for(j = 0; j < dim1; j++) {\
+          for (j = 0; j < dim1; j++) {\
             array[i][j] = (x*)(array + dim0 + dim0*dim1) + i*dim1*dim2 + j*dim2;\
           }\
         }\
@@ -123,6 +123,69 @@ FREE3D(FreeUShort3D,unsigned short);
 FREE3D(FreeULLong3D,unsigned long long);
 FREE3D(FreeFloat3D,float);
 FREE3D(FreeDouble3D,double);
+
+/**
+ * Generic-type macro for 4D memory allocation
+ *
+ * @brief Allocate 4D memory buffer
+ *
+ * @param s The storage object for which the array has to be allocated
+ *
+ * @return Allocated array, NULL otherwise
+ */
+#define ALLOCATE4D(y,x)\
+  x**** y(storage *s) {\
+    x**** array = NULL;\
+    int i = 0, j = 0, k = 0;\
+    int dim0, dim1, dim2, dim3;\
+    dim0 = s->layout.storage_dim[0];\
+    dim1 = s->layout.storage_dim[1];\
+    dim2 = s->layout.storage_dim[2];\
+    dim3 = s->layout.storage_dim[3];\
+    if (s->layout.storage_size > 0) {\
+      array = malloc((dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x***))\
+          + (dim0*dim1*dim2*dim3 * sizeof(x)));\
+      if (array) {\
+        for (i = 0; i < dim0; i++) {\
+          array[i] = (x***)(array + dim0) + i * dim1;\
+          for (j = 0; j < dim1; j++) {\
+            array[i][j] = (x**)(array + dim0 + dim0*dim1) + i*dim1*dim2 + j*dim2;\
+            for (k = 0; k < dim2; k++) {\
+              array[i][j][k] = (x*)(array + dim0 + dim0*dim1 + dim0*dim1*dim2) + i*dim1*dim2*dim3 + j*dim2*dim3 + k*dim3;\
+            }\
+          }\
+        }\
+      } else {\
+        Error(CORE_ERR_MEM);\
+      }\
+    }\
+    return array;\
+  }\
+
+#define FREE4D(y,x)\
+  void y(x ****array) {\
+    free(array);\
+  }\
+
+ALLOCATE4D(AllocateInt4D,int);
+ALLOCATE4D(AllocateShort4D,short);
+ALLOCATE4D(AllocateLong4D,long);
+ALLOCATE4D(AllocateLLong4D,long long);
+ALLOCATE4D(AllocateUInt4D,unsigned int);
+ALLOCATE4D(AllocateUShort4D,unsigned short);
+ALLOCATE4D(AllocateULLong4D,unsigned long long);
+ALLOCATE4D(AllocateFloat4D,float);
+ALLOCATE4D(AllocateDouble4D,double);
+
+FREE4D(FreeInt4D,int);
+FREE4D(FreeShort4D,short);
+FREE4D(FreeLong4D,long);
+FREE4D(FreeLLong4D,long long);
+FREE4D(FreeUInt4D,unsigned int);
+FREE4D(FreeUShort4D,unsigned short);
+FREE4D(FreeULLong4D,unsigned long long);
+FREE4D(FreeFloat4D,float);
+FREE4D(FreeDouble4D,double);
 
 /**
  * @brief Common error handler
