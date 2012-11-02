@@ -558,6 +558,38 @@ int Setup(setup *s) {
  *    // unique task-ID
  *    ReadData(&p->tasks[i]->storage[0], buffer);
  *
+ * If you need dynamic allocation of local data buffers, you may use Allocate* functions
+ * available. For the 2-dimensional buffers:
+ *
+ * | C datatype             | Allocate function | Free function |            
+ * |:-----------------------|:------------------|:--------------|
+ * | signed int             | AllocateInt2D     | FreeInt2D     |
+ * | signed short int       | AllocateShort2D   | FreeShort2D   |
+ * | signed long int        | AllocateLong2D    | FreeLong2D    |
+ * | signed long long int   | AllocateLLong2D   | FreeLLong2D   |
+ * | unsigned int           | AllocateUInt2D    | FreeUInt2D    |
+ * | unsigned short int     | AllocateUShort2D  | FreeUShort2D  |
+ * | unsigned long long int | AllocateULLong2D  | FreeULLong2D  |
+ * | float                  | AllocateFloat2D   | FreeFloat2D   |
+ * | double                 | AllocateDouble2   | FreeDouble2D  |
+ * 
+ * Example:
+ *
+ *    int **buffer;
+ *    ...
+ *    buffer = AllocateInt2D(&t->storage[0]);
+ *    ReadData(&t->storage[0], &buff[0][0]);
+ *    ...
+ *    FreeInt2D(buff);
+ *
+ * There are corresponding 3- and 4D version as well.
+ *
+ * To get the dimensionality of the data block, one can use:
+ *
+ *    int dims[MAX_RANK];
+ *    ...
+ *    GetDims(&t->storage[0], dims);
+ *
  *
  * ### Checkpoint
  *
