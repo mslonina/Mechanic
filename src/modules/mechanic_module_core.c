@@ -672,7 +672,7 @@ int Storage(pool *p, setup *s) {
     .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
     .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
     .dim[2] = LRC_option2int("core", "zres", s->head), // depth res
-    .dim[3] = 1,
+    .dim[3] = 2, // task status, computing node
     .datatype = H5T_NATIVE_SHORT,
     .sync = 1,
     .use_hdf = 1,

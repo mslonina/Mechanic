@@ -24,6 +24,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
 
   t->pid = p->pid;
   t->tid = tid;
+  t->node = m->node;
 
   t->storage = calloc(m->layer.init.banks_per_task, sizeof(storage));
   if (!t->storage) Error(CORE_ERR_MEM);

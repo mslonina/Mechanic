@@ -181,6 +181,7 @@ typedef struct {
   int tid; /**< The task id */
   int status; /**< The task status */
   int location[TASK_BOARD_RANK]; /**< Coordinates of the task */
+  short node; /** The computing node */
   storage *storage; /**< The storage schema and data */
 } task;
 

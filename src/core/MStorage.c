@@ -38,7 +38,10 @@ int Storage(module *m, pool *p) {
   CheckLayout(m->pool_banks, p->storage);
 
   /* The pool size */
-  p->pool_size = GetSize(p->board->layout.rank, p->board->layout.dim);
+  p->pool_size = 1;
+  for (i = 0; i < TASK_BOARD_RANK; i++) {
+    p->pool_size *= p->board->layout.dim[i];
+  }
 
   /* Right now, there is no support for different storage types of pool datasets */
   for (i = 0; i < m->pool_banks; i++) {
