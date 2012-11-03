@@ -668,11 +668,12 @@ int Storage(pool *p, setup *s) {
   /* Path: /Pools/pool-ID/board */
   p->board->layout = (schema) {
     .path = "board",
-    .rank = TASK_BOARD_RANK, // pool rank
+    .rank = TASK_BOARD_RANK+1, // pool rank
     .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
     .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
     .dim[2] = LRC_option2int("core", "zres", s->head), // depth res
-    .datatype = H5T_NATIVE_INT,
+    .dim[3] = 1,
+    .datatype = H5T_NATIVE_SHORT,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,

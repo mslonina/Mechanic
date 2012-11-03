@@ -87,13 +87,6 @@ int Storage(module *m, pool *p) {
             p->task->storage[i].layout.dim[j];
         }
         
-        // 2/3D task board overwrite
-        /*p->task->storage[i].layout.storage_dim[2] = p->board->layout.dim[2];
-        if (p->task->storage[i].layout.rank > 2) {
-          p->task->storage[i].layout.storage_dim[2] =
-            p->task->storage[i].layout.dim[2] * p->board->layout.dim[2];
-        }*/
-
         size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
         p->task->storage[i].layout.storage_elements = size;
         p->task->storage[i].layout.storage_size = (size_t)size * p->task->storage[i].layout.datatype_size;
@@ -150,8 +143,8 @@ int CheckLayout(int banks, storage *s) {
     }
 
     if (s[i].layout.storage_type == STORAGE_BOARD &&
-        s[i].layout.rank < 3) {
-      Message(MESSAGE_ERR, "Minimum rank for STORAGE_BOARD is 3\n");
+        s[i].layout.rank < TASK_BOARD_RANK) {
+      Message(MESSAGE_ERR, "Minimum rank for STORAGE_BOARD is TASK_BOARD_RANK (= 3)\n");
       Error(CORE_ERR_STORAGE);
     }
 

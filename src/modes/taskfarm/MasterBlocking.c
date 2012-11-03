@@ -18,7 +18,7 @@ int MasterBlocking(module *m, pool *p) {
   int tag;
   int header[HEADER_SIZE] = HEADER_INIT;
   int c_offset = 0;
-  int ***board_buffer = NULL;
+  short ****board_buffer = NULL;
   int completed = 0, send_node;
   int x, y, z;
 
@@ -30,27 +30,20 @@ int MasterBlocking(module *m, pool *p) {
   checkpoint *c = NULL;
 
   /* Initialize the temporary task board buffer */
-  board_buffer = AllocateInt3D(p->board);
+  board_buffer = AllocateShort4D(p->board);
   if (m->mode != RESTART_MODE) {
-/*    for (x = 0; x < p->board->layout.dim[0]; x++) {
-      for (y = 0; y < p->board->layout.dim[1]; y++) {
-        for (z = 0; z < p->board->layout.dim[2]; z++) {
-          board_buffer[x][y][z] = TASK_AVAILABLE;
-        }
-      }
-    }*/
-    memset(&board_buffer[0][0][0], TASK_AVAILABLE, p->pool_size*sizeof(int));
+    memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->pool_size*sizeof(int));
   } else {
-    ReadData(p->board, &board_buffer[0][0][0]);
+    ReadData(p->board, &board_buffer[0][0][0][0]);
 
     /* Prepare the task board */
     for (x = 0; x < p->board->layout.dim[0]; x++) {
       for (y = 0; y < p->board->layout.dim[1]; y++) {
         for (z = 0; z < p->board->layout.dim[2]; z++) {
-          if (board_buffer[x][y][z] == TASK_IN_USE) {
-            board_buffer[x][y][z] = TASK_TO_BE_RESTARTED;
+          if (board_buffer[x][y][z][0] == TASK_IN_USE) {
+            board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
           }
-          if (board_buffer[x][y][z] == TASK_FINISHED) {
+          if (board_buffer[x][y][z][0] == TASK_FINISHED) {
             completed++;
           }
         }
@@ -92,7 +85,7 @@ int MasterBlocking(module *m, pool *p) {
     if (mstat != NO_MORE_TASKS) {
       mstat = Pack(m, send_buffer->memory, p, t, TAG_DATA);
       CheckStatus(mstat);
-      board_buffer[t->location[0]][t->location[1]][t->location[2]] = TASK_IN_USE;
+      board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_IN_USE;
     } else {
       tag = TAG_TERMINATE;
       mstat = CopyData(&tag, send_buffer->memory, sizeof(int));
@@ -110,7 +103,7 @@ int MasterBlocking(module *m, pool *p) {
     /* Flush checkpoint buffer and write data, reset counter */
     if (c->counter > (c->size-1)) {
 
-      WriteData(p->board, &board_buffer[0][0][0]);
+      WriteData(p->board, &board_buffer[0][0][0][0]);
       mstat = CheckpointPrepare(m, p, c);
       CheckStatus(mstat);
 
@@ -137,7 +130,7 @@ int MasterBlocking(module *m, pool *p) {
       c_offset = c->counter * (int)recv_buffer->layout.size;
       mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
 
-      board_buffer[header[3]][header[4]][header[5]] = header[2];
+      board_buffer[header[3]][header[4]][header[5]][0] = header[2];
 
       c->counter++;
       completed++;
@@ -150,7 +143,7 @@ int MasterBlocking(module *m, pool *p) {
         mstat = Pack(m, send_buffer->memory, p, t, TAG_DATA);
         CheckStatus(mstat);
 
-        board_buffer[t->location[0]][t->location[1]][t->location[2]] = TASK_IN_USE;
+        board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_IN_USE;
 
         MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
             send_node, TAG_DATA, MPI_COMM_WORLD);
@@ -161,7 +154,7 @@ int MasterBlocking(module *m, pool *p) {
     if (completed == p->pool_size) break;
   }
 
-  WriteData(p->board, &board_buffer[0][0][0]);
+  WriteData(p->board, &board_buffer[0][0][0][0]);
   mstat = CheckpointPrepare(m, p, c);
   CheckStatus(mstat);
 
@@ -194,7 +187,7 @@ int MasterBlocking(module *m, pool *p) {
   }
 
   if (board_buffer) {
-    FreeInt3D(board_buffer);
+    FreeShort4D(board_buffer);
   }
 
   return mstat;
