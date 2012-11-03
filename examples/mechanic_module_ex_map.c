@@ -85,7 +85,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * matplotlib. You may use here standard HDF5 API, as well as HDF5_HL API.
  */
 int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
-  double xmin, xmax, ymin, ymax;
+  double xmin, xmax, ymin, ymax, zmin, zmax;
   hsize_t adims;
   hid_t hstat;
   double attr_data[1];
@@ -95,6 +95,8 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
     xmax = LRC_option2double("core", "xmax", s->head);
     ymin = LRC_option2double("core", "ymin", s->head);
     ymax = LRC_option2double("core", "ymax", s->head);
+    zmin = LRC_option2double("core", "zmin", s->head);
+    zmax = LRC_option2double("core", "zmax", s->head);
 
     adims = 1;
     attr_data[0] = xmin;
@@ -108,6 +110,12 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
     
     attr_data[0] = ymax;
     hstat = H5LTset_attribute_double(h5location, d->layout.path, "ymax", attr_data, adims);
+    
+    attr_data[0] = zmin;
+    hstat = H5LTset_attribute_double(h5location, d->layout.path, "zmin", attr_data, adims);
+    
+    attr_data[0] = zmax;
+    hstat = H5LTset_attribute_double(h5location, d->layout.path, "zmax", attr_data, adims);
   }
 
   return SUCCESS;

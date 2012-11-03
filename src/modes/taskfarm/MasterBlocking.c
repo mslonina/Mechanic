@@ -32,14 +32,14 @@ int MasterBlocking(module *m, pool *p) {
   /* Initialize the temporary task board buffer */
   board_buffer = AllocateInt3D(p->board);
   if (m->mode != RESTART_MODE) {
-    for (x = 0; x < p->board->layout.dim[0]; x++) {
+/*    for (x = 0; x < p->board->layout.dim[0]; x++) {
       for (y = 0; y < p->board->layout.dim[1]; y++) {
         for (z = 0; z < p->board->layout.dim[2]; z++) {
           board_buffer[x][y][z] = TASK_AVAILABLE;
         }
       }
-    }
-//    memset(&board_buffer[0][0][0], TASK_AVAILABLE, p->pool_size*sizeof(int));
+    }*/
+    memset(&board_buffer[0][0][0], TASK_AVAILABLE, p->pool_size*sizeof(int));
   } else {
     ReadData(p->board, &board_buffer[0][0][0]);
 

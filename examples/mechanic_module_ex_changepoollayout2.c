@@ -57,9 +57,10 @@ int Storage(pool *p, setup *s) {
   if (p->pid == 2) {
     p->task->storage[1].layout = (schema) {
       .path = "result-board",
-      .rank = 2,
+      .rank = TASK_BOARD_RANK,
       .dim[0] = 3,
       .dim[1] = 3,
+      .dim[2] = 1,
       .sync = 1,
       .use_hdf = 1,
       .storage_type = STORAGE_BOARD,

@@ -8,7 +8,8 @@ Mechanic 2.x roadmap
   - [DONE] Move memory buffers: s->data => s->memory (keep double type and rank 2)
   - [DONE] Move datatypes: double => generic (map HDF5/MPI/LRC atomic datatypes, keep rank 2)
   - [DONE] Allow rank > 2 datasets
-  - Update Non-blocking communication mode to reflect new memory handling
+  - [POSTPONED] Update Non-blocking communication mode to reflect new memory handling
+2. [DONE] Task board rank > 2
 
 2.3.x
 -----
@@ -22,4 +23,3 @@ Mechanic 2.x roadmap
 
 1. Setup subsystem updates
   - Save configuration as attributes (for better efficiency)
-2. Task board rank > 2

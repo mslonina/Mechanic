@@ -27,9 +27,10 @@ int fractal(double a, double b, double c);
 int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .path = "result",
-    .rank = 2,
+    .rank = TASK_BOARD_RANK,
     .dim[0] = 1,
     .dim[1] = 1,
+    .dim[2] = 1,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_BOARD,
@@ -45,9 +46,9 @@ int Storage(pool *p, setup *s) {
 int TaskProcess(pool *p, task *t, setup *s) {
   double real_min, real_max, imag_min, imag_max;
   double scale_real, scale_imag;
-  double c, xres, yres;
+  double c, xres, yres, zres;
   double x,y;
-  double buffer[1][1];
+  double buffer[1][1][1];
 
   real_min = -2.0;
   real_max = 2.0;
@@ -57,6 +58,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   xres = p->board->layout.dim[1];
   yres = p->board->layout.dim[0];
+  zres = p->board->layout.dim[2];
 
   /* Coordinate system */
   scale_real = (real_max - real_min) / ((double) xres - 1.0);
@@ -69,7 +71,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   y = real_min + t->location[1] * scale_real;
 
   // The state of the system
-  buffer[0][0] = fractal(x, y, c);
+  buffer[0][0][0] = fractal(x, y, c);
 
   WriteData(&t->storage[0], buffer);
 

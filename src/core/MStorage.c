@@ -79,12 +79,21 @@ int Storage(module *m, pool *p) {
           p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
         p->task->storage[i].layout.storage_dim[1] =
           p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
+        p->task->storage[i].layout.storage_dim[2] =
+          p->task->storage[i].layout.dim[2] * p->board->layout.dim[2];
 
-        for (j = 2; j < MAX_RANK; j++) {
+        for (j = 3; j < MAX_RANK; j++) {
           p->task->storage[i].layout.storage_dim[j] =
             p->task->storage[i].layout.dim[j];
         }
         
+        // 2/3D task board overwrite
+        /*p->task->storage[i].layout.storage_dim[2] = p->board->layout.dim[2];
+        if (p->task->storage[i].layout.rank > 2) {
+          p->task->storage[i].layout.storage_dim[2] =
+            p->task->storage[i].layout.dim[2] * p->board->layout.dim[2];
+        }*/
+
         size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
         p->task->storage[i].layout.storage_elements = size;
         p->task->storage[i].layout.storage_size = (size_t)size * p->task->storage[i].layout.datatype_size;
@@ -137,6 +146,12 @@ int CheckLayout(int banks, storage *s) {
 
     if (s[i].layout.rank > MAX_RANK) {
       Message(MESSAGE_ERR, "Rank must be <= %d\n", MAX_RANK);
+      Error(CORE_ERR_STORAGE);
+    }
+
+    if (s[i].layout.storage_type == STORAGE_BOARD &&
+        s[i].layout.rank < 3) {
+      Message(MESSAGE_ERR, "Minimum rank for STORAGE_BOARD is 3\n");
       Error(CORE_ERR_STORAGE);
     }
 
@@ -331,7 +346,7 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
     for (i = 0; i < MAX_RANK; i++) {
       dims[i] = s->layout.storage_dim[i];
     }
-    
+
     h5status = H5Sset_extent_simple(h5dataspace, s->layout.rank, dims, NULL);
     H5CheckStatus(h5status);
   }

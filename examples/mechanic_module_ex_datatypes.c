@@ -70,9 +70,10 @@ int Storage(pool *p, setup *s) {
 
   p->task->storage[0].layout = (schema) {
     .path = "double-datatype",
-    .rank = 2,
+    .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
+    .dim[2] = 1,
     .datatype = H5T_NATIVE_DOUBLE,
     .sync = 1,
     .use_hdf = 1,
@@ -81,9 +82,10 @@ int Storage(pool *p, setup *s) {
 
   p->task->storage[1].layout = (schema) {
     .path = "integer-datatype",
-    .rank = 2,
+    .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
+    .dim[2] = 1,
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
@@ -155,8 +157,8 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
  */
 int PoolProcess(pool **allpools, pool *current, setup *s) {
   int i, j, k, l;
-  int **ibuff;
-  double **dbuff;
+  int **ibuff, ***cbuff;
+  double ***dbuff;
   int dims[MAX_RANK];
   
   /**
@@ -184,20 +186,20 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[0].layout.dim[0] * p->board->layout.dim[0]
    * dims[1] = p->task->storage[0].layout.dim[1] * p->board->layout.dim[1]
    */
-  dbuff = AllocateDouble2D(&current->task->storage[0]);
-  ReadData(&current->task->storage[0], &dbuff[0][0]);
+  dbuff = AllocateDouble3D(&current->task->storage[0]);
+  ReadData(&current->task->storage[0], &dbuff[0][0][0]);
 
   GetDims(&current->task->storage[0], dims);
 
   Message(MESSAGE_OUTPUT, "\nDouble dataset of STORAGE_BOARD\n");
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
-      Message(MESSAGE_OUTPUT, "%5.2f ", dbuff[i][j]);
+      Message(MESSAGE_OUTPUT, "%5.2f ", dbuff[i][j][0]);
     }
     printf("\n");
   }
 
-  FreeDouble2D(dbuff);
+  FreeDouble3D(dbuff);
 
   /**
    * Read the p->task->storage[1] dataset
@@ -206,20 +208,20 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[1].layout.dim[0] * p->board->layout.dim[0]
    * dims[1] = p->task->storage[1].layout.dim[1] * p->board->layout.dim[1]
    */
-  ibuff = AllocateInt2D(&current->task->storage[1]);
-  ReadData(&current->task->storage[1], &ibuff[0][0]);
+  cbuff = AllocateInt3D(&current->task->storage[1]);
+  ReadData(&current->task->storage[1], &cbuff[0][0][0]);
 
   GetDims(&current->task->storage[1], dims);
 
   Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_BOARD\n");
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
-      Message(MESSAGE_OUTPUT, "%2d ", ibuff[i][j]);
+      Message(MESSAGE_OUTPUT, "%2d ", cbuff[i][j][0]);
     }
     printf("\n");
   }
 
-  FreeInt2D(ibuff);
+  FreeInt3D(cbuff);
 
   /**
    * Read the p->task->storage[3] dataset
@@ -272,19 +274,21 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
  * Implements TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  double data[DIM0][DIM1];
+  double data[DIM0][DIM1][1];
   int idata[DIM0][DIM1];
+  int cdata[DIM0][DIM1][1];
   int i,j;
 
   for (i = 0; i < DIM0; i++) {
     for (j = 0; j < DIM1; j++) {
-      data[i][j] = t->tid+1.1;
+      data[i][j][0] = t->tid+1.1;
       idata[i][j] = t->tid+1;
+      cdata[i][j][0] = t->tid+1;
     }
   }
 
   WriteData(&t->storage[0], data);
-  WriteData(&t->storage[1], idata);
+  WriteData(&t->storage[1], cdata);
   WriteData(&t->storage[2], idata);
   WriteData(&t->storage[3], idata);
   WriteData(&t->storage[4], idata);

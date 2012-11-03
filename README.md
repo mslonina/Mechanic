@@ -87,7 +87,7 @@ Notes
 -----
 
 - The datasets are H5S_SIMPLE-type
-- The task board is rank 2
+- The task board is rank 3
 
 Example usage
 -------------

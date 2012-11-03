@@ -534,13 +534,15 @@ int Setup(setup *s) {
  *
  * #### STORAGE_BOARD
  *
- * The memory block is stored in a dataset with a {row,column}-offset
- * according to the board-location of the task. Suppose we have a dataset defined like
- * this:
+ * The memory block is stored in a dataset with a {row,column,depth}-offset
+ * according to the board-location of the task. The minimum rank must be TASK_BOARD_RANK.
+ * Suppose we have a dataset defined like this:
  *
  *     p->task->storage[0].layout.path = "board-dataset";
+ *     p->task->storage[0].layout.rank = TASK_BOARD_RANK;
  *     p->task->storage[0].layout.dim[0] = 2;
  *     p->task->storage[0].layout.dim[1] = 3;
+ *     p->task->storage[0].layout.dim[2] = 1;
  *     p->task->storage[0].layout.storage_type = STORAGE_BOARD;
  *     p->task->storage[0].layout.use_hdf = 1;
  *     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
@@ -557,7 +559,8 @@ int Setup(setup *s) {
  *     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
  *     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
  *
- * The size of the final dataset is pool_dim[0] * taks_dim[0] x pool_dim[1] * task_dim[1].
+ * The size of the final dataset is pool_dim[0] * task_dim[0] x pool_dim[1] * task_dim[1]
+ * x pool_dim[2] * task_dim[2] x ... .
  *
  * ### Datatypes
  *
