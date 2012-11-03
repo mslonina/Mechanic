@@ -61,7 +61,7 @@
 
 /* Storage */
 #define MAX_RANK H5S_MAX_RANK /**< The maximum dataset rank */
-#define TASK_BOARD_RANK 2 /**< The maximum task board rank */
+#define TASK_BOARD_RANK 3 /**< The maximum task board rank */
 #define STORAGE_GROUP 11 /**< The basic data storage type */
 #define STORAGE_PM3D 12 /**< The pm3d data storage type */
 #define STORAGE_BOARD 13 /**< The board data storage type */
@@ -92,7 +92,7 @@
 /* Data */
 #define TASK_NO_LOCATION -99 /**< Task location defaults */
 #define HEADER_SIZE 3+TASK_BOARD_RANK /**< The data header size */
-#define HEADER_INIT {TAG_TERMINATE,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION}
+#define HEADER_INIT {TAG_TERMINATE,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION,TASK_NO_LOCATION}
 
 #define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
 

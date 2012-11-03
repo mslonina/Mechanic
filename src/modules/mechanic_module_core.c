@@ -227,13 +227,21 @@ int Setup(setup *s) {
   };
   s->options[3] = (LRC_configDefaults) {
     .space="core",
+    .name="zres",
+    .shortName='z',
+    .value="1",
+    .type=LRC_INT,
+    .description="The task pool board depth resolution"
+  };
+  s->options[4] = (LRC_configDefaults) {
+    .space="core",
     .name="checkpoint",
     .shortName='d',
     .value="2048",
     .type=LRC_INT,
     .description="The checkpoint size"
   };
-  s->options[4] = (LRC_configDefaults) {
+  s->options[5] = (LRC_configDefaults) {
     .space="core",
     .name="module",
     .shortName='p',
@@ -241,7 +249,7 @@ int Setup(setup *s) {
     .type=LRC_STRING,
     .description="The user-supplied module name"
   };
-  s->options[5] = (LRC_configDefaults) {
+  s->options[6] = (LRC_configDefaults) {
     .space="core",
     .name="config",
     .shortName='c',
@@ -249,7 +257,7 @@ int Setup(setup *s) {
     .type=LRC_STRING,
     .description="The configuration file"
   };
-  s->options[6] = (LRC_configDefaults) {
+  s->options[7] = (LRC_configDefaults) {
     .space="core",
     .name="checkpoint-files",
     .shortName='b',
@@ -257,7 +265,7 @@ int Setup(setup *s) {
     .type=LRC_INT,
     .description="The number of incremental backups of the master file"
   };
-  s->options[7] = (LRC_configDefaults) {
+  s->options[8] = (LRC_configDefaults) {
     .space="core",
     .name="no-backup",
     .shortName='\0',
@@ -265,7 +273,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Disable the initial master file backup"
   };
-  s->options[8] = (LRC_configDefaults) {
+  s->options[9] = (LRC_configDefaults) {
     .space="core",
     .name="restart-mode",
     .shortName='r',
@@ -273,7 +281,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="The restart mode"
   };
-  s->options[9] = (LRC_configDefaults) {
+  s->options[10] = (LRC_configDefaults) {
     .space="core",
     .name="restart-file",
     .shortName='\0',
@@ -281,7 +289,7 @@ int Setup(setup *s) {
     .type=LRC_STRING,
     .description="The name of the file to use in the restart mode"
   };
-  s->options[10] = (LRC_configDefaults) {
+  s->options[11] = (LRC_configDefaults) {
     .space="core",
     .name="blocking",
     .shortName='\0',
@@ -289,7 +297,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Switch to the blocking communication mode"
   };
-  s->options[11] = (LRC_configDefaults) {
+  s->options[12] = (LRC_configDefaults) {
     .space="core",
     .name="xmin",
     .shortName='\0',
@@ -297,7 +305,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The x-axis minimum"
   };
-  s->options[12] = (LRC_configDefaults) {
+  s->options[13] = (LRC_configDefaults) {
     .space="core",
     .name="xmax",
     .shortName='\0',
@@ -305,7 +313,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The x-axis maximum"
   };
-  s->options[13] = (LRC_configDefaults) {
+  s->options[14] = (LRC_configDefaults) {
     .space="core",
     .name="ymin",
     .shortName='\0',
@@ -313,7 +321,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The y-axis minimum"
   };
-  s->options[14] = (LRC_configDefaults) {
+  s->options[15] = (LRC_configDefaults) {
     .space="core",
     .name="ymax",
     .shortName='\0',
@@ -321,7 +329,23 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The y-axis maximum"
   };
-  s->options[15] = (LRC_configDefaults) {
+  s->options[16] = (LRC_configDefaults) {
+    .space="core",
+    .name="zmin",
+    .shortName='\0',
+    .value="0.0",
+    .type=LRC_DOUBLE,
+    .description="The z-axis minimum"
+  };
+  s->options[17] = (LRC_configDefaults) {
+    .space="core",
+    .name="zmax",
+    .shortName='\0',
+    .value="1.0",
+    .type=LRC_DOUBLE,
+    .description="The z-axis maximum"
+  };
+  s->options[18] = (LRC_configDefaults) {
     .space="core",
     .name="xorigin",
     .shortName='\0',
@@ -329,7 +353,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The x-axis origin"
   };
-  s->options[16] = (LRC_configDefaults) {
+  s->options[19] = (LRC_configDefaults) {
     .space="core",
     .name="yorigin",
     .shortName='\0',
@@ -337,7 +361,15 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The y-axis origin"
   };
-  s->options[17] = (LRC_configDefaults) {
+  s->options[20] = (LRC_configDefaults) {
+    .space="core",
+    .name="zorigin",
+    .shortName='\0',
+    .value="0.5",
+    .type=LRC_DOUBLE,
+    .description="The z-axis origin"
+  };
+  s->options[21] = (LRC_configDefaults) {
     .space="core",
     .name="print-defaults",
     .shortName='\0',
@@ -345,7 +377,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Print default settings"
   };
-  s->options[18] = (LRC_configDefaults) {
+  s->options[22] = (LRC_configDefaults) {
     .space="core",
     .name="help",
     .shortName='?',
@@ -353,7 +385,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Show this help message"
   };
-  s->options[19] = (LRC_configDefaults) {
+  s->options[23] = (LRC_configDefaults) {
     .space="core",
     .name="usage",
     .shortName='\0',
@@ -361,7 +393,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Display brief message"
   };
-  s->options[20] = (LRC_configDefaults) LRC_OPTIONS_END;
+  s->options[24] = (LRC_configDefaults) LRC_OPTIONS_END;
 
   return SUCCESS;
 }
@@ -636,6 +668,7 @@ int Storage(pool *p, setup *s) {
     .rank = TASK_BOARD_RANK, // pool rank
     .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
     .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
+    .dim[2] = LRC_option2int("core", "zres", s->head), // depth res
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
@@ -755,15 +788,24 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
  * @return SUCCESS or error code otherwise
  */
 int TaskMapping(pool *p, task *t, setup *s) {
-  int px, vert;
+  int px, vert, horiz;
 
   px = t->tid;
+  horiz = p->board->layout.dim[0];
   vert = p->board->layout.dim[1];
+
+  t->location[2] = px / (vert * horiz);
+
+  // Shift the current px on the 2D board
+  if (t->location[2] > 0) {
+    px = px - t->location[2] * (vert * horiz);
+  }
 
   if (px < vert) {
     t->location[0] = px / vert;
     t->location[1] = px;
   }
+
   if (px > vert - 1) {
     t->location[0] = px / vert;
     t->location[1] = px % vert;

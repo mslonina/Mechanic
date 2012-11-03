@@ -86,9 +86,9 @@ task* TaskLoad(module *m, pool *p, int tid) {
  *
  * @return 0 on success or NO_MORE_TASKS when the task board is finished
  */
-int GetNewTask(module *m, pool *p, task *t, int **board_buffer) {
+int GetNewTask(module *m, pool *p, task *t, int ***board_buffer) {
   int mstat = SUCCESS;
-  int x, y;
+  int x, y, z;
   query *q;
   setup *s = &(m->layer.setup);
 
@@ -101,13 +101,16 @@ int GetNewTask(module *m, pool *p, task *t, int **board_buffer) {
 
     x = t->location[0];
     y = t->location[1];
+    z = t->location[2];
 
     if (m->mode == RESTART_MODE) {
-      if (board_buffer[x][y] == TASK_AVAILABLE
-          || board_buffer[x][y] == TASK_TO_BE_RESTARTED) break;
+      if (board_buffer[x][y][z] == TASK_AVAILABLE
+          || board_buffer[x][y][z] == TASK_TO_BE_RESTARTED) break;
     }
 
-    if (board_buffer[x][y] == TASK_AVAILABLE) break;
+    if (board_buffer[x][y][z] == TASK_AVAILABLE) {
+      break;
+    }
     t->tid++;
 
   }

@@ -152,6 +152,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->status = header[2];
         t->location[0] = header[3];
         t->location[1] = header[4];
+        t->location[2] = header[5];
 
         Message(MESSAGE_DEBUG, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
             header[0], t->tid, t->status, t->location[0], t->location[1]);

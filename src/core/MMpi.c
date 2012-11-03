@@ -60,18 +60,20 @@ int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
 int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
   int mstat = SUCCESS, i = 0;
   int header[HEADER_SIZE] = HEADER_INIT;
-  size_t position = 0 ,size = 0;
+  size_t position = 0, size = 0;
 
   header[0] = tag;
   header[1] = t->tid;
   header[2] = t->status;
   header[3] = t->location[0];
   header[4] = t->location[1];
+  header[5] = t->location[2];
 
   position = sizeof(int)*(HEADER_SIZE);
   mstat = CopyData(header, buffer, sizeof(int) * (HEADER_SIZE));
   CheckStatus(mstat);
 
+//  printf("header %d %d %d %d\n", header[1], header[3], header[4], header[5]);
   if (tag != TAG_TERMINATE) {
 
     /* Task data */
@@ -116,6 +118,7 @@ int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
   t->status = header[2];
   t->location[0]= header[3];
   t->location[1] = header[4];
+  t->location[2] = header[5];
 
   if (*tag != TAG_TERMINATE) {
 
