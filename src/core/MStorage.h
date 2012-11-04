@@ -17,6 +17,7 @@
 
 int CommitStorageLayout(module *m, pool *p);
 int CommitMemoryLayout(int banks, storage *s);
+int CommitAttrMemoryLayout(int banks, storage *s);
 void FreeMemoryLayout(int banks, storage *s);
 int Storage(module *m, pool *p);
 int CheckLayout(module *m, int banks, storage *s);

@@ -30,17 +30,44 @@
  * per task available. You may change the defaults by using the Init() hook.
  */
 int Storage(pool *p, setup *s) {
-  p->task->storage[0].layout = (schema) {
-    .name = "input",
+  p->storage[0].layout = (schema) {
+    .name = "pool-data",
     .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = 3,
-    .sync = 0,
-    .use_hdf = 0,
-    .storage_type = STORAGE_PM3D,
+    .dim[0] = 4,
+    .dim[1] = 5,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_GROUP,
+    .datatype = H5T_NATIVE_INT
+  };
+
+  /* Attributes for the pool dataset */
+  p->storage[0].attr[0].layout = (schema) {
+    .name = "Global integer attribute",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_INT
+  };
+
+  p->storage[0].attr[1].layout = (schema) {
+    .name = "Global double attribute",
+    .dataspace = H5S_SCALAR,
     .datatype = H5T_NATIVE_DOUBLE
   };
 
+  /* First dataset */
+  p->task->storage[0].layout = (schema) {
+    .name = "input",
+    .rank = TASK_BOARD_RANK,
+    .dim[0] = 1,
+    .dim[1] = 3,
+    .dim[2] = 1,
+    .sync = 0,
+    .use_hdf = 0,
+    .storage_type = STORAGE_BOARD,
+    .datatype = H5T_NATIVE_DOUBLE
+  };
+
+  /* Attributes for the first dataset */
   p->task->storage[0].attr[0].layout = (schema) {
     .name = "Sample integer attribute",
     .dataspace = H5S_SCALAR,
@@ -64,6 +91,7 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_BOARD,
     .datatype = H5T_NATIVE_DOUBLE
   };
+
   return SUCCESS;
 }
 
@@ -140,4 +168,22 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
 int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
   Message(MESSAGE_INFO, "Dataset name: %s\n", d->layout.name);
   return SUCCESS;
+}
+
+/**
+ * Implements PoolProcess()
+ */
+int PoolProcess(pool *all, pool *p, setup *s) {
+  double attr;
+  double t_attr;
+  int mstat;
+
+  attr = 12345.6789;
+
+  mstat = WriteAttr(&p->task->storage[0].attr[1], &attr);
+  mstat = ReadAttr(&p->task->storage[0].attr[1], &t_attr);
+
+  Message(MESSAGE_OUTPUT, "Attribute = %f\n", t_attr);
+
+  return POOL_FINALIZE;
 }

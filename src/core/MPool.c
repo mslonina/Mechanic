@@ -293,13 +293,10 @@ int PoolReset(module *m, pool *p) {
  * @param p The pool pointer to finalize
  */
 void PoolFinalize(module *m, pool *p) {
-  int i = 0, j = 0;
+  int i = 0;
 
   if (p->storage) {
     for (i = 0; i < m->layer.init.banks_per_pool; i++) {
-      for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
-        if (p->storage[i].attr[j].layout.rank > 0) free(p->storage[i].attr[j].memory);
-      }
       free(p->storage[i].attr);
     }
     FreeMemoryLayout(m->pool_banks, p->storage);
@@ -309,9 +306,6 @@ void PoolFinalize(module *m, pool *p) {
   if (p->task) {
     if (p->task->storage) {
       for (i = 0; i < m->layer.init.banks_per_pool; i++) {
-        for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
-          if (p->storage[i].attr[j].layout.rank > 0) free(p->storage[i].attr[j].memory);
-        }
         free(p->task->storage[i].attr);
       }
       FreeMemoryLayout(m->task_banks, p->task->storage);

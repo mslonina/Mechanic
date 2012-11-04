@@ -319,7 +319,6 @@ void FreeFloat4D(float ****array);
 double**** AllocateDouble4D(storage *s);
 void FreeDouble4D(double ****array);
 
-
 /**
  * Data read/write helpers
  */
@@ -327,6 +326,8 @@ int GetSize(int rank, int *dims); /**< Get the 1D size for given rank and dimens
 void GetDims(storage *s, int *dims); /**< Get the dimensions of the storage object */
 int WriteData(storage *s, void* data); /**< Copy local data buffers to memory */
 int ReadData(storage *s, void* data); /**< Copy memory buffers to local data buffers */
+int WriteAttr(attr *a, void* data); /**< Copy local attribute buffers to memory */
+int ReadAttr(attr *a, void* data); /**< Copy attribute buffers to local data buffers */
 int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
 
 /**

@@ -138,6 +138,7 @@ int Allocate(storage *s, size_t size, size_t datatype) {
     return CORE_ERR_MEM;
   }
 
+  Message(MESSAGE_DEBUG, "Storage alloc: size = %zu, datatype = %zu\n", size, datatype);
   if (size > 0) {
     s->memory = calloc(size, datatype);
   }
@@ -167,10 +168,11 @@ void Free(storage *s) {
 int AllocateAttribute(attr *s, size_t size, size_t datatype) {
 
   if (s->memory) {
-    Message(MESSAGE_ERR, "The buffer is already allocated\n");
+    Message(MESSAGE_ERR, "The attribute buffer is already allocated\n");
     return CORE_ERR_MEM;
   }
 
+  Message(MESSAGE_DEBUG, "Attr alloc: size = %zu, datatype = %zu\n", size, datatype);
   if (size > 0) {
     s->memory = calloc(size, datatype);
   }

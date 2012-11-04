@@ -318,6 +318,38 @@ int ReadData(storage *s, void *data) {
 }
 
 /**
+ * @brief Copies data from local buffer to the attribute memory buffer
+ *
+ * @param s The attribute object
+ * @param data The data pointer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int WriteAttr(attr *a, void *data) {
+  if (!a->memory) return CORE_ERR_MEM;
+  if (!data) return CORE_ERR_MEM;
+
+  CopyData(data, a->memory, a->layout.storage_size);
+  return SUCCESS;
+}
+
+/**
+ * @brief Copies data from the attribute buffer to the local storage
+ *
+ * @param s The attribute object
+ * @param data The data pointer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int ReadAttr(attr *a, void *data) {
+  if (!a->memory) return CORE_ERR_MEM;
+  if (!data) return CORE_ERR_MEM;
+
+  CopyData(a->memory, data, a->layout.storage_size);
+  return SUCCESS;
+}
+
+/**
  * @brief Wrapper to memcpy
  *
  * @param in The input buffer
