@@ -12,10 +12,11 @@ maintained), if the following requirements are met:
 - MPI2 implementation (in favour of OpenMPI)
 - HDF5 >= 1.8
 - Popt library >= 1.14
-- Libreadconfig with HDF5 support >= 0.12.4 (see http://git.astri.umk.pl/projects/lrc)
+- [Libreadconfig](http://github.com/mslonina/libreadconfig) with HDF5 support >= 0.12.4
+  (see also http://git.astri.umk.pl/projects/lrc)
 
-Compilation
------------
+Manual Compilation
+------------------
 
     tar -xvvf mechanic-2.1.0.tar.gz
     cd mechanic-2.1.0
@@ -39,25 +40,31 @@ file and change some default settings, such as installation path or compilers.
 
 The script requires wget/curl and cmake to be installed on your system.
 
-    # edit the install_mechanic.sh
-    # change CC, CXX, FC, F77 to point to your compilers, i.e.
+First, export `PATH` and `LD_LIBRARY_PATH` to point to our new Mechanic environment
+(Mac OS X users need to adjust `DYLD_LIBRARY_PATH` insted of `LD_LIBRARY_PATH`):
+
+    export PATH=/path/to/mechanic-opt/bin:$PATH
+    export LD_LIBRARY_PATH=/path/to/mechanic-opt/lib:$LD_LIBRARY_PATH
+
+Before running the script, please edit following variables to point to your compiler:
+
     # CC=icc
     # CXX=icpc
     # FC=ifort
     # F77=ifort
 
-    # run the script
+Running the script:
+
     chmod +x install_mechanic.sh
     ./install_mechanic.sh
 
-After the successfull installation you should adjust `LD_LIBRARY_PATH` and `PATH` variables to
-point to the Mechanic environment, i.e.
+After the successfull installation, for an everyday usage, you may adjust your shell
+variables to point to the Mechanic environment, i.e.
 
     # for Bash users, edit .bashrc file:
     export PATH=/path/to/mechanic-opt/bin:$PATH
     export LD_LIBRARY_PATH=/path/to/mechanic-opt/lib:$LD_LIBRARY_PATH
 
-Note: Mac OS X users need to adjust `DYLD_LIBRARY_PATH`
 
 Gentoo users
 ------------
@@ -68,8 +75,4 @@ Mechanic and its dependencies. After you install the overlay, you may use:
 
     emerge =mechanic-2.1.0
 
-Additional modules
-------------------
 
-All but core module have been moved to separate project.
-See http://git.astri.umk.pl/projects/mechanic_modules
