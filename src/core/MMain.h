@@ -15,7 +15,6 @@
 #include "MLog.h"
 #include "MSetup.h"
 #include "MMpi.h"
-#include "MAttributes.h"
 #include "MWork.h"
 
 #endif

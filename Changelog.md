@@ -10,6 +10,8 @@ Mechanic short changelog
 - Better attribute handling, through the schema API
 - New memory handling, much more flexible and efficient
 - New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
+- New public functions: ReadData(), WriteData(), ReadAttr(), WriteAttr() 
+  and memory allocation function for all basic datatypes, up to rank 4
 - Several bug fixes and minor improvements
 - Documentation updates
 

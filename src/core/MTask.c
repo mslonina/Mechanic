@@ -14,7 +14,7 @@
  * @return The task object, NULL otherwise
  */
 task* TaskLoad(module *m, pool *p, int tid) {
-  int i = 0, j = 0, k = 0;
+  int i = 0, j = 0;
   size_t len;
   task* t = NULL;
 

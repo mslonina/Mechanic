@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i, j, k, task_groups, size;
+  int i, j, task_groups, size;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -586,7 +586,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
  */
 int CommitAttribute(hid_t h5location, attr *a) {
   int mstat = SUCCESS, i = 0;
-  hid_t attr_s, attr_d, attr_m;
+  hid_t attr_s, attr_d;
   herr_t h5status = 0;
   hsize_t dims[MAX_RANK];
   char *buffer = NULL;
