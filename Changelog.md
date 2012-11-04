@@ -7,6 +7,7 @@ Mechanic short changelog
 - Support for all basic (native) datatypes
 - Multidimensional datasets (min. rank 2 up to max rank H5S_MAX_RANK)
 - Support for 3D task board, and additional task information right at the board
+- Better attribute handling, through the schema API
 - New memory handling, much more flexible and efficient
 - New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
 - Several bug fixes and minor improvements

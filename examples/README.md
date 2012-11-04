@@ -12,6 +12,7 @@ List of examples
 - Defining and using configuration options (`Init()` and `Setup()` hooks)
 - Using different datatypes, reading and writing data to the memory banks
 - Using datasets of different datatypes and dimensionality
+- Using HDF5 attributes
 - The Mandelbrot set
 
 Compilation

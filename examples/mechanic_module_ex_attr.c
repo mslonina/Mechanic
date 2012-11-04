@@ -23,7 +23,7 @@
  * Implements Storage()
  *
  * Each worker will return 1x3 result array. The master node will combine the worker
- * result arrays into one dataset suitable to process with Gnuplot PM3D. The final dataset
+ * result arrays into one dataset suitable to process with Matplotlib. The final dataset
  * will be available at /Pools/pool-0000/Tasks/result.
  *
  * By default, we have 8 memory/storage banks per each task pool + 8 memory/storage banks
@@ -41,7 +41,12 @@ int Storage(pool *p, setup *s) {
     .datatype = H5T_NATIVE_INT
   };
 
-  /* Attributes for the pool dataset */
+  /* Attributes for the pool dataset 
+   * 
+   * We define attributes in the similar fashion as datasets. Since most of attributes are
+   * small data, we will tell the Mechanic to use special storage type, H5S_SIMPLE, which
+   * makes the attribute to be rank 1. The attribute name is required.
+   */
   p->storage[0].attr[0].layout = (schema) {
     .name = "Global integer attribute",
     .dataspace = H5S_SCALAR,
@@ -80,6 +85,7 @@ int Storage(pool *p, setup *s) {
     .datatype = H5T_NATIVE_DOUBLE
   };
 
+  /* The result dataset */
   p->task->storage[1].layout = (schema) {
     .name = "result",
     .rank = TASK_BOARD_RANK,
@@ -92,6 +98,9 @@ int Storage(pool *p, setup *s) {
     .datatype = H5T_NATIVE_DOUBLE
   };
   
+  /* HDF5 attributes may also have some dimensionality,
+   * in such case, we need to tell the Mechanic to use H5S_SIMPLE dataspace,
+   * and adjust the dimensions of the attribute */
   p->task->storage[1].attr[0].layout = (schema) {
     .name = "Some special attribute",
     .dataspace = H5S_SIMPLE,
@@ -129,58 +138,11 @@ int TaskProcess(pool *p, task *t, setup *s) {
 }
 
 /**
- * Implements DatasetPrepare()
- *
- * We use this hook to write some simple attributes useful for postprocessing in i.e.
- * matplotlib. You may use here standard HDF5 API, as well as HDF5_HL API.
- */
-int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
-  double xmin, xmax, ymin, ymax, zmin, zmax;
-  hsize_t adims;
-  hid_t hstat;
-  double attr_data[1];
-
-  if (strcmp(d->layout.name, "result") == 0) {
-    xmin = LRC_option2double("core", "xmin", s->head);
-    xmax = LRC_option2double("core", "xmax", s->head);
-    ymin = LRC_option2double("core", "ymin", s->head);
-    ymax = LRC_option2double("core", "ymax", s->head);
-    zmin = LRC_option2double("core", "zmin", s->head);
-    zmax = LRC_option2double("core", "zmax", s->head);
-
-    adims = 1;
-    attr_data[0] = xmin;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "xmin", attr_data, adims);
-    
-    attr_data[0] = xmax;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "xmax", attr_data, adims);
-    
-    attr_data[0] = ymin;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "ymin", attr_data, adims);
-    
-    attr_data[0] = ymax;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "ymax", attr_data, adims);
-    
-    attr_data[0] = zmin;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "zmin", attr_data, adims);
-    
-    attr_data[0] = zmax;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "zmax", attr_data, adims);
-  }
-
-  return SUCCESS;
-}
-
-/**
- * Implements DatasetProcess()
- */
-int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
-  Message(MESSAGE_INFO, "Dataset name: %s\n", d->layout.name);
-  return SUCCESS;
-}
-
-/**
  * Implements PoolProcess()
+ *
+ * The attributes are attached to the dataset after all tasks are processed, and after the
+ * PoolProcess() hook is invoked. It is the best place to adjust data for an attribute by
+ * using WriteAttr() function.
  */
 int PoolProcess(pool *all, pool *p, setup *s) {
   double attr;
@@ -194,11 +156,11 @@ int PoolProcess(pool *all, pool *p, setup *s) {
   s_attr[0][2] = 323.0;
   s_attr[0][3] = 423.0;
 
+  /* Write some attributes */
   mstat = WriteAttr(&p->task->storage[0].attr[1], &attr);
-  mstat = ReadAttr(&p->task->storage[0].attr[1], &t_attr);
-  
   mstat = WriteAttr(&p->task->storage[0].attr[2], &s_attr);
 
+  mstat = ReadAttr(&p->task->storage[0].attr[1], &t_attr);
   Message(MESSAGE_OUTPUT, "Attribute = %f\n", t_attr);
 
   return POOL_FINALIZE;

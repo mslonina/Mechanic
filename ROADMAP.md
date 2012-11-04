@@ -10,15 +10,11 @@ Mechanic 2.x roadmap
   - [DONE] Allow rank > 2 datasets
   - [MOVED2CONTRIB] Update Non-blocking communication mode to reflect new memory handling
 2. [DONE] Task board rank > 2
-
-2.3.x
------
-
-1. Allow usage of storage.attr (automatic storage of attributes for given datasets)
+3. [DONE] Allow usage of storage.attr (automatic storage of attributes for given datasets)
   - Currently to store attributes we need use DatasetPrepare/Process() hooks, with new
     attributes interface and memory handling it should be far easier
 
-2.4.x
+2.3.x
 -----
 
 1. Setup subsystem updates
