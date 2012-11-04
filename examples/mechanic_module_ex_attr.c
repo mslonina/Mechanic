@@ -61,8 +61,8 @@ int Storage(pool *p, setup *s) {
     .dim[0] = 1,
     .dim[1] = 3,
     .dim[2] = 1,
-    .sync = 0,
-    .use_hdf = 0,
+    .sync = 1,
+    .use_hdf = 1,
     .storage_type = STORAGE_BOARD,
     .datatype = H5T_NATIVE_DOUBLE
   };
@@ -91,7 +91,16 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_BOARD,
     .datatype = H5T_NATIVE_DOUBLE
   };
-
+  
+  p->task->storage[1].attr[0].layout = (schema) {
+    .name = "Some special attribute",
+    .dataspace = H5S_SIMPLE,
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = 4,
+    .datatype = H5T_NATIVE_DOUBLE
+  };
+  
   return SUCCESS;
 }
 
@@ -176,12 +185,19 @@ int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
 int PoolProcess(pool *all, pool *p, setup *s) {
   double attr;
   double t_attr;
+  double s_attr[1][4];
   int mstat;
 
   attr = 12345.6789;
+  s_attr[0][0] = 123.0;
+  s_attr[0][1] = 223.0;
+  s_attr[0][2] = 323.0;
+  s_attr[0][3] = 423.0;
 
   mstat = WriteAttr(&p->task->storage[0].attr[1], &attr);
   mstat = ReadAttr(&p->task->storage[0].attr[1], &t_attr);
+  
+  mstat = WriteAttr(&p->task->storage[0].attr[2], &s_attr);
 
   Message(MESSAGE_OUTPUT, "Attribute = %f\n", t_attr);
 

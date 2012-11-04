@@ -177,7 +177,7 @@ int PoolProcess(module *m, pool **all, pool *p) {
     q = LoadSym(m, "PoolProcess", LOAD_DEFAULT);
     if (q) pool_create = q(all, p, s);
 
-    /* Write pool data */
+    /* Do some data processing */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
     H5CheckStatus(h5location);
 
@@ -185,10 +185,22 @@ int PoolProcess(module *m, pool **all, pool *p) {
     h5pool = H5Gopen(h5location, path, H5P_DEFAULT);
     H5CheckStatus(h5pool);
 
+    /* Process task board attributes */
+    h5dataset = H5Dopen(h5pool, p->board->layout.name, H5P_DEFAULT);
+    H5CheckStatus(h5dataset);
+
+    for (j = 0; j < p->board->attr_banks; j++) {
+       mstat = CommitAttribute(h5dataset, &p->board->attr[j]);
+       CheckStatus(mstat);
+    }
+
+    H5Dclose(h5dataset);
+    
+    /* Write pool data */
     mstat = CommitData(h5pool, m->pool_banks, p->storage);
     CheckStatus(mstat);
 
-    /* Write attributes */
+    /* Write global attributes */
     adims = 1;
     attr_data[0] = 1;
 
@@ -204,6 +216,11 @@ int PoolProcess(module *m, pool **all, pool *p) {
         q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
         if (q) mstat = q(h5pool, h5dataset, p, &(p->storage[i]), s);
         CheckStatus(mstat);
+
+        for (j = 0; j < p->storage[i].attr_banks; j++) {
+          mstat = CommitAttribute(h5dataset, &p->storage[i].attr[j]);
+          CheckStatus(mstat);
+        }
 
         H5Dclose(h5dataset);
       }
@@ -221,6 +238,11 @@ int PoolProcess(module *m, pool **all, pool *p) {
           q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
           if (q) mstat = q(h5tasks, h5dataset, p, &(p->task->storage[i]), s);
           CheckStatus(mstat);
+
+          for (j = 0; j < p->task->storage[i].attr_banks; j++) {
+            mstat = CommitAttribute(h5dataset, &p->task->storage[i].attr[j]);
+            CheckStatus(mstat);
+          }
 
           H5Dclose(h5dataset);
         } else {

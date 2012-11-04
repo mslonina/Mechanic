@@ -53,6 +53,14 @@ int Storage(module *m, pool *p) {
     }
   }
 
+  p->board->attr_banks = 0;
+  for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+    if (p->board->attr[j].layout.dataspace == H5S_SIMPLE ||
+        p->board->attr[j].layout.dataspace == H5S_SCALAR) {
+      p->board->attr_banks++;
+    }
+  }
+
   /* Check and fix the memory/storage layout */
   CheckLayout(m, 1, p->board);
   CheckLayout(m, m->pool_banks, p->storage);
@@ -555,6 +563,48 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
     }
   }
+
+  return mstat;
+}
+
+/**
+ * @brief Commits the attribute to the HDF5 location
+ *
+ * @param h5location The HDF5 location
+ * @param a The attribtue to store
+ *
+ */
+int CommitAttribute(hid_t h5location, attr *a) {
+  int mstat = SUCCESS, i = 0;
+  hid_t attr_s, attr_d, attr_m;
+  herr_t h5status = 0;
+  hsize_t dims[MAX_RANK];
+  char *buffer = NULL;
+      
+  buffer = calloc(a->layout.elements, a->layout.datatype_size);
+  ReadAttr(a, buffer);
+
+  attr_s = H5Screate(a->layout.dataspace);
+  H5CheckStatus(attr_s);
+
+  if (a->layout.dataspace == H5S_SIMPLE) {
+    for (i = 0; i < MAX_RANK; i++) {
+      dims[i] = a->layout.storage_dim[i];
+    }
+    
+    h5status = H5Sset_extent_simple(attr_s, a->layout.rank, dims, NULL);
+    H5CheckStatus(h5status);
+  }
+  
+  attr_d = H5Acreate(h5location, a->layout.name, a->layout.datatype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+  H5CheckStatus(attr_d);
+
+  H5Awrite(attr_d, a->layout.datatype, buffer); 
+
+  H5Aclose(attr_d);
+  H5Sclose(attr_s);
+
+  if (buffer) free(buffer);
 
   return mstat;
 }
