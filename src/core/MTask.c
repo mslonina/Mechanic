@@ -14,7 +14,7 @@
  * @return The task object, NULL otherwise
  */
 task* TaskLoad(module *m, pool *p, int tid) {
-  int i = 0, j = 0;
+  int i = 0, j = 0, k = 0;
   size_t len;
   task* t = NULL;
 
@@ -33,6 +33,12 @@ task* TaskLoad(module *m, pool *p, int tid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     t->storage[i].layout = (schema) STORAGE_END;
     t->storage[i].memory = NULL;
+    t->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+    if (!t->storage[i].attr) Error(CORE_ERR_MEM);
+    for (j = 0; j < m->layer.init.attr_per_dataset;  j++) {
+      t->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
+      t->storage[i].attr[j].memory = NULL;
+    }
   }
 
   /* Initialize the task */
@@ -60,16 +66,22 @@ task* TaskLoad(module *m, pool *p, int tid) {
         p->task->storage[i].layout.dim[j];
     }
 
-    t->storage[i].layout.sync = p->task->storage[i].layout.sync;
-    t->storage[i].layout.storage_type = p->task->storage[i].layout.storage_type;
-    t->storage[i].layout.dataspace = p->task->storage[i].layout.dataspace;
-    t->storage[i].layout.datatype = p->task->storage[i].layout.datatype;
-    t->storage[i].layout.mpi_datatype = p->task->storage[i].layout.mpi_datatype;
-    t->storage[i].layout.size = p->task->storage[i].layout.size;
-    t->storage[i].layout.storage_size = p->task->storage[i].layout.size;
-    t->storage[i].layout.elements = p->task->storage[i].layout.elements;
+    t->storage[i].layout.sync             = p->task->storage[i].layout.sync;
+    t->storage[i].layout.storage_type     = p->task->storage[i].layout.storage_type;
+    t->storage[i].layout.dataspace        = p->task->storage[i].layout.dataspace;
+    t->storage[i].layout.datatype         = p->task->storage[i].layout.datatype;
+    t->storage[i].layout.mpi_datatype     = p->task->storage[i].layout.mpi_datatype;
+    t->storage[i].layout.size             = p->task->storage[i].layout.size;
+    t->storage[i].layout.storage_size     = p->task->storage[i].layout.size;
+    t->storage[i].layout.elements         = p->task->storage[i].layout.elements;
     t->storage[i].layout.storage_elements = p->task->storage[i].layout.elements;
-    t->storage[i].layout.datatype_size = p->task->storage[i].layout.datatype_size;
+    t->storage[i].layout.datatype_size    = p->task->storage[i].layout.datatype_size;
+    
+    /**
+     * @todo Attributes
+     *
+     * If only worker nodes knew about attributes...
+     */
   }
 
   CommitMemoryLayout(m->task_banks, t->storage);
@@ -182,11 +194,14 @@ void TaskReset(module *m, pool *p, task *t, int tid) {
  * @param t The task pointer to be freed
  */
 void TaskFinalize(module *m, pool *p, task *t) {
-  int i = 0;
+  int i = 0, j = 0;
 
   for (i = 0; i < m->task_banks; i++) {
     if (t->storage[i].layout.use_hdf) {
       if (t->storage[i].layout.name) free(t->storage[i].layout.name);
+    }
+    for (j = 0; j < t->storage[i].attr_banks; j++) {
+      if (t->storage[i].attr[j].layout.name) free(t->storage[i].attr[j].layout.name);
     }
   }
 

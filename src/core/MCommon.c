@@ -168,7 +168,8 @@ void Free(storage *s) {
 int AllocateAttribute(attr *s, size_t size, size_t datatype) {
 
   if (s->memory) {
-    Message(MESSAGE_ERR, "The attribute buffer is already allocated\n");
+    Message(MESSAGE_ERR, "The attribute buffer for '%s' is already allocated\n",
+        s->layout.name);
     return CORE_ERR_MEM;
   }
 

@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i, j, task_groups, size;
+  int i, j, k, task_groups, size;
   query *q;
 
   /* First load the fallback (core) storage layout */
@@ -86,7 +86,10 @@ int Storage(module *m, pool *p) {
 
     /* Commit memory for task banks (whole datasets) */
     for (i = 0; i < m->task_banks; i++) {
-      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) task_groups = 1;
+      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
+        task_groups = 1;
+        mstat = CommitAttrMemoryLayout(p->task->storage[i].attr_banks, &p->task->storage[i]);
+      }
 
       if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[i].layout.storage_type == STORAGE_LIST) {
@@ -137,6 +140,13 @@ int Storage(module *m, pool *p) {
       p->tasks = calloc(p->pool_size, sizeof(task));
       for (i = 0; i < p->pool_size; i++) {
         p->tasks[i] = TaskLoad(m, p, i);
+
+        /**
+         * @todo Different attributes for each task
+         *
+         * This probably requires worker nodes to know something on attributes...
+         */
+
       }
     }
 

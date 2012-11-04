@@ -16,6 +16,14 @@
  * ----------------
  *
  *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
+ *
+ * Note
+ * ----
+ *
+ * Attributes for STORAGE_GROUP-type task datasets are limited, currently each
+ * /Tasks/task-ID group receives the same attributes (worker nodes does not know anything
+ * about attributes, it is still work to do)
+ *
  */
 #include "Mechanic2.h"
 
@@ -110,6 +118,26 @@ int Storage(pool *p, setup *s) {
     .datatype = H5T_NATIVE_DOUBLE
   };
   
+  /* The group-type dataset */
+  p->task->storage[2].layout = (schema) {
+    .name = "group-result",
+    .rank = TASK_BOARD_RANK,
+    .dim[0] = 1,
+    .dim[1] = 3,
+    .dim[2] = 1,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_GROUP,
+    .datatype = H5T_NATIVE_DOUBLE
+  };
+
+  /* Attributes for the first dataset */
+  p->task->storage[2].attr[0].layout = (schema) {
+    .name = "Group integer attribute",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_INT
+  };
+
   return SUCCESS;
 }
 

@@ -164,7 +164,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
  */
 int PoolProcess(module *m, pool **all, pool *p) {
   int mstat = SUCCESS;
-  int pool_create = 0, i = 0, j = 0, task_groups = 0;
+  int pool_create = 0, i = 0, j = 0, k = 0, task_groups = 0;
   char path[LRC_CONFIG_LEN];
   int attr_data[1];
   double setup_attr;
@@ -284,6 +284,11 @@ int PoolProcess(module *m, pool **all, pool *p) {
 
             h5dataset = H5Dopen(h5task, p->task->storage[j].layout.name, H5P_DEFAULT);
             H5CheckStatus(h5dataset);
+            
+            for (k = 0; k < p->task->storage[j].attr_banks; k++) {
+              mstat = CommitAttribute(h5dataset, &p->task->storage[j].attr[k]);
+              CheckStatus(mstat);
+            }
 
             q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
             if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]), s);
