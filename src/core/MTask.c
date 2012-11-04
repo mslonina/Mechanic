@@ -39,15 +39,15 @@ task* TaskLoad(module *m, pool *p, int tid) {
   for (i = 0; i < m->task_banks; i++) {
     t->storage[i].layout.use_hdf = p->task->storage[i].layout.use_hdf;
 
-    /* The setup path, we need this only when use_hdf = 1 */
+    /* The dataset name, we need this only when use_hdf = 1 */
     if (t->storage[i].layout.use_hdf) {
-      if (p->task->storage[i].layout.path != NULL) {
-        len = strlen(p->task->storage[i].layout.path);
-        t->storage[i].layout.path = calloc(len+1, sizeof(char));
-        if (!t->storage[i].layout.path) Error(CORE_ERR_MEM);
+      if (p->task->storage[i].layout.name != NULL) {
+        len = strlen(p->task->storage[i].layout.name);
+        t->storage[i].layout.name = calloc(len+1, sizeof(char));
+        if (!t->storage[i].layout.name) Error(CORE_ERR_MEM);
 
-        strncpy(t->storage[i].layout.path, p->task->storage[i].layout.path, len);
-        t->storage[i].layout.path[len] = LRC_NULL;
+        strncpy(t->storage[i].layout.name, p->task->storage[i].layout.name, len);
+        t->storage[i].layout.name[len] = LRC_NULL;
       }
     }
 
@@ -186,7 +186,7 @@ void TaskFinalize(module *m, pool *p, task *t) {
 
   for (i = 0; i < m->task_banks; i++) {
     if (t->storage[i].layout.use_hdf) {
-      if (t->storage[i].layout.path) free(t->storage[i].layout.path);
+      if (t->storage[i].layout.name) free(t->storage[i].layout.name);
     }
   }
 

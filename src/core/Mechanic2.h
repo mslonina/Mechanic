@@ -94,7 +94,7 @@
 #define HEADER_SIZE 3+TASK_BOARD_RANK /**< The data header size */
 #define HEADER_INIT {TAG_TERMINATE,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION,TASK_NO_LOCATION}
 
-#define STORAGE_END {.path = NULL, .dataspace_type = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
+#define STORAGE_END {.name = NULL, .dataspace_type = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
 
 /**
  * @struct init
@@ -135,7 +135,7 @@ typedef struct {
  * Defines the memory/storage schema
  */
 typedef struct {
-  char *path; /**< The name of the dataset */
+  char *name; /**< The name of the dataset */
   int rank; /**< The rank of the dataset */
   int storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
   int use_hdf; /**< Enables HDF5 storage for the memory block */

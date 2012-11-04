@@ -31,7 +31,7 @@
  */
 int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
-    .path = "input",
+    .name = "input",
     .rank = 2,
     .dim[0] = 1,
     .dim[1] = 3,
@@ -42,7 +42,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[1].layout = (schema) {
-    .path = "result",
+    .name = "result",
     .rank = 2,
     .dim[0] = 1,
     .dim[1] = 3,
@@ -90,7 +90,7 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
   hid_t hstat;
   double attr_data[1];
 
-  if (strcmp(d->layout.path, "result") == 0) {
+  if (strcmp(d->layout.name, "result") == 0) {
     xmin = LRC_option2double("core", "xmin", s->head);
     xmax = LRC_option2double("core", "xmax", s->head);
     ymin = LRC_option2double("core", "ymin", s->head);
@@ -100,22 +100,22 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
 
     adims = 1;
     attr_data[0] = xmin;
-    hstat = H5LTset_attribute_double(h5location, d->layout.path, "xmin", attr_data, adims);
+    hstat = H5LTset_attribute_double(h5location, d->layout.name, "xmin", attr_data, adims);
     
     attr_data[0] = xmax;
-    hstat = H5LTset_attribute_double(h5location, d->layout.path, "xmax", attr_data, adims);
+    hstat = H5LTset_attribute_double(h5location, d->layout.name, "xmax", attr_data, adims);
     
     attr_data[0] = ymin;
-    hstat = H5LTset_attribute_double(h5location, d->layout.path, "ymin", attr_data, adims);
+    hstat = H5LTset_attribute_double(h5location, d->layout.name, "ymin", attr_data, adims);
     
     attr_data[0] = ymax;
-    hstat = H5LTset_attribute_double(h5location, d->layout.path, "ymax", attr_data, adims);
+    hstat = H5LTset_attribute_double(h5location, d->layout.name, "ymax", attr_data, adims);
     
     attr_data[0] = zmin;
-    hstat = H5LTset_attribute_double(h5location, d->layout.path, "zmin", attr_data, adims);
+    hstat = H5LTset_attribute_double(h5location, d->layout.name, "zmin", attr_data, adims);
     
     attr_data[0] = zmax;
-    hstat = H5LTset_attribute_double(h5location, d->layout.path, "zmax", attr_data, adims);
+    hstat = H5LTset_attribute_double(h5location, d->layout.name, "zmax", attr_data, adims);
   }
 
   return SUCCESS;
@@ -125,6 +125,6 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
  * Implements DatasetProcess()
  */
 int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
-  Message(MESSAGE_INFO, "path: %s\n", d->layout.path);
+  Message(MESSAGE_INFO, "Dataset name: %s\n", d->layout.name);
   return SUCCESS;
 }

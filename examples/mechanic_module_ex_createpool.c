@@ -38,7 +38,7 @@
  */
 int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
-    .path = "result",
+    .name = "result",
     .rank = 2,
     .dim[0] = 1,
     .dim[1] = 3,

@@ -36,7 +36,7 @@
 int Storage(pool *p, setup *s) {
 
   p->storage[0].layout = (schema) {
-    .path = "integer-datatype",
+    .name = "integer-datatype",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -47,7 +47,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->storage[1].layout = (schema) {
-    .path = "double-datatype",
+    .name = "double-datatype",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -58,7 +58,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->storage[2].layout = (schema) {
-    .path = "float-datatype",
+    .name = "float-datatype",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -69,7 +69,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[0].layout = (schema) {
-    .path = "double-datatype",
+    .name = "double-datatype",
     .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -81,7 +81,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[1].layout = (schema) {
-    .path = "integer-datatype",
+    .name = "integer-datatype",
     .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -93,7 +93,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[2].layout = (schema) {
-    .path = "integer-datatype",
+    .name = "integer-datatype",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -104,7 +104,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[3].layout = (schema) {
-    .path = "integer-datatype-pm3d",
+    .name = "integer-datatype-pm3d",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -115,7 +115,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[4].layout = (schema) {
-    .path = "integer-datatype-list",
+    .name = "integer-datatype-list",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,

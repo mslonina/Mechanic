@@ -117,7 +117,7 @@ create a `mechanic_module_map.c` file and put in it the following code:
 
     int Storage(pool *p, setup *s) {
       p->task->storage[0].layout = (schema) {
-        .path = "result", // the name of the output dataset
+        .name = "result", // the name of the output dataset
         .rank = 2, // the rank of the dataset
         .dim[0] = 1, // the vertical dimension of the result array (not the dataset)
         .dim[1] = 3, // the horizontal dimension of the result array (not the dataset)

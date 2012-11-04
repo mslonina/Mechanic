@@ -40,7 +40,7 @@
  */
 int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
-    .path = "result",
+    .name = "result",
     .rank = 2,
     .dim[0] = 1,
     .dim[1] = 3,
@@ -56,7 +56,7 @@ int Storage(pool *p, setup *s) {
   // result will have proper offsets
   if (p->pid == 2) {
     p->task->storage[1].layout = (schema) {
-      .path = "result-board",
+      .name = "result-board",
       .rank = TASK_BOARD_RANK,
       .dim[0] = 3,
       .dim[1] = 3,

@@ -410,7 +410,7 @@ int Setup(setup *s) {
  * To define the dataset, any C99 struct initialization is allowed. i.e.:
  *
  *     p->storage[0].layout = (schema) {
- *       .path = "pool-data",
+ *       .name = "pool-data",
  *       .rank = 2,
  *       .dim[0] = 1, // horizontal size
  *       .dim[1] = 6, // vertical size
@@ -422,7 +422,7 @@ int Setup(setup *s) {
  *     };
  *
  * where:
- * - path - the dataset name (char string)
+ * - name - the dataset name (char string)
  * - rank - the rank of the dataset (max 2)
  * - dim - the dimensions of the dataset
  * - use_hdf - whether to store dataset in the master file or not
@@ -461,7 +461,7 @@ int Setup(setup *s) {
  * The whole memory block is stored in a dataset inside /Tasks/task-ID
  * group (the ID is the unique task indentifier), i.e., for a dataset defined similar to:
  *
- *     p->task->storage[0].layout.path = "basic-dataset";
+ *     p->task->storage[0].layout.name = "basic-dataset";
  *     p->task->storage[0].layout.dim[0] = 2;
  *     p->task->storage[0].layout.dim[1] = 6;
  *     p->task->storage[0].layout.storage_type = STORAGE_GROUP;
@@ -484,7 +484,7 @@ int Setup(setup *s) {
  *
  * while each worker returns the result of size 2x7. For a dataset defined similar to:
  *
- *     p->task->storage[0].layout.path = "pm3d-dataset";
+ *     p->task->storage[0].layout.name = "pm3d-dataset";
  *     p->task->storage[0].layout.dim[0] = 2;
  *     p->task->storage[0].layout.dim[1] = 7;
  *     p->task->storage[0].layout.storage_type = STORAGE_PM3D;
@@ -511,7 +511,7 @@ int Setup(setup *s) {
  * similar to STORAGE_PM3D, this time however, there is no column-offset. For a dataset
  * defined as below:
  *
- *     p->task->storage[0].layout.path = "list-dataset";
+ *     p->task->storage[0].layout.name = "list-dataset";
  *     p->task->storage[0].layout.dim[0] = 2;
  *     p->task->storage[0].layout.dim[1] = 7;
  *     p->task->storage[0].layout.storage_type = STORAGE_LIST;
@@ -538,7 +538,7 @@ int Setup(setup *s) {
  * according to the board-location of the task. The minimum rank must be TASK_BOARD_RANK.
  * Suppose we have a dataset defined like this:
  *
- *     p->task->storage[0].layout.path = "board-dataset";
+ *     p->task->storage[0].layout.name = "board-dataset";
  *     p->task->storage[0].layout.rank = TASK_BOARD_RANK;
  *     p->task->storage[0].layout.dim[0] = 2;
  *     p->task->storage[0].layout.dim[1] = 3;
@@ -667,7 +667,7 @@ int Storage(pool *p, setup *s) {
 
   /* Path: /Pools/pool-ID/board */
   p->board->layout = (schema) {
-    .path = "board",
+    .name = "board",
     .rank = TASK_BOARD_RANK+1, // pool rank
     .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
     .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res

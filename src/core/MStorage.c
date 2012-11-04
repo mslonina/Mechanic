@@ -176,13 +176,13 @@ int CheckLayout(int banks, storage *s) {
       }
 
       /* Check for mistakes */
-      if (s[i].layout.path == NULL) {
-        Message(MESSAGE_ERR, "The storage path is required when use_hdf\n");
+      if (s[i].layout.name == NULL) {
+        Message(MESSAGE_ERR, "The storage name is required when use_hdf\n");
         Error(CORE_ERR_STORAGE);
       }
       if (s[i].layout.sync != 1) {
         Message(MESSAGE_WARN, "The sync flag for '%s' must be enabled for use_hdf. Fixing\n",
-          s[i].layout.path);
+          s[i].layout.name);
         s[i].layout.sync = 1;
       }
     }
@@ -347,7 +347,7 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
     H5CheckStatus(h5status);
   }
 
-  h5dataset = H5Dcreate(h5location, s->layout.path, s->layout.datatype, h5dataspace,
+  h5dataset = H5Dcreate(h5location, s->layout.name, s->layout.datatype, h5dataspace,
       H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   H5CheckStatus(h5dataset);
 
@@ -401,7 +401,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf && (int)s[i].layout.size > 0) {
 
-      dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
+      dataset = H5Dopen(h5location, s[i].layout.name, H5P_DEFAULT);
       H5CheckStatus(dataset);
       dataspace = H5Dget_space(dataset);
       H5CheckStatus(dataspace);
@@ -466,8 +466,8 @@ int ReadDataset(hid_t h5location, int banks, storage *s, int size) {
       }
       buffer = calloc(elements, s[i].layout.datatype_size);
 
-      Message(MESSAGE_DEBUG, "Read Data storage path: %s\n", s[i].layout.path);
-      dataset = H5Dopen(h5location, s[i].layout.path, H5P_DEFAULT);
+      Message(MESSAGE_DEBUG, "Read Data storage name: %s\n", s[i].layout.name);
+      dataset = H5Dopen(h5location, s[i].layout.name, H5P_DEFAULT);
       hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
       H5CheckStatus(hstat);
       H5Dclose(dataset);

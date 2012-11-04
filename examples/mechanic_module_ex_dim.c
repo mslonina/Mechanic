@@ -41,7 +41,7 @@ int Storage(pool *p, setup *s) {
    * 3D integer dataset
    */
   p->storage[0].layout = (schema) {
-    .path = "3d-integer-datatype-group",
+    .name = "3d-integer-datatype-group",
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -56,7 +56,7 @@ int Storage(pool *p, setup *s) {
    * 4D double dataset
    */
   p->storage[1].layout = (schema) {
-    .path = "4d-double-datatype-group",
+    .name = "4d-double-datatype-group",
     .rank = 4,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -72,7 +72,7 @@ int Storage(pool *p, setup *s) {
    * 2D float dataset
    */
   p->storage[2].layout = (schema) {
-    .path = "2d-float-datatype-group",
+    .name = "2d-float-datatype-group",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -86,7 +86,7 @@ int Storage(pool *p, setup *s) {
    * 3D double dataset of type STORAGE_BOARD
    */
   p->task->storage[0].layout = (schema) {
-    .path = "3d-double-datatype-board",
+    .name = "3d-double-datatype-board",
     .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -101,7 +101,7 @@ int Storage(pool *p, setup *s) {
    * 2D integer dataset of type STORAGE_BOARD
    */
   p->task->storage[1].layout = (schema) {
-    .path = "2d-integer-datatype-board",
+    .name = "2d-integer-datatype-board",
     .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -116,7 +116,7 @@ int Storage(pool *p, setup *s) {
    * 3D integer dataset of type STORAGE_GROUP
    */
   p->task->storage[2].layout = (schema) {
-    .path = "3d-integer-datatype-group",
+    .name = "3d-integer-datatype-group",
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -131,7 +131,7 @@ int Storage(pool *p, setup *s) {
    * 2D integer dataset of type STORAGE_PM3D
    */
   p->task->storage[3].layout = (schema) {
-    .path = "2d-integer-datatype-pm3d",
+    .name = "2d-integer-datatype-pm3d",
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -145,7 +145,7 @@ int Storage(pool *p, setup *s) {
    * 3D integer dataset of type STORAGE_LIST
    */
   p->task->storage[4].layout = (schema) {
-    .path = "3d-integer-datatype-list",
+    .name = "3d-integer-datatype-list",
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -160,7 +160,7 @@ int Storage(pool *p, setup *s) {
    * 4D double dataset of type STORAGE_BOARD
    */
   p->task->storage[5].layout = (schema) {
-    .path = "4d-result",
+    .name = "4d-result",
     .rank = 4,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
