@@ -15,6 +15,8 @@ set (
   MMpi.c MMpi.h
   MStorage.c MStorage.h
   MLog.c MLog.h
+  MAttributes.c MAttributes.h
+  MWork.c MWork.h
   MCheckpoint.c MCheckpoint.h
   MRestart.c MRestart.h
 )

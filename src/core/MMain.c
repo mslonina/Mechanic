@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
     Message(MESSAGE_OUTPUT, "\n");
   }
 
-  mstat = Taskfarm(&module);
+  mstat = Work(&module);
   CheckStatus(mstat);
 
   time_out = clock();
@@ -215,6 +215,10 @@ int main(int argc, char** argv) {
    * @todo
    * Write global attributes here, such as master cpu_time and some statistics
    */
+  if (node == MASTER) {
+    h5location = H5Fopen(module.filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    H5Fclose(h5location);
+  }
 
   /**
    * (K) Finalize

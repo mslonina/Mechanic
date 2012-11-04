@@ -1,5 +1,5 @@
-#ifndef MECHANIC_MODE_TASKFARM_H
-#define MECHANIC_MODE_TASKFARM_H
+#ifndef MECHANIC_WORK_H
+#define MECHANIC_WORK_H
 
 #include "Mechanic2.h"
 #include "MCommon.h"
@@ -12,7 +12,8 @@
 #include "MCore.h"
 #include "MRestart.h"
 
-int Master(module *m, pool *p);
-int Worker(module *m, pool *p);
+#include "Taskfarm.h"
+
+int Work(module *m);
 
 #endif

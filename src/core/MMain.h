@@ -15,6 +15,7 @@
 #include "MLog.h"
 #include "MSetup.h"
 #include "MMpi.h"
-#include "Taskfarm.h"
+#include "MAttributes.h"
+#include "MWork.h"
 
 #endif
