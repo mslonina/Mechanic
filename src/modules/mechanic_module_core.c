@@ -115,7 +115,7 @@ int Init(init *i) {
   i->pools = 64; /**< Maximum number of task pools */
   i->banks_per_pool = 8; /**< Maximum number of memory bank per pool */
   i->banks_per_task = 8; /**< Maximum number of memory banks per task */
-  i->attr_per_dataset = 8; /**< Maximum number of attributes that may be assigned to the dataset */
+  i->attr_per_dataset = 24; /**< Maximum number of attributes that may be assigned to the dataset */
 
   return SUCCESS;
 }
@@ -303,7 +303,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.0",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The x-axis minimum"
   };
   s->options[13] = (LRC_configDefaults) {
@@ -312,7 +311,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="1.0",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The x-axis maximum"
   };
   s->options[14] = (LRC_configDefaults) {
@@ -321,7 +319,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.0",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The y-axis minimum"
   };
   s->options[15] = (LRC_configDefaults) {
@@ -330,7 +327,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="1.0",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The y-axis maximum"
   };
   s->options[16] = (LRC_configDefaults) {
@@ -339,7 +335,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.0",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The z-axis minimum"
   };
   s->options[17] = (LRC_configDefaults) {
@@ -348,7 +343,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="1.0",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The z-axis maximum"
   };
   s->options[18] = (LRC_configDefaults) {
@@ -357,7 +351,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.5",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The x-axis origin"
   };
   s->options[19] = (LRC_configDefaults) {
@@ -366,7 +359,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.5",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The y-axis origin"
   };
   s->options[20] = (LRC_configDefaults) {
@@ -375,7 +367,6 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.5",
     .type=LRC_DOUBLE,
-    .attr=HDF5_ATTR,
     .description="The z-axis origin"
   };
   s->options[21] = (LRC_configDefaults) {
@@ -686,6 +677,53 @@ int Storage(pool *p, setup *s) {
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,
+  };
+
+  /* Global pool attributes */
+  p->board->attr[0].layout = (schema) {
+    .name = "xmin",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[1].layout = (schema) {
+    .name = "xmax",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[2].layout = (schema) {
+    .name = "ymin",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[3].layout = (schema) {
+    .name = "ymax",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[4].layout = (schema) {
+    .name = "zmin",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[5].layout = (schema) {
+    .name = "zmax",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[6].layout = (schema) {
+    .name = "xorigin",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[7].layout = (schema) {
+    .name = "yorigin",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[8].layout = (schema) {
+    .name = "zorigin",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_DOUBLE,
   };
 
   p->checkpoint_size = LRC_option2int("core", "checkpoint", s->head);
