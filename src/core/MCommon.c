@@ -155,4 +155,37 @@ void Free(storage *s) {
   if (s->memory) free(s->memory);
 }
 
+/**
+ * @brief Allocates the memory buffer for attribute
+ *
+ * @param buffer The memory buffer to allocate
+ * @param size The size of the memory buffer
+ * @param datatype The size of the datatype
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int AllocateAttribute(attr *s, size_t size, size_t datatype) {
+
+  if (s->memory) {
+    Message(MESSAGE_ERR, "The buffer is already allocated\n");
+    return CORE_ERR_MEM;
+  }
+
+  if (size > 0) {
+    s->memory = calloc(size, datatype);
+  }
+
+  if (!s->memory) return CORE_ERR_MEM;
+  return SUCCESS;
+}
+
+/**
+ * @brief Free the memory buffer of the attribute
+ *
+ * @param s The storage object
+ */
+void FreeAttribute(attr *s) {
+  if (s->memory) free(s->memory);
+}
+
 

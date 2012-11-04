@@ -12,7 +12,7 @@ maintained), if the following requirements are met:
 - MPI2 implementation (in favour of OpenMPI)
 - HDF5 >= 1.8
 - Popt library >= 1.14
-- [Libreadconfig](http://github.com/mslonina/libreadconfig) with HDF5 support >= 0.12.4
+- [Libreadconfig](http://github.com/mslonina/libreadconfig) with HDF5 support >= 0.12.5
   (see also http://git.astri.umk.pl/projects/lrc)
 
 Manual Compilation

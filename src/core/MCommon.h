@@ -24,5 +24,7 @@ int Validate(char *filename);
 
 int Allocate(storage *s, size_t size, size_t datatype); /**< Memory allocator */
 void Free(storage *s); /**< Garbage cleaner */
+int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory allocator */
+void FreeAttribute(attr *s); /**< Garbage cleaner */
 
 #endif

@@ -101,8 +101,10 @@ int Work(module *m) {
       CheckStatus(mstat);
       
       p[pid]->rid++;
+      
       time_out = clock();
       cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
+
       if (m->node == MASTER) {
         Message(MESSAGE_INFO, "Pool %04d computed. CPU time: %f\n", p[pid]->pid, cpu_time);
 

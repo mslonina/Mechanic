@@ -94,7 +94,11 @@
 #define HEADER_SIZE 3+TASK_BOARD_RANK /**< The data header size */
 #define HEADER_INIT {TAG_TERMINATE,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION,TASK_NO_LOCATION}
 
-#define STORAGE_END {.name = NULL, .dataspace_type = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
+#define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
+#define ATTR_STORAGE_END {.name = NULL, .dataspace = -1, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The attribute storage scheme default initializer */
+
+/* Option attributes */
+#define HDF5_ATTR 1
 
 /**
  * @struct init
@@ -144,7 +148,7 @@ typedef struct {
   hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
   int storage_dim[MAX_RANK]; /**< @internal The dimensions of the storage dataset */
   int offset[MAX_RANK]; /**< @internal The offsets (calculated automatically) */
-  H5S_class_t dataspace_type; /**< @internal The type of the HDF5 dataspace (H5S_SIMPLE) */
+  H5S_class_t dataspace; /**< @internal The type of the HDF5 dataspace (H5S_SIMPLE) */
   MPI_Datatype mpi_datatype; /**< @internal The MPI datatype of the dataset */
   size_t size; /**< @internal The size of the memory block */
   size_t storage_size; /**< @internal The size of the storage block */
@@ -170,6 +174,7 @@ typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   char *memory; /**< The memory block */
   attr *attr; /**< The dataset attributes */
+  int attr_banks; /**< Number of attribute banks in use */
 } storage;
 
 /**

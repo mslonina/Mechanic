@@ -62,7 +62,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
 
     t->storage[i].layout.sync = p->task->storage[i].layout.sync;
     t->storage[i].layout.storage_type = p->task->storage[i].layout.storage_type;
-    t->storage[i].layout.dataspace_type = p->task->storage[i].layout.dataspace_type;
+    t->storage[i].layout.dataspace = p->task->storage[i].layout.dataspace;
     t->storage[i].layout.datatype = p->task->storage[i].layout.datatype;
     t->storage[i].layout.mpi_datatype = p->task->storage[i].layout.mpi_datatype;
     t->storage[i].layout.size = p->task->storage[i].layout.size;

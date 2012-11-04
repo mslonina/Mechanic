@@ -19,7 +19,8 @@ int CommitStorageLayout(module *m, pool *p);
 int CommitMemoryLayout(int banks, storage *s);
 void FreeMemoryLayout(int banks, storage *s);
 int Storage(module *m, pool *p);
-int CheckLayout(int banks, storage *s);
+int CheckLayout(module *m, int banks, storage *s);
+int CheckAttributeLayout(attr *a);
 
 int CreateDataset(hid_t location, storage *s, module *m, pool *p);
 int CommitDataset(hid_t h5location, storage *s, double **data);

@@ -33,9 +33,29 @@ int Storage(module *m, pool *p) {
   m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
   m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
 
+  for (i = 0; i < m->pool_banks; i++) {
+    p->storage[i].attr_banks = 0;
+    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+      if (p->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
+          p->storage[i].attr[j].layout.dataspace == H5S_SCALAR) {
+        p->storage[i].attr_banks++;
+      }
+    }
+  }
+
+  for (i = 0; i < m->task_banks; i++) {
+    p->task->storage[i].attr_banks = 0;
+    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+      if (p->task->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
+          p->task->storage[i].attr[j].layout.dataspace == H5S_SCALAR) {
+        p->task->storage[i].attr_banks++;
+      }
+    }
+  }
+
   /* Check and fix the memory/storage layout */
-  CheckLayout(1, p->board);
-  CheckLayout(m->pool_banks, p->storage);
+  CheckLayout(m, 1, p->board);
+  CheckLayout(m, m->pool_banks, p->storage);
 
   /* The pool size */
   p->pool_size = 1;
@@ -48,7 +68,7 @@ int Storage(module *m, pool *p) {
     p->storage[i].layout.storage_type = STORAGE_GROUP;
   }
 
-  CheckLayout(m->task_banks, p->task->storage);
+  CheckLayout(m, m->task_banks, p->task->storage);
 
   /* Commit memory layout used during the task pool */
   CommitMemoryLayout(m->pool_banks, p->storage);
@@ -131,7 +151,7 @@ int Storage(module *m, pool *p) {
  *
  * @return 0 on success, error code otherwise
  */
-int CheckLayout(int banks, storage *s) {
+int CheckLayout(module *m, int banks, storage *s) {
   int i = 0, j = 0, mstat = SUCCESS;
 
   for (i = 0; i < banks; i++) {
@@ -170,7 +190,7 @@ int CheckLayout(int banks, storage *s) {
     }
 
     if (s[i].layout.use_hdf) {
-      s[i].layout.dataspace_type = H5S_SIMPLE;
+      s[i].layout.dataspace = H5S_SIMPLE;
       for (j = 0; j < MAX_RANK; j++) {
         s[i].layout.offset[j] = 0; // Offsets are calculated automatically
       }
@@ -196,7 +216,77 @@ int CheckLayout(int banks, storage *s) {
     s[i].layout.storage_size = (size_t) s[i].layout.storage_elements * s[i].layout.datatype_size;
     s[i].layout.size = (size_t) s[i].layout.elements * s[i].layout.datatype_size;
 
+    /* Check attributes */
+    for (j = 0; j < s[i].attr_banks; j++) {
+      mstat = CheckAttributeLayout(&s[i].attr[j]);
+    }
+
   }
+
+  return mstat;
+}
+
+/**
+ * @brief Check for any inconsistencies in the storage layout for attributes
+ *
+ * @param banks The number of memory/storage banks
+ * @param s The storage structure to check
+ *
+ * @return 0 on success, error code otherwise
+ */
+int CheckAttributeLayout(attr *a) {
+  int i = 0, j = 0, mstat = SUCCESS;
+
+    if (a->layout.name == NULL) {
+      Message(MESSAGE_ERR, "Attribute name is required\n");
+      Error(CORE_ERR_STORAGE);
+    }
+
+    /* For scalar attribute reduce the size */
+    if (a->layout.dataspace == H5S_SCALAR) {
+      for (j = 0; j < a->layout.rank; j++){
+        a->layout.dim[i] = 1;
+      }
+      a->layout.rank = 1;
+    }
+
+    if (a->layout.dataspace == H5S_SIMPLE) {
+      if (a->layout.rank <= 0) {
+        Message(MESSAGE_ERR, "Attribute rank for H5S_SIMPLE dataspace must be > 0\n");
+        Error(CORE_ERR_STORAGE);
+      }
+
+      if (a->layout.rank > MAX_RANK) {
+        Message(MESSAGE_ERR, "Attribute rank for H5S_SIMPLE dataspace must be <= %d\n", MAX_RANK);
+        Error(CORE_ERR_STORAGE);
+      }
+
+      for (j = 0; j < a->layout.rank; j++) {
+        if (a->layout.dim[j] <= 0) {
+          Message(MESSAGE_ERR, "Invalid size for attribute dimension %d = %d\n", i, a->layout.dim[j]);
+          Error(CORE_ERR_STORAGE);
+        }
+        a->layout.storage_dim[j] = a->layout.dim[j];
+      }
+    }
+
+    if ((int)a->layout.datatype <= 0) {
+      Message(MESSAGE_ERR, "Attribute datatype is missing\n");
+      Error(CORE_ERR_STORAGE);
+    }
+
+    for (j = 0; j < MAX_RANK; j++) {
+      a->layout.offset[j] = 0; // Offsets are calculated automatically
+    }
+
+    a->layout.mpi_datatype = GetMpiDatatype(a->layout.datatype);
+    a->layout.datatype_size = H5Tget_size(a->layout.datatype);
+    
+    a->layout.storage_elements = 
+      a->layout.elements = GetSize(a->layout.rank, a->layout.dim);
+
+    a->layout.storage_size = (size_t) a->layout.storage_elements * a->layout.datatype_size;
+    a->layout.size = (size_t) a->layout.elements * a->layout.datatype_size;
 
   return mstat;
 }
@@ -214,11 +304,16 @@ int CheckLayout(int banks, storage *s) {
  *
  */
 int CommitMemoryLayout(int banks, storage *s) {
-  int mstat = SUCCESS, i = 0;
+  int mstat = SUCCESS, i = 0, j = 0;
 
   for (i = 0; i < banks; i++) {
     mstat = Allocate(&s[i], (size_t)s[i].layout.storage_elements, s[i].layout.datatype_size);
     CheckStatus(mstat);
+    for (j = 0; j < s[i].attr_banks; j++) {
+      mstat = AllocateAttribute(&s[i].attr[j], (size_t)s[i].attr[j].layout.storage_elements, s[i].attr[j].layout.datatype_size);
+      CheckStatus(mstat);
+    }
+
   }
 
   return mstat;
@@ -231,11 +326,16 @@ int CommitMemoryLayout(int banks, storage *s) {
  * @param s The storage structure to free
  */
 void FreeMemoryLayout(int banks, storage *s) {
-  int i = 0;
+  int i = 0, j = 0;
 
   for (i = 0; i < banks; i++) {
-    if (s[i].memory) {
-      Free(&s[i]);
+    if (s[i].layout.rank > 0) {
+      for (j = 0; j < s[i].attr_banks; j++) {
+        FreeAttribute(&s[i].attr[j]);
+      }
+      if (s[i].memory) {
+        Free(&s[i]);
+      }
     }
   }
 }
@@ -335,9 +435,10 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   hsize_t dims[MAX_RANK];
   herr_t h5status;
 
-  h5dataspace = H5Screate(s->layout.dataspace_type);
+  h5dataspace = H5Screate(s->layout.dataspace);
   H5CheckStatus(h5dataspace);
-  if (s->layout.dataspace_type == H5S_SIMPLE) {
+
+  if (s->layout.dataspace == H5S_SIMPLE) {
     
     for (i = 0; i < MAX_RANK; i++) {
       dims[i] = s->layout.storage_dim[i];

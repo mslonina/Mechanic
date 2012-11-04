@@ -303,6 +303,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.0",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The x-axis minimum"
   };
   s->options[13] = (LRC_configDefaults) {
@@ -311,6 +312,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="1.0",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The x-axis maximum"
   };
   s->options[14] = (LRC_configDefaults) {
@@ -319,6 +321,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.0",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The y-axis minimum"
   };
   s->options[15] = (LRC_configDefaults) {
@@ -327,6 +330,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="1.0",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The y-axis maximum"
   };
   s->options[16] = (LRC_configDefaults) {
@@ -335,6 +339,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.0",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The z-axis minimum"
   };
   s->options[17] = (LRC_configDefaults) {
@@ -343,6 +348,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="1.0",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The z-axis maximum"
   };
   s->options[18] = (LRC_configDefaults) {
@@ -351,6 +357,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.5",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The x-axis origin"
   };
   s->options[19] = (LRC_configDefaults) {
@@ -359,6 +366,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.5",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The y-axis origin"
   };
   s->options[20] = (LRC_configDefaults) {
@@ -367,6 +375,7 @@ int Setup(setup *s) {
     .shortName='\0',
     .value="0.5",
     .type=LRC_DOUBLE,
+    .attr=HDF5_ATTR,
     .description="The z-axis origin"
   };
   s->options[21] = (LRC_configDefaults) {

@@ -13,7 +13,7 @@
  * @return The pool pointer, NULL otherwise
  */
 pool* PoolLoad(module *m, int pid) {
-  int i = 0;
+  int i = 0, j = 0;
   pool *p = NULL;
 
   /* Allocate pool pointer */
@@ -27,6 +27,11 @@ pool* PoolLoad(module *m, int pid) {
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
     p->storage[i].layout = (schema) STORAGE_END;
     p->storage[i].memory = NULL;
+    p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+      p->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
+      p->storage[i].attr[j].memory = NULL;
+    }
   }
 
   /* Allocate task board pointer */
@@ -46,6 +51,11 @@ pool* PoolLoad(module *m, int pid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     p->task->storage[i].layout = (schema) STORAGE_END;
     p->task->storage[i].memory = NULL;
+    p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+      p->task->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
+      p->task->storage[i].attr[j].memory = NULL;
+    }
   }
 
   p->tasks = NULL;
@@ -283,15 +293,27 @@ int PoolReset(module *m, pool *p) {
  * @param p The pool pointer to finalize
  */
 void PoolFinalize(module *m, pool *p) {
-  int i = 0;
+  int i = 0, j = 0;
 
   if (p->storage) {
+    for (i = 0; i < m->layer.init.banks_per_pool; i++) {
+      for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+        if (p->storage[i].attr[j].layout.rank > 0) free(p->storage[i].attr[j].memory);
+      }
+      free(p->storage[i].attr);
+    }
     FreeMemoryLayout(m->pool_banks, p->storage);
     free(p->storage);
   }
 
   if (p->task) {
     if (p->task->storage) {
+      for (i = 0; i < m->layer.init.banks_per_pool; i++) {
+        for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+          if (p->storage[i].attr[j].layout.rank > 0) free(p->storage[i].attr[j].memory);
+        }
+        free(p->task->storage[i].attr);
+      }
       FreeMemoryLayout(m->task_banks, p->task->storage);
       free(p->task->storage);
     }
