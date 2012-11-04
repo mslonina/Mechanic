@@ -34,6 +34,8 @@ int main(int argc, char** argv) {
   double cpu_time;
   clock_t time_in, time_out;
 
+  hid_t attr_d, attr_s;
+
   /**
    * (A) Initialize MPI
    */
@@ -189,7 +191,7 @@ int main(int argc, char** argv) {
   }
 
   /**
-   * (J) Modes
+   * (J) The Work pool
    */
   if (mpi_size <= 1) {
     Message(MESSAGE_WARN, "You must use min. two MPI threads to run Mechanic.\n");
@@ -212,11 +214,15 @@ int main(int argc, char** argv) {
   cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
 
   /**
-   * @todo
-   * Write global attributes here, such as master cpu_time and some statistics
+   * Write global attributes here, such as master cpu_time
    */
   if (node == MASTER) {
     h5location = H5Fopen(module.filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    attr_s = H5Screate(H5S_SCALAR);
+    attr_d = H5Acreate(h5location, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time); 
+    H5Aclose(attr_d);
+    H5Sclose(attr_s);
     H5Fclose(h5location);
   }
 
