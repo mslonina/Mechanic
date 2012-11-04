@@ -650,6 +650,55 @@ int Setup(setup *s) {
  *    ...
  *    GetDims(&t->storage[0], dims);
  *
+ * ### Attributes
+ *
+ * For a good introduction to HDF5 attributes see:
+ * http://www.hdfgroup.org/HDF5/doc/UG/13_Attributes.html
+ *
+ * Attributes are small amount of data that can be attached to datasets. You can attach
+ * attributes to your datasets by defining the proper attribute schema, similar to
+ * dataset's schema:
+ *
+ *     p->task->storage[0].attr[0].layout = (schema) {
+ *       .name = "My attribute",
+ *       .dataspace = H5S_SCALAR,
+ *       .datatype = H5T_NATIVE_INT
+ *     }
+ *
+ * The code above will attach the integer attribute to the first storage bank of a task.
+ * The `name` is required. In case of more dimensional attributes, you must use H5S_SIMPLE
+ * dataspace, and fill out additional information, such as rank and dimensions:
+ *
+ *    p->task->storage[0].attr[1].layout = (schema) {
+ *       .name = "My attribute 2D",
+ *       .dataspace = H5S_SIMPLE,
+ *       .datatype = H5T_NATIVE_INT,
+ *       .rank = 2,
+ *       .dim[0] = 3,
+ *       .dim[1] = 4,
+ *    }
+ *
+ * By default, 24 attributes are available for each storage bank (both for tasks and
+ * pools). You can change it through the Init() hook:
+ *
+ *     i->attr_per_dataset = 32;
+ *
+ * To write and read attributes, WriteAttr() and ReadAttr() functions are provided.
+ * Attributes are stored in the master datafile after the PoolProcess() hook has been
+ * invoked, so the best place for manipulating them is the PoolProcess():
+ *
+ *     int attr_i, attr_d[3][4];
+ *     ...
+ *     WriteAttr(&p->task->storage[0].attr[0], &attr_i);
+ *     WriteAttr(&p->task->storage[0].attr[1], attr_d);
+ *
+ * Of course, you can use more advanced techniques with the help of DatasetPrepare() and
+ * DatasetProcess() hooks, however this requires HDF5 knowledge.
+ *
+ * Note: Attributes for STORAGE_GROUP are limited, each task group will receive same
+ * attributes (and same values).
+ *
+ * Attributes are managed only on the master node.
  *
  * ### Checkpoint
  *
