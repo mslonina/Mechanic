@@ -167,6 +167,7 @@ int PoolProcess(module *m, pool **all, pool *p) {
   int pool_create = 0, i = 0, j = 0, task_groups = 0;
   char path[LRC_CONFIG_LEN];
   int attr_data[1];
+  double setup_attr;
   setup *s = &(m->layer.setup);
   query *q;
   hid_t h5location, h5pool, h5tasks, h5task, h5dataset;
@@ -188,6 +189,26 @@ int PoolProcess(module *m, pool **all, pool *p) {
     /* Process task board attributes */
     h5dataset = H5Dopen(h5pool, p->board->layout.name, H5P_DEFAULT);
     H5CheckStatus(h5dataset);
+
+    /* @todo: Remove when all options will be stored as attributes by default */
+    setup_attr = LRC_option2double("core", "xmin", s->head);
+    WriteAttr(&p->board->attr[0], &setup_attr);
+    setup_attr = LRC_option2double("core", "xmax", s->head);
+    WriteAttr(&p->board->attr[1], &setup_attr);
+    setup_attr = LRC_option2double("core", "ymin", s->head);
+    WriteAttr(&p->board->attr[2], &setup_attr);
+    setup_attr = LRC_option2double("core", "ymax", s->head);
+    WriteAttr(&p->board->attr[3], &setup_attr);
+    setup_attr = LRC_option2double("core", "zmin", s->head);
+    WriteAttr(&p->board->attr[4], &setup_attr);
+    setup_attr = LRC_option2double("core", "zmax", s->head);
+    WriteAttr(&p->board->attr[5], &setup_attr);
+    setup_attr = LRC_option2double("core", "xorigin", s->head);
+    WriteAttr(&p->board->attr[6], &setup_attr);
+    setup_attr = LRC_option2double("core", "yorigin", s->head);
+    WriteAttr(&p->board->attr[7], &setup_attr);
+    setup_attr = LRC_option2double("core", "zorigin", s->head);
+    WriteAttr(&p->board->attr[8], &setup_attr);
 
     for (j = 0; j < p->board->attr_banks; j++) {
        mstat = CommitAttribute(h5dataset, &p->board->attr[j]);
