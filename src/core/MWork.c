@@ -20,6 +20,9 @@ int Work(module *m) {
   double cpu_time;
   clock_t time_in, time_out;
 
+  hid_t h5location, h5pool, attr_s, attr_d;
+  char path[LRC_CONFIG_LEN];
+
   /* Prepare the simulation */
   mstat = Prepare(m);
   CheckStatus(mstat);
@@ -102,6 +105,24 @@ int Work(module *m) {
       cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
       if (m->node == MASTER) {
         Message(MESSAGE_INFO, "Pool %04d computed. CPU time: %f\n", p[pid]->pid, cpu_time);
+
+        /**
+         * Write global pool attributes
+         */
+        h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+        
+        sprintf(path, POOL_PATH, p[pid]->pid);
+        h5pool = H5Gopen(h5location, path, H5P_DEFAULT);
+        H5CheckStatus(h5pool);
+        
+        attr_s = H5Screate(H5S_SCALAR);
+        attr_d = H5Acreate(h5pool, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+        H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time); 
+
+        H5Aclose(attr_d);
+        H5Sclose(attr_s);
+        H5Gclose(h5pool);
+        H5Fclose(h5location);
       }
     } while (pool_create == POOL_RESET);
 
