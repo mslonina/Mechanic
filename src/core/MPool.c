@@ -325,10 +325,13 @@ int PoolReset(module *m, pool *p) {
   int mstat = SUCCESS;
   hid_t h5location, group;
   char path[LRC_CONFIG_LEN];
+  short ****board;
 
   /* Reset the board memory banks */
   if (m->node == MASTER) {
-    memset(p->board->memory, TASK_AVAILABLE, sizeof(int));
+    board = AllocateShort4D(p->board);
+    memset(&board[0][0][0][0], TASK_AVAILABLE, p->pool_size * sizeof(short));
+    WriteData(p->board, &board[0][0][0][0]);
 
     /* Reset the board storage banks */
     h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -343,6 +346,8 @@ int PoolReset(module *m, pool *p) {
 
     H5Gclose(group);
     H5Fclose(h5location);
+
+    FreeShort4D(board);
   }
 
   return mstat;

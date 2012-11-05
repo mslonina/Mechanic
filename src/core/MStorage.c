@@ -594,25 +594,29 @@ int CommitAttribute(hid_t h5location, attr *a) {
   buffer = calloc(a->layout.elements, a->layout.datatype_size);
   ReadAttr(a, buffer);
 
-  attr_s = H5Screate(a->layout.dataspace);
-  H5CheckStatus(attr_s);
+  if (H5Aexists(h5location, a->layout.name) > 0) {
+    attr_d = H5Aopen(h5location, a->layout.name, H5P_DEFAULT);
+    H5Awrite(attr_d, a->layout.datatype, buffer); 
+  } else {
+    attr_s = H5Screate(a->layout.dataspace);
+    H5CheckStatus(attr_s);
 
-  if (a->layout.dataspace == H5S_SIMPLE) {
-    for (i = 0; i < MAX_RANK; i++) {
-      dims[i] = a->layout.storage_dim[i];
-    }
+    if (a->layout.dataspace == H5S_SIMPLE) {
+      for (i = 0; i < MAX_RANK; i++) {
+        dims[i] = a->layout.storage_dim[i];
+      }
     
-    h5status = H5Sset_extent_simple(attr_s, a->layout.rank, dims, NULL);
-    H5CheckStatus(h5status);
-  }
+      h5status = H5Sset_extent_simple(attr_s, a->layout.rank, dims, NULL);
+      H5CheckStatus(h5status);
+    }
   
-  attr_d = H5Acreate(h5location, a->layout.name, a->layout.datatype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-  H5CheckStatus(attr_d);
-
-  H5Awrite(attr_d, a->layout.datatype, buffer); 
+    attr_d = H5Acreate(h5location, a->layout.name, a->layout.datatype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5CheckStatus(attr_d);
+    H5Awrite(attr_d, a->layout.datatype, buffer); 
+    H5Sclose(attr_s);
+  }
 
   H5Aclose(attr_d);
-  H5Sclose(attr_s);
 
   if (buffer) free(buffer);
 
