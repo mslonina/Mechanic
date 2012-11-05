@@ -75,7 +75,7 @@ Key features
 - **HDF5 data storage layout**
 - **All HDF5/MPI basic datatypes are supported**
 - **Multidimensional datasets support, with minimum rank 2 up to rank H5S_MAX_RANK (32)**
-- **Possibility of using HDF5 attributes**
+- **Possibility of using HDF5 attributes (directly or through API)**
 - **Automatic backup of data files and restart mode**
 - **Configuration command line.** All configuration options defined through API are
   automatically available in the command line

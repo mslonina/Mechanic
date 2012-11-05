@@ -308,6 +308,8 @@ int PoolProcess(module *m, pool **all, pool *p) {
 
   MPI_Bcast(&pool_create, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
 
+  p->status = pool_create;
+
   return pool_create;
 }
 

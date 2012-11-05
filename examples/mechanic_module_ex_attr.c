@@ -1,5 +1,5 @@
 /**
- * Using HDF5 attribtues
+ * Using HDF5 attributes
  * =====================
  *
  * Compilation
@@ -34,8 +34,6 @@
  * result arrays into one dataset suitable to process with Matplotlib. The final dataset
  * will be available at /Pools/pool-0000/Tasks/result.
  *
- * By default, we have 8 memory/storage banks per each task pool + 8 memory/storage banks
- * per task available. You may change the defaults by using the Init() hook.
  */
 int Storage(pool *p, setup *s) {
   p->storage[0].layout = (schema) {
@@ -193,3 +191,4 @@ int PoolProcess(pool *all, pool *p, setup *s) {
 
   return POOL_FINALIZE;
 }
+
