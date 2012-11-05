@@ -32,7 +32,8 @@ int Master(module *m, pool *p) {
   /* Initialize the temporary task board buffer */
   board_buffer = AllocateShort4D(p->board);
   if (m->mode != RESTART_MODE) {
-    memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->pool_size*sizeof(short));
+    memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
+    WriteData(p->board, &board_buffer[0][0][0][0]);
   } else {
     ReadData(p->board, &board_buffer[0][0][0][0]);
 
@@ -152,6 +153,8 @@ int Master(module *m, pool *p) {
         MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
             send_node, TAG_DATA, MPI_COMM_WORLD);
 
+      } else {
+        Message(MESSAGE_DEBUG, "Master: no more tasks after %d of %d completed\n", completed, p->pool_size);
       }
     }
 

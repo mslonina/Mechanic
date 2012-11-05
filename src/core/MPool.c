@@ -330,7 +330,7 @@ int PoolReset(module *m, pool *p) {
   /* Reset the board memory banks */
   if (m->node == MASTER) {
     board = AllocateShort4D(p->board);
-    memset(&board[0][0][0][0], TASK_AVAILABLE, p->pool_size * sizeof(short));
+    memset(&board[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
     WriteData(p->board, &board[0][0][0][0]);
 
     /* Reset the board storage banks */

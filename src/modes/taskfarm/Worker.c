@@ -61,6 +61,9 @@ int Worker(module *m, pool *p) {
       break;
     } else {
 
+      Message(MESSAGE_DEBUG, "Worker recv: %d %d %d %d\n", t->tid,
+          t->location[0], t->location[1], t->location[2]);
+
       mstat = TaskPrepare(m, p, t);
       CheckStatus(mstat);
 

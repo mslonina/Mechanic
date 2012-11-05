@@ -60,10 +60,11 @@ int Work(module *m) {
     /* Pool storage */
     if (m->mode != RESTART_MODE) Storage(m, p[pid]);
 
+    if (m->node == MASTER) {
+      Message(MESSAGE_INFO, "Entering the pool %04d\n", p[pid]->pid);
+    }
+
     do {
-      if (m->node == MASTER) {
-        Message(MESSAGE_INFO, "Entering the pool %04d\n", p[pid]->pid);
-      }
       
       time_in = clock();
       

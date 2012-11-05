@@ -65,7 +65,7 @@ int Storage(module *m, pool *p) {
   CheckLayout(m, 1, p->board);
   CheckLayout(m, m->pool_banks, p->storage);
 
-  /* The pool size */
+  /* Update the pool size */
   p->pool_size = 1;
   for (i = 0; i < TASK_BOARD_RANK; i++) {
     p->pool_size *= p->board->layout.dim[i];
