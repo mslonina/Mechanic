@@ -161,7 +161,7 @@ int Master(module *m, pool *p) {
     if (completed == p->pool_size) break;
   }
 
-  Message(MESSAGE_INFO, "Completed %d tasks\n", completed);
+  Message(MESSAGE_DEBUG, "Completed %d tasks\n", completed);
 
   WriteData(p->board, &board_buffer[0][0][0][0]);
   mstat = CheckpointPrepare(m, p, c);
