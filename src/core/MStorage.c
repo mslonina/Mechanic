@@ -175,6 +175,12 @@ int CheckLayout(module *m, int banks, storage *s) {
   int i = 0, j = 0, mstat = SUCCESS;
 
   for (i = 0; i < banks; i++) {
+      
+    if (s[i].layout.name == NULL) {
+      Message(MESSAGE_ERR, "The storage name is required\n");
+      Error(CORE_ERR_STORAGE);
+    }
+
     if (s[i].layout.rank <= 1) {
       Message(MESSAGE_ERR, "Rank must be > 1\n");
       Error(CORE_ERR_STORAGE);
@@ -216,10 +222,6 @@ int CheckLayout(module *m, int banks, storage *s) {
       }
 
       /* Check for mistakes */
-      if (s[i].layout.name == NULL) {
-        Message(MESSAGE_ERR, "The storage name is required when use_hdf\n");
-        Error(CORE_ERR_STORAGE);
-      }
       if (s[i].layout.sync != 1) {
         Message(MESSAGE_WARN, "The sync flag for '%s' must be enabled for use_hdf. Fixing\n",
           s[i].layout.name);
