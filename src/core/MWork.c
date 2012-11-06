@@ -103,6 +103,9 @@ int Work(module *m) {
       
       p[pid]->rid++;
     } while (pool_create == POOL_RESET);
+    
+    time_out = clock();
+    cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
 
     if (m->node == MASTER) {
       Message(MESSAGE_INFO, "Pool %04d computed. CPU time: %f\n", p[pid]->pid, cpu_time);
@@ -130,9 +133,6 @@ int Work(module *m) {
       H5Gclose(h5pool);
       H5Fclose(h5location);
     }
-      
-    time_out = clock();
-    cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
 
     pid++;
 
@@ -155,3 +155,4 @@ int Work(module *m) {
 
   return mstat;
 }
+
