@@ -171,22 +171,32 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * using WriteAttr() function.
  */
 int PoolProcess(pool *all, pool *p, setup *s) {
-  double attr;
+  double dattr;
   double t_attr;
   double s_attr[1][4];
+  int iattr;
   int mstat;
 
-  attr = 12345.6789;
+  iattr = 197;
+  dattr = 12345.6789;
   s_attr[0][0] = 123.0;
   s_attr[0][1] = 223.0;
   s_attr[0][2] = 323.0;
   s_attr[0][3] = 423.0;
 
   /* Write some attributes */
-  mstat = WriteAttr(&p->task->storage[0].attr[1], &attr);
-  mstat = WriteAttr(&p->task->storage[0].attr[2], &s_attr);
+  mstat = WriteTaskAttr(p->task, "input", "Sample integer attribute", &iattr);
+  mstat = WriteTaskAttr(p->task, "input", "Sample double attribute", &dattr);
 
-  mstat = ReadAttr(&p->task->storage[0].attr[1], &t_attr);
+  /* You may use explicit interface, instead: */
+  //mstat = WriteAttr(&p->task->storage[0].attr[0], &attr);
+  //mstat = WriteAttr(&p->task->storage[0].attr[1], &s_attr);
+
+  mstat = ReadTaskAttr(p->task, "input", "Sample double attribute", &t_attr);
+  
+  /* Or using explicit interface: */
+  //mstat = ReadAttr(&p->task->storage[0].attr[1], &t_attr);
+  
   Message(MESSAGE_OUTPUT, "Attribute = %f\n", t_attr);
 
   return POOL_FINALIZE;

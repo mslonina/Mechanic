@@ -374,7 +374,7 @@ int CopyData(void *in, void *out, size_t size) {
  *
  * @return storage index when the storage bank is found, -1 otherwise
  */
-int GetStorageByName(storage *s, char *name) {
+int GetStorageIndex(storage *s, char *name) {
   int index = 0;
 
   if (!name) return -1;
@@ -383,6 +383,30 @@ int GetStorageByName(storage *s, char *name) {
   while (s[index].layout.rank > 0) {
     if (s[index].layout.name) {
       if (strcmp(s[index].layout.name, name) == 0) return index;
+      index++;
+    }
+  }
+
+  return -1;
+}
+
+/**
+ * @brief Get the attribute bank index for a given name
+ *
+ * @param s The attribute array
+ * @param name The name to look for
+ *
+ * @return storage index when the storage bank is found, -1 otherwise
+ */
+int GetAttributeIndex(attr *a, char *name) {
+  int index = 0;
+
+  if (!name) return -1;
+  if (!a) return -1;
+
+  while (a[index].layout.rank > 0) {
+    if (a[index].layout.name) {
+      if (strcmp(a[index].layout.name, name) == 0) return index;
       index++;
     }
   }
@@ -408,7 +432,7 @@ int ReadPool(pool *p, char *storage_name, void *data) {
     Error(CORE_ERR_MEM);
   }
 
-  index = GetStorageByName(p->storage, storage_name);
+  index = GetStorageIndex(p->storage, storage_name);
   printf("index for '%s' = %d\n", storage_name, index);
 
   if (index < 0) {
@@ -439,7 +463,7 @@ int WritePool(pool *p, char *storage_name, void *data) {
     Error(CORE_ERR_MEM);
   }
 
-  index = GetStorageByName(p->storage, storage_name);
+  index = GetStorageIndex(p->storage, storage_name);
 
   if (index < 0) {
     Message(MESSAGE_ERR, "WritePool: Storage bank '%s' could not be found\n", storage_name);
@@ -451,13 +475,77 @@ int WritePool(pool *p, char *storage_name, void *data) {
   return mstat;
 }
 
+/**
+ * @brief Read attribute for a pool storage bank
+ *
+ * @param p the pool pointer
+ * @param storage_name The storage bank name
+ * @param attr_name The attribtue name
+ * @param data The data buffer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
 int ReadPoolAttr(pool *p, char *storage_name, char *attr_name, void *data) {
   int mstat = SUCCESS;
+  int s_index, a_index;
+
+  if (!p) {
+    Message(MESSAGE_ERR, "ReadPoolAttr: Invalid task object\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  s_index = GetStorageIndex(p->storage, storage_name);
+
+  if (s_index < 0) {
+    Message(MESSAGE_ERR, "ReadPoolAttr: Storage bank '%s' could not be found\n", storage_name);
+    Error(CORE_ERR_MEM);
+  } else {
+    a_index = GetAttributeIndex(p->storage[s_index].attr, attr_name);
+    if (a_index < 0) {
+      Message(MESSAGE_ERR, "ReadPoolAttr: Attribute '%s' for storage '%s' could not be found\n",
+          attr_name, storage_name);
+      Error(CORE_ERR_MEM);
+    }
+    mstat = ReadAttr(&p->storage[s_index].attr[a_index], data);
+  }
+
   return mstat;
 }
 
+/**
+ * @brief Write attribute to the pool storage bank
+ *
+ * @param p the pool pointer
+ * @param storage_name The storage bank name
+ * @param attr_name The attribtue name
+ * @param data The data buffer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
 int WritePoolAttr(pool *p, char *storage_name, char *attr_name, void *data) {
   int mstat = SUCCESS;
+  int s_index, a_index;
+
+  if (!p) {
+    Message(MESSAGE_ERR, "WritePoolAttr: Invalid pool object\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  s_index = GetStorageIndex(p->storage, storage_name);
+
+  if (s_index < 0) {
+    Message(MESSAGE_ERR, "WritePoolAttr: Storage bank '%s' could not be found\n", storage_name);
+    Error(CORE_ERR_MEM);
+  } else {
+    a_index = GetAttributeIndex(p->storage[s_index].attr, attr_name);
+    if (a_index < 0) {
+      Message(MESSAGE_ERR, "WritePoolAttr: Attribute '%s' for storage '%s' could not be found\n",
+          attr_name, storage_name);
+      Error(CORE_ERR_MEM);
+    }
+    mstat = WriteAttr(&p->storage[s_index].attr[a_index], data);
+  }
+
   return mstat;
 }
 
@@ -479,7 +567,7 @@ int ReadTask(task *t, char *storage_name, void *data) {
     Error(CORE_ERR_MEM);
   }
 
-  index = GetStorageByName(t->storage, storage_name);
+  index = GetStorageIndex(t->storage, storage_name);
 
   if (index < 0) {
     Message(MESSAGE_ERR, "ReadTask: Storage bank '%s' could not be found\n", storage_name);
@@ -509,7 +597,7 @@ int WriteTask(task *t, char *storage_name, void *data) {
     Error(CORE_ERR_MEM);
   }
 
-  index = GetStorageByName(t->storage, storage_name);
+  index = GetStorageIndex(t->storage, storage_name);
 
   if (index < 0) {
     Message(MESSAGE_ERR, "WriteTask: Storage bank '%s' could not be found\n", storage_name);
@@ -521,13 +609,77 @@ int WriteTask(task *t, char *storage_name, void *data) {
   return mstat;
 }
 
+/**
+ * @brief Read attribute for a task storage bank data
+ *
+ * @param t the task pointer
+ * @param storage_name The storage bank name
+ * @param attr_name The attribute name
+ * @param data The data buffer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
 int ReadTaskAttr(task *t, char *storage_name, char *attr_name, void *data) {
   int mstat = SUCCESS;
+  int s_index, a_index;
+
+  if (!t) {
+    Message(MESSAGE_ERR, "ReadTaskAttr: Invalid task object\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  s_index = GetStorageIndex(t->storage, storage_name);
+
+  if (s_index < 0) {
+    Message(MESSAGE_ERR, "ReadTaskAttr: Storage bank '%s' could not be found\n", storage_name);
+    Error(CORE_ERR_MEM);
+  } else {
+    a_index = GetAttributeIndex(t->storage[s_index].attr, attr_name);
+    if (a_index < 0) {
+      Message(MESSAGE_ERR, "ReadTaskAttr: Attribute '%s' for storage '%s' could not be found\n",
+          attr_name, storage_name);
+      Error(CORE_ERR_MEM);
+    }
+    mstat = ReadAttr(&t->storage[s_index].attr[a_index], data);
+  }
+
   return mstat;
 }
 
+/**
+ * @brief Write attribute to the task storage bank data
+ *
+ * @param t the task pointer
+ * @param storage_name The storage bank name
+ * @param attr_name The attribute name
+ * @param data The data buffer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
 int WriteTaskAttr(task *t, char *storage_name, char *attr_name, void *data) {
   int mstat = SUCCESS;
+  int s_index, a_index;
+
+  if (!t) {
+    Message(MESSAGE_ERR, "WriteTaskAttr: Invalid task object\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  s_index = GetStorageIndex(t->storage, storage_name);
+
+  if (s_index < 0) {
+    Message(MESSAGE_ERR, "WriteTaskAttr: Storage bank '%s' could not be found\n", storage_name);
+    Error(CORE_ERR_MEM);
+  } else {
+    a_index = GetAttributeIndex(t->storage[s_index].attr, attr_name);
+    if (a_index < 0) {
+      Message(MESSAGE_ERR, "WriteTaskAttr: Attribute '%s' for storage '%s' could not be found\n",
+          attr_name, storage_name);
+      Error(CORE_ERR_MEM);
+    }
+    mstat = WriteAttr(&t->storage[s_index].attr[a_index], data);
+  }
+
   return mstat;
 }
 
