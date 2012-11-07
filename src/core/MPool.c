@@ -199,12 +199,10 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   int mstat = SUCCESS;
   int i = 0, j = 0, k = 0, task_groups = 0;
   char path[LRC_CONFIG_LEN];
-  int attr_data[1];
   query *q;
   hid_t h5location, h5pool, h5tasks, h5task, h5dataset;
   hid_t attr_s, attr_d;
   hid_t hstat;
-  hsize_t adims;
 
   /* Do some data processing */
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -321,14 +319,14 @@ int PoolProcessData(module *m, pool *p, setup *s) {
           h5dataset = H5Dopen(h5task, p->task->storage[j].layout.name, H5P_DEFAULT);
           H5CheckStatus(h5dataset);
           
+          q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
+          if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]), s);
+          CheckStatus(mstat);
+
           for (k = 0; k < p->task->storage[j].attr_banks; k++) {
             mstat = CommitAttribute(h5dataset, &p->task->storage[j].attr[k]);
             CheckStatus(mstat);
           }
-
-          q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
-          if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]), s);
-          CheckStatus(mstat);
 
           H5Dclose(h5dataset);
         }

@@ -141,9 +141,18 @@ int ModuleInit(module *m) {
 
   m->layer.setup.popt->string_args = calloc(3*opts, sizeof(char));
   if (!m->layer.setup.popt->string_args) Error(CORE_ERR_MEM);
+  
+  m->layer.setup.popt->val_args = calloc(3*opts, sizeof(int));
+  if (!m->layer.setup.popt->val_args) Error(CORE_ERR_MEM);
 
   m->layer.setup.popt->int_args = calloc(3*opts, sizeof(int));
   if (!m->layer.setup.popt->int_args) Error(CORE_ERR_MEM);
+  
+  m->layer.setup.popt->long_args = calloc(3*opts, sizeof(long));
+  if (!m->layer.setup.popt->long_args) Error(CORE_ERR_MEM);
+  
+  m->layer.setup.popt->float_args = calloc(3*opts, sizeof(float));
+  if (!m->layer.setup.popt->float_args) Error(CORE_ERR_MEM);
 
   m->layer.setup.popt->double_args = calloc(3*opts, sizeof(double));
   if (!m->layer.setup.popt->double_args) Error(CORE_ERR_MEM);
@@ -212,7 +221,10 @@ void FinalizeLayer(layer *l) {
   if (l->setup.options) free(l->setup.options);
   if (l->setup.popt->popt) free(l->setup.popt->popt);
   if (l->setup.popt->string_args) free(l->setup.popt->string_args);
+  if (l->setup.popt->val_args) free(l->setup.popt->val_args);
   if (l->setup.popt->int_args) free(l->setup.popt->int_args);
+  if (l->setup.popt->long_args) free(l->setup.popt->long_args);
+  if (l->setup.popt->float_args) free(l->setup.popt->float_args);
   if (l->setup.popt->double_args) free(l->setup.popt->double_args);
   if (l->setup.popt->poptcontext) poptFreeContext(l->setup.popt->poptcontext);
   if (l->setup.popt) free(l->setup.popt);

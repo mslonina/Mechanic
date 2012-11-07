@@ -199,6 +199,13 @@ int PoptOptions(module *m, setup *s) {
           &s->popt->string_args[i], 0, s->options[i].description, s->options[i].value
       };
     }
+    if (s->options[i].type == LRC_VAL) {
+      s->popt->val_args[i] = (int)strtol(s->options[i].value, &garbage, 0);
+      s->popt->popt[i] = (struct poptOption) {
+        s->options[i].name, s->options[i].shortName, POPT_ARG_VAL,
+          &s->popt->val_args[i], 1, s->options[i].description, NULL
+       };
+     }
     if (s->options[i].type == LRC_INT) {
       s->popt->int_args[i] = (int)strtol(s->options[i].value, &garbage, 0);
       s->popt->popt[i] = (struct poptOption) {
@@ -206,11 +213,18 @@ int PoptOptions(module *m, setup *s) {
           &s->popt->int_args[i], 0, s->options[i].description, s->options[i].value
       };
     }
-   if (s->options[i].type == LRC_VAL) {
-      s->popt->int_args[i] = (int)strtol(s->options[i].value, &garbage, 0);
+    if (s->options[i].type == LRC_LONG) {
+      s->popt->long_args[i] = strtol(s->options[i].value, &garbage, 0);
       s->popt->popt[i] = (struct poptOption) {
-        s->options[i].name, s->options[i].shortName, POPT_ARG_VAL,
-          &s->popt->int_args[i], 1, s->options[i].description, NULL
+        s->options[i].name, s->options[i].shortName, POPT_ARG_LONG,
+          &s->popt->long_args[i], 0, s->options[i].description, s->options[i].value
+      };
+    }
+    if (s->options[i].type == LRC_FLOAT) {
+      s->popt->float_args[i] = strtof(s->options[i].value, &garbage);
+      s->popt->popt[i] = (struct poptOption) {
+        s->options[i].name, s->options[i].shortName, POPT_ARG_FLOAT,
+          &s->popt->float_args[i], 0, s->options[i].description, s->options[i].value
       };
     }
     if (s->options[i].type == LRC_DOUBLE) {
@@ -249,19 +263,28 @@ int LRCUpdate(setup *s) {
         }
       }
     }
-    if (s->options[i].type == LRC_INT) {
-      sprintf(s->options[i].value,"%d",s->popt->int_args[i]);
-    }
+    
     if (s->options[i].type == LRC_VAL) {
-      sprintf(s->options[i].value,"%d",s->popt->int_args[i]);
+      sprintf(s->options[i].value, "%d", s->popt->val_args[i]);
+    }
+    if (s->options[i].type == LRC_INT) {
+      sprintf(s->options[i].value, "%d", s->popt->int_args[i]);
+    }
+    if (s->options[i].type == LRC_LONG) {
+      sprintf(s->options[i].value, "%ld", s->popt->long_args[i]);
+    }
+    if (s->options[i].type == LRC_FLOAT) {
+      sprintf(s->options[i].value, "%.19E", s->popt->float_args[i]);
     }
     if (s->options[i].type == LRC_DOUBLE) {
-      sprintf(s->options[i].value,"%.19E",s->popt->double_args[i]);
+      sprintf(s->options[i].value, "%.19E", s->popt->double_args[i]);
     }
+
     LRC_modifyOption(s->options[i].space, s->options[i].name,
         s->options[i].value, s->options[i].type, s->head);
     i++;
   }
+
   return mstat;
 }
 

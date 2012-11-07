@@ -58,8 +58,8 @@
 #define POOL_FINALIZE 1001 /**< The pool finalize return code */
 #define POOL_RESET 1002 /**< The pool reset return code */
 #define POOL_CREATE_NEW 1003 /**< The pool create new return code */
-#define POOL_PREPARED 2001
-#define POOL_PROCESSED 2002
+#define POOL_PREPARED 2001 /**< Pool prepared state */
+#define POOL_PROCESSED 2002 /**< Pool processed state */
 
 /* Storage */
 #define MAX_RANK H5S_MAX_RANK /**< The maximum dataset rank */
@@ -124,7 +124,10 @@ typedef struct {
   struct poptOption *popt; /**< The Popt options */
   poptContext poptcontext; /**< The Popt context */
   char **string_args; /**< String arguments received from Popt */
+  int *val_args; /**< Value arguments received from Popt */
   int *int_args; /**< Integer arguments received from Popt */
+  long *long_args; /**< Long integer arguments received from Popt */
+  float *float_args; /**< Float arguments received from Popt */
   double *double_args; /**< Double arguments received from Popt */
 } popt;
 
