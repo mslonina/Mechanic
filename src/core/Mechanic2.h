@@ -58,6 +58,8 @@
 #define POOL_FINALIZE 1001 /**< The pool finalize return code */
 #define POOL_RESET 1002 /**< The pool reset return code */
 #define POOL_CREATE_NEW 1003 /**< The pool create new return code */
+#define POOL_PREPARED 2001
+#define POOL_PROCESSED 2002
 
 /* Storage */
 #define MAX_RANK H5S_MAX_RANK /**< The maximum dataset rank */
@@ -211,6 +213,7 @@ typedef struct {
   int pid; /**< The pool id */
   int rid; /**< The reset id */
   int status; /**< The pool create status */
+  int state;
   storage *board; /**< The task board */
   storage *storage; /**< The global pool storage scheme */
   task *task; /**< The task scheme */
