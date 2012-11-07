@@ -366,3 +366,169 @@ int CopyData(void *in, void *out, size_t size) {
   return SUCCESS;
 }
 
+/**
+ * @brief Get the storage bank index for a given name
+ *
+ * @param s The storage array
+ * @param name The name to look for
+ *
+ * @return storage index when the storage bank is found, -1 otherwise
+ */
+int GetStorageByName(storage *s, char *name) {
+  int index = 0;
+
+  if (!name) return -1;
+  if (!s) return -1;
+
+  while (s[index].layout.rank > 0) {
+    if (s[index].layout.name) {
+      if (strcmp(s[index].layout.name, name) == 0) return index;
+      index++;
+    }
+  }
+
+  return -1;
+}
+
+/**
+ * @brief Read the storage bank data for a pool
+ *
+ * @param p the pool pointer
+ * @param storage_name The storage bank name
+ * @param data The data buffer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int ReadPool(pool *p, char *storage_name, void *data) {
+  int mstat = SUCCESS;
+  int index;
+
+  if (!p) {
+    Message(MESSAGE_ERR, "ReadPool: Invalid pool object\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  index = GetStorageByName(p->storage, storage_name);
+  printf("index for '%s' = %d\n", storage_name, index);
+
+  if (index < 0) {
+    Message(MESSAGE_ERR, "ReadPool: Storage bank '%s' could not be found\n", storage_name);
+    Error(CORE_ERR_MEM);
+  }
+
+  mstat = ReadData(&p->storage[index], data);
+
+  return mstat;
+}
+
+/**
+ * @brief Write the storage bank data for a pool
+ *
+ * @param p the pool pointer
+ * @param storage_name The storage bank name
+ * @param data The data buffer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int WritePool(pool *p, char *storage_name, void *data) {
+  int mstat = SUCCESS;
+  int index;
+
+  if (!p) {
+    Message(MESSAGE_ERR, "WritePool: Invalid pool object\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  index = GetStorageByName(p->storage, storage_name);
+
+  if (index < 0) {
+    Message(MESSAGE_ERR, "WritePool: Storage bank '%s' could not be found\n", storage_name);
+    Error(CORE_ERR_MEM);
+  }
+
+  mstat = WriteData(&p->storage[index], data);
+
+  return mstat;
+}
+
+int ReadPoolAttr(pool *p, char *storage_name, char *attr_name, void *data) {
+  int mstat = SUCCESS;
+  return mstat;
+}
+
+int WritePoolAttr(pool *p, char *storage_name, char *attr_name, void *data) {
+  int mstat = SUCCESS;
+  return mstat;
+}
+
+/**
+ * @brief Read the storage bank data for a task
+ *
+ * @param t the task pointer
+ * @param storage_name The storage bank name
+ * @param data The data buffer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int ReadTask(task *t, char *storage_name, void *data) {
+  int mstat = SUCCESS;
+  int index;
+
+  if (!t) {
+    Message(MESSAGE_ERR, "ReadTask: Invalid task object\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  index = GetStorageByName(t->storage, storage_name);
+
+  if (index < 0) {
+    Message(MESSAGE_ERR, "ReadTask: Storage bank '%s' could not be found\n", storage_name);
+    Error(CORE_ERR_MEM);
+  }
+
+  mstat = ReadData(&t->storage[index], data);
+
+  return mstat;
+}
+
+/**
+ * @brief Write the storage bank data for a task
+ *
+ * @param t the task pointer
+ * @param storage_name The storage bank name
+ * @param data The data buffer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
+int WriteTask(task *t, char *storage_name, void *data) {
+  int mstat = SUCCESS;
+  int index;
+
+  if (!t) {
+    Message(MESSAGE_ERR, "WriteTask: Invalid task object\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  index = GetStorageByName(t->storage, storage_name);
+
+  if (index < 0) {
+    Message(MESSAGE_ERR, "WriteTask: Storage bank '%s' could not be found\n", storage_name);
+    Error(CORE_ERR_MEM);
+  }
+
+  mstat = WriteData(&t->storage[index], data);
+
+  return mstat;
+}
+
+int ReadTaskAttr(task *t, char *storage_name, char *attr_name, void *data) {
+  int mstat = SUCCESS;
+  return mstat;
+}
+
+int WriteTaskAttr(task *t, char *storage_name, char *attr_name, void *data) {
+  int mstat = SUCCESS;
+  return mstat;
+}
+
+

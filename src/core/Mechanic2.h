@@ -94,8 +94,10 @@
 #define HEADER_SIZE 3+TASK_BOARD_RANK /**< The data header size */
 #define HEADER_INIT {TAG_TERMINATE,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION,TASK_NO_LOCATION}
 
-#define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The storage scheme default initializer */
-#define ATTR_STORAGE_END {.name = NULL, .dataspace = -1, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = -1} /**< The attribute storage scheme default initializer */
+#define STORAGE_NULL -1
+
+#define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
+#define ATTR_STORAGE_END {.name = NULL, .dataspace = -1, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
 
 /* Option attributes */
 #define HDF5_ATTR 1
@@ -175,6 +177,7 @@ typedef struct {
   char *memory; /**< The memory block */
   attr *attr; /**< The dataset attributes */
   int attr_banks; /**< Number of attribute banks in use */
+//  int banks_in_use; /**< Number of storage banks in use */
 } storage;
 
 /**
@@ -325,11 +328,26 @@ void FreeDouble4D(double ****array);
  */
 int GetSize(int rank, int *dims); /**< Get the 1D size for given rank and dimensions */
 void GetDims(storage *s, int *dims); /**< Get the dimensions of the storage object */
+int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
+
 int WriteData(storage *s, void* data); /**< Copy local data buffers to memory */
 int ReadData(storage *s, void* data); /**< Copy memory buffers to local data buffers */
 int WriteAttr(attr *a, void* data); /**< Copy local attribute buffers to memory */
 int ReadAttr(attr *a, void* data); /**< Copy attribute buffers to local data buffers */
-int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
+
+int GetStorageByName(storage *s, char *storage_name);
+
+int ReadPool(pool *p, char *storage_name, void *data);
+int WritePool(pool *p, char *storage_name, void *data);
+
+int ReadPoolAttr(pool *p, char *storage_name, char *attr_name, void *data);
+int WritePoolAttr(pool *p, char *storage_name, char *attr_name, void *data);
+
+int ReadTask(task *t, char *storage_name, void *data);
+int WriteTask(task *t, char *storage_name, void *data);
+
+int ReadTaskAttr(task *t, char *storage_name, char *attr_name, void *data);
+int WriteTaskAttr(task *t, char *storage_name, char *attr_name, void *data);
 
 /**
  * Message and log helpers
