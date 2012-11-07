@@ -13,7 +13,7 @@
 
 #define CORE_MODULE "core"
 
-void Welcome();
+void Welcome(void);
 int Prepare(module *m);
 int Process(module *m, pool **all);
 int NodePrepare(module *m, pool **all, pool *current);

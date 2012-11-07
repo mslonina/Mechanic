@@ -73,7 +73,6 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
   mstat = CopyData(header, buffer, sizeof(int) * (HEADER_SIZE));
   CheckStatus(mstat);
 
-//  printf("header %d %d %d %d\n", header[1], header[3], header[4], header[5]);
   if (tag != TAG_TERMINATE) {
 
     /* Task data */

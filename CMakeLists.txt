@@ -35,18 +35,16 @@ include (CheckCCompilerFlag)
 
 add_definitions (-DHAVE_CONFIG_H)
 
-check_c_compiler_flag(-Wall HAS_ALL)
+check_c_compiler_flag(-Wall HAS_WALL)
 check_c_compiler_flag(-std=c99 HAS_STD_C99)
 
-if (HAS_ALL)
+if (HAS_WALL)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-endif(HAS_ALL)
+endif(HAS_WALL)
 if (HAS_STD_C99)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 endif(HAS_STD_C99)
-
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -ggdb")
-
+  
 CHECK_INCLUDE_FILES (stdio.h HAVE_STDIO_H)
 CHECK_INCLUDE_FILES (dlfcn.h HAVE_DLFCN_H)
 CHECK_INCLUDE_FILES (stdlib.h HAVE_STDLIB_H)

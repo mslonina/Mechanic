@@ -217,8 +217,8 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   H5CheckStatus(h5dataset);
 
   for (j = 0; j < p->board->attr_banks; j++) {
-     mstat = CommitAttribute(h5dataset, &p->board->attr[j]);
-     CheckStatus(mstat);
+    mstat = CommitAttribute(h5dataset, &p->board->attr[j]);
+    CheckStatus(mstat);
   }
 
   H5Dclose(h5dataset);
@@ -242,10 +242,10 @@ int PoolProcessData(module *m, pool *p, setup *s) {
 
   if (H5Aexists(h5pool, "Id") > 0) {
     attr_d = H5Aopen(h5pool, "Id", H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_SHORT, &p->pid);
+    H5Awrite(attr_d, H5T_NATIVE_INT, &p->pid);
   } else {
     attr_s = H5Screate(H5S_SCALAR);
-    attr_d = H5Acreate(h5pool, "Id", H5T_NATIVE_SHORT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    attr_d = H5Acreate(h5pool, "Id", H5T_NATIVE_INT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &p->pid); 
     H5Sclose(attr_s);
   }
