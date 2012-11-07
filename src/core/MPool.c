@@ -186,6 +186,15 @@ int PoolProcess(module *m, pool **all, pool *p) {
   return pool_create;
 }
 
+/**
+ * @brief Process pool data
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param s The setup pointer
+ *
+ * @return SUCCESS on success, error code otherwise
+ */
 int PoolProcessData(module *m, pool *p, setup *s) {
   int mstat = SUCCESS;
   int i = 0, j = 0, k = 0, task_groups = 0;

@@ -213,7 +213,7 @@ typedef struct {
   int pid; /**< The pool id */
   int rid; /**< The reset id */
   int status; /**< The pool create status */
-  int state;
+  int state; /**< The pool processing state */
   storage *board; /**< The task board */
   storage *storage; /**< The global pool storage scheme */
   task *task; /**< The task scheme */
