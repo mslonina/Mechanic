@@ -202,6 +202,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   int attr_data[1];
   query *q;
   hid_t h5location, h5pool, h5tasks, h5task, h5dataset;
+  hid_t attr_s, attr_d;
   hid_t hstat;
   hsize_t adims;
 
@@ -229,11 +230,39 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   CheckStatus(mstat);
 
   /* Write global attributes */
-  adims = 1;
-  attr_data[0] = p->state;
+  if (H5Aexists(h5pool, "Status") > 0) {
+    attr_d = H5Aopen(h5pool, "Status", H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_SHORT, &p->state);
+  } else {
+    attr_s = H5Screate(H5S_SCALAR);
+    attr_d = H5Acreate(h5pool, "Status", H5T_NATIVE_SHORT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &p->state); 
+    H5Sclose(attr_s);
+  }
+      
+  H5Aclose(attr_d);
 
-  hstat = H5LTset_attribute_int(h5location, path, "Status", attr_data, adims);
-  H5CheckStatus(hstat);
+  if (H5Aexists(h5pool, "Id") > 0) {
+    attr_d = H5Aopen(h5pool, "Id", H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_SHORT, &p->pid);
+  } else {
+    attr_s = H5Screate(H5S_SCALAR);
+    attr_d = H5Acreate(h5pool, "Id", H5T_NATIVE_SHORT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &p->pid); 
+    H5Sclose(attr_s);
+  }
+      
+  H5Aclose(attr_d);
+
+  /* The last pool link */
+  if (p->state == POOL_PREPARED) {
+    if (H5Lexists(h5location, LAST_GROUP, H5P_DEFAULT)) {
+      H5Ldelete(h5location, LAST_GROUP, H5P_DEFAULT);
+    }
+
+    hstat = H5Lcreate_hard(h5pool, path, h5location, LAST_GROUP, H5P_DEFAULT, H5P_DEFAULT);
+    H5CheckStatus(hstat);
+  }
 
   /* Process all datasets in the current pool */
   for (i = 0; i < m->pool_banks; i++) {
