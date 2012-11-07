@@ -177,7 +177,6 @@ typedef struct {
   char *memory; /**< The memory block */
   attr *attr; /**< The dataset attributes */
   int attr_banks; /**< Number of attribute banks in use */
-//  int banks_in_use; /**< Number of storage banks in use */
 } storage;
 
 /**
@@ -330,24 +329,25 @@ int GetSize(int rank, int *dims); /**< Get the 1D size for given rank and dimens
 void GetDims(storage *s, int *dims); /**< Get the dimensions of the storage object */
 int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
 
-int WriteData(storage *s, void* data); /**< Copy local data buffers to memory */
-int ReadData(storage *s, void* data); /**< Copy memory buffers to local data buffers */
-int WriteAttr(attr *a, void* data); /**< Copy local attribute buffers to memory */
-int ReadAttr(attr *a, void* data); /**< Copy attribute buffers to local data buffers */
+int WriteData(storage *s, void* data); /**< Copy local data buffers to memory (by storage index) */
+int ReadData(storage *s, void* data); /**< Copy memory buffers to local data buffers (by storage index) */
+int WriteAttr(attr *a, void* data); /**< Copy local attribute buffers to memory (by attribute index) */
+int ReadAttr(attr *a, void* data); /**< Copy attribute buffers to local data buffers (by attribute index */
 
-int GetStorageByName(storage *s, char *storage_name);
+int GetStorageIndex(storage *s, char *storage_name); /**< Get the index for given storage bank */
+int GetAttributeIndex(attr *a, char *storage_name); /**< Get the index for given attribute */
 
-int ReadPool(pool *p, char *storage_name, void *data);
-int WritePool(pool *p, char *storage_name, void *data);
+int ReadPool(pool *p, char *storage_name, void *data); /**< Read pool data */
+int WritePool(pool *p, char *storage_name, void *data); /**< Write data to the pool */
 
-int ReadPoolAttr(pool *p, char *storage_name, char *attr_name, void *data);
-int WritePoolAttr(pool *p, char *storage_name, char *attr_name, void *data);
+int ReadPoolAttr(pool *p, char *storage_name, char *attr_name, void *data); /**< Read pool attribute */
+int WritePoolAttr(pool *p, char *storage_name, char *attr_name, void *data); /**< Write an attribute to the pool */
 
-int ReadTask(task *t, char *storage_name, void *data);
-int WriteTask(task *t, char *storage_name, void *data);
+int ReadTask(task *t, char *storage_name, void *data); /**< Read task data */
+int WriteTask(task *t, char *storage_name, void *data); /**< Write data to the task */
 
-int ReadTaskAttr(task *t, char *storage_name, char *attr_name, void *data);
-int WriteTaskAttr(task *t, char *storage_name, char *attr_name, void *data);
+int ReadTaskAttr(task *t, char *storage_name, char *attr_name, void *data); /**< Read task attribute */
+int WriteTaskAttr(task *t, char *storage_name, char *attr_name, void *data); /**< Write an attribute to the task */
 
 /**
  * Message and log helpers
