@@ -6,6 +6,7 @@
 #define MECHANIC_COMMON_H
 
 #include "Mechanic2.h"
+#include "MTypes.h"
 
 #if HAVE_CONFIG_H
   #include <config.h>
@@ -21,6 +22,7 @@ char* Name(char *prefix, char *name, char *suffix, char *extension);
 
 int Copy(char *in, char *out);
 int Validate(char *filename);
+int MechanicHeader(module *m, hid_t h5location);
 
 int Allocate(storage *s, size_t size, size_t datatype); /**< Memory allocator */
 void Free(storage *s); /**< Garbage cleaner */

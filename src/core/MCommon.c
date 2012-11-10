@@ -107,6 +107,23 @@ int Copy(char* in, char* out) {
 }
 
 /**
+ * @brief Creates the valid Mechanic file header
+ */
+int MechanicHeader(module *m, hid_t h5location) {
+  char *api = PACKAGE_VERSION_API;
+  hid_t attr_s, attr_d;
+
+//  sprintf(api, "%s", PACKAGE_VERSION_API);
+//  printf("API = %s\n", api);
+
+  attr_s = H5Screate(H5S_SCALAR);
+  attr_d = H5Acreate(h5location, "API", H5T_C_S1, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+  H5Awrite(attr_d, H5T_C_S1, &api);
+  H5Sclose(attr_s);
+  H5Aclose(attr_d);
+}
+
+/**
  * @brief Validate the checkpoint file
  *
  * @todo
