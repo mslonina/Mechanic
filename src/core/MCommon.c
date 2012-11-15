@@ -121,6 +121,8 @@ int MechanicHeader(module *m, hid_t h5location) {
   H5Awrite(attr_d, H5T_C_S1, &api);
   H5Sclose(attr_s);
   H5Aclose(attr_d);
+
+  return SUCCESS;
 }
 
 /**

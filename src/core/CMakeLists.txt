@@ -11,6 +11,7 @@ set (
   MModules.c  MModules.h
   MTask.c MTask.h
   MPool.c MPool.h
+  MConfig.c MConfig.h
   MSetup.c MSetup.h
   MMpi.c MMpi.h
   MStorage.c MStorage.h
@@ -32,13 +33,13 @@ set (
 
 add_library(libmechanic2 SHARED ${libsources})
 set_target_properties(libmechanic2 PROPERTIES OUTPUT_NAME mechanic2)
-target_link_libraries(libmechanic2 hdf5 hdf5_hl m mpi readconfig)
+target_link_libraries(libmechanic2 hdf5 hdf5_hl m mpi)
 
 add_library(core ${coresources})
-target_link_libraries(core hdf5 hdf5_hl m mpi readconfig libmechanic2)
+target_link_libraries(core hdf5 hdf5_hl m mpi libmechanic2)
 
 add_executable(mechanic2 ${mainsources})
-target_link_libraries(mechanic2 core taskfarm popt readconfig mpi hdf5 hdf5_hl m libmechanic2)
+target_link_libraries(mechanic2 core taskfarm popt mpi hdf5 hdf5_hl m libmechanic2)
 
 install (TARGETS libmechanic2 DESTINATION lib)
 install (TARGETS mechanic2 DESTINATION bin)

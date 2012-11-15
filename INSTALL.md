@@ -12,14 +12,12 @@ maintained), if the following requirements are met:
 - MPI2 implementation (in favour of OpenMPI)
 - HDF5 >= 1.8
 - Popt library >= 1.14
-- [Libreadconfig](http://github.com/mslonina/libreadconfig) with HDF5 support >= 0.12.5
-  (see also http://git.astri.umk.pl/projects/lrc)
 
 Manual Compilation
 ------------------
 
-    tar -xvvf mechanic-2.1.0.tar.gz
-    cd mechanic-2.1.0
+    tar -xvvf mechanic-2.2.0.tar.gz
+    cd mechanic-2.2.0
     mkdir build
     cd build
     CC=mpicc cmake ..
@@ -73,6 +71,6 @@ There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
 http://github.com/mslonina/mechanic-overlay. This is the preferred way of installing the
 Mechanic and its dependencies. After you install the overlay, you may use:
 
-    emerge =mechanic-2.1.0
+    emerge =mechanic-2.2_beta5
 
 
