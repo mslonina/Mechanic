@@ -16,7 +16,8 @@
  * LRC short introduction
  * ----------------------
  *
- * Libreadconfig (LRC) is a library developed to handle configuration files.
+ * Libreadconfig (LRC) is a library developed to handle configuration files, specifically
+ * for the Mechanic and is shipped with the core.
  *
  * ### Defining options
  *

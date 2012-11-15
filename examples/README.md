@@ -18,6 +18,6 @@ List of examples
 Compilation
 -----------
 
-    mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 -lreadconfig mechanic_module_example.c -o libmechanic_module_example.so
+    mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 mechanic_module_example.c -o libmechanic_module_example.so
 
 

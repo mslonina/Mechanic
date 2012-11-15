@@ -5,7 +5,7 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 -lreadconfig -lhdf5 -lhdf5_hl mechanic_module_pool.c -o libmechanic_module_pool.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_pool.c -o libmechanic_module_pool.so
  *
  * Using the module
  * ----------------

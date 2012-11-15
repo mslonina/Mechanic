@@ -5,7 +5,7 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 -lreadconfig -lhdf5 -lhdf5_hl mechanic_module_attr.c -o libmechanic_module_attr.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_attr.c -o libmechanic_module_attr.so
  *
  * Using the module
  * ----------------
