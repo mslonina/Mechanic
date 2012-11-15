@@ -28,6 +28,7 @@ set (
 
 set (
   libsources
+  MConfig.c MConfig.h
   MPublic.c Mechanic2.h
 )
 
