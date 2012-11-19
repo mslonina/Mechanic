@@ -114,7 +114,7 @@
 #define LRC_MAX_LINE_LENGTH 1024
 #define LRC_CONFIG_LEN 512
 #define LRC_NULL '\0'
-#define LRC_OPTIONS_END {.space="", .name="", .shortName='\0', .value="", .description="", .type=0}
+#define OPTIONS_END {.space="", .name="", .shortName='\0', .value="", .description="", .type=0}
 
 /**
  * @def LRC_E_CONFIG_SYNTAX
@@ -172,7 +172,7 @@ enum LRC_messages_type{
 #define LRC_LONG POPT_ARG_LONG
 
 /**
- * @struct LRC_configOptions
+ * @struct config
  * @brief Options struct.
  *
  * @param char
@@ -184,12 +184,12 @@ enum LRC_messages_type{
  * @param int
  *   The type of the variable.
  */
-typedef struct LRC_configOptions{
+typedef struct config{
   char name[LRC_CONFIG_LEN];
   char value[LRC_CONFIG_LEN];
   int type;
-  struct LRC_configOptions* next;
-} LRC_configOptions;
+  struct config* next;
+} config;
 
 /**
  * @struct LRC_configNamespace
@@ -198,7 +198,7 @@ typedef struct LRC_configOptions{
  * @param char 
  *   The name of the namespace.
  *
- * @param LRC_configOptions
+ * @param config
  *   The array of structs of config options.
  *
  * @param int
@@ -206,12 +206,12 @@ typedef struct LRC_configOptions{
  */
 typedef struct LRC_configNamespace{
   char space[LRC_CONFIG_LEN];
-  LRC_configOptions* options;
+  config* options;
   struct LRC_configNamespace* next;
 } LRC_configNamespace;
 
 /**
- * @struct LRC_configDefaults
+ * @struct options
  * @brief Allowed types.
  * 
  * @param char
@@ -231,14 +231,14 @@ typedef struct {
   char description[LRC_CONFIG_LEN];
   int type;
   int attr;
-} LRC_configDefaults;
+} options;
 
 /**
  * Public API
  */
 
 /* Required */
-LRC_configNamespace* LRC_assignDefaults(LRC_configDefaults* cd);
+LRC_configNamespace* LRC_assignDefaults(options* cd);
 void LRC_cleanup(LRC_configNamespace* head);
 
 /* Output */
@@ -250,15 +250,15 @@ int LRC_ASCIIWriter(FILE* file, char* sep, char* comm, LRC_configNamespace* head
 
 /* Search and modify */
 LRC_configNamespace* LRC_findNamespace(char* space, LRC_configNamespace* head);
-LRC_configOptions* LRC_findOption(char* var, LRC_configNamespace* current);
-LRC_configOptions* LRC_modifyOption(char* space, char* var, char* value, int type, LRC_configNamespace* head);
+config* LRC_findOption(char* var, LRC_configNamespace* current);
+config* LRC_modifyOption(char* space, char* var, char* value, int type, LRC_configNamespace* head);
 int LRC_allOptions(LRC_configNamespace* head);
 int LRC_countOptions(char* space, LRC_configNamespace* head);
 char* LRC_getOptionValue(char* space, char* var, LRC_configNamespace* current);
-int LRC_countDefaultOptions(LRC_configDefaults *in);
-int LRC_mergeDefaults(LRC_configDefaults *in, LRC_configDefaults *add);
-LRC_configDefaults* LRC_head2struct(LRC_configNamespace *head);
-int LRC_head2struct_noalloc(LRC_configNamespace *head, LRC_configDefaults *c);
+int LRC_countDefaultOptions(options *in);
+int LRC_mergeDefaults(options *in, options *add);
+options* LRC_head2struct(LRC_configNamespace *head);
+int LRC_head2struct_noalloc(LRC_configNamespace *head, options *c);
 
 /* Converters */
 int LRC_option2int(char* space, char* var, LRC_configNamespace* head);
@@ -277,10 +277,10 @@ int LRC_HDF5Writer(hid_t file_id, char* group_name, LRC_configNamespace* head);
 void LRC_message(int line, int type, char* message);
 char* LRC_nameTrim(char*);
 int LRC_charCount(char*, char*);
-int LRC_matchType(char*, char*, LRC_configDefaults*, int);
+int LRC_matchType(char*, char*, options*, int);
 int LRC_checkType(char*, int);
 int LRC_isAllowed(int);
-int LRC_checkName(char*, LRC_configDefaults*, int);
+int LRC_checkName(char*, options*, int);
 LRC_configNamespace* LRC_newNamespace(char* cfg);
 LRC_configNamespace* LRC_lastLeaf(LRC_configNamespace* head);
 
@@ -317,7 +317,7 @@ typedef struct {
  * The setup structure, combines LRC and Popt
  */
 typedef struct {
-  LRC_configDefaults *options; /**< The LRC default options table */
+  options *options; /**< The LRC default options table */
   LRC_configNamespace *head; /**< The LRC options linked list */
   popt *popt; /**< The popt options, @see popt */
 } setup;

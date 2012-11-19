@@ -23,7 +23,7 @@
  *
  * LRC-type options are defined in a following structure:
  *
- *     (LRC_configDefaults) {
+ *     (options) {
  *      .space,
  *      .name,
  *      .value,
@@ -106,7 +106,7 @@ int Init(init *i) {
  * Implements Setup()
  */
 int Setup(setup *s) {
-  s->options[0] = (LRC_configDefaults) {
+  s->options[0] = (options) {
     .space="mymodule", // The namespace of the configuration
     .name="max-pools", // The name of the variable
     .shortName='\0', // The short name of the variable (command line)
@@ -114,7 +114,7 @@ int Setup(setup *s) {
     .type=LRC_INT, // Type of the variable
     .description="Maximum number of pools to evaluate (max 128)" // Description
   };
-  s->options[1] = (LRC_configDefaults) {
+  s->options[1] = (options) {
     .space="mymodule",
     .name="dlimit",
     .shortName='l',
@@ -122,7 +122,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="Example double-type value",
   };
-  s->options[2] = (LRC_configDefaults) {
+  s->options[2] = (options) {
     .space="mymodule",
     .name="ilimit",
     .shortName='i',
@@ -130,7 +130,7 @@ int Setup(setup *s) {
     .type=LRC_INT,
     .description="Example integer-type value"
   };
-  s->options[3] = (LRC_configDefaults) {
+  s->options[3] = (options) {
     .space="mymodule",
     .name="debug",
     .shortName='\0',
@@ -138,7 +138,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Example of boolean-type value"
   };
-  s->options[4] = (LRC_configDefaults) {
+  s->options[4] = (options) {
     .space="mymodule",
     .name="host",
     .shortName='\0',
@@ -147,7 +147,7 @@ int Setup(setup *s) {
     .description="Example of string-type value"
   };
   // Options must end with this:
-  s->options[5] = (LRC_configDefaults) LRC_OPTIONS_END;
+  s->options[5] = (options) OPTIONS_END;
   return SUCCESS;
 }
 

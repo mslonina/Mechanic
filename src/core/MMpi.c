@@ -5,14 +5,14 @@
 #include "MMpi.h"
 
 /**
- * @brief Build MPI derived type for LRC_configDefaults
+ * @brief Build MPI derived type for options
  *
  * @param c The input LRC defaults structure
  * @param mpi_t The output MPI derived type
  *
  * @return 0 on success, error code otherwise
  */
-int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t) {
+int LRC_datatype(options c, MPI_Datatype *mpi_t) {
   int mstat = SUCCESS, i = 0;
   int block_lengths[4];
   MPI_Aint displacements[4];

@@ -14,7 +14,7 @@
 #define DEST 0
 #define SOURCE 0
 
-int LRC_datatype(LRC_configDefaults c, MPI_Datatype *mpi_t);
+int LRC_datatype(options c, MPI_Datatype *mpi_t);
 
 int Pack(module *m, void *buffer, pool *p, task *t, int tag);
 int Unpack(module *m, void *buffer, pool *p, task *t, int *tag);

@@ -143,7 +143,7 @@ int Init(init *i) {
  *
  * The LRC API allows any kind of C99 struct initialization to be used, i.e.:
  *
- *     s->options[0] = (LRC_configDefaults) {
+ *     s->options[0] = (options) {
  *       .space="NAMESPACE",
  *       .name="VARIABLE",
  *       .shortName="V",
@@ -167,9 +167,9 @@ int Init(init *i) {
  *   - LRC_STRING - char variable
  *   - LRC_VAL - variable that only updates its value (i.e. boolean)
  *
- * The options table must finish with LRC_OPTIONS_END:
+ * The options table must finish with OPTIONS_END:
  *
- *     s->options[13] = (LRC_configDefaults) LRC_OPTIONS_END;
+ *     s->options[13] = (options) OPTIONS_END;
  *
  * ### The configuration file
  *
@@ -201,7 +201,7 @@ int Init(init *i) {
  * @return SUCCESS on success, error code otherwise
  */
 int Setup(setup *s) {
-  s->options[0] = (LRC_configDefaults) {
+  s->options[0] = (options) {
     .space="core",
     .name="name",
     .shortName='n',
@@ -209,7 +209,7 @@ int Setup(setup *s) {
     .type=LRC_STRING,
     .description="The name of the run"
   };
-  s->options[1] = (LRC_configDefaults) {
+  s->options[1] = (options) {
     .space="core",
     .name="xres",
     .shortName='x',
@@ -217,7 +217,7 @@ int Setup(setup *s) {
     .type=LRC_INT,
     .description="The task pool board horizontal resolution"
   };
-  s->options[2] = (LRC_configDefaults) {
+  s->options[2] = (options) {
     .space="core",
     .name="yres",
     .shortName='y',
@@ -225,7 +225,7 @@ int Setup(setup *s) {
     .type=LRC_INT,
     .description="The task pool board vertical resolution"
   };
-  s->options[3] = (LRC_configDefaults) {
+  s->options[3] = (options) {
     .space="core",
     .name="zres",
     .shortName='z',
@@ -233,7 +233,7 @@ int Setup(setup *s) {
     .type=LRC_INT,
     .description="The task pool board depth resolution"
   };
-  s->options[4] = (LRC_configDefaults) {
+  s->options[4] = (options) {
     .space="core",
     .name="checkpoint",
     .shortName='d',
@@ -241,7 +241,7 @@ int Setup(setup *s) {
     .type=LRC_INT,
     .description="The checkpoint size"
   };
-  s->options[5] = (LRC_configDefaults) {
+  s->options[5] = (options) {
     .space="core",
     .name="module",
     .shortName='p',
@@ -249,7 +249,7 @@ int Setup(setup *s) {
     .type=LRC_STRING,
     .description="The user-supplied module name"
   };
-  s->options[6] = (LRC_configDefaults) {
+  s->options[6] = (options) {
     .space="core",
     .name="config",
     .shortName='c',
@@ -257,7 +257,7 @@ int Setup(setup *s) {
     .type=LRC_STRING,
     .description="The configuration file"
   };
-  s->options[7] = (LRC_configDefaults) {
+  s->options[7] = (options) {
     .space="core",
     .name="checkpoint-files",
     .shortName='b',
@@ -265,7 +265,7 @@ int Setup(setup *s) {
     .type=LRC_INT,
     .description="The number of incremental backups of the master file"
   };
-  s->options[8] = (LRC_configDefaults) {
+  s->options[8] = (options) {
     .space="core",
     .name="no-backup",
     .shortName='\0',
@@ -273,7 +273,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Disable the initial master file backup"
   };
-  s->options[9] = (LRC_configDefaults) {
+  s->options[9] = (options) {
     .space="core",
     .name="restart-mode",
     .shortName='r',
@@ -281,7 +281,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="The restart mode"
   };
-  s->options[10] = (LRC_configDefaults) {
+  s->options[10] = (options) {
     .space="core",
     .name="restart-file",
     .shortName='\0',
@@ -289,7 +289,7 @@ int Setup(setup *s) {
     .type=LRC_STRING,
     .description="The name of the file to use in the restart mode"
   };
-  s->options[11] = (LRC_configDefaults) {
+  s->options[11] = (options) {
     .space="core",
     .name="blocking",
     .shortName='\0',
@@ -297,7 +297,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Switch to the blocking communication mode"
   };
-  s->options[12] = (LRC_configDefaults) {
+  s->options[12] = (options) {
     .space="core",
     .name="xmin",
     .shortName='\0',
@@ -305,7 +305,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The x-axis minimum"
   };
-  s->options[13] = (LRC_configDefaults) {
+  s->options[13] = (options) {
     .space="core",
     .name="xmax",
     .shortName='\0',
@@ -313,7 +313,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The x-axis maximum"
   };
-  s->options[14] = (LRC_configDefaults) {
+  s->options[14] = (options) {
     .space="core",
     .name="ymin",
     .shortName='\0',
@@ -321,7 +321,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The y-axis minimum"
   };
-  s->options[15] = (LRC_configDefaults) {
+  s->options[15] = (options) {
     .space="core",
     .name="ymax",
     .shortName='\0',
@@ -329,7 +329,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The y-axis maximum"
   };
-  s->options[16] = (LRC_configDefaults) {
+  s->options[16] = (options) {
     .space="core",
     .name="zmin",
     .shortName='\0',
@@ -337,7 +337,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The z-axis minimum"
   };
-  s->options[17] = (LRC_configDefaults) {
+  s->options[17] = (options) {
     .space="core",
     .name="zmax",
     .shortName='\0',
@@ -345,7 +345,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The z-axis maximum"
   };
-  s->options[18] = (LRC_configDefaults) {
+  s->options[18] = (options) {
     .space="core",
     .name="xorigin",
     .shortName='\0',
@@ -353,7 +353,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The x-axis origin"
   };
-  s->options[19] = (LRC_configDefaults) {
+  s->options[19] = (options) {
     .space="core",
     .name="yorigin",
     .shortName='\0',
@@ -361,7 +361,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The y-axis origin"
   };
-  s->options[20] = (LRC_configDefaults) {
+  s->options[20] = (options) {
     .space="core",
     .name="zorigin",
     .shortName='\0',
@@ -369,7 +369,7 @@ int Setup(setup *s) {
     .type=LRC_DOUBLE,
     .description="The z-axis origin"
   };
-  s->options[21] = (LRC_configDefaults) {
+  s->options[21] = (options) {
     .space="core",
     .name="print-defaults",
     .shortName='\0',
@@ -377,7 +377,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Print default settings"
   };
-  s->options[22] = (LRC_configDefaults) {
+  s->options[22] = (options) {
     .space="core",
     .name="help",
     .shortName='?',
@@ -385,7 +385,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Show this help message"
   };
-  s->options[23] = (LRC_configDefaults) {
+  s->options[23] = (options) {
     .space="core",
     .name="usage",
     .shortName='\0',
@@ -393,7 +393,7 @@ int Setup(setup *s) {
     .type=LRC_VAL,
     .description="Display brief message"
   };
-  s->options[24] = (LRC_configDefaults) LRC_OPTIONS_END;
+  s->options[24] = (options) OPTIONS_END;
 
   return SUCCESS;
 }

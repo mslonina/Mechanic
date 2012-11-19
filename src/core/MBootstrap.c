@@ -130,7 +130,7 @@ int ModuleInit(module *m) {
   opts = m->layer.init.options;
   if (m->fallback.handler) opts = opts + m->fallback.init.options;
 
-  m->layer.setup.options = calloc(opts, sizeof(LRC_configDefaults));
+  m->layer.setup.options = calloc(opts, sizeof(options));
   if (!m->layer.setup.options) Error(CORE_ERR_MEM);
 
   m->layer.setup.popt = calloc(1, sizeof(popt));
