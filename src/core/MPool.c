@@ -90,7 +90,7 @@ pool* PoolLoad(module *m, int pid) {
  * @return 0 on success, error code otherwise
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
-  int mstat = SUCCESS, i = 0;
+  int mstat = SUCCESS, i = 0, j = 0;
   double setup_attr;
   query *q;
   setup *s = &(m->layer.setup);
@@ -147,6 +147,11 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       if ((int)p->storage[i].layout.elements > 0) {
         MPI_Bcast(&(p->storage[i].memory[0]), p->storage[i].layout.elements,
             p->storage[i].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
+        // Broadcast pool attributes
+        for (j = 0; j < p->storage[i].attr_banks; j++) {
+          MPI_Bcast(&(p->storage[i].attr[j].memory[0]), p->storage[i].attr[j].layout.elements,
+              p->storage[i].attr[j].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
+        }
       }
     }
   }

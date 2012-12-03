@@ -140,20 +140,47 @@ int Storage(pool *p, setup *s) {
 }
 
 /**
+ * Implements PoolPrepare()
+ *
+ * We can prepare some attributes here. The attributes are broadcasted among with pool
+ * data, so you may use them during the TaskProcess().
+ */
+int PoolPrepare(pool *all, pool *p, setup *s) {
+  int iattr;
+  double dattr;
+
+  iattr = 34;
+  dattr = 45.67;
+
+  // Using direct attribute interface
+  WriteAttr(&p->storage[0].attr[0], &iattr);
+  WriteAttr(&p->storage[0].attr[1], &dattr);
+
+  return SUCCESS;
+}
+
+/**
  * Implements TaskProcess()
  *
- * For a dynamical map, we need to store the position of the point on the map and the
- * state of the dynamical system. In this example the position is represented by
- * task location, and the state of the system by the task unique identifier.
+ * Here we read some pool attributes, and use them to prepare the task result
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   double buffer_one[1][3];
+  int iattr;
+  double dattr;
+
+  // Read pool attributes
+  // Using direct attribute interface
+  ReadAttr(&p->storage[0].attr[0], &iattr);
+  ReadAttr(&p->storage[0].attr[1], &dattr);
+
+  //printf("Pool attributes: %d %f\n", iattr, dattr);
 
   // The vertical position of the pixel
-  buffer_one[0][0] = t->location[0];
+  buffer_one[0][0] = iattr + t->location[0];
 
   // The horizontal position of the pixel
-  buffer_one[0][1] = t->location[1];
+  buffer_one[0][1] = dattr + t->location[1];
 
   // The state of the system
   buffer_one[0][2] = t->tid;
