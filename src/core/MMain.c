@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
   H5CheckStatus(hstat);
 
   if (node == MASTER) Welcome();
+  if (node == MASTER) Message(MESSAGE_INFO, "MPI pool size is %d\n", mpi_size);
 
   /**
    * (C) Bootstrap core
