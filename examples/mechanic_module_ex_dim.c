@@ -432,7 +432,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
    * datasets per each task and available through p->tasks[task-ID]->storage[2] group.
    */
   GetDims(&t->storage[2], dims);
-  cdata = AllocateInt3D(&t->storage[2]);
+//  cdata = AllocateInt3D(&t->storage[2]);
+  MAllocate3(t, "3d-integer-datatype-group", cdata, int);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       for (k = 0; k < dims[2]; k++) {
@@ -474,7 +475,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
    * This is real example of what scientific things Mechanic can do
    */
   GetDims(&t->storage[5], dims);
-  four = AllocateDouble4D(&t->storage[5]);
+//  four = AllocateDouble4D(&t->storage[5]);
+  MAllocate4(t, "4d-result", four, double);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       for (k = 0; k < dims[2]; k++) {
@@ -495,9 +497,12 @@ int TaskProcess(pool *p, task *t, setup *s) {
    * Release the resources
    */
   FreeDouble3D(ddata);
-  FreeInt3D(cdata);
+ // FreeInt3D(cdata);
   FreeInt2D(idata);
-  FreeDouble4D(four);
+//  FreeDouble4D(four);
+
+  free(cdata);
+  free(four);
 
   return SUCCESS;
 }

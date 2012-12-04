@@ -414,3 +414,29 @@ int GetAttributeIndex(attr *a, char *name) {
   return -1;
 }
 
+#define VALLOCATE3D(y,x)\
+  void*** y(storage *s) {\
+    void*** array = NULL;\
+    int i = 0, j = 0;\
+    int dim0, dim1, dim2;\
+    dim0 = s->layout.storage_dim[0];\
+    dim1 = s->layout.storage_dim[1];\
+    dim2 = s->layout.storage_dim[2];\
+    if (s->layout.storage_size > 0) {\
+      array = malloc((dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x)));\
+      if (array) {\
+        for (i = 0; i < dim0; i++) {\
+          array[i] = (void**)(array + dim0) + i * dim1;\
+          for (j = 0; j < dim1; j++) {\
+            array[i][j] = (void*)(array + dim0 + dim0*dim1) + i*dim1*dim2 + j*dim2;\
+          }\
+        }\
+      } else {\
+        Error(CORE_ERR_MEM);\
+      }\
+    }\
+    return array;\
+  }\
+
+VALLOCATE3D(VAllocateInt3D,int)
+

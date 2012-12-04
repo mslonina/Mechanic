@@ -425,6 +425,8 @@ typedef enum {
 
 /**
  * Memory allocation helpers
+ *
+ * @deprecated, see MAllocate2, MAllocate3 and MAllocate4 macros
  */
 //2D
 int** AllocateInt2D(storage *s);
@@ -605,7 +607,8 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
       CheckStatus(_mmstat);\
     }\
   } else {\
-    Message(MESSAGE_ERR, "MWriteAttr Invalid object\n");\
+    Message(MESSAGE_ERR, "MWriteAttr: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
   }
 
 /**
@@ -629,7 +632,80 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
       CheckStatus(_mmstat);\
     }\
   } else {\
-    Message(MESSAGE_ERR, "MWriteAttr Invalid object\n");\
+    Message(MESSAGE_ERR, "MWriteAttr: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
+/**
+ * Low level memory allocation macros
+ */
+#define MAllocate3(_mobject, _mstorage_name, _mbuffer, _mtype)\
+  if (_mobject) {\
+    int _msindex, _i = 0, _j = 0;\
+    int _dim0, _dim1, _dim2;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MAllocate3: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      _dim0 = _mobject->storage[_msindex].layout.storage_dim[0];\
+      _dim1 = _mobject->storage[_msindex].layout.storage_dim[1];\
+      _dim2 = _mobject->storage[_msindex].layout.storage_dim[2];\
+      if (_mobject->storage[_msindex].layout.storage_size > 0) {\
+        _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype)));\
+        if (_mbuffer) {\
+          for (_i = 0; _i < _dim0; _i++) {\
+            _mbuffer[_i] = (_mtype**)(_mbuffer + _dim0) + _i * _dim1;\
+            for (_j = 0; _j < _dim1; _j++) {\
+              _mbuffer[_i][_j] = (_mtype*)(_mbuffer + _dim0 + _dim0 * _dim1) + _i * _dim1 * _dim2 + _j * _dim2;\
+            }\
+          }\
+        } else {\
+          Error(CORE_ERR_MEM);\
+        }\
+      }\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MAllocate3: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
+#define MAllocate4(_mobject, _mstorage_name, _mbuffer, _mtype)\
+  if (_mobject) {\
+    int _msindex, _i = 0, _j = 0, _k = 0;\
+    int _dim0, _dim1, _dim2, _dim3;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MAllocate4: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      _dim0 = _mobject->storage[_msindex].layout.storage_dim[0];\
+      _dim1 = _mobject->storage[_msindex].layout.storage_dim[1];\
+      _dim2 = _mobject->storage[_msindex].layout.storage_dim[2];\
+      _dim3 = _mobject->storage[_msindex].layout.storage_dim[3];\
+      if (_mobject->storage[_msindex].layout.storage_size > 0) {\
+        _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype***))\
+            + (_dim0 * _dim1 * _dim2 * _dim3 * sizeof(_mtype)));\
+        if (_mbuffer) {\
+          for (_i = 0; _i < _dim0; _i++) {\
+            _mbuffer[_i] = (_mtype***)(_mbuffer + _dim0) + _i * _dim1;\
+            for (_j = 0; _j < _dim1; _j++) {\
+              _mbuffer[_i][_j] = (_mtype**)(_mbuffer + _dim0 + _dim0 * _dim1) + _i * _dim1 * _dim2 + _j * _dim2;\
+              for (_k = 0; _k < _dim2; _k++) {\
+                _mbuffer[_i][_j][_k] = (_mtype*)(_mbuffer + _dim0 + _dim0 * _dim1 + _dim0 * _dim1 * _dim2) + \
+                  _i * _dim1 * _dim2 * _dim3 + _j * _dim2 * _dim3 + _k * _dim3;\
+              }\
+            }\
+          }\
+        } else {\
+          Error(CORE_ERR_MEM);\
+        }\
+      }\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MAllocate4: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
   }
 
 #endif
+
