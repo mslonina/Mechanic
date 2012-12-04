@@ -196,7 +196,7 @@ int main(int argc, char** argv) {
    */
   if (mpi_size < module.layer.init.min_cpu_required) {
     Message(MESSAGE_WARN, "You must use min. %d MPI threads to run Mechanic.\n", module.layer.init.min_cpu_required);
-    Message(MESSAGE_WARN, "Try: mpirun -np 2 mechanic2\n");
+    Message(MESSAGE_WARN, "Try: mpirun -np %d mechanic2 -p %s\n", module.layer.init.min_cpu_required, module_name);
     goto finalize;
   }
 
