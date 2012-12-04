@@ -23,7 +23,7 @@ as well as desktop computers and works equally well (the Linux and Mac OS X oper
 systems are actively maintained).
 
 Mechanic is BSD-licensed. The source code package comes with few example
-modules and is freely available at http://git.astri.umk.pl/projects/mechanic
+modules and is freely available at [the project page](http://git.astri.umk.pl).
 
 - [How does it work?](#how-does-it-work)
 - [Key features](#key-features)

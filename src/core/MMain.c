@@ -194,8 +194,8 @@ int main(int argc, char** argv) {
   /**
    * (J) The Work pool
    */
-  if (mpi_size <= 1) {
-    Message(MESSAGE_WARN, "You must use min. two MPI threads to run Mechanic.\n");
+  if (mpi_size < module.layer.init.min_cpu_required) {
+    Message(MESSAGE_WARN, "You must use min. %d MPI threads to run Mechanic.\n", module.layer.init.min_cpu_required);
     Message(MESSAGE_WARN, "Try: mpirun -np 2 mechanic2\n");
     goto finalize;
   }

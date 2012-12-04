@@ -295,6 +295,7 @@ typedef struct {
   int banks_per_pool; /**< The maximum number of memory/storage banks per pool */
   int banks_per_task; /**< The maximum number of memory/storage banks per task */
   int attr_per_dataset; /**< The maximum number of attributes per dataset */
+  int min_cpu_required; /**< The minimum number of CPUs required */
 } init;
 
 /**

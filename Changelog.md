@@ -12,6 +12,7 @@ Mechanic short changelog
 - New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
 - New public functions: ReadData(), WriteData(), ReadAttr(), WriteAttr() 
   and memory allocation function for all basic datatypes, up to rank 4
+- Libreadconfig no longer as dependency (shipped with the core)
 - Several bug fixes and minor improvements
 - Documentation updates
 
