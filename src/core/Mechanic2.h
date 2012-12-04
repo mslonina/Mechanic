@@ -517,6 +517,9 @@ int GetSize(int rank, int *dims); /**< Get the 1D size for given rank and dimens
 void GetDims(storage *s, int *dims); /**< Get the dimensions of the storage object */
 int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
 
+/**
+ * Direct read/write interface
+ */
 int WriteData(storage *s, void* data); /**< Copy local data buffers to memory (by storage index) */
 int ReadData(storage *s, void* data); /**< Copy memory buffers to local data buffers (by storage index) */
 int WriteAttr(attr *a, void* data); /**< Copy local attribute buffers to memory (by attribute index) */
@@ -528,14 +531,8 @@ int GetAttributeIndex(attr *a, char *storage_name); /**< Get the index for given
 int ReadPool(pool *p, char *storage_name, void *data); /**< Read pool data */
 int WritePool(pool *p, char *storage_name, void *data); /**< Write data to the pool */
 
-int ReadPoolAttr(pool *p, char *storage_name, char *attr_name, void *data); /**< Read pool attribute */
-int WritePoolAttr(pool *p, char *storage_name, char *attr_name, void *data); /**< Write an attribute to the pool */
-
 int ReadTask(task *t, char *storage_name, void *data); /**< Read task data */
 int WriteTask(task *t, char *storage_name, void *data); /**< Write data to the task */
-
-int ReadTaskAttr(task *t, char *storage_name, char *attr_name, void *data); /**< Read task attribute */
-int WriteTaskAttr(task *t, char *storage_name, char *attr_name, void *data); /**< Write an attribute to the task */
 
 /**
  * Message and log helpers
@@ -545,5 +542,94 @@ void Error(int status); /**< Error reporting */
 void Abort(int status); /**< Abort handler */
 void CheckStatus(int status); /**< Status checking utility*/
 void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
+
+/**
+ * Public macros
+ */
+
+/**
+ * Read the data for the given object (pool, task)
+ */
+#define MReadData(_mobject, _mstorage_name, _mdata)\
+  if (_mobject) {\
+    int _msindex, _mmstat;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MReadData: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      _mmstat = ReadData(&_mobject->storage[_msindex], _mdata);\
+      CheckStatus(_mmstat);\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MReadData: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
+/**
+ * Write the data for the given object (pool, task)
+ */
+#define MWriteData(_mobject, _mstorage_name, _mdata)\
+  if (_mobject) {\
+    int _msindex, _mmstat;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MWriteData: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      _mmstat = WriteData(&_mobject->storage[_msindex], _mdata);\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MWriteData: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
+/**
+ * Read the attribute for the given object (pool, task)
+ */
+#define MReadAttr(_mobject, _mstorage_name, _mattr_name, _mdata)\
+  if (_mobject) {\
+    int _msindex, _maindex, _mmstat;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MReadAttr: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      _maindex = GetAttributeIndex(_mobject->storage[_msindex].attr, _mattr_name);\
+      if (_maindex < 0) {\
+        Message(MESSAGE_ERR, "MReadAttr: Attribute '%s' for storage '%s' could not be found\n",\
+            _mattr_name, _mstorage_name);\
+        Error(CORE_ERR_MEM);\
+      }\
+      _mmstat = ReadAttr(&_mobject->storage[_msindex].attr[_maindex], _mdata);\
+      CheckStatus(_mmstat);\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MWriteAttr Invalid object\n");\
+  }
+
+/**
+ * Write the attribute for the given object (pool, task)
+ */
+#define MWriteAttr(_mobject, _mstorage_name, _mattr_name, _mdata)\
+  if (_mobject) {\
+    int _msindex, _maindex, _mmstat;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MWriteAttr: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      _maindex = GetAttributeIndex(_mobject->storage[_msindex].attr, _mattr_name);\
+      if (_maindex < 0) {\
+        Message(MESSAGE_ERR, "MWriteAttr: Attribute '%s' for storage '%s' could not be found\n",\
+            _mattr_name, _mstorage_name);\
+        Error(CORE_ERR_MEM);\
+      }\
+      _mmstat = WriteAttr(&_mobject->storage[_msindex].attr[_maindex], _mdata);\
+      CheckStatus(_mmstat);\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MWriteAttr Invalid object\n");\
+  }
 
 #endif

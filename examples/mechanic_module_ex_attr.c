@@ -24,6 +24,19 @@
  * /Tasks/task-ID group receives the same attributes (worker nodes does not know anything
  * about attributes, it is still work to do)
  *
+ * API functions introduced
+ * ------------------------
+ *
+ * - MWriteAttr(object, storage_name, attr_name, buffer), i.e:
+ *
+ *     MWriteAttr(p, "global data", "some global attribute", &ibuffer);
+ *     MWriteAttr(p->task, "result", "some attribute", &ibuffer);
+ *
+ * - MReadAttr(object, storage_name, attr_name, buffer), i.e:
+ *
+ *     MReadAttr(p, "global data", "some global attribute", &ibuffer);
+ *     MReadAttr(p->task, "result", "some attribute", &ibuffer);
+ *
  */
 #include "Mechanic2.h"
 
@@ -145,7 +158,7 @@ int Storage(pool *p, setup *s) {
  * We can prepare some attributes here. The attributes are broadcasted among with pool
  * data, so you may use them during the TaskProcess().
  */
-int PoolPrepare(pool *all, pool *p, setup *s) {
+int PoolPrepare(pool **all, pool *p, setup *s) {
   int iattr;
   double dattr;
 
@@ -153,8 +166,11 @@ int PoolPrepare(pool *all, pool *p, setup *s) {
   dattr = 45.67;
 
   // Using direct attribute interface
-  WriteAttr(&p->storage[0].attr[0], &iattr);
-  WriteAttr(&p->storage[0].attr[1], &dattr);
+  //WriteAttr(&p->storage[0].attr[0], &iattr);
+  //WriteAttr(&p->storage[0].attr[1], &dattr);
+
+  MWriteAttr(p, "pool-data", "Global integer attribute", &iattr);
+  MWriteAttr(p, "pool-data", "Global double attribute", &dattr);
 
   return SUCCESS;
 }
@@ -185,7 +201,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
   // The state of the system
   buffer_one[0][2] = t->tid;
 
-  WriteData(&t->storage[1], buffer_one);
+  //WriteData(&t->storage[1], buffer_one);
+  MWriteData(t, "result", buffer_one);
   
   return SUCCESS;
 }
@@ -197,7 +214,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * PoolProcess() hook is invoked. It is the best place to adjust data for an attribute by
  * using WriteAttr() function.
  */
-int PoolProcess(pool *all, pool *p, setup *s) {
+int PoolProcess(pool **all, pool *p, setup *s) {
   double dattr;
   double t_attr;
   double s_attr[1][4];
@@ -212,14 +229,15 @@ int PoolProcess(pool *all, pool *p, setup *s) {
   s_attr[0][3] = 423.0;
 
   /* Write some attributes */
-  mstat = WriteTaskAttr(p->task, "input", "Sample integer attribute", &iattr);
-  mstat = WriteTaskAttr(p->task, "input", "Sample double attribute", &dattr);
+  MWriteAttr(p->task, "input", "Sample integer attribute", &iattr);
+  MWriteAttr(p->task, "input", "Sample double attribute", &dattr);
 
   /* You may use explicit interface, instead: */
   //mstat = WriteAttr(&p->task->storage[0].attr[0], &attr);
   //mstat = WriteAttr(&p->task->storage[0].attr[1], &s_attr);
+  MWriteAttr(p->task, "result", "Some special attribute", &s_attr);
 
-  mstat = ReadTaskAttr(p->task, "input", "Sample double attribute", &t_attr);
+  MReadAttr(p->task, "input", "Sample double attribute", &t_attr);
   
   /* Or using explicit interface: */
   //mstat = ReadAttr(&p->task->storage[0].attr[1], &t_attr);

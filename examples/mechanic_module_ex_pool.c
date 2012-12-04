@@ -71,7 +71,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
     }
   }
   
-  WritePool(p, "pool-double-data", &pdata[0][0]);
+  MWriteData(p, "pool-double-data", &pdata[0][0]);
 
   GetDims(&p->storage[1], dims);
   idata = AllocateInt2D(&p->storage[1]);
@@ -82,7 +82,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
     }
   }
 
-  WritePool(p, "pool-int-data", &idata[0][0]);
+  MWriteData(p, "pool-int-data", &idata[0][0]);
 
   FreeDouble2D(pdata);
   FreeInt2D(idata);
@@ -102,7 +102,7 @@ int PoolProcess(pool **all, pool *p, setup *s) {
   pdata = AllocateDouble2D(&p->storage[0]);
 
   Message(MESSAGE_INFO, "Reading pool 'pool-double-data'\n");
-  ReadPool(p, "pool-double-data", &pdata[0][0]);
+  MReadData(p, "pool-double-data", &pdata[0][0]);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       printf("%2f ", pdata[i][j]);
@@ -115,7 +115,7 @@ int PoolProcess(pool **all, pool *p, setup *s) {
   idata = AllocateInt2D(&p->storage[1]);
   
   Message(MESSAGE_INFO, "Reading pool 'pool-int-data'\n");
-  ReadPool(p, "pool-int-data", &idata[0][0]);
+  MReadData(p, "pool-int-data", &idata[0][0]);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       printf("%2d ", idata[i][j]);

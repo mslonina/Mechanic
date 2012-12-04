@@ -489,6 +489,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   }
 
   WriteData(&t->storage[5], &four[0][0][0][0]);
+//  MWriteData(t, "4d-result", &four[0][0][0][0]);
 
   /**
    * Release the resources
