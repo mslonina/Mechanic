@@ -3,7 +3,7 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 2)
 set (Mechanic_VERSION_MINOR 2)
-set (Mechanic_VERSION_PATCH beta6)
+set (Mechanic_VERSION_PATCH beta7)
 set (Mechanic_VERSION_API 0220)
 
 set (package_version
@@ -12,7 +12,7 @@ set (package_version
 set (package_name "\"${CMAKE_PROJECT_NAME}\"")
 set (package_author "\"Celestial Mechanics Group (TCFA/NCU)\"")
 set (package_bugs "\"mechanics@astri.umk.pl\"")
-set (package_url "\"http://git.astri.umk.pl/projects/mechanic\"")
+set (package_url "\"http://git.ca.umk.pl\"")
 set (package_version_major "\"${Mechanic_VERSION_MAJOR}\"")
 set (package_version_minor "\"${Mechanic_VERSION_MINOR}\"")
 set (package_version_patch "\"${Mechanic_VERSION_PATCH}\"")

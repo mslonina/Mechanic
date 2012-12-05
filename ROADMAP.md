@@ -21,5 +21,5 @@ Mechanic 2.x roadmap
 2. Loadable run modes (such as taskfarm, masteralone, collective etc.)
   - Refactor code headers (public and private)
   - Mode API functions: Init(), Master(), Worker()
-  - Min CPU option in Init() 
+  - [DONE] Min CPU option in Init() 
 

@@ -23,7 +23,7 @@ as well as desktop computers and works equally well (the Linux and Mac OS X oper
 systems are actively maintained).
 
 Mechanic is BSD-licensed. The source code package comes with few example
-modules and is freely available at [the project page](http://git.astri.umk.pl).
+modules and is freely available at [the project page](http://git.ca.umk.pl).
 
 - [How does it work?](#how-does-it-work)
 - [Key features](#key-features)
@@ -207,7 +207,7 @@ in the dataset `/Pools/pool-0000/Tasks/result`:
        (8,0): 8, 0, 80,
        (9,0): 9, 0, 90,
 
-       (... the full output is cutted off)
+       (... the full output cutted off)
     }
 
 Differences to other task management systems
