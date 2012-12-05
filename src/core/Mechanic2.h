@@ -639,6 +639,33 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
 /**
  * Low level memory allocation macros
  */
+#define MAllocate2(_mobject, _mstorage_name, _mbuffer, _mtype)\
+  if (_mobject) {\
+    int _msindex, _i = 0;\
+    int _dim0, _dim1;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MAllocate2: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      _dim0 = _mobject->storage[_msindex].layout.storage_dim[0];\
+      _dim1 = _mobject->storage[_msindex].layout.storage_dim[1];\
+      if (_mobject->storage[_msindex].layout.storage_size > 0) {\
+        _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype)));\
+        if (_mbuffer) {\
+          for (_i = 0; _i < _dim0; _i++) {\
+            _mbuffer[_i] = (_mtype*)(_mbuffer + _dim0) + _i * _dim1;\
+          }\
+        } else {\
+          Error(CORE_ERR_MEM);\
+        }\
+      }\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MAllocate2: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
 #define MAllocate3(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
     int _msindex, _i = 0, _j = 0;\
