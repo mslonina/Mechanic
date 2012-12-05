@@ -734,5 +734,20 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
     Error(CORE_ERR_MEM);\
   }
 
+#define MGetDims(_mobject, _mstorage_name, _dims)\
+  if (_mobject) {\
+    int _msindex;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MGetDims: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      GetDims(&_mobject->storage[_msindex], _dims);\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MGetDims: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
 #endif
 

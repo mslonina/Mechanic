@@ -62,8 +62,15 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
   int **idata;
   int i, j, dims[MAX_RANK], mstat;
 
-  GetDims(&p->storage[0], dims);
-  pdata = AllocateDouble2D(&p->storage[0]);
+  MGetDims(p, "pool-double-data" , dims);
+  
+  // Direct interface:
+  //GetDims(&p->storage[0], dims);
+
+  MAllocate2(p, "pool-double-data", pdata, double);
+  
+  // Direct interface:
+  //pdata = AllocateDouble2D(&p->storage[0]);
 
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
@@ -73,8 +80,11 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
   
   MWriteData(p, "pool-double-data", &pdata[0][0]);
 
-  GetDims(&p->storage[1], dims);
-  idata = AllocateInt2D(&p->storage[1]);
+  // Direct interface:
+  // WriteData(&p->storage[0], &pdata[0][0]);
+
+  MGetDims(p, "pool-int-data", dims);
+  MAllocate2(p, "pool-int-data", idata, int);
   
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
@@ -84,8 +94,8 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
 
   MWriteData(p, "pool-int-data", &idata[0][0]);
 
-  FreeDouble2D(pdata);
-  FreeInt2D(idata);
+  free(pdata);
+  free(idata);
   
   return SUCCESS;
 }
@@ -98,8 +108,8 @@ int PoolProcess(pool **all, pool *p, setup *s) {
   int **idata;
   int i, j, dims[MAX_RANK], mstat;
 
-  GetDims(&p->storage[0], dims);
-  pdata = AllocateDouble2D(&p->storage[0]);
+  MGetDims(p, "pool-double-data", dims);
+  MAllocate2(p, "pool-double-data", pdata, double);
 
   Message(MESSAGE_INFO, "Reading pool 'pool-double-data'\n");
   MReadData(p, "pool-double-data", &pdata[0][0]);
@@ -109,10 +119,9 @@ int PoolProcess(pool **all, pool *p, setup *s) {
     }
     printf("\n");
   }
-  
 
-  GetDims(&p->storage[1], dims);
-  idata = AllocateInt2D(&p->storage[1]);
+  MGetDims(p, "pool-int-data", dims);
+  MAllocate2(p, "pool-int-data", idata, int);
   
   Message(MESSAGE_INFO, "Reading pool 'pool-int-data'\n");
   MReadData(p, "pool-int-data", &idata[0][0]);
@@ -123,9 +132,8 @@ int PoolProcess(pool **all, pool *p, setup *s) {
     printf("\n");
   }
 
-
-  FreeDouble2D(pdata);
-  FreeInt2D(idata);
+  free(pdata);
+  free(idata);
   
   return POOL_FINALIZE;
 }
