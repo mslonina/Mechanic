@@ -7,53 +7,52 @@
 #define CONFIG_HDF5_DATATYPE "Config"
 
 /**
- * @def LRC_E_CONFIG_SYNTAX
+ * @def CONFIG_ERR_CONFIG_SYNTAX
  * @brief Main message for config syntax error. 
  * 
- * @def LRC_E_MISSING_VAR
+ * @def CONFIG_ERR_MISSING_VAR
  * @brief Message for missing variable error.
  * 
- * @def LRC_E_MISSING_VAL
+ * @def CONFIG_ERR_MISSING_VAL
  * @brief Message for missing value error.
  * 
- * @def LRC_E_MISSING_SEP
+ * @def CONFIG_ERR_MISSING_SEP
  * @brief Message for missing separator error.
  * 
- * @def LRC_E_MISSING_BRACKET
+ * @def CONFIG_ERR_MISSING_BRACKET
  * @brief Message for namespace error.
  * 
- * @def LRC_E_TOOMANY_SEP
+ * @def CONFIG_ERR_TOOMANY_SEP
  * @brief Message for toomany separators error.
  * 
- * @def LRC_E_WRONG_INPUT
+ * @def CONFIG_ERR_WRONG_INPUT
  * @brief Message for wrong user input.
  *
- * @def LRC_E_UNKNOWN_VAR
+ * @def CONFIG_ERR_UNKNOWN_VAR
  * @brief Message for unknown variable error.
  */
 
-enum LRC_messages_type{
-  LRC_ERR_CONFIG_SYNTAX,
-  LRC_ERR_WRONG_INPUT,
-  LRC_ERR_UNKNOWN_VAR,
-  LRC_ERR_FILE_OPEN,
-  LRC_ERR_FILE_CLOSE,
-  LRC_ERR_HDF
-} LRC_messages;
+enum configMessagesType {
+  CONFIG_ERR_CONFIG_SYNTAX,
+  CONFIG_ERR_WRONG_INPUT,
+  CONFIG_ERR_UNKNOWN_VAR,
+  CONFIG_ERR_FILE_OPEN,
+  CONFIG_ERR_FILE_CLOSE,
+  CONFIG_ERR_HDF
+} configMessages;
 
-#define LRC_MSG_CONFIG_SYNTAX "Config file syntax error"
-#define LRC_MSG_MISSING_VAR "Missing variable name"
-#define LRC_MSG_MISSING_VAL "Missing value"
-#define LRC_MSG_MISSING_SEP "Missing separator"
-#define LRC_MSG_MISSING_BRACKET "Missing bracket in namespace"
-#define LRC_MSG_TOOMANY_SEP "Too many separators"
-#define LRC_MSG_WRONG_INPUT "Wrong input value type"
-#define LRC_MSG_UNKNOWN_VAR "Unknown variable"
-#define LRC_MSG_FILE_OPEN "File open error"
-#define LRC_MSG_HDF "HDF5 error"
-#define LRC_MSG_NONAMESPACE "No namespace has been specified"
-#define LRC_MSG_UNKNOWN_NAMESPACE "Unknown namespace"
-
+#define CONFIG_MSG_CONFIG_SYNTAX "Config file syntax error"
+#define CONFIG_MSG_MISSING_VAR "Missing variable name"
+#define CONFIG_MSG_MISSING_VAL "Missing value"
+#define CONFIG_MSG_MISSING_SEP "Missing separator"
+#define CONFIG_MSG_MISSING_BRACKET "Missing bracket in namespace"
+#define CONFIG_MSG_TOOMANY_SEP "Too many separators"
+#define CONFIG_MSG_WRONG_INPUT "Wrong input value type"
+#define CONFIG_MSG_UNKNOWN_VAR "Unknown variable"
+#define CONFIG_MSG_FILE_OPEN "File open error"
+#define CONFIG_MSG_HDF "HDF5 error"
+#define CONFIG_MSG_NONAMESPACE "No namespace has been specified"
+#define CONFIG_MSG_UNKNOWN_NAMESPACE "Unknown namespace"
 
 /**
  * @var typedef struct ccd_t
