@@ -16,53 +16,35 @@
  *
  * @return Allocated array, NULL otherwise
  */
-#define ALLOCATE2D(y,x) \
-  x** y(storage *s) { \
-    x** array = NULL; \
-    int i = 0; \
+#define ALLOCATE2(y,x)\
+  x** y(storage *s) {\
+    x** array = NULL;\
+    int i = 0;\
+    int dim0, dim1;\
+    dim0 = s->layout.storage_dim[0];\
+    dim1 = s->layout.storage_dim[1];\
     if (s->layout.storage_size > 0) { \
-      array = calloc(s->layout.storage_dim[0], sizeof(x*)); \
-      if (array) { \
-        array[0] = calloc(s->layout.storage_size, sizeof(x)); \
-        if (array[0]) { \
-          for (i = 0; i < s->layout.storage_dim[0]; i++) { \
-            array[i] = array[0] + i * s->layout.storage_dim[1]; \
-          } \
-        } else { \
-          Error(CORE_ERR_MEM); \
-        } \
-      } else { \
-        Error(CORE_ERR_MEM); \
-      } \
+      array = malloc((dim0 * sizeof(x*)) + (dim0 * dim1 * sizeof(x)));\
+      if (array) {\
+        for (i = 0; i < dim0; i++) {\
+          array[i] = (x*)(array + dim0) + i * dim1;\
+        }\
+      } else {\
+        Error(CORE_ERR_MEM);\
+      }\
     } \
     return array; \
   } \
 
-#define FREE2D(y,x)\
-  void y(x **array) {\
-  if (array[0]) free(array[0]);\
-  if (array) free(array);\
-}\
-
-ALLOCATE2D(AllocateInt2D,int)
-ALLOCATE2D(AllocateShort2D,short)
-ALLOCATE2D(AllocateLong2D,long)
-ALLOCATE2D(AllocateLLong2D,long long)
-ALLOCATE2D(AllocateUInt2D,unsigned int)
-ALLOCATE2D(AllocateUShort2D,unsigned short)
-ALLOCATE2D(AllocateULLong2D,unsigned long long)
-ALLOCATE2D(AllocateFloat2D,float)
-ALLOCATE2D(AllocateDouble2D,double)
-
-FREE2D(FreeInt2D,int)
-FREE2D(FreeShort2D,short)
-FREE2D(FreeLong2D,long)
-FREE2D(FreeLLong2D,long long)
-FREE2D(FreeUInt2D,unsigned int)
-FREE2D(FreeUShort2D,unsigned short)
-FREE2D(FreeULLong2D,unsigned long long)
-FREE2D(FreeFloat2D,float)
-FREE2D(FreeDouble2D,double)
+ALLOCATE2(AllocateInt2,int)
+ALLOCATE2(AllocateShort2,short)
+ALLOCATE2(AllocateLong2,long)
+ALLOCATE2(AllocateLLong2,long long)
+ALLOCATE2(AllocateUInt2,unsigned int)
+ALLOCATE2(AllocateUShort2,unsigned short)
+ALLOCATE2(AllocateULLong2,unsigned long long)
+ALLOCATE2(AllocateFloat2,float)
+ALLOCATE2(AllocateDouble2,double)
 
 /**
  * Generic-type macro for 3D memory allocation
@@ -75,7 +57,7 @@ FREE2D(FreeDouble2D,double)
  *
  * @return Allocated array, NULL otherwise
  */
-#define ALLOCATE3D(y,x)\
+#define ALLOCATE3(y,x)\
   x*** y(storage *s) {\
     x*** array = NULL;\
     int i = 0, j = 0;\
@@ -99,30 +81,15 @@ FREE2D(FreeDouble2D,double)
     return array;\
   }\
 
-#define FREE3D(y,x)\
-  void y(x ***array) {\
-    free(array);\
-  }\
-
-ALLOCATE3D(AllocateInt3D,int)
-ALLOCATE3D(AllocateShort3D,short)
-ALLOCATE3D(AllocateLong3D,long)
-ALLOCATE3D(AllocateLLong3D,long long)
-ALLOCATE3D(AllocateUInt3D,unsigned int)
-ALLOCATE3D(AllocateUShort3D,unsigned short)
-ALLOCATE3D(AllocateULLong3D,unsigned long long)
-ALLOCATE3D(AllocateFloat3D,float)
-ALLOCATE3D(AllocateDouble3D,double)
-
-FREE3D(FreeInt3D,int)
-FREE3D(FreeShort3D,short)
-FREE3D(FreeLong3D,long)
-FREE3D(FreeLLong3D,long long)
-FREE3D(FreeUInt3D,unsigned int)
-FREE3D(FreeUShort3D,unsigned short)
-FREE3D(FreeULLong3D,unsigned long long)
-FREE3D(FreeFloat3D,float)
-FREE3D(FreeDouble3D,double)
+ALLOCATE3(AllocateInt3,int)
+ALLOCATE3(AllocateShort3,short)
+ALLOCATE3(AllocateLong3,long)
+ALLOCATE3(AllocateLLong3,long long)
+ALLOCATE3(AllocateUInt3,unsigned int)
+ALLOCATE3(AllocateUShort3,unsigned short)
+ALLOCATE3(AllocateULLong3,unsigned long long)
+ALLOCATE3(AllocateFloat3,float)
+ALLOCATE3(AllocateDouble3,double)
 
 /**
  * Generic-type macro for 4D memory allocation
@@ -133,7 +100,7 @@ FREE3D(FreeDouble3D,double)
  *
  * @return Allocated array, NULL otherwise
  */
-#define ALLOCATE4D(y,x)\
+#define ALLOCATE4(y,x)\
   x**** y(storage *s) {\
     x**** array = NULL;\
     int i = 0, j = 0, k = 0;\
@@ -162,30 +129,15 @@ FREE3D(FreeDouble3D,double)
     return array;\
   }\
 
-#define FREE4D(y,x)\
-  void y(x ****array) {\
-    free(array);\
-  }\
-
-ALLOCATE4D(AllocateInt4D,int)
-ALLOCATE4D(AllocateShort4D,short)
-ALLOCATE4D(AllocateLong4D,long)
-ALLOCATE4D(AllocateLLong4D,long long)
-ALLOCATE4D(AllocateUInt4D,unsigned int)
-ALLOCATE4D(AllocateUShort4D,unsigned short)
-ALLOCATE4D(AllocateULLong4D,unsigned long long)
-ALLOCATE4D(AllocateFloat4D,float)
-ALLOCATE4D(AllocateDouble4D,double)
-
-FREE4D(FreeInt4D,int)
-FREE4D(FreeShort4D,short)
-FREE4D(FreeLong4D,long)
-FREE4D(FreeLLong4D,long long)
-FREE4D(FreeUInt4D,unsigned int)
-FREE4D(FreeUShort4D,unsigned short)
-FREE4D(FreeULLong4D,unsigned long long)
-FREE4D(FreeFloat4D,float)
-FREE4D(FreeDouble4D,double)
+ALLOCATE4(AllocateInt4,int)
+ALLOCATE4(AllocateShort4,short)
+ALLOCATE4(AllocateLong4,long)
+ALLOCATE4(AllocateLLong4,long long)
+ALLOCATE4(AllocateUInt4,unsigned int)
+ALLOCATE4(AllocateUShort4,unsigned short)
+ALLOCATE4(AllocateULLong4,unsigned long long)
+ALLOCATE4(AllocateFloat4,float)
+ALLOCATE4(AllocateDouble4,double)
 
 /**
  * @brief Common error handler

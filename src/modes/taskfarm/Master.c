@@ -30,7 +30,7 @@ int Master(module *m, pool *p) {
   checkpoint *c = NULL;
 
   /* Initialize the temporary task board buffer */
-  board_buffer = AllocateShort4D(p->board);
+  board_buffer = AllocateShort4(p->board);
   if (m->mode != RESTART_MODE) {
     memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
     WriteData(p->board, &board_buffer[0][0][0][0]);
@@ -196,7 +196,7 @@ int Master(module *m, pool *p) {
   }
 
   if (board_buffer) {
-    FreeShort4D(board_buffer);
+    free(board_buffer);
   }
 
   return mstat;

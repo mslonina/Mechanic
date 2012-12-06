@@ -363,7 +363,7 @@ int PoolReset(module *m, pool *p) {
 
   /* Reset the board memory banks */
   if (m->node == MASTER) {
-    board = AllocateShort4D(p->board);
+    board = AllocateShort4(p->board);
     memset(&board[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
     WriteData(p->board, &board[0][0][0][0]);
 
@@ -381,7 +381,7 @@ int PoolReset(module *m, pool *p) {
     H5Gclose(group);
     H5Fclose(h5location);
 
-    FreeShort4D(board);
+    free(board);
   }
 
   return mstat;
