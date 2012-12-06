@@ -30,16 +30,16 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
   if (!fname) Error(CORE_ERR_MEM);
 
   strncpy(fname, prefix, preflen);
-  fname[preflen] = LRC_NULL;
+  fname[preflen] = CONFIG_NULL;
 
   strncat(fname, name, nlen);
-  fname[preflen+nlen] = LRC_NULL;
+  fname[preflen+nlen] = CONFIG_NULL;
 
   strncat(fname, suffix, sufflen);
-  fname[preflen+nlen+sufflen] = LRC_NULL;
+  fname[preflen+nlen+sufflen] = CONFIG_NULL;
 
   strncat(fname, extension, extlen);
-  fname[filelen] = LRC_NULL;
+  fname[filelen] = CONFIG_NULL;
 
   return fname;
 }

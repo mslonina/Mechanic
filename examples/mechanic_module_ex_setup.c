@@ -48,9 +48,9 @@
  * LRC-type options are stored as char strings in a dynamic linked-list,
  * and you may access them by using the `setup->head` pointer and following functions:
  *
- * - `LRC_option2int(namespace, variable long name, setup->head)` for `LRC_INT`, `LRC_VAL`
+ * - `Option2Int(namespace, variable long name, setup->head)` for `LRC_INT`, `LRC_VAL`
  * - `LRC_option2float(namespace, variable long name, setup->head)` for `LRC_DOUBLE`
- * - `LRC_option2double(namespace, variable long name, setup->head)` for `LRC_FLOAT`
+ * - `Option2Double(namespace, variable long name, setup->head)` for `LRC_FLOAT`
  *
  * You can modify an option during run-time by calling:
  *
@@ -111,7 +111,7 @@ int Setup(setup *s) {
     .name="max-pools", // The name of the variable
     .shortName='\0', // The short name of the variable (command line)
     .value="10", // Default value
-    .type=LRC_INT, // Type of the variable
+    .type=C_INT, // Type of the variable
     .description="Maximum number of pools to evaluate (max 128)" // Description
   };
   s->options[1] = (options) {
@@ -119,7 +119,7 @@ int Setup(setup *s) {
     .name="dlimit",
     .shortName='l',
     .value="99.5",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="Example double-type value",
   };
   s->options[2] = (options) {
@@ -127,7 +127,7 @@ int Setup(setup *s) {
     .name="ilimit",
     .shortName='i',
     .value="12",
-    .type=LRC_INT,
+    .type=C_INT,
     .description="Example integer-type value"
   };
   s->options[3] = (options) {
@@ -135,7 +135,7 @@ int Setup(setup *s) {
     .name="debug",
     .shortName='\0',
     .value="0",
-    .type=LRC_VAL,
+    .type=C_VAL,
     .description="Example of boolean-type value"
   };
   s->options[4] = (options) {
@@ -143,7 +143,7 @@ int Setup(setup *s) {
     .name="host",
     .shortName='\0',
     .value="localhost",
-    .type=LRC_STRING,
+    .type=C_STRING,
     .description="Example of string-type value"
   };
   // Options must end with this:
@@ -158,10 +158,10 @@ int Prepare(int node, char *masterfile, setup *s) {
   int max_pools, ilimit, debug;
   double dlimit;
 
-  max_pools = LRC_option2int("mymodule", "max-pools", s->head);
-  ilimit = LRC_option2int("mymodule", "ilimit", s->head);
-  debug = LRC_option2int("mymodule", "debug", s->head);
-  dlimit = LRC_option2double("mymodule", "dlimit", s->head);
+  max_pools = Option2Int("mymodule", "max-pools", s->head);
+  ilimit = Option2Int("mymodule", "ilimit", s->head);
+  debug = Option2Int("mymodule", "debug", s->head);
+  dlimit = Option2Double("mymodule", "dlimit", s->head);
 
   if (node == MASTER) {
     Message(MESSAGE_COMMENT, "Options are: \n");
@@ -169,7 +169,7 @@ int Prepare(int node, char *masterfile, setup *s) {
     Message(MESSAGE_COMMENT, "--ilimit = %d\n", ilimit);
     Message(MESSAGE_COMMENT, "--debug = %d\n", debug);
     Message(MESSAGE_COMMENT, "--dlimit = %f\n", dlimit);
-    Message(MESSAGE_COMMENT, "--host = %s\n", LRC_getOptionValue("mymodule", "host", s->head));
+    Message(MESSAGE_COMMENT, "--host = %s\n", ConfigGetOptionValue("mymodule", "host", s->head));
     Message(MESSAGE_COMMENT, "\n");
   }
 
@@ -187,10 +187,10 @@ int PoolProcess(pool **all, pool *current, setup *s) {
   double dlimit;
 
   // Getting the integer data
-  max_pools = LRC_option2int("mymodule", "max-pools", s->head);
-  ilimit = LRC_option2int("mymodule", "ilimit", s->head);
-  debug = LRC_option2int("mymodule", "debug", s->head);
-  dlimit = LRC_option2double("mymodule", "dlimit", s->head);
+  max_pools = Option2Int("mymodule", "max-pools", s->head);
+  ilimit = Option2Int("mymodule", "ilimit", s->head);
+  debug = Option2Int("mymodule", "debug", s->head);
+  dlimit = Option2Double("mymodule", "dlimit", s->head);
 
   Message(MESSAGE_COMMENT, "Pool %d processed\n", current->pid);
 

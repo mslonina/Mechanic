@@ -70,7 +70,6 @@ int Init(init *i) {
  * @brief Define the configuration options
  *
  * This function is used to define configuration options. 
- * The [Libreadconfig API](http://github.com/mslonina/libreadconfig) is used here.
  * Configuration options are automatically available in the command line.
  *
  * If the Setup() hook is present in a custom module, the options are merged with the core
@@ -87,7 +86,7 @@ int Init(init *i) {
  *
  * ### Defining options
  *
- * The LRC API allows any kind of C99 struct initialization to be used, i.e.:
+ * The Config API allows any kind of C99 struct initialization to be used, i.e.:
  *
  *     s->options[0] = (options) {
  *       .space="NAMESPACE",
@@ -107,11 +106,12 @@ int Init(init *i) {
  * - value - the default value (char string)
  * - description - description for the variable (char string), used in command line args
  * - type - the variable type:
- *   - LRC_INT - integer variable
- *   - LRC_FLOAT - float variable
- *   - LRC_DOUBLE - double variable
- *   - LRC_STRING - char variable
- *   - LRC_VAL - variable that only updates its value (i.e. boolean)
+ *   - C_INT - integer variable
+ *   - C_LONG - long integer variable
+ *   - C_FLOAT - float variable
+ *   - C_DOUBLE - double variable
+ *   - C_STRING - char variable
+ *   - C_VAL - variable that only updates its value (i.e. boolean)
  *
  * The options table must finish with OPTIONS_END:
  *
@@ -152,7 +152,7 @@ int Setup(setup *s) {
     .name="name",
     .shortName='n',
     .value="mechanic",
-    .type=LRC_STRING,
+    .type=C_STRING,
     .description="The name of the run"
   };
   s->options[1] = (options) {
@@ -160,7 +160,7 @@ int Setup(setup *s) {
     .name="xres",
     .shortName='x',
     .value="5",
-    .type=LRC_INT,
+    .type=C_INT,
     .description="The task pool board horizontal resolution"
   };
   s->options[2] = (options) {
@@ -168,7 +168,7 @@ int Setup(setup *s) {
     .name="yres",
     .shortName='y',
     .value="5",
-    .type=LRC_INT,
+    .type=C_INT,
     .description="The task pool board vertical resolution"
   };
   s->options[3] = (options) {
@@ -176,7 +176,7 @@ int Setup(setup *s) {
     .name="zres",
     .shortName='z',
     .value="1",
-    .type=LRC_INT,
+    .type=C_INT,
     .description="The task pool board depth resolution"
   };
   s->options[4] = (options) {
@@ -184,7 +184,7 @@ int Setup(setup *s) {
     .name="checkpoint",
     .shortName='d',
     .value="2048",
-    .type=LRC_INT,
+    .type=C_INT,
     .description="The checkpoint size"
   };
   s->options[5] = (options) {
@@ -192,7 +192,7 @@ int Setup(setup *s) {
     .name="module",
     .shortName='p',
     .value="core",
-    .type=LRC_STRING,
+    .type=C_STRING,
     .description="The user-supplied module name"
   };
   s->options[6] = (options) {
@@ -200,7 +200,7 @@ int Setup(setup *s) {
     .name="config",
     .shortName='c',
     .value="mechanic-config.cfg",
-    .type=LRC_STRING,
+    .type=C_STRING,
     .description="The configuration file"
   };
   s->options[7] = (options) {
@@ -208,7 +208,7 @@ int Setup(setup *s) {
     .name="checkpoint-files",
     .shortName='b',
     .value="2",
-    .type=LRC_INT,
+    .type=C_INT,
     .description="The number of incremental backups of the master file"
   };
   s->options[8] = (options) {
@@ -216,7 +216,7 @@ int Setup(setup *s) {
     .name="no-backup",
     .shortName='\0',
     .value="0",
-    .type=LRC_VAL,
+    .type=C_VAL,
     .description="Disable the initial master file backup"
   };
   s->options[9] = (options) {
@@ -224,7 +224,7 @@ int Setup(setup *s) {
     .name="restart-mode",
     .shortName='r',
     .value="0",
-    .type=LRC_VAL,
+    .type=C_VAL,
     .description="The restart mode"
   };
   s->options[10] = (options) {
@@ -232,7 +232,7 @@ int Setup(setup *s) {
     .name="restart-file",
     .shortName='\0',
     .value="restart-file.h5",
-    .type=LRC_STRING,
+    .type=C_STRING,
     .description="The name of the file to use in the restart mode"
   };
   s->options[11] = (options) {
@@ -240,7 +240,7 @@ int Setup(setup *s) {
     .name="blocking",
     .shortName='\0',
     .value="0",
-    .type=LRC_VAL,
+    .type=C_VAL,
     .description="Switch to the blocking communication mode"
   };
   s->options[12] = (options) {
@@ -248,7 +248,7 @@ int Setup(setup *s) {
     .name="xmin",
     .shortName='\0',
     .value="0.0",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The x-axis minimum"
   };
   s->options[13] = (options) {
@@ -256,7 +256,7 @@ int Setup(setup *s) {
     .name="xmax",
     .shortName='\0',
     .value="1.0",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The x-axis maximum"
   };
   s->options[14] = (options) {
@@ -264,7 +264,7 @@ int Setup(setup *s) {
     .name="ymin",
     .shortName='\0',
     .value="0.0",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The y-axis minimum"
   };
   s->options[15] = (options) {
@@ -272,7 +272,7 @@ int Setup(setup *s) {
     .name="ymax",
     .shortName='\0',
     .value="1.0",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The y-axis maximum"
   };
   s->options[16] = (options) {
@@ -280,7 +280,7 @@ int Setup(setup *s) {
     .name="zmin",
     .shortName='\0',
     .value="0.0",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The z-axis minimum"
   };
   s->options[17] = (options) {
@@ -288,7 +288,7 @@ int Setup(setup *s) {
     .name="zmax",
     .shortName='\0',
     .value="1.0",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The z-axis maximum"
   };
   s->options[18] = (options) {
@@ -296,7 +296,7 @@ int Setup(setup *s) {
     .name="xorigin",
     .shortName='\0',
     .value="0.5",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The x-axis origin"
   };
   s->options[19] = (options) {
@@ -304,7 +304,7 @@ int Setup(setup *s) {
     .name="yorigin",
     .shortName='\0',
     .value="0.5",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The y-axis origin"
   };
   s->options[20] = (options) {
@@ -312,7 +312,7 @@ int Setup(setup *s) {
     .name="zorigin",
     .shortName='\0',
     .value="0.5",
-    .type=LRC_DOUBLE,
+    .type=C_DOUBLE,
     .description="The z-axis origin"
   };
   s->options[21] = (options) {
@@ -320,7 +320,7 @@ int Setup(setup *s) {
     .name="print-defaults",
     .shortName='\0',
     .value="0",
-    .type=LRC_VAL,
+    .type=C_VAL,
     .description="Print default settings"
   };
   s->options[22] = (options) {
@@ -328,7 +328,7 @@ int Setup(setup *s) {
     .name="help",
     .shortName='?',
     .value="0",
-    .type=LRC_VAL,
+    .type=C_VAL,
     .description="Show this help message"
   };
   s->options[23] = (options) {
@@ -336,7 +336,7 @@ int Setup(setup *s) {
     .name="usage",
     .shortName='\0',
     .value="0",
-    .type=LRC_VAL,
+    .type=C_VAL,
     .description="Display brief message"
   };
   s->options[24] = (options) OPTIONS_END;
@@ -664,9 +664,9 @@ int Storage(pool *p, setup *s) {
   p->board->layout = (schema) {
     .name = "board",
     .rank = TASK_BOARD_RANK+1, // pool rank
-    .dim[0] = LRC_option2int("core", "yres", s->head), // vertical res
-    .dim[1] = LRC_option2int("core", "xres", s->head), // horizontal res
-    .dim[2] = LRC_option2int("core", "zres", s->head), // depth res
+    .dim[0] = Option2Int("core", "yres", s->head), // vertical res
+    .dim[1] = Option2Int("core", "xres", s->head), // horizontal res
+    .dim[2] = Option2Int("core", "zres", s->head), // depth res
     .dim[3] = 2, // task status, computing node
     .datatype = H5T_NATIVE_SHORT,
     .sync = 1,
@@ -721,7 +721,7 @@ int Storage(pool *p, setup *s) {
     .datatype = H5T_NATIVE_DOUBLE,
   };
 
-  p->checkpoint_size = LRC_option2int("core", "checkpoint", s->head);
+  p->checkpoint_size = Option2Int("core", "checkpoint", s->head);
 
   return SUCCESS;
 }

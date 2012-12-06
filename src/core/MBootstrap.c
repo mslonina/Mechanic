@@ -193,12 +193,12 @@ int ModuleSetup(module *m, int argc, char **argv) {
      * Since we merge core layer to module layer, the user cannot change the core defaults
      */
     if (m->fallback.handler) {
-      mstat = LRC_mergeDefaults(m->layer.setup.options, m->fallback.setup.options);
+      mstat = ConfigMergeDefaults(m->layer.setup.options, m->fallback.setup.options);
       CheckStatus(mstat);
     }
   }
 
-  m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
+  m->layer.setup.head = ConfigAssignDefaults(m->layer.setup.options);
 
   /* Popt options */
   mstat = PoptOptions(m, &m->layer.setup);
@@ -206,7 +206,7 @@ int ModuleSetup(module *m, int argc, char **argv) {
   m->layer.setup.popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, m->layer.setup.popt->popt, 0);
   poptGetNextOpt(m->layer.setup.popt->poptcontext);
 
-  LRCUpdate(&m->layer.setup);
+  ConfigUpdate(&m->layer.setup);
 
   return mstat;
 }
@@ -228,7 +228,7 @@ void FinalizeLayer(layer *l) {
   if (l->setup.popt->double_args) free(l->setup.popt->double_args);
   if (l->setup.popt->poptcontext) poptFreeContext(l->setup.popt->poptcontext);
   if (l->setup.popt) free(l->setup.popt);
-  if (l->setup.head) LRC_cleanup(l->setup.head);
+  if (l->setup.head) ConfigCleanup(l->setup.head);
 }
 
 /**

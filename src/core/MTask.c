@@ -59,7 +59,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
         if (!t->storage[i].layout.name) Error(CORE_ERR_MEM);
 
         strncpy(t->storage[i].layout.name, p->task->storage[i].layout.name, len);
-        t->storage[i].layout.name[len] = LRC_NULL;
+        t->storage[i].layout.name[len] = CONFIG_NULL;
       }
     }
 

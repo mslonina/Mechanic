@@ -72,8 +72,8 @@ int main(int argc, char** argv) {
    * (D) Handle the restart mode
    */
   if (node == MASTER) {
-    if (LRC_option2int("core", "restart-mode", core.layer.setup.head)) {
-      core.filename = Name(LRC_getOptionValue("core", "restart-file", core.layer.setup.head), "", "", "");
+    if (Option2Int("core", "restart-mode", core.layer.setup.head)) {
+      core.filename = Name(ConfigGetOptionValue("core", "restart-file", core.layer.setup.head), "", "", "");
       Message(MESSAGE_INFO,
           "Switching to restart mode with checkpoint file: '%s'\n", core.filename);
       if (stat(core.filename, &file) < 0) {
@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
   /**
    * (E) Core setup
    */
-  filename = Name(LRC_getOptionValue("core", "config", core.layer.setup.head), "", "", "");
+  filename = Name(ConfigGetOptionValue("core", "config", core.layer.setup.head), "", "", "");
   mstat = Setup(&core, filename, argc, argv, CORE_SETUP);
   CheckStatus(mstat);
   free(filename);
@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
    * (F) Bootstrap the module
    * Fallback to core if module not specified
    */
-  module_name = LRC_getOptionValue("core", "module", core.layer.setup.head);
+  module_name = ConfigGetOptionValue("core", "module", core.layer.setup.head);
   module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
   module.mode = core.mode;
   if (node == MASTER && core.mode == RESTART_MODE) module.filename = Name(core.filename, "", "", "");
@@ -119,7 +119,7 @@ int main(int argc, char** argv) {
   /**
    * (G) Configure the module
    */
-  filename = Name(LRC_getOptionValue("core", "config", module.layer.setup.head), "", "", "");
+  filename = Name(ConfigGetOptionValue("core", "config", module.layer.setup.head), "", "", "");
 
   mstat = Setup(&module, filename, argc, argv, MODULE_SETUP);
   CheckStatus(mstat);
@@ -147,8 +147,8 @@ int main(int argc, char** argv) {
    * (H) Backup the master data file
    */
   if (node == MASTER) {
-    if (!LRC_option2int("core", "no-backup", core.layer.setup.head)) {
-      masterfile = Name(LRC_getOptionValue("core", "name", core.layer.setup.head),
+    if (!Option2Int("core", "no-backup", core.layer.setup.head)) {
+      masterfile = Name(ConfigGetOptionValue("core", "name", core.layer.setup.head),
         "-master-", "00", ".h5");
       masterfile_backup = Name("backup-", masterfile, "", "");
 
@@ -163,7 +163,7 @@ int main(int argc, char** argv) {
 
     /* Copy the restart file to the master file */
     if (module.mode == RESTART_MODE) {
-      masterfile = Name(LRC_getOptionValue("core", "name", core.layer.setup.head),
+      masterfile = Name(ConfigGetOptionValue("core", "name", core.layer.setup.head),
         "-master-", "00", ".h5");
       Copy(module.filename, masterfile);
       free(masterfile);
@@ -171,8 +171,8 @@ int main(int argc, char** argv) {
       /* Our restart file now becomes the master file */
       free(core.filename);
       free(module.filename);
-      core.filename = Name(LRC_getOptionValue("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
-      module.filename = Name(LRC_getOptionValue("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
+      core.filename = Name(ConfigGetOptionValue("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
+      module.filename = Name(ConfigGetOptionValue("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
     }
   }
 
@@ -180,14 +180,14 @@ int main(int argc, char** argv) {
    * (I) Write the configuration to the master file
    */
   if (node == MASTER && module.mode != RESTART_MODE) {
-    module.filename = Name(LRC_getOptionValue("core", "name", module.layer.setup.head),
+    module.filename = Name(ConfigGetOptionValue("core", "name", module.layer.setup.head),
       "-master", "-00", ".h5");
 
     h5location = H5Fcreate(module.filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     H5CheckStatus(h5location);
 
-    LRC_HDF5Writer(h5location, "/config/core", core.layer.setup.head);
-    LRC_HDF5Writer(h5location, "/config/module", module.layer.setup.head);
+    ConfigHDF5Writer(h5location, "/config/core", core.layer.setup.head);
+    ConfigHDF5Writer(h5location, "/config/module", module.layer.setup.head);
     H5Fclose(h5location);
   }
 

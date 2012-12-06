@@ -96,7 +96,7 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
   int i = 0, j = 0, k = 0, l = 0, r = 0;
-  char path[LRC_CONFIG_LEN];
+  char path[CONFIG_LEN];
   int header[HEADER_SIZE];
   int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
   int s_offset = 0, r_offset = 0, dim_offset = 0;
@@ -376,14 +376,14 @@ int Backup(module *m, setup *s) {
   struct stat current;
   struct stat backup;
 
-  b = LRC_option2int("core", "checkpoint-files", s->head);
+  b = Option2Int("core", "checkpoint-files", s->head);
 
   for (i = b-2; i >= 0; i--) {
     snprintf(iter, 3, "%02d", i+1);
-    backup_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", iter, ".h5");
+    backup_name = Name(ConfigGetOptionValue("core", "name", s->head), "-master-", iter, ".h5");
 
     snprintf(iter, 3,"%02d", i);
-    current_name = Name(LRC_getOptionValue("core", "name", s->head), "-master-", iter, ".h5");
+    current_name = Name(ConfigGetOptionValue("core", "name", s->head), "-master-", iter, ".h5");
 
     if (stat(current_name, &current) == 0) {
       if (stat(backup_name, &backup) < 0) {

@@ -386,7 +386,7 @@ void FreeMemoryLayout(int banks, storage *s) {
  */
 int CommitStorageLayout(module *m, pool *p) {
   int mstat = SUCCESS, i = 0, j = 0;
-  char path[LRC_CONFIG_LEN];
+  char path[CONFIG_LEN];
   hid_t h5location, h5group, h5pools, h5tasks, h5task;
 
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);

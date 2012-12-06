@@ -9,6 +9,7 @@
 #include "MCommon.h"
 #include "MModules.h"
 #include "MLog.h"
+#include "MConfig.h"
 #include "MTask.h"
 
 checkpoint* CheckpointLoad(module *m, pool *p, int cid);

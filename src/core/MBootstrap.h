@@ -9,6 +9,7 @@
 #include "MTypes.h"
 #include "MCommon.h"
 #include "MModules.h"
+#include "MConfig.h"
 #include "MSetup.h"
 
 module Bootstrap(int node, int mpisize, int argc, char **argv, char *name, module *f);

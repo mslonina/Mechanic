@@ -31,11 +31,11 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
       H5CheckStatus(h5location);
 
       if (setup_mode == CORE_SETUP) {
-        LRC_HDF5Parser(h5location, "/config/core", m->layer.setup.head);
+        ConfigHDF5Parser(h5location, "/config/core", m->layer.setup.head);
       }
 
       if (setup_mode == MODULE_SETUP) {
-        LRC_HDF5Parser(h5location, "/config/module", m->layer.setup.head);
+        ConfigHDF5Parser(h5location, "/config/module", m->layer.setup.head);
       }
 
       H5Fclose(h5location);
@@ -47,8 +47,8 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
     }
   }
 
-  LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
-  opts = LRC_allOptions(m->layer.setup.head);
+  ConfigHead2StructNoalloc(m->layer.setup.head, m->layer.setup.options);
+  opts = ConfigAllOptions(m->layer.setup.head);
 
   /* In case of config file, we need to update the popt tables with new defaults  */
   PoptOptions(m, &m->layer.setup);
@@ -58,11 +58,11 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
   if (mstat != 0) return mstat;
 
   if (m->mode != RESTART_MODE) {
-    LRC_head2struct_noalloc(m->layer.setup.head, m->layer.setup.options);
+    ConfigHead2StructNoalloc(m->layer.setup.head, m->layer.setup.options);
   }
 
   /* Broadcast new configuration */
-  mstat = LRC_datatype(m->layer.setup.options[0], &mpi_t);
+  mstat = ConfigDatatype(m->layer.setup.options[0], &mpi_t);
   CheckStatus(mstat);
 
   for (i = 0; i < opts; i++) {
@@ -80,13 +80,13 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
    * Cleanup previous default configuration
    * Reassigning defaults should be faster than modifying options one-by-one
    */
-  LRC_cleanup(m->layer.setup.head);
+  ConfigCleanup(m->layer.setup.head);
 
-  m->layer.setup.head = LRC_assignDefaults(m->layer.setup.options);
+  m->layer.setup.head = ConfigAssignDefaults(m->layer.setup.options);
   if (setup_mode == MODULE_SETUP
       && m->node == MASTER
-      && LRC_option2int("core", "print-defaults", m->layer.setup.head)) {
-    LRC_printAll(m->layer.setup.head);
+      && Option2Int("core", "print-defaults", m->layer.setup.head)) {
+    ConfigPrintAll(m->layer.setup.head);
   }
 
   return mstat;
@@ -102,11 +102,11 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
  *
  * @return 0 on success, error code otherwise
  */
-int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_mode) {
+int ReadConfig(module *m, char *filename, configNamespace *head, int setup_mode) {
   int mstat = SUCCESS;
   FILE *inif;
 
-  if (filename == NULL || filename[0] == LRC_NULL) {
+  if (filename == NULL || filename[0] == CONFIG_NULL) {
     Message(MESSAGE_ERR, "Option -c|--config specified but no valid configuration file present\n");
     Error(CORE_ERR_SETUP);
   }
@@ -116,12 +116,12 @@ int ReadConfig(module *m, char *filename, LRC_configNamespace *head, int setup_m
   if (inif) {
     if (setup_mode == MODULE_SETUP) {
       Message(MESSAGE_INFO, "Configuration file to use: '%s'\n", filename);
-      mstat = LRC_ASCIIParser(inif, SEPARATOR, COMMENTS, head);
+      mstat = ConfigAsciiParser(inif, SEPARATOR, COMMENTS, head);
       CheckStatus(mstat);
     }
     fclose(inif);
   } else if (inif == NULL) {
-    if (strcmp(filename, LRC_getOptionValue("core", "config", m->layer.setup.head)) != 0) {
+    if (strcmp(filename, ConfigGetOptionValue("core", "config", m->layer.setup.head)) != 0) {
       Message(MESSAGE_ERR, "The specified configuration file could not be opened\n");
       Error(CORE_ERR_SETUP);
     }
@@ -162,17 +162,17 @@ int Popt(module *m, int argc, char** argv, setup *s, int setup_mode) {
   }
 
   /* Update the LRC options struct with values from command line */
-  LRCUpdate(s);
+  ConfigUpdate(s);
 
-  if (LRC_option2int("core", "help", s->head)) {
+  if (Option2Int("core", "help", s->head)) {
     return CORE_SETUP_HELP;
   }
 
-  if (LRC_option2int("core", "usage", s->head)) {
+  if (Option2Int("core", "usage", s->head)) {
     return CORE_SETUP_USAGE;
   }
 
-  if (LRC_option2int("core", "blocking", s->head)) {
+  if (Option2Int("core", "blocking", s->head)) {
     m->communication_type = MPI_BLOCKING;
   }
 
@@ -192,42 +192,42 @@ int PoptOptions(module *m, setup *s) {
   char* garbage;
 
   /* Module options */
-  while (s->options[i].name[0] != LRC_NULL) {
-    if (s->options[i].type == LRC_STRING) {
+  while (s->options[i].name[0] != CONFIG_NULL) {
+    if (s->options[i].type == C_STRING) {
       s->popt->popt[i] = (struct poptOption) {
         s->options[i].name, s->options[i].shortName, POPT_ARG_STRING,
           &s->popt->string_args[i], 0, s->options[i].description, s->options[i].value
       };
     }
-    if (s->options[i].type == LRC_VAL) {
+    if (s->options[i].type == C_VAL) {
       s->popt->val_args[i] = (int)strtol(s->options[i].value, &garbage, 0);
       s->popt->popt[i] = (struct poptOption) {
         s->options[i].name, s->options[i].shortName, POPT_ARG_VAL,
           &s->popt->val_args[i], 1, s->options[i].description, NULL
        };
      }
-    if (s->options[i].type == LRC_INT) {
+    if (s->options[i].type == C_INT) {
       s->popt->int_args[i] = (int)strtol(s->options[i].value, &garbage, 0);
       s->popt->popt[i] = (struct poptOption) {
         s->options[i].name, s->options[i].shortName, POPT_ARG_INT,
           &s->popt->int_args[i], 0, s->options[i].description, s->options[i].value
       };
     }
-    if (s->options[i].type == LRC_LONG) {
+    if (s->options[i].type == C_LONG) {
       s->popt->long_args[i] = strtol(s->options[i].value, &garbage, 0);
       s->popt->popt[i] = (struct poptOption) {
         s->options[i].name, s->options[i].shortName, POPT_ARG_LONG,
           &s->popt->long_args[i], 0, s->options[i].description, s->options[i].value
       };
     }
-    if (s->options[i].type == LRC_FLOAT) {
+    if (s->options[i].type == C_FLOAT) {
       s->popt->float_args[i] = strtof(s->options[i].value, &garbage);
       s->popt->popt[i] = (struct poptOption) {
         s->options[i].name, s->options[i].shortName, POPT_ARG_FLOAT,
           &s->popt->float_args[i], 0, s->options[i].description, s->options[i].value
       };
     }
-    if (s->options[i].type == LRC_DOUBLE) {
+    if (s->options[i].type == C_DOUBLE) {
       s->popt->double_args[i] = strtod(s->options[i].value, &garbage);
       s->popt->popt[i] = (struct poptOption) {
         s->options[i].name, s->options[i].shortName, POPT_ARG_DOUBLE,
@@ -249,38 +249,38 @@ int PoptOptions(module *m, setup *s) {
  *
  * @return 0 on success, error code otherwise
  */
-int LRCUpdate(setup *s) {
+int ConfigUpdate(setup *s) {
   int i = 0, mstat = SUCCESS;
   size_t len;
 
-  while (s->options[i].name[0] != LRC_NULL) {
-    if (s->options[i].type == LRC_STRING) {
+  while (s->options[i].name[0] != CONFIG_NULL) {
+    if (s->options[i].type == C_STRING) {
       if (s->popt->string_args[i] != NULL) {
-        if (LRC_trim(&s->popt->string_args[i][0]) != LRC_NULL) {
-          len = strlen(LRC_trim(s->popt->string_args[i]));
-          strncpy(s->options[i].value, LRC_trim(s->popt->string_args[i]), len);
-          s->options[i].value[len] = LRC_NULL;
+        if (ConfigTrim(&s->popt->string_args[i][0]) != CONFIG_NULL) {
+          len = strlen(ConfigTrim(s->popt->string_args[i]));
+          strncpy(s->options[i].value, ConfigTrim(s->popt->string_args[i]), len);
+          s->options[i].value[len] = CONFIG_NULL;
         }
       }
     }
     
-    if (s->options[i].type == LRC_VAL) {
+    if (s->options[i].type == C_VAL) {
       sprintf(s->options[i].value, "%d", s->popt->val_args[i]);
     }
-    if (s->options[i].type == LRC_INT) {
+    if (s->options[i].type == C_INT) {
       sprintf(s->options[i].value, "%d", s->popt->int_args[i]);
     }
-    if (s->options[i].type == LRC_LONG) {
+    if (s->options[i].type == C_LONG) {
       sprintf(s->options[i].value, "%ld", s->popt->long_args[i]);
     }
-    if (s->options[i].type == LRC_FLOAT) {
+    if (s->options[i].type == C_FLOAT) {
       sprintf(s->options[i].value, "%.19E", s->popt->float_args[i]);
     }
-    if (s->options[i].type == LRC_DOUBLE) {
+    if (s->options[i].type == C_DOUBLE) {
       sprintf(s->options[i].value, "%.19E", s->popt->double_args[i]);
     }
 
-    LRC_modifyOption(s->options[i].space, s->options[i].name,
+    ConfigModifyOption(s->options[i].space, s->options[i].name,
         s->options[i].value, s->options[i].type, s->head);
     i++;
   }

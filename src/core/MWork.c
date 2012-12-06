@@ -21,7 +21,7 @@ int Work(module *m) {
   clock_t time_in, time_out;
 
   hid_t h5location, h5pool, attr_s, attr_d;
-  char path[LRC_CONFIG_LEN];
+  char path[CONFIG_LEN];
 
   /* Prepare the simulation */
   mstat = Prepare(m);

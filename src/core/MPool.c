@@ -104,31 +104,31 @@ int PoolPrepare(module *m, pool **all, pool *p) {
      *
      * @todo: Remove when all options will be stored as attributes by default 
      */
-    setup_attr = LRC_option2double("core", "xmin", s->head);
+    setup_attr = Option2Double("core", "xmin", s->head);
     WriteAttr(&p->board->attr[0], &setup_attr);
 
-    setup_attr = LRC_option2double("core", "xmax", s->head);
+    setup_attr = Option2Double("core", "xmax", s->head);
     WriteAttr(&p->board->attr[1], &setup_attr);
 
-    setup_attr = LRC_option2double("core", "ymin", s->head);
+    setup_attr = Option2Double("core", "ymin", s->head);
     WriteAttr(&p->board->attr[2], &setup_attr);
     
-    setup_attr = LRC_option2double("core", "ymax", s->head);
+    setup_attr = Option2Double("core", "ymax", s->head);
     WriteAttr(&p->board->attr[3], &setup_attr);
     
-    setup_attr = LRC_option2double("core", "zmin", s->head);
+    setup_attr = Option2Double("core", "zmin", s->head);
     WriteAttr(&p->board->attr[4], &setup_attr);
     
-    setup_attr = LRC_option2double("core", "zmax", s->head);
+    setup_attr = Option2Double("core", "zmax", s->head);
     WriteAttr(&p->board->attr[5], &setup_attr);
     
-    setup_attr = LRC_option2double("core", "xorigin", s->head);
+    setup_attr = Option2Double("core", "xorigin", s->head);
     WriteAttr(&p->board->attr[6], &setup_attr);
     
-    setup_attr = LRC_option2double("core", "yorigin", s->head);
+    setup_attr = Option2Double("core", "yorigin", s->head);
     WriteAttr(&p->board->attr[7], &setup_attr);
     
-    setup_attr = LRC_option2double("core", "zorigin", s->head);
+    setup_attr = Option2Double("core", "zorigin", s->head);
     WriteAttr(&p->board->attr[8], &setup_attr);
 
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
@@ -203,7 +203,7 @@ int PoolProcess(module *m, pool **all, pool *p) {
 int PoolProcessData(module *m, pool *p, setup *s) {
   int mstat = SUCCESS;
   int i = 0, j = 0, k = 0, task_groups = 0;
-  char path[LRC_CONFIG_LEN];
+  char path[CONFIG_LEN];
   query *q;
   hid_t h5location, h5pool, h5tasks, h5task, h5dataset;
   hid_t attr_s, attr_d;
@@ -358,7 +358,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
 int PoolReset(module *m, pool *p) {
   int mstat = SUCCESS;
   hid_t h5location, group;
-  char path[LRC_CONFIG_LEN];
+  char path[CONFIG_LEN];
   short ****board;
 
   /* Reset the board memory banks */

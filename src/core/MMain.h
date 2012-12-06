@@ -13,6 +13,7 @@
 #include "MCore.h"
 #include "MCommon.h"
 #include "MLog.h"
+#include "MConfig.h"
 #include "MSetup.h"
 #include "MMpi.h"
 #include "MWork.h"

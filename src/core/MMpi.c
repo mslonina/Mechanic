@@ -12,16 +12,16 @@
  *
  * @return 0 on success, error code otherwise
  */
-int LRC_datatype(options c, MPI_Datatype *mpi_t) {
+int ConfigDatatype(options c, MPI_Datatype *mpi_t) {
   int mstat = SUCCESS, i = 0;
   int block_lengths[4];
   MPI_Aint displacements[4];
   MPI_Datatype types[4];
   MPI_Aint addresses[5];
 
-  block_lengths[0] = LRC_CONFIG_LEN;
-  block_lengths[1] = LRC_CONFIG_LEN;
-  block_lengths[2] = LRC_CONFIG_LEN;
+  block_lengths[0] = CONFIG_LEN;
+  block_lengths[1] = CONFIG_LEN;
+  block_lengths[2] = CONFIG_LEN;
   types[0] = MPI_CHAR;
   types[1] = MPI_CHAR;
   types[2] = MPI_CHAR;

@@ -91,12 +91,12 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
   double attr_data[1];
 
   if (strcmp(d->layout.name, "result") == 0) {
-    xmin = LRC_option2double("core", "xmin", s->head);
-    xmax = LRC_option2double("core", "xmax", s->head);
-    ymin = LRC_option2double("core", "ymin", s->head);
-    ymax = LRC_option2double("core", "ymax", s->head);
-    zmin = LRC_option2double("core", "zmin", s->head);
-    zmax = LRC_option2double("core", "zmax", s->head);
+    xmin = Option2Double("core", "xmin", s->head);
+    xmax = Option2Double("core", "xmax", s->head);
+    ymin = Option2Double("core", "ymin", s->head);
+    ymax = Option2Double("core", "ymax", s->head);
+    zmin = Option2Double("core", "zmin", s->head);
+    zmax = Option2Double("core", "zmax", s->head);
 
     adims = 1;
     attr_data[0] = xmin;
