@@ -189,13 +189,13 @@ typedef struct {
 /* Search and modify */
 config* ConfigFindOption(char* var, configNamespace* current);
 config* ConfigModifyOption(char* space, char* var, char* value, int type, configNamespace* head);
-char* ConfigGetOptionValue(char* space, char* var, configNamespace* current);
 
 /* Converters */
 int Option2Int(char* space, char* var, configNamespace* head);
 float Option2Float(char* space, char* var, configNamespace* head);
 double Option2Double(char* space, char* var, configNamespace* head);
 long double Option2LDouble(char* space, char* var, configNamespace* head);
+char* Option2String(char* space, char* var, configNamespace* head);
 
 /**
  * @struct init

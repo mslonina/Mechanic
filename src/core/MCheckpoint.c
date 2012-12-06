@@ -380,10 +380,10 @@ int Backup(module *m, setup *s) {
 
   for (i = b-2; i >= 0; i--) {
     snprintf(iter, 3, "%02d", i+1);
-    backup_name = Name(ConfigGetOptionValue("core", "name", s->head), "-master-", iter, ".h5");
+    backup_name = Name(Option2String("core", "name", s->head), "-master-", iter, ".h5");
 
     snprintf(iter, 3,"%02d", i);
-    current_name = Name(ConfigGetOptionValue("core", "name", s->head), "-master-", iter, ".h5");
+    current_name = Name(Option2String("core", "name", s->head), "-master-", iter, ".h5");
 
     if (stat(current_name, &current) == 0) {
       if (stat(backup_name, &backup) < 0) {

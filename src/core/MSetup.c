@@ -121,7 +121,7 @@ int ReadConfig(module *m, char *filename, configNamespace *head, int setup_mode)
     }
     fclose(inif);
   } else if (inif == NULL) {
-    if (strcmp(filename, ConfigGetOptionValue("core", "config", m->layer.setup.head)) != 0) {
+    if (strcmp(filename, Option2String("core", "config", m->layer.setup.head)) != 0) {
       Message(MESSAGE_ERR, "The specified configuration file could not be opened\n");
       Error(CORE_ERR_SETUP);
     }

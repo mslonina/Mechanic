@@ -1166,7 +1166,7 @@ config* ConfigModifyOption(char* namespace, char* varname, char* newvalue, int n
 	return option;
 }
 
-char* ConfigGetOptionValue(char* namespace, char* var, configNamespace* head){
+char* Option2String(char* namespace, char* var, configNamespace* head){
 	config* option = NULL;
   configNamespace* current = NULL;
 
