@@ -70,14 +70,14 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
   double **data;
   int dims[MAX_RANK], i = 0, j = 0;
 
-  GetDims(&p->storage[0], dims);
-  data = AllocateDouble2D(&p->storage[0]);
+  MGetDims(p,"global-double-data", dims);
+  MAllocate2(p, "global-double-data", data, double);
 
   Message(MESSAGE_OUTPUT, "Revision ID: %d\n", p->rid);
 
   /* Read data from the previous pool and modify it */
   if (p->pid > 0) {
-    ReadData(&all[p->pid-1]->storage[0], &data[0][0]);
+    MReadData(all[p->pid-1], "global-double-data", &data[0][0]);
     for (i = 0; i < dims[0]; i++) {
       for (j = 0; j < dims[1]; j++) {
         data[i][j] += 2;
@@ -92,10 +92,10 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
   }
   
   /* Write data to the storage buffer */
-  WriteData(&p->storage[0], &data[0][0]);
+  MWriteData(p, "global-double-data", &data[0][0]);
 
   /* Release the resources */
-  FreeDouble2D(data);
+  free(data);
 
   return SUCCESS;
 }
@@ -109,15 +109,15 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
 int TaskProcess(pool *p, task *t, setup *s) {
   int **buffer;
 
-  buffer = AllocateInt2D(&t->storage[0]);
+  MAllocate2(t, "task-integer-data", buffer, int);
 
   buffer[0][0] = t->tid;
   buffer[0][1] = p->pid;
   buffer[0][2] = p->rid;
 
-  WriteData(&t->storage[0], &buffer[0][0]);
+  MWriteData(t, "task-integer-data", &buffer[0][0]);
 
-  FreeInt2D(buffer);
+  free(buffer);
 
   return SUCCESS;
 }

@@ -32,6 +32,16 @@
 #define DIM2 5
 #define DIM3 6
 
+#define PSET0 "3d-integer-datatype-group"
+#define PSET1 "4d-double-datatype-group"
+#define PSET2 "2d-float-datatype-group"
+#define TSET0 "3d-double-datatype-board"
+#define TSET1 "2d-integer-datatype-board"
+#define TSET2 "3d-integer-datatype-group"
+#define TSET3 "2d-integer-datatype-pm3d"
+#define TSET4 "3d-integer-datatype-list"
+#define TSET5 "4d-result"
+
 /**
  * Implements Storage()
  */
@@ -41,7 +51,7 @@ int Storage(pool *p, setup *s) {
    * 3D integer dataset
    */
   p->storage[0].layout = (schema) {
-    .name = "3d-integer-datatype-group",
+    .name = PSET0,
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -56,7 +66,7 @@ int Storage(pool *p, setup *s) {
    * 4D double dataset
    */
   p->storage[1].layout = (schema) {
-    .name = "4d-double-datatype-group",
+    .name = PSET1,
     .rank = 4,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -72,7 +82,7 @@ int Storage(pool *p, setup *s) {
    * 2D float dataset
    */
   p->storage[2].layout = (schema) {
-    .name = "2d-float-datatype-group",
+    .name = PSET2,
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -86,7 +96,7 @@ int Storage(pool *p, setup *s) {
    * 3D double dataset of type STORAGE_BOARD
    */
   p->task->storage[0].layout = (schema) {
-    .name = "3d-double-datatype-board",
+    .name = TSET0,
     .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -101,7 +111,7 @@ int Storage(pool *p, setup *s) {
    * 2D integer dataset of type STORAGE_BOARD
    */
   p->task->storage[1].layout = (schema) {
-    .name = "2d-integer-datatype-board",
+    .name = TSET1,
     .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -116,7 +126,7 @@ int Storage(pool *p, setup *s) {
    * 3D integer dataset of type STORAGE_GROUP
    */
   p->task->storage[2].layout = (schema) {
-    .name = "3d-integer-datatype-group",
+    .name = TSET2,
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -131,7 +141,7 @@ int Storage(pool *p, setup *s) {
    * 2D integer dataset of type STORAGE_PM3D
    */
   p->task->storage[3].layout = (schema) {
-    .name = "2d-integer-datatype-pm3d",
+    .name = TSET3,
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -145,7 +155,7 @@ int Storage(pool *p, setup *s) {
    * 3D integer dataset of type STORAGE_LIST
    */
   p->task->storage[4].layout = (schema) {
-    .name = "3d-integer-datatype-list",
+    .name = TSET4,
     .rank = 3,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -160,7 +170,7 @@ int Storage(pool *p, setup *s) {
    * 4D double dataset of type STORAGE_BOARD
    */
   p->task->storage[5].layout = (schema) {
-    .name = "4d-result",
+    .name = TSET5,
     .rank = 4,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -188,8 +198,8 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
   /**
    * Allocate and fill the 3D integer dataset
    */
-  GetDims(&current->storage[0], dims);
-  data = AllocateInt3D(&current->storage[0]);
+  MAllocate3(current, PSET0, data, int);
+  MGetDims(current, PSET0, dims);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       for (k = 0; k < dims[2]; k++) {
@@ -198,13 +208,13 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
     }
   }
 
-  WriteData(&(current->storage[0]), &data[0][0][0]);
+  MWriteData(current, PSET0, &data[0][0][0]);
 
   /**
    * Allocate and fill the 4D double dataset
    */
-  GetDims(&current->storage[1], dims);
-  buff = AllocateDouble4D(&current->storage[1]);
+  MAllocate4(current, PSET1, buff, double);
+  MGetDims(current, PSET1, dims);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       for (k = 0; k < dims[2]; k++) {
@@ -215,27 +225,27 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
     }
   }
 
-  WriteData(&(current->storage[1]), &buff[0][0][0][0]);
+  MWriteData(current, PSET1, &buff[0][0][0][0]);
 
   /**
    * Allocate and fill the 2D float dataset
    */
-  GetDims(&current->storage[2], dims);
-  floa = AllocateFloat2D(&current->storage[2]);
+  MAllocate2(current, PSET2, floa, float);
+  MGetDims(current, PSET2, dims);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       floa[i][j] = 80.23 + i + j;
     }
   }
 
-  WriteData(&(current->storage[2]), &floa[0][0]);
+  MWriteData(current, PSET2, &floa[0][0]);
 
   /**
    * Release the resources
    */
-  FreeInt3D(data);
-  FreeFloat2D(floa);
-  FreeDouble4D(buff);
+  free(data);
+  free(floa);
+  free(buff);
 
   return SUCCESS;
 }
@@ -252,10 +262,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 
   Message(MESSAGE_OUTPUT, "\n3D Integer dataset of STORAGE_GROUP (XY slice-0)\n\n");
   
-  tp = AllocateInt3D(&current->tasks[0]->storage[2]);
+  MAllocate3(current->tasks[0], TSET2, tp, int);
 
-  ReadData(&current->tasks[0]->storage[2], &tp[0][0][0]);
-  GetDims(&current->tasks[0]->storage[2], dims);
+  MReadData(current->tasks[0], TSET2, &tp[0][0][0]);
+  MGetDims(current->tasks[0], TSET2, dims);
 
   for (i = 0; i < dims[0]; i++) {
     printf("\t");
@@ -287,7 +297,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   
   Message(MESSAGE_OUTPUT, "\n3D Integer dataset of STORAGE_GROUP (XY slice-0)\n\n");
 
-  ReadData(&current->tasks[current->pool_size - 1]->storage[2], &tp[0][0][0]);
+  MReadData(current->tasks[current->pool_size - 1], TSET2, &tp[0][0][0]);
   
   for (i = 0; i < dims[0]; i++) {
     printf("\t");
@@ -300,9 +310,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   /* Read whole dataset from the pool->task->storage[0] */
   Message(MESSAGE_OUTPUT, "\n3D Double dataset of STORAGE_BOARD (XY slice DIM2-1)\n\n");
 
-  GetDims(&current->task->storage[0], dims);
-  data = AllocateDouble3D(&current->task->storage[0]);
-  ReadData(&current->task->storage[0], &data[0][0][0]);
+  MAllocate3(current->task, TSET0, data, double);
+  
+  MGetDims(current->task, TSET0, dims);
+  MReadData(current->task, TSET0, &data[0][0][0]);
  
   for (i = 0; i < dims[0]; i++) {
     printf("\t");
@@ -324,9 +335,9 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 
   Message(MESSAGE_OUTPUT, "\n2D Integer dataset of STORAGE_BOARD (XY only)\n\n");
 
-  GetDims(&current->task->storage[1], dims);
-  idata = AllocateInt3D(&current->task->storage[1]);
-  ReadData(&current->task->storage[1], &idata[0][0][0]);
+  MGetDims(current->task, TSET1, dims);
+  MAllocate3(current->task, TSET1, idata, int);
+  MReadData(current->task, TSET1, &idata[0][0][0]);
   
   for (i = 0; i < dims[0]; i++) {
     printf("\t");
@@ -349,9 +360,9 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   printf("\n");
 
   Message(MESSAGE_OUTPUT, "\n4D double result dataset\n\n");
-  GetDims(&current->task->storage[5], dims);
-  four = AllocateDouble4D(&current->task->storage[5]);
-  ReadData(&current->task->storage[5], &four[0][0][0][0]);
+  MGetDims(current->task, TSET5, dims);
+  MAllocate4(current->task, TSET5, four, double);
+  MReadData(current->task, TSET5, &four[0][0][0][0]);
 
   for (k = 0; k < dims[2]; k++) {
     printf("\t4D depth = %d\n", k);
@@ -365,10 +376,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeInt3D(tp);
-  FreeDouble3D(data);
-  FreeInt3D(idata);
-  FreeDouble4D(four);
+  free(tp); free(data); free(idata); free(four);
 
   return POOL_FINALIZE;
 }
@@ -396,8 +404,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
    * dataset with offsets calculated automatically. Each task will return dims-size
    * datablock.
    */
-  GetDims(&t->storage[0], dims);
-  ddata = AllocateDouble3D(&t->storage[0]);
+  MGetDims(t, TSET0, dims);
+  MAllocate3(t, TSET0, ddata, double);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       for (k = 0; k < dims[2]; k++) {
@@ -406,7 +414,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
     }
   }
   
-  WriteData(&t->storage[0], &ddata[0][0][0]);
+  MWriteData(t, TSET0, &ddata[0][0][0]);
 
   /**
    * Allocate and fill the 3D (2D and 1) integer-type data for t->storage[1]
@@ -414,15 +422,15 @@ int TaskProcess(pool *p, task *t, setup *s) {
    *
    * This is STORAGE_BOARD-type as well.
    */
-  GetDims(&t->storage[1], dims);
-  bdata = AllocateInt3D(&t->storage[1]);
+  MGetDims(t, TSET1, dims);
+  MAllocate3(t, TSET1, bdata, int);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       bdata[i][j][0] = t->tid+1;
     }
   }
 
-  WriteData(&t->storage[1], &bdata[0][0][0]);
+  MWriteData(t, TSET1, &bdata[0][0][0]);
 
   /**
    * Allocate and fill the 3D integer-type data buffer
@@ -431,9 +439,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
    * Since this is STORAGE_GROUP-type storage, the data will be stored in separated
    * datasets per each task and available through p->tasks[task-ID]->storage[2] group.
    */
-  GetDims(&t->storage[2], dims);
-//  cdata = AllocateInt3D(&t->storage[2]);
-  MAllocate3(t, "3d-integer-datatype-group", cdata, int);
+  MGetDims(t, TSET2, dims);
+  MAllocate3(t, TSET2, cdata, int);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       for (k = 0; k < dims[2]; k++) {
@@ -442,7 +449,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
     }
   }
 
-  WriteData(&t->storage[2], &cdata[0][0][0]);
+  MWriteData(t, TSET2, &cdata[0][0][0]);
 
   /**
    * Allocate and fill the 2D integer-type data buffer for t->storage[3]
@@ -450,15 +457,15 @@ int TaskProcess(pool *p, task *t, setup *s) {
    *
    * The data will be stored as STORAGE_PM3D-type dataset.
    */
-  GetDims(&t->storage[3], dims);
-  idata = AllocateInt2D(&t->storage[3]);
+  MGetDims(t, TSET3, dims);
+  MAllocate2(t, TSET3, idata, int);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       idata[i][j] = t->tid+1;
     }
   }
 
-  WriteData(&t->storage[3], &idata[0][0]);
+  MWriteData(t, TSET3, &idata[0][0]);
 
   /**
    * We are reusing here data for t->storage[2], this time however we are storing
@@ -466,7 +473,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
    * 
    * (see p->task->storage[4].layout in Storage())
    */
-  WriteData(&t->storage[4], &cdata[0][0][0]);
+  MWriteData(t, TSET4, &cdata[0][0][0]);
 
   /**
    * Now, here is the real fun
@@ -474,9 +481,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
    *
    * This is real example of what scientific things Mechanic can do
    */
-  GetDims(&t->storage[5], dims);
-//  four = AllocateDouble4D(&t->storage[5]);
-  MAllocate4(t, "4d-result", four, double);
+  MGetDims(t, TSET5, dims);
+  MAllocate4(t, TSET5, four, double);
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       for (k = 0; k < dims[2]; k++) {
@@ -490,19 +496,12 @@ int TaskProcess(pool *p, task *t, setup *s) {
     }
   }
 
-  WriteData(&t->storage[5], &four[0][0][0][0]);
-//  MWriteData(t, "4d-result", &four[0][0][0][0]);
+  MWriteData(t, TSET5, &four[0][0][0][0]);
 
   /**
    * Release the resources
    */
-  FreeDouble3D(ddata);
- // FreeInt3D(cdata);
-  FreeInt2D(idata);
-//  FreeDouble4D(four);
-
-  free(cdata);
-  free(four);
+  free(ddata); free(idata); free(cdata); free(four);
 
   return SUCCESS;
 }

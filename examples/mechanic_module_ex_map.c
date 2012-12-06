@@ -73,7 +73,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   // The state of the system
   buffer_one[0][2] = t->tid;
 
-  WriteData(&t->storage[1], buffer_one);
+  MWriteData(t, "result", buffer_one);
   
   return SUCCESS;
 }

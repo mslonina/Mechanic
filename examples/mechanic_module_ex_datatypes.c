@@ -30,13 +30,23 @@
 #define DIM0 3
 #define DIM1 4
 
+#define PSET0 "integer-datatype"
+#define PSET1 "double-datatype"
+#define PSET2 "float-datatype"
+
+#define TSET0 "double-datatype"
+#define TSET1 "integer-datatype"
+#define TSET2 "integer-datatype-group"
+#define TSET3 "TSET3"
+#define TSET4 "TSET4"
+
 /**
  * Implements Storage()
  */
 int Storage(pool *p, setup *s) {
 
   p->storage[0].layout = (schema) {
-    .name = "integer-datatype",
+    .name = PSET0,
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -47,7 +57,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->storage[1].layout = (schema) {
-    .name = "double-datatype",
+    .name = PSET1,
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -58,7 +68,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->storage[2].layout = (schema) {
-    .name = "float-datatype",
+    .name = PSET2,
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -69,7 +79,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[0].layout = (schema) {
-    .name = "double-datatype",
+    .name = TSET0,
     .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -81,7 +91,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[1].layout = (schema) {
-    .name = "integer-datatype",
+    .name = TSET1,
     .rank = TASK_BOARD_RANK,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -93,7 +103,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[2].layout = (schema) {
-    .name = "integer-datatype",
+    .name = TSET2,
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -104,7 +114,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[3].layout = (schema) {
-    .name = "integer-datatype-pm3d",
+    .name = TSET3,
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -115,7 +125,7 @@ int Storage(pool *p, setup *s) {
   };
 
   p->task->storage[4].layout = (schema) {
-    .name = "integer-datatype-list",
+    .name = TSET4,
     .rank = 2,
     .dim[0] = DIM0,
     .dim[1] = DIM1,
@@ -145,9 +155,9 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
     }
   }
 
-  WriteData(&(current->storage[0]), data);
-  WriteData(&(current->storage[1]), buff);
-  WriteData(&(current->storage[2]), floa);
+  MWriteData(current, PSET0, data);
+  MWriteData(current, PSET1, buff);
+  MWriteData(current, PSET2, floa);
 
   return SUCCESS;
 }
@@ -164,10 +174,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   /**
    * Read the dataset inside the Tasks/task-[i] group
    */
-  ibuff = AllocateInt2D(&current->tasks[current->pool_size - 1]->storage[2]);
-  ReadData(&current->tasks[current->pool_size - 1]->storage[2], &ibuff[0][0]);
+  MAllocate2(current->tasks[current->pool_size - 1], TSET2, ibuff, int);
+  MReadData(current->tasks[current->pool_size - 1], TSET2, &ibuff[0][0]);
 
-  GetDims(&current->tasks[current->pool_size - 1]->storage[2], dims);
+  MGetDims(current->tasks[current->pool_size - 1], TSET2, dims);
 
   Message(MESSAGE_OUTPUT, "Integer dataset of STORAGE_GROUP\n");
   for (i = 0; i < dims[0]; i++) {
@@ -177,7 +187,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeInt2D(ibuff);
+  free(ibuff);
 
   /**
    * Read the p->task->storage[0] dataset
@@ -186,10 +196,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[0].layout.dim[0] * p->board->layout.dim[0]
    * dims[1] = p->task->storage[0].layout.dim[1] * p->board->layout.dim[1]
    */
-  dbuff = AllocateDouble3D(&current->task->storage[0]);
-  ReadData(&current->task->storage[0], &dbuff[0][0][0]);
+  MAllocate3(current->task, TSET0, dbuff, double);
+  MReadData(current->task, TSET0, &dbuff[0][0][0]);
 
-  GetDims(&current->task->storage[0], dims);
+  MGetDims(current->task, TSET0, dims);
 
   Message(MESSAGE_OUTPUT, "\nDouble dataset of STORAGE_BOARD\n");
   for (i = 0; i < dims[0]; i++) {
@@ -199,7 +209,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeDouble3D(dbuff);
+  free(dbuff);
 
   /**
    * Read the p->task->storage[1] dataset
@@ -208,10 +218,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[1].layout.dim[0] * p->board->layout.dim[0]
    * dims[1] = p->task->storage[1].layout.dim[1] * p->board->layout.dim[1]
    */
-  cbuff = AllocateInt3D(&current->task->storage[1]);
-  ReadData(&current->task->storage[1], &cbuff[0][0][0]);
+  MAllocate3(current->task, TSET1, cbuff, int);
+  MReadData(current->task, TSET1, &cbuff[0][0][0]);
 
-  GetDims(&current->task->storage[1], dims);
+  MGetDims(current->task, TSET1, dims);
 
   Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_BOARD\n");
   for (i = 0; i < dims[0]; i++) {
@@ -221,7 +231,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeInt3D(cbuff);
+  free(cbuff);
 
   /**
    * Read the p->task->storage[3] dataset
@@ -230,10 +240,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[3].layout.dim[0] * p->pool_size
    * dims[1] = p->task->storage[3].layout.dim[1] 
    */
-  ibuff = AllocateInt2D(&current->task->storage[3]);
-  ReadData(&current->task->storage[3], &ibuff[0][0]);
+  MAllocate2(current->task, TSET3, ibuff, int);
+  MReadData(current->task, TSET3, &ibuff[0][0]);
   
-  GetDims(&current->task->storage[3], dims);
+  MGetDims(current->task, TSET3, dims);
 
   Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_PM3D\n");
   for (i = 0; i < dims[0]; i++) {
@@ -243,7 +253,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeInt2D(ibuff);
+  free(ibuff);
 
   /**
    * Read the p->task->storage[4] dataset
@@ -252,10 +262,10 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * dims[0] = p->task->storage[3].layout.dim[0] * p->pool_size
    * dims[1] = p->task->storage[3].layout.dim[1] 
    */
-  ibuff = AllocateInt2D(&current->task->storage[4]);
-  ReadData(&current->task->storage[4], &ibuff[0][0]);
+  MAllocate2(current->task, TSET4, ibuff, int);
+  MReadData(current->task, TSET4, &ibuff[0][0]);
   
-  GetDims(&current->task->storage[4], dims);
+  MGetDims(current->task, TSET4, dims);
 
   Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_LIST\n");
   for (i = 0; i < dims[0]; i++) {
@@ -265,7 +275,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
     printf("\n");
   }
 
-  FreeInt2D(ibuff);
+  free(ibuff);
 
   return POOL_FINALIZE;
 }
@@ -287,11 +297,11 @@ int TaskProcess(pool *p, task *t, setup *s) {
     }
   }
 
-  WriteData(&t->storage[0], data);
-  WriteData(&t->storage[1], cdata);
-  WriteData(&t->storage[2], idata);
-  WriteData(&t->storage[3], idata);
-  WriteData(&t->storage[4], idata);
+  MWriteData(t, TSET0, data);
+  MWriteData(t, TSET1, cdata);
+  MWriteData(t, TSET2, idata);
+  MWriteData(t, TSET3, idata);
+  MWriteData(t, TSET4, idata);
 
   return SUCCESS;
 }

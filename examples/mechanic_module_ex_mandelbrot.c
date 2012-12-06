@@ -73,7 +73,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   // The state of the system
   buffer[0][0][0] = fractal(x, y, c);
 
-  WriteData(&t->storage[0], buffer);
+  MWriteData(t, "result", buffer);
 
   return SUCCESS;
 }
