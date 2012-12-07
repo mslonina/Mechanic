@@ -2,6 +2,8 @@
  * Working with datasets
  * =====================
  *
+ * In this example we manipulate the datasets with advanced hooks
+ *
  * Compilation
  * -----------
  *

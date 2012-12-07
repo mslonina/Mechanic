@@ -2,9 +2,12 @@
  * Using the Init()/Setup() hooks
  * ==============================
  *
- * The Setup() hook uses Libreadconfig public API to define the configuration options. The
+ * The Setup() hook is to define the configuration options. The
  * options are automatically merged with the core options, added to the popt table
  * (command line) and stored in the master datafile
+ *
+ * The Init() hook is used to define some low-level Mechanic variables, such as number of
+ * storage banks or configuration options.
  *
  * Using the module
  * ----------------
@@ -13,15 +16,12 @@
  *
  *     mpirun -np 2 mechanic2 -p setup --help
  *
- * LRC short introduction
- * ----------------------
- *
- * Libreadconfig (LRC) is a library developed to handle configuration files, specifically
- * for the Mechanic and is shipped with the core.
+ * Config API short introduction
+ * -----------------------------
  *
  * ### Defining options
  *
- * LRC-type options are defined in a following structure:
+ * Configuration options are defined in a following structure:
  *
  *     (options) {
  *      .space,
@@ -37,7 +37,7 @@
  * - `name` - long name of the variable (string)
  * - `short_name` - the short name of the variable (int, may be `'\0'`)
  * - `value` - the default value (string)
- * - `type` - the datatype of the variable: `LRC_INT`, `LRC_DOUBLE`, `LRC_FLOAT`, `LRC_VAL`, `LRC_STRING`
+ * - `type` - the datatype of the variable: `C_INT`, `C_DOUBLE`, `C_FLOAT`, `C_VAL`, `C_STRING`
  * - `description` - description of a variable
  *
  * All options are automatically added to the Popt table and are available in the command
@@ -45,16 +45,17 @@
  *
  * ### Getting the run-time configuration
  *
- * LRC-type options are stored as char strings in a dynamic linked-list,
+ * Configuration options are stored as char strings in a dynamic linked-list,
  * and you may access them by using the `setup->head` pointer and following functions:
  *
- * - `Option2Int(namespace, variable long name, setup->head)` for `LRC_INT`, `LRC_VAL`
- * - `LRC_option2float(namespace, variable long name, setup->head)` for `LRC_DOUBLE`
- * - `Option2Double(namespace, variable long name, setup->head)` for `LRC_FLOAT`
+ * - `Option2Int(namespace, variable long name, setup->head)` for `C_INT`, `C_VAL`
+ * - `Option2Float(namespace, variable long name, setup->head)` for `C_DOUBLE`
+ * - `Option2Double(namespace, variable long name, setup->head)` for `C_FLOAT`
+ * - `Option2String(namespace, variable long name, setup->head)` for `C_STRING`
  *
  * You can modify an option during run-time by calling:
  *
- *     LRC_modifyOption(namespace, variable, new value, new type, setup->head);
+ *     ModifyOption(namespace, variable, new value, new type, setup->head);
  *
  * ### Access the core options
  *
@@ -80,6 +81,11 @@
  * To use configuration file try:
  *
  *     mpirun -np 2 mechanic2 -p setup --config=myconfigfile
+ *
+ * ### Future
+ *
+ * The configuration options are marked to become full HDF5 attributes, so the entire API
+ * of accessing options is a subject to change.
  */
 
 #include "Mechanic2.h"
@@ -92,12 +98,14 @@
  * - the number of memory banks for a task
  * - the number of memory banks for a pool
  * - the number of configuration options
+ * - the minimum number of CPU required to run the job
  */
 int Init(init *i) {
   i->options = 24;
   i->pools = 128;
   i->banks_per_pool = 4;
   i->banks_per_task = 4;
+  i->min_cpu_required = 2;
 
   return SUCCESS;
 }
