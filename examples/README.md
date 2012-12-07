@@ -42,3 +42,61 @@ Compilation
     mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 mechanic_module_example.c -o libmechanic_module_example.so
 
 
+
+API helpers
+-----------
+
+Mechanic comes with a set of useful API functions and macros to read and write data, as
+well as attributes and allocate the memory:
+
+#### Memory allocation
+
+#### Reading and writing data
+
+- `MReadData(object, storage_name, buffer)`
+- `MWriteData(object, storage_name, buffer)`
+  
+Both macros take the valid `object`, such as task or pool, the storage bank name `storage_name`,
+and read/write data to the `buffer`:
+
+      double ibuffer[1][3];
+      double rbuffer[1][3];
+      ...
+      MWriteData(t, "result", ibuffer);
+      ...
+      MReadData(t, "result", rbuffer);
+
+  For a dynamically allocated array, we must pass the proper pointer:
+      
+      double **ibuffer;
+      double **rbuffer;
+      ...
+      MAllocate2(t, "result", ibuffer, double);
+      MReadData(t, "result", &ibuffer[0][0]);
+      ...
+      MAllocate2(t, "result", rbuffer, double);
+      MWriteData(t, "result", &rbuffer[0][0]);
+
+
+**Note: data buffers type must match the datatypes defined through the Storage().**
+
+You may use direct, low-level read/write functions:
+
+- ReadData(storage *s, void *buffer)
+- WriteData(storage *s, void *buffer)
+
+These functions take valid storage object, such as `t->storage[0]`, and read/write data
+into the buffer:
+
+    double **ibuffer;
+    double **rbuffer;
+    ...
+    MAllocate2(t, "result", ibuffer, double);
+    WriteData(t->storage[0], &ibuffer[0][0]); // Assuming "result" is t->storage[0]
+    ...
+    MAllocate2(t, "result", rbuffer, double);
+    ReadData(t->storage[0], &rbuffer[0][0]); // Assuming "result" is t->storage[0]
+
+#### Reading and writing attributes
+
+#### Additional helpers
