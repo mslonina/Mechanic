@@ -32,7 +32,7 @@ Using the installation script
 -----------------------------
 
 We provide very simple install shell script to help in installation of requirements (such as
-HDF, MPI, Libreadconfig). By default, the script will install all dependencies and the
+HDF, MPI). By default, the script will install all dependencies and the
 Mechanic in the `mechanic-opt` directory under the current working dir. You may edit the
 file and change some default settings, such as installation path or compilers.
 
@@ -71,6 +71,6 @@ There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
 http://github.com/mslonina/mechanic-overlay. This is the preferred way of installing the
 Mechanic and its dependencies. After you install the overlay, you may use:
 
-    emerge =mechanic-2.2_beta5
+    emerge =sci-misc/mechanic-2.2.0
 
 

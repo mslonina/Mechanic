@@ -74,7 +74,7 @@ Key features
   at the every stage of the simulation
 - **HDF5 data storage layout**
 - **All HDF5/MPI basic datatypes are supported**
-- **Multidimensional datasets support, with minimum rank 2 up to rank H5S_MAX_RANK (32)**
+- **Multidimensional datasets support, with minimum rank 2 up to rank `H5S_MAX_RANK` (32)**
 - **Possibility of using HDF5 attributes (directly or through API)**
 - **Automatic backup of data files and restart mode**
 - **Configuration command line.** All configuration options defined through API are
@@ -86,7 +86,7 @@ Key features
 Notes
 -----
 
-- The datasets are H5S_SIMPLE-type
+- The datasets are `H5S_SIMPLE`-type
 - The task board is rank 3
 
 Example usage
@@ -96,7 +96,7 @@ Example usage
   a standalone numerical task
 - **Genetic algorithms.** Each pool of tasks may be treated as a generation in the
   language of GAs, and each task as a member of current population
-- **Data processing.** Think about of processing of a huge number of astronomical observations
+- **Data processing.** Think of processing of a huge number of astronomical observations
 
 Quick start
 -----------
@@ -218,7 +218,7 @@ or Workqueue, in terms of user API: our code does not use the executable of user
 code. Instead, the user's code should be rewritten within the provided API. In such a way, 
 we focus only on the numerical part of the task, and not its setup or storage. The HDF5
 storage layer provides unified way to access the data by a number of different
-applications (not to mention C/Fortran codes only, but also Python software)
+applications (not to mention C/Fortran codes only, but also Python software).
 
 Short history of Mechanic
 -------------------------
@@ -238,7 +238,7 @@ Publications
 - [Slonina M., Gozdziewski K., Migaszewski C., OCPD 125-129 (2012)](http://adsabs.harvard.edu/abs/2012ocpd.conf..125S)
 - [Migaszewski C., Slonina M., Gozdziewski K., 2012arXiv1205.0822M](http://arxiv.org/abs/1205.0822)
 - [Gozdziewski K. et al, MNRAS 425, 930–949 (2012)](http://onlinelibrary.wiley.com/doi/10.1111/j.1365-2966.2012.21341.x/full)
-- [Slonina M., Gozdziewski K., Migaszewski C., Rozenkiewicz A., 2012arXiv1205.1341S](http://arxiv.org/abs/1205.1341)
+- [Gozdziewski K., Slonina M., Migaszewski C., Rozenkiewicz A., 2012arXiv1205.1341S](http://arxiv.org/abs/1205.1341)
 - [Gozdziewski K., Slonina M., Migaszewski C., OCPD 97-102 (2012)](http://adsabs.harvard.edu/abs/2012ocpd.conf...97G)
 - [Slonina M., Gozdziewski K., Migaszewski C., Astrophysics Source Code Library, record
 ascl:1205.001](http://asterisk.apod.com/viewtopic.php?f=35&t=28482)

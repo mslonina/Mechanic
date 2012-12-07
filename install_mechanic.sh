@@ -17,10 +17,9 @@ F77=gfortran #ifort
 FC=gfortran #ifort
 
 # software versions
-MECHANIC=2.2_beta1
+MECHANIC=2.2.0
 HDF=1.8.9
 MPI=1.5.5
-LRC=0.12.4
 
 # make opts
 opts=-j4
@@ -66,7 +65,6 @@ ${DWN} http://www.open-mpi.org/software/ompi/v1.5/downloads/openmpi-${MPI}.tar.b
 ${DWN} http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF}.tar.bz2 ${DWNO} hdf5-${HDF}.tar.bz2
 
 # Download the Mechanic environment
-${DWN} https://github.com/mslonina/LibReadConfig/tarball/${LRC} ${DWNO} libreadconfig-${LRC}.tar.gz
 ${DWN} https://github.com/mslonina/Mechanic/tarball/${MECHANIC} ${DWNO} mechanic-${MECHANIC}.tar.gz
 
 export CC=${CC}
@@ -86,17 +84,6 @@ tar -xvvf hdf5-${HDF}.tar.bz2
 cd hdf5-${HDF}
 ./configure --prefix=$mdir
 #./configure CC=icc CXX=icpc F77=ifort FC=ifort --enable-fortran --prefix=$mdir
-make $opts && make install
-
-# Install LRC
-cd ..
-mkdir libreadconfig-${LRC}
-tar -zxvf libreadconfig-${LRC}.tar.gz -C libreadconfig-${LRC} --strip-components=1
-cd libreadconfig-${LRC}/
-mkdir build
-cd build
-
-CC=mpicc cmake .. -DBUILD_HDF5:BOOL=ON -DCMAKE_INSTALL_PREFIX:PATH="$mdir"
 make $opts && make install
 
 # Install Mechanic
