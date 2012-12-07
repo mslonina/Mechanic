@@ -2,6 +2,7 @@ Mechanic 2.x quick start
 ========================
 
 - [Examples](#list-of-examples)
+- [Task pool status](#task-pool-status)
 - [Datatypes](#datatypes)
 - [API helpers](#api-helpers)
 - [Messages](#messages)
@@ -49,6 +50,36 @@ at following examples:
 
     mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 mechanic_module_example.c -o libmechanic_module_example.so
 
+#### The core module
+
+Take a look at `mechanic_module_core.c` located in `src/modules`. It containes,
+documents and uses all available hooks.
+
+
+Task pool states
+----------------
+
+During the task pool loop, the following status codes are defined, and available through
+`p->state`:
+
+- `POOL_PREPARED`, after the `PoolPrepare()` hook has been invoked
+- `POOL_PROCESSED`, after the `PoolProcess()` hook has been invoked
+
+i.e.
+
+  NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
+    if (p->status == POOL_PREPARED) {
+      ...
+    }
+    if (p->status == POOL_PROCESSED) {
+      ...
+    }
+  }
+
+The `PoolProcess()` hook must return one of the following codes:
+- `POOL_CREATE_NEW` - the return code for new task pool creation
+- `POOL_RESET` - the return code for the current task pool reset
+- `POOL_FINALIZE` - the return code to finalize the task pool loop
 
 Datatypes
 ---------
