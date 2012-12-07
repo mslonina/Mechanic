@@ -61,8 +61,7 @@ Mechanic support all native MPI/HDF5 datatypes:
 | unsigned char          | MPI_UNSIGNED_CHAR      | H5T_NATIVE_UCHAR     | H5T_STD_U8BE or H5T_STD_U8LE     |
 | signed int             | MPI_INT                | H5T_NATIVE_INT       | H5T_STD_I32BE or H5T_STD_I32LE   |
 | signed short int       | MPI_SHORT              | H5T_NATIVE_SHORT     | H5T_STD_I16BE or H5T_STD_I16LE   |
-| signed long int        | MPI_LONG               | H5T_NATIVE_LONG      | H5T_STD_I32BE, H5T_STD_I32LE,    |
-|                        |                        |                      | H5T_STD_I64BE or H5T_STD_I64LE   |
+| signed long int        | MPI_LONG               | H5T_NATIVE_LONG      | H5T_STD_I32BE, H5T_STD_I32LE, H5T_STD_I64BE or H5T_STD_I64LE   |
 | signed long long int   | MPI_LONG_LONG          | H5T_NATIVE_LLONG     | H5T_STD_I64BE or H5T_STD_I64LE   |
 | unsigned int           | MPI_UNSIGNED           | H5T_NATIVE_UINT      | H5T_STD_U32BE or H5T_STD_U32LE   |
 | unsigned short int     | MPI_UNSIGNED_SHORT     | H5T_NATIVE_USHORT    | H5T_STD_U16BE or H5T_STD_U16LE   |
@@ -86,7 +85,7 @@ basic datatypes:
 - `MAllocate3(object, storage_name, buffer, datatype)`
 - `MAllocate4(object, storage_name, buffer, datatype)`
 
-These macros take the valid `object`, the storage bank name `storage_name`, the data
+These macros take the valid `object` (pool or task), the storage bank name `storage_name`, the data
 buffer `buffer` to allocate and its `datatype`. The datatype must match the datatype
 defined through `Storage()`.
 
@@ -110,7 +109,7 @@ During i.e., `TaskProcess()` we want the result buffer to match the defined stor
 This will guarantee that the allocated buffer has enough space to hold data for the
 "result" storage bank.
 
-The allocation macros allocate memory in one contiguous chunk, so that, only one free is
+The allocation macros **allocate memory in one contiguous chunk**, so that, only one free is
 required:
 
     free(buffer);
@@ -166,8 +165,8 @@ and read/write data to the `buffer`:
 
 You may use direct, low-level read/write functions:
 
-- ReadData(storage *s, void *buffer)
-- WriteData(storage *s, void *buffer)
+- `ReadData(storage *s, void *buffer)`
+- `WriteData(storage *s, void *buffer)`
 
 These functions take valid storage object, such as `t->storage[0]`, and read/write data
 into the buffer:
@@ -189,5 +188,44 @@ into the buffer:
 Messages
 --------
 
+We provide wrapper for `printf` for prettier handling of messages:
+
+- `Message(message_type, format, args)`
+
+i.e.
+
+    Message(MESSAGE_INFO, "my pretty message from node %d\n", node);
+
+Available types of messages:
+
+- `MESSAGE_INFO`
+- `MESSAGE_ERR`
+- `MESSAGE_WARN`
+- `MESSAGE_OUTPUT`
+- `MESSAGE_RESULT`
+- `MESSAGE_COMMENT`
+
 Error codes
 -----------
+
+Mechanic check the internal as well as module return codes. In the case of success, the
+function should return `SUCCESS` code, i.e.
+
+    TaskProcess(pool *p, task *t, setup *s) {
+      return SUCCESS;
+    }
+
+Otherwise, following error codes should be returned:
+
+| Module error code | Code | Core error code | Code | Component   |
+|:------------------|:-----|:----------------|:-----|:------------|
+| MODULE_ERR_CORE   | 801  | CORE_ERR_CORE   | 901  | Core        |
+| MODULE_ERR_MPI    | 811  | CORE_ERR_MPI    | 911  | MPI         |  
+| MODULE_ERR_HDF    | 812  | CORE_ERR_HDF    | 912  | HDF5        |
+| -                 | -    | CORE_ERR_MODULE | 913  | Module      |
+| MODULE_ERR_SETUP  | 814  | CORE_ERR_SETUP  | 914  | Setup       |
+| MODULE_ERR_MEM    | 815  | CORE_ERR_MEM    | 915  | Memory      |
+| MODULE_ERR_STORAGE| 816  | CORE_ERR_STORAGE| 916  | Storage     |
+| MODULE_ERR_OTHER  | 888  | CORE_ERR_OTHER  | 999  | Other       |
+
+Mechanic will try to safely abort job on any error code.
