@@ -169,7 +169,7 @@ int Prepare(int node, char *masterfile, setup *s) {
     Message(MESSAGE_COMMENT, "--ilimit = %d\n", ilimit);
     Message(MESSAGE_COMMENT, "--debug = %d\n", debug);
     Message(MESSAGE_COMMENT, "--dlimit = %f\n", dlimit);
-    Message(MESSAGE_COMMENT, "--host = %s\n", ConfigGetOptionValue("mymodule", "host", s->head));
+    Message(MESSAGE_COMMENT, "--host = %s\n", Option2String("mymodule", "host", s->head));
     Message(MESSAGE_COMMENT, "\n");
   }
 
