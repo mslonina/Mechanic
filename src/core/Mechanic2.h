@@ -13,18 +13,12 @@
 #include <stdarg.h>
 #include <sys/dir.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/param.h>
-#include <signal.h>
 #include <fcntl.h>
-#include <dirent.h>
-#include <math.h>
-#include <popt.h>
-#include <dlfcn.h>
 #include <time.h>
 #include <ctype.h>
-
+#include <dlfcn.h>
+#include <math.h>
+#include <popt.h>
 #include <mpi.h>
 #include <hdf5.h>
 #include <hdf5_hl.h>
