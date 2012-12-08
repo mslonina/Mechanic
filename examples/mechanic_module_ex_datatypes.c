@@ -7,12 +7,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_datatypes.c -o libmechanic_module_datatypes.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_ex_datatypes.c -o libmechanic_ex_module_datatypes.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p datatypes -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p ex_datatypes -x 10 -y 20
  *
  * Listing the contents of the data file
  * -------------------------------------

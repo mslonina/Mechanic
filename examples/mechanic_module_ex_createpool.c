@@ -7,12 +7,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_createpool.c -o libmechanic_module_createpool.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_ex_createpool.c -o libmechanic_module_ex_createpool.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p createpool -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p ex_createpool -x 10 -y 20
  *
  * Listing the contents of the data file
  * -------------------------------------

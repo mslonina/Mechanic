@@ -2,20 +2,28 @@ CC=mpicc
 CFLAGS=-std=c99 -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl
 EXT=dylib
 
-all:
-	${CC} ${CFLAGS} mechanic_module_ex_map.c -o libmechanic_module_map.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_mandelbrot.c -o libmechanic_module_mandelbrot.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_setup.c -o libmechanic_module_setup.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_prepareprocess.c -o libmechanic_module_prepareprocess.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_createpool.c -o libmechanic_module_createpool.${EXT}		
-	${CC} ${CFLAGS} mechanic_module_ex_changepoollayout.c -o libmechanic_module_chpoollayout.${EXT}		
-	${CC} ${CFLAGS} mechanic_module_ex_changepoollayout2.c -o libmechanic_module_chpoollayout2.${EXT}		
-	${CC} ${CFLAGS} mechanic_module_ex_datatypes.c -o libmechanic_module_datatypes.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_dim.c -o libmechanic_module_dim.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_attr.c -o libmechanic_module_attr.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_reset.c -o libmechanic_module_reset.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_pool.c -o libmechanic_module_pool.${EXT}	
-	${CC} ${CFLAGS} mechanic_module_ex_dset.c -o libmechanic_module_dset.${EXT}	
+examples=\
+	mechanic_module_ex_map.${EXT} \
+	mechanic_module_ex_mandelbrot.${EXT} \
+	mechanic_module_ex_setup.${EXT} \
+	mechanic_module_ex_prepareprocess.${EXT} \
+	mechanic_module_ex_createpool.${EXT} \
+	mechanic_module_ex_changepoollayout.${EXT} \
+	mechanic_module_ex_changepoollayout2.${EXT} \
+	mechanic_module_ex_datatypes.${EXT} \
+	mechanic_module_ex_dim.${EXT} \
+	mechanic_module_ex_attr.${EXT} \
+	mechanic_module_ex_reset.${EXT} \
+	mechanic_module_ex_pool.${EXT} \
+	mechanic_module_ex_dset.${EXT} 
+
+%.so: %.c
+	${CC} -o lib$@ $< ${CFLAGS}
+
+%.dylib: %.c
+	${CC} -o lib$@ $< ${CFLAGS}
+
+all: ${examples}
 
 clean:
-	rm -f *.dylib *.so *.h5
+	rm -f *.o *.dylib *.so *.h5

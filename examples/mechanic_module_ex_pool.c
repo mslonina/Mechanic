@@ -5,12 +5,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_pool.c -o libmechanic_module_pool.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_ex_pool.c -o libmechanic_module_ex_pool.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p pool -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p ex_pool -x 10 -y 20
  *
  * Getting the data
  * ----------------

@@ -7,12 +7,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_dset.c -o libmechanic_module_dset.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_ex_dset.c -o libmechanic_module_ex_dset.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p dset -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p ex_dset -x 10 -y 20
  *
  * Getting the data
  * ----------------

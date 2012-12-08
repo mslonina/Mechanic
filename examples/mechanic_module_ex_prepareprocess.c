@@ -1,6 +1,22 @@
 /**
  * Using Prepare/Process hooks
  * ===========================
+ *
+ * Compilation
+ * -----------
+ *
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_ex_prepareprocess.c -o libmechanic_module_ex_prepareprocess.so
+ *
+ * Using the module
+ * ----------------
+ *
+ *    mpirun -np 4 mechanic2 -p ex_prepareprocess -x 10 -y 20
+ *
+ * Getting the data
+ * ----------------
+ *
+ *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
+ *
  */
 
 #include "Mechanic2.h"

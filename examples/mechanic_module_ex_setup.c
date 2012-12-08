@@ -14,7 +14,7 @@
  *
  * To get the available configuration options try:
  *
- *     mpirun -np 2 mechanic2 -p setup --help
+ *     mpirun -np 2 mechanic2 -p ex_setup --help
  *
  * Config API short introduction
  * -----------------------------
@@ -80,7 +80,7 @@
  *
  * To use configuration file try:
  *
- *     mpirun -np 2 mechanic2 -p setup --config=myconfigfile
+ *     mpirun -np 2 mechanic2 -p ex_setup --config=myconfigfile
  *
  * ### Future
  *

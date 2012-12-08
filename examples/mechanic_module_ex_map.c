@@ -5,12 +5,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_map.c -o libmechanic_module_map.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_ex_map.c -o libmechanic_module_ex_map.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p map -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p ex_map -x 10 -y 20
  *
  * Getting the data
  * ----------------

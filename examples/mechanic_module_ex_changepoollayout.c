@@ -8,12 +8,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_chpoollayout.c -o libmechanic_module_chpoollayout.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_ex_chpoollayout.c -o libmechanic_module_ex_chpoollayout.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p chpoollayout -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p ex_chpoollayout -x 10 -y 20
  *
  * Listing the contents of the data file
  * -------------------------------------

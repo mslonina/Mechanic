@@ -5,12 +5,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_mandelbrot.c -o libmechanic_module_mandelbrot.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_ex_mandelbrot.c -o libmechanic_module_ex_mandelbrot.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p mandelbrot -x 2048 -y 2048
+ *    mpirun -np 4 mechanic2 -p ex_mandelbrot -x 2048 -y 2048
  *
  * Getting the data
  * ----------------

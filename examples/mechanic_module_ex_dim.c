@@ -1,18 +1,18 @@
 /**
- * Use different datatypes
- * =======================
+ * Use different storage dimensions
+ * ================================
  *
- * In this example we show usage of different (native) datatypes
+ * In this example we show usage of different storage dimensions
  *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_datatypes.c -o libmechanic_module_datatypes.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_ex_dim.c -o libmechanic_module_ex_dim.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p dim -x 10 -y 20
+ *    mpirun -np 4 mechanic2 -p ex_dim -x 10 -y 20
  *
  * Listing the contents of the data file
  * -------------------------------------
