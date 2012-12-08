@@ -7,14 +7,15 @@ Mechanic short changelog
 - Support for all basic (native) datatypes
 - Multidimensional datasets (min. rank 2 up to max rank H5S_MAX_RANK)
 - Support for 3D task board, and additional task information right at the board
-- Better attribute handling, through the schema API
+- HDF5 attributes handling through the schema API
 - New memory handling, much more flexible and efficient
 - New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
-- New public functions: ReadData(), WriteData(), ReadAttr(), WriteAttr() 
-  and memory allocation function for all basic datatypes, up to rank 4
-- Libreadconfig no longer as dependency (shipped with the core)
+- New public functions: ReadData(), WriteData(), ReadAttr(), WriteAttr() with
+  corresponding generic-type macros and memory allocation functions for all basic datatypes, up to rank 4
+- Libreadconfig now shipped with the core
+- Build system improvements
 - Several bug fixes and minor improvements
-- Documentation updates
+- Documentation updates, examples installed in share/mechanic/examples
 
 2.1
 ---
