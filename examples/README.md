@@ -1,8 +1,10 @@
-Mechanic 2.x quick start
-========================
+Mechanic 2.x quick reference
+============================
 
 - [Examples](#list-of-examples)
-- [Task pool status](#task-pool-status)
+- [The pool loop](#the-pool-loop)
+- [The task loop](#the-task-loop)
+- [Storage](#storage)
 - [Datatypes](#datatypes)
 - [Hooks](#hooks)
 - [API helpers](#api-helpers)
@@ -53,12 +55,18 @@ at following examples:
 
 #### The core module
 
-Take a look at `mechanic_module_core.c` located in `src/modules`. It containes,
+Take a look at `mechanic_module_core.c` located in `src/modules`. It contains,
 documents and uses all available hooks.
 
 
-Task pool states
-----------------
+The pool loop
+-------------
+
+#### The pool loop explained
+
+@todo
+
+#### Task pool states
 
 During the task pool loop, the following status codes are defined, and available through
 `p->state`:
@@ -81,6 +89,17 @@ The `PoolProcess()` hook must return one of the following codes:
 - `POOL_CREATE_NEW` - the return code for new task pool creation
 - `POOL_RESET` - the return code for the current task pool reset
 - `POOL_FINALIZE` - the return code to finalize the task pool loop
+
+
+The task loop
+-------------
+
+@todo
+
+Storage type
+------------
+
+@todo
 
 Datatypes
 ---------
@@ -143,22 +162,23 @@ Hooks
       
       [pool loop]
       
-      Storage()
-        NodePrepare()
-        PoolPrepare()
-        LoopPrepare()
-      
-        [task loop]
-          TaskBoardMap()
-          TaskPrepare()
-          TaskProcess()
-        [/task loop]
+        Storage()
+          NodePrepare()
+          PoolPrepare()
+          LoopPrepare()
         
-        LoopProcess()
-        PoolProcess()
-        NodeProcess()
-      
+          [task loop]
+            TaskBoardMap()
+            TaskPrepare()
+            TaskProcess()
+          [/task loop]
+          
+          LoopProcess()
+          PoolProcess()
+          NodeProcess()
+        
       [/pool loop]
+
     Process()
 
 API helpers
@@ -256,8 +276,8 @@ and read/write data to the `buffer`:
 
 You may use direct, low-level read/write functions:
 
-- `ReadData(storage *s, void *buffer)`
-- `WriteData(storage *s, void *buffer)`
+- `int ReadData(storage *s, void *buffer)`
+- `int WriteData(storage *s, void *buffer)`
 
 These functions take valid storage object, such as `t->storage[0]`, and read/write data
 into the buffer:
@@ -266,15 +286,54 @@ into the buffer:
     double **rbuffer;
     ...
     MAllocate2(t, "result", ibuffer, double);
-    WriteData(t->storage[0], &ibuffer[0][0]); // Assuming "result" is t->storage[0]
+    WriteData(&t->storage[0], &ibuffer[0][0]); // Assuming "result" is t->storage[0]
     ...
     MAllocate2(t, "result", rbuffer, double);
-    ReadData(t->storage[0], &rbuffer[0][0]); // Assuming "result" is t->storage[0]
+    ReadData(&t->storage[0], &rbuffer[0][0]); // Assuming "result" is t->storage[0]
 
 #### Reading and writing attributes
 
+- `MReadAttr(object, storage_name, attribute_name, buffer)`
+- `MWriteAttr(object, storage_name, attribute_name, buffer)`
+  
+Both macros take the valid `object`, such as task or pool, the storage bank name `storage_name`,
+the attribute name `attribute_name` and read/write the attribute data to the `buffer`:
+  
+    int iattr, rattr;
+    iattr = 91;
+    MWriteAttr(t, "dataset", "integer attr", &iattr);
+    ...
+    MReadAttr(t, "dataset", "integer attr", &rattr);
+
+The low level interface is available:
+
+- `int WriteAttr(storage *s, void *buffer)`
+- `int ReadAttr(storage *s, void *buffer)`
+
+i.e.
+
+    int iattr, rattr;
+    iattr = 91;
+    WriteAttr(&t->storage[0].attr[0], &iattr);
+    ...
+    ReadAttr(&t->storage[0].attr[0], &rattr);
+
+
 #### Additional helpers
 
+- `MGetDims(object, storage_name, dims)` - this macro gets the dimensions of the specified 
+  storage bank `storage_name` of a given `object` (pool or task), i.e.
+
+    int dims[MAX_RANK];
+    MGetDims(t, "result", dims);
+
+Low level interface is available:
+- `int GetDims(storage *s, int *dims)`, i.e.
+    
+    int dims[MAX_RANK];
+    GetDims(t->storage[0], dims);
+
+**Note: the dims array must be at least of length `MAX_RANK`.**
 
 Messages
 --------
