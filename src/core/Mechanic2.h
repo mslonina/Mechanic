@@ -24,7 +24,6 @@
 #include <dlfcn.h>
 #include <time.h>
 #include <ctype.h>
-#include <popt.h>
 
 #include <mpi.h>
 #include <hdf5.h>
