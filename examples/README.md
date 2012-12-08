@@ -332,7 +332,8 @@ storage bank `storage_name` of a given `object` (pool or task), i.e.
 Low level interface is available:
 - `int GetDims(storage *s, int *dims)`
 
-    
+i.e.
+
     int dims[MAX_RANK];
     GetDims(t->storage[0], dims);
 
