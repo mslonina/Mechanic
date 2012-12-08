@@ -64,7 +64,28 @@ The pool loop
 
 #### The pool loop explained
 
-@todo
+After the core and the module are bootstrapped, the Mechanic enters the four-step pool
+loop:
+
+1. `PoolPrepare()`
+  All nodes enter the `PoolPrepare()`. Data of all previous pools is passed to this
+  function, so that we may use them to prepare data for the current pool. The current pool
+  data is broadcasted to all nodes and stored in the master datafile.
+
+2. The Task Loop
+  All nodes enter the task loop. The master node prepares the task during
+  `TaskPrepare()`. Each worker receives a task, and calls the `TaskProcess()`. The task
+  data, marked with `use_hdf = 1` are received by the master node after the
+  `TaskProcess()` is finished and stored during the `CheckpointProcess()`.
+
+3. The Checkpoint
+  `The CheckpointPrepare()` hook might be used to adjust the received data. The pool 
+  data might be adjusted here as well, the data is stored again during `CheckpointProcess()`.
+
+4. `PoolProcess()`
+  After the task loop is finished, the `PoolProcess()` is used to decide whether to
+  continue the pool loop or not. The data of all pools is passed to this function. 
+
 
 #### Task pool states
 
