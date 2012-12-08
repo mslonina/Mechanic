@@ -4,6 +4,7 @@ Mechanic 2.x quick reference
 - [Examples](#list-of-examples)
 - [The pool loop](#the-pool-loop)
 - [The task loop](#the-task-loop)
+- [Setup](#setup)
 - [Storage](#storage)
 - [Datatypes](#datatypes)
 - [Hooks](#hooks)
@@ -116,6 +117,73 @@ The task loop
 -------------
 
 @todo
+
+
+Setup
+-----
+
+By using the `Setup()` hook it is possible to define all configuration options required by
+the module. Options are available in the command line, and are stored in the master file.
+The master node reads the configuration and parses the commandline.
+The configuration is broadcasted then to all nodes.
+
+To obtain all available options, try the `--help` or `--usage` flag, i.e.
+
+    mpirun -np 2 mechanic2 -p hello --help
+    
+The Config API allows any kind of C99 struct initialization to be used, i.e.:
+
+     s->options[0] = (options) {
+       .space="NAMESPACE",
+       .name="VARIABLE",
+       .shortName="V",
+       .value="DEFAULT_VALUE",
+       .type=TYPE,
+       .description="SHORT DESCRIPTION"
+     };
+
+where
+
+- `space` - the name of the configuration namespace (char string)
+- `name` - the name of the variable (char string)
+- `shortName` - the short name of the variable (char string), used in command line args,
+   may be '\0' (no short option)
+- `value` - the default value (char string)
+- `description` - description for the variable (char string), used in command line args
+- `type` - the variable type:
+  - `C_INT` - integer variable
+  - `C_LONG` - long integer variable
+  - `C_FLOAT` - float variable
+  - `C_DOUBLE` - double variable
+  - `C_STRING` - char variable
+  - `C_VAL` - variable that only updates its value (i.e. boolean)
+
+The options table must finish with `OPTIONS_END`:
+
+     s->options[13] = (options) OPTIONS_END;
+
+#### The configuration file
+
+The configuration file may be used, in a sample form (only one configuration
+file both for core and the module):
+
+    [core] # namespace defined through .space="NAMESPACE"
+    name = arnoldweb
+    xres = 2048
+    yres = 2048
+    xmin = 0.95
+    xmax = 1.05
+    ymin = 0.95
+    ymax = 1.05
+
+    [arnold]
+    step = 0.3
+    tend = 2000.0
+    driver = 2
+    eps = 0.0
+    epsmax = 0.1
+    eps_interval = 0.02
+
 
 Storage
 -------
