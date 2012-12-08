@@ -96,8 +96,8 @@ The task loop
 
 @todo
 
-Storage type
-------------
+Storage
+-------
 
 @todo
 
@@ -324,14 +324,14 @@ i.e.
 - `MGetDims(object, storage_name, dims)` - this macro gets the dimensions of the specified 
   storage bank `storage_name` of a given `object` (pool or task), i.e.
 
-      int dims[MAX_RANK];
-      MGetDims(t, "result", dims);
+    int dims[MAX_RANK];
+    MGetDims(t, "result", dims);
 
 Low level interface is available:
 - `int GetDims(storage *s, int *dims)`, i.e.
     
-      int dims[MAX_RANK];
-      GetDims(t->storage[0], dims);
+    int dims[MAX_RANK];
+    GetDims(t->storage[0], dims);
 
 **Note: the dims array must be at least of length `MAX_RANK`.**
 
