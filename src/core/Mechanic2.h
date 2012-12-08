@@ -94,90 +94,59 @@
 #define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
 #define ATTR_STORAGE_END {.name = NULL, .dataspace = -1, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
 
-/* Option attributes */
-#define HDF5_ATTR 1
-
-#define OPTIONS_END {.space="", .name="", .shortName='\0', .value="", .description="", .type=0}
-
-#define C_VAL POPT_ARG_VAL
-#define C_INT POPT_ARG_INT
-#define C_FLOAT POPT_ARG_FLOAT
-#define C_DOUBLE POPT_ARG_DOUBLE
-#define C_STRING POPT_ARG_STRING
-#define C_LONG POPT_ARG_LONG
-
 /**
- * @def CONFIG_MAX_LINE_LENGTH
- * @brief Maximum line length in the config file.
- *
- * @def CONFIG_NULL
- * @brief Null character for trimming.
+ * The configuration
  */
-#define CONFIG_MAX_LINE_LENGTH 1024
-#define CONFIG_LEN 512
-#define CONFIG_NULL '\0'
+#define OPTIONS_END {.space="", .name="", .shortName='\0', .value="", .description="", .type=0} /**< Options default initializer */
+
+#define C_VAL POPT_ARG_VAL /**< int */
+#define C_INT POPT_ARG_INT /**< int */
+#define C_FLOAT POPT_ARG_FLOAT /**< float */
+#define C_DOUBLE POPT_ARG_DOUBLE /**< double */
+#define C_STRING POPT_ARG_STRING /**< string */
+#define C_LONG POPT_ARG_LONG /**< long */
+
+#define CONFIG_MAX_LINE_LENGTH 1024 /**< Maximum line length in the config file */
+#define CONFIG_LEN 512 /**< Maximum config filename length */
+#define CONFIG_NULL '\0' /**< Null */
 
 /**
  * @struct config
- * @brief Options struct.
- *
- * @param char
- *   The name of the variable.
- *
- * @param char
- *   The value of the variable.
- *
- * @param int
- *   The type of the variable.
+ * Internal options struct
  */
 typedef struct config{
-  char name[CONFIG_LEN];
-  char value[CONFIG_LEN];
-  int type;
-  struct config* next;
+  char name[CONFIG_LEN]; /**< The name of the variable */
+  char value[CONFIG_LEN]; /**< The value of the variable */
+  int type; /**< The datatype of the variable */
+  struct config* next; /**< The next option pointer */
 } config;
 
 /**
  * @struct configNamespace
- * @brief Namespace struct.
- *
- * @param char 
- *   The name of the namespace.
- *
- * @param config
- *   The array of structs of config options.
- *
- * @param int
- *   The number of options read for given config options struct.
+ * The internal namespace struct
  */
 typedef struct configNamespace{
-  char space[CONFIG_LEN];
-  config* options;
-  struct configNamespace* next;
+  char space[CONFIG_LEN]; /**< The name of the namespace */
+  config* options; /**< The options strcuture for given namespace */
+  struct configNamespace* next; /**< The pointer to the next namespace */
 } configNamespace;
 
 /**
  * @struct options
- * @brief Allowed types.
- * 
- * @param char
- *   The namespace name.
- *
- * @param char
- *   The name of the option.
- *
- * @param int
- *   The type of the value.
+ * The configuration options
  */
 typedef struct {
-  char space[CONFIG_LEN];
-  char name[CONFIG_LEN];
-  char shortName;
-  char value[CONFIG_LEN];
-  char description[CONFIG_LEN];
-  int type;
-  int attr;
+  char space[CONFIG_LEN]; /**< The name of the configuration namespace */
+  char name[CONFIG_LEN]; /**< The name of the variable */
+  char shortName; /**< The short name of the variable */
+  char value[CONFIG_LEN]; /**< The default value of the variable */
+  char description[CONFIG_LEN]; /**< The description of the variable */
+  int type; /**< The datatype of the variable */
 } options;
+
+/**
+ * Configuration helpers
+ */
 
 /* Search and modify */
 config* ConfigFindOption(char* var, configNamespace* current);
@@ -239,7 +208,7 @@ typedef struct {
   int use_hdf; /**< Enables HDF5 storage for the memory block */
   int sync; /**< Whether to synchronize memory bank between master and worker */
   int dim[MAX_RANK]; /**< The dimensions of the memory dataset */
-  hid_t datatype; /**< The datatype of the dataset (H5T_NATIVE_DOUBLE) */
+  hid_t datatype; /**< The datatype of the dataset */
   int storage_dim[MAX_RANK]; /**< @internal The dimensions of the storage dataset */
   int offset[MAX_RANK]; /**< @internal The offsets (calculated automatically) */
   H5S_class_t dataspace; /**< @internal The type of the HDF5 dataspace (H5S_SIMPLE) */
@@ -330,9 +299,9 @@ typedef enum {
 
 /**
  * Low level Memory allocation helpers
- *
  */
-//2D
+
+/* 2D */
 int** AllocateInt2(storage *s);
 short** AllocateShort2(storage *s);
 long** AllocateLong2(storage *s);
@@ -343,7 +312,7 @@ unsigned long long** AllocateULLong2(storage *s);
 float** AllocateFloat2(storage *s);
 double** AllocateDouble2(storage *s);
 
-// 3D
+/* 3D */
 int*** AllocateInt3(storage *s);
 short*** AllocateShort3(storage *s);
 long*** AllocateLong3(storage *s);
@@ -354,7 +323,7 @@ unsigned long long*** AllocateULLong3(storage *s);
 float*** AllocateFloat3(storage *s);
 double*** AllocateDouble3(storage *s);
 
-// 4D
+/* 4D */
 int**** AllocateInt4(storage *s);
 short**** AllocateShort4(storage *s);
 long**** AllocateLong4(storage *s);
@@ -367,6 +336,11 @@ double**** AllocateDouble4(storage *s);
 
 /**
  * High level memory allocation macros
+ */
+
+/**
+ * @macro
+ * Allocate the 2D contiguous array 
  */
 #define MAllocate2(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
@@ -395,6 +369,10 @@ double**** AllocateDouble4(storage *s);
     Error(CORE_ERR_MEM);\
   }
 
+/**
+ * @macro
+ * Allocate the 3D contiguous array 
+ */
 #define MAllocate3(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
     int _msindex, _i = 0, _j = 0;\
@@ -426,6 +404,10 @@ double**** AllocateDouble4(storage *s);
     Error(CORE_ERR_MEM);\
   }
 
+/**
+ * @macro
+ * Allocate the 4D contiguous array 
+ */
 #define MAllocate4(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
     int _msindex, _i = 0, _j = 0, _k = 0;\
@@ -490,17 +472,14 @@ int WriteTask(task *t, char *storage_name, void *data); /**< Write data to the t
 /**
  * Message and log helpers
  */
-void Message(int type, char* message, ...);
+void Message(int type, char* message, ...); /**< Common printf wrapper */
 void Error(int status); /**< Error reporting */
 void Abort(int status); /**< Abort handler */
 void CheckStatus(int status); /**< Status checking utility*/
 void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
 
 /**
- * Public macros
- */
-
-/**
+ * @macro
  * Read the data for the given object (pool, task)
  */
 #define MReadData(_mobject, _mstorage_name, _mdata)\
@@ -520,6 +499,7 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
   }
 
 /**
+ * @macro
  * Write the data for the given object (pool, task)
  */
 #define MWriteData(_mobject, _mstorage_name, _mdata)\
@@ -538,6 +518,7 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
   }
 
 /**
+ * @macro
  * Read the attribute for the given object (pool, task)
  */
 #define MReadAttr(_mobject, _mstorage_name, _mattr_name, _mdata)\
@@ -563,6 +544,7 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
   }
 
 /**
+ * @macro
  * Write the attribute for the given object (pool, task)
  */
 #define MWriteAttr(_mobject, _mstorage_name, _mattr_name, _mdata)\
@@ -587,7 +569,10 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
     Error(CORE_ERR_MEM);\
   }
 
-
+/**
+ * @macro
+ * Get the dimensions for the given object
+ */
 #define MGetDims(_mobject, _mstorage_name, _dims)\
   if (_mobject) {\
     int _msindex;\
