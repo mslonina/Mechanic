@@ -567,26 +567,26 @@ int Setup(setup *s) {
  * If you need dynamic allocation of local data buffers, you may use Allocate* functions
  * available. For the 2-dimensional buffers:
  *
- * | C datatype             | Allocate function | Free function |            
- * |:-----------------------|:------------------|:--------------|
- * | signed int             | AllocateInt2D     | FreeInt2D     |
- * | signed short int       | AllocateShort2D   | FreeShort2D   |
- * | signed long int        | AllocateLong2D    | FreeLong2D    |
- * | signed long long int   | AllocateLLong2D   | FreeLLong2D   |
- * | unsigned int           | AllocateUInt2D    | FreeUInt2D    |
- * | unsigned short int     | AllocateUShort2D  | FreeUShort2D  |
- * | unsigned long long int | AllocateULLong2D  | FreeULLong2D  |
- * | float                  | AllocateFloat2D   | FreeFloat2D   |
- * | double                 | AllocateDouble2   | FreeDouble2D  |
+ * | C datatype             | Allocate function |
+ * |:-----------------------|:------------------|
+ * | signed int             | AllocateInt2      |
+ * | signed short int       | AllocateShort2    |
+ * | signed long int        | AllocateLong2     |
+ * | signed long long int   | AllocateLLong2    |
+ * | unsigned int           | AllocateUInt2     |
+ * | unsigned short int     | AllocateUShort2   |
+ * | unsigned long long int | AllocateULLong2   |
+ * | float                  | AllocateFloat2    |
+ * | double                 | AllocateDouble2   |
  * 
  * Example:
  *
  *    int **buffer;
  *    ...
- *    buffer = AllocateInt2D(&t->storage[0]);
+ *    buffer = AllocateInt2(&t->storage[0]);
  *    ReadData(&t->storage[0], &buff[0][0]);
  *    ...
- *    FreeInt2D(buff);
+ *    free(buff);
  *
  * There are corresponding 3- and 4D version as well.
  *
@@ -823,7 +823,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
  *
  * This function is called during the TaskPrepare() phase.
  *
- * If the TaskMapping() hook is present in a custom module, it will be used instead of the
+ * If the TaskBoardMap() hook is present in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup master_only
@@ -833,7 +833,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
  *
  * @return SUCCESS or error code otherwise
  */
-int TaskMapping(pool *p, task *t, setup *s) {
+int TaskBoardMap(pool *p, task *t, setup *s) {
   int px, vert, horiz;
 
   px = t->tid;

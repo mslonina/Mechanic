@@ -4,6 +4,7 @@ Mechanic 2.x quick start
 - [Examples](#list-of-examples)
 - [Task pool status](#task-pool-status)
 - [Datatypes](#datatypes)
+- [Hooks](#hooks)
 - [API helpers](#api-helpers)
 - [Messages](#messages)
 - [Error codes](#error-codes)
@@ -67,14 +68,14 @@ During the task pool loop, the following status codes are defined, and available
 
 i.e.
 
-  NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
-    if (p->status == POOL_PREPARED) {
-      ...
+    NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
+      if (p->status == POOL_PREPARED) {
+        ...
+      }
+      if (p->status == POOL_PROCESSED) {
+        ...
+      }
     }
-    if (p->status == POOL_PROCESSED) {
-      ...
-    }
-  }
 
 The `PoolProcess()` hook must return one of the following codes:
 - `POOL_CREATE_NEW` - the return code for new task pool creation
@@ -100,6 +101,65 @@ Mechanic support all native MPI/HDF5 datatypes:
 | float                  | MPI_FLOAT              | H5T_NATIVE_FLOAT     | H5T_IEEE_F32BE or H5T_IEEE_F32LE |
 | double                 | MPI_DOUBLE             | H5T_NATIVE_DOUBLE    | H5T_IEEE_F64BE or H5T_IEEE_F64LE |
 
+
+
+Hooks
+-----
+
+#### Basic hooks
+
+- `int Init(init *i)` - initialize low level core variables
+- `int Setup(setup *s)` - define configuration options
+- `int Storage(pool *p, storage *s)` - define the storage layout per task pool
+- `int PoolPrepare(pool **all, pool *p, setup *s)` - prepare the task pool
+- `int PoolProcess(pool **all, pool *p, setup *s)` - process the task pool
+- `int TaskPrepare(pool *p, task *t, setup *s)` - prepare the task
+- `int TaskProcess(pool *p, task *t, setup *s)` - process the task
+
+#### Advanced hooks
+
+- `int TaskBoardMap(pool *p, task *t, setup *s)` - map the task on the task board
+- `int CheckpointPrepare(pool *p, checkpoint *c, setup *s)` - prepare the checkpoint 
+- `int Prepare(int node, char *masterfile, setup *s)` - prepare the run 
+- `int Process(int node, char *masterfile, pool **all, setup *s)` - process the run 
+- `int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s)` -
+  prepare the dataset
+- `int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s)` -
+  process the dataset
+- `int NodePrepare(int mpi_size, int node, pool **all, pool *p, setup *s)` - prepare the
+  task pool loop on the specific node
+- `int NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s)` - process the
+  task pool loop on the specific node
+- `int LoopPrepare(int mpi_size, int node, pool **all, pool *p, setup *s)` - prepare the
+  task loop
+- `int LoopProcess(int mpi_size, int node, pool **all, pool *p, setup *s)` - process the
+  task loop
+
+#### Hooks calling order
+
+    Init()
+    Setup()
+    Prepare()
+      
+      [pool loop]
+      
+      Storage()
+        NodePrepare()
+        PoolPrepare()
+        LoopPrepare()
+      
+        [task loop]
+          TaskBoardMap()
+          TaskPrepare()
+          TaskProcess()
+        [/task loop]
+        
+        LoopProcess()
+        PoolProcess()
+        NodeProcess()
+      
+      [/pool loop]
+    Process()
 
 API helpers
 -----------

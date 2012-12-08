@@ -114,7 +114,7 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
   while(1) {
     if (t->tid >= p->pool_size) return NO_MORE_TASKS;
 
-    q = LoadSym(m, "TaskMapping", LOAD_DEFAULT);
+    q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
     if (q) mstat = q(p, t, s);
     CheckStatus(mstat);
 
