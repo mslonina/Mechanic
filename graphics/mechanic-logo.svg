@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="1440"
+   height="900"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.2 r9819"
+   sodipodi:docname="mechanic-logo.svg"
+   inkscape:export-filename="/Volumes/Data/mechanic-workload.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300">
+  <defs
+     id="defs4">
+    <filter
+       inkscape:collect="always"
+       id="filter4144">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.88734015"
+         id="feGaussianBlur4146" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3866">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.23344688"
+         id="feGaussianBlur3868" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3870"
+       x="-0.021379867"
+       width="1.0427597"
+       y="-0.11386176"
+       height="1.2277235">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.4156813"
+         id="feGaussianBlur3872" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3947">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.41586286"
+         id="feGaussianBlur3949" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3955"
+       x="-0.0062000565"
+       width="1.0124001"
+       y="-0.18594915"
+       height="1.3718983">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.3912095"
+         id="feGaussianBlur3957" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#6ca8e3"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="1"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.8284766"
+     inkscape:cx="-13.923735"
+     inkscape:cy="303.48762"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     width="1440px"
+     inkscape:window-width="1436"
+     inkscape:window-height="856"
+     inkscape:window-x="4"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-152.36218)">
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;stroke:#000000;stroke-opacity:0.78431373000000004;filter:url(#filter3870);font-family:FontAwesome;-inkscape-font-specification:FontAwesome Bold;fill-opacity:0.39215687"
+       x="175.96365"
+       y="828.85864"
+       id="text3812"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan3814"
+         x="175.96365"
+         y="828.85864"
+         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;stroke:#000000;stroke-opacity:0.78431373000000004;font-family:Myriad Pro;-inkscape-font-specification:Myriad Pro;fill-opacity:0.39215687">Mechanic</tspan></text>
+    <text
+       sodipodi:linespacing="125%"
+       id="text3862"
+       y="828.84698"
+       x="176.44899"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:0.58844759999999996;stroke:#ffffff;stroke-opacity:0.1732852;filter:url(#filter3866);font-family:FontAwesome;-inkscape-font-specification:FontAwesome Bold"
+       xml:space="preserve"><tspan
+         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:0.58844759999999996;stroke:#ffffff;stroke-opacity:0.1732852;font-family:Myriad Pro;-inkscape-font-specification:Myriad Pro"
+         y="828.84698"
+         x="176.44899"
+         id="tspan3864"
+         sodipodi:role="line">Mechanic</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:40px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;font-family:FontAwesome;-inkscape-font-specification:FontAwesome Bold"
+       x="175.86179"
+       y="828.50836"
+       id="text2987"
+       sodipodi:linespacing="125%"><tspan
+         sodipodi:role="line"
+         id="tspan2989"
+         x="175.86179"
+         y="828.50836"
+         style="font-size:40px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;font-family:Myriad Pro;-inkscape-font-specification:Myriad Pro">Mechanic</tspan></text>
+    <g
+       id="g3874"
+       transform="translate(3.8786048,-8.0370208)">
+      <g
+         transform="matrix(0.33835218,0,0,0.33835218,164.29946,557.32081)"
+         id="g4148">
+        <rect
+           y="704.63202"
+           x="536.09332"
+           height="29.578005"
+           width="29.578005"
+           id="rect3926"
+           style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:0.39215686;stroke-dasharray:none;filter:url(#filter4144)" />
+        <rect
+           style="fill:none;stroke:#ffffff;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+           id="rect3924"
+           width="29.578005"
+           height="29.578005"
+           x="534.27515"
+           y="702.81384" />
+      </g>
+      <g
+         transform="matrix(0.33835218,0,0,0.33835218,178.11682,557.32081)"
+         id="g4152">
+        <rect
+           style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:0.39215686;stroke-dasharray:none;filter:url(#filter4144)"
+           id="rect4154"
+           width="29.578005"
+           height="29.578005"
+           x="536.09332"
+           y="704.63202" />
+        <rect
+           y="702.81384"
+           x="534.27515"
+           height="29.578005"
+           width="29.578005"
+           id="rect4156"
+           style="fill:none;stroke:#ffffff;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      </g>
+      <rect
+         transform="matrix(0.33835218,0,0,0.33835218,178.11682,543.5034)"
+         style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:0.39215686;stroke-dasharray:none;filter:url(#filter4144)"
+         id="rect4160"
+         width="29.578005"
+         height="29.578005"
+         x="536.09332"
+         y="704.63202" />
+      <rect
+         y="781.302"
+         x="358.88998"
+         height="10.007782"
+         width="10.007782"
+         id="rect4162"
+         style="fill:#ffffff;fill-opacity:0.55234656;stroke:#ffffff;stroke-width:1.35340869;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      <g
+         transform="matrix(0.33835218,0,0,0.33835218,164.29946,543.5034)"
+         id="g4164">
+        <rect
+           style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:0.39215686;stroke-dasharray:none;filter:url(#filter4144)"
+           id="rect4166"
+           width="29.578005"
+           height="29.578005"
+           x="536.09332"
+           y="704.63202" />
+        <rect
+           y="702.81384"
+           x="534.27515"
+           height="29.578005"
+           width="29.578005"
+           id="rect4168"
+           style="fill:none;stroke:#ffffff;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+      </g>
+    </g>
+    <rect
+       style="fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       id="rect3959"
+       width="1606.3829"
+       height="193.61702"
+       x="-44.680851"
+       y="886.40472" />
+    <g
+       id="g3281"
+       inkscape:export-filename="/Volumes/Data/GITHUB/mechanic/graphics/mechanic-logo-thumb.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300">
+      <rect
+         y="680.68573"
+         x="-191.62259"
+         height="80"
+         width="80"
+         id="rect3279"
+         style="fill:#80b3ff;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+      <g
+         id="g3255"
+         transform="translate(-491.79459,-56.119441)">
+        <g
+           transform="matrix(0.33835218,0,0,0.33835218,164.29946,557.32081)"
+           id="g3257">
+          <rect
+             y="704.63202"
+             x="536.09332"
+             height="29.578005"
+             width="29.578005"
+             id="rect3259"
+             style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:0.39215686;stroke-dasharray:none;filter:url(#filter4144)" />
+          <rect
+             style="fill:none;stroke:#ffffff;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+             id="rect3261"
+             width="29.578005"
+             height="29.578005"
+             x="534.27515"
+             y="702.81384" />
+        </g>
+        <g
+           transform="matrix(0.33835218,0,0,0.33835218,178.11682,557.32081)"
+           id="g3263">
+          <rect
+             style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:0.39215686;stroke-dasharray:none;filter:url(#filter4144)"
+             id="rect3265"
+             width="29.578005"
+             height="29.578005"
+             x="536.09332"
+             y="704.63202" />
+          <rect
+             y="702.81384"
+             x="534.27515"
+             height="29.578005"
+             width="29.578005"
+             id="rect3267"
+             style="fill:none;stroke:#ffffff;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        </g>
+        <rect
+           transform="matrix(0.33835218,0,0,0.33835218,178.11682,543.5034)"
+           style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:0.39215686;stroke-dasharray:none;filter:url(#filter4144)"
+           id="rect3269"
+           width="29.578005"
+           height="29.578005"
+           x="536.09332"
+           y="704.63202" />
+        <rect
+           y="781.302"
+           x="358.88998"
+           height="10.007782"
+           width="10.007782"
+           id="rect3271"
+           style="fill:#ffffff;fill-opacity:0.55234656;stroke:#ffffff;stroke-width:1.35340869;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        <g
+           transform="matrix(0.33835218,0,0,0.33835218,164.29946,543.5034)"
+           id="g3273">
+          <rect
+             style="fill:none;stroke:#000000;stroke-width:4;stroke-miterlimit:4;stroke-opacity:0.39215686;stroke-dasharray:none;filter:url(#filter4144)"
+             id="rect3275"
+             width="29.578005"
+             height="29.578005"
+             x="536.09332"
+             y="704.63202" />
+          <rect
+             y="702.81384"
+             x="534.27515"
+             height="29.578005"
+             width="29.578005"
+             id="rect3277"
+             style="fill:none;stroke:#ffffff;stroke-width:4;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
