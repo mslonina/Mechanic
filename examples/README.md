@@ -134,12 +134,12 @@ To obtain all available options, try the `--help` or `--usage` flag, i.e.
 The Config API allows any kind of C99 struct initialization to be used, i.e.:
 
      s->options[0] = (options) {
-       .space="NAMESPACE",
-       .name="VARIABLE",
-       .shortName="V",
-       .value="DEFAULT_VALUE",
-       .type=TYPE,
-       .description="SHORT DESCRIPTION"
+       .space="hello",
+       .name="space",
+       .shortName="\0",
+       .value="0.3",
+       .type=C_DOUBLE,
+       .description="Integration step"
      };
 
 where
@@ -168,7 +168,7 @@ The configuration file may be used, in a sample form (only one configuration
 file both for core and the module):
 
     [core] # namespace defined through .space="NAMESPACE"
-    name = arnoldweb
+    name = hellorun
     xres = 2048
     yres = 2048
     xmin = 0.95
@@ -176,7 +176,7 @@ file both for core and the module):
     ymin = 0.95
     ymax = 1.05
 
-    [arnold]
+    [hello]
     step = 0.3
     tend = 2000.0
     driver = 2
@@ -188,7 +188,271 @@ file both for core and the module):
 Storage
 -------
 
-@todo
+Mechanic allows to store module data in datasets of any basic datatypes, with minimum rank
+2 up to rank `H5S_MAX_RANK` (32). The storage information must be provided with `Storage()` hook.
+To define the dataset, any C99 struct initialization is allowed. i.e.:
+
+     p->storage[0].layout = (schema) {
+       .name = "pool-data",
+       .rank = 2,
+       .dim[0] = 1, // horizontal size
+       .dim[1] = 6, // vertical size
+       .use_hdf = 1,
+       .storage_type = STORAGE_GROUP,
+       .datatype = H5T_NATIVE_DOUBLE,
+       .sync = 1,
+     };
+
+where:
+ - `name` - the dataset name (char string)
+ - `rank` - the rank of the dataset (max `H5S_MAX_RANK`)
+ - `dim` - the dimensions of the dataset
+ - `use_hdf` - whether to store dataset in the master file or not
+ - `storage_type` - the type of the storage to use (see below)
+ - `sync` - whether to broadcast the data to all computing pool
+ - `datatype` - HDF5 datatype 
+
+You can adjust the number of available memory/storage banks by implementing the `Init()`
+hook (`banks_per_pool`, `banks_per_task`).
+
+### The Pool storage
+
+The Pool stores its global data in the `/Pools/pool-ID` group, where the ID is the unique pool identifier.
+The task data is stored in `/Pools/pool-ID/Tasks` group.
+
+The size of the storage dataset and the memory is the same. In the case of pool, whole
+memory block is stored at once, if `use_hdf = 1` (only `STORAGE_GROUP` is supported for
+pools).
+
+The Pool data is broadcasted right after the `PoolPrepare()` hook and stored in the master
+datafile.
+
+Note: All global pool datasets must use `STORAGE_GROUP` storage type.
+
+### The task storage
+
+The task data is stored inside `/Pools/pool-ID/Tasks` group. The memory banks defined for
+the task storage are synchronized between master and worker after the `TaskProcess()`.
+
+There are four available methods to store the task result:
+
+#### `STORAGE_GROUP`
+
+The whole memory block is stored in a dataset inside `/Tasks/task-ID`
+group (the ID is the unique task indentifier), i.e., for a dataset defined similar to:
+
+     p->task->storage[0].layout.name = "basic-dataset";
+     p->task->storage[0].layout.dim[0] = 2;
+     p->task->storage[0].layout.dim[1] = 6;
+     p->task->storage[0].layout.storage_type = STORAGE_GROUP;
+     p->task->storage[0].layout.use_hdf = 1;
+     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
+
+the output is stored in `/Pools/pool-ID/Tasks/task-ID/basic-dataset`:
+
+     9 9 9 9 9 9
+     9 9 9 9 9 9
+
+#### `STORAGE_PM3D`
+
+The memory block is stored in a dataset with a column-offset, so that
+the output is suitable to process with Gnuplot. Example: Suppose we have a 2x5 task
+pool:
+
+     1 2 3 4 5
+     6 7 8 9 0
+
+while each worker returns the result of size 2x7. For a dataset defined similar to:
+
+     p->task->storage[0].layout.name = "pm3d-dataset";
+     p->task->storage[0].layout.dim[0] = 2;
+     p->task->storage[0].layout.dim[1] = 7;
+     p->task->storage[0].layout.storage_type = STORAGE_PM3D;
+     p->task->storage[0].layout.use_hdf = 1;
+     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
+
+we have: `/Pools/pool-ID/Tasks/pm3d-dataset` with:
+
+     1 1 1 1 1 1 1
+     1 1 1 1 1 1 1
+     6 6 6 6 6 6 6
+     6 6 6 6 6 6 6
+     2 2 2 2 2 2 2
+     2 2 2 2 2 2 2
+     7 7 7 7 7 7 7
+     7 7 7 7 7 7 7
+     ...
+
+The size of the final dataset is `p->pool_size * dim[1]`.
+
+#### `STORAGE_LIST`
+
+The memory block is stored in a dataset with a task-ID offset, This is
+similar to `STORAGE_PM3D`, this time however, there is no column-offset. For a dataset
+defined as below:
+
+     p->task->storage[0].layout.name = "list-dataset";
+     p->task->storage[0].layout.dim[0] = 2;
+     p->task->storage[0].layout.dim[1] = 7;
+     p->task->storage[0].layout.storage_type = STORAGE_LIST;
+     p->task->storage[0].layout.use_hdf = 1;
+     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
+
+the output is stored in `/Pools/pool-ID/Tasks/list-dataset`:
+
+     1 1 1 1 1 1 1
+     1 1 1 1 1 1 1
+     2 2 2 2 2 2 2
+     2 2 2 2 2 2 2
+     3 3 3 3 3 3 3
+     3 3 3 3 3 3 3
+     4 4 4 4 4 4 4
+     4 4 4 4 4 4 4
+     ...
+
+The size of the final dataset is `p->pool_size * dim[1]`.
+
+#### `STORAGE_BOARD`
+
+The memory block is stored in a dataset with a {row,column,depth}-offset
+according to the board-location of the task. The minimum rank must be `TASK_BOARD_RANK`.
+Suppose we have a dataset defined like this:
+
+     p->task->storage[0].layout.name = "board-dataset";
+     p->task->storage[0].layout.rank = TASK_BOARD_RANK;
+     p->task->storage[0].layout.dim[0] = 2;
+     p->task->storage[0].layout.dim[1] = 3;
+     p->task->storage[0].layout.dim[2] = 1;
+     p->task->storage[0].layout.storage_type = STORAGE_BOARD;
+     p->task->storage[0].layout.use_hdf = 1;
+     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
+
+For a 2x5 task pool:
+
+     1 2 3 4 5
+     6 7 8 9 0
+
+the result is stored in `/Pools/pool-ID/Tasks/board-dataset`:
+
+     1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
+     1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
+     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
+     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
+
+The size of the final dataset is `pool_dim[0] * task_dim[0] x pool_dim[1] * task_dim[1]
+x pool_dim[2] * task_dim[2] x ... `.
+ 
+### Accessing the data
+
+All data is stored in flattened, one-dimensional arrays, which allows to use different
+datatypes and dimensionality of the memory blocks. The data may be accessed directly,
+by using the memory pointer:
+
+    p->task->storage[0].memory
+
+You may use `ReadData()` and `WriteData()` or corresponding macros to manipulate the data. For example, suppose
+integer-type task dataset of dimensionality dims = {2,3} per task with storage type `STORAGE_BOARD`, and task board = {5,5}. 
+The allocated memory block is `p->pool_size x dims x sizeof(int)`. To access it, we need
+to copy the data:
+
+    int buffer[10][15]; // dims0: 2x5, dims1: 3x5
+    ...
+    ReadData(&p->task->storage[0], buffer);
+
+(the storage index follows the definition of the datasets).
+For a `STORAGE_LIST` or `STORAGE_PM3D`, we would have:
+   
+    int buffer[50][3]; // dims0: 2x5x5, dims1: 3x5
+    ...
+    ReadData(&p->task->storage[0], buffer);
+
+For a `STORAGE_GROUP` dataset, the size of the memory block follows the storage
+definition:
+
+    int buffer[2][3];
+    ...
+    // for a pool memory bank
+    ReadData(&p->storage[0], buffer);
+   
+    // or, for a task memory bank, where i is a
+    // unique task-ID
+    ReadData(&p->tasks[i]->storage[0], buffer);
+
+If you need dynamic allocation of local data buffers, you may use Allocate functions
+available. For the 2-dimensional buffers:
+
+    int **buffer;
+    ...
+    buffer = AllocateInt2(&t->storage[0]);
+    ReadData(&t->storage[0], &buff[0][0]);
+    ...
+    free(buff);
+
+
+To get the dimensionality of the data block, one can use:
+
+    int dims[MAX_RANK];
+    ...
+    GetDims(&t->storage[0], dims);
+
+For a reference to allocate and read/write functions take a look at [API Helpers](#api-helpers).
+
+### Attributes
+
+[Introduction to HDF5 attributes](http://www.hdfgroup.org/HDF5/doc/UG/13_Attributes.html)
+
+Attributes are small amount of data that can be attached to datasets. You can attach
+attributes to your datasets by defining the proper attribute schema, similar to
+dataset's schema:
+
+    p->task->storage[0].attr[0].layout = (schema) {
+      .name = "My attribute",
+      .dataspace = H5S_SCALAR,
+      .datatype = H5T_NATIVE_INT
+    }
+
+The code above will attach the integer attribute to the first storage bank of a task.
+The `name` is required. In case of more dimensional attributes, you must use `H5S_SIMPLE`
+dataspace, and fill out additional information, such as rank and dimensions:
+
+    p->task->storage[0].attr[1].layout = (schema) {
+      .name = "My attribute 2D",
+      .dataspace = H5S_SIMPLE,
+      .datatype = H5T_NATIVE_INT,
+      .rank = 2,
+      .dim[0] = 3,
+      .dim[1] = 4,
+    }
+
+By default, 24 attributes are available for each storage bank (both for tasks and
+pools). You can change it through the `Init()` hook:
+
+    i->attr_per_dataset = 32;
+
+To write and read attributes, `WriteAttr()` and `ReadAttr()` functions are provided.
+Attributes are stored in the master datafile after the `PoolProcess()` hook has been
+invoked, so the best place for manipulating them is the `PoolProcess()`:
+
+    int attr_i, attr_d[3][4];
+    ...
+    WriteAttr(&p->task->storage[0].attr[0], &attr_i);
+    WriteAttr(&p->task->storage[0].attr[1], attr_d);
+
+Of course, you can use more advanced techniques with the help of `DatasetPrepare()` and
+`DatasetProcess()` hooks, however this requires HDF5 knowledge.
+
+Note: Attributes for `STORAGE_GROUP` are limited, each task group will receive same
+attributes (and same values).
+
+Attributes are managed only on the master node.
+
+For a reference to read/write functions take a look at [API Helpers](#api-helpers).
+
+### Checkpoint
+
+The checkpoint contains the results from tasks that have been processed and received. When the
+checkpoint is filled up, the result is stored in the master datafile, according to the
+storage information provided in the module.
 
 Datatypes
 ---------
