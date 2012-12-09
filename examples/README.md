@@ -1,7 +1,7 @@
 Mechanic 2.x quick reference
 ============================
 
-- [Examples](#list-of-examples)
+- [Examples](#examples)
 - [The pool loop](#the-pool-loop)
 - [The task loop](#the-task-loop)
 - [Setup](#setup)
@@ -12,8 +12,8 @@ Mechanic 2.x quick reference
 - [Messages](#messages)
 - [Error codes](#error-codes)
 
-List of examples
-----------------
+Examples
+--------
 
 As a quick start and tutorial for creating numerical modules for the Mechanic, take a look
 at following examples:
@@ -52,7 +52,8 @@ at following examples:
 
 #### Compilation
 
-    mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 mechanic_module_example.c -o libmechanic_module_example.so
+    mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 \
+    mechanic_module_example.c -o libmechanic_module_example.so
 
 #### The core module
 
@@ -144,12 +145,12 @@ The Config API allows any kind of C99 struct initialization to be used, i.e.:
 
 where
 
-- `space` - the name of the configuration namespace (char string)
-- `name` - the name of the variable (char string)
-- `shortName` - the short name of the variable (char string), used in command line args,
+- `space` - the name of the configuration namespace (string)
+- `name` - the name of the variable (string)
+- `shortName` - the short name of the variable (string), used in command line args,
    may be '\0' (no short option)
-- `value` - the default value (char string)
-- `description` - description for the variable (char string), used in command line args
+- `value` - the default value (string)
+- `description` - description for the variable (string), used in command line args
 - `type` - the variable type:
   - `C_INT` - integer variable
   - `C_LONG` - long integer variable
@@ -167,7 +168,7 @@ The options table must finish with `OPTIONS_END`:
 The configuration file may be used, in a sample form (only one configuration
 file both for core and the module):
 
-    [core] # namespace defined through .space="NAMESPACE"
+    [core] # namespace defined through .space="core"
     name = hellorun
     xres = 2048
     yres = 2048
@@ -204,7 +205,7 @@ To define the dataset, any C99 struct initialization is allowed. i.e.:
      };
 
 where:
- - `name` - the dataset name (char string)
+ - `name` - the dataset name (string)
  - `rank` - the rank of the dataset (max `H5S_MAX_RANK`)
  - `dim` - the dimensions of the dataset
  - `use_hdf` - whether to store dataset in the master file or not
@@ -350,10 +351,10 @@ by using the memory pointer:
 
     p->task->storage[0].memory
 
-You may use `ReadData()` and `WriteData()` or corresponding macros to manipulate the data. For example, suppose
-integer-type task dataset of dimensionality dims = {2,3} per task with storage type `STORAGE_BOARD`, and task board = {5,5}. 
-The allocated memory block is `p->pool_size x dims x sizeof(int)`. To access it, we need
-to copy the data:
+You may use `ReadData()` and `WriteData()` or corresponding macros to manipulate the data.
+For example, suppose integer-type task dataset of dimensionality dims = {2,3} per task with
+storage type `STORAGE_BOARD`, and task board = {5,5}. The allocated memory block is
+`p->pool_size x dims x sizeof(int)`. To access it, we need to copy the data:
 
     int buffer[10][15]; // dims0: 2x5, dims1: 3x5
     ...
@@ -459,19 +460,19 @@ Datatypes
 
 Mechanic support all native MPI/HDF5 datatypes:
 
-| C datatype             | MPI datatype           | HDF5 native datatype | HDF5 platform datatype           |
-|:-----------------------|:-----------------------|:---------------------|:---------------------------------|
-| signed char            | MPI_CHAR               | H5T_NATIVE_CHAR      | H5T_STD_I8BE or H5T_STD_I8LE     |
-| unsigned char          | MPI_UNSIGNED_CHAR      | H5T_NATIVE_UCHAR     | H5T_STD_U8BE or H5T_STD_U8LE     |
-| signed int             | MPI_INT                | H5T_NATIVE_INT       | H5T_STD_I32BE or H5T_STD_I32LE   |
-| signed short int       | MPI_SHORT              | H5T_NATIVE_SHORT     | H5T_STD_I16BE or H5T_STD_I16LE   |
-| signed long int        | MPI_LONG               | H5T_NATIVE_LONG      | H5T_STD_I32BE, H5T_STD_I32LE, H5T_STD_I64BE or H5T_STD_I64LE   |
-| signed long long int   | MPI_LONG_LONG          | H5T_NATIVE_LLONG     | H5T_STD_I64BE or H5T_STD_I64LE   |
-| unsigned int           | MPI_UNSIGNED           | H5T_NATIVE_UINT      | H5T_STD_U32BE or H5T_STD_U32LE   |
-| unsigned short int     | MPI_UNSIGNED_SHORT     | H5T_NATIVE_USHORT    | H5T_STD_U16BE or H5T_STD_U16LE   |
-| unsigned long long int | MPI_UNSIGNED_LONG_LONG | H5T_NATIVE_ULLONG    | H5T_STD_U64BE or H5T_STD_U64LE   |
-| float                  | MPI_FLOAT              | H5T_NATIVE_FLOAT     | H5T_IEEE_F32BE or H5T_IEEE_F32LE |
-| double                 | MPI_DOUBLE             | H5T_NATIVE_DOUBLE    | H5T_IEEE_F64BE or H5T_IEEE_F64LE |
+| C datatype             | MPI datatype           | HDF5 native datatype |
+|:-----------------------|:-----------------------|:---------------------|
+| signed char            | MPI_CHAR               | H5T_NATIVE_CHAR      |
+| unsigned char          | MPI_UNSIGNED_CHAR      | H5T_NATIVE_UCHAR     |
+| signed int             | MPI_INT                | H5T_NATIVE_INT       |
+| signed short int       | MPI_SHORT              | H5T_NATIVE_SHORT     |
+| signed long int        | MPI_LONG               | H5T_NATIVE_LONG      |
+| signed long long int   | MPI_LONG_LONG          | H5T_NATIVE_LLONG     |
+| unsigned int           | MPI_UNSIGNED           | H5T_NATIVE_UINT      |
+| unsigned short int     | MPI_UNSIGNED_SHORT     | H5T_NATIVE_USHORT    |
+| unsigned long long int | MPI_UNSIGNED_LONG_LONG | H5T_NATIVE_ULLONG    |
+| float                  | MPI_FLOAT              | H5T_NATIVE_FLOAT     |
+| double                 | MPI_DOUBLE             | H5T_NATIVE_DOUBLE    |
 
 
 
