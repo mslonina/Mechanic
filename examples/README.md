@@ -4,6 +4,7 @@ Mechanic 2.x quick reference
 - [Examples](#examples)
 - [The pool loop](#the-pool-loop)
 - [The task loop](#the-task-loop)
+- [Init](#init)
 - [Setup](#setup)
 - [Storage](#storage)
 - [Datatypes](#datatypes)
@@ -119,6 +120,25 @@ The task loop
 
 @todo
 
+
+Init
+----
+
+The `Init()` hook is used to initialize critical core variables:
+- `options` - the number of configuration options (default: 128)
+- `pools` - the maximum number of task pools (default: 64)
+- `banks_per_pool` - the maximum number of storage banks per task pool (default: 8)
+- `banks_per_task` - the maximum number of storage banks per task (default: 8)
+- `attr_per_dataset` - the maximum number of attributes per storage bank (default: 24)
+- `min_cpu_required` - the minimum number of CPUs to run the job (default: 2)
+
+You may change any of these variables, i.e.
+
+    int Init(init *i) {
+      i->min_cpu_required = 4;
+
+      return SUCCESS;
+    }
 
 Setup
 -----

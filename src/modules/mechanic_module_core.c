@@ -43,12 +43,7 @@
  * The core module must implement this function, so that some sensible defaults are set.
  *
  * If the Init() hook is present in a custom module, the variables will be merged with
- * the core defaults, i.e.:
- *
- *     int Init(init *i) {
- *       i->options = 128;
- *       i->pools = 12;
- *     }
+ * the core defaults.
  *
  * @ingroup all_nodes
  *
