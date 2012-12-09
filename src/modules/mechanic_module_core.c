@@ -116,7 +116,7 @@ int Setup(setup *s) {
     .shortName='d',
     .value="2048",
     .type=C_INT,
-    .description="The checkpoint size"
+    .description="The checkpoint size (number of tasks)"
   };
   s->options[5] = (options) {
     .space="core",

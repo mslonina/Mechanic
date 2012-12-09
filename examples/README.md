@@ -7,6 +7,7 @@ Mechanic 2.x quick reference
 - [The task loop](#the-task-loop)
 - [Init](#init)
 - [Setup](#setup)
+  - [Core options](#core-options)
   - [The configuration file](#the-configuration-file)
 - [Storage](#storage)
   - [The pool storage](#the-pool-storage)
@@ -153,68 +154,138 @@ You may change any of these variables, i.e.
 Setup
 -----
 
-By using the `Setup()` hook it is possible to define all configuration options required by
-the module. Options are available in the command line, and are stored in the master file.
-The master node reads the configuration and parses the commandline.
-The configuration is broadcasted then to all nodes.
+The configuration is handled by the internal Config API. Options
+are defined through the `Setup()` hook. They are available in the command line, as well as
+configuration file, and are stored in the master file.
+
+The Config API allows any kind of C99 struct initialization to be used, i.e.:
+
+     int Setup(setup *s) {
+       s->options[0] = (options) {
+         .space="hello",
+         .name="step",
+         .shortName="s",
+         .value="0.3",
+         .type=C_DOUBLE,
+         .description="Integration step"
+       };
+       s->options[1] = (options) {
+         .space="hello",
+         .name="driver",
+         .shortName="\0",
+         .value="2",
+         .type=C_INT,
+         .description="The driver"
+       };
+       s->options[2] = (options) OPTIONS_END;
+       return SUCCESS;
+     }
+
+
+where
+
+- `space` - the name of the configuration namespace (string)
+- `name` - the name of the option (string)
+- `shortName` - the short name of the option (string), used in the command line,
+   may be '\0' (no short option)
+- `value` - the default value (string)
+- `description` - description for the option (string), used in the command line
+- `type` - the option datatype type:
+  - `C_INT` - integer option
+  - `C_LONG` - long integer option
+  - `C_FLOAT` - float option
+  - `C_DOUBLE` - double option
+  - `C_STRING` - char option
+  - `C_VAL` - boolean option
+
+The Config API allows namespaces to contain options with the same name, however, due to
+design of the command line (and Popt), the `shortName` must be unique.
+
+The options table must finish with `OPTIONS_END`:
+
+     s->options[2] = (options) OPTIONS_END;
 
 To obtain all available options, try the `--help` or `--usage` flag, i.e.
 
     mpirun -np 2 mechanic2 -p hello --help
     
-The Config API allows any kind of C99 struct initialization to be used, i.e.:
+Note: Only the master node reads the configuration and parses the commandline.
+The configuration is broadcasted then to all nodes.
 
-     s->options[0] = (options) {
-       .space="hello",
-       .name="space",
-       .shortName="\0",
-       .value="0.3",
-       .type=C_DOUBLE,
-       .description="Integration step"
-     };
+#### Core options
 
-where
+To obtain all configuration options available in the core, try:
 
-- `space` - the name of the configuration namespace (string)
-- `name` - the name of the variable (string)
-- `shortName` - the short name of the variable (string), used in command line args,
-   may be '\0' (no short option)
-- `value` - the default value (string)
-- `description` - description for the variable (string), used in command line args
-- `type` - the variable type:
-  - `C_INT` - integer variable
-  - `C_LONG` - long integer variable
-  - `C_FLOAT` - float variable
-  - `C_DOUBLE` - double variable
-  - `C_STRING` - char variable
-  - `C_VAL` - variable that only updates its value (i.e. boolean)
+    mpirun -np 2 mechanic2 --help
 
-The options table must finish with `OPTIONS_END`:
 
-     s->options[13] = (options) OPTIONS_END;
+- `--name`, `-n` - the name of the run
+- `--module`, `-p` -- the user-supplied module name
+- `--config`, `-c` -- the configuration file name
+- `--xres`, `-x` - the task pool board horizontal resolution
+- `--yres`, `-y` - the task pool board vertical resolution
+- `--zres`, `-z` - the task pool board depth resolution
+- `--xmin`, `--xmax` - the task pool board x-axis min/max
+- `--ymin`, `--ymax` - the task pool board y-axis min/max
+- `--zmin`, `--zmax` - the task pool board z-axis min/max
+- `--xorigin` - the task pool board x-axis origin
+- `--yorigin` - the task pool board y-axis origin
+- `--zorigin` - the task pool board z-axis origin
+- `--checkpoint`, `-d` -- the checkpoint size (number of tasks)
+- `--checkpoint-files`, `-b` -- the number of incremental backups
+- `--no-backup` -- disable automatic master file backup (in case of the same run names)
+- `--restart-mode`, `-r` -- the restart mode
+- `--restart-file`, -- the restart file
+- `--print-defaults` -- print the default options
+- `--help`, `-?` -- show help message
+- `--usage` -- show short help message
 
 #### The configuration file
 
-The configuration file may be used, in a sample form (only one configuration
-file both for core and the module):
+All configuration options may be used in a configuration file. The file syntax is:
 
-    [core] # namespace defined through .space="core"
-    name = hellorun
-    xres = 2048
-    yres = 2048
-    xmin = 0.95
-    xmax = 1.05
-    ymin = 0.95
-    ymax = 1.05
+    [namespace-1]
+    option1 = value
+    option2 = value
+
+    [namespace-2]
+    option3 = value
+
+Everything that starts with `#` is treated as a comment (both single and multiline
+comments are supported).
+
+For example, for options defined above, we get the configuration file such as (i.e.
+`myconfig.cfg`):
 
     [hello]
     step = 0.3
-    tend = 2000.0
     driver = 2
-    eps = 0.0
-    epsmax = 0.1
-    eps_interval = 0.02
 
+
+Only one configuration file is needed, for core and module, i.e.
+
+    [hello]
+    step = 0.3
+    driver = 2
+
+    [core]
+    xmin = 0.9
+    xmax = 1.1
+
+To use it, we call:
+
+    mpirun -np 2 mechanic2 -p mymodule --config=myconfig.cfg
+
+Of course, we can override default values not only from the configuration file, but also from the
+command line:
+
+    mpirun -np 2 mechanic2 -p mymodule --config=myconfig.cfg --driver=1
+
+The configuration order is:
+
+1. The default values defined through the `Setup()`
+2. The configuration file
+3. The command line
 
 Storage
 -------
@@ -222,17 +293,20 @@ Storage
 Mechanic allows to store module data in datasets of any basic datatypes, with minimum rank
 2 up to rank `H5S_MAX_RANK` (32). The storage information must be provided with `Storage()` hook.
 To define the dataset, any C99 struct initialization is allowed. i.e.:
-
-     p->storage[0].layout = (schema) {
-       .name = "pool-data",
-       .rank = 2,
-       .dim[0] = 1, // horizontal size
-       .dim[1] = 6, // vertical size
-       .use_hdf = 1,
-       .storage_type = STORAGE_GROUP,
-       .datatype = H5T_NATIVE_DOUBLE,
-       .sync = 1,
-     };
+    
+    int Storage(pool *p, setup *s) {
+      p->storage[0].layout = (schema) {
+        .name = "pool-data",
+        .rank = 2,
+        .dim[0] = 1, // horizontal size
+        .dim[1] = 6, // vertical size
+        .use_hdf = 1,
+        .storage_type = STORAGE_GROUP,
+        .datatype = H5T_NATIVE_DOUBLE,
+        .sync = 1,
+      };
+      return SUCCESS;
+    }
 
 where:
  - `name` - the dataset name (string)
@@ -245,6 +319,14 @@ where:
 
 You can adjust the number of available memory/storage banks by implementing the `Init()`
 hook (`banks_per_pool`, `banks_per_task`).
+
+The storage layout may be defined per pool (different storage layout for different task
+pools), i.e.
+
+    if (p->pid == 2) {
+      p->storage[0].layout.rank = 3;
+      p->storage[0].layout.dim[2] = 4;
+    }
 
 ### The Pool storage
 
