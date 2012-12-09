@@ -1,29 +1,9 @@
-Mechanic 2.x user guide
-=======================
+Mechanic 2.x quick start
+========================
+
 
 - [How to write a Mechanic module](#how-to-write-a-mechanic-module)
 - [Examples](#examples)
-- [The pool loop](#the-pool-loop)
-  - [The pool loop explained](#the-pool-loop-explained)
-- [The task loop](#the-task-loop)
-- [Init](#init)
-- [Setup](#setup)
-  - [Core options](#core-options)
-  - [The configuration file](#the-configuration-file)
-- [Storage](#storage)
-  - [The pool storage](#the-pool-storage)
-  - [The task storage](#the-task-storage)
-  - [Accessing the data](#accessing-the-data)
-  - [Attributes](#attributes)
-  - [Checkpoint](#checkpoint)
-- [Datatypes](#datatypes)
-- [Hooks](#hooks)
-- [API helpers](#api-helpers)
-  - [Memory allocation](#memory-allocation)
-  - [Reading and writing data](#reading-and-writing-data)
-  - [Reading and writing attributes](#reading-and-writing-attributes)
-- [Messages](#messages)
-- [Error codes](#error-codes)
 
 
 How to write a Mechanic module
@@ -89,7 +69,7 @@ Examples
 As a quick start and tutorial for creating numerical modules for the Mechanic, take a look
 at following examples:
 
-#### The `TaskProcess()`
+#### The basics
 
   - A simple map or image: `mechanic_module_ex_map.c`
   - The Mandelbrot set: `mechanic_module_ex_mandelbrot.c`
@@ -130,6 +110,32 @@ at following examples:
 
 Take a look at `mechanic_module_core.c` located in `src/modules`. It contains,
 documents and uses all available hooks.
+
+Mechanic 2.x reference
+======================
+
+- [The pool loop](#the-pool-loop)
+  - [The pool loop explained](#the-pool-loop-explained)
+- [The task loop](#the-task-loop)
+- [Init](#init)
+- [Setup](#setup)
+  - [Core options](#core-options)
+  - [The configuration file](#the-configuration-file)
+- [Storage](#storage)
+  - [The pool storage](#the-pool-storage)
+  - [The task storage](#the-task-storage)
+  - [Accessing the data](#accessing-the-data)
+  - [Attributes](#attributes)
+  - [Checkpoint](#checkpoint)
+- [Datatypes](#datatypes)
+- [Hooks](#hooks)
+- [API helpers](#api-helpers)
+  - [Memory allocation](#memory-allocation)
+  - [Reading and writing data](#reading-and-writing-data)
+  - [Reading and writing attributes](#reading-and-writing-attributes)
+- [Messages](#messages)
+- [Error codes](#error-codes)
+
 
 
 The pool loop
