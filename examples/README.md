@@ -41,8 +41,8 @@ Finally, we write the `TaskProcess()` function, where the numerics goes on:
     int TaskProcess(pool *p, task *t, setup *s) {
       double buffer[1][3]; // fits the storage information provided in Storage()
       
-      buffer[0][0] = t->location[0]; // vertical position of the task
-      buffer[0][1] = t->location[1]; // horizontal position of the task
+      buffer[0][0] = t->location[1]; // horizontal position of the task
+      buffer[0][1] = t->location[0]; // vertical position of the task
       buffer[0][2] = t->tid; // the task id
 
       MWriteData(t, "result", buffer);

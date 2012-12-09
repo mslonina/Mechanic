@@ -119,8 +119,8 @@ create a `mechanic_module_map.c` file and put in it the following code:
       p->task->storage[0].layout = (schema) {
         .name = "result", // the name of the output dataset
         .rank = 2, // the rank of the dataset
-        .dim[0] = 1, // the vertical dimension of the result array (not the dataset)
-        .dim[1] = 3, // the horizontal dimension of the result array (not the dataset)
+        .dim[0] = 1, // the vertical dimension of the result array 
+        .dim[1] = 3, // the horizontal dimension of the result array 
         .use_hdf = 1, // whether to store the result in the master data file
         .storage_type = STORAGE_PM3D, // storage type, which is suitable to process with Gnuplot PM3D
         .datatype = H5T_NATIVE_DOUBLE, // the datatype
@@ -138,15 +138,14 @@ The second step is to create the `TaskProcess()` function, in which we will comp
 state of the system:
 
     int TaskProcess(pool *p, task *t, setup *s) {
-      double buff[1][3];
+      double buffer[1][3];
 
-      buff[0][0] = t->location[1]; // the vertical position of the current task
-      buff[0][1] = t->location[0]; // the horizontal position of the current task
-      buff[0][2] = t->tid; // task id represents the state of the system
+      buffer[0][0] = t->location[1]; // the vertical position of the current task
+      buffer[0][1] = t->location[0]; // the horizontal position of the current task
+      buffer[0][2] = t->tid; // task id represents the state of the system
 
       // Write the buffer data to Mechanic's memory buffers
-      // The buff size must meet the t->storage[0] size (both dimensions and datatype)
-      WriteData(&t->storage[0], buff);
+      MWriteData(t, "result", buffer);
 
       return SUCCESS;
     }
