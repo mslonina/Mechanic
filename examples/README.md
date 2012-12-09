@@ -1,6 +1,7 @@
-Mechanic 2.x quick reference
-============================
+Mechanic 2.x user guide
+=======================
 
+- [How to write a Mechanic module](#how-to-write-a-mechanic-module)
 - [Examples](#examples)
 - [The pool loop](#the-pool-loop)
   - [The pool loop explained](#the-pool-loop-explained)
@@ -24,6 +25,64 @@ Mechanic 2.x quick reference
 - [Messages](#messages)
 - [Error codes](#error-codes)
 
+
+How to write a Mechanic module
+------------------------------
+
+The Mechanic does not handle any numerics or science by itself. It requires the user supplied
+module. The minimal module must provide storage information and the actual numerical code.
+
+We start by including the neccessary header:
+
+    #include "Mechanic2.h"
+
+As a simple example, we assume that our numerical task is similar to image processing.
+Each worker node will receive coordinates of the image, and process the numerical task
+according to those coordinates. Each worker will then send back the 1x3 double-type array, and
+the master node will combine all of such arrays into one result. The result will contain
+the location of the task and the task id, and will be suitable to process with Gnuplot
+PM3D. The storage information for the task is:
+
+    int Storage(pool *p, setup *s) {
+      p->task->storage[0].layout = (schema) {
+        .name = "result", // the name of the HDF5 dataset
+        .rank = 2, // the rank of the dataset
+        .dim[0] = 1, // the horizontal size of the task result
+        .dim[1] = 3, // the vertical size of the task result
+        .datatype = H5T_NATIVE_DOUBLE, // the datatype
+        .use_hdf = 1, // whether to store the data in the file or not
+        .storage_type = STORAGE_PM3D // the storage type, here, suitable for Gnuplot PM3D
+      };
+      return SUCCESS;
+    }
+
+Finally, we write the `TaskProcess()` function, where the numerics goes on:
+
+    int TaskProcess(pool *p, task *t, setup *s) {
+      double buffer[1][3]; // fits the storage information provided in Storage()
+      
+      buffer[0][0] = t->location[0]; // vertical position of the task
+      buffer[0][1] = t->location[1]; // horizontal position of the task
+      buffer[0][2] = t->tid; // the task id
+
+      MWriteData(t, "result", buffer);
+
+      return SUCCESS;
+    }
+
+We must compile this code to a shared library:
+
+    mpicc -fPiC -Dpic -shared mechanic_module_map.c -o libmechanic_module_map.so
+
+The `libmechanic_module_` prefix is required. We may than run the module:
+
+    mpirun -np 2 mechanic2 -p map -x 10 -y 20
+
+which will use our code on two nodes (master and one worker), and will do a 10x20
+independent numerical simulations, creating a map suitable to process with Gnuplot PM3D.
+The data will be stored in the master file: `mechanic-master-00.h5` in the dataset
+`/Pools/pool-0000/Tasks/result`.
+
 Examples
 --------
 
@@ -35,7 +94,7 @@ at following examples:
   - A simple map or image: `mechanic_module_ex_map.c`
   - The Mandelbrot set: `mechanic_module_ex_mandelbrot.c`
 
-#### Working with task pools (using `PoolPrepare()` and `PoolProcess()`)
+#### Working with task pools
   
   - Creating task pools: `mechanic_module_ex_createpool.c`
   - Reading and writing task pool data: `mechanic_module_ex_pool.c`
@@ -43,9 +102,9 @@ at following examples:
   - Different storage layout per task pool (basic): `mechanic_module_ex_chpoollayout.c`
   - Different storage layout per task pool (advanced): `mechanic_module_ex_chpoollayout2.c`
 
-#### Configuration (`Init()`, `Setup()`)
+#### Configuration
 
-  - Defining and using configuration options: `mechanic_module_ex_setup.c`
+  - Defining and using configuration options (`Init()` and `Setup()`): `mechanic_module_ex_setup.c`
 
 #### Datatypes and dimensionality
 
@@ -60,7 +119,7 @@ at following examples:
 #### Advanced hooks
 
   - Using `Prepare()` and `Process()` hooks: `mechanic_module_ex_prepareprocess.c`
-  - Using `DatasetPrepare()` and `DatasetProcess()`: `mechanic_module_ex_dataset.c`
+  - Using `DatasetPrepare()` and `DatasetProcess()` hooks: `mechanic_module_ex_dataset.c`
 
 #### Compilation
 
