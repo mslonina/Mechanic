@@ -280,7 +280,7 @@ int ConfigUpdate(setup *s) {
       sprintf(s->options[i].value, "%.19E", s->popt->double_args[i]);
     }
 
-    ConfigModifyOption(s->options[i].space, s->options[i].name,
+    ModifyOption(s->options[i].space, s->options[i].name,
         s->options[i].value, s->options[i].type, s->head);
     i++;
   }

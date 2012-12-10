@@ -1000,7 +1000,7 @@ configNamespace* ConfigAssignDefaults(options* cd){
           /* Assign type */
           currentOP->type = cd[i].type;
 				} else {
-          ConfigModifyOption(current->space, currentOP->name, cd[i].value, cd[i].type, current);
+          ModifyOption(current->space, currentOP->name, cd[i].value, cd[i].type, current);
         }
       }
 
@@ -1134,13 +1134,13 @@ config* ConfigFindOption(char* varname, configNamespace* current){
 }
 
 /**
- * @fn config* ConfigModifyOption(char* varname, char* newvalue, int newtype, configNamespace* head)
+ * @fn config* ModifyOption(char* varname, char* newvalue, int newtype, configNamespace* head)
  * @brief Modifies value and type of given option.
  *
  * @return
  *  The pointer to modified option or NULL if option was not found
  */
-config* ConfigModifyOption(char* namespace, char* varname, char* newvalue, int newtype, configNamespace* head){
+config* ModifyOption(char* namespace, char* varname, char* newvalue, int newtype, configNamespace* head){
 	config* option = NULL;
   configNamespace* current = NULL;
 	size_t vlen;
@@ -1166,6 +1166,13 @@ config* ConfigModifyOption(char* namespace, char* varname, char* newvalue, int n
 	return option;
 }
 
+/**
+ * @fn Option2String(char* namespace, char* varname, configNamespace* head)
+ * @brief Converts the option to string
+ *
+ * @return
+ *  Converted option
+ */
 char* Option2String(char* namespace, char* var, configNamespace* head){
 	config* option = NULL;
   configNamespace* current = NULL;
@@ -1200,6 +1207,34 @@ int Option2Int(char* namespace, char* varname, configNamespace* head){
       if (option) {
         if (option->value) {
           value = atoi(option->value);
+        }
+      }
+    }
+  }
+
+  return value;
+}
+
+/**
+ * @fn Option2Long(char* namespace, char* varname, configNamespace* head)
+ * @brief Converts the option to long integer
+ *
+ * @return
+ *  Converted option
+ */
+long Option2Long(char* namespace, char* varname, configNamespace* head){
+  config* option = NULL;
+  configNamespace* current = NULL;
+  long value = 0;
+  
+  if (head && namespace) {
+    current = ConfigFindNamespace(namespace, head);
+    if (current && varname) {
+      option = ConfigFindOption(varname, current);
+
+      if (option) {
+        if (option->value) {
+          value = atol(option->value);
         }
       }
     }
@@ -1263,35 +1298,6 @@ double Option2Double(char* namespace, char* varname, configNamespace* head){
     }
   }
   
-  return value;
-}
-
-/**
- * @fn Option2LDouble(char* namespace, char* varname, configNamespace* head)
- * @brief Converts the option to long double
- *
- * @return
- *  Converted option
- */
-long double Option2LDouble(char* namespace, char* varname, configNamespace* head){
-  config* option = NULL;
-  configNamespace* current = NULL;
-  long double value = 0.0;
-  char* p = NULL;
-  
-  if (head && namespace) {
-    current = ConfigFindNamespace(namespace, head);
-    if (current && varname) {
-      option = ConfigFindOption(varname, current);
-    
-      if (option) {
-        if (option->value) {
-          value = strtold(option->value, &p);
-        }
-      }
-    }
-  }
-
   return value;
 }
 
