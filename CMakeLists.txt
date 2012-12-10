@@ -28,6 +28,16 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set (platform_linux 1)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+#MESSAGE("${CMAKE_C_COMPILER}")
+set (USES_MPICC 0)
+if ("${CMAKE_C_COMPILER}" MATCHES "mpicc")
+  set (USES_MPICC 1)
+endif ("${CMAKE_C_COMPILER}" MATCHES "mpicc")
+
+if (NOT USES_MPICC)
+  MESSAGE(FATAL_ERROR "You must use MPI compiler wrapper, such as mpicc in order to compile the Mechanic")
+endif (NOT USES_MPICC)
+
 include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckCSourceCompiles)
