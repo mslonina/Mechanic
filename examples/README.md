@@ -88,7 +88,7 @@ at following examples:
 
 #### Datatypes and dimensionality
 
-  - Using different datatypes, reading and writing data to the memory banks: [mechanic_module_ex_datatypes.c](./c/mechanic_module_ex_datatypes.c]
+  - Using different datatypes, reading and writing data to the memory banks: [mechanic_module_ex_datatypes.c](./c/mechanic_module_ex_datatypes.c)
   - Using datasets of different datatypes and dimensionality: [mechanic_module_ex_dim.c](./c/mechanic_module_ex_dim.c)
 
 #### Attributes
