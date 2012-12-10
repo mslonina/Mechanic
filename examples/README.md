@@ -98,8 +98,10 @@ at following examples:
 
 #### Advanced hooks
 
-  - Using `Prepare()` and `Process()` hooks: `mechanic_module_ex_prepareprocess.c`
-  - Using `DatasetPrepare()` and `DatasetProcess()` hooks: `mechanic_module_ex_dataset.c`
+  - Using `Prepare()` and `Process()` hooks:
+    [mechanic_module_ex_prepareprocess.c](./c/mechanic_module_ex_prepareprocess.c)
+  - Using `DatasetPrepare()` and `DatasetProcess()` hooks:
+    [mechanic_module_ex_dataset.c](./c/mechanic_module_ex_dataset.c)
 
 #### Compilation
 
@@ -110,6 +112,10 @@ at following examples:
 
 Take a look at `mechanic_module_core.c` located in `src/modules`. It contains,
 documents and uses all available hooks.
+
+#### Fortran
+
+  - Connecting external Fortran subroutine: [mechanic_module_ex_ffc.c](./fortran/mechanic_module_ex_ffc.c)
 
 Mechanic 2.x reference
 ======================
