@@ -2,8 +2,146 @@ Mechanic 2.x quick start
 ========================
 
 
+- [How the Mechanic work](#how-the-mechanic-work)
 - [How to write a Mechanic module](#how-to-write-a-mechanic-module)
 - [Examples](#examples)
+
+How the Mechanic work
+---------------------
+
+The Mechanic is independent on the numerical problem, thus it must implement all the
+neccessary API to handle most of the cases. Take a look on the simplified schema of the
+API, and hook calling order. None of the hooks is required -- in case of missing hook, 
+the corresponding core hook is invoked. No knowledge on MPI/HDF programming is required,
+however, it is still possible to use it during advanced hooks (marked with MPI/HDF keyword
+on the graph below).
+
+    -- MPI/HDF init
+      
+        `- (core) Init()
+        `- (core) Setup()
+            The core bootstraps and loads sensible defaults. The core looks for the
+            user-supplied module specified with -p option
+
+        `- (module) Init()
+        `- (module) Setup()
+            The user-supplied module bootstraps (if option -p is not specified, the core module is
+            loaded as a fallback)
+
+        `- The configuration is read (both core and user-supplied module options)
+        `- The master file gets prepared and configuration is stored
+
+        `- [WORK POOL]
+            
+            `- Prepare() [MPI/HDF]
+                Each node invokes the Prepare() hook.
+
+                `- [POOL LOOP] [#1]
+                  
+                  [CURRENT POOL]
+
+                    `- Storage()
+                        All nodes invoke the Storage() hook. The master node prepares
+                        specified datasets in the master file. The memory for the current
+                        pool is allocated.
+
+                        During dataset creation, the DatasetPrepare() hook is invoked.
+
+                        The pool storage, as well as task storage may be different during different pools.
+
+                    `- NodePrepare() [MPI/HDF] [#2]
+                        All nodes invoke the NodePrepare() hook. The data for the previous
+                        pools is available, and might be used to do additional operations,
+                        i.e. additional MPI or HDF5 calls.
+
+                    `- PoolPrepare()
+                        The master node invokes the PoolPrepare() hook. The data stored in
+                        the pool memory is broadcasted to all workers, unless the sync
+                        option for the storage bank is set to 0. The data is stored in the
+                        master file, unless use_hdf is set to 0.
+
+                        The pool receives p->state = POOL_PREPARED.
+
+                        This is the best place to read additional data files etc. If such
+                        is stored in the pool memory, it might be automatically
+                        broadcasted to all workers and stored in the master file.
+
+                    `- LoopPrepare() [MPI/HDF]
+                        All nodes invoke the LoopPrepare() hook. The pool data is
+                        available and might be used to do additional operations, such as
+                        MPI/HDF calls.
+
+                        [TASK LOOP]
+
+                          `- TaskBoardMap()
+                          `- TaskPrepare()
+                              The master node prepares the task. The task receives its
+                              location on the task board by the TaskBoardMap().
+
+                          `- TaskProcess()
+                              The worker node processes the task. The data stored in the
+                              task memory is sended back to the master node. If the
+                              checkpoint is filled up, the master node writes the data to
+                              the file.
+
+                              [CHECKPOINT]
+                                `- CheckpointPrepare()
+                                    This hook is invoked on the master node before the
+                                    current checkpoint is stored in the master file.
+
+                                    During file storage the DatasetProcess() hook is
+                                    invoked. The master file is incrementally backuped at each
+                                    checkpoint (i.e., mechanic-master-00.h5,
+                                    mechanic-master-01.h5, etc.)
+                              [/CHECKPOINT]
+                        
+                        [/TASK LOOP]
+
+                    `- LoopProcess() [MPI/HDF]
+                        The task loop is finished. All received data is available for all
+                        nodes. Each node invoke this hook, and it might be used to do
+                        additional operations, such as MPI/HDF calls.
+
+                    `- PoolProcess()
+                        The master node invoke the PoolProcess() hook. The decision has to
+                        be made: POOL_CREATE_NEW will create the new task pool, POOL_RESET
+                        will reset the current task pool, the POOL_FINALIZE will finalize
+                        the pool loop.
+
+                        In case of POOL_RESET, the loop goes to #2, with reset id
+                        p->rid++. The data from the previous revision of the current pool is 
+                        available, and may be reused.
+
+                        In case of POOL_CREATE_NEW, the current loop finished, and goes to
+                        #1, with the pool id p->pid++. If the p->pid++ is greater than
+                        maximum number of pools defined in Init() hook, the pool loop is
+                        forced to finalize.
+
+                        In case of POOL_FINALIZE the pool loop is finalized, and goes to
+                        #3. The pool receives p->state = POOL_PROCESSED.
+
+                        The pool data as well as task data is stored in the master file.
+
+                    `- NodeProcess() [MPI/HDF]
+                        All nodes invoke the NodeProcess() hook, which might be used to do
+                        additional operations.
+
+                  [/CURRENT POOL]
+
+                `- [/POOL LOOP] [#3]
+
+            `- Process() [MPI/HDF]
+                Each node call the Process() hook.
+
+                The work pool is finalized, and the memory freed.
+        `- [/WORK POOL]
+        
+    -- Finalize
+
+
+The user-supplied module is a C-code compiled to a shared library. It may be
+interconnected with any C-interoperable programming language, such as C++, OpenCL, CUDA
+and Fortran2003+.
 
 
 How to write a Mechanic module
@@ -119,12 +257,11 @@ documents and uses all available hooks.
 
     mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 \
     mechanic_module_example.c -o libmechanic_module_example.so
+
 Mechanic 2.x reference
 ======================
 
 - [The pool loop](#the-pool-loop)
-  - [The pool loop explained](#the-pool-loop-explained)
-- [The task loop](#the-task-loop)
 - [Init](#init)
 - [Setup](#setup)
   - [Core options](#core-options)
@@ -147,35 +284,11 @@ Mechanic 2.x reference
 
 
 
+
 The pool loop
 -------------
 
-#### The pool loop explained
-
-After the core and the module are bootstrapped, the Mechanic enters the four-step pool
-loop:
-
-1. `PoolPrepare()`
-  All nodes enter the `PoolPrepare()`. Data of all previous pools is passed to this
-  function, so that we may use them to prepare data for the current pool. The current pool
-  data is broadcasted to all nodes and stored in the master datafile.
-
-2. The Task Loop
-  All nodes enter the task loop. The master node prepares the task during
-  `TaskPrepare()`. Each worker receives a task, and calls the `TaskProcess()`. The task
-  data, marked with `use_hdf = 1` are received by the master node after the
-  `TaskProcess()` is finished and stored during the `CheckpointProcess()`.
-
-3. The Checkpoint
-  `The CheckpointPrepare()` hook might be used to adjust the received data. The pool 
-  data might be adjusted here as well, the data is stored again during `CheckpointProcess()`.
-
-4. `PoolProcess()`
-  After the task loop is finished, the `PoolProcess()` is used to decide whether to
-  continue the pool loop or not. The data of all pools is passed to this function. 
-
-
-#### Task pool states
+#### The pool states
 
 During the task pool loop, the following status codes are defined, and available through
 `p->state`:
@@ -208,12 +321,6 @@ be created. If the number of pools reach 5, the pool loop is finalized:
       if (p->pid < 5) return POOL_CREATE_NEW;
       return POOL_FINALIZE;
     }
-
-
-The task loop
--------------
-
-@todo
 
 
 Init
@@ -729,33 +836,6 @@ Hooks
   task loop
 - `int LoopProcess(int mpi_size, int node, pool **all, pool *p, setup *s)` - process the
   task loop
-
-#### Hooks calling order
-
-    Init()
-    Setup()
-    Prepare()
-      
-      [pool loop]
-      
-        Storage()
-          NodePrepare()
-          PoolPrepare()
-          LoopPrepare()
-        
-          [task loop]
-            TaskBoardMap()
-            TaskPrepare()
-            TaskProcess()
-          [/task loop]
-          
-          LoopProcess()
-          PoolProcess()
-          NodeProcess()
-        
-      [/pool loop]
-
-    Process()
 
 API helpers
 -----------
