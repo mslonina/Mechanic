@@ -76,32 +76,29 @@ at following examples:
 
 #### Working with task pools
   
-  - Creating task pools: `mechanic_module_ex_createpool.c`
-  - Reading and writing task pool data: `mechanic_module_ex_pool.c`
-  - Resetting the task pool: `mechanic_module_ex_reset.c`
-  - Different storage layout per task pool (basic): `mechanic_module_ex_chpoollayout.c`
-  - Different storage layout per task pool (advanced): `mechanic_module_ex_chpoollayout2.c`
+  - Creating task pools: [mechanic_module_ex_createpool.c](./c/mechanic_module_ex_createpool.c)
+  - Reading and writing task pool data: [mechanic_module_ex_pool.c](./c/mechanic_module_ex_pool.c)
+  - Resetting the task pool: [mechanic_module_ex_reset.c](./c/mechanic_module_ex_reset.c)
+  - Different storage layout per task pool (basic): [mechanic_module_ex_chpoollayout.c](./c/mechanic_module_ex_chpoollayout.c)
+  - Different storage layout per task pool (advanced): [mechanic_module_ex_chpoollayout2.c](./c/mechanic_module_ex_chpoollayout2.c)
 
 #### Configuration
 
-  - Defining and using configuration options (`Init()` and `Setup()`): `mechanic_module_ex_setup.c`
+  - Defining and using configuration options (`Init()` and `Setup()`): [mechanic_module_ex_setup.c](./c/mechanic_module_ex_setup.c)
 
 #### Datatypes and dimensionality
 
-  - Using different datatypes, reading and writing data to the memory banks:
-    `mechanic_module_ex_datatypes.c`
-  - Using datasets of different datatypes and dimensionality: `mechanic_module_ex_dim.c`
+  - Using different datatypes, reading and writing data to the memory banks: [mechanic_module_ex_datatypes.c](./c/mechanic_module_ex_datatypes.c]
+  - Using datasets of different datatypes and dimensionality: [mechanic_module_ex_dim.c](./c/mechanic_module_ex_dim.c)
 
 #### Attributes
 
-  - Using HDF5 attributes: `mechanic_module_ex_attr.c`
+  - Using HDF5 attributes: [mechanic_module_ex_attr.c](./c/mechanic_module_ex_attr.c)
 
 #### Advanced hooks
 
-  - Using `Prepare()` and `Process()` hooks:
-    [mechanic_module_ex_prepareprocess.c](./c/mechanic_module_ex_prepareprocess.c)
-  - Using `DatasetPrepare()` and `DatasetProcess()` hooks:
-    [mechanic_module_ex_dataset.c](./c/mechanic_module_ex_dataset.c)
+  - Using `Prepare()` and `Process()` hooks: [mechanic_module_ex_prepareprocess.c](./c/mechanic_module_ex_prepareprocess.c)
+  - Using `DatasetPrepare()` and `DatasetProcess()` hooks: [mechanic_module_ex_dataset.c](./c/mechanic_module_ex_dataset.c)
 
 #### Compilation
 
