@@ -9,12 +9,36 @@ Mechanic 2.x quick start
 How the Mechanic work
 ---------------------
 
-The Mechanic is independent on the numerical problem, thus it must implement all the
-neccessary API to handle most of the cases. Take a look on the simplified schema of the
-API, and hook calling order. None of the hooks is required -- in case of missing hook, 
+The goal of the Mechanic is to provide unified framework for scientific applications, that
+requires a lot of computing power. Under the hood it uses MPI for CPU communication and
+HDF5 standard for data storage. It provides API for common
+programming tasks, such as defining and using configuration options, data storage, memory
+allocation etc. It was designed this way to simplify and shorten developing process of scientific
+codes. The Mechanic does not solve numerical problems, such as NBody or ODEs by self. It
+requires the user-supplied module with the actual numerical code. In that way, the core
+code is independent on the scientific problem, and the scientific problem is fully
+scalable on CPU/GPU clusters. The resulting data is handled in a unified way, through the HDF5 standard,
+and may be externally accessed in a number of different applications (say Python).
+
+We tried to design the Mechanic to handle most of scientific problems. It was already
+successfully tested with classical NBody problems, RV observation fitting, genetic
+algorithms and basic CUDA codes. The connection with user-supplied code takes place in the API hooks,
+described shortly on the schematic graph below. None of the hooks is required -- in case of missing hook, 
 the corresponding core hook is invoked. No knowledge on MPI/HDF programming is required,
-however, it is still possible to use it during advanced hooks (marked with MPI/HDF keyword
-on the graph below).
+however, it is still possible to use it during advanced hooks (marked with MPI/HDF keyword).
+
+The Mechanic internally works on top of the _MPI Task Farm_ model. This means, we have one
+master node which prepares numerical tasks for workers. Tasks are grouped into pools, and
+we may have many such pools with different storage and number of tasks. Tasks are mapped
+onto 3D task board, which helps to find out which tasks are completed, and is required for
+the restart mode. Each pool, as well as tasks, may have own storage to suit best your
+application. Different storage types are available, suitable for processing with Gnuplot
+or Matplotlib. All basic datatypes are supported and datasets up to rank 32.
+
+The user-supplied module is a C-code compiled to a shared library. It may be
+interconnected with any C-interoperable programming language, such as C++, OpenCL, CUDA
+and Fortran2003+. Some basic C programming knowledge is required to work with Mechanic
+modules.
 
     -- MPI/HDF init
       
@@ -40,14 +64,17 @@ on the graph below).
                   
                   [CURRENT POOL]
 
+                  The pool consists of tasks. Each pool may have different storage and
+                  different number of tasks. Each pool is aware of previous pools and has
+                  access to their data. You may use this knowledge as the power at your
+                  fingers.
+
                     `- Storage()
                         All nodes invoke the Storage() hook. The master node prepares
                         specified datasets in the master file. The memory for the current
                         pool is allocated.
 
                         During dataset creation, the DatasetPrepare() hook is invoked.
-
-                        The pool storage, as well as task storage may be different during different pools.
 
                     `- NodePrepare() [MPI/HDF] [#2]
                         All nodes invoke the NodePrepare() hook. The data for the previous
@@ -139,10 +166,6 @@ on the graph below).
     -- Finalize
 
 
-The user-supplied module is a C-code compiled to a shared library. It may be
-interconnected with any C-interoperable programming language, such as C++, OpenCL, CUDA
-and Fortran2003+.
-
 
 How to write a Mechanic module
 ------------------------------
@@ -204,8 +227,8 @@ The data will be stored in the master file: `mechanic-master-00.h5` in the datas
 Examples
 --------
 
-As a quick start and tutorial for creating numerical modules for the Mechanic, take a look
-at following examples:
+As the best start and reference of different Mechanic aspects and possibilites, take a
+look at following examples: 
 
 #### The basics
 
