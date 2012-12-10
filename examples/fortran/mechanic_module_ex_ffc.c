@@ -7,9 +7,9 @@
  * Compilation
  * -----------
  *
- *    mpicc -std=c99 -c mechanic_module_ffc.c -fPIC -Dpic
- *    mpif90 -std=f2003 -c mechanic_module_ffc_fortran.F90 -fPIC -Dpic
- *    mpicc -shared -o libmechanic_module_ffc.so mechanic_module_ffc.o mechanic_module_ffc_fortran.o -lgfortran -lmechanic2
+ *    mpicc -std=c99 -c mechanic_module_ex_ffc.c -fPIC -Dpic
+ *    mpif90 -std=f2003 -c mechanic_module_ex_ffc_fortran.F90 -fPIC -Dpic
+ *    mpicc -shared -o libmechanic_module_ex_ffc.so mechanic_module_ex_ffc.o mechanic_module_ex_ffc_fortran.o -lgfortran -lmechanic2
  */
 #include "Mechanic2.h"
 
@@ -25,11 +25,28 @@ int cfunc(int n, double *x) {
 void integrator(cfunc_ptr func, int n, double *ctrl, double *x, double *f, int *pstatus);
 
 /**
+ * Implements Storage()
+ */
+int Storage(pool *p, storage *s) {
+  p->task->storage[0].layout = (schema) {
+    .name = "result",
+    .rank = 2,
+    .dim[0] = 1,
+    .dim[1] = 10,
+    .datatype = H5T_NATIVE_DOUBLE,
+    .storage_type = STORAGE_PM3D,
+    .use_hdf = 1,
+  };
+  return SUCCESS;
+}
+
+/**
  * Implements TaskProcess()
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   int n, pstatus;
   double ctrl[10], x[24], f;
+  double buffer[1][10];
 
   n = t->tid;
   ctrl[7] = t->location[0];
@@ -38,6 +55,13 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   /* Call Fortran function, we pass cfunc as an argument */
   integrator(cfunc, n, ctrl, x, &f, &pstatus);
+
+  buffer[0][0] = ctrl[7];
+  buffer[0][1] = x[21];
+  buffer[0][2] = f;
+  buffer[0][3] = n;
+
+  MWriteData(t, "result", buffer);
 
   Message(MESSAGE_OUTPUT, "Node %d, status = %d\n", t->node, pstatus);
   return SUCCESS;

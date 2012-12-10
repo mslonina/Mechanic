@@ -5,9 +5,9 @@ FFLAGS=-std=f2003 -fPIC -Dpic
 EXT=so
 
 all:
-	${CC} ${CFLAGS} -c mechanic_module_ffc.c
-	${FC} ${FFLAGS} -c mechanic_module_ffc_fortran.F90 
-	${CC} ${CFLAGS} -o libmechanic_module_ffc.${EXT} mechanic_module_ffc.o mechanic_module_ffc_fortran.o 
+	${CC} ${CFLAGS} -c mechanic_module_ex_ffc.c
+	${FC} ${FFLAGS} -c mechanic_module_ex_ffc_fortran.F90 
+	${CC} ${CFLAGS} -o libmechanic_module_ex_ffc.${EXT} mechanic_module_ex_ffc.o mechanic_module_ex_ffc_fortran.o 
 
 clean:
 	rm -f *.so *.dylib *.o *mod
