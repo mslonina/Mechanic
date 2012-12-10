@@ -27,7 +27,7 @@ void integrator(cfunc_ptr func, int n, double *ctrl, double *x, double *f, int *
 /**
  * Implements Storage()
  */
-int Storage(pool *p, storage *s) {
+int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
