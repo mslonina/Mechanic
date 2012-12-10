@@ -106,11 +106,6 @@ at following examples:
   - Reading input file and storing it in the master datafile (`Storage()` and `PoolPrepare()` hooks): [mechanic_module_ex_readfile.c](./c/mechanic_module_ex_readfile.c)
   - Reading input file and storing it in the master datafile with `Setup()`: [mechanic_module_ex_readfile_setup.c](./c/mechanic_module_ex_readfile_setup.c)
 
-#### Compilation
-
-    mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 \
-    mechanic_module_example.c -o libmechanic_module_example.so
-
 #### The core module
 
 Take a look at `mechanic_module_core.c` located in `src/modules`. It contains,
@@ -120,6 +115,10 @@ documents and uses all available hooks.
 
   - Connecting external Fortran subroutine: [mechanic_module_ex_ffc.c](./fortran/mechanic_module_ex_ffc.c)
 
+#### Compilation
+
+    mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 \
+    mechanic_module_example.c -o libmechanic_module_example.so
 Mechanic 2.x reference
 ======================
 
@@ -187,18 +186,28 @@ During the task pool loop, the following status codes are defined, and available
 i.e.
 
     NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
-      if (p->status == POOL_PREPARED) {
+      if (p->state == POOL_PREPARED) {
         ...
       }
-      if (p->status == POOL_PROCESSED) {
+      if (p->state == POOL_PROCESSED) {
         ...
       }
+      return SUCCESS;
     }
 
 The `PoolProcess()` hook must return one of the following codes:
 - `POOL_CREATE_NEW` - the return code for new task pool creation
 - `POOL_RESET` - the return code for the current task pool reset
 - `POOL_FINALIZE` - the return code to finalize the task pool loop
+
+In the following example, the Pool will be reset 10 times. After that, the next pool will
+be created. If the number of pools reach 5, the pool loop is finalized:
+
+    int PoolProcess(pool **all, pool *p, setup *s) {
+      if (p->rid < 10) return POOL_RESET;
+      if (p->pid < 5) return POOL_CREATE_NEW;
+      return POOL_FINALIZE;
+    }
 
 
 The task loop
