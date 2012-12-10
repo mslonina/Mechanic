@@ -124,6 +124,7 @@ Mechanic 2.x reference
 - [Setup](#setup)
   - [Core options](#core-options)
   - [The configuration file](#the-configuration-file)
+  - [Getting the run time configuration](#getting-the-run-time-configuration)
 - [Storage](#storage)
   - [The pool storage](#the-pool-storage)
   - [The task storage](#the-task-storage)
@@ -354,6 +355,31 @@ The configuration order is:
 1. The default values defined through the `Setup()`
 2. The configuration file
 3. The command line
+
+#### Getting the run time configuration
+
+Config API provides functions to access the configuration options inside any part of the
+module. Options are stored in a linked list, and you may access them through the `setup` object, 
+which is passed to all functions, i.e.
+
+    int TaskProcess(pool *p, task *t, setup *s) {
+      int driver;
+      double xmin, xmax, step;
+
+      driver = Option2Int("hello", "driver", s->head);
+      step = Option2Double("hello", "step", s->head);
+      xmin = Option2Double("core", "xmin", s->head);
+      xmax = Option2Double("core", "xmax", s->head);
+
+      return SUCCESS;
+    }
+
+where:
+
+- `int Option2Int(char *space, char *option, configNamespace *head)`
+- `float Option2Float(char *space, char *option, configNamespace *head)`
+- `double Option2Double(char *space, char *option, configNamespace *head)`
+- `char* Option2String(char *space, char *option, configNamespace *head)`
 
 Storage
 -------
