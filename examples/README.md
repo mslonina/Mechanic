@@ -100,6 +100,11 @@ at following examples:
   - Using `Prepare()` and `Process()` hooks: [mechanic_module_ex_prepareprocess.c](./c/mechanic_module_ex_prepareprocess.c)
   - Using `DatasetPrepare()` and `DatasetProcess()` hooks: [mechanic_module_ex_dataset.c](./c/mechanic_module_ex_dataset.c)
 
+#### Real-life examples
+  
+  - Reading input file and storing it in the master datafile (`Storage()` and `PoolPrepare()` hooks): [mechanic_module_ex_readfile.c](./c/mechanic_module_ex_readfile.c)
+  - Reading input file and storing it in the master datafile with `Setup()`: [mechanic_module_ex_readfile_setup.c](./c/mechanic_module_ex_readfile_setup.c)
+
 #### Compilation
 
     mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 \
