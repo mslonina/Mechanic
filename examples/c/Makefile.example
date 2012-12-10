@@ -18,7 +18,8 @@ examples=\
 	mechanic_module_ex_dset.${EXT} \
 	mechanic_module_ex_node.${EXT} \
 	mechanic_module_ex_loop.${EXT} \
-	mechanic_module_ex_readfile.${EXT}
+	mechanic_module_ex_readfile.${EXT} \
+	mechanic_module_ex_readfile_setup.${EXT}
 
 %.so: %.c
 	${CC} -o lib$@ $< ${CFLAGS}
