@@ -376,12 +376,11 @@ which is passed to all functions, i.e.
 
 where:
 
-- `int Option2Int(char *space, char *option, configNamespace *head)` (for `C_INT` and
-  `C_VAL`)
-- `long Option2Long(char *space, char *option, configNamespace *head)`
-- `float Option2Float(char *space, char *option, configNamespace *head)`
-- `double Option2Double(char *space, char *option, configNamespace *head)`
-- `char* Option2String(char *space, char *option, configNamespace *head)`
+- `int Option2Int(char *space, char *option, configNamespace *head)` (for `C_INT` and `C_VAL`)
+- `long Option2Long(char *space, char *option, configNamespace *head)` (for `C_LONG`)
+- `float Option2Float(char *space, char *option, configNamespace *head)` (for `C_FLOAT`)
+- `double Option2Double(char *space, char *option, configNamespace *head)` (for `C_DOUBLE`)
+- `char* Option2String(char *space, char *option, configNamespace *head)` (for `C_STRING`)
 
 Storage
 -------
