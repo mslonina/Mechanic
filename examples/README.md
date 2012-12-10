@@ -71,8 +71,8 @@ at following examples:
 
 #### The basics
 
-  - A simple map or image: `mechanic_module_ex_map.c`
-  - The Mandelbrot set: `mechanic_module_ex_mandelbrot.c`
+  - A simple map or image: [mechanic_module_ex_map.c](./c/mechanic_module_ex_attr.c)
+  - The Mandelbrot set: [mechanic_module_ex_mandelbrot.c](./c/mechanic_module_ex_mandelbrot.c)
 
 #### Working with task pools
   
