@@ -156,9 +156,9 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
     }
   }
 
-  MWriteData(current, PSET0, data);
-  MWriteData(current, PSET1, buff);
-  MWriteData(current, PSET2, floa);
+  MWriteData(current, PSET0, &data[0][0]);
+  MWriteData(current, PSET1, &buff[0][0]);
+  MWriteData(current, PSET2, &floa[0][0]);
 
   return SUCCESS;
 }
@@ -298,11 +298,11 @@ int TaskProcess(pool *p, task *t, setup *s) {
     }
   }
 
-  MWriteData(t, TSET0, data);
-  MWriteData(t, TSET1, cdata);
-  MWriteData(t, TSET2, idata);
-  MWriteData(t, TSET3, idata);
-  MWriteData(t, TSET4, idata);
+  MWriteData(t, TSET0, &data[0][0][0]);
+  MWriteData(t, TSET1, &cdata[0][0][0]);
+  MWriteData(t, TSET2, &idata[0][0]);
+  MWriteData(t, TSET3, &idata[0][0]);
+  MWriteData(t, TSET4, &idata[0][0]);
 
   return SUCCESS;
 }

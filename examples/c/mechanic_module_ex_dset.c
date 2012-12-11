@@ -54,18 +54,18 @@ int Storage(pool *p, setup *s) {
  * task location, and the state of the system by the task unique identifier.
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  double buffer_one[1][3];
+  double buffer[1][3];
 
   // The vertical position of the pixel
-  buffer_one[0][0] = t->location[0];
+  buffer[0][0] = t->location[0];
 
   // The horizontal position of the pixel
-  buffer_one[0][1] = t->location[1];
+  buffer[0][1] = t->location[1];
 
   // The state of the system
-  buffer_one[0][2] = t->tid;
+  buffer[0][2] = t->tid;
 
-  MWriteData(t, "result", buffer_one);
+  MWriteData(t, "result", &buffer[0][0]);
   
   return SUCCESS;
 }

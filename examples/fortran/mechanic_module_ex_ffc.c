@@ -68,7 +68,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   buffer[0][2] = f;
   buffer[0][3] = n;
 
-  MWriteData(t, "result", buffer);
+  MWriteData(t, "result", &buffer[0][0]);
 
   Message(MESSAGE_OUTPUT, "Node %d, status = %d\n", t->node, pstatus);
   return SUCCESS;

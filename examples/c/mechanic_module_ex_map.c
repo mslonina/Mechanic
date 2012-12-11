@@ -53,9 +53,7 @@ int Storage(pool *p, setup *s) {
  * task location, and the state of the system by the task unique identifier.
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  double **buffer;
-
-  MAllocate2(t, "result", buffer, double);
+  double buffer[1][3];
 
   // The vertical position of the pixel
   buffer[0][0] = t->location[0];
@@ -68,8 +66,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   MWriteData(t, "result", &buffer[0][0]);
 
-  free(buffer);
-  
   return SUCCESS;
 }
 

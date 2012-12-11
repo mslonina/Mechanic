@@ -105,7 +105,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
         buffer_two[i][j] = i+j;
       }
     }
-    MWriteData(t, "result-board", buffer_two);
+    MWriteData(t, "result-board", &buffer_two[0][0]);
   }
 
   // We are at pool-0004
@@ -116,9 +116,9 @@ int TaskProcess(pool *p, task *t, setup *s) {
     buffer_three[0][3] = t->tid + 3.1;
     buffer_three[0][4] = t->tid + 4.1;
 
-    MWriteData(t, "result", buffer_three);
+    MWriteData(t, "result", &buffer_three[0][0]);
   } else {
-    MWriteData(t, "result", buffer_one);
+    MWriteData(t, "result", &buffer_one[0][0]);
   }
 
   return SUCCESS;
@@ -134,7 +134,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
   // Access the stored data in the current pool for STORAGE_GROUP
   if (current->pid == 4) {
     for (i = 0; i < current->pool_size; i++) {
-      MReadData(current->tasks[i], "result", buffer);
+      MReadData(current->tasks[i], "result", &buffer[0][0]);
       Message(MESSAGE_OUTPUT, "task[%04d] = [%04d %04d %04d]\n",
        current->tasks[i]->tid,
        (int)buffer[0][0],

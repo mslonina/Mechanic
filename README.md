@@ -145,7 +145,7 @@ state of the system:
       buffer[0][2] = t->tid; // task id represents the state of the system
 
       // Write the buffer data to Mechanic's memory buffers
-      MWriteData(t, "result", buffer);
+      MWriteData(t, "result", &buffer[0][0]);
 
       return SUCCESS;
     }

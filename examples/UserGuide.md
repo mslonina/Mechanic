@@ -205,7 +205,7 @@ Finally, we write the `TaskProcess()` function, where the numerics goes on:
       buffer[0][1] = t->location[0]; // vertical position of the task
       buffer[0][2] = t->tid; // the task id
 
-      MWriteData(t, "result", buffer);
+      MWriteData(t, "result", &buffer[0][0]);
 
       return SUCCESS;
     }
@@ -952,9 +952,9 @@ and read/write data to the `buffer`:
       double ibuffer[1][3];
       double rbuffer[1][3];
       ...
-      MWriteData(t, "result", ibuffer);
+      MWriteData(t, "result", &ibuffer[0][0]);
       ...
-      MReadData(t, "result", rbuffer);
+      MReadData(t, "result", &rbuffer[0][0]);
 
   For a dynamically allocated array, we must pass the proper pointer:
       
