@@ -261,6 +261,7 @@ look at following examples:
   - Using `Prepare()` and `Process()` hooks: [mechanic_module_ex_prepareprocess.c](./c/mechanic_module_ex_prepareprocess.c)
   - Using `DatasetPrepare()` and `DatasetProcess()` hooks: [mechanic_module_ex_dataset.c](./c/mechanic_module_ex_dataset.c)
   - Using `NodePrepare()` and `NodeProcess()` hooks: [mechanic_module_ex_node.c](./c/mechanic_module_ex_node.c)
+  - Using `LoopPrepare()` and `LoopProcess()` hooks: [mechanic_module_ex_loop.c](./c/mechanic_module_ex_loop.c)
 
 #### Real-life examples
   
@@ -304,8 +305,6 @@ Mechanic 2.x reference
   - [Reading and writing attributes](#reading-and-writing-attributes)
 - [Messages](#messages)
 - [Error codes](#error-codes)
-
-
 
 
 The pool loop
