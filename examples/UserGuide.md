@@ -509,13 +509,15 @@ where:
 Storage
 -------
 
+
+
 Mechanic allows to store module data in datasets of any basic datatypes, with minimum rank
 2 up to rank `H5S_MAX_RANK` (32). The storage information must be provided through the `Storage()` hook.
 To define the dataset, any C99 struct initialization is allowed. i.e.:
 
     int Storage(pool *p, setup *s) {
       p->storage[0].layout = (schema) {
-        .name = "pool-data",
+        .name = "sample-data",
         .rank = 2,
         .dim[0] = 1, // horizontal size
         .dim[1] = 6, // vertical size

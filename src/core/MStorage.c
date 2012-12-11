@@ -223,8 +223,6 @@ int CheckLayout(module *m, int banks, storage *s) {
 
       /* Check for mistakes */
       if (s[i].layout.sync != 1) {
-        Message(MESSAGE_WARN, "The sync flag for '%s' must be enabled for use_hdf. Fixing\n",
-          s[i].layout.name);
         s[i].layout.sync = 1;
       }
     }

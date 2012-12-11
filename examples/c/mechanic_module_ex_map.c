@@ -29,23 +29,9 @@
  * Each worker will return 1x3 result array. The master node will combine the worker
  * result arrays into one dataset suitable to process with Gnuplot PM3D. The final dataset
  * will be available at /Pools/pool-0000/Tasks/result.
- *
- * By default, we have 8 memory/storage banks per each task pool + 8 memory/storage banks
- * per task available. You may change the defaults by using the Init() hook.
  */
 int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
-    .name = "input",
-    .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = 3,
-    .sync = 0,
-    .use_hdf = 0,
-    .storage_type = STORAGE_PM3D,
-    .datatype = H5T_NATIVE_DOUBLE
-  };
-
-  p->task->storage[1].layout = (schema) {
     .name = "result",
     .rank = 2,
     .dim[0] = 1,
@@ -55,6 +41,7 @@ int Storage(pool *p, setup *s) {
     .storage_type = STORAGE_PM3D,
     .datatype = H5T_NATIVE_DOUBLE
   };
+
   return SUCCESS;
 }
 
@@ -66,18 +53,22 @@ int Storage(pool *p, setup *s) {
  * task location, and the state of the system by the task unique identifier.
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  double buffer_one[1][3];
+  double **buffer;
+
+  MAllocate2(t, "result", buffer, double);
 
   // The vertical position of the pixel
-  buffer_one[0][0] = t->location[0];
+  buffer[0][0] = t->location[0];
 
   // The horizontal position of the pixel
-  buffer_one[0][1] = t->location[1];
+  buffer[0][1] = t->location[1];
 
   // The state of the system
-  buffer_one[0][2] = t->tid;
+  buffer[0][2] = t->tid;
 
-  MWriteData(t, "result", buffer_one);
+  MWriteData(t, "result", &buffer[0][0]);
+
+  free(buffer);
   
   return SUCCESS;
 }
