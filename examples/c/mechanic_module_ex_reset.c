@@ -2,10 +2,13 @@
  * Using POOL_RESET
  * ================
  *
+ * This example shows how to reset the current task pool
+ *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl mechanic_module_ex_reset.c -o libmechanic_module_ex_reset.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_reset.c -o libmechanic_module_ex_reset.so
  *
  * Using the module
  * ----------------

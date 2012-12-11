@@ -7,7 +7,8 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl mechanic_module_ex_dset.c -o libmechanic_module_ex_dset.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_dset.c -o libmechanic_module_ex_dset.so
  *
  * Using the module
  * ----------------

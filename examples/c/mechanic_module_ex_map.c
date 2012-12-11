@@ -2,10 +2,14 @@
  * Sample map or image
  * ===================
  *
+ * This example shows how to create a sample map (image) that is suitable to process with
+ * Gnuplot PM3D
+ *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl mechanic_module_ex_map.c -o libmechanic_module_ex_map.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_map.c -o libmechanic_module_ex_map.so
  *
  * Using the module
  * ----------------

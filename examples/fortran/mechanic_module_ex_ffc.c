@@ -7,9 +7,16 @@
  * Compilation
  * -----------
  *
- *    mpicc -std=c99 -c mechanic_module_ex_ffc.c -fPIC -Dpic
- *    mpif90 -std=f2003 -c mechanic_module_ex_ffc_fortran.F90 -fPIC -Dpic
- *    mpicc -shared -o libmechanic_module_ex_ffc.so mechanic_module_ex_ffc.o mechanic_module_ex_ffc_fortran.o -lgfortran -lmechanic
+ *    mpicc -std=c99 -fPIC -Dpic -lmechanic -c mechanic_module_ex_ffc.c 
+ *    mpif90 -std=f2003 -fPIC -Dpic -c mechanic_module_ex_ffc_fortran.F90 
+ *    mpicc -shared -lgfortran -lmechanic -o libmechanic_module_ex_ffc.so \
+ *        mechanic_module_ex_ffc.o mechanic_module_ex_ffc_fortran.o
+ *
+ * Using the module
+ * ----------------
+ *
+ *    mpirun -np 4 mechanic -p ex_ffc -x 10 -y 20
+ *
  */
 #include "mechanic.h"
 

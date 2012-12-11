@@ -9,7 +9,8 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic mechanic_module_ex_chpoollayout2.c -o libmechanic_module_ex_chpoollayout2.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_chpoollayout2.c -o libmechanic_module_ex_chpoollayout2.so
  *
  * Using the module
  * ----------------

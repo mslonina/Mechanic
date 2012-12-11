@@ -2,10 +2,14 @@
  * Read/Write pool data
  * ====================
  *
+ * In this example, we write and read pool data (using PoolPrepare() and PoolProcess()
+ * hooks)
+ *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl mechanic_module_ex_pool.c -o libmechanic_module_ex_pool.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_pool.c -o libmechanic_module_ex_pool.so
  *
  * Using the module
  * ----------------

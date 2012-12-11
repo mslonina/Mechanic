@@ -11,7 +11,14 @@
  * Compilation
  * -----------
  *
- *    mpicc -shared -std=c99 -fPIC -Dpic mechanic_module_ex_loop.c -o libmechanic_module_ex_loop.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_loop.c -o libmechanic_module_ex_loop.so
+ *
+ * Using the module
+ * ----------------
+ *
+ *    mpirun -np 4 mechanic -p ex_loop -x 10 -y 20
+ *
  */
 #include "mechanic.h"
 

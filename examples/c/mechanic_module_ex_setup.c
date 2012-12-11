@@ -8,6 +8,13 @@
  *
  * The Init() hook is used to define some low-level Mechanic variables, such as number of
  * storage banks or configuration options.
+ * 
+ * Compilation
+ * -----------
+ *
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_setup.c -o libmechanic_module_ex_setup.so
+ *
  *
  * Using the module
  * ----------------

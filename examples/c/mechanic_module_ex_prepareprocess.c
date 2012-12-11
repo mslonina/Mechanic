@@ -2,10 +2,14 @@
  * Using Prepare/Process hooks
  * ===========================
  *
+ * In this example we show how to use Prepare()/Process() hooks. These advanced hooks may
+ * be used for additional MPI/HDF5 operations.
+ *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl mechanic_module_ex_prepareprocess.c -o libmechanic_module_ex_prepareprocess.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_prepareprocess.c -o libmechanic_module_ex_prepareprocess.so
  *
  * Using the module
  * ----------------

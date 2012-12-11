@@ -2,10 +2,14 @@
  * Using HDF5 attributes
  * =====================
  *
+ * This example shows how to use HDF5 attributes. We specify attributes directly through
+ * the API.
+ *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl mechanic_module_ex_attr.c -o libmechanic_module_ex_attr.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_attr.c -o libmechanic_module_ex_attr.so
  *
  * Using the module
  * ----------------

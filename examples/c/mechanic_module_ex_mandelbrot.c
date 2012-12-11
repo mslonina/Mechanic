@@ -2,10 +2,13 @@
  * The Mandelbrot set
  * ==================
  *
+ * This example shows how to compute the Mandelbrot set
+ *
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic mechanic_module_ex_mandelbrot.c -o libmechanic_module_ex_mandelbrot.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_mandelbrot.c -o libmechanic_module_ex_mandelbrot.so
  *
  * Using the module
  * ----------------

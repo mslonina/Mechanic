@@ -20,7 +20,14 @@
  * Compilation
  * -----------
  *
- *    mpicc -std=c99 -fPIC -Dpic -shared mechanic_module_ex_readfile_setup.c -o libmechanic_module_ex_readfile_setup.so
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_readfile_setup.c -o libmechanic_module_ex_readfile_setup.so
+ *
+ * Using the module
+ * ----------------
+ *
+ *    mpirun -np 4 mechanic -p ex_readfile_setup -x 10 -y 20
+ *
  */
 #include "mechanic.h"
 

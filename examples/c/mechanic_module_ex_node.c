@@ -6,8 +6,20 @@
  * to allocate additional data structures that cannot be passed directly through the API. The
  * all configuration and data for the current, and previous task pools is passed.
  *
- * NodePrepare() hook is invoked before PoolPrepare().
- * NodeProcess() hook is invoked after PoolProcess().
+ * The NodePrepare() hook is invoked before PoolPrepare().
+ * The NodeProcess() hook is invoked after PoolProcess().
+ * 
+ * Compilation
+ * -----------
+ *
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *        mechanic_module_ex_node.c -o libmechanic_module_ex_node.so
+ *
+ * Using the module
+ * ----------------
+ *
+ *    mpirun -np 4 mechanic -p ex_node -x 10 -y 20
+ *
  */
 #include "mechanic.h"
 
