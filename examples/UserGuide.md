@@ -1,7 +1,6 @@
 Mechanic 2.x quick start
 ========================
 
-
 - [How the Mechanic work](#how-the-mechanic-work)
 - [How to write a Mechanic module](#how-to-write-a-mechanic-module)
 - [Examples](#examples)
@@ -232,42 +231,60 @@ look at following examples:
 
 #### The basics
 
-  - A simple map or image: [mechanic_module_ex_map.c](./c/mechanic_module_ex_attr.c)
-  - The Mandelbrot set: [mechanic_module_ex_mandelbrot.c](./c/mechanic_module_ex_mandelbrot.c)
+  - A simple map or image:
+    [mechanic_module_ex_map.c](./c/mechanic_module_ex_attr.c)
+  - The Mandelbrot set:
+    [mechanic_module_ex_mandelbrot.c](./c/mechanic_module_ex_mandelbrot.c)
 
 #### Working with task pools
-  
-  - Creating task pools: [mechanic_module_ex_createpool.c](./c/mechanic_module_ex_createpool.c)
-  - Reading and writing task pool data: [mechanic_module_ex_pool.c](./c/mechanic_module_ex_pool.c)
-  - Resetting the task pool: [mechanic_module_ex_reset.c](./c/mechanic_module_ex_reset.c)
-  - Different storage layout per task pool (basic): [mechanic_module_ex_chpoollayout.c](./c/mechanic_module_ex_chpoollayout.c)
-  - Different storage layout per task pool (advanced): [mechanic_module_ex_chpoollayout2.c](./c/mechanic_module_ex_chpoollayout2.c)
+
+  - Creating task pools:
+    [mechanic_module_ex_createpool.c](./c/mechanic_module_ex_createpool.c)
+  - Reading and writing task pool data:
+    [mechanic_module_ex_pool.c](./c/mechanic_module_ex_pool.c)
+  - Resetting the task pool:
+    [mechanic_module_ex_reset.c](./c/mechanic_module_ex_reset.c)
+  - Different storage layout per task pool (basic):
+    [mechanic_module_ex_chpoollayout.c](./c/mechanic_module_ex_chpoollayout.c)
+  - Different storage layout per task pool (advanced):
+    [mechanic_module_ex_chpoollayout2.c](./c/mechanic_module_ex_chpoollayout2.c)
 
 #### Configuration
 
-  - Defining and using configuration options (`Init()` and `Setup()`): [mechanic_module_ex_setup.c](./c/mechanic_module_ex_setup.c)
+  - Defining and using configuration options (`Init()` and `Setup()`):
+    [mechanic_module_ex_setup.c](./c/mechanic_module_ex_setup.c)
 
 #### Datatypes and dimensionality
 
-  - Using different datatypes, reading and writing data to the memory banks: [mechanic_module_ex_datatypes.c](./c/mechanic_module_ex_datatypes.c)
-  - Using datasets of different datatypes and dimensionality: [mechanic_module_ex_dim.c](./c/mechanic_module_ex_dim.c)
+  - Using different datatypes, reading and writing data to the memory banks:
+    [mechanic_module_ex_datatypes.c](./c/mechanic_module_ex_datatypes.c)
+  - Using datasets of different datatypes and dimensionality:
+    [mechanic_module_ex_dim.c](./c/mechanic_module_ex_dim.c)
 
 #### Attributes
 
-  - Using HDF5 attributes: [mechanic_module_ex_attr.c](./c/mechanic_module_ex_attr.c)
+  - Using HDF5 attributes:
+    [mechanic_module_ex_attr.c](./c/mechanic_module_ex_attr.c)
 
 #### Advanced hooks
 
-  - Using `Prepare()` and `Process()` hooks: [mechanic_module_ex_prepareprocess.c](./c/mechanic_module_ex_prepareprocess.c)
-  - Using `DatasetPrepare()` and `DatasetProcess()` hooks: [mechanic_module_ex_dataset.c](./c/mechanic_module_ex_dataset.c)
-  - Using `NodePrepare()` and `NodeProcess()` hooks: [mechanic_module_ex_node.c](./c/mechanic_module_ex_node.c)
-  - Using `LoopPrepare()` and `LoopProcess()` hooks: [mechanic_module_ex_loop.c](./c/mechanic_module_ex_loop.c)
+  - Using `Prepare()` and `Process()` hooks:
+    [mechanic_module_ex_prepareprocess.c](./c/mechanic_module_ex_prepareprocess.c)
+  - Using `DatasetPrepare()` and `DatasetProcess()` hooks:
+    [mechanic_module_ex_dataset.c](./c/mechanic_module_ex_dataset.c)
+  - Using `NodePrepare()` and `NodeProcess()` hooks:
+    [mechanic_module_ex_node.c](./c/mechanic_module_ex_node.c)
+  - Using `LoopPrepare()` and `LoopProcess()` hooks:
+    [mechanic_module_ex_loop.c](./c/mechanic_module_ex_loop.c)
 
 #### Real-life examples
-  
-  - Reading input file and storing it in the master datafile (`Storage()` and `PoolPrepare()` hooks): [mechanic_module_ex_readfile.c](./c/mechanic_module_ex_readfile.c)
-  - Reading input file and storing it in the master datafile with `Setup()`: [mechanic_module_ex_readfile_setup.c](./c/mechanic_module_ex_readfile_setup.c)
-  - Very simple genetic algorithm: [mechanic_module_ex_ga.c](./c/mechanic_module_ex_ga.c)
+
+  - Reading input file and storing it in the master datafile (`Storage()` and `PoolPrepare()` hooks):
+    [mechanic_module_ex_readfile.c](./c/mechanic_module_ex_readfile.c)
+  - Reading input file and storing it in the master datafile with `Setup()`:
+    [mechanic_module_ex_readfile_setup.c](./c/mechanic_module_ex_readfile_setup.c)
+  - Very simple genetic algorithm:
+    [mechanic_module_ex_ga.c](./c/mechanic_module_ex_ga.c)
 
 #### The core module
 
@@ -276,7 +293,8 @@ documents and uses all available hooks.
 
 #### Fortran
 
-  - Connecting external Fortran subroutine: [mechanic_module_ex_ffc.c](./fortran/mechanic_module_ex_ffc.c)
+  - Connecting external Fortran subroutine:
+    [mechanic_module_ex_ffc.c](./fortran/mechanic_module_ex_ffc.c)
 
 #### Compilation
 
@@ -286,7 +304,6 @@ documents and uses all available hooks.
 Mechanic 2.x reference
 ======================
 
-- [The pool loop](#the-pool-loop)
 - [Init](#init)
 - [Setup](#setup)
   - [Core options](#core-options)
@@ -299,6 +316,7 @@ Mechanic 2.x reference
   - [Attributes](#attributes)
   - [Checkpoint](#checkpoint)
 - [Datatypes](#datatypes)
+- [The pool loop](#the-pool-loop)
 - [Hooks](#hooks)
 - [API helpers](#api-helpers)
   - [Memory allocation](#memory-allocation)
@@ -306,44 +324,6 @@ Mechanic 2.x reference
   - [Reading and writing attributes](#reading-and-writing-attributes)
 - [Messages](#messages)
 - [Error codes](#error-codes)
-
-
-The pool loop
--------------
-
-#### The pool states
-
-During the task pool loop, the following status codes are defined, and available through
-`p->state`:
-
-- `POOL_PREPARED`, after the `PoolPrepare()` hook has been invoked
-- `POOL_PROCESSED`, after the `PoolProcess()` hook has been invoked
-
-i.e.
-
-    NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
-      if (p->state == POOL_PREPARED) {
-        ...
-      }
-      if (p->state == POOL_PROCESSED) {
-        ...
-      }
-      return SUCCESS;
-    }
-
-The `PoolProcess()` hook must return one of the following codes:
-- `POOL_CREATE_NEW` - the return code for new task pool creation
-- `POOL_RESET` - the return code for the current task pool reset
-- `POOL_FINALIZE` - the return code to finalize the task pool loop
-
-In the following example, the Pool will be reset 10 times. After that, the next pool will
-be created. If the number of pools reach 5, the pool loop is finalized:
-
-    int PoolProcess(pool **all, pool *p, setup *s) {
-      if (p->rid < 10) return POOL_RESET;
-      if (p->pid < 5) return POOL_CREATE_NEW;
-      return POOL_FINALIZE;
-    }
 
 
 Init
@@ -394,7 +374,6 @@ The Config API allows any kind of C99 struct initialization to be used, i.e.:
        s->options[2] = (options) OPTIONS_END;
        return SUCCESS;
      }
-
 
 where
 
@@ -531,9 +510,9 @@ Storage
 -------
 
 Mechanic allows to store module data in datasets of any basic datatypes, with minimum rank
-2 up to rank `H5S_MAX_RANK` (32). The storage information must be provided with `Storage()` hook.
+2 up to rank `H5S_MAX_RANK` (32). The storage information must be provided through the `Storage()` hook.
 To define the dataset, any C99 struct initialization is allowed. i.e.:
-    
+
     int Storage(pool *p, setup *s) {
       p->storage[0].layout = (schema) {
         .name = "pool-data",
@@ -826,6 +805,42 @@ Mechanic support all native MPI/HDF5 datatypes:
 | float                  | MPI_FLOAT              | H5T_NATIVE_FLOAT     |
 | double                 | MPI_DOUBLE             | H5T_NATIVE_DOUBLE    |
 
+The pool loop
+-------------
+
+#### The pool states
+
+During the task pool loop, the following status codes are defined, and available through
+`p->state`:
+
+- `POOL_PREPARED`, after the `PoolPrepare()` hook has been invoked
+- `POOL_PROCESSED`, after the `PoolProcess()` hook has been invoked
+
+i.e.
+
+    NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
+      if (p->state == POOL_PREPARED) {
+        ...
+      }
+      if (p->state == POOL_PROCESSED) {
+        ...
+      }
+      return SUCCESS;
+    }
+
+The `PoolProcess()` hook must return one of the following codes:
+- `POOL_CREATE_NEW` - the return code for new task pool creation
+- `POOL_RESET` - the return code for the current task pool reset
+- `POOL_FINALIZE` - the return code to finalize the task pool loop
+
+In the following example, the Pool will be reset 10 times. After that, the next pool will
+be created. If the number of pools reach 5, the pool loop is finalized:
+
+    int PoolProcess(pool **all, pool *p, setup *s) {
+      if (p->rid < 10) return POOL_RESET;
+      if (p->pid < 5) return POOL_CREATE_NEW;
+      return POOL_FINALIZE;
+    }
 
 
 Hooks
