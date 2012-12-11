@@ -267,6 +267,7 @@ look at following examples:
   
   - Reading input file and storing it in the master datafile (`Storage()` and `PoolPrepare()` hooks): [mechanic_module_ex_readfile.c](./c/mechanic_module_ex_readfile.c)
   - Reading input file and storing it in the master datafile with `Setup()`: [mechanic_module_ex_readfile_setup.c](./c/mechanic_module_ex_readfile_setup.c)
+  - Very simple genetic algorithm: [mechanic_module_ex_ga.c](./c/mechanic_module_ex_ga.c)
 
 #### The core module
 
