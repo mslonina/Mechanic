@@ -7,11 +7,11 @@
  * PoolPrepare() is finished. The default file "readfile.txt" may be changed through the
  * defined option "inputfile":
  *
- *    mpirun -np 2 mechanic2 -p ex_readfile_setup --inputfile=input.dat
+ *    mpirun -np 2 mechanic -p ex_readfile_setup --inputfile=input.dat
  *
  *    or
  *    
- *    mpirun -np 2 mechanic2 -p ex_readfile_setup -f input.dat
+ *    mpirun -np 2 mechanic -p ex_readfile_setup -f input.dat
  *
  * The data can be accessed in `/Pools/pool-0000/input` dataset.
  *
@@ -22,7 +22,7 @@
  *
  *    mpicc -std=c99 -fPIC -Dpic -shared mechanic_module_ex_readfile_setup.c -o libmechanic_module_ex_readfile_setup.so
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 #define MAX_ENTRIES 4
 #define ENTRY_LENGTH 7

@@ -7,12 +7,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_ex_dim.c -o libmechanic_module_ex_dim.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic mechanic_module_ex_dim.c -o libmechanic_module_ex_dim.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p ex_dim -x 10 -y 20
+ *    mpirun -np 4 mechanic -p ex_dim -x 10 -y 20
  *
  * Listing the contents of the data file
  * -------------------------------------
@@ -25,7 +25,7 @@
  *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
  */
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 #define DIM0 3
 #define DIM1 4

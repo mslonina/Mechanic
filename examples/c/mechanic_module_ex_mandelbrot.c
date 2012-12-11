@@ -5,19 +5,19 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_ex_mandelbrot.c -o libmechanic_module_ex_mandelbrot.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic mechanic_module_ex_mandelbrot.c -o libmechanic_module_ex_mandelbrot.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p ex_mandelbrot -x 2048 -y 2048
+ *    mpirun -np 4 mechanic -p ex_mandelbrot -x 2048 -y 2048
  *
  * Getting the data
  * ----------------
  *
  *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 int fractal(double a, double b, double c);
 

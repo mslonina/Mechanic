@@ -3,7 +3,7 @@
 # Template gnuplot script to plot dynamical map from MECHANIC 
 # 
 # 1) Run the Mechanic:
-# mpirun -np 5 mechanic2 -p arnoldweb -n arnoldweb -x 512 -y 512 -d 250
+# mpirun -np 5 mechanic -p arnoldweb -n arnoldweb -x 512 -y 512 -d 250
 # 2) Extract data:
 # h52ascii arnoldweb-master-00.h5 512 /Pools/pool-0000/Tasks/result pm3d.dat
 # 3) Run Gnuplot:

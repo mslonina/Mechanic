@@ -5,7 +5,7 @@
 #ifndef MECHANIC_CORE_H
 #define MECHANIC_CORE_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "MTypes.h"
 #include "MLog.h"
 #include "MCommon.h"

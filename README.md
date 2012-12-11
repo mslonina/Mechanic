@@ -113,7 +113,7 @@ First, we would like to define some sensible storage layout for the result data.
 store the location of the point of the map and the state of the system (1x3 array). Let us
 create a `mechanic_module_map.c` file and put in it the following code:
 
-    #include "Mechanic2.h"
+    #include "mechanic.h"
 
     int Storage(pool *p, setup *s) {
       p->task->storage[0].layout = (schema) {
@@ -165,7 +165,7 @@ We should now compile our code to a shared library:
 After all, we may run the code for a 10x10px map, using four MPI threads, one master 
 and three workers:
 
-    mpirun -np 4 mechanic2 -p map -x 10 -y 10
+    mpirun -np 4 mechanic -p map -x 10 -y 10
 
 The result is stored in the `mechanic-master-00.h5` file and may be accessed i.e. through
 `h5dump` utility. To list the contents of the file, try

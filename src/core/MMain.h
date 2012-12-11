@@ -5,7 +5,7 @@
 #ifndef MECHANIC_MAIN_H
 #define MECHANIC_MAIN_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 #include "MTypes.h"
 #include "MBootstrap.h"

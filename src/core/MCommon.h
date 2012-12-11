@@ -5,7 +5,7 @@
 #ifndef MECHANIC_COMMON_H
 #define MECHANIC_COMMON_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "MTypes.h"
 
 #if HAVE_CONFIG_H

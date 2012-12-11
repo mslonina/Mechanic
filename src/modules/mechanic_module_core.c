@@ -24,7 +24,7 @@
 
 /** @} */
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "mechanic_module_core.h"
 
 /**

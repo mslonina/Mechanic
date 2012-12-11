@@ -175,7 +175,7 @@ module. The minimal module must provide storage information and the actual numer
 
 We start by including the neccessary header:
 
-    #include "Mechanic2.h"
+    #include "mechanic.h"
 
 As a simple example, we assume that our numerical task is similar to image processing.
 Each worker node will receive coordinates of the image, and process the numerical task
@@ -217,7 +217,7 @@ We must compile this code to a shared library:
 
 The `libmechanic_module_` prefix is required. We may than run the module:
 
-    mpirun -np 2 mechanic2 -p map -x 10 -y 20
+    mpirun -np 2 mechanic -p map -x 10 -y 20
 
 which will use our code on two nodes (master and one worker), and will do a 10x20
 independent numerical simulations, creating a map suitable to process with Gnuplot PM3D.
@@ -279,7 +279,7 @@ documents and uses all available hooks.
 
 #### Compilation
 
-    mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic2 \
+    mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic \
     mechanic_module_example.c -o libmechanic_module_example.so
 
 Mechanic 2.x reference
@@ -420,7 +420,7 @@ The options table must finish with `OPTIONS_END`:
 
 To obtain all available options, try the `--help` or `--usage` flag, i.e.
 
-    mpirun -np 2 mechanic2 -p hello --help
+    mpirun -np 2 mechanic -p hello --help
     
 Note: Only the master node reads the configuration and parses the commandline.
 The configuration is broadcasted then to all nodes.
@@ -429,7 +429,7 @@ The configuration is broadcasted then to all nodes.
 
 To obtain all configuration options available in the core, try:
 
-    mpirun -np 2 mechanic2 --help
+    mpirun -np 2 mechanic --help
 
 
 - `--name`, `-n` - the name of the run
@@ -487,12 +487,12 @@ Only one configuration file is needed, for core and module, i.e.
 
 To use it, we call:
 
-    mpirun -np 2 mechanic2 -p mymodule --config=myconfig.cfg
+    mpirun -np 2 mechanic -p mymodule --config=myconfig.cfg
 
 Of course, we can override default values not only from the configuration file, but also from the
 command line:
 
-    mpirun -np 2 mechanic2 -p mymodule --config=myconfig.cfg --driver=1
+    mpirun -np 2 mechanic -p mymodule --config=myconfig.cfg --driver=1
 
 The configuration order is:
 

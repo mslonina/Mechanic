@@ -5,12 +5,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_ex_prepareprocess.c -o libmechanic_module_ex_prepareprocess.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl mechanic_module_ex_prepareprocess.c -o libmechanic_module_ex_prepareprocess.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p ex_prepareprocess -x 10 -y 20
+ *    mpirun -np 4 mechanic -p ex_prepareprocess -x 10 -y 20
  *
  * Getting the data
  * ----------------
@@ -19,7 +19,7 @@
  *
  */
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 #define DIM0 4
 #define DIM1 4

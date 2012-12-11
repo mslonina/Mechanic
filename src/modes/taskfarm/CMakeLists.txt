@@ -7,4 +7,4 @@ set (
 )
 
 add_library(taskfarm ${farmsources})
-target_link_libraries(taskfarm core libmechanic2)
+target_link_libraries(taskfarm core libmechanic)

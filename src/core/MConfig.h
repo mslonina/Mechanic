@@ -1,7 +1,7 @@
 #ifndef MECHANIC_CONFIG_H
 #define MECHANIC_CONFIG_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 #define CONFIG_GROUP "config"
 #define CONFIG_HDF5_DATATYPE "Config"

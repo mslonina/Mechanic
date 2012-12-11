@@ -5,7 +5,7 @@
 #ifndef MECHANIC_POOL_H
 #define MECHANIC_POOL_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "MTypes.h"
 #include "MCommon.h"
 #include "MLog.h"

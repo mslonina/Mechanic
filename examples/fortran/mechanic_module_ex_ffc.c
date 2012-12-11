@@ -9,9 +9,9 @@
  *
  *    mpicc -std=c99 -c mechanic_module_ex_ffc.c -fPIC -Dpic
  *    mpif90 -std=f2003 -c mechanic_module_ex_ffc_fortran.F90 -fPIC -Dpic
- *    mpicc -shared -o libmechanic_module_ex_ffc.so mechanic_module_ex_ffc.o mechanic_module_ex_ffc_fortran.o -lgfortran -lmechanic2
+ *    mpicc -shared -o libmechanic_module_ex_ffc.so mechanic_module_ex_ffc.o mechanic_module_ex_ffc_fortran.o -lgfortran -lmechanic
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 typedef int (*cfunc_ptr)(int n, double *x);
 

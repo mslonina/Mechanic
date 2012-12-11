@@ -1,7 +1,7 @@
 #ifndef MECHANIC_MODE_TASKFARM_H
 #define MECHANIC_MODE_TASKFARM_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "MCommon.h"
 #include "MTypes.h"
 #include "MLog.h"

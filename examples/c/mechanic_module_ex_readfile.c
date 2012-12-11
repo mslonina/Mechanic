@@ -15,7 +15,7 @@
  *
  *    mpicc -std=c99 -fPIC -Dpic -shared mechanic_module_ex_readfile.c -o libmechanic_module_ex_readfile.so
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 #define MAX_ENTRIES 4
 #define ENTRY_LENGTH 7

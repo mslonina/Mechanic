@@ -13,7 +13,7 @@
  *
  *    mpicc -shared -std=c99 -fPIC -Dpic mechanic_module_ex_loop.c -o libmechanic_module_ex_loop.so
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 int info;
 

@@ -1,7 +1,7 @@
 #ifndef MECHANIC_WORK_H
 #define MECHANIC_WORK_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "MCommon.h"
 #include "MTypes.h"
 #include "MLog.h"

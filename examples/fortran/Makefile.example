@@ -1,6 +1,6 @@
 CC=mpicc
 FC=mpif90
-CFLAGS=-std=c99 -fPIC -Dpic -shared -lgfortran -lmechanic2 -lhdf5 -lhdf5_hl
+CFLAGS=-std=c99 -fPIC -Dpic -shared -lgfortran -lmechanic -lhdf5 -lhdf5_hl
 FFLAGS=-std=f2003 -fPIC -Dpic
 EXT=so
 

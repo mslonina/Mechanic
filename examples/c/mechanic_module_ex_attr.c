@@ -5,12 +5,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl mechanic_module_ex_attr.c -o libmechanic_module_ex_attr.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl mechanic_module_ex_attr.c -o libmechanic_module_ex_attr.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p ex_attr -x 10 -y 20
+ *    mpirun -np 4 mechanic -p ex_attr -x 10 -y 20
  *
  * Getting the data
  * ----------------
@@ -38,7 +38,7 @@
  *     MReadAttr(p->task, "result", "some attribute", &ibuffer);
  *
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 /**
  * Implements Storage()

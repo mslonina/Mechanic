@@ -5,7 +5,7 @@
 #ifndef MECHANIC_TASK_H
 #define MECHANIC_TASK_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "MTypes.h"
 #include "MCommon.h"
 #include "MLog.h"

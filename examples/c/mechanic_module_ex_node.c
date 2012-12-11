@@ -9,7 +9,7 @@
  * NodePrepare() hook is invoked before PoolPrepare().
  * NodeProcess() hook is invoked after PoolProcess().
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 /* Sample global struct */
 typedef struct pass {

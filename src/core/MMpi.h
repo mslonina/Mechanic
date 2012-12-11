@@ -5,7 +5,7 @@
 #ifndef MECHANIC_MPI_H
 #define MECHANIC_MPI_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "MCommon.h"
 #include "MPool.h"
 #include "MTask.h"

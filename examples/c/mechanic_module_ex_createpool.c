@@ -7,12 +7,12 @@
  * Compilation
  * -----------
  *
- *     mpicc -fPIC -Dpic -shared -lmechanic2 mechanic_module_ex_createpool.c -o libmechanic_module_ex_createpool.so
+ *     mpicc -fPIC -Dpic -shared -lmechanic mechanic_module_ex_createpool.c -o libmechanic_module_ex_createpool.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic2 -p ex_createpool -x 10 -y 20
+ *    mpirun -np 4 mechanic -p ex_createpool -x 10 -y 20
  *
  * Listing the contents of the data file
  * -------------------------------------
@@ -27,7 +27,7 @@
  *    h5dump -d/Pools/pool-0002/Tasks/result mechanic-master-00.h5
  *    h5dump -d/Pools/pool-0003/Tasks/result mechanic-master-00.h5
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 /**
  * Implements Storage()

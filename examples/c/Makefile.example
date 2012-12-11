@@ -1,5 +1,5 @@
 CC=mpicc
-CFLAGS=-std=c99 -fPIC -Dpic -shared -lmechanic2 -lhdf5 -lhdf5_hl
+CFLAGS=-std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl
 EXT=dylib
 
 examples=\

@@ -5,7 +5,7 @@
 #ifndef MECHANIC_RESTART_H
 #define MECHANIC_RESTART_H
 
-#include "Mechanic2.h"
+#include "mechanic.h"
 #include "MTypes.h"
 #include "MCommon.h"
 #include "MLog.h"
