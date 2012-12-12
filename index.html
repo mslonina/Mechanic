@@ -1,97 +1,297 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-
   <head>
-    <meta charset='utf-8' />
-    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
-    <meta name="description" content="Mechanic : The MPI task management system for the dynamical astronomy" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Mechanic by mslonina</title>
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
-
-    <title>Mechanic</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
   </head>
-
   <body>
+    <div class="wrapper">
+      <header>
+        <h1>Mechanic</h1>
+        <p>The MPI task management system for the dynamical astronomy</p>
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/mslonina/Mechanic">Fork Me on GitHub</a>
+        <p class="view"><a href="https://github.com/mslonina/Mechanic">View the Project on GitHub <small>mslonina/Mechanic</small></a></p>
 
-          <h1 id="project_title">Mechanic</h1>
-          <h2 id="project_tagline">The MPI task management system for the dynamical astronomy</h2>
 
-          <section id="downloads">
-            <a class="zip_download_link" href="https://github.com/mslonina/Mechanic/zipball/0.13">Download this project as a .zip file</a>
-            <a class="tar_download_link" href="https://github.com/mslonina/Mechanic/tarball/0.13">Download this project as a tar.gz file</a>
-          </section>
-        </header>
-    </div>
+        <ul>
+          <li><a href="https://github.com/mslonina/Mechanic/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mslonina/Mechanic/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mslonina/Mechanic">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h2>Overview</h2>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
-        <h3>Overview</h3>
+<p>The Mechanic is a task management system and host software framework developed to help 
+in conducting massive numerical simulations. It provides powerful and flexible user API 
+with unified data storage and management. It relies on the core-module approach, which 
+allows to separate numerical problem from the common programming tasks, such as setup, 
+storage, task management, splitting the workload, checkpointing etc. From this point of 
+view it allows the user to focus on the numerical part of the scientific problem only, 
+without digging into MPI or advanced data storage. Since the user API is written in C, 
+it allows to easily adapt any code developed with a C-interoperable programming language,
+such as C++, Fortran2003+, OpenCL, CUDA etc.</p>
 
-<p>The aim of the Mechanic is to help in conducting massive numerical simulations. It provides tools to help you focus on numerical problem: the storage, checkpoints (backups, restarts), setup, command-line, splitting the workload, CPU-communication etc. is handled by the core code. The rest is in user-supplied module.</p>
+<p>The core code is based on the MPI Task Farm model and the HDF5 data storage specification.
+It may be installed system-wide and become a helper tool for users, who need to perform 
+a large number of serial computations. The code has been tested on large CPU-clusters, 
+as well as desktop computers and works equally well (the Linux and Mac OS X operating 
+systems are actively maintained).</p>
 
-<h3>Key features</h3>
+<p>Mechanic is BSD-licensed. The source code package comes with few example
+modules and is freely available at <a href="http://git.ca.umk.pl">the project page</a>.</p>
 
 <ul>
-<li>Core-module architecture -- the numerical code separated from the communication and storage layers</li>
-<li>C-based user-supplied modules, which allows to connect several C-interoperable programming languages (such as C++, OpenCl, CUDA, partly Fortran2003+)</li>
-<li>Task farm communication pattern (on top of the MPI2 standard), working well on large CPU-clusters, PC-workstations or laptops </li>
-<li>Unified data management (on top of the HDF5 library) with storage scheme implemented through the rich user API</li>
-<li>The module setup implemented through the API (among with the command-line options)</li>
-<li>No MPI or HDF5 knowledge required</li>
-<li>Pool-based task farm, task pools created on-the-fly, based on data from previous pools (example: Genetic Algorithms)</li>
-<li>Several storage types, which allows to store result data for different purposes (example: Dynamical Maps)</li>
-<li>Custom storage scheme per pool</li>
-</ul><h3>Sample module</h3>
+<li><a href="#how-does-it-work">How does it work?</a></li>
+<li><a href="#key-features">Key features</a></li>
+<li><a href="#notes">Notes</a></li>
+<li><a href="#example-usage">Example usage</a></li>
+<li><a href="#quick-start">Quick start</a></li>
+<li><a href="#differences-to-other-task-management-systems">Differences to other task management systems</a></li>
+<li><a href="#short-history-of-mechanic">Short history of Mechanic</a></li>
+<li><a href="#publications">Publications</a></li>
+<li><a href="#posters">Posters</a></li>
+<li><a href="#acknowledgments">Acknowledgments</a></li>
+</ul><h2>How does it work?</h2>
 
-<pre><code>#include "MMechanic2.h"
+<p>Consider generation of an image (sets of points). In a single-threaded software,
+it requires a loop over all points (pixels):</p>
 
-int Storage(pool *p) {
-  p-&gt;task-&gt;storage[0].layout = (schema) {
-    .path = "conditions";
-    .dataspace_type = H5S_SIMPLE;
-    .datatype = H5T_NATIVE_DOUBLE;
-    .rank = 2;
-    .dim[0] = 5;
-    .dim[1] = 6;
-    .use_hdf = 1;
-  return 0;
-}
-
-int TaskProcess(pool *p, task *t, setup *s) {
- t-&gt;storage[0].data[0][4] = 123.45;
- return 0;
+<pre><code>for (i = 0; i &lt; xdim; i++) {
+  for (j = 0; j &lt; ydim; j++) {
+    result = Compute(i, j);
+  }
 }
 </code></pre>
 
-<h3>Authors</h3>
+<p>It works well, however, the problem arises, when the <code>Compute()</code> function takes a 
+long time to finish (especially in dynamical astronomy, the research field the Mechanic 
+came from). Since each <code>Compute()</code> call is independent, we may try to split the 
+workload by using some parallel techniques. In such a case, we will loop over all tasks 
+to do, this time, however, each parallel thread will receive a single task, and return 
+the result to the master thread. This is what Mechanic does. It sends a single 
+<code>Compute()</code> task to each worker node in the computing pool (say CPU cluster) and 
+combine the results (the so-called <em>MPI Task Farm</em> model). Under the hood, the Mechanic 
+is independent from the numerical problem itself -- it provides a unified way to create 
+and access data files, setup, node-communication etc.</p>
+
+<h2>Key features</h2>
 
 <ul>
-<li>Mariusz Słonina, <em>Toruń Centre for Astronomy, NCU</em> (Maintainer)</li>
-<li>Krzysztof Goździewski, <em>Toruń Centre for Astronomy, NCU</em>
-</li>
-<li>Cezary Migaszewski, <em>Toruń Centre for Astronomy, NCU</em>
-</li>
-</ul><h3>Acknowledgements</h3>
+<li>
+<strong>The numerical part of the code is fully separated from the setup and storage phase.</strong> 
+You may use the user API to adjust the storage layout and configuration options</li>
+<li>
+<strong>Storage of data and configuration.</strong> The core code takes care on the data storage 
+and configuration</li>
+<li>
+<strong>MPI Task Farm</strong> model (master -- worker relationships between nodes in a computing
+pool)</li>
+<li>
+<strong>The pool-based simulations.</strong> Each pool may have different number of tasks to compute
+(the task loop follows the <em>MPI Task Farm</em> model), and data from all pools may be used 
+at the every stage of the simulation</li>
+<li><strong>HDF5 data storage layout</strong></li>
+<li><strong>All HDF5/MPI basic datatypes are supported</strong></li>
+<li><strong>Multidimensional datasets support, with minimum rank 2 up to rank <code>H5S_MAX_RANK</code> (32)</strong></li>
+<li><strong>Possibility of using HDF5 attributes (directly or through API)</strong></li>
+<li><strong>Automatic backup of data files and restart mode</strong></li>
+<li>
+<strong>Configuration command line.</strong> All configuration options defined through API are
+automatically available in the command line</li>
+<li>
+<strong>Different storage modes</strong> which allows to design the storage layout that fits best
+the user needs (i.e. for processing with Gnuplot or Matplotlib)</li>
+<li>
+<strong>Linux and MAC OS X</strong> supported</li>
+</ul><h2>Notes</h2>
 
-<p>This project is supported by the Polish Ministry of Science and Higher Education through the grant N/N203/402739. This work is conducted within the POWIEW project of the European Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08.</p>
+<ul>
+<li>The datasets are <code>H5S_SIMPLE</code>-type</li>
+<li>The task board is rank 3 with the fourth dimension containing additional run information</li>
+</ul><h2>Example usage</h2>
+
+<ul>
+<li>
+<strong>Efficient creation of dynamical maps.</strong> Each pixel of the map is mapped into
+a standalone numerical task</li>
+<li>
+<strong>Genetic algorithms.</strong> Each pool of tasks may be treated as a generation in the
+language of GAs, and each task as a member of current population</li>
+<li>
+<strong>Data processing.</strong> Think of processing of a huge number of astronomical observations</li>
+</ul><h2>Quick start</h2>
+
+<p>As a quick and simple example consider creating a dynamical map (which is similar to image
+processing). A dynamical map helps to obtain global information of the dynamics of 
+the dynamical system. We would like to know the state of the system when we move from 
+the nominal solution (i.e. in the range of observations' uncertaintites). To do so, we 
+create a grid of initial conditions (a map), which is close to the nominal solution. 
+Each point of the map is a standalone numerical simulation, and we may speed up 
+the computations by splitting the workload within the farm model.  </p>
+
+<p>First, we would like to define some sensible storage layout for the result data. We will 
+store the location of the point of the map and the state of the system (1x3 array). Let us
+create a <code>mechanic_module_map.c</code> file and put in it the following code:</p>
+
+<pre><code>#include "mechanic.h"
+
+int Storage(pool *p, setup *s) {
+  p-&gt;task-&gt;storage[0].layout = (schema) {
+    .name = "result", // the name of the output dataset
+    .rank = 2, // the rank of the dataset
+    .dim[0] = 1, // the vertical dimension of the result array 
+    .dim[1] = 3, // the horizontal dimension of the result array 
+    .use_hdf = 1, // whether to store the result in the master data file
+    .storage_type = STORAGE_PM3D, // storage type, which is suitable to process with Gnuplot PM3D
+    .datatype = H5T_NATIVE_DOUBLE, // the datatype
+  };
+
+  return SUCCESS;
+}
+</code></pre>
+
+<p>Each worker node will return such 1x3 array. The master node will receive those arrays 
+and combine them into one result dataset.  We tell the Mechanic, that the output dataset 
+should be suitable to be processed with Gnuplot PM3D (STORAGE_PM3D flag). The size of 
+the output dataset in this case will be task_pool_size x 3.</p>
+
+<p>The second step is to create the <code>TaskProcess()</code> function, in which we will compute the
+state of the system:</p>
+
+<pre><code>int TaskProcess(pool *p, task *t, setup *s) {
+  double buffer[1][3];
+
+  buffer[0][0] = t-&gt;location[1]; // the vertical position of the current task
+  buffer[0][1] = t-&gt;location[0]; // the horizontal position of the current task
+  buffer[0][2] = t-&gt;tid; // task id represents the state of the system
+
+  // Write the buffer data to Mechanic's memory buffers
+  MWriteData(t, "result", &amp;buffer[0][0]);
+
+  return SUCCESS;
+}
+</code></pre>
+
+<p>The <code>data</code> array is automatically allocated using the information provided in the
+<code>Storage()</code> hook.</p>
+
+<p>Our state of the system is represented here by the unique task ID (you may use
+any numerical function here to get the result, of course). The task location is filled up
+automatically during the task preparation phase. Each worker node receives a unique task
+to compute. </p>
+
+<p>We should now compile our code to a shared library:</p>
+
+<pre><code>mpicc -fPIC -Dpic -shared mechanic_module_map.c -o libmechanic_module_map.so
+</code></pre>
+
+<p>After all, we may run the code for a 10x10px map, using four MPI threads, one master 
+and three workers:</p>
+
+<pre><code>mpirun -np 4 mechanic -p map -x 10 -y 10
+</code></pre>
+
+<p>The result is stored in the <code>mechanic-master-00.h5</code> file and may be accessed i.e. through
+<code>h5dump</code> utility. To list the contents of the file, try</p>
+
+<pre><code># h5ls -r mechanic-master-00.h5
+
+/                        Group
+/LRC_Config              Type
+/Pools                   Group
+/Pools/last              Group
+/Pools/last/Tasks        Group
+/Pools/last/Tasks/result Dataset {100, 3}
+/Pools/last/board        Dataset {10, 10}
+/Pools/pool-0000         Group, same as /Pools/last
+/config                  Group
+/config/core             Group
+/config/core/core        Dataset {13}
+/config/module           Group
+/config/module/core      Dataset {13}
+</code></pre>
+
+<p>Our result is stored in the first task pool (only one task pool has been computed so far),
+in the dataset <code>/Pools/pool-0000/Tasks/result</code>:</p>
+
+<pre><code># h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
+
+DATASET "/Pools/pool-0000/Tasks/result" {
+   DATATYPE  H5T_IEEE_F64LE
+   DATASPACE  SIMPLE { ( 100, 3 ) / ( 100, 3 ) }
+   DATA {
+   (0,0): 0, 0, 0,
+   (1,0): 1, 0, 10,
+   (2,0): 2, 0, 20,
+   (3,0): 3, 0, 30,
+   (4,0): 4, 0, 40,
+   (5,0): 5, 0, 50,
+   (6,0): 6, 0, 60,
+   (7,0): 7, 0, 70,
+   (8,0): 8, 0, 80,
+   (9,0): 9, 0, 90,
+
+   (... the full output cutted off)
+}
+</code></pre>
+
+<h2>Differences to other task management systems</h2>
+
+<p>The Mechanic differs significantly from other task management systems, such as Condor 
+or Workqueue, in terms of user API: our code does not use the executable of user's serial
+code. Instead, the user's code should be rewritten within the provided API. In such a way, 
+we focus only on the numerical part of the task, and not its setup or storage. The HDF5
+storage layer provides unified way to access the data by a number of different
+applications (not to mention C/Fortran codes only, but also Python software).</p>
+
+<h2>Short history of Mechanic</h2>
+
+<p>The idea of creating the Mechanic came from the problem of efficient computing of 
+dynamical maps of planetary systems. Such maps consist of many many independent numerical 
+simulations which may take a long time (from seconds to weeks). Efficient splitting 
+of such workload was neccessary to determine the global dynamics of exo-planets. 
+The MPI-software-skeleton-kind idea that came once to K. Goździewski's mind was expanded 
+and developed by his PhD student, M. Słonina, as a part of his PHD thesis. The very first 
+branch of the Mechanic, the proof-of-concept 0.12.x, was successfully used on several
+clusters and became a good starting point for the full featured software.</p>
+
+<h2>Publications</h2>
+
+<ul>
+<li><a href="http://adsabs.harvard.edu/abs/2012ocpd.conf..125S">Slonina M., Gozdziewski K., Migaszewski C., OCPD 125-129 (2012)</a></li>
+<li><a href="http://arxiv.org/abs/1205.0822">Migaszewski C., Slonina M., Gozdziewski K., 2012arXiv1205.0822M</a></li>
+<li><a href="http://onlinelibrary.wiley.com/doi/10.1111/j.1365-2966.2012.21341.x/full">Gozdziewski K. et al, MNRAS 425, 930–949 (2012)</a></li>
+<li><a href="http://arxiv.org/abs/1205.1341">Gozdziewski K., Slonina M., Migaszewski C., Rozenkiewicz A., 2012arXiv1205.1341S</a></li>
+<li><a href="http://adsabs.harvard.edu/abs/2012ocpd.conf...97G">Gozdziewski K., Slonina M., Migaszewski C., OCPD 97-102 (2012)</a></li>
+<li><a href="http://asterisk.apod.com/viewtopic.php?f=35&amp;t=28482">Slonina M., Gozdziewski K., Migaszewski C., Astrophysics Source Code Library, record
+ascl:1205.001</a></li>
+</ul><h2>Posters</h2>
+
+<ul>
+<li>Slonina M., Gozdziewski K., Migaszewski C., Simtech2011 (Stuttgart, June 2011)</li>
+<li>Slonina M., Gozdziewski K., Migaszewski C., Orbital Couples: "Pas de Deux" in the Solar
+System and the Milky Way (Paris, October 2011)</li>
+</ul><h2>Acknowledgments</h2>
+
+<p>This project is supported by the Polish Ministry of Science and Higher Education through
+the grant N/N203/402739. This work is conducted within the POWIEW project of the European
+Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08.</p>
       </section>
-    </div>
-
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">Mechanic maintained by <a href="https://github.com/mslonina">Mariusz Slonina</a></p>
-        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/mslonina">mslonina</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
-
+    <script src="javascripts/scale.fix.js"></script>
     
-
   </body>
 </html>
