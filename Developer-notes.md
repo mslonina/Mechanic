@@ -1,6 +1,8 @@
 Developer notes
 ===============
 
+[Fork this project on Github](https://github.com/mslonina/Mechanic)
+
 Programming style
 -----------------
 

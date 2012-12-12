@@ -16,8 +16,8 @@ maintained), if the following requirements are met:
 Manual Compilation
 ------------------
 
-    tar -xvvf mechanic-2.2.0.tar.gz
-    cd mechanic-2.2.0
+    tar -xvvf mechanic-2.2.1.tar.gz
+    cd mechanic-2.2.1
     mkdir build
     cd build
     CC=mpicc cmake ..
@@ -68,9 +68,10 @@ Gentoo users
 ------------
 
 There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
-http://github.com/mslonina/mechanic-overlay. This is the preferred way of installing the
-Mechanic and its dependencies. After you install the overlay, you may use:
+[mechanic overlay](http://github.com/mslonina/mechanic-overlay).
+This is the preferred way of installing the Mechanic and its dependencies.
+After you install the overlay, you may use:
 
-    emerge =sci-misc/mechanic-2.2.0
+    emerge sci-misc/mechanic
 
 
