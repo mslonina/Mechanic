@@ -296,10 +296,10 @@ int Storage(pool *p, setup *s) {
   p->board->layout = (schema) {
     .name = "board",
     .rank = TASK_BOARD_RANK+1, // pool rank
-    .dim[0] = Option2Int("core", "yres", s->head), // vertical res
-    .dim[1] = Option2Int("core", "xres", s->head), // horizontal res
-    .dim[2] = Option2Int("core", "zres", s->head), // depth res
-    .dim[3] = 2, // task status, computing node
+    .dims[0] = Option2Int("core", "yres", s->head), // vertical res
+    .dims[1] = Option2Int("core", "xres", s->head), // horizontal res
+    .dims[2] = Option2Int("core", "zres", s->head), // depth res
+    .dims[3] = 2, // task status, computing node
     .datatype = H5T_NATIVE_SHORT,
     .sync = 1,
     .use_hdf = 1,
@@ -450,8 +450,8 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
  *      8  9 10 11
  *
  * The current task location is available at t->location array. The pool resolution
- * is available at p->board->layout.dim array. The pool_size is a multiplication of
- * p->board->layout.dim[i], where i < p->board->layout.rank.
+ * is available at p->board->layout.dims array. The pool_size is a multiplication of
+ * p->board->layout.dims[i], where i < p->board->layout.rank.
  *
  * This function is called during the TaskPrepare() phase.
  *
@@ -469,8 +469,8 @@ int TaskBoardMap(pool *p, task *t, setup *s) {
   int px, vert, horiz;
 
   px = t->tid;
-  horiz = p->board->layout.dim[0];
-  vert = p->board->layout.dim[1];
+  horiz = p->board->layout.dims[0];
+  vert = p->board->layout.dims[1];
 
   t->location[2] = px / (vert * horiz);
 

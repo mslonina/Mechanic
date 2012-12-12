@@ -68,7 +68,7 @@ int Storage(module *m, pool *p) {
   /* Update the pool size */
   p->pool_size = 1;
   for (i = 0; i < TASK_BOARD_RANK; i++) {
-    p->pool_size *= p->board->layout.dim[i];
+    p->pool_size *= p->board->layout.dims[i];
   }
 
   /* Right now, there is no support for different storage types of pool datasets */
@@ -95,11 +95,11 @@ int Storage(module *m, pool *p) {
         p->task->storage[i].layout.storage_type == STORAGE_LIST) {
 
         p->task->storage[i].layout.storage_dim[0] =
-          p->task->storage[i].layout.dim[0] * p->pool_size;
+          p->task->storage[i].layout.dims[0] * p->pool_size;
         
         for (j = 1; j < MAX_RANK; j++) {
           p->task->storage[i].layout.storage_dim[j] =
-            p->task->storage[i].layout.dim[j];
+            p->task->storage[i].layout.dims[j];
         }
         
         size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
@@ -111,15 +111,15 @@ int Storage(module *m, pool *p) {
 
       if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
         p->task->storage[i].layout.storage_dim[0] =
-          p->task->storage[i].layout.dim[0] * p->board->layout.dim[0];
+          p->task->storage[i].layout.dims[0] * p->board->layout.dims[0];
         p->task->storage[i].layout.storage_dim[1] =
-          p->task->storage[i].layout.dim[1] * p->board->layout.dim[1];
+          p->task->storage[i].layout.dims[1] * p->board->layout.dims[1];
         p->task->storage[i].layout.storage_dim[2] =
-          p->task->storage[i].layout.dim[2] * p->board->layout.dim[2];
+          p->task->storage[i].layout.dims[2] * p->board->layout.dims[2];
 
         for (j = 3; j < MAX_RANK; j++) {
           p->task->storage[i].layout.storage_dim[j] =
-            p->task->storage[i].layout.dim[j];
+            p->task->storage[i].layout.dims[j];
         }
         
         size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
@@ -130,7 +130,7 @@ int Storage(module *m, pool *p) {
       }
 
       for (j = 0; j < MAX_RANK; j++) {
-        p->task->storage[i].layout.offset[j] = 0;
+        p->task->storage[i].layout.offsets[j] = 0;
       }
 
     }
@@ -198,11 +198,11 @@ int CheckLayout(module *m, int banks, storage *s) {
     }
 
     for (j = 0; j < s[i].layout.rank; j++) {
-      if (s[i].layout.dim[j] < 1) {
-        Message(MESSAGE_ERR, "Invalid size for dimension %d = %d\n", i, s[i].layout.dim[j]);
+      if (s[i].layout.dims[j] < 1) {
+        Message(MESSAGE_ERR, "Invalid size for dimension %d = %d\n", i, s[i].layout.dims[j]);
         Error(CORE_ERR_STORAGE);
       }
-      s[i].layout.storage_dim[j] = s[i].layout.dim[j];
+      s[i].layout.storage_dim[j] = s[i].layout.dims[j];
     }
 
     if ((int)s[i].layout.datatype <= 0) {
@@ -218,7 +218,7 @@ int CheckLayout(module *m, int banks, storage *s) {
     if (s[i].layout.use_hdf) {
       s[i].layout.dataspace = H5S_SIMPLE;
       for (j = 0; j < MAX_RANK; j++) {
-        s[i].layout.offset[j] = 0; // Offsets are calculated automatically
+        s[i].layout.offsets[j] = 0; // Offsets are calculated automatically
       }
 
       /* Check for mistakes */
@@ -231,7 +231,7 @@ int CheckLayout(module *m, int banks, storage *s) {
     s[i].layout.datatype_size = H5Tget_size(s[i].layout.datatype);
     
     s[i].layout.storage_elements = 
-      s[i].layout.elements = GetSize(s[i].layout.rank, s[i].layout.dim);
+      s[i].layout.elements = GetSize(s[i].layout.rank, s[i].layout.dims);
 
     s[i].layout.storage_size = (size_t) s[i].layout.storage_elements * s[i].layout.datatype_size;
     s[i].layout.size = (size_t) s[i].layout.elements * s[i].layout.datatype_size;
@@ -266,7 +266,7 @@ int CheckAttributeLayout(attr *a) {
     if (a->layout.dataspace == H5S_SCALAR) {
       a->layout.rank = 1;
       for (j = 0; j < a->layout.rank; j++){
-        a->layout.dim[i] = 1;
+        a->layout.dims[i] = 1;
       }
     }
 
@@ -282,11 +282,11 @@ int CheckAttributeLayout(attr *a) {
       }
 
       for (j = 0; j < a->layout.rank; j++) {
-        if (a->layout.dim[j] <= 0) {
-          Message(MESSAGE_ERR, "Invalid size for attribute dimension %d = %d\n", i, a->layout.dim[j]);
+        if (a->layout.dims[j] <= 0) {
+          Message(MESSAGE_ERR, "Invalid size for attribute dimension %d = %d\n", i, a->layout.dims[j]);
           Error(CORE_ERR_STORAGE);
         }
-        a->layout.storage_dim[j] = a->layout.dim[j];
+        a->layout.storage_dim[j] = a->layout.dims[j];
       }
     }
 
@@ -296,14 +296,14 @@ int CheckAttributeLayout(attr *a) {
     }
 
     for (j = 0; j < MAX_RANK; j++) {
-      a->layout.offset[j] = 0; // Offsets are calculated automatically
+      a->layout.offsets[j] = 0; // Offsets are calculated automatically
     }
 
     a->layout.mpi_datatype = GetMpiDatatype(a->layout.datatype);
     a->layout.datatype_size = H5Tget_size(a->layout.datatype);
     
-    a->layout.storage_elements = GetSize(a->layout.rank, a->layout.dim);
-    a->layout.elements = GetSize(a->layout.rank, a->layout.dim);
+    a->layout.storage_elements = GetSize(a->layout.rank, a->layout.dims);
+    a->layout.elements = GetSize(a->layout.rank, a->layout.dims);
 
     a->layout.storage_size = (size_t) a->layout.storage_elements * a->layout.datatype_size;
     a->layout.size = (size_t) a->layout.elements * a->layout.datatype_size;
@@ -554,7 +554,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
       } else {
         for (j = 0; j < MAX_RANK; j++) {
           dims[j] = s[i].layout.storage_dim[j];
-          offsets[j] = s[i].layout.offset[j];
+          offsets[j] = s[i].layout.offsets[j];
         }
 
         memspace = H5Screate_simple(s[i].layout.rank, dims, NULL);

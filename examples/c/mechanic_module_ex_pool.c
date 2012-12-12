@@ -36,8 +36,8 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout = (schema) {
     .name = "pool-double-data",
     .rank = 2,
-    .dim[0] = 4,
-    .dim[1] = 5,
+    .dims[0] = 4,
+    .dims[1] = 5,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,
@@ -47,8 +47,8 @@ int Storage(pool *p, setup *s) {
   p->storage[1].layout = (schema) {
     .name = "pool-int-data",
     .rank = 2,
-    .dim[0] = 4,
-    .dim[1] = 5,
+    .dims[0] = 4,
+    .dims[1] = 5,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,

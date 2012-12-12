@@ -58,7 +58,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
 
       /* Read pool storage banks */
       for (j = 0; j < m->pool_banks; j++) {
-        size = GetSize(pools[i]->storage[j].layout.rank, pools[i]->storage[j].layout.dim);
+        size = GetSize(pools[i]->storage[j].layout.rank, pools[i]->storage[j].layout.dims);
         if (size > 0 && pools[i]->storage[j].layout.use_hdf) {
           ReadDataset(group, 1, &(pools[i]->storage[j]), 1);
         }
@@ -70,7 +70,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
 
       /* Read simple datasets */
       for (j = 0; j < m->task_banks; j++) {
-        size = GetSize(pools[i]->task->storage[j].layout.rank, pools[i]->task->storage[j].layout.dim);
+        size = GetSize(pools[i]->task->storage[j].layout.rank, pools[i]->task->storage[j].layout.dims);
         if (size > 0 && pools[i]->task->storage[j].layout.use_hdf) {
           if (pools[i]->task->storage[j].layout.storage_type == STORAGE_PM3D
             || pools[i]->task->storage[j].layout.storage_type == STORAGE_LIST
@@ -85,7 +85,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
         for (k = 0; k < m->task_banks; k++) {
           if (pools[i]->task->storage[k].layout.use_hdf
               && pools[i]->task->storage[k].layout.storage_type == STORAGE_GROUP) {
-            size = GetSize(pools[i]->task->storage[k].layout.rank, pools[i]->task->storage[k].layout.dim);
+            size = GetSize(pools[i]->task->storage[k].layout.rank, pools[i]->task->storage[k].layout.dims);
             if (size > 0) {
               sprintf(task_path, TASK_PATH, k);
               task_id = H5Gopen(tasks, task_path, H5P_DEFAULT);

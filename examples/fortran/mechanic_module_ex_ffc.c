@@ -38,8 +38,8 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = 10,
+    .dims[0] = 1,
+    .dims[1] = 10,
     .datatype = H5T_NATIVE_DOUBLE,
     .storage_type = STORAGE_PM3D,
     .use_hdf = 1,

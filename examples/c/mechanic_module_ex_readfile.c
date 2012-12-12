@@ -66,8 +66,8 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout = (schema) {
     .name = "input",
     .rank = 2,
-    .dim[0] = MAX_ENTRIES,
-    .dim[1] = ENTRY_LENGTH,
+    .dims[0] = MAX_ENTRIES,
+    .dims[1] = ENTRY_LENGTH,
     .datatype = H5T_NATIVE_DOUBLE,
     .storage_type = STORAGE_GROUP,
     .use_hdf = 1,

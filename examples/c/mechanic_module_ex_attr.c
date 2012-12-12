@@ -56,8 +56,8 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout = (schema) {
     .name = "pool-data",
     .rank = 2,
-    .dim[0] = 4,
-    .dim[1] = 5,
+    .dims[0] = 4,
+    .dims[1] = 5,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,
@@ -86,9 +86,9 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .name = "input",
     .rank = TASK_BOARD_RANK,
-    .dim[0] = 1,
-    .dim[1] = 3,
-    .dim[2] = 1,
+    .dims[0] = 1,
+    .dims[1] = 3,
+    .dims[2] = 1,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_BOARD,
@@ -112,9 +112,9 @@ int Storage(pool *p, setup *s) {
   p->task->storage[1].layout = (schema) {
     .name = "result",
     .rank = TASK_BOARD_RANK,
-    .dim[0] = 1,
-    .dim[1] = 3,
-    .dim[2] = 1,
+    .dims[0] = 1,
+    .dims[1] = 3,
+    .dims[2] = 1,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_BOARD,
@@ -128,8 +128,8 @@ int Storage(pool *p, setup *s) {
     .name = "Some special attribute",
     .dataspace = H5S_SIMPLE,
     .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = 4,
+    .dims[0] = 1,
+    .dims[1] = 4,
     .datatype = H5T_NATIVE_DOUBLE
   };
   
@@ -137,9 +137,9 @@ int Storage(pool *p, setup *s) {
   p->task->storage[2].layout = (schema) {
     .name = "group-result",
     .rank = TASK_BOARD_RANK,
-    .dim[0] = 1,
-    .dim[1] = 3,
-    .dim[2] = 1,
+    .dims[0] = 1,
+    .dims[1] = 3,
+    .dims[2] = 1,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,

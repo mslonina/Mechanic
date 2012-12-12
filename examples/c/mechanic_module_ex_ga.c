@@ -100,7 +100,7 @@ int Storage(pool *p, setup *s) {
   int pool_size;
   int genes;
 
-  pool_size = p->board->layout.dim[0] * p->board->layout.dim[1];
+  pool_size = p->board->layout.dims[0] * p->board->layout.dims[1];
   genes = Option2Int("ga", "genes", s->head);
 
   /**
@@ -110,8 +110,8 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout = (schema) {
     .name = "population",
     .rank = 2,
-    .dim[0] = pool_size,
-    .dim[1] = genes,
+    .dims[0] = pool_size,
+    .dims[1] = genes,
     .use_hdf = 1,
     .sync = 1,
     .storage_type = STORAGE_GROUP,
@@ -125,8 +125,8 @@ int Storage(pool *p, setup *s) {
   p->storage[1].layout = (schema) {
     .name = "model",
     .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = genes,
+    .dims[0] = 1,
+    .dims[1] = genes,
     .use_hdf = 1,
     .sync = 1,
     .storage_type = STORAGE_GROUP,
@@ -140,8 +140,8 @@ int Storage(pool *p, setup *s) {
   p->storage[2].layout = (schema) {
     .name = "tmp-data",
     .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = genes,
+    .dims[0] = 1,
+    .dims[1] = genes,
     .use_hdf = 0,
     .storage_type = STORAGE_GROUP,
     .datatype = H5T_NATIVE_INT,
@@ -154,8 +154,8 @@ int Storage(pool *p, setup *s) {
   p->storage[3].layout = (schema) {
     .name = "children",
     .rank = 2,
-    .dim[0] = pool_size,
-    .dim[1] = genes,
+    .dims[0] = pool_size,
+    .dims[1] = genes,
     .use_hdf = 0,
     .sync = 1,
     .storage_type = STORAGE_GROUP,
@@ -170,8 +170,8 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .name = "fitness",
     .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = 1, // 0 - fitness
+    .dims[0] = 1,
+    .dims[1] = 1, // 0 - fitness
     .use_hdf = 1,
     .sync = 1,
     .storage_type = STORAGE_LIST,

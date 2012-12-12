@@ -43,8 +43,8 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = 3,
+    .dims[0] = 1,
+    .dims[1] = 3,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_PM3D,
@@ -59,9 +59,9 @@ int Storage(pool *p, setup *s) {
     p->task->storage[1].layout = (schema) {
       .name = "result-board",
       .rank = TASK_BOARD_RANK,
-      .dim[0] = 3,
-      .dim[1] = 3,
-      .dim[2] = 1,
+      .dims[0] = 3,
+      .dims[1] = 3,
+      .dims[2] = 1,
       .sync = 1,
       .use_hdf = 1,
       .storage_type = STORAGE_BOARD,
@@ -71,7 +71,7 @@ int Storage(pool *p, setup *s) {
 
   // Change the layout at the pool-0004
   if (p->pid == 4) {
-    p->task->storage[0].layout.dim[1] = 5;
+    p->task->storage[0].layout.dims[1] = 5;
     // Each task will have its own result dataset
     // /Pools/pool-0004/Tasks/task-ID/result
     p->task->storage[0].layout.storage_type = STORAGE_GROUP;
@@ -100,8 +100,8 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   // We are at pool-0002
   if (p->pid == 2) {
-    for (i = 0; i < t->storage[1].layout.dim[0]; i++) {
-      for (j = 0; j < t->storage[1].layout.dim[1]; j++) {
+    for (i = 0; i < t->storage[1].layout.dims[0]; i++) {
+      for (j = 0; j < t->storage[1].layout.dims[1]; j++) {
         buffer_two[i][j] = i+j;
       }
     }

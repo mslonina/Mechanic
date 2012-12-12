@@ -38,9 +38,9 @@ int Master(module *m, pool *p) {
     ReadData(p->board, &board_buffer[0][0][0][0]);
 
     /* Prepare the task board */
-    for (x = 0; x < p->board->layout.dim[0]; x++) {
-      for (y = 0; y < p->board->layout.dim[1]; y++) {
-        for (z = 0; z < p->board->layout.dim[2]; z++) {
+    for (x = 0; x < p->board->layout.dims[0]; x++) {
+      for (y = 0; y < p->board->layout.dims[1]; y++) {
+        for (z = 0; z < p->board->layout.dims[2]; z++) {
           if (board_buffer[x][y][z][0] == TASK_IN_USE) {
             board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
           }
@@ -67,7 +67,7 @@ int Master(module *m, pool *p) {
   send_buffer->layout.size = sizeof(int) * (HEADER_SIZE);
   for (k = 0; k < m->task_banks; k++) {
     send_buffer->layout.size +=
-      GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
+      GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dims)*p->task->storage[k].layout.datatype_size;
   }
 
   recv_buffer->layout.size = send_buffer->layout.size;

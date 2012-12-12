@@ -68,8 +68,8 @@ task* TaskLoad(module *m, pool *p, int tid) {
     /* Memory size */
     for (j = 0; j < t->storage[i].layout.rank; j++) {
       t->storage[i].layout.storage_dim[j] = 
-        t->storage[i].layout.dim[j] = 
-        p->task->storage[i].layout.dim[j];
+        t->storage[i].layout.dims[j] = 
+        p->task->storage[i].layout.dims[j];
     }
 
     t->storage[i].layout.sync             = p->task->storage[i].layout.sync;

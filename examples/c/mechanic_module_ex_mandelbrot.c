@@ -31,9 +31,9 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = TASK_BOARD_RANK,
-    .dim[0] = 1,
-    .dim[1] = 1,
-    .dim[2] = 1,
+    .dims[0] = 1,
+    .dims[1] = 1,
+    .dims[2] = 1,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_BOARD,
@@ -59,9 +59,9 @@ int TaskProcess(pool *p, task *t, setup *s) {
   imag_max = 2.0;
   c = 4.0;
 
-  xres = p->board->layout.dim[1];
-  yres = p->board->layout.dim[0];
-  zres = p->board->layout.dim[2];
+  xres = p->board->layout.dims[1];
+  yres = p->board->layout.dims[0];
+  zres = p->board->layout.dims[2];
 
   /* Coordinate system */
   scale_real = (real_max - real_min) / ((double) xres - 1.0);

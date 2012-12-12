@@ -42,8 +42,8 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
-    .dim[0] = 1,
-    .dim[1] = 3,
+    .dims[0] = 1,
+    .dims[1] = 3,
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_PM3D,
@@ -52,7 +52,7 @@ int Storage(pool *p, setup *s) {
 
   // Change the layout at the pool-0004
   if (p->pid == 4) {
-    p->task->storage[0].layout.dim[1] = 5;
+    p->task->storage[0].layout.dims[1] = 5;
   }
 
   return SUCCESS;

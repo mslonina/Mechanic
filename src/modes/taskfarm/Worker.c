@@ -38,7 +38,7 @@ int Worker(module *m, pool *p) {
   send_buffer->layout.size = sizeof(int) * (HEADER_SIZE);
   for (k = 0; k < m->task_banks; k++) {
     send_buffer->layout.size +=
-      GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dim)*p->task->storage[k].layout.datatype_size;
+      GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dims)*p->task->storage[k].layout.datatype_size;
   }
 
   recv_buffer->layout.size = send_buffer->layout.size;

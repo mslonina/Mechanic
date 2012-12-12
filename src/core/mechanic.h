@@ -91,8 +91,8 @@
 
 #define STORAGE_NULL -1
 
-#define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
-#define ATTR_STORAGE_END {.name = NULL, .dataspace = -1, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dim = {0, 0, 0, 0}, .offset = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
+#define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
+#define ATTR_STORAGE_END {.name = NULL, .dataspace = -1, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
 
 /**
  * The configuration
@@ -207,10 +207,10 @@ typedef struct {
   int storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
   int use_hdf; /**< Enables HDF5 storage for the memory block */
   int sync; /**< Whether to synchronize memory bank between master and worker */
-  int dim[MAX_RANK]; /**< The dimensions of the memory dataset */
+  int dims[MAX_RANK]; /**< The dimensions of the memory dataset */
   hid_t datatype; /**< The datatype of the dataset */
   int storage_dim[MAX_RANK]; /**< @internal The dimensions of the storage dataset */
-  int offset[MAX_RANK]; /**< @internal The offsets (calculated automatically) */
+  int offsets[MAX_RANK]; /**< @internal The offsets (calculated automatically) */
   H5S_class_t dataspace; /**< @internal The type of the HDF5 dataspace (H5S_SIMPLE) */
   MPI_Datatype mpi_datatype; /**< @internal The MPI datatype of the dataset */
   size_t size; /**< @internal The size of the memory block */

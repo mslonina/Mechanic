@@ -49,8 +49,8 @@ int Storage(pool *p, setup *s) {
   p->storage[0].layout = (schema) {
     .name = PSET0,
     .rank = 2,
-    .dim[0] = DIM0,
-    .dim[1] = DIM1,
+    .dims[0] = DIM0,
+    .dims[1] = DIM1,
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
@@ -60,8 +60,8 @@ int Storage(pool *p, setup *s) {
   p->storage[1].layout = (schema) {
     .name = PSET1,
     .rank = 2,
-    .dim[0] = DIM0,
-    .dim[1] = DIM1,
+    .dims[0] = DIM0,
+    .dims[1] = DIM1,
     .datatype = H5T_NATIVE_DOUBLE,
     .sync = 1,
     .use_hdf = 1,
@@ -71,8 +71,8 @@ int Storage(pool *p, setup *s) {
   p->storage[2].layout = (schema) {
     .name = PSET2,
     .rank = 2,
-    .dim[0] = DIM0,
-    .dim[1] = DIM1,
+    .dims[0] = DIM0,
+    .dims[1] = DIM1,
     .datatype = H5T_NATIVE_FLOAT,
     .sync = 1,
     .use_hdf = 1,
@@ -82,9 +82,9 @@ int Storage(pool *p, setup *s) {
   p->task->storage[0].layout = (schema) {
     .name = TSET0,
     .rank = TASK_BOARD_RANK,
-    .dim[0] = DIM0,
-    .dim[1] = DIM1,
-    .dim[2] = 1,
+    .dims[0] = DIM0,
+    .dims[1] = DIM1,
+    .dims[2] = 1,
     .datatype = H5T_NATIVE_DOUBLE,
     .sync = 1,
     .use_hdf = 1,
@@ -94,9 +94,9 @@ int Storage(pool *p, setup *s) {
   p->task->storage[1].layout = (schema) {
     .name = TSET1,
     .rank = TASK_BOARD_RANK,
-    .dim[0] = DIM0,
-    .dim[1] = DIM1,
-    .dim[2] = 1,
+    .dims[0] = DIM0,
+    .dims[1] = DIM1,
+    .dims[2] = 1,
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
@@ -106,8 +106,8 @@ int Storage(pool *p, setup *s) {
   p->task->storage[2].layout = (schema) {
     .name = TSET2,
     .rank = 2,
-    .dim[0] = DIM0,
-    .dim[1] = DIM1,
+    .dims[0] = DIM0,
+    .dims[1] = DIM1,
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
@@ -117,8 +117,8 @@ int Storage(pool *p, setup *s) {
   p->task->storage[3].layout = (schema) {
     .name = TSET3,
     .rank = 2,
-    .dim[0] = DIM0,
-    .dim[1] = DIM1,
+    .dims[0] = DIM0,
+    .dims[1] = DIM1,
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
@@ -128,8 +128,8 @@ int Storage(pool *p, setup *s) {
   p->task->storage[4].layout = (schema) {
     .name = TSET4,
     .rank = 2,
-    .dim[0] = DIM0,
-    .dim[1] = DIM1,
+    .dims[0] = DIM0,
+    .dims[1] = DIM1,
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
@@ -194,8 +194,8 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * Read the p->task->storage[0] dataset
    *
    * This is the STORAGE_BOARD dataset, which means, that the buffer must have the size
-   * dims[0] = p->task->storage[0].layout.dim[0] * p->board->layout.dim[0]
-   * dims[1] = p->task->storage[0].layout.dim[1] * p->board->layout.dim[1]
+   * dims[0] = p->task->storage[0].layout.dims[0] * p->board->layout.dims[0]
+   * dims[1] = p->task->storage[0].layout.dims[1] * p->board->layout.dims[1]
    */
   MAllocate3(current->task, TSET0, dbuff, double);
   MReadData(current->task, TSET0, &dbuff[0][0][0]);
@@ -216,8 +216,8 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * Read the p->task->storage[1] dataset
    *
    * This is the STORAGE_BOARD dataset, which means, that the buffer must have the size
-   * dims[0] = p->task->storage[1].layout.dim[0] * p->board->layout.dim[0]
-   * dims[1] = p->task->storage[1].layout.dim[1] * p->board->layout.dim[1]
+   *.dims[0] = p->task->storage[1].layout.dims[0] * p->board->layout.dims[0]
+   *.dims[1] = p->task->storage[1].layout.dims[1] * p->board->layout.dims[1]
    */
   MAllocate3(current->task, TSET1, cbuff, int);
   MReadData(current->task, TSET1, &cbuff[0][0][0]);
@@ -238,8 +238,8 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * Read the p->task->storage[3] dataset
    *
    * This is the STORAGE_PM3D dataset, which means, that the buffer must have the size
-   * dims[0] = p->task->storage[3].layout.dim[0] * p->pool_size
-   * dims[1] = p->task->storage[3].layout.dim[1] 
+   *.dims[0] = p->task->storage[3].layout.dims[0] * p->pool_size
+   *.dims[1] = p->task->storage[3].layout.dims[1] 
    */
   MAllocate2(current->task, TSET3, ibuff, int);
   MReadData(current->task, TSET3, &ibuff[0][0]);
@@ -260,8 +260,8 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
    * Read the p->task->storage[4] dataset
    *
    * This is the STORAGE_LIST dataset, which means, that the buffer must have the size
-   * dims[0] = p->task->storage[3].layout.dim[0] * p->pool_size
-   * dims[1] = p->task->storage[3].layout.dim[1] 
+   *.dims[0] = p->task->storage[3].layout.dims[0] * p->pool_size
+   *.dims[1] = p->task->storage[3].layout.dims[1] 
    */
   MAllocate2(current->task, TSET4, ibuff, int);
   MReadData(current->task, TSET4, &ibuff[0][0]);
