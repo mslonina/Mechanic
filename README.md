@@ -45,17 +45,17 @@ it requires a loop over all points (pixels):
 
     for (i = 0; i < xdim; i++) {
       for (j = 0; j < ydim; j++) {
-        result = PixelCompute(i, j);
+        result = Compute(i, j);
       }
     }
 
-It works well, however, the problem arises, when the `PixelCompute()` function takes a 
+It works well, however, the problem arises, when the `Compute()` function takes a 
 long time to finish (especially in dynamical astronomy, the research field the Mechanic 
-came from). Since each `PixelCompute()` call is independent, we may try to split the 
+came from). Since each `Compute()` call is independent, we may try to split the 
 workload by using some parallel techniques. In such a case, we will loop over all tasks 
 to do, this time, however, each parallel thread will receive a single task, and return 
 the result to the master thread. This is what Mechanic does. It sends a single 
-`PixelCompute()` task to each worker node in the computing pool (say CPU cluster) and 
+`Compute()` task to each worker node in the computing pool (say CPU cluster) and 
 combine the results (the so-called _MPI Task Farm_ model). Under the hood, the Mechanic 
 is independent from the numerical problem itself -- it provides a unified way to create 
 and access data files, setup, node-communication etc.
