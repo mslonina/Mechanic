@@ -198,7 +198,7 @@ int CheckLayout(module *m, int banks, storage *s) {
     }
 
     for (j = 0; j < s[i].layout.rank; j++) {
-      if (s[i].layout.dim[j] <= 0) {
+      if (s[i].layout.dim[j] < 1) {
         Message(MESSAGE_ERR, "Invalid size for dimension %d = %d\n", i, s[i].layout.dim[j]);
         Error(CORE_ERR_STORAGE);
       }
