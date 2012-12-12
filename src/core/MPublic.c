@@ -1,8 +1,8 @@
 /**
  * @file
- * The Mechanic2 public interface
+ * The Mechanic public interface
  */
-#include "Mechanic2.h"
+#include "mechanic.h"
 
 /**
  * Generic-type macro for 2D allocation
