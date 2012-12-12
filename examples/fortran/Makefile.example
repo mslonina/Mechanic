@@ -10,4 +10,4 @@ all:
 	${CC} ${CFLAGS} -o libmechanic_module_ex_ffc.${EXT} mechanic_module_ex_ffc.o mechanic_module_ex_ffc_fortran.o 
 
 clean:
-	rm -f *.so *.dylib *.o *mod
+	rm -f *.so *.dylib *.o *.mod *.h5
