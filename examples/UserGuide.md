@@ -187,8 +187,8 @@ PM3D. The storage information for the task is:
       p->task->storage[0].layout = (schema) {
         .name = "result", // the name of the HDF5 dataset
         .rank = 2, // the rank of the dataset
-        .dim[0] = 1, // the horizontal size of the task result
-        .dim[1] = 3, // the vertical size of the task result
+        .dims[0] = 1, // the horizontal size of the task result
+        .dims[1] = 3, // the vertical size of the task result
         .datatype = H5T_NATIVE_DOUBLE, // the datatype
         .use_hdf = 1, // whether to store the data in the file or not
         .storage_type = STORAGE_PM3D // the storage type, here, suitable for Gnuplot PM3D
@@ -519,8 +519,8 @@ To define the dataset, any C99 struct initialization is allowed. i.e.:
       p->storage[0].layout = (schema) {
         .name = "sample-data",
         .rank = 2,
-        .dim[0] = 1, // horizontal size
-        .dim[1] = 6, // vertical size
+        .dims[0] = 1, // horizontal size
+        .dims[1] = 6, // vertical size
         .use_hdf = 1,
         .storage_type = STORAGE_GROUP,
         .datatype = H5T_NATIVE_DOUBLE,
@@ -546,7 +546,7 @@ pools), i.e.
 
     if (p->pid == 2) {
       p->storage[0].layout.rank = 3;
-      p->storage[0].layout.dim[2] = 4;
+      p->storage[0].layout.dims[2] = 4;
     }
 
 ### The Pool storage
@@ -576,8 +576,8 @@ The whole memory block is stored in a dataset inside `/Tasks/task-ID`
 group (the ID is the unique task indentifier), i.e., for a dataset defined similar to:
 
      p->task->storage[0].layout.name = "basic-dataset";
-     p->task->storage[0].layout.dim[0] = 2;
-     p->task->storage[0].layout.dim[1] = 6;
+     p->task->storage[0].layout.dims[0] = 2;
+     p->task->storage[0].layout.dims[1] = 6;
      p->task->storage[0].layout.storage_type = STORAGE_GROUP;
      p->task->storage[0].layout.use_hdf = 1;
      p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
@@ -599,8 +599,8 @@ pool:
 while each worker returns the result of size 2x7. For a dataset defined similar to:
 
      p->task->storage[0].layout.name = "pm3d-dataset";
-     p->task->storage[0].layout.dim[0] = 2;
-     p->task->storage[0].layout.dim[1] = 7;
+     p->task->storage[0].layout.dims[0] = 2;
+     p->task->storage[0].layout.dims[1] = 7;
      p->task->storage[0].layout.storage_type = STORAGE_PM3D;
      p->task->storage[0].layout.use_hdf = 1;
      p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
@@ -617,7 +617,7 @@ we have: `/Pools/pool-ID/Tasks/pm3d-dataset` with:
      7 7 7 7 7 7 7
      ...
 
-The size of the final dataset is `p->pool_size * dim[1]`.
+The size of the final dataset is `p->pool_size * dims[1]`.
 
 #### `STORAGE_LIST`
 
@@ -626,8 +626,8 @@ similar to `STORAGE_PM3D`, this time however, there is no column-offset. For a d
 defined as below:
 
      p->task->storage[0].layout.name = "list-dataset";
-     p->task->storage[0].layout.dim[0] = 2;
-     p->task->storage[0].layout.dim[1] = 7;
+     p->task->storage[0].layout.dims[0] = 2;
+     p->task->storage[0].layout.dims[1] = 7;
      p->task->storage[0].layout.storage_type = STORAGE_LIST;
      p->task->storage[0].layout.use_hdf = 1;
      p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
@@ -644,7 +644,7 @@ the output is stored in `/Pools/pool-ID/Tasks/list-dataset`:
      4 4 4 4 4 4 4
      ...
 
-The size of the final dataset is `p->pool_size * dim[1]`.
+The size of the final dataset is `p->pool_size * dims[1]`.
 
 #### `STORAGE_BOARD`
 
@@ -654,9 +654,9 @@ Suppose we have a dataset defined like this:
 
      p->task->storage[0].layout.name = "board-dataset";
      p->task->storage[0].layout.rank = TASK_BOARD_RANK;
-     p->task->storage[0].layout.dim[0] = 2;
-     p->task->storage[0].layout.dim[1] = 3;
-     p->task->storage[0].layout.dim[2] = 1;
+     p->task->storage[0].layout.dims[0] = 2;
+     p->task->storage[0].layout.dims[1] = 3;
+     p->task->storage[0].layout.dims[2] = 1;
      p->task->storage[0].layout.storage_type = STORAGE_BOARD;
      p->task->storage[0].layout.use_hdf = 1;
      p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
@@ -673,8 +673,8 @@ the result is stored in `/Pools/pool-ID/Tasks/board-dataset`:
      6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
      6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
 
-The size of the final dataset is `pool_dim[0] * task_dim[0] x pool_dim[1] * task_dim[1]
-x pool_dim[2] * task_dim[2] x ... `.
+The size of the final dataset is `pool_dims[0] * task_dims[0] x pool_dims[1] * task_dims[1]
+x pool_dims[2] * task_dims[2] x ... `.
  
 ### Accessing the data
 
@@ -754,8 +754,8 @@ dataspace, and fill out additional information, such as rank and dimensions:
       .dataspace = H5S_SIMPLE,
       .datatype = H5T_NATIVE_INT,
       .rank = 2,
-      .dim[0] = 3,
-      .dim[1] = 4,
+      .dims[0] = 3,
+      .dims[1] = 4,
     }
 
 By default, 24 attributes are available for each storage bank (both for tasks and
@@ -902,8 +902,8 @@ For example, have a look at the dataset defined such as:
       .name = "result",
       .datatype = H5T_NATIVE_DOUBLE,
       .rank = 2,
-      .dim[0] = 4,
-      .dim[1] = 5,
+      .dims[0] = 4,
+      .dims[1] = 5,
       ...
     }
 
