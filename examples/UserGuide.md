@@ -323,7 +323,7 @@ Mechanic 2.x reference
   - [Reading and writing data](#reading-and-writing-data)
   - [Reading and writing attributes](#reading-and-writing-attributes)
 - [Messages](#messages)
-- [Error codes](#error-codes)
+- [Return codes](#return-codes)
 
 
 Init
@@ -1055,8 +1055,8 @@ Available types of messages:
 - `MESSAGE_RESULT`
 - `MESSAGE_COMMENT`
 
-Error codes
------------
+Return codes
+------------
 
 Mechanic check the internal as well as module return codes. In the case of success, the
 function should return `SUCCESS` code, i.e.
@@ -1078,4 +1078,5 @@ Otherwise, following error codes should be returned:
 | MODULE_ERR_STORAGE| 816  | CORE_ERR_STORAGE| 916  | Storage     |
 | MODULE_ERR_OTHER  | 888  | CORE_ERR_OTHER  | 999  | Other       |
 
-Mechanic will try to safely abort job on any error code.
+Mechanic will try to safely abort job (with the `MPI_Abort()`) on any error code.
+
