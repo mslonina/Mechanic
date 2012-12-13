@@ -10,6 +10,7 @@
 
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/app.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -19,11 +20,13 @@
     <div class="wrapper">
       <header>
         <?php include("Header.html");?>
+      <nav>
+        <?php //include("Nav.html");?>
+      </nav>
       </header>
-
       <section>
         <?php
-          $file = "https://raw.github.com/mslonina/Mechanic/2.x/README.md";
+          $file = "https://raw.github.com/mslonina/Mechanic/2.x/Overview.md";
           $content = Markdown(file_get_contents($file));
           print $content;
         ?>
