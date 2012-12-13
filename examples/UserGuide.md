@@ -618,8 +618,8 @@ group (the ID is the unique task indentifier), i.e., for a dataset defined simil
 
 the output is stored in `/Pools/pool-ID/Tasks/task-ID/basic-dataset`:
 
-     9 9 9 9 9 9
-     9 9 9 9 9 9
+     | 9 9 9 9 9 9 |
+     | 9 9 9 9 9 9 |
 
 #### `STORAGE_PM3D`
 
@@ -646,15 +646,18 @@ while each worker returns the result of size 2x7. For a dataset defined similar 
 
 we have: `/Pools/pool-ID/Tasks/pm3d-dataset` with:
 
-     1 1 1 1 1 1 1
-     1 1 1 1 1 1 1
-     6 6 6 6 6 6 6
-     6 6 6 6 6 6 6
-     2 2 2 2 2 2 2
-     2 2 2 2 2 2 2
-     7 7 7 7 7 7 7
-     7 7 7 7 7 7 7
-     ...
+     | 1 1 1 1 1 1 1 |
+     | 1 1 1 1 1 1 1 |
+     |---------------|
+     | 6 6 6 6 6 6 6 |
+     | 6 6 6 6 6 6 6 |
+     |---------------|
+     | 2 2 2 2 2 2 2 |
+     | 2 2 2 2 2 2 2 |
+     |---------------|
+     | 7 7 7 7 7 7 7 |
+     | 7 7 7 7 7 7 7 |
+     | ...
 
 The size of the final dataset is `p->pool_size * dims[1]`.
 
@@ -677,15 +680,18 @@ defined as below:
 
 the output is stored in `/Pools/pool-ID/Tasks/list-dataset`:
 
-     1 1 1 1 1 1 1
-     1 1 1 1 1 1 1
-     2 2 2 2 2 2 2
-     2 2 2 2 2 2 2
-     3 3 3 3 3 3 3
-     3 3 3 3 3 3 3
-     4 4 4 4 4 4 4
-     4 4 4 4 4 4 4
-     ...
+     | 1 1 1 1 1 1 1 |
+     | 1 1 1 1 1 1 1 |
+     |---------------|
+     | 2 2 2 2 2 2 2 |
+     | 2 2 2 2 2 2 2 |
+     |---------------|
+     | 3 3 3 3 3 3 3 |
+     | 3 3 3 3 3 3 3 |
+     |---------------|
+     | 4 4 4 4 4 4 4 |
+     | 4 4 4 4 4 4 4 |
+     | ...
 
 The size of the final dataset is `p->pool_size * dims[1]`.
 
@@ -714,10 +720,11 @@ For a 2x5 task pool:
 
 the result is stored in `/Pools/pool-ID/Tasks/board-dataset`:
 
-     1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
-     1 1 1 2 2 2 3 3 3 4 4 4 5 5 5
-     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
-     6 6 6 7 7 7 8 8 8 9 9 9 0 0 0
+     | 1 1 1 | 2 2 2 | 3 3 3 | 4 4 4 | 5 5 5 |
+     | 1 1 1 | 2 2 2 | 3 3 3 | 4 4 4 | 5 5 5 |
+     |-------|-------|-------|-------|-------|
+     | 6 6 6 | 7 7 7 | 8 8 8 | 9 9 9 | 0 0 0 |
+     | 6 6 6 | 7 7 7 | 8 8 8 | 9 9 9 | 0 0 0 |
 
 The size of the final dataset is `pool_dims[0] * task_dims[0] x pool_dims[1] * task_dims[1]
 x pool_dims[2] * task_dims[2] x ... `.
