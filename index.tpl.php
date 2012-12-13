@@ -11,12 +11,14 @@
     <link rel="stylesheet" href="stylesheets/styles.css">
     <link rel="stylesheet" href="stylesheets/pygment_trac.css">
     <link rel="stylesheet" href="stylesheets/app.css">
+    <link rel="stylesheet" href="prettify/prettify.css">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <script src="javascripts/jquery-1.8.3.min.js"></script>
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
   </head>
-  <body>
+  <body onload="styleCode()">
     <div class="wrapper">
       <header>
         <?php include("Header.html");?>
@@ -37,6 +39,8 @@
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>
+    <script src="javascripts/code.js"></script>
+    <script src="prettify/prettify.js"></script>
     
   </body>
 </html>
