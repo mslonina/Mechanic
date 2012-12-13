@@ -724,9 +724,9 @@ x pool_dims[2] * task_dims[2] x ... `.
  
 ### Accessing the data
 
-All data is stored in flattened, one-dimensional arrays, which allows to use different
-datatypes and dimensionality of the memory blocks. The data may be accessed directly,
-by using the memory pointer:
+All data is stored in flattened, one-dimensional arrays (one continguous memory chunk).
+This allows to use different datatypes and dimensionality of the memory blocks.
+The data may be accessed directly, by using the memory pointer:
 
     p->task->storage[0].memory
 
