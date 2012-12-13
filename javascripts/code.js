@@ -2,7 +2,7 @@
 // elements on the page and add the "prettyprint" style. If at least one 
 // prettyprint element was found, call the Google Prettify prettyPrint() API.
 //http://sstatic.net/so/js/master.js?v=6523
-
+//http://www.codingthewheel.com/archives/syntax-highlighting-stackoverflow-google-prettify
 
 function styleCode() 
 {
