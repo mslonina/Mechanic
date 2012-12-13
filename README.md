@@ -1,7 +1,7 @@
 Mechanic
 ========
 
-> Numerical framework and task management system
+> The MPI task management system for the dynamical astronomy
 
 Overview
 --------
