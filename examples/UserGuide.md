@@ -509,8 +509,6 @@ where:
 Storage
 -------
 
-
-
 Mechanic allows to store module data in datasets of any basic datatypes, with minimum rank
 2 up to rank `H5S_MAX_RANK` (32). The storage information must be provided through the `Storage()` hook.
 To define the dataset, any C99 struct initialization is allowed. i.e.:
@@ -532,21 +530,42 @@ To define the dataset, any C99 struct initialization is allowed. i.e.:
 where:
  - `name` - the dataset name (string)
  - `rank` - the rank of the dataset (max `H5S_MAX_RANK`)
- - `dim` - the dimensions of the dataset
+ - `dims` - the dimensions of the dataset
  - `use_hdf` - whether to store dataset in the master file or not
  - `storage_type` - the type of the storage to use (see below)
  - `sync` - whether to broadcast the data to all computing pool
  - `datatype` - HDF5 datatype 
 
 You can adjust the number of available memory/storage banks by implementing the `Init()`
-hook (`banks_per_pool`, `banks_per_task`).
+hook:
+
+    int Init(init *i) {
+      i->banks_per_pool = 12;
+      i->banks_per_task = 4;
+
+      return SUCCESS;
+    }
 
 The storage layout may be defined per pool (different storage layout for different task
 pools), i.e.
 
-    if (p->pid == 2) {
-      p->storage[0].layout.rank = 3;
-      p->storage[0].layout.dims[2] = 4;
+    int Storage(pool *p, setup *s) {
+      p->storage[0].layout = (schema) {
+        .name = "sample-data",
+        .rank = 2,
+        .dims[0] = 1, // horizontal size
+        .dims[1] = 6, // vertical size
+        .use_hdf = 1,
+        .storage_type = STORAGE_GROUP,
+        .datatype = H5T_NATIVE_DOUBLE,
+        .sync = 1,
+      };
+
+      if (p->pid == 2) {
+        p->storage[0].layout.rank = 3;
+        p->storage[0].layout.dims[2] = 4;
+      }
+      return SUCCESS;
     }
 
 ### The Pool storage
@@ -557,6 +576,17 @@ The task data is stored in `/Pools/pool-ID/Tasks` group.
 The size of the storage dataset and the memory is the same. In the case of pool, whole
 memory block is stored at once, if `use_hdf = 1` (only `STORAGE_GROUP` is supported for
 pools).
+
+    p->storage[0].layout = (schema) {
+      .name = "pool-dataset",
+      .rank = 2,
+      .dims[0] = 7,
+      .dims[1] = 6,
+      .use_hdf = 1,
+      .storage_type = STORAGE_GROUP,
+      .datatype = H5T_NATIVE_INT,
+      .sync = 1,
+    };
 
 The Pool data is broadcasted right after the `PoolPrepare()` hook and stored in the master
 datafile.
@@ -575,12 +605,16 @@ There are four available methods to store the task result:
 The whole memory block is stored in a dataset inside `/Tasks/task-ID`
 group (the ID is the unique task indentifier), i.e., for a dataset defined similar to:
 
-     p->task->storage[0].layout.name = "basic-dataset";
-     p->task->storage[0].layout.dims[0] = 2;
-     p->task->storage[0].layout.dims[1] = 6;
-     p->task->storage[0].layout.storage_type = STORAGE_GROUP;
-     p->task->storage[0].layout.use_hdf = 1;
-     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
+    p->task->storage[0].layout = (schema) {
+      .name = "basic-dataset",
+      .rank = 2,
+      .dims[0] = 2,
+      .dims[1] = 6,
+      .use_hdf = 1,
+      .storage_type = STORAGE_GROUP,
+      .datatype = H5T_NATIVE_INT,
+      .sync = 1,
+    };
 
 the output is stored in `/Pools/pool-ID/Tasks/task-ID/basic-dataset`:
 
@@ -598,12 +632,17 @@ pool:
 
 while each worker returns the result of size 2x7. For a dataset defined similar to:
 
-     p->task->storage[0].layout.name = "pm3d-dataset";
-     p->task->storage[0].layout.dims[0] = 2;
-     p->task->storage[0].layout.dims[1] = 7;
-     p->task->storage[0].layout.storage_type = STORAGE_PM3D;
-     p->task->storage[0].layout.use_hdf = 1;
-     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
+    p->task->storage[0].layout = (schema) {
+      .name = "pm3d-dataset",
+      .rank = 2,
+      .dims[0] = 2,
+      .dims[1] = 7,
+      .use_hdf = 1,
+      .storage_type = STORAGE_PM3D,
+      .datatype = H5T_NATIVE_INT,
+      .sync = 1,
+    };
+
 
 we have: `/Pools/pool-ID/Tasks/pm3d-dataset` with:
 
@@ -625,12 +664,16 @@ The memory block is stored in a dataset with a task-ID offset, This is
 similar to `STORAGE_PM3D`, this time however, there is no column-offset. For a dataset
 defined as below:
 
-     p->task->storage[0].layout.name = "list-dataset";
-     p->task->storage[0].layout.dims[0] = 2;
-     p->task->storage[0].layout.dims[1] = 7;
-     p->task->storage[0].layout.storage_type = STORAGE_LIST;
-     p->task->storage[0].layout.use_hdf = 1;
-     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
+    p->task->storage[0].layout = (schema) {
+      .name = "list-dataset",
+      .rank = 2,
+      .dims[0] = 2,
+      .dims[1] = 7,
+      .use_hdf = 1,
+      .storage_type = STORAGE_LIST,
+      .datatype = H5T_NATIVE_INT,
+      .sync = 1,
+    };
 
 the output is stored in `/Pools/pool-ID/Tasks/list-dataset`:
 
@@ -652,14 +695,17 @@ The memory block is stored in a dataset with a {row,column,depth}-offset
 according to the board-location of the task. The minimum rank must be `TASK_BOARD_RANK`.
 Suppose we have a dataset defined like this:
 
-     p->task->storage[0].layout.name = "board-dataset";
-     p->task->storage[0].layout.rank = TASK_BOARD_RANK;
-     p->task->storage[0].layout.dims[0] = 2;
-     p->task->storage[0].layout.dims[1] = 3;
-     p->task->storage[0].layout.dims[2] = 1;
-     p->task->storage[0].layout.storage_type = STORAGE_BOARD;
-     p->task->storage[0].layout.use_hdf = 1;
-     p->task->storage[0].layout.datatype = H5T_NATIVE_INT;
+    p->task->storage[0].layout = (schema) {
+      .name = "board-dataset",
+      .rank = TASK_BOARD_RANK,
+      .dims[0] = 2,
+      .dims[1] = 3,
+      .dims[2] = 1;
+      .use_hdf = 1,
+      .storage_type = STORAGE_BOARD,
+      .datatype = H5T_NATIVE_INT,
+      .sync = 1,
+    };
 
 For a 2x5 task pool:
 
