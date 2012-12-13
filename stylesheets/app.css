@@ -1,0 +1,14 @@
+/*nav {
+  width: 500px;
+  float: right;
+  margin-top: -50px;
+}*/
+
+nav ul {
+  list-style-type: none;
+}
+nav ul li {
+  display: inline;
+  padding: 0 20px;
+  text-transform: uppercase;
+}
