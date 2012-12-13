@@ -15,21 +15,28 @@
   <body>
     <div class="wrapper">
       <header>
-        <h1>Mechanic</h1>
+                <h1>Mechanic</h1>
         <p>The MPI task management system for the dynamical astronomy</p>
-
-        <p class="view"><a href="https://github.com/mslonina/Mechanic">View the Project on GitHub</a></p>
-        <p class="view"><a href="http://git.ca.umk.pl">View the Project on TCFA code repository</a></p>
-
 
         <ul>
           <li><a href="https://github.com/mslonina/Mechanic/archive/2.2.1.zip">Download <strong>ZIP File</strong></a></li>
           <li><a href="https://github.com/mslonina/Mechanic/archive/2.2.1.tar.gz">Download <strong>TAR Ball</strong></a></li>
           <li><a href="https://github.com/mslonina/Mechanic">View On <strong>GitHub</strong></a></li>
         </ul>
+
+        <a href="./index.html">Overview</a><br />
+        <a href="./install.html">Installation</a><br />
+        <a href="./userguide.html">User guide</a>
       </header>
+
       <section>
-        <h2>Overview</h2>
+        <h1>Mechanic</h1>
+
+<blockquote>
+  <p>Numerical framework and task management system</p>
+</blockquote>
+
+<h2>Overview</h2>
 
 <p>The Mechanic is a task management system and host software framework developed to help 
 in conducting massive numerical simulations. It provides powerful and flexible user API 
@@ -61,7 +68,9 @@ modules and is freely available at <a href="http://git.ca.umk.pl">the project pa
 <li><a href="#publications">Publications</a></li>
 <li><a href="#posters">Posters</a></li>
 <li><a href="#acknowledgments">Acknowledgments</a></li>
-</ul><h2>How does it work?</h2>
+</ul>
+
+<h2>How does it work?</h2>
 
 <p>Consider generation of an image (sets of points). In a single-threaded software,
 it requires a loop over all points (pixels):</p>
@@ -87,17 +96,13 @@ and access data files, setup, node-communication etc.</p>
 <h2>Key features</h2>
 
 <ul>
-<li>
-<strong>The numerical part of the code is fully separated from the setup and storage phase.</strong> 
+<li><strong>The numerical part of the code is fully separated from the setup and storage phase.</strong> 
 You may use the user API to adjust the storage layout and configuration options</li>
-<li>
-<strong>Storage of data and configuration.</strong> The core code takes care on the data storage 
+<li><strong>Storage of data and configuration.</strong> The core code takes care on the data storage 
 and configuration</li>
-<li>
-<strong>MPI Task Farm</strong> model (master -- worker relationships between nodes in a computing
+<li><strong>MPI Task Farm</strong> model (master -- worker relationships between nodes in a computing
 pool)</li>
-<li>
-<strong>The pool-based simulations.</strong> Each pool may have different number of tasks to compute
+<li><strong>The pool-based simulations.</strong> Each pool may have different number of tasks to compute
 (the task loop follows the <em>MPI Task Farm</em> model), and data from all pools may be used 
 at the every stage of the simulation</li>
 <li><strong>HDF5 data storage layout</strong></li>
@@ -105,31 +110,31 @@ at the every stage of the simulation</li>
 <li><strong>Multidimensional datasets support, with minimum rank 2 up to rank <code>H5S_MAX_RANK</code> (32)</strong></li>
 <li><strong>Possibility of using HDF5 attributes (directly or through API)</strong></li>
 <li><strong>Automatic backup of data files and restart mode</strong></li>
-<li>
-<strong>Configuration command line.</strong> All configuration options defined through API are
+<li><strong>Configuration command line.</strong> All configuration options defined through API are
 automatically available in the command line</li>
-<li>
-<strong>Different storage modes</strong> which allows to design the storage layout that fits best
+<li><strong>Different storage modes</strong> which allows to design the storage layout that fits best
 the user needs (i.e. for processing with Gnuplot or Matplotlib)</li>
-<li>
-<strong>Linux and MAC OS X</strong> supported</li>
-</ul><h2>Notes</h2>
+<li><strong>Linux and MAC OS X</strong> supported</li>
+</ul>
+
+<h2>Notes</h2>
 
 <ul>
 <li>The datasets are <code>H5S_SIMPLE</code>-type</li>
 <li>The task board is rank 3 with the fourth dimension containing additional run information</li>
-</ul><h2>Example usage</h2>
+</ul>
+
+<h2>Example usage</h2>
 
 <ul>
-<li>
-<strong>Efficient creation of dynamical maps.</strong> Each pixel of the map is mapped into
+<li><strong>Efficient creation of dynamical maps.</strong> Each pixel of the map is mapped into
 a standalone numerical task</li>
-<li>
-<strong>Genetic algorithms.</strong> Each pool of tasks may be treated as a generation in the
+<li><strong>Genetic algorithms.</strong> Each pool of tasks may be treated as a generation in the
 language of GAs, and each task as a member of current population</li>
-<li>
-<strong>Data processing.</strong> Think of processing of a huge number of astronomical observations</li>
-</ul><h2>Quick start</h2>
+<li><strong>Data processing.</strong> Think of processing of a huge number of astronomical observations</li>
+</ul>
+
+<h2>Quick start</h2>
 
 <p>As a quick and simple example consider creating a dynamical map (which is similar to image
 processing). A dynamical map helps to obtain global information of the dynamics of 
@@ -137,7 +142,7 @@ the dynamical system. We would like to know the state of the system when we move
 the nominal solution (i.e. in the range of observations' uncertaintites). To do so, we 
 create a grid of initial conditions (a map), which is close to the nominal solution. 
 Each point of the map is a standalone numerical simulation, and we may speed up 
-the computations by splitting the workload within the farm model.  </p>
+the computations by splitting the workload within the farm model.</p>
 
 <p>First, we would like to define some sensible storage layout for the result data. We will 
 store the location of the point of the map and the state of the system (1x3 array). Let us
@@ -188,7 +193,7 @@ state of the system:</p>
 <p>Our state of the system is represented here by the unique task ID (you may use
 any numerical function here to get the result, of course). The task location is filled up
 automatically during the task preparation phase. Each worker node receives a unique task
-to compute. </p>
+to compute.</p>
 
 <p>We should now compile our code to a shared library:</p>
 
@@ -275,21 +280,32 @@ clusters and became a good starting point for the full featured software.</p>
 <li><a href="http://adsabs.harvard.edu/abs/2012ocpd.conf...97G">Gozdziewski K., Slonina M., Migaszewski C., OCPD 97-102 (2012)</a></li>
 <li><a href="http://asterisk.apod.com/viewtopic.php?f=35&amp;t=28482">Slonina M., Gozdziewski K., Migaszewski C., Astrophysics Source Code Library, record
 ascl:1205.001</a></li>
-</ul><h2>Posters</h2>
+</ul>
+
+<h2>Posters</h2>
 
 <ul>
 <li>Slonina M., Gozdziewski K., Migaszewski C., Simtech2011 (Stuttgart, June 2011)</li>
 <li>Slonina M., Gozdziewski K., Migaszewski C., Orbital Couples: "Pas de Deux" in the Solar
 System and the Milky Way (Paris, October 2011)</li>
-</ul><h2>Acknowledgments</h2>
+</ul>
+
+<h2>Acknowledgments</h2>
 
 <p>This project is supported by the Polish Ministry of Science and Higher Education through
 the grant N/N203/402739. This work is conducted within the POWIEW project of the European
 Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08.</p>
       </section>
+
       <footer>
-        <p>This project is maintained by <a href="https://github.com/mslonina">Mariusz Słonina (TCFA/NCU)</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+        <p><small>
+This project is supported by the Polish Ministry of Science and Higher Education through
+the grant N/N203/402739. This work is conducted within the POWIEW project of the European
+Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08.
+</p></small>
+<p><small>This project is maintained by <a href="http://www.ca.umk.pl/pl/users/mslonina">Mariusz
+    Słonina (TCFA/NCU)</a></small></p>
+<p><small>GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
       </footer>
     </div>
     <script src="javascripts/scale.fix.js"></script>

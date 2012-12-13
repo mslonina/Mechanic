@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Mechanic</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+                <h1>Mechanic</h1>
+        <p>The MPI task management system for the dynamical astronomy</p>
+
+        <ul>
+          <li><a href="https://github.com/mslonina/Mechanic/archive/2.2.1.zip">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/mslonina/Mechanic/archive/2.2.1.tar.gz">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/mslonina/Mechanic">View On <strong>GitHub</strong></a></li>
+        </ul>
+
+        <a href="./index.html">Overview</a><br />
+        <a href="./install.html">Installation</a><br />
+        <a href="./userguide.html">User guide</a>
+      </header>
+
+      <section>
+        <h1>Mechanic 2.x installation guide</h1>
+
+<h2>Requirements</h2>
+
+<p>Mechanic should run on any Unix-like platforms (Linux and MacOSX are actively
+maintained), if the following requirements are met:</p>
+
+<ul>
+<li>gcc >= 4.6 or ifort >= 11.0</li>
+<li>CMake >= 2.8</li>
+<li>MPI2 implementation (in favour of OpenMPI)</li>
+<li>HDF5 >= 1.8</li>
+<li>Popt library >= 1.14</li>
+</ul>
+
+<h2>Manual Compilation</h2>
+
+<pre><code>tar -xvvf mechanic-2.2.1.tar.gz
+cd mechanic-2.2.1
+mkdir build
+cd build
+CC=mpicc cmake ..
+make
+make install
+</code></pre>
+
+<p>By default, Cmake installs to <code>/usr/local</code>. You can change the installation path by setting</p>
+
+<pre><code>-DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
+</code></pre>
+
+<h2>Using the installation script</h2>
+
+<p>We provide very simple install shell script to help in installation of requirements (such as
+HDF, MPI). By default, the script will install all dependencies and the
+Mechanic in the <code>mechanic-opt</code> directory under the current working dir. You may edit the
+file and change some default settings, such as installation path or compilers.</p>
+
+<p>The script requires wget/curl and cmake to be installed on your system.</p>
+
+<p>First, export <code>PATH</code> and <code>LD_LIBRARY_PATH</code> to point to our new Mechanic environment
+(Mac OS X users need to adjust <code>DYLD_LIBRARY_PATH</code> insted of <code>LD_LIBRARY_PATH</code>):</p>
+
+<pre><code>export PATH=/path/to/mechanic-opt/bin:$PATH
+export LD_LIBRARY_PATH=/path/to/mechanic-opt/lib:$LD_LIBRARY_PATH
+</code></pre>
+
+<p>Before running the script, please edit following variables to point to your compiler:</p>
+
+<pre><code># CC=icc
+# CXX=icpc
+# FC=ifort
+# F77=ifort
+</code></pre>
+
+<p>Running the script:</p>
+
+<pre><code>chmod +x install_mechanic.sh
+./install_mechanic.sh
+</code></pre>
+
+<p>After the successfull installation, for an everyday usage, you may adjust your shell
+variables to point to the Mechanic environment, i.e.</p>
+
+<pre><code># for Bash users, edit .bashrc file:
+export PATH=/path/to/mechanic-opt/bin:$PATH
+export LD_LIBRARY_PATH=/path/to/mechanic-opt/lib:$LD_LIBRARY_PATH
+</code></pre>
+
+<h2>Gentoo users</h2>
+
+<p>There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
+<a href="http://github.com/mslonina/mechanic-overlay">mechanic overlay</a>.
+This is the preferred way of installing the Mechanic and its dependencies.
+After you install the overlay, you may use:</p>
+
+<pre><code>emerge sci-misc/mechanic
+</code></pre>
+      </section>
+
+      <footer>
+        <p><small>
+This project is supported by the Polish Ministry of Science and Higher Education through
+the grant N/N203/402739. This work is conducted within the POWIEW project of the European
+Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08.
+</p></small>
+<p><small>This project is maintained by <a href="http://www.ca.umk.pl/pl/users/mslonina">Mariusz
+    Słonina (TCFA/NCU)</a></small></p>
+<p><small>GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
