@@ -289,7 +289,7 @@ look at following examples:
 #### The core module
 
 Take a look at `mechanic_module_core.c` located in `src/modules`. It contains,
-documents and uses all available hooks.
+document and uses all available hooks.
 
 #### Fortran
 
@@ -451,8 +451,8 @@ For example, for options defined above, we get the configuration file such as (i
 `myconfig.cfg`):
 
     [hello]
-    step = 0.3
-    driver = 2
+    step = 0.3 # the step size
+    driver = 2 # the integrator
 
 
 Only one configuration file is needed, for core and module, i.e.
@@ -536,8 +536,36 @@ where:
  - `sync` - whether to broadcast the data to all computing pool
  - `datatype` - HDF5 datatype 
 
-You can adjust the number of available memory/storage banks by implementing the `Init()`
-hook:
+The `storage[0]` is the storage bank index:
+
+    int Storage(pool *p, setup *s) {
+      p->storage[0].layout = (schema) {
+        .name = "first-dataset",
+        .rank = 2,
+        .dims[0] = 3,
+        .dims[1] = 6,
+        .use_hdf = 1,
+        .storage_type = STORAGE_GROUP,
+        .datatype = H5T_NATIVE_DOUBLE,
+        .sync = 1,
+      };
+
+      p->storage[1].layout = (schema) {
+        .name = "second-dataset",
+        .rank = 2,
+        .dims[0] = 5,
+        .dims[1] = 6,
+        .use_hdf = 1,
+        .storage_type = STORAGE_GROUP,
+        .datatype = H5T_NATIVE_INT,
+        .sync = 1,
+      };
+
+      return SUCCESS;
+    }
+
+By default, there are eight storage banks available, both for the task pools and tasks.
+You can adjust the number of available storage banks by implementing the `Init()` hook:
 
     int Init(init *i) {
       i->banks_per_pool = 12;
@@ -567,6 +595,7 @@ pools), i.e.
       }
       return SUCCESS;
     }
+
 
 ### The Pool storage
 
@@ -625,7 +654,7 @@ the output is stored in `/Pools/pool-ID/Tasks/task-ID/basic-dataset`:
 
 The memory block is stored in a dataset with a column-offset, so that
 the output is suitable to process with Gnuplot. Example: Suppose we have a 2x5 task
-pool:
+pool (10 tasks):
 
      1 2 3 4 5
      6 7 8 9 0
@@ -646,8 +675,8 @@ while each worker returns the result of size 2x7. For a dataset defined similar 
 
 we have: `/Pools/pool-ID/Tasks/pm3d-dataset` with:
 
-     | 1 1 1 1 1 1 1 |
-     | 1 1 1 1 1 1 1 |
+     | 1 1 1 1 1 1 1 | 2x7 datablock
+     | 1 1 1 1 1 1 1 | 2x7 x 10 dataset
      |---------------|
      | 6 6 6 6 6 6 6 |
      | 6 6 6 6 6 6 6 |
@@ -680,8 +709,8 @@ defined as below:
 
 the output is stored in `/Pools/pool-ID/Tasks/list-dataset`:
 
-     | 1 1 1 1 1 1 1 |
-     | 1 1 1 1 1 1 1 |
+     | 1 1 1 1 1 1 1 | 2x7 datablock
+     | 1 1 1 1 1 1 1 | 2x7 x 10 dataset
      |---------------|
      | 2 2 2 2 2 2 2 |
      | 2 2 2 2 2 2 2 |
@@ -720,7 +749,7 @@ For a 2x5 task pool:
 
 the result is stored in `/Pools/pool-ID/Tasks/board-dataset`:
 
-     | 1 1 1 | 2 2 2 | 3 3 3 | 4 4 4 | 5 5 5 |
+     | 1 1 1 | 2 2 2 | 3 3 3 | 4 4 4 | 5 5 5 | 2x3 datablock
      | 1 1 1 | 2 2 2 | 3 3 3 | 4 4 4 | 5 5 5 |
      |-------|-------|-------|-------|-------|
      | 6 6 6 | 7 7 7 | 8 8 8 | 9 9 9 | 0 0 0 |
@@ -838,13 +867,25 @@ For a reference to read/write functions take a look at [API Helpers](#api-helper
 ### Checkpoint
 
 The checkpoint contains the results from tasks that have been processed and received. When the
-checkpoint is filled up, the result is stored in the master datafile, according to the
-storage information provided in the module.
+checkpoint is filled up, the result is stored into the master datafile, according to the
+storage information provided in the module. You may adjust the number of incremental
+checkpoint files with `-b` flag, as well as the size of the checkpoint (number of
+completed tasks to store in each checkpoint) with the `-d` flag, i.e.
+
+    mpirun -np 4 mechanic -x 50 -y 50 -b 7 -d 41
+
+The checkpoint size is the main part of the occupied memory resources. It takes into
+account all the storage information provided for the tasks. **The checkpoint memory is allocated only
+on the master node.** We did our best to optimize
+the checkpoint storage, however, there might be cases, where underlying memory resources
+are not enough to handle your simulation. In such a case, you should refine the checkpoint
+settings (i.e. by reducing the requested number of completed tasks). 
+
 
 Datatypes
 ---------
 
-Mechanic support all native MPI/HDF5 datatypes:
+Mechanic supports all native MPI/HDF5 datatypes:
 
 | C datatype             | MPI datatype           | HDF5 native datatype |
 |:-----------------------|:-----------------------|:---------------------|
@@ -905,11 +946,11 @@ Hooks
 
 - `int Init(init *i)` - initialize low level core variables
 - `int Setup(setup *s)` - define configuration options
-- `int Storage(pool *p, storage *s)` - define the storage layout per task pool
-- `int PoolPrepare(pool **all, pool *p, setup *s)` - prepare the task pool
-- `int PoolProcess(pool **all, pool *p, setup *s)` - process the task pool
-- `int TaskPrepare(pool *p, task *t, setup *s)` - prepare the task
-- `int TaskProcess(pool *p, task *t, setup *s)` - process the task
+- `int Storage(pool *p, setup *s)` - define the storage layout per task pool
+- `int PoolPrepare(pool **all, pool *p, setup *s)` - prepare the current task pool
+- `int PoolProcess(pool **all, pool *p, setup *s)` - process the current task pool
+- `int TaskPrepare(pool *p, task *t, setup *s)` - prepare the current task
+- `int TaskProcess(pool *p, task *t, setup *s)` - process the current task
 
 #### Advanced hooks
 
@@ -926,19 +967,16 @@ Hooks
 - `int NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s)` - process the
   task pool loop on the specific node
 - `int LoopPrepare(int mpi_size, int node, pool **all, pool *p, setup *s)` - prepare the
-  task loop
+  task loop on the specific node
 - `int LoopProcess(int mpi_size, int node, pool **all, pool *p, setup *s)` - process the
-  task loop
+  task loop on the specific node
 
 API helpers
 -----------
 
-Mechanic comes with a set of useful API functions and macros to read and write data, as
-well as attributes and allocate the memory:
-
 #### Memory allocation
 
-We provide memory allocation macros and function for 2,3 and 4-dimensional arrays of all
+We provide memory allocation macros and functions for 2,3 and 4-dimensional arrays of all
 basic datatypes:
 
 - `MAllocate2(object, storage_name, buffer, datatype)`
@@ -986,7 +1024,7 @@ Low-level memory allocation functions are available:
 - `AllocateFloat2(storage *s)` for `float`
 - `AllocateDouble2(storage *s)` for `double`
 
-among with corresponding versions for 3 and 4 dimensions. These functions takes the valid
+among with corresponding versions for 3 and 4 dimensions. These functions take the valid
 storage object, i.e.
 
     int **ibuffer;
@@ -1009,7 +1047,7 @@ and read/write data to the `buffer`:
       ...
       MReadData(t, "result", &rbuffer[0][0]);
 
-  For a dynamically allocated array, we must pass the proper pointer:
+For a dynamically allocated array:
       
       double **ibuffer;
       double **rbuffer;
@@ -1054,7 +1092,7 @@ the attribute name `attribute_name` and read/write the attribute data to the `bu
     ...
     MReadAttr(t, "dataset", "integer attr", &rattr);
 
-The low level interface is available:
+The low level interface is available as well:
 
 - `int WriteAttr(storage *s, void *buffer)`
 - `int ReadAttr(storage *s, void *buffer)`
@@ -1111,7 +1149,7 @@ Available types of messages:
 Return codes
 ------------
 
-Mechanic check the internal as well as module return codes. In the case of success, the
+Mechanic checks the core and module return codes. In the case of success, the
 function should return `SUCCESS` code, i.e.
 
     TaskProcess(pool *p, task *t, setup *s) {
