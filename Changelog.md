@@ -8,35 +8,29 @@ The most important change is the new memory handler. It allows using different d
 and dimensionality for datasets. The Module API had to be changed to reflect core changes.
 See the examples for the in-depth usage of the new Module API.
 
-Memory
-======
+#### Memory
 
 - Contiguous memory allocation for different datatypes and dimensionality
 - Generic type allocation macros `MAllocate*` and corresponding functions `Allocate*` (up to rank 4)
 
-Datasets and datatypes
-======================
+#### Datasets and datatypes
 
 - Support for all basic (native) datatypes
 - Multidimensional datasets (min. rank 2 up to max rank `H5S_MAX_RANK`)
 
-Attributes
-==========
+#### Attributes
 
 - HDF5 attributes fully handled through the Storage API
 
-Task board
-==========
+#### Task board
 
 - Task board is now 3D. The fourth dimension is preserved for additional task information
 
-Config API
-==========
+#### Config API
 
 - Libreadconfig is now shipped with the core and has been moved to Config API
 
-Hooks
-=====
+#### Hooks
 
 - New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
 - New public functions for reading and writing data:
@@ -44,8 +38,7 @@ Hooks
 - Corresponding generic-type macros for reading and writing data:
   MReadData(), MWriteData(), MReadAttr(), MWriteAttr()
 
-Other
-=====
+#### Other
 
 - Build system improvements
 - Several bug fixes and minor improvements
