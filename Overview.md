@@ -112,13 +112,20 @@ create a `mechanic_module_map.c` file and put in it the following code:
 
     int Storage(pool *p, setup *s) {
       p->task->storage[0].layout = (schema) {
-        .name = "result", // the name of the output dataset
-        .rank = 2, // the rank of the dataset
-        .dim[0] = 1, // the vertical dimension of the result array 
-        .dim[1] = 3, // the horizontal dimension of the result array 
-        .use_hdf = 1, // whether to store the result in the master data file
-        .storage_type = STORAGE_PM3D, // storage type, which is suitable to process with Gnuplot PM3D
-        .datatype = H5T_NATIVE_DOUBLE, // the datatype
+        // the name of the output dataset
+        .name = "result",
+        // the rank of the dataset
+        .rank = 2,
+        // the vertical dimension of the result array 
+        .dim[0] = 1,
+        // the horizontal dimension of the result array 
+        .dim[1] = 3,
+        // whether to store the result in the master data file
+        .use_hdf = 1,
+        // storage type, which is suitable to process with Gnuplot PM3D
+        .storage_type = STORAGE_PM3D,
+        // the datatype
+        .datatype = H5T_NATIVE_DOUBLE,
       };
 
       return SUCCESS;
@@ -135,9 +142,12 @@ state of the system:
     int TaskProcess(pool *p, task *t, setup *s) {
       double buffer[1][3];
 
-      buffer[0][0] = t->location[1]; // the vertical position of the current task
-      buffer[0][1] = t->location[0]; // the horizontal position of the current task
-      buffer[0][2] = t->tid; // task id represents the state of the system
+      // the vertical position of the current task
+      buffer[0][0] = t->location[1];
+      // the horizontal position of the current task
+      buffer[0][1] = t->location[0];
+      // task id represents the state of the system
+      buffer[0][2] = t->tid;
 
       // Write the buffer data to Mechanic's memory buffers
       MWriteData(t, "result", &buffer[0][0]);
@@ -155,7 +165,8 @@ to compute.
 
 We should now compile our code to a shared library:
 
-    mpicc -fPIC -Dpic -shared mechanic_module_map.c -o libmechanic_module_map.so
+    mpicc -std=c99 -fPIC -Dpic -shared \
+      mechanic_module_map.c -o libmechanic_module_map.so
 
 After all, we may run the code for a 10x10px map, using four MPI threads, one master 
 and three workers:
@@ -168,7 +179,7 @@ The result is stored in the `mechanic-master-00.h5` file and may be accessed i.e
     # h5ls -r mechanic-master-00.h5
 
     /                        Group
-    /LRC_Config              Type
+    /Config                  Type
     /Pools                   Group
     /Pools/last              Group
     /Pools/last/Tasks        Group
