@@ -18,8 +18,8 @@ FC=gfortran #ifort
 
 # software versions
 MECHANIC=2.2.1
-HDF=1.8.9
-MPI=1.5.5
+HDF=1.8.10
+MPI=1.6.3
 
 # make opts
 opts=-j4
@@ -61,11 +61,11 @@ cd $mdir
 mkdir -p src && cd src
 
 # Download the OpenMPI and HDF5
-${DWN} http://www.open-mpi.org/software/ompi/v1.5/downloads/openmpi-${MPI}.tar.bz2 ${DWNO} openmpi-${MPI}.tar.bz2
+${DWN} http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-${MPI}.tar.bz2 ${DWNO} openmpi-${MPI}.tar.bz2
 ${DWN} http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-${HDF}.tar.bz2 ${DWNO} hdf5-${HDF}.tar.bz2
 
 # Download the Mechanic environment
-${DWN} https://github.com/mslonina/Mechanic/tarball/${MECHANIC} ${DWNO} mechanic-${MECHANIC}.tar.gz
+${DWN} https://github.com/mslonina/Mechanic/archive/${MECHANIC}.tar.gz ${DWNO} mechanic-${MECHANIC}.tar.gz
 
 export CC=${CC}
 export CXX=${CXX}
