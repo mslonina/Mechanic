@@ -1,14 +1,25 @@
-/*nav {
-  width: 500px;
-  float: right;
-  margin-top: -50px;
-}*/
+nav {
+  padding: 0px 0 50px 0;
+  float:right;
+}
 
 nav ul {
+  float:right;
   list-style-type: none;
 }
 nav ul li {
   display: inline;
-  padding: 0 20px;
+  padding: 0px 10px;
   text-transform: uppercase;
+}
+nav ul li a {
+  color: #999;
+  padding: 7px 12px;
+}
+nav ul li a.active {
+  border-bottom: 2px solid #000;
+}
+
+header {
+  padding-top: 85px;
 }

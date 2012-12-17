@@ -1,4 +1,5 @@
 <?php
+  include_once "functions.php";
   include_once "markdown.php";
 ?>
 <!doctype html>
@@ -6,20 +7,17 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Mechanic</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <title>Mechanic :: Installation</title>
+    <?php print html_header();?>
   </head>
   <body>
     <div class="wrapper">
       <header>
         <?php include("Header.html");?>
       </header>
+      <nav>
+        <?php print nav("install");?>
+      </nav>
 
       <section>
         <?php
@@ -33,7 +31,7 @@
         <?php include("Footer.html");?>
       </footer>
     </div>
-    <script src="javascripts/scale.fix.js"></script>
+    <?php print html_footer();?>
     
   </body>
 </html>
