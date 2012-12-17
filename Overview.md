@@ -241,7 +241,7 @@ Publications
 ------------
 
 - [Slonina M., Gozdziewski K., Migaszewski C., OCPD 125-129 (2012)](http://adsabs.harvard.edu/abs/2012ocpd.conf..125S)
-- [Migaszewski C., Slonina M., Gozdziewski K., 2012arXiv1205.0822M](http://arxiv.org/abs/1205.0822)
+- [Migaszewski C., Slonina M., Gozdziewski K., MNRAS 427, 1, 770-789 (2012)](http://adsabs.harvard.edu/abs/2012MNRAS.427..770M)
 - [Gozdziewski K. et al, MNRAS 425, 930–949 (2012)](http://onlinelibrary.wiley.com/doi/10.1111/j.1365-2966.2012.21341.x/full)
 - [Gozdziewski K., Slonina M., Migaszewski C., Rozenkiewicz A., 2012arXiv1205.1341S](http://arxiv.org/abs/1205.1341)
 - [Gozdziewski K., Slonina M., Migaszewski C., OCPD 97-102 (2012)](http://adsabs.harvard.edu/abs/2012ocpd.conf...97G)
