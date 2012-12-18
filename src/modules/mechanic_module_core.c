@@ -248,13 +248,37 @@ int Setup(setup *s) {
   };
   s->options[21] = (options) {
     .space="core",
+    .name="xelement",
+    .shortName='\0',
+    .value="0",
+    .type=C_INT,
+    .description="The x-axis element"
+  };
+  s->options[22] = (options) {
+    .space="core",
+    .name="yelement",
+    .shortName='\0',
+    .value="0",
+    .type=C_INT,
+    .description="The y-axis element"
+  };
+  s->options[23] = (options) {
+    .space="core",
+    .name="zelement",
+    .shortName='\0',
+    .value="0",
+    .type=C_INT,
+    .description="The z-axis element"
+  };
+  s->options[24] = (options) {
+    .space="core",
     .name="print-defaults",
     .shortName='\0',
     .value="0",
     .type=C_VAL,
     .description="Print default settings"
   };
-  s->options[22] = (options) {
+  s->options[25] = (options) {
     .space="core",
     .name="help",
     .shortName='?',
@@ -262,7 +286,7 @@ int Setup(setup *s) {
     .type=C_VAL,
     .description="Show this help message"
   };
-  s->options[23] = (options) {
+  s->options[26] = (options) {
     .space="core",
     .name="usage",
     .shortName='\0',
@@ -270,7 +294,7 @@ int Setup(setup *s) {
     .type=C_VAL,
     .description="Display brief message"
   };
-  s->options[24] = (options) OPTIONS_END;
+  s->options[27] = (options) OPTIONS_END;
 
   return SUCCESS;
 }
@@ -351,6 +375,21 @@ int Storage(pool *p, setup *s) {
     .name = "zorigin",
     .dataspace = H5S_SCALAR,
     .datatype = H5T_NATIVE_DOUBLE,
+  };
+  p->board->attr[9].layout = (schema) {
+    .name = "xelement",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_INT,
+  };
+  p->board->attr[10].layout = (schema) {
+    .name = "yelement",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_INT,
+  };
+  p->board->attr[11].layout = (schema) {
+    .name = "zelement",
+    .dataspace = H5S_SCALAR,
+    .datatype = H5T_NATIVE_INT,
   };
 
   p->checkpoint_size = Option2Int("core", "checkpoint", s->head);

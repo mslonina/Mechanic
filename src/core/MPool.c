@@ -130,6 +130,15 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     
     setup_attr = Option2Double("core", "zorigin", s->head);
     WriteAttr(&p->board->attr[8], &setup_attr);
+    
+    setup_attr = Option2Int("core", "xelement", s->head);
+    WriteAttr(&p->board->attr[9], &setup_attr);
+    
+    setup_attr = Option2Int("core", "yelement", s->head);
+    WriteAttr(&p->board->attr[10], &setup_attr);
+
+    setup_attr = Option2Int("core", "zelement", s->head);
+    WriteAttr(&p->board->attr[11], &setup_attr);
 
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(all, p, s);
