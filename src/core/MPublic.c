@@ -366,3 +366,14 @@ int GetAttributeIndex(attr *a, char *name) {
   return -1;
 }
 
+/**
+ * @brief Check for the ICE file
+ *
+ * @return CORE_ICE if the file has been found, SUCCESS otherwise
+ */
+int Ice() {
+  struct stat file;
+  if (stat(ICE_FILENAME, &file) == 0) return CORE_ICE;
+  return SUCCESS;
+}
+

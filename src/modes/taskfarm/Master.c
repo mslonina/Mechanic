@@ -13,7 +13,7 @@
  * @return 0 on success, error code otherwise
  */
 int Master(module *m, pool *p) {
-  int mstat = SUCCESS;
+  int mstat = SUCCESS, ice = 0;
   int i = 0, k = 0, cid = 0, terminated_nodes = 0;
   int tag;
   int header[HEADER_SIZE] = HEADER_INIT;
@@ -103,8 +103,14 @@ int Master(module *m, pool *p) {
   /* The task farm loop (Blocking communication) */
   while (1) {
 
+    /* Check for ICE file */
+    ice = Ice();
+    if (ice == CORE_ICE) {
+      Message(MESSAGE_WARN, "The ICE file has been detected. Flushing checkpoints\n");
+    }
+
     /* Flush checkpoint buffer and write data, reset counter */
-    if (c->counter > (c->size-1)) {
+    if ((c->counter > (c->size-1)) || ice == CORE_ICE) {
 
       WriteData(p->board, &board_buffer[0][0][0][0]);
       mstat = CheckpointPrepare(m, p, c);
@@ -118,6 +124,9 @@ int Master(module *m, pool *p) {
       /* Reset the checkpoint */
       CheckpointReset(m, p, c, cid);
     }
+
+    /* Do simple Abort on ICE */
+    if (ice == CORE_ICE) Abort(CORE_ICE);
 
     /* Wait for any operation to complete */
     MPI_Recv(&(recv_buffer->memory[0]), (int)recv_buffer->layout.size, MPI_CHAR,

@@ -23,6 +23,8 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
+#define ICE_FILENAME "mechanic.ice" /** The Mechanic ICE file */
+
 #define SUCCESS 0 /**< The success return code */
 #define CORE_ICE 112 /**< The core emergency return code */
 #define CORE_SETUP_HELP 212 /**< The core help message return code */
@@ -473,6 +475,7 @@ int WriteTask(task *t, char *storage_name, void *data); /**< Write data to the t
  * Message and log helpers
  */
 void Message(int type, char* message, ...); /**< Common printf wrapper */
+int Ice(); /** Checks for the ICE file */
 void Error(int status); /**< Error reporting */
 void Abort(int status); /**< Abort handler */
 void CheckStatus(int status); /**< Status checking utility*/

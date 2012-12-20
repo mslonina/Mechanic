@@ -19,7 +19,7 @@
  * @return EXIT_SUCCESS on success, error code otherwise
  */
 int main(int argc, char** argv) {
-  int mpi_rank, mpi_size, node;
+  int mpi_rank, mpi_size, node, ice = 0;
   module core, module, fallback;
 
   char *filename, *module_name;
@@ -127,6 +127,20 @@ int main(int argc, char** argv) {
 
   if (node == MASTER)
     Message(MESSAGE_INFO, "The '%s' module has been bootstrapped and configured\n", module_name);
+
+  /* Check for ICE file */
+  if (node == MASTER) {
+    ice = Ice();
+  }
+
+  MPI_Bcast(&ice, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
+  
+  if (ice == CORE_ICE) {
+    if (node == MASTER) {
+      Message(MESSAGE_ERR, "The core ICE file '%s' is present. Please remove it to proceed with the simulation\n", ICE_FILENAME);
+    }
+    goto finalize;
+  }
 
   /* Help message */
   if (mstat == CORE_SETUP_HELP) {
