@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
 
   char *filename, *module_name;
   char *masterfile, *masterfile_backup;
+  char cwd[MAXPATHLEN+1], hostname[MPI_MAX_PROCESSOR_NAME];
+  int hostname_len = MPI_MAX_PROCESSOR_NAME;
 
   struct stat file;
   hid_t h5location;
@@ -42,7 +44,10 @@ int main(int argc, char** argv) {
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+  MPI_Get_processor_name(hostname, &hostname_len);
+  
   node = mpi_rank;
+  getcwd(cwd,MAXPATHLEN+1);
 
   /**
    * (B) Initialize HDF
@@ -51,7 +56,11 @@ int main(int argc, char** argv) {
   H5CheckStatus(hstat);
 
   if (node == MASTER) Welcome();
-  if (node == MASTER) Message(MESSAGE_INFO, "MPI pool size is %d\n", mpi_size);
+  if (node == MASTER) {
+    Message(MESSAGE_INFO, "MPI pool size is %d\n", mpi_size);
+    Message(MESSAGE_INFO, "The master node is '%s'\n", hostname);
+    Message(MESSAGE_INFO, "The current working dir is '%s'\n", cwd);
+  }
 
   /**
    * (C) Bootstrap core

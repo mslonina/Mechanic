@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <sys/dir.h>
 #include <sys/stat.h>
+#include <sys/param.h>
 #include <fcntl.h>
 #include <time.h>
 #include <ctype.h>

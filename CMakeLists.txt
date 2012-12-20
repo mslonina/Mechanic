@@ -91,6 +91,11 @@ if (NOT HAVE_STAT_H)
   MESSAGE(FATAL ERROR "Missing sys/stat.h")
 endif (NOT HAVE_STAT_H)
 
+CHECK_INCLUDE_FILES (sys/param.h HAVE_STAT_H)
+if (NOT HAVE_STAT_H)
+  MESSAGE(FATAL ERROR "Missing sys/param.h")
+endif (NOT HAVE_STAT_H)
+
 CHECK_INCLUDE_FILES (fcntl.h HAVE_FCNTL_H)
 if (NOT HAVE_FCNTL_H)
   MESSAGE(FATAL ERROR "Missing fcntl.h")
