@@ -24,7 +24,7 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
-#define ICE_FILENAME "mechanic.ice" /** The Mechanic ICE file */
+#define ICE_FILENAME "mechanic.ice" /**< The Mechanic ICE file */
 
 #define SUCCESS 0 /**< The success return code */
 #define CORE_ICE 112 /**< The core emergency return code */
@@ -79,8 +79,9 @@
 
 /* Message tags */
 #define TAG_DATA 1337 /**< Send/Receiving data tag */
-#define TAG_STANDBY 49 /**< Thoe node standby tag */
+#define TAG_STANDBY 49 /**< The node standby tag */
 #define TAG_RESULT 59 /**< The data result tag */
+#define TAG_CHECKPOINT 69 /**< The data checkpoint tag */
 #define TAG_TERMINATE 32763 /** The node terminate tag */
 
 #define MASTER 0 /**< The master node */
@@ -482,8 +483,8 @@ int WriteTask(task *t, char *storage_name, void *data); /**< Write data to the t
 /**
  * Message and log helpers
  */
+int Ice(); /**< Checks for the ICE file */
 void Message(int type, char* message, ...); /**< Common printf wrapper */
-int Ice(); /** Checks for the ICE file */
 void Error(int status); /**< Error reporting */
 void Abort(int status); /**< Abort handler */
 void CheckStatus(int status); /**< Status checking utility*/
