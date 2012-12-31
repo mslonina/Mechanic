@@ -36,16 +36,27 @@
 
 <h2>Requirements</h2>
 
-<p>Mechanic should run on any Unix-like platforms (Linux and MacOSX are actively
+<p>Mechanic should run on any Unix-like platforms (Linux and OS X are actively
 maintained), if the following requirements are met:</p>
 
 <ul>
-<li>gcc >= 4.6 or ifort >= 11.0</li>
+<li>GCC >= 4.2 (CLang, Intel)</li>
 <li>CMake >= 2.8</li>
-<li>MPI2 implementation (in favour of OpenMPI)</li>
+<li>OpenMPI >= 1.4 (or other MPI2 implementation)</li>
 <li>HDF5 >= 1.8</li>
 <li>Popt library >= 1.14</li>
 </ul>
+
+<p>All of the above packages should be available in the package manager of your distribution.
+OS X users may use <a href="http://mxcl.github.com/homebrew/">homebrew</a> or other package manager,
+however, we recommend the <a href="http://www.gentoo.org/proj/en/gentoo-alt/prefix/">Gentoo Prefix</a>
+(see instructions below).</p>
+
+<p>Notes:
+- GCC 4.6+ is required for the support of the Fortran2003+ <code>iso_c_binding</code> (C
+interoperability)
+- GCC up to version 4.5 is supported by the CUDA 5.0
+- GCC support is OS X is provided by the command line tools of the XCode distribution</p>
 
 <h2>Manual Compilation</h2>
 
@@ -58,7 +69,7 @@ make
 make install
 </code></pre>
 
-<p>By default, Cmake installs to <code>/usr/local</code>. You can change the installation path by setting</p>
+<p>By default, CMake installs to <code>/usr/local</code>. You can change the installation path by setting</p>
 
 <pre><code>-DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
 </code></pre>
@@ -103,7 +114,7 @@ export LD_LIBRARY_PATH=/path/to/mechanic-opt/lib:$LD_LIBRARY_PATH
 
 <h2>Gentoo users</h2>
 
-<p>There is a mechanic-overlay prepared for Gentoo/Gentoo prefix users, see
+<p>There is a <code>mechanic-overlay</code> prepared for Gentoo/Gentoo Prefix users, see
 <a href="http://github.com/mslonina/mechanic-overlay">mechanic overlay</a>.
 This is the preferred way of installing the Mechanic and its dependencies.
 After you install the overlay, you may use:</p>
