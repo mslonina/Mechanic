@@ -11,12 +11,14 @@
     <?php print html_header(); ?>
   </head>
   <body onload="styleCode()">
+    <?php print ribbon(); ?>
     <div class="wrapper">
       <header>
         <?php include("Header.html");?>
+        <?php print nav("index");?>
       </header>
       <nav>
-        <?php print nav("index");?>
+        <?php //print nav("index");?>
       </nav>
       <section>
         <?php

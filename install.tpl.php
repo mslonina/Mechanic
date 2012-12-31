@@ -11,12 +11,14 @@
     <?php print html_header();?>
   </head>
   <body>
+    <?php print ribbon();?>
     <div class="wrapper">
       <header>
         <?php include("Header.html");?>
+        <?php print nav("install");?>
       </header>
       <nav>
-        <?php print nav("install");?>
+        <?php //print nav("install");?>
       </nav>
 
       <section>

@@ -1,5 +1,14 @@
 <?php
 
+function ribbon() {
+  $out = '
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border:
+  0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork
+  me on GitHub"></a>
+    ';
+  return $out;
+}
+
 function nav($active) {
   $nav = array(
     "index.html" => "Overview",
@@ -11,9 +20,9 @@ function nav($active) {
 
   foreach ($nav as $key => $value) {
     if (basename($key, ".html") === $active) {
-      $out .= '<li><a href="./'.$key.'" class="active">' .$value. '</a></li>'; 
+      $out .= '<li><strong><a href="./'.$key.'" class="active">' .$value. '</a></strong></li>'; 
     } else {
-      $out .= '<li><a href="./'.$key.'">' .$value. '</a></li>'; 
+      $out .= '<li><strong><a href="./'.$key.'">' .$value. '</a></strong></li>'; 
     }
   }
   $out .= "</ul>";
