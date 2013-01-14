@@ -19,7 +19,7 @@ int Master(module *m, pool *p) {
   int header[HEADER_SIZE] = HEADER_INIT;
   int c_offset = 0;
   short ****board_buffer = NULL;
-  int completed = 0, send_node;
+  int send_node;
   int x, y, z;
 
   MPI_Status mpi_status;
@@ -28,6 +28,9 @@ int Master(module *m, pool *p) {
 
   task *t = NULL;
   checkpoint *c = NULL;
+
+  /* Reset the completed counter */
+  p->completed = 0;
 
   /* Initialize the temporary task board buffer */
   board_buffer = AllocateShort4(p->board);
@@ -45,7 +48,7 @@ int Master(module *m, pool *p) {
             board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
           }
           if (board_buffer[x][y][z][0] == TASK_FINISHED) {
-            completed++;
+            p->completed++;
           }
         }
       }
@@ -98,6 +101,9 @@ int Master(module *m, pool *p) {
 
     MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
+        
+    mstat = Send(MASTER, i, TAG_DATA, m, p);
+    CheckStatus(mstat);
   }
 
   /* The task farm loop (Blocking communication) */
@@ -138,6 +144,11 @@ int Master(module *m, pool *p) {
     mstat = CopyData(recv_buffer->memory, header, sizeof(int) * (HEADER_SIZE));
     CheckStatus(mstat);
 
+    if (header[0] == TAG_RESULT) p->completed++;
+
+    mstat = Receive(MASTER, send_node, header[0], m, p, recv_buffer->memory);
+    CheckStatus(mstat);
+
     if (header[0] == TAG_RESULT) {
       c_offset = c->counter * (int)recv_buffer->layout.size;
       mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
@@ -146,7 +157,6 @@ int Master(module *m, pool *p) {
       board_buffer[header[3]][header[4]][header[5]][1] = send_node;
 
       c->counter++;
-      completed++;
 
       mstat = GetNewTask(m, p, t, board_buffer);
       CheckStatus(mstat);
@@ -162,15 +172,18 @@ int Master(module *m, pool *p) {
         MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
             send_node, TAG_DATA, MPI_COMM_WORLD);
 
+        mstat = Send(MASTER, send_node, TAG_DATA, m, p);
+        CheckStatus(mstat);
+
       } else {
-        Message(MESSAGE_DEBUG, "Master: no more tasks after %d of %d completed\n", completed, p->pool_size);
+        Message(MESSAGE_DEBUG, "Master: no more tasks after %d of %d completed\n", p->completed, p->pool_size);
       }
     }
 
-    if (completed == p->pool_size) break;
+    if (p->completed == p->pool_size) break;
   }
 
-  Message(MESSAGE_DEBUG, "Completed %d tasks\n", completed);
+  Message(MESSAGE_DEBUG, "Completed %d tasks\n", p->completed);
 
   WriteData(p->board, &board_buffer[0][0][0][0]);
   mstat = CheckpointPrepare(m, p, c);
@@ -187,6 +200,9 @@ int Master(module *m, pool *p) {
 
     MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
+        
+    mstat = Send(MASTER, i, tag, m, p);
+    CheckStatus(mstat);
 
   }
 

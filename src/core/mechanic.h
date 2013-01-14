@@ -290,6 +290,7 @@ typedef struct {
   task **tasks; /**< All tasks */
   int checkpoint_size; /**< The checkpoint size */
   int pool_size; /**< The pool size (number of tasks to do) */
+  int completed; /**< The pool task completed counter */
   int node; /**< The node ID */
   int mpi_size; /**< The MPI COMM size */
 } pool;

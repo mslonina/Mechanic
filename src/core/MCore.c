@@ -138,3 +138,50 @@ int LoopProcess(module *m, pool **all, pool *current) {
   return mstat;
 }
 
+/**
+ * @brief The send hook
+ *
+ * @param node The current node
+ * @param dest The destination node
+ * @param tag The message tag
+ * @param m The module pointer
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
+ */
+int Send(int node, int dest, int tag, module *m, pool *p) {
+  int mstat = SUCCESS;
+  setup *s = &(m->layer.setup);
+  query *q;
+
+  q = LoadSym(m, "Send", LOAD_DEFAULT);
+  if (q) mstat = q(m->mpi_size, m->node, dest, tag, p, s);
+  CheckStatus(mstat);
+
+  return mstat;
+}
+
+/**
+ * @brief The receive hook
+ *
+ * @param node The current node
+ * @param sender The sender node
+ * @param tag The message tag
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param buffer The raw data received
+ *
+ * @return 0 on success, error code otherwise
+ */
+int Receive(int node, int sender, int tag, module *m, pool *p, void *buffer) {
+  int mstat = SUCCESS;
+  setup *s = &(m->layer.setup);
+  query *q;
+
+  q = LoadSym(m, "Receive", LOAD_DEFAULT);
+  if (q) mstat = q(m->mpi_size, m->node, sender, tag, p, s, buffer);
+  CheckStatus(mstat);
+
+  return mstat;
+}
+

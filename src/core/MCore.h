@@ -20,5 +20,7 @@ int NodePrepare(module *m, pool **all, pool *current);
 int NodeProcess(module *m, pool **all, pool *current);
 int LoopPrepare(module *m, pool **all, pool *current);
 int LoopProcess(module *m, pool **all, pool *current);
+int Send(int node, int dest, int tag, module *m, pool *p);
+int Receive(int node, int sender, int tag, module *m, pool *p, void *buffer);
 
 #endif

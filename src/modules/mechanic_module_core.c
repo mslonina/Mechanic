@@ -805,5 +805,49 @@ int LoopProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
   return SUCCESS;
 } 
 
+/**
+ * @brief The MPI Send hook
+ *
+ * This hook is performed after MPI_Send.
+ *
+ * @ingroup all_nodes
+ * @param mpi_size The MPI_COMM_WORLD size
+ * @param node The current node
+ * @param dest The destination node
+ * @param tag The message tag
+ * @param p The current pool pointer
+ * @param s The setup pointer
+ *
+ * @return SUCCESS or error code otherwise
+ */
+int Send(int mpi_size, int node, int dest, int tag, pool *p, setup *s) {
+  return SUCCESS;
+}
+
+/**
+ * @brief The MPI Receive hook
+ *
+ * This hook is performed after MPI_Send.
+ *
+ * @ingroup all_nodes
+ * @param mpi_size The MPI_COMM_WORLD size
+ * @param node The current node
+ * @param sender The sender node
+ * @param tag The message tag
+ * @param p The current pool pointer
+ * @param s The setup pointer
+ * @param buffer The raw data buffer received
+ *
+ * @return SUCCESS or error code otherwise
+ */
+int Receive(int mpi_size, int node, int sender, int tag, pool *p, setup *s, void *buffer) {
+  if (node == MASTER) {
+    if (tag == TAG_RESULT) {
+      Message(MESSAGE_RESULT, "Completed %4d of %4d tasks\n", p->completed, p->pool_size);
+    }
+  }
+  return SUCCESS;
+}
+
 /** @} */
 

@@ -76,6 +76,7 @@ pool* PoolLoad(module *m, int pid) {
   p->rid = 0;
   p->node = m->node;
   p->mpi_size = m->mpi_size;
+  p->completed = 0;
 
   return p;
 }
@@ -372,6 +373,7 @@ int PoolReset(module *m, pool *p) {
 
   /* Reset the board memory banks */
   if (m->node == MASTER) {
+    p->completed = 0;
     board = AllocateShort4(p->board);
     memset(&board[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
     WriteData(p->board, &board[0][0][0][0]);

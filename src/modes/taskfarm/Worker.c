@@ -57,6 +57,9 @@ int Worker(module *m, pool *p) {
     mstat = Unpack(m, recv_buffer->memory, p, t, &tag);
     CheckStatus(mstat);
 
+    mstat = Receive(m->node, MASTER, tag, m, p, &(recv_buffer->memory[0]));
+    CheckStatus(mstat);
+
     if (tag == TAG_TERMINATE) {
       break;
     } else {
@@ -78,6 +81,9 @@ int Worker(module *m, pool *p) {
 
       MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
           MASTER, TAG_DATA, MPI_COMM_WORLD);
+
+      mstat = Send(m->node, MASTER, TAG_DATA, m, p);
+      CheckStatus(mstat);
 
     }
   }
