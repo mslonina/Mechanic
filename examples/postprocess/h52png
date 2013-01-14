@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#
+# Simple script to obtain the image map directly from the master file
+#
+
+h5topng -d/Pools/pool-0000/Tasks/image -c jet -T -z 0 -o image.png mechanic-master-00.h5 
