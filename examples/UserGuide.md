@@ -248,6 +248,8 @@ look at following examples:
     [mechanic_module_ex_chpoollayout.c](./c/mechanic_module_ex_chpoollayout.c)
   - Different storage layout per task pool (advanced):
     [mechanic_module_ex_chpoollayout2.c](./c/mechanic_module_ex_chpoollayout2.c)
+  - Override the task pool size:
+    [mechanic_module_ex_poolsize.c](./c/mechanic_module_ex_poolsize.c)
 
 #### Configuration
 
