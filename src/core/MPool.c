@@ -92,7 +92,10 @@ pool* PoolLoad(module *m, int pid) {
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = SUCCESS, i = 0, j = 0;
-  double setup_attr;
+  int int_attr;
+  long long_attr;
+  float float_attr;
+  double double_attr;
   query *q;
   setup *s = &(m->layer.setup);
 
@@ -103,43 +106,30 @@ int PoolPrepare(module *m, pool **all, pool *p) {
      *
      * The user can overwrite them in PoolPrepare() hook
      *
-     * @todo: Remove when all options will be stored as attributes by default 
      */
-    setup_attr = Option2Double("core", "xmin", s->head);
-    WriteAttr(&p->board->attr[0], &setup_attr);
+    for (i = 0; i < p->board->attr_banks; i++) {
+      if (s->options[i].type == C_STRING) continue; // fix it
 
-    setup_attr = Option2Double("core", "xmax", s->head);
-    WriteAttr(&p->board->attr[1], &setup_attr);
+      if (s->options[i].type == C_INT || s->options[i].type == C_VAL) {
+        int_attr = Option2Int(s->options[i].space, s->options[i].name, s->head);
+        WriteAttr(&p->board->attr[i], &int_attr);
+      }
+      
+      if (s->options[i].type == C_LONG) {
+        long_attr = Option2Int(s->options[i].space, s->options[i].name, s->head);
+        WriteAttr(&p->board->attr[i], &long_attr);
+      }
+      
+      if (s->options[i].type == C_FLOAT) {
+        float_attr = Option2Float(s->options[i].space, s->options[i].name, s->head);
+        WriteAttr(&p->board->attr[i], &float_attr);
+      }
 
-    setup_attr = Option2Double("core", "ymin", s->head);
-    WriteAttr(&p->board->attr[2], &setup_attr);
-    
-    setup_attr = Option2Double("core", "ymax", s->head);
-    WriteAttr(&p->board->attr[3], &setup_attr);
-    
-    setup_attr = Option2Double("core", "zmin", s->head);
-    WriteAttr(&p->board->attr[4], &setup_attr);
-    
-    setup_attr = Option2Double("core", "zmax", s->head);
-    WriteAttr(&p->board->attr[5], &setup_attr);
-    
-    setup_attr = Option2Double("core", "xorigin", s->head);
-    WriteAttr(&p->board->attr[6], &setup_attr);
-    
-    setup_attr = Option2Double("core", "yorigin", s->head);
-    WriteAttr(&p->board->attr[7], &setup_attr);
-    
-    setup_attr = Option2Double("core", "zorigin", s->head);
-    WriteAttr(&p->board->attr[8], &setup_attr);
-    
-    setup_attr = Option2Int("core", "xelement", s->head);
-    WriteAttr(&p->board->attr[9], &setup_attr);
-    
-    setup_attr = Option2Int("core", "yelement", s->head);
-    WriteAttr(&p->board->attr[10], &setup_attr);
-
-    setup_attr = Option2Int("core", "zelement", s->head);
-    WriteAttr(&p->board->attr[11], &setup_attr);
+      if (s->options[i].type == C_DOUBLE) {
+        double_attr = Option2Double(s->options[i].space, s->options[i].name, s->head);
+        WriteAttr(&p->board->attr[i], &double_attr);
+      }
+    }
 
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(all, p, s);
@@ -148,6 +138,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     p->state = POOL_PREPARED;
 
     mstat = PoolProcessData(m, p, s);
+    CheckStatus(mstat);
 
   }
 
@@ -436,6 +427,9 @@ void PoolFinalize(module *m, pool *p) {
   }
 
   if (p->board) {
+    for (i = 0; i < p->board->attr_banks; i++) {
+      free(p->board->attr[i].layout.name);
+    }
     FreeMemoryLayout(1, p->board);
     free(p->board->attr);
     free(p->board);
