@@ -1,6 +1,16 @@
 Mechanic short changelog
 ========================
 
+2.2.1 -> 2.2.4
+--------------
+
+- ICE check. If the master node founds mechanic.ice file, it will abort the run
+- New hooks: Send() and Receive()
+- Configuration is stored as attributes of the task board
+- Support for numeric and string attributes
+- New core configuration options: x/y/z-axis element
+- Documentation updates
+
 2.2
 ---
 

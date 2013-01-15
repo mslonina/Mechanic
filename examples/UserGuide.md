@@ -426,6 +426,9 @@ To obtain all configuration options available in the core, try:
 - `--xorigin` - the task pool board x-axis origin
 - `--yorigin` - the task pool board y-axis origin
 - `--zorigin` - the task pool board z-axis origin
+- `--xelement` - the task pool board x-axis element
+- `--yelement` - the task pool board y-axis element
+- `--zelement` - the task pool board z-axis element
 - `--checkpoint`, `-d` -- the checkpoint size (number of tasks)
 - `--checkpoint-files`, `-b` -- the number of incremental backups
 - `--no-backup` -- disable automatic master file backup (in case of the same run names)
