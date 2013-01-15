@@ -114,8 +114,8 @@
 #define C_STRING POPT_ARG_STRING /**< string */
 #define C_LONG POPT_ARG_LONG /**< long */
 
-#define CONFIG_MAX_LINE_LENGTH 1024 /**< Maximum line length in the config file */
-#define CONFIG_LEN 512 /**< Maximum config filename length */
+#define CONFIG_MAX_LINE_LENGTH 512 /**< Maximum line length in the config file */
+#define CONFIG_LEN 64 /**< Maximum config filename length */
 #define CONFIG_NULL '\0' /**< Null */
 
 /**
@@ -135,7 +135,7 @@ typedef struct config{
  */
 typedef struct configNamespace{
   char space[CONFIG_LEN]; /**< The name of the namespace */
-  config* options; /**< The options strcuture for given namespace */
+  config* options; /**< The options structure for given namespace */
   struct configNamespace* next; /**< The pointer to the next namespace */
 } configNamespace;
 
