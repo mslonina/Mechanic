@@ -319,8 +319,13 @@ int CheckAttributeLayout(attr *a) {
     a->layout.mpi_datatype = GetMpiDatatype(a->layout.datatype);
     a->layout.datatype_size = H5Tget_size(a->layout.datatype);
     
-    a->layout.storage_elements = GetSize(a->layout.rank, a->layout.dims);
-    a->layout.elements = GetSize(a->layout.rank, a->layout.dims);
+    if (a->layout.datatype == H5T_NATIVE_CHAR || a->layout.datatype == H5T_C_S1) {
+      a->layout.storage_elements = CONFIG_LEN;
+      a->layout.elements = CONFIG_LEN;
+    } else {
+      a->layout.storage_elements = GetSize(a->layout.rank, a->layout.dims);
+      a->layout.elements = GetSize(a->layout.rank, a->layout.dims);
+    }
 
     a->layout.storage_size = (size_t) a->layout.storage_elements * a->layout.datatype_size;
     a->layout.size = (size_t) a->layout.elements * a->layout.datatype_size;
@@ -603,37 +608,93 @@ int CommitData(hid_t h5location, int banks, storage *s) {
  */
 int CommitAttribute(hid_t h5location, attr *a) {
   int mstat = SUCCESS, i = 0;
-  hid_t attr_s, attr_d;
+  hid_t attr_s, attr_d, ctype, memtype;
   herr_t h5status = 0;
-  hsize_t dims[MAX_RANK];
+  hsize_t dims[MAX_RANK], sdims[1] = {1};
   char *buffer = NULL;
       
   buffer = calloc(a->layout.elements, a->layout.datatype_size);
   ReadAttr(a, buffer);
 
   if (H5Aexists(h5location, a->layout.name) > 0) {
-    attr_d = H5Aopen(h5location, a->layout.name, H5P_DEFAULT);
-    H5Awrite(attr_d, a->layout.datatype, buffer); 
-  } else {
-    attr_s = H5Screate(a->layout.dataspace);
-    H5CheckStatus(attr_s);
+    if (a->layout.datatype == H5T_NATIVE_CHAR || a->layout.datatype == H5T_C_S1) {
+      
+      /**
+       * Existing string attributes
+       */
+      Message(MESSAGE_DEBUG, "String attribute '%s' committed: %s\n", a->layout.name, a->memory);
+      
+      ctype = H5Tcopy(H5T_C_S1);
+      h5status = H5Tset_size(ctype, CONFIG_LEN);
+      memtype = H5Tcopy(H5T_C_S1);
+      h5status = H5Tset_size(memtype, CONFIG_LEN);
+      attr_s = H5Screate_simple(1, sdims, NULL);
+      
+      attr_d = H5Aopen(h5location, a->layout.name, H5P_DEFAULT);
+      H5CheckStatus(attr_d);
+      H5Awrite(attr_d, memtype, buffer);
+      
+      H5Sclose(attr_s);
+      H5Aclose(attr_d);
+      H5Tclose(ctype);
+      H5Tclose(memtype);
 
-    if (a->layout.dataspace == H5S_SIMPLE) {
-      for (i = 0; i < MAX_RANK; i++) {
-        dims[i] = a->layout.storage_dim[i];
+    } else {
+
+      /**
+       * Existing numeric attributes
+       */
+      attr_d = H5Aopen(h5location, a->layout.name, H5P_DEFAULT);
+      H5Awrite(attr_d, a->layout.datatype, buffer); 
+      H5Aclose(attr_d);
+    }
+  } else {
+    if (a->layout.datatype == H5T_NATIVE_CHAR || a->layout.datatype == H5T_C_S1) {
+
+      /**
+       * String attributes
+       */
+      Message(MESSAGE_DEBUG, "String attribute '%s' created: %s\n", a->layout.name, a->memory);
+      
+      ctype = H5Tcopy(H5T_C_S1);
+      h5status = H5Tset_size(ctype, CONFIG_LEN);
+      memtype = H5Tcopy(H5T_C_S1);
+      h5status = H5Tset_size(memtype, CONFIG_LEN);
+      attr_s = H5Screate_simple(1, sdims, NULL);
+
+      attr_d = H5Acreate(h5location, a->layout.name, memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+      H5CheckStatus(attr_d);
+      H5Awrite(attr_d, memtype, buffer);
+      
+      H5Aclose(attr_d);
+      H5Sclose(attr_s);
+      H5Tclose(ctype);
+      H5Tclose(memtype);
+    } else {
+     
+      /**
+       * Numeric attributes
+       */
+      attr_s = H5Screate(a->layout.dataspace);
+      H5CheckStatus(attr_s);
+
+      if (a->layout.dataspace == H5S_SIMPLE) {
+        for (i = 0; i < MAX_RANK; i++) {
+          dims[i] = a->layout.storage_dim[i];
+        }
+      
+        h5status = H5Sset_extent_simple(attr_s, a->layout.rank, dims, NULL);
+        H5CheckStatus(h5status);
       }
     
-      h5status = H5Sset_extent_simple(attr_s, a->layout.rank, dims, NULL);
-      H5CheckStatus(h5status);
+      attr_d = H5Acreate(h5location, a->layout.name, a->layout.datatype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+      H5CheckStatus(attr_d);
+      
+      H5Awrite(attr_d, a->layout.datatype, buffer); 
+      H5Sclose(attr_s);
+      H5Aclose(attr_d);
     }
-  
-    attr_d = H5Acreate(h5location, a->layout.name, a->layout.datatype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-    H5CheckStatus(attr_d);
-    H5Awrite(attr_d, a->layout.datatype, buffer); 
-    H5Sclose(attr_s);
   }
-
-  H5Aclose(attr_d);
 
   if (buffer) free(buffer);
 

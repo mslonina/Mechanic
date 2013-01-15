@@ -108,7 +108,9 @@ int PoolPrepare(module *m, pool **all, pool *p) {
      *
      */
     for (i = 0; i < p->board->attr_banks; i++) {
-      if (s->options[i].type == C_STRING) continue; // fix it
+      if (s->options[i].type == C_STRING) {
+        WriteAttr(&p->board->attr[i], s->options[i].value);
+      }
 
       if (s->options[i].type == C_INT || s->options[i].type == C_VAL) {
         int_attr = Option2Int(s->options[i].space, s->options[i].name, s->head);
