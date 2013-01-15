@@ -548,7 +548,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * @return SUCCESS or error code otherwise
  */
 int CheckpointPrepare(pool *p, checkpoint *c, setup *s) {
-  Message(MESSAGE_COMMENT, "Checkpoint %04d processed\n", c->cid);
+  Message(MESSAGE_INFO, "Checkpoint %04d processed\n", c->cid);
   return SUCCESS;
 }
 
