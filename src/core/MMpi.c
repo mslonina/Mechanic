@@ -14,30 +14,37 @@
  */
 int ConfigDatatype(options c, MPI_Datatype *mpi_t) {
   int mstat = SUCCESS, i = 0;
-  int block_lengths[4];
-  MPI_Aint displacements[4];
-  MPI_Datatype types[4];
-  MPI_Aint addresses[5];
+  int block_lengths[6];
+  MPI_Aint displacements[6];
+  MPI_Datatype types[6];
+  MPI_Aint addresses[7];
 
   block_lengths[0] = CONFIG_LEN;
   block_lengths[1] = CONFIG_LEN;
-  block_lengths[2] = CONFIG_LEN;
+  block_lengths[2] = 1;
+  block_lengths[3] = CONFIG_LEN;
+  block_lengths[4] = CONFIG_LEN;
+  block_lengths[5] = 1;
   types[0] = MPI_CHAR;
   types[1] = MPI_CHAR;
   types[2] = MPI_CHAR;
-  types[3] = MPI_INT;
+  types[3] = MPI_CHAR;
+  types[4] = MPI_CHAR;
+  types[5] = MPI_INT;
 
   MPI_Get_address(&c, &addresses[0]);
   MPI_Get_address(&c.space, &addresses[1]);
   MPI_Get_address(&c.name, &addresses[2]);
-  MPI_Get_address(&c.value, &addresses[3]);
-  MPI_Get_address(&c.type, &addresses[4]);
+  MPI_Get_address(&c.shortName, &addresses[3]);
+  MPI_Get_address(&c.value, &addresses[4]);
+  MPI_Get_address(&c.description, &addresses[5]);
+  MPI_Get_address(&c.type, &addresses[6]);
 
-  for (i = 0; i < 4; i++) {
+  for (i = 0; i < 6; i++) {
     displacements[i] = addresses[i+1] - addresses[0];
   }
 
-  mstat = MPI_Type_struct(4, block_lengths, displacements, types, mpi_t);
+  mstat = MPI_Type_struct(6, block_lengths, displacements, types, mpi_t);
   if (mstat != MPI_SUCCESS) Error(CORE_ERR_MPI);
 
   mstat = MPI_Type_commit(mpi_t);
