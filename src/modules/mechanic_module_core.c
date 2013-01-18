@@ -294,6 +294,31 @@ int Setup(setup *s) {
     .type=C_VAL,
     .description="Display brief message"
   };
+  s->options[27] = (options) {
+    .space="core",
+    .name="debug",
+    .shortName='\0',
+    .value="0",
+    .type=C_VAL,
+    .description="Switch to debug mode (for modules)"
+  };
+  s->options[28] = (options) {
+    .space="core",
+    .name="test",
+    .shortName='\0',
+    .value="0",
+    .type=C_VAL,
+    .description="Switch to test mode (for modules)"
+  };
+  s->options[29] = (options) {
+    .space="core",
+    .name="yes",
+    .shortName='\0',
+    .value="0",
+    .type=C_VAL,
+    .description="Skip checks (for modules)"
+  };
+
   s->options[27] = (options) OPTIONS_END;
 
   return SUCCESS;

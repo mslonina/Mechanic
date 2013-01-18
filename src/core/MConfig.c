@@ -474,24 +474,28 @@ void ConfigCleanup(configNamespace* head){
   configNamespace* nextNM = NULL;
   configNamespace* current = NULL;
 
-  current = head;
+  if (head) {
+    current = head;
 
-  while (current) {
-    nextNM = current->next;
-    currentOP = current->options;
+    while (current) {
+      nextNM = current->next;
+      currentOP = current->options;
+        
+      if (currentOP) {
+        while (currentOP) {
+          nextOP = currentOP->next;
+          if (currentOP) free(currentOP);
+          currentOP = nextOP;
+        }
+      }
+
+      if (current) free(current);
+      current=nextNM;
       
-    while (currentOP) {
-      nextOP = currentOP->next;
-      if (currentOP) free(currentOP);
-      currentOP = nextOP;
     }
 
-    if (current) free(current);
-    current=nextNM;
-    
+    head = NULL;
   }
-
-  head = NULL;
 }
 
 /**

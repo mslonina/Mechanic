@@ -437,6 +437,9 @@ To obtain all configuration options available in the core, try:
 - `--print-defaults` -- print the default options
 - `--help`, `-?` -- show help message
 - `--usage` -- show short help message
+- `--debug` -- this flag may be used for specific debug output of a custom module
+- `--test` -- this flag may be used for specific test output of a custom module
+- `--yes` -- this flag may be used for specfic force runs (skip checks etc.) of a custom module 
 
 #### The configuration file
 
