@@ -78,255 +78,151 @@ int Init(init *i) {
  * @return SUCCESS on success, error code otherwise
  */
 int Setup(setup *s) {
-  s->options[0] = (options) {
-    .space="core",
-    .name="name",
-    .shortName='n',
-    .value="mechanic",
-    .type=C_STRING,
-    .description="The name of the run"
+  s->options[ 0] = (options) {
+    .space="core", .name="name", .shortName='n', .value="mechanic", .type=C_STRING,
+    .description="The name of the run (master filename prefix)"
   };
-  s->options[1] = (options) {
-    .space="core",
-    .name="xres",
-    .shortName='x',
-    .value="5",
-    .type=C_INT,
-    .description="The task pool board horizontal resolution"
+  s->options[ 1] = (options) {
+    .space="core", .name="title", .shortName='\0', .value="", .type=C_STRING,
+    .description="The title of the run"
   };
-  s->options[2] = (options) {
-    .space="core",
-    .name="yres",
-    .shortName='y',
-    .value="5",
-    .type=C_INT,
-    .description="The task pool board vertical resolution"
+  s->options[ 2] = (options) {
+    .space="core", .name="description", .shortName='\0', .value="", .type=C_STRING,
+    .description="The short description of the run"
   };
-  s->options[3] = (options) {
-    .space="core",
-    .name="zres",
-    .shortName='z',
-    .value="1",
-    .type=C_INT,
-    .description="The task pool board depth resolution"
-  };
-  s->options[4] = (options) {
-    .space="core",
-    .name="checkpoint",
-    .shortName='d',
-    .value="2048",
-    .type=C_INT,
-    .description="The checkpoint size (number of tasks)"
-  };
-  s->options[5] = (options) {
-    .space="core",
-    .name="module",
-    .shortName='p',
-    .value="core",
-    .type=C_STRING,
+  s->options[ 3] = (options) {
+    .space="core", .name="module", .shortName='p', .value="core", .type=C_STRING,
     .description="The user-supplied module name"
   };
-  s->options[6] = (options) {
-    .space="core",
-    .name="config",
-    .shortName='c',
-    .value="mechanic-config.cfg",
-    .type=C_STRING,
+  s->options[ 4] = (options) {
+    .space="core", .name="config", .shortName='c', .value="mechanic-config.cfg", .type=C_STRING,
     .description="The configuration file"
   };
-  s->options[7] = (options) {
-    .space="core",
-    .name="checkpoint-files",
-    .shortName='b',
-    .value="2",
-    .type=C_INT,
-    .description="The number of incremental backups of the master file"
-  };
-  s->options[8] = (options) {
-    .space="core",
-    .name="no-backup",
-    .shortName='\0',
-    .value="0",
-    .type=C_VAL,
-    .description="Disable the initial master file backup"
-  };
-  s->options[9] = (options) {
-    .space="core",
-    .name="restart-mode",
-    .shortName='r',
-    .value="0",
-    .type=C_VAL,
-    .description="The restart mode"
-  };
-  s->options[10] = (options) {
-    .space="core",
-    .name="restart-file",
-    .shortName='\0',
-    .value="restart-file.h5",
-    .type=C_STRING,
-    .description="The name of the file to use in the restart mode"
-  };
-  s->options[11] = (options) {
-    .space="core",
-    .name="blocking",
-    .shortName='\0',
-    .value="0",
-    .type=C_VAL,
-    .description="Switch to the blocking communication mode"
-  };
-  s->options[12] = (options) {
-    .space="core",
-    .name="xmin",
-    .shortName='\0',
-    .value="0.0",
-    .type=C_DOUBLE,
-    .description="The x-axis minimum"
-  };
-  s->options[13] = (options) {
-    .space="core",
-    .name="xmax",
-    .shortName='\0',
-    .value="1.0",
-    .type=C_DOUBLE,
-    .description="The x-axis maximum"
-  };
-  s->options[14] = (options) {
-    .space="core",
-    .name="ymin",
-    .shortName='\0',
-    .value="0.0",
-    .type=C_DOUBLE,
-    .description="The y-axis minimum"
-  };
-  s->options[15] = (options) {
-    .space="core",
-    .name="ymax",
-    .shortName='\0',
-    .value="1.0",
-    .type=C_DOUBLE,
-    .description="The y-axis maximum"
-  };
-  s->options[16] = (options) {
-    .space="core",
-    .name="zmin",
-    .shortName='\0',
-    .value="0.0",
-    .type=C_DOUBLE,
-    .description="The z-axis minimum"
-  };
-  s->options[17] = (options) {
-    .space="core",
-    .name="zmax",
-    .shortName='\0',
-    .value="1.0",
-    .type=C_DOUBLE,
-    .description="The z-axis maximum"
-  };
-  s->options[18] = (options) {
-    .space="core",
-    .name="xorigin",
-    .shortName='\0',
-    .value="0.5",
-    .type=C_DOUBLE,
-    .description="The x-axis origin"
-  };
-  s->options[19] = (options) {
-    .space="core",
-    .name="yorigin",
-    .shortName='\0',
-    .value="0.5",
-    .type=C_DOUBLE,
-    .description="The y-axis origin"
-  };
-  s->options[20] = (options) {
-    .space="core",
-    .name="zorigin",
-    .shortName='\0',
-    .value="0.5",
-    .type=C_DOUBLE,
-    .description="The z-axis origin"
-  };
-  s->options[21] = (options) {
-    .space="core",
-    .name="xelement",
-    .shortName='\0',
-    .value="0",
-    .type=C_INT,
+  s->options[ 5] = (options) {
+    .space="core", .name="xelement", .shortName='\0', .value="0", .type=C_INT,
     .description="The x-axis element"
   };
-  s->options[22] = (options) {
-    .space="core",
-    .name="yelement",
-    .shortName='\0',
-    .value="0",
-    .type=C_INT,
+  s->options[ 6] = (options) {
+    .space="core", .name="yelement", .shortName='\0', .value="0", .type=C_INT,
     .description="The y-axis element"
   };
-  s->options[23] = (options) {
-    .space="core",
-    .name="zelement",
-    .shortName='\0',
-    .value="0",
-    .type=C_INT,
+  s->options[ 7] = (options) {
+    .space="core", .name="zelement", .shortName='\0', .value="0", .type=C_INT,
     .description="The z-axis element"
   };
+  s->options[ 8] = (options) {
+    .space="core", .name="xlabel", .shortName='\0', .value="", .type=C_STRING,
+    .description="The x-axis label"
+  };
+  s->options[ 9] = (options) {
+    .space="core", .name="ylabel", .shortName='\0', .value="", .type=C_STRING,
+    .description="The y-axis label"
+  };
+  s->options[10] = (options) {
+    .space="core", .name="zlabel", .shortName='\0', .value="", .type=C_STRING,
+    .description="The z-axis label"
+  };
+  s->options[11] = (options) {
+    .space="core", .name="xorigin", .shortName='\0', .value="0.5", .type=C_DOUBLE,
+    .description="The x-axis origin"
+  };
+  s->options[12] = (options) {
+    .space="core", .name="yorigin", .shortName='\0', .value="0.5", .type=C_DOUBLE,
+    .description="The y-axis origin"
+  };
+  s->options[13] = (options) {
+    .space="core", .name="zorigin", .shortName='\0', .value="0.5", .type=C_DOUBLE,
+    .description="The z-axis origin"
+  };
+  s->options[14] = (options) {
+    .space="core", .name="xres", .shortName='x', .value="5", .type=C_INT,
+    .description="The task pool board horizontal resolution"
+  };
+  s->options[15] = (options) {
+    .space="core", .name="yres", .shortName='y', .value="5", .type=C_INT,
+    .description="The task pool board vertical resolution"
+  };
+  s->options[16] = (options) {
+    .space="core", .name="zres", .shortName='z', .value="1", .type=C_INT,
+    .description="The task pool board depth resolution"
+  };
+  s->options[17] = (options) {
+    .space="core", .name="xmin", .shortName='\0', .value="0.0", .type=C_DOUBLE,
+    .description="The x-axis minimum"
+  };
+  s->options[18] = (options) {
+    .space="core", .name="xmax", .shortName='\0', .value="1.0", .type=C_DOUBLE,
+    .description="The x-axis maximum"
+  };
+  s->options[19] = (options) {
+    .space="core", .name="ymin", .shortName='\0', .value="0.0", .type=C_DOUBLE,
+    .description="The y-axis minimum"
+  };
+  s->options[20] = (options) {
+    .space="core", .name="ymax", .shortName='\0', .value="1.0", .type=C_DOUBLE,
+    .description="The y-axis maximum"
+  };
+  s->options[21] = (options) {
+    .space="core", .name="zmin", .shortName='\0', .value="0.0", .type=C_DOUBLE,
+    .description="The z-axis minimum"
+  };
+  s->options[22] = (options) {
+    .space="core", .name="zmax", .shortName='\0', .value="1.0", .type=C_DOUBLE,
+    .description="The z-axis maximum"
+  };
+  s->options[23] = (options) {
+    .space="core", .name="checkpoint", .shortName='d', .value="2048", .type=C_INT,
+    .description="The checkpoint size (number of tasks)"
+  };
   s->options[24] = (options) {
-    .space="core",
-    .name="print-defaults",
-    .shortName='\0',
-    .value="0",
-    .type=C_VAL,
-    .description="Print default settings"
+    .space="core", .name="checkpoint-files", .shortName='b', .value="2", .type=C_INT,
+    .description="The number of incremental backups of the master file"
   };
   s->options[25] = (options) {
-    .space="core",
-    .name="help",
-    .shortName='?',
-    .value="0",
-    .type=C_VAL,
-    .description="Show this help message"
+    .space="core", .name="no-backup", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Disable the initial master file backup"
   };
   s->options[26] = (options) {
-    .space="core",
-    .name="usage",
-    .shortName='\0',
-    .value="0",
-    .type=C_VAL,
-    .description="Display brief message"
+    .space="core", .name="restart-mode", .shortName='r', .value="0", .type=C_VAL,
+    .description="The restart mode"
   };
   s->options[27] = (options) {
-    .space="core",
-    .name="debug",
-    .shortName='\0',
-    .value="0",
-    .type=C_VAL,
-    .description="Switch to debug mode (for modules)"
+    .space="core", .name="restart-file", .shortName='\0', .value="restart-file.h5", .type=C_STRING,
+    .description="The name of the file to use in the restart mode"
   };
   s->options[28] = (options) {
-    .space="core",
-    .name="test",
-    .shortName='\0',
-    .value="0",
-    .type=C_VAL,
-    .description="Switch to test mode (for modules)"
+    .space="core", .name="blocking", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Switch to the blocking communication mode (for modules)"
   };
   s->options[29] = (options) {
-    .space="core",
-    .name="yes",
-    .shortName='\0',
-    .value="0",
-    .type=C_VAL,
-    .description="Skip checks (for modules)"
+    .space="core", .name="test", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Switch to test mode (for modules)"
   };
   s->options[30] = (options) {
-    .space="core",
-    .name="dense",
-    .shortName='\0',
-    .value="0",
-    .type=C_VAL,
+    .space="core", .name="yes", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Skip checks (for modules)"
+  };
+  s->options[31] = (options) {
+    .space="core", .name="dense", .shortName='\0', .value="0", .type=C_VAL,
     .description="Use dense output (for modules)"
   };
-  s->options[31] = (options) OPTIONS_END;
+  s->options[32] = (options) {
+    .space="core", .name="debug", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Switch to debug mode (for modules)"
+  };
+  s->options[33] = (options) {
+    .space="core", .name="print-defaults", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Print default settings"
+  };
+  s->options[34] = (options) {
+    .space="core", .name="help", .shortName='?', .value="0", .type=C_VAL,
+    .description="Show this help message"
+  };
+  s->options[35] = (options) {
+    .space="core", .name="usage", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Display brief message"
+  };
+  s->options[36] = (options) OPTIONS_END;
 
   return SUCCESS;
 }

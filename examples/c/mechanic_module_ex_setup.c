@@ -64,7 +64,7 @@
  *
  *     ModifyOption(namespace, variable, new value, new type, setup->head);
  *
- * ### Access the core options
+ * ### Accessing the core options
  *
  * Core options are handled in the same way the module options are. You can access them by
  * using "core" namespace.
@@ -92,7 +92,9 @@
  * ### Future
  *
  * The configuration options are marked to become full HDF5 attributes, so the entire API
- * of accessing options is a subject to change.
+ * of accessing options is a subject to change. Starting from 2.2.6 release, all defined
+ * options (both core and module) are available as attributes to the task board dataset,
+ * i.e. /Pools/last/board.
  */
 
 #include "mechanic.h"
@@ -108,7 +110,6 @@
  * - the minimum number of CPU required to run the job
  */
 int Init(init *i) {
-  i->options = 24;
   i->pools = 128;
   i->banks_per_pool = 4;
   i->banks_per_task = 4;
@@ -147,7 +148,7 @@ int Setup(setup *s) {
   };
   s->options[3] = (options) {
     .space="mymodule",
-    .name="debug",
+    .name="dtrue",
     .shortName='\0',
     .value="0",
     .type=C_VAL,
@@ -170,19 +171,19 @@ int Setup(setup *s) {
  * Implements Prepare()
  */
 int Prepare(int node, char *masterfile, setup *s) {
-  int max_pools, ilimit, debug;
+  int max_pools, ilimit, dtrue;
   double dlimit;
 
   max_pools = Option2Int("mymodule", "max-pools", s->head);
   ilimit = Option2Int("mymodule", "ilimit", s->head);
-  debug = Option2Int("mymodule", "debug", s->head);
+  dtrue = Option2Int("mymodule", "dtrue", s->head);
   dlimit = Option2Double("mymodule", "dlimit", s->head);
 
   if (node == MASTER) {
     Message(MESSAGE_COMMENT, "Options are: \n");
     Message(MESSAGE_COMMENT, "--max-pools = %d\n", max_pools);
     Message(MESSAGE_COMMENT, "--ilimit = %d\n", ilimit);
-    Message(MESSAGE_COMMENT, "--debug = %d\n", debug);
+    Message(MESSAGE_COMMENT, "--dtrue = %d\n", dtrue);
     Message(MESSAGE_COMMENT, "--dlimit = %f\n", dlimit);
     Message(MESSAGE_COMMENT, "--host = %s\n", Option2String("mymodule", "host", s->head));
     Message(MESSAGE_COMMENT, "\n");
@@ -198,13 +199,13 @@ int Prepare(int node, char *masterfile, setup *s) {
  * Init() hook is reached, the task pool loop will be finished.
  */
 int PoolProcess(pool **all, pool *current, setup *s) {
-  int max_pools, ilimit, debug;
+  int max_pools, ilimit, dtrue;
   double dlimit;
 
   // Getting the integer data
   max_pools = Option2Int("mymodule", "max-pools", s->head);
   ilimit = Option2Int("mymodule", "ilimit", s->head);
-  debug = Option2Int("mymodule", "debug", s->head);
+  dtrue = Option2Int("mymodule", "dtrue", s->head);
   dlimit = Option2Double("mymodule", "dlimit", s->head);
 
   Message(MESSAGE_COMMENT, "Pool %d processed\n", current->pid);

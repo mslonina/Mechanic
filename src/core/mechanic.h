@@ -115,7 +115,7 @@
 #define C_LONG POPT_ARG_LONG /**< long */
 
 #define CONFIG_MAX_LINE_LENGTH 512 /**< Maximum line length in the config file */
-#define CONFIG_LEN 96 /**< Maximum config filename length */
+#define CONFIG_LEN 128 /**< Maximum config filename length */
 #define CONFIG_NULL '\0' /**< Null */
 
 /**
