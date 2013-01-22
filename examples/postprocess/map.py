@@ -14,4 +14,4 @@ settings = {
     'origin-label' : r'$\mathbf{\bullet}$'
     }
 
-mt.PlotDataset(settings)
+mt.Plot3(settings)
