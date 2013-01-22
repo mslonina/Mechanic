@@ -440,6 +440,7 @@ To obtain all configuration options available in the core, try:
 - `--debug` -- this flag may be used for specific debug output of a custom module
 - `--test` -- this flag may be used for specific test output of a custom module
 - `--yes` -- this flag may be used for specfic force runs (skip checks etc.) of a custom module 
+- `--dense` -- this flag may be used for specific, dense, module output
 
 #### The configuration file
 

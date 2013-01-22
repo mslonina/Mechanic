@@ -108,7 +108,7 @@ int Work(module *m) {
     cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
 
     if (m->node == MASTER) {
-      Message(MESSAGE_INFO, "Pool %04d computed. CPU time: %f\n", p[pid]->pid, cpu_time);
+      Message(MESSAGE_INFO, "Pool %04d completed. CPU time: %f\n", p[pid]->pid, cpu_time);
 
       /**
        * Write global pool attributes

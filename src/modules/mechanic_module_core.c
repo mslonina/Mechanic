@@ -318,8 +318,15 @@ int Setup(setup *s) {
     .type=C_VAL,
     .description="Skip checks (for modules)"
   };
-
-  s->options[27] = (options) OPTIONS_END;
+  s->options[30] = (options) {
+    .space="core",
+    .name="dense",
+    .shortName='\0',
+    .value="0",
+    .type=C_VAL,
+    .description="Use dense output (for modules)"
+  };
+  s->options[31] = (options) OPTIONS_END;
 
   return SUCCESS;
 }
