@@ -169,7 +169,7 @@ SET (CPACK_PACKAGE_INSTALL_DIRECTORY "/usr/local")
 SET (CPACK_SOURCE_PACKAGE_FILE_NAME
   "${CMAKE_PROJECT_NAME}-${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}")
 SET (CPACK_SOURCE_IGNORE_FILES
-  "/build/;/.DS_Store;/.gitignore;/.git/;~$;*.so;*.dylib;${CPACK_SOURCE_IGNORE_FILES}")
+  "/build/;/.DS_Store;/.gitignore;/.git/;~$;*.so;*.dylib;*.h5;${CPACK_SOURCE_IGNORE_FILES}")
 
 include (CPack)
 
