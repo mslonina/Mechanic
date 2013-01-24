@@ -200,14 +200,14 @@ int PoptOptions(module *m, setup *s) {
       };
     }
     if (s->options[i].type == C_VAL) {
-      s->popt->val_args[i] = (int)strtol(s->options[i].value, &garbage, 0);
+      s->popt->val_args[i] = strtol(s->options[i].value, &garbage, 0);
       s->popt->popt[i] = (struct poptOption) {
         s->options[i].name, s->options[i].shortName, POPT_ARG_VAL,
           &s->popt->val_args[i], 1, s->options[i].description, NULL
        };
      }
     if (s->options[i].type == C_INT) {
-      s->popt->int_args[i] = (int)strtol(s->options[i].value, &garbage, 0);
+      s->popt->int_args[i] = strtol(s->options[i].value, &garbage, 0);
       s->popt->popt[i] = (struct poptOption) {
         s->options[i].name, s->options[i].shortName, POPT_ARG_INT,
           &s->popt->int_args[i], 0, s->options[i].description, s->options[i].value

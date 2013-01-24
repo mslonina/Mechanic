@@ -109,7 +109,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
   for (i = 0; i <= *pool_counter; i++) {
     for (j = 0; j < m->pool_banks; j++) {
       if (pools[i]->storage[j].layout.sync) {
-        if ((int)pools[i]->storage[j].layout.elements > 0) {
+        if (pools[i]->storage[j].layout.elements > 0) {
           MPI_Bcast(&(pools[i]->storage[j].memory[0]), pools[i]->storage[j].layout.elements, 
               pools[i]->storage[j].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
         }

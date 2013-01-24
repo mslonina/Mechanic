@@ -287,7 +287,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
         if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
 
-          c_offset = c->storage->layout.size * i + sizeof(int)*(HEADER_SIZE);
+          c_offset = c->storage->layout.size * i + sizeof(int) * (HEADER_SIZE);
           mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
           CheckStatus(mstat);
 

@@ -147,7 +147,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   /* Broadcast pool data */
   for (i = 0; i < m->pool_banks; i++) {
     if (p->storage[i].layout.sync) {
-      if ((int)p->storage[i].layout.elements > 0) {
+      if (p->storage[i].layout.elements > 0) {
         MPI_Bcast(&(p->storage[i].memory[0]), p->storage[i].layout.elements,
             p->storage[i].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
         // Broadcast pool attributes

@@ -222,7 +222,7 @@ int CheckLayout(module *m, int banks, storage *s) {
       s[i].layout.storage_dim[j] = s[i].layout.dims[j];
     }
 
-    if ((int)s[i].layout.datatype <= 0) {
+    if (s[i].layout.datatype <= 0) {
       Message(MESSAGE_ERR, "Datatype is missing\n");
       Error(CORE_ERR_STORAGE);
     }
@@ -307,7 +307,7 @@ int CheckAttributeLayout(attr *a) {
       }
     }
 
-    if ((int)a->layout.datatype <= 0) {
+    if (a->layout.datatype <= 0) {
       Message(MESSAGE_ERR, "Attribute datatype is missing\n");
       Error(CORE_ERR_STORAGE);
     }
