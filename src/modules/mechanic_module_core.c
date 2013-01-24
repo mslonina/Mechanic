@@ -260,6 +260,11 @@ int Storage(pool *p, setup *s) {
 
   p->checkpoint_size = Option2Int("core", "checkpoint", s->head);
 
+  if (p->checkpoint_size <= 0) {
+    p->checkpoint_size = 2048;
+    ModifyOption("core", "checkpoint", "2048", C_INT, s->head);
+  }
+
   return SUCCESS;
 }
 

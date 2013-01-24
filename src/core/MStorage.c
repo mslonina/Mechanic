@@ -121,8 +121,8 @@ int Storage(module *m, pool *p) {
         
         size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
         p->task->storage[i].layout.storage_elements = size;
-        p->task->storage[i].layout.storage_size = (size_t)size * p->task->storage[i].layout.datatype_size;
-        mstat = Allocate(&(p->task->storage[i]), (size_t)size, p->task->storage[i].layout.datatype_size);
+        p->task->storage[i].layout.storage_size = size * p->task->storage[i].layout.datatype_size;
+        mstat = Allocate(&(p->task->storage[i]), size, p->task->storage[i].layout.datatype_size);
         mstat = CommitAttrMemoryLayout(p->task->storage[i].attr_banks, &p->task->storage[i]);
       }
 
@@ -141,8 +141,8 @@ int Storage(module *m, pool *p) {
         
         size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
         p->task->storage[i].layout.storage_elements = size;
-        p->task->storage[i].layout.storage_size = (size_t)size * p->task->storage[i].layout.datatype_size;
-        mstat = Allocate(&(p->task->storage[i]), (size_t)size, p->task->storage[i].layout.datatype_size);
+        p->task->storage[i].layout.storage_size = size * p->task->storage[i].layout.datatype_size;
+        mstat = Allocate(&(p->task->storage[i]), size, p->task->storage[i].layout.datatype_size);
         mstat = CommitAttrMemoryLayout(p->task->storage[i].attr_banks, &p->task->storage[i]);
       }
 
@@ -250,8 +250,8 @@ int CheckLayout(module *m, int banks, storage *s) {
     s[i].layout.storage_elements = 
       s[i].layout.elements = GetSize(s[i].layout.rank, s[i].layout.dims);
 
-    s[i].layout.storage_size = (size_t) s[i].layout.storage_elements * s[i].layout.datatype_size;
-    s[i].layout.size = (size_t) s[i].layout.elements * s[i].layout.datatype_size;
+    s[i].layout.storage_size = s[i].layout.storage_elements * s[i].layout.datatype_size;
+    s[i].layout.size = s[i].layout.elements * s[i].layout.datatype_size;
 
     /* Check attributes */
     for (j = 0; j < s[i].attr_banks; j++) {
@@ -327,8 +327,8 @@ int CheckAttributeLayout(attr *a) {
       a->layout.elements = GetSize(a->layout.rank, a->layout.dims);
     }
 
-    a->layout.storage_size = (size_t) a->layout.storage_elements * a->layout.datatype_size;
-    a->layout.size = (size_t) a->layout.elements * a->layout.datatype_size;
+    a->layout.storage_size = a->layout.storage_elements * a->layout.datatype_size;
+    a->layout.size = a->layout.elements * a->layout.datatype_size;
     Message(MESSAGE_DEBUG, "Layout attr '%s': elements %d, storage_elements %d, size = %zu, storage_size = %zu\n",
         a->layout.name, a->layout.storage_elements, a->layout.elements, a->layout.size, a->layout.storage_size);
 
@@ -351,7 +351,7 @@ int CommitMemoryLayout(int banks, storage *s) {
   int mstat = SUCCESS, i = 0;
 
   for (i = 0; i < banks; i++) {
-    mstat = Allocate(&s[i], (size_t)s[i].layout.storage_elements, s[i].layout.datatype_size);
+    mstat = Allocate(&s[i], s[i].layout.storage_elements, s[i].layout.datatype_size);
     CheckStatus(mstat);
   
     mstat = CommitAttrMemoryLayout(s[i].attr_banks, s);
@@ -368,7 +368,7 @@ int CommitAttrMemoryLayout(int banks, storage *s) {
   for (i = 0; i < banks; i++) {
     Message(MESSAGE_DEBUG, "Attribute '%s', elements = %d, size = %zu\n",
         s->attr[i].layout.name, s->attr[i].layout.storage_elements, s->attr[i].layout.datatype_size);
-    mstat = AllocateAttribute(&s->attr[i], (size_t)s->attr[i].layout.storage_elements, s->attr[i].layout.datatype_size);
+    mstat = AllocateAttribute(&s->attr[i], s->attr[i].layout.storage_elements, s->attr[i].layout.datatype_size);
     CheckStatus(mstat);
   }
 
@@ -556,7 +556,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
   char *buffer = NULL;
 
   for (i = 0; i < banks; i++) {
-    if (s[i].layout.use_hdf && (int)s[i].layout.size > 0) {
+    if (s[i].layout.use_hdf && s[i].layout.size > 0) {
 
       dataset = H5Dopen(h5location, s[i].layout.name, H5P_DEFAULT);
       H5CheckStatus(dataset);
