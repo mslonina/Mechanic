@@ -51,7 +51,7 @@ int Worker(module *m, pool *p) {
 
   while (1) {
 
-    MPI_Recv(&(recv_buffer->memory[0]), (int)recv_buffer->layout.size, MPI_CHAR,
+    MPI_Recv(&(recv_buffer->memory[0]), recv_buffer->layout.size, MPI_CHAR,
         MASTER, MPI_ANY_TAG, MPI_COMM_WORLD, &recv_status);
 
     mstat = Unpack(m, recv_buffer->memory, p, t, &tag);
@@ -79,7 +79,7 @@ int Worker(module *m, pool *p) {
       mstat = Pack(m, send_buffer->memory, p, t, tag);
       CheckStatus(mstat);
 
-      MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
+      MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
           MASTER, TAG_DATA, MPI_COMM_WORLD);
 
       mstat = Send(m->node, MASTER, TAG_DATA, m, p);

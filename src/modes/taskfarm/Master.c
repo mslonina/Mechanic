@@ -99,7 +99,7 @@ int Master(module *m, pool *p) {
       terminated_nodes++;
     }
 
-    MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
+    MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
         
     mstat = Send(MASTER, i, TAG_DATA, m, p);
@@ -135,7 +135,7 @@ int Master(module *m, pool *p) {
     if (ice == CORE_ICE) Abort(CORE_ICE);
 
     /* Wait for any operation to complete */
-    MPI_Recv(&(recv_buffer->memory[0]), (int)recv_buffer->layout.size, MPI_CHAR,
+    MPI_Recv(&(recv_buffer->memory[0]), recv_buffer->layout.size, MPI_CHAR,
       MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
 
     send_node = mpi_status.MPI_SOURCE;
@@ -150,7 +150,7 @@ int Master(module *m, pool *p) {
     CheckStatus(mstat);
 
     if (header[0] == TAG_RESULT) {
-      c_offset = c->counter * (int)recv_buffer->layout.size;
+      c_offset = c->counter * recv_buffer->layout.size;
       mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
 
       board_buffer[header[3]][header[4]][header[5]][0] = header[2];
@@ -169,7 +169,7 @@ int Master(module *m, pool *p) {
         board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_IN_USE;
         board_buffer[t->location[0]][t->location[1]][t->location[2]][1] = send_node;
 
-        MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
+        MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
             send_node, TAG_DATA, MPI_COMM_WORLD);
 
         mstat = Send(MASTER, send_node, TAG_DATA, m, p);
@@ -198,7 +198,7 @@ int Master(module *m, pool *p) {
     mstat = CopyData(&tag, send_buffer->memory, sizeof(int));
     CheckStatus(mstat);
 
-    MPI_Send(&(send_buffer->memory[0]), (int)send_buffer->layout.size, MPI_CHAR,
+    MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
         
     mstat = Send(MASTER, i, tag, m, p);
