@@ -53,6 +53,8 @@ int Master(module *m, pool *p) {
         }
       }
     }
+    
+    Message(MESSAGE_INFO, "Completed %04d of %04d tasks\n", p->completed, p->pool_size);
   }
 
   /* Data buffers */
@@ -80,6 +82,9 @@ int Master(module *m, pool *p) {
 
   recv_buffer->memory = malloc(recv_buffer->layout.size);
   if (!recv_buffer->memory) Error(CORE_ERR_MEM);
+
+  // Specific for the restart mode. The restart file is already full of completed tasks
+  if (p->completed == p->pool_size) goto finalize;
 
   /* Send initial tasks to all workers */
   for (i = 1; i < m->mpi_size; i++) {
@@ -192,6 +197,8 @@ int Master(module *m, pool *p) {
   mstat = CheckpointProcess(m, p, c);
   CheckStatus(mstat);
 
+finalize:
+
   /* Terminate all workers */
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
     tag = TAG_TERMINATE;
@@ -203,7 +210,6 @@ int Master(module *m, pool *p) {
         
     mstat = Send(MASTER, i, tag, m, p);
     CheckStatus(mstat);
-
   }
 
   /* Finalize */
