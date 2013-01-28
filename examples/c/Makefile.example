@@ -6,6 +6,7 @@ examples=\
 	mechanic_module_ex_map.${EXT} \
 	mechanic_module_ex_mandelbrot.${EXT} \
 	mechanic_module_ex_setup.${EXT} \
+	mechanic_module_ex_poolsetup.${EXT} \
 	mechanic_module_ex_prepareprocess.${EXT} \
 	mechanic_module_ex_createpool.${EXT} \
 	mechanic_module_ex_changepoollayout.${EXT} \
