@@ -1,15 +1,25 @@
 Mechanic short changelog
 ========================
 
-2.2.1 -> 2.2.9
---------------
+2.3.x
+-----
 
 - ICE check. If the master node founds mechanic.ice file, it will abort the run
-- New hooks: Send() and Receive()
-- Configuration is stored as attributes of the task board. No more `/Config` dataset
 - Support for numeric and string attributes
+
+### Configuration
+
+- Runtime configuration is stored as attributes to the task board. No more `/Config` dataset
+- Runtime configuration may be now modified per task pool
 - New core configuration options: x/y/z-axis element, x/y/z-label, as well as common
   module-like options such as: debug, dense etc.
+
+### Hooks
+
+- New hooks: Send() and Receive()
+
+### Other
+
 - Initial work for python postprocessing pipeline
 - Documentation updates
 - Bug fixes

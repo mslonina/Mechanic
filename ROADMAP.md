@@ -27,3 +27,5 @@ Mechanic 2.x roadmap
 3. [DONE] Mechanic ICE check 
 4. [IN PROGRESS] Intermediate storage
   - [DONE] Task states
+  - Intermediate checkpoint storage
+  - Support for the restart mode
