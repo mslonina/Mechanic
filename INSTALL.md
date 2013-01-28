@@ -27,8 +27,8 @@ interoperability)
 Manual Compilation
 ------------------
 
-    tar -xvvf mechanic-2.2.8.tar.gz
-    cd mechanic-2.2.8
+    tar -xvvf mechanic-2.2.9.tar.gz
+    cd mechanic-2.2.9
     mkdir build
     cd build
     CC=mpicc cmake ..

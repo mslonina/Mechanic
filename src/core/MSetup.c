@@ -22,7 +22,13 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
   int mstat = SUCCESS, opts = 0, i = 0, n = 0;
   MPI_Datatype mpi_t;
   MPI_Status mpi_status;
-  hid_t h5location;
+  hid_t h5location, h5board, h5attr, h5atype;
+  char string_attr[CONFIG_LEN];
+  int int_attr;
+  long long_attr;
+  float float_attr;
+  double double_attr;
+  size_t len;
 
   /* Read the specified configuration file */
   if (m->node == MASTER) {
@@ -30,14 +36,47 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
       h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
       H5CheckStatus(h5location);
 
-      if (setup_mode == CORE_SETUP) {
-        ConfigHDF5Parser(h5location, "/config/core", m->layer.setup.head);
+      h5board = H5Dopen(h5location, "/Pools/last/board", H5P_DEFAULT);
+      H5CheckStatus(h5location);
+
+      i = 0;
+      while (m->layer.setup.options[i].name[0] != CONFIG_NULL) {
+        h5attr = H5Aopen_name(h5board, m->layer.setup.options[i].name);
+        h5atype = H5Aget_type(h5attr);
+
+        if (m->layer.setup.options[i].type == C_STRING) {
+          H5Aread(h5attr, h5atype, &string_attr);
+          len = strlen(ConfigTrim(string_attr));
+          strncpy(m->layer.setup.options[i].value, ConfigTrim(string_attr), len);
+        }
+        
+        if (m->layer.setup.options[i].type == C_INT
+            || m->layer.setup.options[i].type == C_VAL) {
+          H5Aread(h5attr, H5T_NATIVE_INT, &int_attr);
+          snprintf(m->layer.setup.options[i].value, CONFIG_LEN, "%d", int_attr);
+        }
+        if (m->layer.setup.options[i].type == C_LONG) {
+          H5Aread(h5attr, H5T_NATIVE_LONG, &long_attr);
+          snprintf(m->layer.setup.options[i].value, CONFIG_LEN, "%ld", long_attr);
+        }
+        if (m->layer.setup.options[i].type == C_FLOAT) {
+          H5Aread(h5attr, H5T_NATIVE_FLOAT, &float_attr);
+          snprintf(m->layer.setup.options[i].value, CONFIG_LEN, "%.19E", float_attr);
+        }
+        if (m->layer.setup.options[i].type == C_DOUBLE) {
+          H5Aread(h5attr, H5T_NATIVE_DOUBLE, &double_attr);
+          snprintf(m->layer.setup.options[i].value, CONFIG_LEN, "%.19E", double_attr);
+        }
+    
+        ModifyOption(m->layer.setup.options[i].space, m->layer.setup.options[i].name,
+          m->layer.setup.options[i].value, m->layer.setup.options[i].type, m->layer.setup.head);
+        
+        H5Tclose(h5atype);
+        H5Aclose(h5attr);
+        i++;
       }
 
-      if (setup_mode == MODULE_SETUP) {
-        ConfigHDF5Parser(h5location, "/config/module", m->layer.setup.head);
-      }
-
+      H5Dclose(h5board);
       H5Fclose(h5location);
     } else {
       if (setup_mode == MODULE_SETUP) {

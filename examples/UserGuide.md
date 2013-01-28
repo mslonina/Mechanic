@@ -352,7 +352,8 @@ Setup
 
 The configuration is handled by the internal Config API. Options
 are defined through the `Setup()` hook. They are available in the command line, as well as
-configuration file, and are stored in the master file.
+configuration file, and are stored in the master file. The runtime configuration is stored
+as attributes to the `/Pools/last/board` dataset.
 
 The Config API allows any kind of C99 struct initialization to be used, i.e.:
 
@@ -414,31 +415,31 @@ To obtain all configuration options available in the core, try:
     mpirun -np 2 mechanic --help
 
 
-- `--name`, `-n` - the name of the run (used for master filename prefix)
-- `--title` - the title of the run
-- `--description` - the short description of the run
-- `--module`, `-p` -- the user-supplied module name
-- `--config`, `-c` -- the configuration file name
-- `--xelement` - the task pool board x-axis element
-- `--yelement` - the task pool board y-axis element
-- `--zelement` - the task pool board z-axis element
-- `--xlabel` - the task pool board x-axis label
-- `--ylabel` - the task pool board y-axis label
-- `--zlabel` - the task pool board z-axis label
-- `--xorigin` - the task pool board x-axis origin
-- `--yorigin` - the task pool board y-axis origin
-- `--zorigin` - the task pool board z-axis origin
-- `--xres`, `-x` - the task pool board horizontal resolution
-- `--yres`, `-y` - the task pool board vertical resolution
-- `--zres`, `-z` - the task pool board depth resolution
-- `--xmin`, `--xmax` - the task pool board x-axis min/max
-- `--ymin`, `--ymax` - the task pool board y-axis min/max
-- `--zmin`, `--zmax` - the task pool board z-axis min/max
-- `--checkpoint`, `-d` -- the checkpoint size (number of tasks)
-- `--checkpoint-files`, `-b` -- the number of incremental backups
+- `--name`, `-n` - the name of the run, used for master filename prefix (string)
+- `--title` - the title of the run (string)
+- `--description` - the short description of the run (string)
+- `--module`, `-p` -- the user-supplied module name (string)
+- `--config`, `-c` -- the configuration file name (string/path)
+- `--xelement` - the task pool board x-axis element (integer)
+- `--yelement` - the task pool board y-axis element (integer)
+- `--zelement` - the task pool board z-axis element (integer)
+- `--xlabel` - the task pool board x-axis label (string)
+- `--ylabel` - the task pool board y-axis label (string)
+- `--zlabel` - the task pool board z-axis label (string)
+- `--xorigin` - the task pool board x-axis origin (integer)
+- `--yorigin` - the task pool board y-axis origin (integer)
+- `--zorigin` - the task pool board z-axis origin (integer)
+- `--xres`, `-x` - the task pool board horizontal resolution (integer)
+- `--yres`, `-y` - the task pool board vertical resolution (integer)
+- `--zres`, `-z` - the task pool board depth resolution (integer)
+- `--xmin`, `--xmax` - the task pool board x-axis min/max (double)
+- `--ymin`, `--ymax` - the task pool board y-axis min/max (double)
+- `--zmin`, `--zmax` - the task pool board z-axis min/max (double)
+- `--checkpoint`, `-d` -- the checkpoint size (number of tasks) (integer)
+- `--checkpoint-files`, `-b` -- the number of incremental backups (integer)
 - `--no-backup` -- disable automatic master file backup (in case of the same run names)
 - `--restart-mode`, `-r` -- the restart mode
-- `--restart-file`, -- the restart file
+- `--restart-file`, -- the restart file (string/path)
 - `--test` -- this flag may be used for specific test output of a custom module
 - `--yes` -- this flag may be used for specfic force runs (skip checks etc.) of a custom module 
 - `--dense` -- this flag may be used for specific, dense, module output

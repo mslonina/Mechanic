@@ -209,8 +209,6 @@ int main(int argc, char** argv) {
     h5location = H5Fcreate(module.filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     H5CheckStatus(h5location);
 
-    ConfigHDF5Writer(h5location, "/config/core", core.layer.setup.head);
-    ConfigHDF5Writer(h5location, "/config/module", module.layer.setup.head);
     H5Fclose(h5location);
   }
 
@@ -240,7 +238,7 @@ int main(int argc, char** argv) {
   /**
    * Write global attributes here, such as master cpu_time
    */
-  if (node == MASTER) {
+  if (node == MASTER && module.mode != RESTART_MODE) {
     h5location = H5Fopen(module.filename, H5F_ACC_RDWR, H5P_DEFAULT);
     
     attr_s = H5Screate(H5S_SCALAR);

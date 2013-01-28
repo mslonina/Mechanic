@@ -179,18 +179,12 @@ The result is stored in the `mechanic-master-00.h5` file and may be accessed i.e
     # h5ls -r mechanic-master-00.h5
 
     /                        Group
-    /Config                  Type
     /Pools                   Group
     /Pools/last              Group
     /Pools/last/Tasks        Group
     /Pools/last/Tasks/result Dataset {100, 3}
     /Pools/last/board        Dataset {10, 10}
     /Pools/pool-0000         Group, same as /Pools/last
-    /config                  Group
-    /config/core             Group
-    /config/core/core        Dataset {13}
-    /config/module           Group
-    /config/module/core      Dataset {13}
 
 Our result is stored in the first task pool (only one task pool has been computed so far),
 in the dataset `/Pools/pool-0000/Tasks/result`:

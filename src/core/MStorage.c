@@ -56,6 +56,7 @@ int Storage(module *m, pool *p) {
 
   /* Programatically create configuration attributes for the task board */
   i = 0;
+  p->board->attr_banks = 0;
   while (m->layer.setup.options[i].name[0] != CONFIG_NULL) {
     len = strlen(m->layer.setup.options[i].name);
     p->board->attr[i].layout.name = calloc(len + 1, sizeof(char));
@@ -67,16 +68,17 @@ int Storage(module *m, pool *p) {
     p->board->attr[i].layout.dataspace = H5S_SCALAR;
     p->board->attr[i].layout.datatype = GetHDF5Datatype(m->layer.setup.options[i].type);
 
+    p->board->attr_banks++;
     i++;
   }
 
-  p->board->attr_banks = 0;
+  /*p->board->attr_banks = 0;
   for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
     if (p->board->attr[j].layout.dataspace == H5S_SIMPLE ||
         p->board->attr[j].layout.dataspace == H5S_SCALAR) {
       p->board->attr_banks++;
     }
-  }
+  }*/
 
   /* Check and fix the memory/storage layout */
   CheckLayout(m, 1, p->board);

@@ -18,8 +18,8 @@ Mechanic 2.x roadmap
 
 1. Setup subsystem updates
   - [DONE] Save configuration as attributes (for better efficiency) of the task board
-  - Restart mode read 
-  - Remove the Config dataset
+  - [DONE] Restart mode read 
+  - [DONE] Remove the Config dataset
 2. Loadable run modes (such as taskfarm, masteralone, collective etc.)
   - Refactor code headers (public and private)
   - Mode API functions: Init(), Master(), Worker()

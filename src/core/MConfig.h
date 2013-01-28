@@ -69,7 +69,7 @@ enum configMessagesType {
  */
 typedef struct{
   char name[CONFIG_LEN];
-  char value[CONFIG_LEN];
+  char value[CONFIG_LEN+1];
   int type;
 } ccd_t;
 
