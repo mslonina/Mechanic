@@ -208,7 +208,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   //WriteData(&t->storage[1], buffer_one);
   MWriteData(t, "result", &buffer_one[0][0]);
   
-  return SUCCESS;
+  return TASK_FINALIZE;
 }
 
 /**

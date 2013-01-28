@@ -122,7 +122,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   free(buffer);
 
-  return SUCCESS;
+  return TASK_FINALIZE;
 }
 
 /**

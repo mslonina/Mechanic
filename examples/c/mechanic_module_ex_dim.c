@@ -504,6 +504,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
    */
   free(ddata); free(idata); free(cdata); free(four);
 
-  return SUCCESS;
+  return TASK_FINALIZE;
 }
 

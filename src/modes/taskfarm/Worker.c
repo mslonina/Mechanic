@@ -73,8 +73,15 @@ int Worker(module *m, pool *p) {
       mstat = TaskProcess(m, p, t);
       CheckStatus(mstat);
 
-      t->status = TASK_FINISHED;
-      tag = TAG_RESULT;
+      if (mstat == TASK_CHECKPOINT) {
+        t->status = TASK_IN_USE;
+        tag = TAG_CHECKPOINT;
+      }
+
+      if (mstat == TASK_FINALIZE) {
+        t->status = TASK_FINISHED;
+        tag = TAG_RESULT;
+      }
 
       mstat = Pack(m, send_buffer->memory, p, t, tag);
       CheckStatus(mstat);

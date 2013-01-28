@@ -207,7 +207,7 @@ Finally, we write the `TaskProcess()` function, where the numerics goes on:
 
       MWriteData(t, "result", &buffer[0][0]);
 
-      return SUCCESS;
+      return TASK_FINALIZE;
     }
 
 We must compile this code to a shared library:
@@ -512,7 +512,7 @@ which is passed to all functions, i.e.
       xmin = Option2Double("core", "xmin", s->head);
       xmax = Option2Double("core", "xmax", s->head);
 
-      return SUCCESS;
+      return TASK_FINALIZE;
     }
 
 where:
@@ -1152,7 +1152,7 @@ We provide wrapper for `printf` for prettier handling of messages:
 
 i.e.
 
-    Message(MESSAGE_INFO, "my pretty message from node %d\n", node);
+    Message(MESSAGE_INFO, "My pretty message from node %d\n", node);
 
 Available types of messages:
 
@@ -1169,7 +1169,7 @@ Return codes
 Mechanic checks the core and module return codes. In the case of success, the
 function should return `SUCCESS` code, i.e.
 
-    TaskProcess(pool *p, task *t, setup *s) {
+    Storage(pool *p, setup *s) {
       return SUCCESS;
     }
 

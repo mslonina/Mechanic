@@ -245,7 +245,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   free(population); free(model);
   free(fitness);
 
-  return SUCCESS;
+  return TASK_FINALIZE;
 }
 
 /**

@@ -86,7 +86,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
     WriteData(&t->storage[0], buffer_one);
   }
 
-  return SUCCESS;
+  return TASK_FINALIZE;
 }
 
 /**

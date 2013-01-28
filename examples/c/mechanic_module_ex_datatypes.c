@@ -304,6 +304,6 @@ int TaskProcess(pool *p, task *t, setup *s) {
   MWriteData(t, TSET3, &idata[0][0]);
   MWriteData(t, TSET4, &idata[0][0]);
 
-  return SUCCESS;
+  return TASK_FINALIZE;
 }
 

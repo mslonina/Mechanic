@@ -152,7 +152,7 @@ state of the system:
       // Write the buffer data to Mechanic's memory buffers
       MWriteData(t, "result", &buffer[0][0]);
 
-      return SUCCESS;
+      return TASK_FINALIZE;
     }
 
 The `data` array is automatically allocated using the information provided in the
