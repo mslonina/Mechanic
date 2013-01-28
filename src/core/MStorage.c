@@ -72,14 +72,6 @@ int Storage(module *m, pool *p) {
     i++;
   }
 
-  /*p->board->attr_banks = 0;
-  for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
-    if (p->board->attr[j].layout.dataspace == H5S_SIMPLE ||
-        p->board->attr[j].layout.dataspace == H5S_SCALAR) {
-      p->board->attr_banks++;
-    }
-  }*/
-
   /* Check and fix the memory/storage layout */
   CheckLayout(m, 1, p->board);
   CheckLayout(m, m->pool_banks, p->storage);
