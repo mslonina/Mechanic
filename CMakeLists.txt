@@ -53,7 +53,7 @@ if (HAS_WALL)
 endif (HAS_WALL)
 
 if (HAS_STD_C99)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -g -ggdb")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 endif (HAS_STD_C99)
   
 CHECK_INCLUDE_FILES (inttypes.h HAVE_INTTYPES_H)
