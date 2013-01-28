@@ -444,7 +444,7 @@ int TaskPrepare(pool *p, task *t, setup *s) {
  * @return SUCCESS on success or error code otherwise
  */
 int TaskProcess(pool *p, task *t, setup *s) {
-  return TASK_FINISHED;
+  return TASK_FINALIZE;
 }
 
 /**
