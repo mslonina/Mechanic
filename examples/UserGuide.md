@@ -255,6 +255,8 @@ look at following examples:
 
   - Defining and using configuration options (`Init()` and `Setup()`):
     [mechanic_module_ex_setup.c](./c/mechanic_module_ex_setup.c)
+  - Changing runtime configuration per task pool:
+    [mechanic_module_ex_poolsetup.c](./c/mechanic_module_ex_poolsetup.c)
 
 #### Datatypes and dimensionality
 
