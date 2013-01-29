@@ -289,6 +289,8 @@ look at following examples:
     [mechanic_module_ex_readfile_setup.c](./c/mechanic_module_ex_readfile_setup.c)
   - Very simple genetic algorithm:
     [mechanic_module_ex_ga.c](./c/mechanic_module_ex_ga.c)
+  - Task snapshots:
+    [mechanic_module_ex_taskcheckpoint.c](./c/mechanic_module_taskcheckpoint.c)
 
 #### The core module
 

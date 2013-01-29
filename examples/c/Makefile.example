@@ -1,6 +1,6 @@
 CC=mpicc
 CFLAGS=-std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl
-EXT=dylib
+EXT=so
 
 examples=\
 	mechanic_module_ex_map.${EXT} \
@@ -22,7 +22,8 @@ examples=\
 	mechanic_module_ex_loop.${EXT} \
 	mechanic_module_ex_readfile.${EXT} \
 	mechanic_module_ex_readfile_setup.${EXT} \
-	mechanic_module_ex_ga.${EXT}
+	mechanic_module_ex_ga.${EXT} \
+	mechanic_module_ex_taskcheckpoint.${EXT}
 
 %.so: %.c
 	${CC} -o lib$@ $< ${CFLAGS}
