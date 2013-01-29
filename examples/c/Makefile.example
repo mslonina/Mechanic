@@ -23,6 +23,7 @@ examples=\
 	mechanic_module_ex_readfile.${EXT} \
 	mechanic_module_ex_readfile_setup.${EXT} \
 	mechanic_module_ex_ga.${EXT} \
+	mechanic_module_ex_rngs.${EXT} \
 	mechanic_module_ex_taskcheckpoint.${EXT}
 
 %.so: %.c

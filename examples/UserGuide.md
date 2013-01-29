@@ -280,6 +280,8 @@ look at following examples:
     [mechanic_module_ex_node.c](./c/mechanic_module_ex_node.c)
   - Using `LoopPrepare()` and `LoopProcess()` hooks:
     [mechanic_module_ex_loop.c](./c/mechanic_module_ex_loop.c)
+  - Using RNGS library:
+    [mechanic_module_ex_rngs.c](./c/mechanic_module_ex_rngs.c)
 
 #### Real-life examples
 
