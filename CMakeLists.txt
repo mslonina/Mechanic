@@ -158,7 +158,7 @@ add_subdirectory(src)
 add_subdirectory(src/core)
 add_subdirectory(src/modes)
 add_subdirectory(src/modules)
-add_subdirectory(src/python)
+add_subdirectory(src/toolkits)
 add_subdirectory(examples)
 
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mechanic")

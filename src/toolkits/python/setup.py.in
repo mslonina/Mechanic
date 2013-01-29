@@ -3,6 +3,6 @@ from setuptools import setup
 setup(name='mechanic',
   version='${PYTHON_PACKAGE_VERSION}',
   package_dir={'': '${CMAKE_CURRENT_SOURCE_DIR}'},
-  packages=['mechanic_toolkit'],
+  packages=['mechanic'],
   setup_requires=['h5py', 'matplotlib']
   )
