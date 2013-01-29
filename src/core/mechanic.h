@@ -601,5 +601,8 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
     Error(CORE_ERR_MEM);\
   }
 
+/* Vendor */
+#include "mechanic_rngs.h"
+
 #endif
 

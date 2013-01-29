@@ -1,4 +1,7 @@
-include_directories(. .. ../../core ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src)
+include_directories(. .. ../../core ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
+  ../../vendor/rngs
+)
+
 set (
   farmsources
   Taskfarm.h

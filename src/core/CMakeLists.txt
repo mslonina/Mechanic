@@ -1,5 +1,9 @@
 include_directories(. .. ../modes/taskfarm ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
-  ${PROJECT_BINARY_DIR}/src/modes/taskfarm)
+  ${PROJECT_BINARY_DIR}/src/modes/taskfarm
+  ${PROJECT_BINARY_DIR}/src/vendor
+  ${PROJECT_BINARY_DIR}/src/vendor/rngs
+  ../vendor/rngs
+  )
 
 set (
   coresources
@@ -34,7 +38,7 @@ set (
 
 add_library(libmechanic SHARED ${libsources})
 set_target_properties(libmechanic PROPERTIES OUTPUT_NAME mechanic)
-target_link_libraries(libmechanic hdf5 hdf5_hl m mpi)
+target_link_libraries(libmechanic hdf5 hdf5_hl m mpi vendor_rngs)
 
 add_library(core ${coresources})
 target_link_libraries(core hdf5 hdf5_hl m mpi libmechanic)
