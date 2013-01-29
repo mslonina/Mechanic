@@ -25,7 +25,7 @@ Mechanic 2.x roadmap
   - Mode API functions: Init(), Master(), Worker()
   - [DONE] Min CPU option in Init() 
 3. [DONE] Mechanic ICE check 
-4. [IN PROGRESS] Intermediate storage
+4. Intermediate storage
   - [DONE] Task states
   - [DONE] Intermediate checkpoint storage
-  - Support for the restart mode
+  - [DONE] Support for the restart mode

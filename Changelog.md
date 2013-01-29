@@ -5,7 +5,7 @@ Mechanic short changelog
 -----
 
 - Task snapshots - possibility to save current state of the task to the checkpoint buffer,
-  and continue the task processing (instead of storing the task state after the task has
+  and continue task processing (instead of storing the task state after the task has
   been processed)
 - ICE check. If the master node founds mechanic.ice file, it will abort the run
 - Support for numeric and string attributes

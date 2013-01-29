@@ -145,10 +145,19 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
   return mstat;
 }
 
+/**
+ * @brief Restore the task data from the pool data (restart mode)
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ * @param t The task pointer
+ *
+ * @return 0 on success, error code otherwise
+ */
 int TaskRestore(module *m, pool *p, task *t) {
   int mstat = SUCCESS;
-  int i = 0, j = 0, k = 0, l = 0, r = 0;
-  int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
+  int j = 0, k = 0, l = 0, r = 0;
+  int e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
   int s_offset = 0, r_offset = 0, dim_offset = 0;
   size_t elements = 0;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
@@ -174,7 +183,7 @@ int TaskRestore(module *m, pool *p, task *t) {
       dim_offset *= t->storage[j].layout.dims[k];
     }
 
-    /* Prepare STORAGE_PM3D */
+    // Prepare STORAGE_PM3D
     if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
       offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dims[0] 
         + t->location[2]*dims[0]*dims[1]*t->storage[j].layout.dims[0];
@@ -186,7 +195,7 @@ int TaskRestore(module *m, pool *p, task *t) {
       z_offset = 0;
     }
 
-    /* Prepare STORAGE_LIST */
+    // Prepare STORAGE_LIST
     if (t->storage[j].layout.storage_type == STORAGE_LIST) {
       offsets[0] = t->tid * t->storage[j].layout.dims[0];
       offsets[1] = 0;
@@ -197,7 +206,7 @@ int TaskRestore(module *m, pool *p, task *t) {
       z_offset = 0;
     }
     
-    /* Prepare STORAGE_BOARD */
+    // Prepare STORAGE_BOARD
     if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
       offsets[0] = t->location[0] * t->storage[j].layout.dims[0];
       offsets[1] = t->location[1] * t->storage[j].layout.dims[1];
@@ -212,7 +221,7 @@ int TaskRestore(module *m, pool *p, task *t) {
       t->storage[j].layout.offsets[l] = offsets[l];
     }
 
-    // Restore data
+    // Restore the data
     if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
 
       elements = 1;

@@ -140,7 +140,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
       for (i = 0; i < c->size; i++) {
 
-        /* Get the data header */
+        // Get the data header
         c_offset = i * c->storage->layout.size;
 
         mstat = CopyData(c->storage->memory + c_offset, header, header_size);
@@ -173,7 +173,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             dim_offset *= t->storage[j].layout.dims[k];
           }
 
-          /* Prepare STORAGE_PM3D */
+          // Prepare STORAGE_PM3D
           if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
             offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dims[0] 
               + t->location[2]*dims[0]*dims[1]*t->storage[j].layout.dims[0];
@@ -185,7 +185,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             z_offset = 0;
           }
 
-          /* Prepare STORAGE_LIST */
+          // Prepare STORAGE_LIST
           if (t->storage[j].layout.storage_type == STORAGE_LIST) {
             offsets[0] = t->tid * t->storage[j].layout.dims[0];
             offsets[1] = 0;
@@ -196,7 +196,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             z_offset = 0;
           }
           
-          /* Prepare STORAGE_BOARD */
+          // Prepare STORAGE_BOARD
           if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
             offsets[0] = t->location[0] * t->storage[j].layout.dims[0];
             offsets[1] = t->location[1] * t->storage[j].layout.dims[1];
@@ -216,7 +216,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
           CheckStatus(mstat);
 
-          /* Commit data to the pool */
+          // Commit data to the pool
           if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
 
             elements = 1;
@@ -244,7 +244,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
               }
             }
             
-          /* For STORAGE_LIST and STORAGE_PM3D it is simpler */
+          // For STORAGE_LIST and STORAGE_PM3D it is simpler
           } else {
             for (k = 0; k < t->storage[j].layout.dims[0]; k++) {
               k_offset = k * l_offset;
@@ -259,7 +259,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             }
           }
 
-          /* Commit data to master datafile */
+          // Commit data to master datafile
           if (p->task->storage[j].layout.use_hdf) {
             mstat = CommitData(tasks, 1, &t->storage[j]);
             CheckStatus(mstat);
@@ -271,7 +271,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
     if (p->task->storage[j].layout.storage_type == STORAGE_GROUP) {
       for (i = 0; i < c->size; i++) {
 
-        /* Get the data header */
+        // Get the data header
         c_offset = c->storage->layout.size * i;
         
         mstat = CopyData(c->storage->memory + c_offset, header, header_size);
