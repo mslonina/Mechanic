@@ -3,7 +3,7 @@ project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 2)
 set (Mechanic_VERSION_MINOR 2)
-set (Mechanic_VERSION_PATCH 9)
+set (Mechanic_VERSION_PATCH 10x)
 set (Mechanic_VERSION_API 0220)
 set (PYTHON_PACKAGE_VERSION
   "${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}")

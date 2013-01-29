@@ -1,7 +1,7 @@
 Mechanic, the numerical framework and task managment system
 ===========================================================
 
-Copyright (c) 2010-2012, Authors (Torun Centre for Astronomy / Nicolaus Copernicus University)
+Copyright (c) 2009-2013, Authors (Torun Centre for Astronomy / Nicolaus Copernicus University)
 All rights reserved.
 
 MECHANIC was created to help solving many numerical problems by providing
