@@ -30,6 +30,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set (platform_linux 1)
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
+OPTION (BUILD_TOOLKITS "Build postprocessing toolkits" OFF)
+
 #MESSAGE("${CMAKE_C_COMPILER}")
 set (USES_MPICC 0)
 if ("${CMAKE_C_COMPILER}" MATCHES "mpicc")
@@ -158,9 +160,12 @@ add_subdirectory(src)
 add_subdirectory(src/core)
 add_subdirectory(src/modes)
 add_subdirectory(src/modules)
-#add_subdirectory(src/toolkits)
 add_subdirectory(src/vendor)
 add_subdirectory(examples)
+
+if (BUILD_TOOLKITS)
+  add_subdirectory(src/toolkits)
+endif (BUILD_TOOLKITS)
 
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mechanic")
 SET (CPACK_PACKAGE_VENDOR "Celestial Mechanics Group (TCFA/NCU)")
