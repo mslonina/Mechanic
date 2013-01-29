@@ -125,7 +125,13 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
     z = t->location[2];
 
     if (m->mode == RESTART_MODE) {
-      if (board_buffer[x][y][z][0] == TASK_AVAILABLE
+      // Prepare the checkpoint data
+      if (board_buffer[x][y][z][0] == TASK_TO_BE_RESTARTED) {
+        mstat = TaskRestore(m, p, t);
+        t->cid = board_buffer[x][y][z][2];
+      }
+
+      if (board_buffer[x][y][z][0] == TASK_AVAILABLE 
           || board_buffer[x][y][z][0] == TASK_TO_BE_RESTARTED) break;
     }
 
@@ -134,6 +140,126 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
     }
     t->tid++;
 
+  }
+
+  return mstat;
+}
+
+int TaskRestore(module *m, pool *p, task *t) {
+  int mstat = SUCCESS;
+  int i = 0, j = 0, k = 0, l = 0, r = 0;
+  int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
+  int s_offset = 0, r_offset = 0, dim_offset = 0;
+  size_t elements = 0;
+  hsize_t dims[MAX_RANK], offsets[MAX_RANK];
+
+  for (l = 0; l < MAX_RANK; l++) {
+    dims[l] = p->board->layout.dims[l];
+  }
+
+  for (j = 0; j < m->task_banks; j++) {
+
+    for (l = 0; l < MAX_RANK; l++) {
+      offsets[l] = 0;
+    }
+
+    elements = 1;
+    for (k = 1; k < t->storage[j].layout.rank; k++) {
+      elements *= t->storage[j].layout.dims[k];
+    }
+    elements *= t->storage[j].layout.datatype_size;
+
+    dim_offset = 1;
+    for (k = 2; k < t->storage[j].layout.rank; k++) {
+      dim_offset *= t->storage[j].layout.dims[k];
+    }
+
+    /* Prepare STORAGE_PM3D */
+    if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
+      offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dims[0] 
+        + t->location[2]*dims[0]*dims[1]*t->storage[j].layout.dims[0];
+      offsets[1] = 0;
+      Message(MESSAGE_DEBUG, "[%s:%d] PM3D[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
+          j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
+      
+      l_offset = elements;
+      z_offset = 0;
+    }
+
+    /* Prepare STORAGE_LIST */
+    if (t->storage[j].layout.storage_type == STORAGE_LIST) {
+      offsets[0] = t->tid * t->storage[j].layout.dims[0];
+      offsets[1] = 0;
+      Message(MESSAGE_DEBUG, "[%s:%d] LIST[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
+          j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
+      
+      l_offset = elements;
+      z_offset = 0;
+    }
+    
+    /* Prepare STORAGE_BOARD */
+    if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
+      offsets[0] = t->location[0] * t->storage[j].layout.dims[0];
+      offsets[1] = t->location[1] * t->storage[j].layout.dims[1];
+      offsets[2] = t->location[2] * t->storage[j].layout.dims[2];
+
+      Message(MESSAGE_DEBUG, "[%s:%d] BOARD[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
+          j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
+      
+    }
+
+    for (l = 0; l < MAX_RANK; l++) {
+      t->storage[j].layout.offsets[l] = offsets[l];
+    }
+
+    // Restore data
+    if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
+
+      elements = 1;
+      for (k = 2; k < t->storage[j].layout.rank; k++) {
+        elements *= t->storage[j].layout.dims[k];
+      }
+
+      elements *= t->storage[j].layout.datatype_size;
+      s_offset = dims[1] * dims[2] * elements * t->storage[j].layout.dims[1];
+
+      for (k = 0; k < t->storage[j].layout.dims[0]; k++) {
+        
+        k_offset = k * s_offset;
+        k_offset += t->location[0] * t->storage[j].layout.dims[0] * s_offset;
+        k_offset += t->location[1] * t->storage[j].layout.dims[1] * dims[2] * elements;
+        k_offset += t->location[2] * elements;
+
+        for (r = 0; r < t->storage[j].layout.dims[1]; r++) {
+
+          e_offset = r * elements + k * t->storage[j].layout.dims[1] * elements;
+          r_offset = r * elements * dims[2] + k_offset;
+
+          mstat = CopyData(p->task->storage[j].memory + r_offset, t->storage[j].memory + e_offset, elements);
+          CheckStatus(mstat);
+        }
+      }
+    } else if (t->storage[j].layout.storage_type == STORAGE_LIST ||
+        t->storage[j].layout.storage_type == STORAGE_PM3D) {
+
+      for (k = 0; k < t->storage[j].layout.dims[0]; k++) {
+        k_offset = k * l_offset;
+        k_offset += t->storage[j].layout.offsets[1] * dim_offset * t->storage[j].layout.datatype_size;
+        k_offset += t->storage[j].layout.offsets[0] * l_offset;
+        k_offset += z_offset;
+
+        e_offset = k * elements;
+      
+        mstat = CopyData(p->task->storage[j].memory + k_offset, t->storage[j].memory + e_offset, elements);
+        CheckStatus(mstat);
+      }
+
+    }
+
+    if (t->storage[j].layout.storage_type == STORAGE_GROUP) {
+      mstat = CopyData(p->tasks[t->tid]->storage[j].memory, t->storage[j].memory, t->storage[j].layout.size);
+      CheckStatus(mstat);
+    }
   }
 
   return mstat;

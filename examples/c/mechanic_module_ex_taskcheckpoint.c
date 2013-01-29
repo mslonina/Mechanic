@@ -67,7 +67,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
 
   // Add data to the task result
   buffer[0][0][0] = t->tid;
-  buffer[0][0][t->cid+1] = t->cid+1;
+  buffer[0][0][t->cid+1] = t->tid + t->cid;
 
   // Write the data (snapshot)
   MWriteData(t, "result", &buffer[0][0][0]);

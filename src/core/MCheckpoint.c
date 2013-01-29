@@ -93,15 +93,17 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
  */
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
-  int i = 0, j = 0, k = 0, l = 0, r = 0;
   char path[CONFIG_LEN];
   int header[HEADER_SIZE];
+  int i = 0, j = 0, k = 0, l = 0, r = 0;
   int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
   int s_offset = 0, r_offset = 0, dim_offset = 0;
-  size_t elements;
+  size_t elements, header_size;
   task *t;
   hid_t h5location, group, tasks, datapath;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
+
+  header_size = sizeof(int) * (HEADER_SIZE);
 
   Backup(m, &m->layer.setup);
 
@@ -126,7 +128,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
   t = TaskLoad(m, p, 0);
 
-  d_offset = 0;
+  for (l = 0; l < MAX_RANK; l++) {
+    dims[l] = p->board->layout.dims[l];
+  }
 
   for (j = 0; j < m->task_banks; j++) {
 
@@ -134,16 +138,12 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         p->task->storage[j].layout.storage_type == STORAGE_LIST ||
         p->task->storage[j].layout.storage_type == STORAGE_BOARD) {
 
-      for (l = 0; l < MAX_RANK; l++) {
-        dims[l] = p->board->layout.dims[l];
-      }
-
       for (i = 0; i < c->size; i++) {
 
         /* Get the data header */
         c_offset = i * c->storage->layout.size;
 
-        mstat = CopyData(c->storage->memory + c_offset, header, sizeof(int)*(HEADER_SIZE));
+        mstat = CopyData(c->storage->memory + c_offset, header, header_size);
         CheckStatus(mstat);
         
         t->tid = header[1];
@@ -151,6 +151,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[0] = header[3];
         t->location[1] = header[4];
         t->location[2] = header[5];
+        t->cid = header[6];
 
         Message(MESSAGE_DEBUG, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
             header[0], t->tid, t->status, t->location[0], t->location[1]);
@@ -210,7 +211,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             t->storage[j].layout.offsets[l] = offsets[l];
           }
 
-          c_offset = c->storage->layout.size * i + sizeof(int)*(HEADER_SIZE);
+          c_offset = c->storage->layout.size * i + header_size;
           
           mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
           CheckStatus(mstat);
@@ -273,13 +274,15 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         /* Get the data header */
         c_offset = c->storage->layout.size * i;
         
-        mstat = CopyData(c->storage->memory + c_offset, header, sizeof(int) * (HEADER_SIZE));
+        mstat = CopyData(c->storage->memory + c_offset, header, header_size);
         CheckStatus(mstat);
 
         t->tid = header[1];
         t->status = header[2];
         t->location[0] = header[3];
         t->location[1] = header[4];
+        t->location[2] = header[5];
+        t->cid = header[6];
 
         for (l = 0; l < MAX_RANK; l++) {
           t->storage[j].layout.offsets[l] = 0;
@@ -287,7 +290,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
         if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
 
-          c_offset = c->storage->layout.size * i + sizeof(int) * (HEADER_SIZE);
+          c_offset = c->storage->layout.size * i + header_size;
           mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
           CheckStatus(mstat);
 
@@ -296,6 +299,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           p->tasks[t->tid]->status = t->status;
           p->tasks[t->tid]->location[0] = t->location[0];
           p->tasks[t->tid]->location[1] = t->location[1];
+          p->tasks[t->tid]->location[2] = t->location[2];
+          p->tasks[t->tid]->cid = t->cid;
 
           mstat = CopyData(t->storage[j].memory, p->tasks[t->tid]->storage[j].memory, t->storage[j].layout.size);
           CheckStatus(mstat);
@@ -337,13 +342,15 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
   int header[HEADER_SIZE] = HEADER_INIT;
   int i = 0, c_offset = 0;
   int mstat = SUCCESS;
+  size_t header_size = 0;
 
+  header_size = sizeof(int) * (HEADER_SIZE);
   c->cid = cid;
   c->counter = 0;
 
   for (i = 0; i < c->size; i++) {
     c_offset = i * c->storage->layout.size;
-    mstat = CopyData(header, c->storage->memory + c_offset, sizeof(int) * (HEADER_SIZE));
+    mstat = CopyData(header, c->storage->memory + c_offset, header_size);
     CheckStatus(mstat);
   }
 }
