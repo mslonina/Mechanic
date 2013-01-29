@@ -6,8 +6,8 @@ Authors
 
 Steve Park & Dave Geyer
 
-RNGS Latest Revision: 09-22-98
-RVGS Latest Revision: 10-28-98
+- RNGS Latest Revision: 09-22-98
+- RVGS Latest Revision: 10-28-98
 
 
 Random Number Generators
@@ -36,8 +36,7 @@ generator' which returns a pseudo-random number uniformly distributed
 smallest and largest possible values are (1 / m) and 1 - (1 / m)
 respectively.  For more details see:
  
-"Random Number Generators: Good Ones Are Hard To Find"
-Steve Park and Keith Miller
+"Random Number Generators: Good Ones Are Hard To Find", Steve Park and Keith Miller,
 Communications of the ACM, October 1988
 
 Random Variate Generators
