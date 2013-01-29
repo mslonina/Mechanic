@@ -4,6 +4,5 @@ set (rngs
   rngs.c mechanic_rngs.h
 )
 
-add_library (vendor_rngs ${rngs})
-target_link_libraries(vendor_rngs m)
+add_library (mechanic_rngs OBJECT ${rngs})
 install (FILES mechanic_rngs.h DESTINATION include)

@@ -36,9 +36,9 @@ set (
   MPublic.c mechanic.h
 )
 
-add_library(libmechanic SHARED ${libsources})
+add_library(libmechanic SHARED ${libsources} $<TARGET_OBJECTS:mechanic_rngs>)
 set_target_properties(libmechanic PROPERTIES OUTPUT_NAME mechanic)
-target_link_libraries(libmechanic hdf5 hdf5_hl m mpi vendor_rngs)
+target_link_libraries(libmechanic hdf5 hdf5_hl m mpi)
 
 add_library(core ${coresources})
 target_link_libraries(core hdf5 hdf5_hl m mpi libmechanic)
