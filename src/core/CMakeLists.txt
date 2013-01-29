@@ -1,3 +1,4 @@
+# http://stackoverflow.com/questions/11429055/cmake-how-create-a-single-shared-library-from-all-static-libraries-of-subprojec
 include_directories(. .. ../modes/taskfarm ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
   ${PROJECT_BINARY_DIR}/src/modes/taskfarm
   ${PROJECT_BINARY_DIR}/src/vendor
