@@ -30,6 +30,8 @@ task* TaskLoad(module *m, pool *p, int tid) {
 
   t->pid = p->pid;
   t->tid = tid;
+  t->rid = 0;
+  t->cid = 0;
   t->node = m->node;
 
   t->storage = calloc(m->layer.init.banks_per_task, sizeof(storage));
@@ -190,6 +192,8 @@ int TaskProcess(module *m, pool *p, task *t) {
 void TaskReset(module *m, pool *p, task *t, int tid) {
   t->tid = TASK_EMPTY;
   t->status = TASK_EMPTY;
+  t->cid = 0;
+  t->rid = 0;
 }
 
 /**

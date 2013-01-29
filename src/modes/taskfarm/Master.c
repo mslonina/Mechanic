@@ -21,12 +21,14 @@ int Master(module *m, pool *p) {
   short ****board_buffer = NULL;
   int send_node;
   int x, y, z;
+  size_t header_size;
 
   MPI_Status mpi_status;
   
-  storage *send_buffer = NULL, *recv_buffer = NULL;
+  storage *send_buffer = NULL, *recv_buffer = NULL, *temp_buffer = NULL;
 
   task *t = NULL;
+  task *tc = NULL;
   checkpoint *c = NULL;
 
   /* Reset the completed counter */
@@ -64,24 +66,34 @@ int Master(module *m, pool *p) {
   recv_buffer = calloc(1, sizeof(storage));
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
+  temp_buffer = calloc(1, sizeof(storage));
+  if (!temp_buffer) Error(CORE_ERR_MEM);
+
   /* Initialize the task and checkpoint */
   t = TaskLoad(m, p, 0);
+  tc = TaskLoad(m, p, 0);
   c = CheckpointLoad(m, p, 0);
 
+  header_size = sizeof(int) * (HEADER_SIZE);
+
   /* Initialize data buffers */
-  send_buffer->layout.size = sizeof(int) * (HEADER_SIZE);
+  send_buffer->layout.size = header_size;
   for (k = 0; k < m->task_banks; k++) {
     send_buffer->layout.size +=
       GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dims)*p->task->storage[k].layout.datatype_size;
   }
 
   recv_buffer->layout.size = send_buffer->layout.size;
+  temp_buffer->layout.size = send_buffer->layout.size;
   
   send_buffer->memory = malloc(send_buffer->layout.size);
   if (!send_buffer->memory) Error(CORE_ERR_MEM);
 
   recv_buffer->memory = malloc(recv_buffer->layout.size);
   if (!recv_buffer->memory) Error(CORE_ERR_MEM);
+
+  temp_buffer->memory = malloc(temp_buffer->layout.size);
+  if (!temp_buffer->memory) Error(CORE_ERR_MEM);
 
   // Specific for the restart mode. The restart file is already full of completed tasks
   if (p->completed == p->pool_size) goto finalize;
@@ -146,7 +158,7 @@ int Master(module *m, pool *p) {
     send_node = mpi_status.MPI_SOURCE;
 
     /* Get the data header */
-    mstat = CopyData(recv_buffer->memory, header, sizeof(int) * (HEADER_SIZE));
+    mstat = CopyData(recv_buffer->memory, header, header_size);
     CheckStatus(mstat);
 
     if (header[0] == TAG_RESULT) p->completed++;
@@ -186,10 +198,20 @@ int Master(module *m, pool *p) {
     }
 
     if (header[0] == TAG_CHECKPOINT) {
-      mstat = Pack(m, recv_buffer->memory, p, t, TAG_DATA);
+      tc->tid = header[1];
+      tc->status = header[2];
+      tc->location[0] = header[3];
+      tc->location[1] = header[4];
+      tc->location[2] = header[5];
+      tc->node = send_node;
+      
+      mstat = CopyData(header, temp_buffer->memory, header_size);
+      CheckStatus(mstat);
+
+      mstat = CopyData(recv_buffer->memory + header_size, temp_buffer->memory + header_size, temp_buffer->layout.size - header_size);
       CheckStatus(mstat);
         
-      MPI_Send(&(recv_buffer->memory[0]), recv_buffer->layout.size, MPI_CHAR,
+      MPI_Send(&(temp_buffer->memory[0]), temp_buffer->layout.size, MPI_CHAR,
           send_node, TAG_DATA, MPI_COMM_WORLD);
 
       mstat = Send(MASTER, send_node, TAG_DATA, m, p);
@@ -225,6 +247,7 @@ finalize:
 
   CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
+  TaskFinalize(m, p, tc);
 
   if (send_buffer) {
     free(send_buffer->memory);
@@ -234,6 +257,11 @@ finalize:
   if (recv_buffer) {
     free(recv_buffer->memory);
     free(recv_buffer);
+  }
+
+  if (temp_buffer) {
+    free(temp_buffer->memory);
+    free(temp_buffer);
   }
 
   if (board_buffer) {

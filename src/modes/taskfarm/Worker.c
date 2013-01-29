@@ -54,7 +54,7 @@ int Worker(module *m, pool *p) {
     MPI_Recv(&(recv_buffer->memory[0]), recv_buffer->layout.size, MPI_CHAR,
         MASTER, MPI_ANY_TAG, MPI_COMM_WORLD, &recv_status);
 
-    mstat = Unpack(m, recv_buffer->memory, p, t, &tag);
+    mstat = Unpack(m, &(recv_buffer->memory[0]), p, t, &tag);
     CheckStatus(mstat);
 
     mstat = Receive(m->node, MASTER, tag, m, p, &(recv_buffer->memory[0]));
@@ -76,6 +76,7 @@ int Worker(module *m, pool *p) {
       if (mstat == TASK_CHECKPOINT) {
         t->status = TASK_IN_USE;
         tag = TAG_CHECKPOINT;
+        t->cid++;
       }
 
       if (mstat == TASK_FINALIZE) {
@@ -92,6 +93,9 @@ int Worker(module *m, pool *p) {
       mstat = Send(m->node, MASTER, TAG_DATA, m, p);
       CheckStatus(mstat);
 
+      if (t->status == TASK_FINISHED) {
+        TaskReset(m, p, t, 0);
+      }
     }
   }
 
