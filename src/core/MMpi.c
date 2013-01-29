@@ -67,7 +67,7 @@ int ConfigDatatype(options c, MPI_Datatype *mpi_t) {
 int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
   int mstat = SUCCESS, i = 0;
   int header[HEADER_SIZE] = HEADER_INIT;
-  size_t position = 0, size = 0;
+  size_t position = 0, size = 0, header_size = 0;
 
   header[0] = tag;
   header[1] = t->tid;
@@ -75,9 +75,11 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
   header[3] = t->location[0];
   header[4] = t->location[1];
   header[5] = t->location[2];
+  header[6] = t->cid;
 
-  position = sizeof(int)*(HEADER_SIZE);
-  mstat = CopyData(header, buffer, sizeof(int) * (HEADER_SIZE));
+  header_size = sizeof(int) * (HEADER_SIZE);
+  position = header_size;
+  mstat = CopyData(header, buffer, header_size);
   CheckStatus(mstat);
 
   if (tag != TAG_TERMINATE) {
@@ -113,10 +115,11 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
 int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
   int mstat = SUCCESS, i = 0;
   int header[HEADER_SIZE] = HEADER_INIT;
-  size_t position = 0, size = 0;
+  size_t position = 0, size = 0, header_size = 0;
 
-  position = sizeof(int)*(HEADER_SIZE);
-  mstat = CopyData(buffer, header, sizeof(int) * (HEADER_SIZE));
+  header_size = sizeof(int) * (HEADER_SIZE);
+  position = header_size;
+  mstat = CopyData(buffer, header, header_size);
   CheckStatus(mstat);
 
   *tag = header[0];
@@ -125,6 +128,7 @@ int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
   t->location[0]= header[3];
   t->location[1] = header[4];
   t->location[2] = header[5];
+  t->cid = header[6];
 
   if (*tag != TAG_TERMINATE) {
 

@@ -251,7 +251,7 @@ int Storage(pool *p, setup *s) {
     .dims[0] = Option2Int("core", "yres", s->head), // vertical res
     .dims[1] = Option2Int("core", "xres", s->head), // horizontal res
     .dims[2] = Option2Int("core", "zres", s->head), // depth res
-    .dims[3] = 2, // task status, computing node
+    .dims[3] = 3, // task status, computing node, task checkpoint number
     .datatype = H5T_NATIVE_SHORT,
     .sync = 1,
     .use_hdf = 1,
