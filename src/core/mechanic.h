@@ -552,7 +552,7 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
       CheckStatus(_mmstat);\
     }\
   } else {\
-    Message(MESSAGE_ERR, "MWriteAttr: Invalid object\n");\
+    Message(MESSAGE_ERR, "MReadAttr: Invalid object\n");\
     Error(CORE_ERR_MEM);\
   }
 
@@ -598,6 +598,46 @@ void H5CheckStatus(hid_t status); /**< HDF5 status checking utility*/
     }\
   } else {\
     Message(MESSAGE_ERR, "MGetDims: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
+/**
+ * @macro
+ * Read the attribute for the pool task board (runtime configuration)
+ */
+#define MReadOption(_mobject, _mattr_name, _mdata)\
+  if (_mobject) {\
+    int _maindex, _mmstat;\
+    _maindex = GetAttributeIndex(_mobject->board->attr, _mattr_name);\
+    if (_maindex < 0) {\
+      Message(MESSAGE_ERR, "MReadOption: Option '%s' could not be found\n",\
+        _mattr_name);\
+      Error(CORE_ERR_MEM);\
+    }\
+    _mmstat = ReadAttr(&_mobject->board->attr[_maindex], _mdata);\
+    CheckStatus(_mmstat);\
+  } else {\
+    Message(MESSAGE_ERR, "MReadOption: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
+/**
+ * @macro
+ * Write the attribute for the pool task board (runtime configuration)
+ */
+#define MWriteOption(_mobject, _mattr_name, _mdata)\
+  if (_mobject) {\
+    int _maindex, _mmstat;\
+    _maindex = GetAttributeIndex(_mobject->board->attr, _mattr_name);\
+    if (_maindex < 0) {\
+      Message(MESSAGE_ERR, "MWriteOption: Option '%s' could not be found\n",\
+        _mattr_name);\
+      Error(CORE_ERR_MEM);\
+    }\
+    _mmstat = WriteAttr(&_mobject->board->attr[_maindex], _mdata);\
+    CheckStatus(_mmstat);\
+  } else {\
+    Message(MESSAGE_ERR, "MWriteOption: Invalid object\n");\
     Error(CORE_ERR_MEM);\
   }
 
