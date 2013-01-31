@@ -1,3 +1,7 @@
+/**
+ * @file
+ * Runtime configuration interface
+ */
 #ifndef MECHANIC_CONFIG_H
 #define MECHANIC_CONFIG_H
 
@@ -47,28 +51,8 @@ enum configMessagesType {
 #define CONFIG_MSG_WRONG_INPUT "Wrong input value type"
 #define CONFIG_MSG_UNKNOWN_VAR "Unknown variable"
 #define CONFIG_MSG_FILE_OPEN "File open error"
-#define CONFIG_MSG_HDF "HDF5 error"
 #define CONFIG_MSG_NONAMESPACE "No namespace has been specified"
 #define CONFIG_MSG_UNKNOWN_NAMESPACE "Unknown namespace"
-
-/**
- * @var typedef struct ccd_t
- * @brief Helper datatype used for HDF5 storage
- *
- * @param name
- *  Name of the variable
- * 
- * @param value
- *  Value of the variable
- *
- * @param type
- *  Type of the variable
- */
-typedef struct{
-  char name[CONFIG_LEN];
-  char value[CONFIG_LEN+1];
-  int type;
-} ccd_t;
 
 configNamespace* ConfigAssignDefaults(options* cd);
 void ConfigCleanup(configNamespace* head);
@@ -111,5 +95,5 @@ float Option2Float(char* space, char* var, configNamespace* head);
 double Option2Double(char* space, char* var, configNamespace* head);
 char* Option2String(char* space, char* var, configNamespace* head);
 
-
 #endif
+

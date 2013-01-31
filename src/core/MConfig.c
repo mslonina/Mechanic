@@ -1,3 +1,7 @@
+/**
+ * @file
+ * Runtime configuration interface
+ */
 #include "MConfig.h"
 
 /**
@@ -21,9 +25,6 @@ void ConfigMessage(int line, int type, char* message){
       break;
     case CONFIG_ERR_FILE_OPEN:
       Message(MESSAGE_ERR, "%s at line %d: %s\n", CONFIG_MSG_FILE_OPEN, line, message);
-      break;
-    case CONFIG_ERR_HDF:
-      Message(MESSAGE_ERR, "%s at line %d: %s\n", CONFIG_MSG_HDF, line, message);
       break;
     default:
       break;
