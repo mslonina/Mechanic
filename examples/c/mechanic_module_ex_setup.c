@@ -159,6 +159,30 @@ int Setup(setup *s) {
   return SUCCESS;
 }
 
+int Storage(pool *current, setup *s) {
+  int max_pools, ilimit, dtrue;
+  double dlimit;
+  char host[CONFIG_LEN];
+  
+  MReadOption(current, "ilimit", &ilimit);
+  MReadOption(current, "max-pools", &max_pools);
+  MReadOption(current, "dtrue", &dtrue);
+  MReadOption(current, "dlimit", &dlimit);
+  MReadOption(current, "host", &host);
+
+  if (current->pid == 0) {
+    Message(MESSAGE_COMMENT, "Options are: \n");
+    Message(MESSAGE_COMMENT, "--max-pools = %d\n", max_pools);
+    Message(MESSAGE_COMMENT, "--ilimit = %d\n", ilimit);
+    Message(MESSAGE_COMMENT, "--dtrue = %d\n", dtrue);
+    Message(MESSAGE_COMMENT, "--dlimit = %f\n", dlimit);
+    Message(MESSAGE_COMMENT, "--host = %s\n", host);
+    Message(MESSAGE_COMMENT, "\n");
+  }
+
+  return SUCCESS;
+}
+
 /**
  * Implements PoolProcess()
  *

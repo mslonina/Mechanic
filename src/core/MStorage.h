@@ -8,6 +8,7 @@
 #include "mechanic.h"
 #include "MLog.h"
 #include "MTypes.h"
+#include "MConfig.h"
 #include "MCommon.h"
 #include "MModules.h"
 #include "MTask.h"

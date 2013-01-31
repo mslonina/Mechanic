@@ -503,29 +503,22 @@ The configuration order is:
 
 #### Getting the run time configuration
 
-Config API provides functions to access the configuration options inside any part of the
-module. Options are stored in a linked list, and you may access them through the `setup` object, 
-which is passed to all functions, i.e.
+Options are stored as attributes to the task board dataset. To access them, `MReadOption`
+macro may be used:
 
     int TaskProcess(pool *p, task *t, setup *s) {
       int driver;
       double xmin, xmax, step;
 
-      driver = Option2Int("hello", "driver", s->head);
-      step = Option2Double("hello", "step", s->head);
-      xmin = Option2Double("core", "xmin", s->head);
-      xmax = Option2Double("core", "xmax", s->head);
+      MReadOption(p, "driver", &driver);
+      MReadOption(p, "step", &step);
+      MReadOption(p, "xmin", &xmin);
+      MReadOption(p, "xmax", &xmax);
 
       return TASK_FINALIZE;
     }
 
-where:
-
-- `int Option2Int(char *space, char *option, configNamespace *head)` (for `C_INT` and `C_VAL`)
-- `long Option2Long(char *space, char *option, configNamespace *head)` (for `C_LONG`)
-- `float Option2Float(char *space, char *option, configNamespace *head)` (for `C_FLOAT`)
-- `double Option2Double(char *space, char *option, configNamespace *head)` (for `C_DOUBLE`)
-- `char* Option2String(char *space, char *option, configNamespace *head)` (for `C_STRING`)
+The macro takes the current pool pointer, the name of the option and the variable pointer.
 
 Storage
 -------

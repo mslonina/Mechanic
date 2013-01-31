@@ -82,38 +82,22 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * You may use standard HDF5 API, as well as HDF5_HL API.
  */
 int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
-  double xmin, xmax, ymin, ymax, zmin, zmax;
+  double amin, amax;
   hsize_t adims;
   hid_t hstat;
   double attr_data[1];
 
   /* Check for the specific dataset */
   if (strcmp(d->layout.name, "result") == 0) {
-    xmin = Option2Double("core", "xmin", s->head);
-    xmax = Option2Double("core", "xmax", s->head);
-    ymin = Option2Double("core", "ymin", s->head);
-    ymax = Option2Double("core", "ymax", s->head);
-    zmin = Option2Double("core", "zmin", s->head);
-    zmax = Option2Double("core", "zmax", s->head);
+    amin = 0.97;
+    amax = 1.01;
 
     adims = 1;
-    attr_data[0] = xmin;
+    attr_data[0] = amin;
     hstat = H5LTset_attribute_double(h5location, d->layout.name, "xmin", attr_data, adims);
     
-    attr_data[0] = xmax;
+    attr_data[0] = amax;
     hstat = H5LTset_attribute_double(h5location, d->layout.name, "xmax", attr_data, adims);
-    
-    attr_data[0] = ymin;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "ymin", attr_data, adims);
-    
-    attr_data[0] = ymax;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "ymax", attr_data, adims);
-    
-    attr_data[0] = zmin;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "zmin", attr_data, adims);
-    
-    attr_data[0] = zmax;
-    hstat = H5LTset_attribute_double(h5location, d->layout.name, "zmax", attr_data, adims);
   }
 
   return SUCCESS;

@@ -105,9 +105,12 @@ int Storage(pool *p, setup *s) {
 int PoolPrepare(pool **all, pool *p, setup *s) {
   double **buffer;
   int mstat = SUCCESS;
+  char filename[CONFIG_LEN];
 
   MAllocate2(p, "input", buffer, double);
-  mstat = ReadFile(Option2String("ex_readfile", "inputfile", s->head), buffer);
+
+  MReadOption(p, "inputfile", &filename);
+  mstat = ReadFile(filename, buffer);
 
   MWriteData(p, "input", &buffer[0][0]);
 

@@ -101,7 +101,7 @@ int Storage(pool *p, setup *s) {
   int genes;
 
   pool_size = p->board->layout.dims[0] * p->board->layout.dims[1];
-  genes = Option2Int("ga", "genes", s->head);
+  MReadOption(p, "genes", &genes);
 
   /**
    * Path: /Pools/pool-ID/population
@@ -195,8 +195,8 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
   MAllocate2(p, "children", current, int);
   MAllocate2(p, "model", model, int);
 
-  genes = Option2Int("ga", "genes", s->head);
-  alleles = Option2Int("ga", "alleles", s->head);
+  MReadOption(p, "genes", &genes);
+  MReadOption(p, "alleles", &alleles);
 
   if (p->rid == 0) {
     if (p->pid == 0) {
@@ -233,7 +233,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
   MAllocate2(p, "population", population, int);
   MAllocate2(p, "model", model, int);
 
-  genes = Option2Int("ga", "genes", s->head);
+  MReadOption(p, "genes", &genes);
 
   MReadData(p, "population", &population[0][0]);
   MReadData(p, "model", &model[0][0]);
@@ -262,11 +262,11 @@ int PoolProcess(pool **all, pool *p, setup *s) {
 
   MAllocate2(p, "tmp-data", fitness, int);
 
-  maxgen = Option2Int("ga", "max-generations", s->head);
-  max_fitness = Option2Int("ga", "max-fitness", s->head);
-  genes = Option2Int("ga", "genes", s->head);
-  alleles = Option2Int("ga", "alleles", s->head);
-  mutation_rate = Option2Double("ga", "mutation-rate", s->head);
+  MReadOption(p, "max-generations", &maxgen);
+  MReadOption(p, "max-fitness", &max_fitness);
+  MReadOption(p, "genes", &genes);
+  MReadOption(p, "alleles", &alleles);
+  MReadOption(p, "mutation-rate", &mutation_rate);
 
   /* Has the model organism been reached? */
   perfectGeneration = EvaluateOrganisms(p, max_fitness);

@@ -92,46 +92,10 @@ pool* PoolLoad(module *m, int pid) {
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = SUCCESS, i = 0, j = 0;
-  int int_attr;
-  long long_attr;
-  float float_attr;
-  double double_attr;
   query *q;
   setup *s = &(m->layer.setup);
 
   if (m->node == MASTER) {
-
-    /**
-     * Assign default attributes
-     *
-     * The user can overwrite them in PoolPrepare() hook
-     *
-     */
-    for (i = 0; i < p->board->attr_banks; i++) {
-      if (s->options[i].type == C_STRING) {
-        WriteAttr(&p->board->attr[i], s->options[i].value);
-      }
-
-      if (s->options[i].type == C_INT || s->options[i].type == C_VAL) {
-        int_attr = Option2Int(s->options[i].space, s->options[i].name, s->head);
-        WriteAttr(&p->board->attr[i], &int_attr);
-      }
-      
-      if (s->options[i].type == C_LONG) {
-        long_attr = Option2Int(s->options[i].space, s->options[i].name, s->head);
-        WriteAttr(&p->board->attr[i], &long_attr);
-      }
-      
-      if (s->options[i].type == C_FLOAT) {
-        float_attr = Option2Float(s->options[i].space, s->options[i].name, s->head);
-        WriteAttr(&p->board->attr[i], &float_attr);
-      }
-
-      if (s->options[i].type == C_DOUBLE) {
-        double_attr = Option2Double(s->options[i].space, s->options[i].name, s->head);
-        WriteAttr(&p->board->attr[i], &double_attr);
-      }
-    }
 
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(all, p, s);

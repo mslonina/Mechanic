@@ -18,68 +18,26 @@ int Storage(module *m, pool *p) {
   size_t len;
   query *q;
 
+  int int_attr;
+  long long_attr;
+  float float_attr;
+  double double_attr;
+
+  /**
+   * We need the task board ready as soon as possible
+   */
+
   /* Create the task board programatically */
   p->board->layout.name = "board";
   p->board->layout.rank = TASK_BOARD_RANK + 1;
-  if (m->node == MASTER) {
-    p->board->layout.dims[0] = Option2Int("core", "yres", m->layer.setup.head); // vertical res
-    p->board->layout.dims[1] = Option2Int("core", "xres", m->layer.setup.head); // horizontal res
-    p->board->layout.dims[2] = Option2Int("core", "zres", m->layer.setup.head); // depth res
-    p->board->layout.dims[3] = 3; // task status, computing node, task checkpoint number
-  } else {
-    // Reduce the memory usage on the worker side
-    p->board->layout.dims[0] = 1;
-    p->board->layout.dims[1] = 1;
-    p->board->layout.dims[2] = 1;
-    p->board->layout.dims[3] = 3;
-  }
+  p->board->layout.dims[0] = Option2Int("core", "yres", m->layer.setup.head); // vertical res
+  p->board->layout.dims[1] = Option2Int("core", "xres", m->layer.setup.head); // horizontal res
+  p->board->layout.dims[2] = Option2Int("core", "zres", m->layer.setup.head); // depth res
+  p->board->layout.dims[3] = 3; // task status, computing node, task checkpoint number
   p->board->layout.datatype = H5T_NATIVE_SHORT;
   p->board->layout.sync = 1;
   p->board->layout.use_hdf = 1;
   p->board->layout.storage_type = STORAGE_GROUP;
-
-  p->checkpoint_size = Option2Int("core", "checkpoint", m->layer.setup.head);
-
-  if (p->checkpoint_size <= 0) {
-    p->checkpoint_size = 2048;
-    ModifyOption("core", "checkpoint", "2048", C_INT, m->layer.setup.head);
-  }
-
-  /* First load the fallback (core) storage layout */
-  if (m->fallback.handler) {
-    q = LoadSym(m, "Storage", FALLBACK_ONLY);
-    if (q) mstat = q(p, &m->layer.setup);
-    CheckStatus(mstat);
-  }
-
-  /* Load the module setup */
-  q = LoadSym(m, "Storage", NO_FALLBACK);
-  if (q) mstat = q(p, &m->layer.setup);
-  CheckStatus(mstat);
-
-  /* Memory/Storage banks */
-  m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
-  m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
-
-  for (i = 0; i < m->pool_banks; i++) {
-    p->storage[i].attr_banks = 0;
-    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
-      if (p->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
-          p->storage[i].attr[j].layout.dataspace == H5S_SCALAR) {
-        p->storage[i].attr_banks++;
-      }
-    }
-  }
-
-  for (i = 0; i < m->task_banks; i++) {
-    p->task->storage[i].attr_banks = 0;
-    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
-      if (p->task->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
-          p->task->storage[i].attr[j].layout.dataspace == H5S_SCALAR) {
-        p->task->storage[i].attr_banks++;
-      }
-    }
-  }
 
   /* Programatically create configuration attributes for the task board */
   i = 0;
@@ -99,25 +57,107 @@ int Storage(module *m, pool *p) {
     i++;
   }
 
-  /* Check and fix the memory/storage layout */
+  /* Check and fix the board layout */
   CheckLayout(m, 1, p->board);
-  CheckLayout(m, m->pool_banks, p->storage);
+  
+  /* Commit task board attributes memory as soon as possible, since we need it during
+   * Storage() */
+  mstat = CommitAttrMemoryLayout(p->board->attr_banks, p->board);
+  CheckStatus(mstat);
 
-  /* Update the pool size */
+  /**
+   * Initial runtime configuration 
+   * The user can overwrite them in Storage() and PoolPrepare() hooks
+   *
+   * This is the last time we use the Config linked list
+   */
+  for (i = 0; i < p->board->attr_banks; i++) {
+    if (m->layer.setup.options[i].type == C_STRING) {
+      WriteAttr(&p->board->attr[i], m->layer.setup.options[i].value);
+    }
+
+    if (m->layer.setup.options[i].type == C_INT || m->layer.setup.options[i].type == C_VAL) {
+      int_attr = Option2Int(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
+      WriteAttr(&p->board->attr[i], &int_attr);
+    }
+    
+    if (m->layer.setup.options[i].type == C_LONG) {
+      long_attr = Option2Int(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
+      WriteAttr(&p->board->attr[i], &long_attr);
+    }
+    
+    if (m->layer.setup.options[i].type == C_FLOAT) {
+      float_attr = Option2Float(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
+      WriteAttr(&p->board->attr[i], &float_attr);
+    }
+
+    if (m->layer.setup.options[i].type == C_DOUBLE) {
+      double_attr = Option2Double(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
+      WriteAttr(&p->board->attr[i], &double_attr);
+    }
+  }
+
+  /* Update the pool size
+   * If the user changes this value, the task board dimensions has to be updated as well */
   p->pool_size = 1;
   for (i = 0; i < TASK_BOARD_RANK; i++) {
     p->pool_size *= p->board->layout.dims[i];
   }
 
+  /* First load the fallback (core) storage layout */
+  if (m->fallback.handler) {
+    q = LoadSym(m, "Storage", FALLBACK_ONLY);
+    if (q) mstat = q(p, &m->layer.setup);
+    CheckStatus(mstat);
+  }
+
+  /* Load the module setup */
+  q = LoadSym(m, "Storage", NO_FALLBACK);
+  if (q) mstat = q(p, &m->layer.setup);
+  CheckStatus(mstat);
+
+  /* Pool banks */
+  m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
+
+  for (i = 0; i < m->pool_banks; i++) {
+    p->storage[i].attr_banks = 0;
+    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+      if (p->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
+          p->storage[i].attr[j].layout.dataspace == H5S_SCALAR) {
+        p->storage[i].attr_banks++;
+      }
+    }
+  }
+  
   /* Right now, there is no support for different storage types of pool datasets */
   for (i = 0; i < m->pool_banks; i++) {
     p->storage[i].layout.storage_type = STORAGE_GROUP;
   }
+  
+  CheckLayout(m, m->pool_banks, p->storage);
+  CommitMemoryLayout(m->pool_banks, p->storage);
+
+  /* The task board size might be overriden by now, check and fix the layout */
+  CheckLayout(m, 1, p->board);
+  
+  /* Commit the task board as late as possible, since we allow to override the size of it
+   * during Storage() */
+  mstat = Allocate(p->board, p->board->layout.storage_elements, p->board->layout.datatype_size);
+  CheckStatus(mstat);
+
+  /* Task Banks */
+  m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
+  for (i = 0; i < m->task_banks; i++) {
+    p->task->storage[i].attr_banks = 0;
+    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+      if (p->task->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
+          p->task->storage[i].attr[j].layout.dataspace == H5S_SCALAR) {
+        p->task->storage[i].attr_banks++;
+      }
+    }
+  }
 
   CheckLayout(m, m->task_banks, p->task->storage);
-
-  /* Commit memory layout used during the task pool */
-  CommitMemoryLayout(m->pool_banks, p->storage);
 
   /* Master only memory/storage operations */
   if (m->node == MASTER) {
@@ -195,8 +235,13 @@ int Storage(module *m, pool *p) {
 
   }
     
-  /* Commit Board */
-  mstat = CommitMemoryLayout(1, p->board);
+  /* Set the checkpoint size at the very end of the storage stage */
+  MReadOption(p, "checkpoint", &p->checkpoint_size);
+
+  if (p->checkpoint_size <= 0) {
+    p->checkpoint_size = 2048;
+    MWriteOption(p, "checkpoint", &p->checkpoint_size);
+  }
 
   return mstat;
 }
@@ -237,7 +282,7 @@ int CheckLayout(module *m, int banks, storage *s) {
 
     for (j = 0; j < s[i].layout.rank; j++) {
       if (s[i].layout.dims[j] < 1) {
-        Message(MESSAGE_ERR, "Invalid size for dimension %d = %d\n", i, s[i].layout.dims[j]);
+        Message(MESSAGE_ERR, "Invalid size for dimension %d = %d\n", j, s[i].layout.dims[j]);
         Error(CORE_ERR_STORAGE);
       }
       s[i].layout.storage_dim[j] = s[i].layout.dims[j];
