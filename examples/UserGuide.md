@@ -94,7 +94,7 @@ modules.
                         broadcasted to all workers and stored in the master file.
 
                         The runtime configuration is stored in the master datafile,
-                        attached as attributes to the task board dataset.
+                        attached as attributes attached to the task board dataset.
 
                     `- LoopPrepare() [MPI/HDF]
                         All nodes invoke the LoopPrepare() hook. The pool data is
@@ -374,7 +374,7 @@ Setup
 The configuration is handled by the internal Config API. Options
 are defined through the `Setup()` hook. They are available in the command line, as well as
 configuration file, and are stored in the master file. The runtime configuration is stored
-as attributes to the `/Pools/last/board` dataset.
+as attributes attached to the `/Pools/pool-ID/board` dataset.
 
 The Config API allows any kind of C99 struct initialization to be used, i.e.:
 

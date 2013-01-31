@@ -27,8 +27,8 @@ interoperability)
 Manual Compilation
 ------------------
 
-    tar -xvvf mechanic-2.2.9.tar.gz
-    cd mechanic-2.2.9
+    tar -xvvf mechanic-2.3.tar.gz
+    cd mechanic-2.3
     mkdir build
     cd build
     CC=mpicc cmake ..
@@ -84,5 +84,12 @@ This is the preferred way of installing the Mechanic and its dependencies.
 After you install the overlay, you may use:
 
     emerge sci-misc/mechanic
+
+Python toolkit
+--------------
+
+To install Python toolkit, based on matplotlib and h5py, use the following:
+
+    CC=mpicc cmake .. -DBUILD_PYTHON_TOOLKIT:BOOL=ON
 
 

@@ -25,7 +25,6 @@
  *
  *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
  */
-
 #include "mechanic.h"
 
 #define DIM0 3

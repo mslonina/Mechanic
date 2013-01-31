@@ -1,8 +1,8 @@
 Mechanic short changelog
 ========================
 
-2.3.x
------
+2.3
+---
 
 - Task snapshots - possibility to save current state of the task to the checkpoint buffer,
   and continue task processing (instead of storing the task state after the task has
@@ -12,7 +12,7 @@ Mechanic short changelog
 
 ### Configuration
 
-- Runtime configuration is stored as attributes to the task board. No more `/Config` dataset
+- Runtime configuration is stored as attributes attached to the task board. No more `/Config` dataset
 - The `setup` object has been removed from the API. Runtime configuration may be now modified
   per task pool through the `MReadOption` and `MWriteOption` macros
 - New core configuration options: x/y/z-axis element, x/y/z-label, as well as common
@@ -20,7 +20,8 @@ Mechanic short changelog
 
 ### Hooks
 
-- New hooks: Send() and Receive()
+- New hooks: Send() and Receive(), we are invoked after MPI_Send and MPI_Receive
+  respectively, on each node
 
 ### Other
 

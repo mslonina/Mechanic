@@ -1,6 +1,6 @@
 /**
  * @file
- * The Mechanic2 public API
+ * The Mechanic public API
  */
 #ifndef MECHANIC_MECHANIC_H
 #define MECHANIC_MECHANIC_H

@@ -80,4 +80,3 @@ int PoolProcess(pool **allpools, pool *current, void *s) {
   return POOL_FINALIZE;
 }
 
-

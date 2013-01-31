@@ -88,7 +88,6 @@
  *     mpirun -np 2 mechanic -p ex_setup --config=myconfigfile
  *
  */
-
 #include "mechanic.h"
 
 /**
@@ -218,3 +217,4 @@ int PoolProcess(pool **all, pool *current, void *s) {
   if (current->pid < max_pools) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }
+
