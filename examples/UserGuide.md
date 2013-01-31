@@ -11,7 +11,7 @@ How the Mechanic work
 The goal of the Mechanic is to provide unified framework for scientific applications, that
 requires a lot of computing power. Under the hood it uses MPI for CPU communication and
 HDF5 standard for data storage. It provides API for common
-programming tasks, such as defining and using configuration options, data storage, memory
+programming tasks, such as defining and using runtime configuration, data storage, memory
 allocation etc. It was designed this way to simplify and shorten developing process of scientific
 codes. The Mechanic does not solve numerical problems, such as NBody or ODEs by self. It
 requires the user-supplied module with the actual numerical code. In that way, the core
@@ -29,10 +29,11 @@ however, it is still possible to use it during advanced hooks (marked with MPI/H
 The Mechanic internally works on top of the _MPI Task Farm_ model. This means, we have one
 master node which prepares numerical tasks for workers. Tasks are grouped into pools, and
 we may have many such pools with different storage and number of tasks. Tasks are mapped
-onto 3D task board, which helps to find out which tasks are completed, and is required for
-the restart mode. Each pool, as well as tasks, may have own storage to suit best your
-application. Different storage types are available, suitable for processing with Gnuplot
-or Matplotlib. All basic datatypes are supported and datasets up to rank 32.
+onto 3D task board, which helps to find out what tasks are completed, and is required for
+the restart mode. Each pool, as well as tasks, may have own storage and runtime
+configuration to suit best your application. Different storage types are available, 
+suitable for processing with Gnuplot or Matplotlib. All basic datatypes are supported
+and datasets up to rank 32.
 
 The user-supplied module is a C-code compiled to a shared library. It may be
 interconnected with any C-interoperable programming language, such as C++, OpenCL, CUDA
@@ -52,7 +53,7 @@ modules.
             loaded as a fallback)
 
         `- The configuration is read (both core and user-supplied module options)
-        `- The master file gets prepared and configuration is stored
+        `- The master file gets prepared
 
         `- [WORK POOL]
             
@@ -63,10 +64,10 @@ modules.
                   
                   [CURRENT POOL]
 
-                  The pool consists of tasks. Each pool may have different storage and
-                  different number of tasks. Each pool is aware of previous pools and has
-                  access to their data. You may use this knowledge as the power at your
-                  fingers.
+                  The pool consists of tasks. Each pool may have different storage,
+                  runtime configuration and different number of tasks. Each pool is aware of 
+                  previous pools and has access to their data. You may use this knowledge as
+                  the power at your fingers.
 
                     `- Storage()
                         All nodes invoke the Storage() hook. The master node prepares
@@ -92,6 +93,9 @@ modules.
                         is stored in the pool memory, it might be automatically
                         broadcasted to all workers and stored in the master file.
 
+                        The runtime configuration is stored in the master datafile,
+                        attached as attributes to the task board dataset.
+
                     `- LoopPrepare() [MPI/HDF]
                         All nodes invoke the LoopPrepare() hook. The pool data is
                         available and might be used to do additional operations, such as
@@ -109,6 +113,14 @@ modules.
                               task memory is sended back to the master node. If the
                               checkpoint is filled up, the master node writes the data to
                               the file.
+
+                              There are task snapshots possible, with the return code
+                              TASK_CHECKPOINT. In such case, the worker node will return
+                              stored data to the master, and continue to work on the
+                              current task.
+
+                              When the task processing is about to finish, use
+                              TASK_FINALIZE return code.
 
                               [CHECKPOINT]
                                 `- CheckpointPrepare()
@@ -280,6 +292,9 @@ look at following examples:
     [mechanic_module_ex_node.c](./c/mechanic_module_ex_node.c)
   - Using `LoopPrepare()` and `LoopProcess()` hooks:
     [mechanic_module_ex_loop.c](./c/mechanic_module_ex_loop.c)
+
+#### External libraries shipped with the core
+
   - Using RNGS library:
     [mechanic_module_ex_rngs.c](./c/mechanic_module_ex_rngs.c)
 
@@ -503,7 +518,7 @@ The configuration order is:
 
 #### Getting the run time configuration
 
-Options are stored as attributes to the task board dataset. To access them, `MReadOption`
+Options are attached as attributes to the task board dataset. To access them, `MReadOption`
 macro may be used:
 
     int TaskProcess(pool *p, task *t, void *s) {
@@ -1185,3 +1200,9 @@ Otherwise, following error codes should be returned:
 
 Mechanic will try to safely abort job (with the `MPI_Abort()`) on any error code.
 
+There are two exceptions:
+
+- `TaskProcess()`: `TASK_FINALIZE` for the completed task, `TASK_CHECKPOINT` for task
+  snapshots, error code otherwise
+- `PoolProcess()`: `POOL_CREATE_NEW` for the new pool, `POOL_FINALIZE` for the completed
+  run, and `POOL_RESET` to reset the current pool
