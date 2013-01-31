@@ -71,7 +71,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
 int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
   query *q = NULL;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
 
   if (m->node == MASTER) {
     q = LoadSym(m, "CheckpointPrepare", LOAD_DEFAULT);

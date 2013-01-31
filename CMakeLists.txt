@@ -2,8 +2,8 @@ cmake_minimum_required (VERSION 2.8)
 project (mechanic)
 
 set (Mechanic_VERSION_MAJOR 2)
-set (Mechanic_VERSION_MINOR 2)
-set (Mechanic_VERSION_PATCH 10x)
+set (Mechanic_VERSION_MINOR 3)
+set (Mechanic_VERSION_PATCH x)
 set (Mechanic_VERSION_API 0220)
 set (PYTHON_PACKAGE_VERSION
   "${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}")
@@ -32,7 +32,6 @@ endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 OPTION (BUILD_PYTHON_TOOLKIT "Build python postprocessing toolkit" OFF)
 
-#MESSAGE("${CMAKE_C_COMPILER}")
 set (USES_MPICC 0)
 if ("${CMAKE_C_COMPILER}" MATCHES "mpicc")
   set (USES_MPICC 1)

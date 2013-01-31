@@ -13,7 +13,9 @@ Mechanic short changelog
 ### Configuration
 
 - Runtime configuration is stored as attributes to the task board. No more `/Config` dataset
-- Runtime configuration may be now modified per task pool
+- Runtime configuration may be now modified per task pool through the `MReadOption` and
+  `MWriteOption`
+- The `setup` object is deprecated and not used during the pool loop
 - New core configuration options: x/y/z-axis element, x/y/z-label, as well as common
   module-like options such as: debug, dense etc.
 

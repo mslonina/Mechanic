@@ -111,7 +111,7 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
   int mstat = SUCCESS;
   int x, y, z;
   query *q;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
 
   while(1) {
     if (t->tid >= p->pool_size) return NO_MORE_TASKS;
@@ -286,7 +286,7 @@ int TaskRestore(module *m, pool *p, task *t) {
 int TaskPrepare(module *m, pool *p, task *t) {
   int mstat = SUCCESS;
   query *q;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
 
   q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
   if (q) mstat = q(p, t, s);
@@ -307,7 +307,7 @@ int TaskPrepare(module *m, pool *p, task *t) {
 int TaskProcess(module *m, pool *p, task *t) {
   int mstat = SUCCESS;
   query *q;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
 
   q = LoadSym(m, "TaskProcess", LOAD_DEFAULT);
   if (q) mstat = q(p, t, s);

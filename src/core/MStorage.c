@@ -17,6 +17,7 @@ int Storage(module *m, pool *p) {
   int i, j, task_groups, size;
   size_t len;
   query *q;
+  void *v = NULL;
 
   int int_attr;
   long long_attr;
@@ -107,13 +108,13 @@ int Storage(module *m, pool *p) {
   /* First load the fallback (core) storage layout */
   if (m->fallback.handler) {
     q = LoadSym(m, "Storage", FALLBACK_ONLY);
-    if (q) mstat = q(p, &m->layer.setup);
+    if (q) mstat = q(p, v);
     CheckStatus(mstat);
   }
 
   /* Load the module setup */
   q = LoadSym(m, "Storage", NO_FALLBACK);
-  if (q) mstat = q(p, &m->layer.setup);
+  if (q) mstat = q(p, v);
   CheckStatus(mstat);
 
   /* Pool banks */
@@ -552,10 +553,10 @@ int CommitStorageLayout(module *m, pool *p) {
 int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   int mstat = SUCCESS, i;
   query *q;
-  setup *o = &(m->layer.setup);
   hid_t h5dataset, h5dataspace;
   hsize_t dims[MAX_RANK];
   herr_t h5status;
+  void *v = NULL;
 
   h5dataspace = H5Screate(s->layout.dataspace);
   H5CheckStatus(h5dataspace);
@@ -575,7 +576,7 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   H5CheckStatus(h5dataset);
 
   q = LoadSym(m, "DatasetPrepare", LOAD_DEFAULT);
-  if (q) mstat = q(h5location, h5dataset, p, s, o);
+  if (q) mstat = q(h5location, h5dataset, p, s, v);
   CheckStatus(mstat);
 
   H5Dclose(h5dataset);

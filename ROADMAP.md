@@ -20,7 +20,7 @@ Mechanic 2.x roadmap
   - [DONE] Save configuration as attributes (for better efficiency) of the task board
   - [DONE] Restart mode read 
   - [DONE] Remove the Config dataset
-  - Remove Option2Int etc. from API, use new MReadOption/MWriteOption macros instead,
+  - [DONE] Remove Option2Int etc. from API, use new MReadOption/MWriteOption macros instead,
     operating directly on attributes of p->board
 2. [DONE] Mechanic ICE check 
 3. Intermediate storage

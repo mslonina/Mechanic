@@ -25,7 +25,7 @@ void Welcome() {
  */
 int Prepare(module *m) {
   int mstat = SUCCESS;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "Prepare", LOAD_DEFAULT);
@@ -44,7 +44,7 @@ int Prepare(module *m) {
  */
 int Process(module *m, pool **p) {
   int mstat = SUCCESS;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "Process", LOAD_DEFAULT);
@@ -65,7 +65,7 @@ int Process(module *m, pool **p) {
  */
 int NodePrepare(module *m, pool **all, pool *current) {
   int mstat = SUCCESS;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "NodePrepare", LOAD_DEFAULT);
@@ -86,7 +86,7 @@ int NodePrepare(module *m, pool **all, pool *current) {
  */
 int NodeProcess(module *m, pool **all, pool *current) {
   int mstat = SUCCESS;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "NodeProcess", LOAD_DEFAULT);
@@ -107,7 +107,7 @@ int NodeProcess(module *m, pool **all, pool *current) {
  */
 int LoopPrepare(module *m, pool **all, pool *current) {
   int mstat = SUCCESS;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "LoopPrepare", LOAD_DEFAULT);
@@ -128,7 +128,7 @@ int LoopPrepare(module *m, pool **all, pool *current) {
  */
 int LoopProcess(module *m, pool **all, pool *current) {
   int mstat = SUCCESS;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "LoopProcess", LOAD_DEFAULT);
@@ -151,7 +151,7 @@ int LoopProcess(module *m, pool **all, pool *current) {
  */
 int Send(int node, int dest, int tag, module *m, pool *p) {
   int mstat = SUCCESS;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "Send", LOAD_DEFAULT);
@@ -175,7 +175,7 @@ int Send(int node, int dest, int tag, module *m, pool *p) {
  */
 int Receive(int node, int sender, int tag, module *m, pool *p, void *buffer) {
   int mstat = SUCCESS;
-  setup *s = &(m->layer.setup);
+  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "Receive", LOAD_DEFAULT);
