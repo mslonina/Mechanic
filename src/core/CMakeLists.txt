@@ -20,7 +20,6 @@ set (
   MSetup.c MSetup.h
   MMpi.c MMpi.h
   MStorage.c MStorage.h
-  MLog.c MLog.h
   MWork.c MWork.h
   MCheckpoint.c MCheckpoint.h
   MRestart.c MRestart.h
@@ -33,8 +32,21 @@ set (
 
 set (
   libsources
-  MConfig.c MConfig.h
-  MPublic.c mechanic.h
+  M2Error.c
+  M2Pool.c
+  M2Task.c
+  M2Storage.c
+  M2Setup.c
+)
+
+set (
+  headers
+  mechanic.h
+  M2Error.h
+  M2Pool.h
+  M2Task.h
+  M2Storage.h
+  M2Setup.h
 )
 
 add_library(libmechanic SHARED ${libsources} $<TARGET_OBJECTS:mechanic_rngs>)
@@ -49,4 +61,4 @@ target_link_libraries(mechanic core taskfarm popt mpi hdf5 hdf5_hl m libmechanic
 
 install (TARGETS libmechanic DESTINATION lib)
 install (TARGETS mechanic DESTINATION bin)
-install (FILES mechanic.h DESTINATION include)
+install (FILES ${headers} DESTINATION include)

@@ -3,9 +3,6 @@
 
 #include "mechanic.h"
 
-#define CONFIG_GROUP "config"
-#define CONFIG_HDF5_DATATYPE "Config"
-
 /**
  * @def CONFIG_ERR_CONFIG_SYNTAX
  * @brief Main message for config syntax error. 
