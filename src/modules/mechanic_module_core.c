@@ -243,28 +243,6 @@ int Setup(setup *s) {
  * @return SUCCESS on success, error code otherwise
  */
 int Storage(pool *p, setup *s) {
-
-  /* Path: /Pools/pool-ID/board */
-  p->board->layout = (schema) {
-    .name = "board",
-    .rank = TASK_BOARD_RANK+1, // pool rank
-    .dims[0] = Option2Int("core", "yres", s->head), // vertical res
-    .dims[1] = Option2Int("core", "xres", s->head), // horizontal res
-    .dims[2] = Option2Int("core", "zres", s->head), // depth res
-    .dims[3] = 3, // task status, computing node, task checkpoint number
-    .datatype = H5T_NATIVE_SHORT,
-    .sync = 1,
-    .use_hdf = 1,
-    .storage_type = STORAGE_GROUP,
-  };
-
-  p->checkpoint_size = Option2Int("core", "checkpoint", s->head);
-
-  if (p->checkpoint_size <= 0) {
-    p->checkpoint_size = 2048;
-    ModifyOption("core", "checkpoint", "2048", C_INT, s->head);
-  }
-
   return SUCCESS;
 }
 

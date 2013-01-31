@@ -159,6 +159,12 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     }
   }
 
+  /* Broadcast pool setup */
+  for (i = 0; i < p->board->attr_banks; i++) {
+    MPI_Bcast(&(p->board->attr[i].memory[0]), p->board->attr[i].layout.elements,
+        p->board->attr[i].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
+  }
+
   return mstat;
 }
 

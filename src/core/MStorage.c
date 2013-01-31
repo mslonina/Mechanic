@@ -18,6 +18,33 @@ int Storage(module *m, pool *p) {
   size_t len;
   query *q;
 
+  /* Create the task board programatically */
+  p->board->layout.name = "board";
+  p->board->layout.rank = TASK_BOARD_RANK + 1;
+  if (m->node == MASTER) {
+    p->board->layout.dims[0] = Option2Int("core", "yres", m->layer.setup.head); // vertical res
+    p->board->layout.dims[1] = Option2Int("core", "xres", m->layer.setup.head); // horizontal res
+    p->board->layout.dims[2] = Option2Int("core", "zres", m->layer.setup.head); // depth res
+    p->board->layout.dims[3] = 3; // task status, computing node, task checkpoint number
+  } else {
+    // Reduce the memory usage on the worker side
+    p->board->layout.dims[0] = 1;
+    p->board->layout.dims[1] = 1;
+    p->board->layout.dims[2] = 1;
+    p->board->layout.dims[3] = 3;
+  }
+  p->board->layout.datatype = H5T_NATIVE_SHORT;
+  p->board->layout.sync = 1;
+  p->board->layout.use_hdf = 1;
+  p->board->layout.storage_type = STORAGE_GROUP;
+
+  p->checkpoint_size = Option2Int("core", "checkpoint", m->layer.setup.head);
+
+  if (p->checkpoint_size <= 0) {
+    p->checkpoint_size = 2048;
+    ModifyOption("core", "checkpoint", "2048", C_INT, m->layer.setup.head);
+  }
+
   /* First load the fallback (core) storage layout */
   if (m->fallback.handler) {
     q = LoadSym(m, "Storage", FALLBACK_ONLY);
@@ -161,15 +188,15 @@ int Storage(module *m, pool *p) {
       }
     }
 
-    /* Commit Board */
-    mstat = CommitMemoryLayout(1, p->board);
-
     /* Commit the storage layout */
     if (m->mode != RESTART_MODE) {
       CommitStorageLayout(m, p);
     }
 
   }
+    
+  /* Commit Board */
+  mstat = CommitMemoryLayout(1, p->board);
 
   return mstat;
 }

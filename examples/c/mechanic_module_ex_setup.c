@@ -52,22 +52,20 @@
  *
  * ### Getting the run-time configuration
  *
- * Configuration options are stored as char strings in a dynamic linked-list,
- * and you may access them by using the `setup->head` pointer and following functions:
+ * Configuration options (both core and the module) are stored as attributes to the task board dataset
+ * and you may access them by using the following macros:
  *
- * - `Option2Int(namespace, variable long name, setup->head)` for `C_INT`, `C_VAL`
- * - `Option2Float(namespace, variable long name, setup->head)` for `C_DOUBLE`
- * - `Option2Double(namespace, variable long name, setup->head)` for `C_FLOAT`
- * - `Option2String(namespace, variable long name, setup->head)` for `C_STRING`
+ * - `MReadOption(pool, option, value)`, i.e.
+ *    
+ *    int ilimit;
+ *    MReadOption(p, "ilimit", &ilimit);
  *
  * You can modify an option during run-time by calling:
  *
- *     ModifyOption(namespace, variable, new value, new type, setup->head);
+ * - `MWriteOption(pool, option, value)`, i.e.
  *
- * ### Accessing the core options
- *
- * Core options are handled in the same way the module options are. You can access them by
- * using "core" namespace.
+ *    int ilimit = 45;
+ *    MWriteOption(p, "ilimit", &ilimit);
  *
  * ### Configuration file
  *
@@ -89,12 +87,6 @@
  *
  *     mpirun -np 2 mechanic -p ex_setup --config=myconfigfile
  *
- * ### Future
- *
- * The configuration options are marked to become full HDF5 attributes, so the entire API
- * of accessing options is a subject to change. Starting from 2.2.6 release, all defined
- * options (both core and module) are available as attributes to the task board dataset,
- * i.e. /Pools/last/board.
  */
 
 #include "mechanic.h"
@@ -168,45 +160,34 @@ int Setup(setup *s) {
 }
 
 /**
- * Implements Prepare()
+ * Implements PoolProcess()
+ *
+ * Here we decide whether to continue the task pool loop. If the max pools defined in the
+ * Init() hook is reached, the task pool loop will be finished.
+ *
+ * We read options, and print the primary setup on the first pool. Options may be modified
+ * per pool using `MWriteOption` macro.
  */
-int Prepare(int node, char *masterfile, setup *s) {
+int PoolProcess(pool **all, pool *current, setup *s) {
   int max_pools, ilimit, dtrue;
   double dlimit;
+  char host[CONFIG_LEN];
 
-  max_pools = Option2Int("mymodule", "max-pools", s->head);
-  ilimit = Option2Int("mymodule", "ilimit", s->head);
-  dtrue = Option2Int("mymodule", "dtrue", s->head);
-  dlimit = Option2Double("mymodule", "dlimit", s->head);
+  MReadOption(current, "ilimit", &ilimit);
+  MReadOption(current, "max-pools", &max_pools);
+  MReadOption(current, "dtrue", &dtrue);
+  MReadOption(current, "dlimit", &dlimit);
+  MReadOption(current, "host", &host);
 
-  if (node == MASTER) {
+  if (current->pid == 0) {
     Message(MESSAGE_COMMENT, "Options are: \n");
     Message(MESSAGE_COMMENT, "--max-pools = %d\n", max_pools);
     Message(MESSAGE_COMMENT, "--ilimit = %d\n", ilimit);
     Message(MESSAGE_COMMENT, "--dtrue = %d\n", dtrue);
     Message(MESSAGE_COMMENT, "--dlimit = %f\n", dlimit);
-    Message(MESSAGE_COMMENT, "--host = %s\n", Option2String("mymodule", "host", s->head));
+    Message(MESSAGE_COMMENT, "--host = %s\n", host);
     Message(MESSAGE_COMMENT, "\n");
   }
-
-  return SUCCESS;
-}
-
-/**
- * Implements PoolProcess()
- *
- * Here we decide whether to continue the task pool loop. If the max pools defined in the
- * Init() hook is reached, the task pool loop will be finished.
- */
-int PoolProcess(pool **all, pool *current, setup *s) {
-  int max_pools, ilimit, dtrue;
-  double dlimit;
-
-  // Getting the integer data
-  max_pools = Option2Int("mymodule", "max-pools", s->head);
-  ilimit = Option2Int("mymodule", "ilimit", s->head);
-  dtrue = Option2Int("mymodule", "dtrue", s->head);
-  dlimit = Option2Double("mymodule", "dlimit", s->head);
 
   Message(MESSAGE_COMMENT, "Pool %d processed\n", current->pid);
 

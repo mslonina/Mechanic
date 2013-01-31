@@ -28,6 +28,7 @@
  * Implements Storage()
  */
 int Storage(pool *p, setup *s) {
+  // STORAGE_BOARD example
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = TASK_BOARD_RANK,
@@ -38,6 +39,19 @@ int Storage(pool *p, setup *s) {
     .use_hdf = 1,
     .storage_type = STORAGE_BOARD,
     .datatype = H5T_NATIVE_DOUBLE
+  };
+
+  // STORAGE_GROUP example
+  p->task->storage[1].layout = (schema) {
+    .name = "result-group",
+    .rank = TASK_BOARD_RANK,
+    .dims[0] = 1,
+    .dims[1] = 1,
+    .dims[2] = MAX_SNAPSHOTS,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_GROUP,
+    .datatype = H5T_NATIVE_INT
   };
 
   return SUCCESS;
@@ -57,20 +71,26 @@ int Storage(pool *p, setup *s) {
  */
 int TaskProcess(pool *p, task *t, setup *s) {
   double buffer[1][1][MAX_SNAPSHOTS];
+  int group[1][1][MAX_SNAPSHOTS];
 
   if (t->cid >= MAX_SNAPSHOTS) return TASK_FINALIZE;
 
   // A snapshot has been performed, read it 
   if (t->cid > 0) {
     MReadData(t, "result", &buffer[0][0][0]);
+    MReadData(t, "result-group", &group[0][0][0]);
   }
 
   // Add data to the task result
   buffer[0][0][0] = t->tid;
   buffer[0][0][t->cid+1] = t->tid + t->cid;
+  
+  group[0][0][0] = t->tid;
+  group[0][0][t->cid+1] = t->tid + t->cid;
 
   // Write the data (snapshot)
   MWriteData(t, "result", &buffer[0][0][0]);
+  MWriteData(t, "result-group", &group[0][0][0]);
 
   return TASK_CHECKPOINT;
 }

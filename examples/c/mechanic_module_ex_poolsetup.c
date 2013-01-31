@@ -14,55 +14,9 @@
  * Using the module
  * ----------------
  *
- *     mpirun -np 2 mechanic -p ex_poolsetup --help
+ *     mpirun -np 2 mechanic -p ex_poolsetup 
  *
- * ### Getting the run-time configuration
- *
- * Configuration options are stored as char strings in a dynamic linked-list,
- * and you may access them by using the `setup->head` pointer and following functions:
- *
- * - `Option2Int(namespace, variable long name, setup->head)` for `C_INT`, `C_VAL`
- * - `Option2Float(namespace, variable long name, setup->head)` for `C_DOUBLE`
- * - `Option2Double(namespace, variable long name, setup->head)` for `C_FLOAT`
- * - `Option2String(namespace, variable long name, setup->head)` for `C_STRING`
- *
- * You can modify an option during run-time by calling:
- *
- *     ModifyOption(namespace, variable, new value, new type, setup->head);
- *
- * ### Accessing the core options
- *
- * Core options are handled in the same way the module options are. You can access them by
- * using "core" namespace.
- *
- * ### Configuration file
- *
- * The Mechanic uses only the one configuration file (both for the core and the module).
- * The file has the following scheme:
- *
- *     [namespace]
- *     variable = value # an inline comment
- *     # full line comment
- *
- * For example:
- *
- *     [mymodule]
- *     dlimit = 99.8
- *     ilimit = 15
- *     host = myhost
- *
- * To use configuration file try:
- *
- *     mpirun -np 2 mechanic -p ex_setup --config=myconfigfile
- *
- * ### Future
- *
- * The configuration options are marked to become full HDF5 attributes, so the entire API
- * of accessing options is a subject to change. Starting from 2.2.6 release, all defined
- * options (both core and module) are available as attributes to the task board dataset,
- * i.e. /Pools/last/board.
  */
-
 #include "mechanic.h"
 
 /**
@@ -115,38 +69,18 @@ int Setup(setup *s) {
 }
 
 /**
- * Implements Prepare()
- */
-int Prepare(int node, char *masterfile, setup *s) {
-  int max_pools, ilimit, dtrue;
-  double dlimit;
-
-  max_pools = Option2Int("mymodule", "max-pools", s->head);
-  ilimit = Option2Int("mymodule", "ilimit", s->head);
-  dtrue = Option2Int("mymodule", "dtrue", s->head);
-  dlimit = Option2Double("mymodule", "dlimit", s->head);
-
-  if (node == MASTER) {
-    Message(MESSAGE_COMMENT, "Options are: \n");
-    Message(MESSAGE_COMMENT, "--max-pools = %d\n", max_pools);
-    Message(MESSAGE_COMMENT, "--ilimit = %d\n", ilimit);
-    Message(MESSAGE_COMMENT, "--dtrue = %d\n", dtrue);
-    Message(MESSAGE_COMMENT, "--dlimit = %f\n", dlimit);
-    Message(MESSAGE_COMMENT, "--host = %s\n", Option2String("mymodule", "host", s->head));
-    Message(MESSAGE_COMMENT, "\n");
-  }
-
-  return SUCCESS;
-}
-
-/**
  * Implements PoolPrepare()
+ *
+ * The PoolPrepare hook is the best place to modify runtime configuration. After the hook
+ * is called, all configuration options are broadcasted to all workers and stored as
+ * attribtues to the task board dataset.
  */
 int PoolPrepare(pool **all, pool *current, setup *s) {
-  
+  int ilimit; 
   // Modify an option depending on the task pool
   if (current->pid == 2) {
-    ModifyOption("mymodule", "ilimit", "34", C_INT, s->head);
+    ilimit = 34;
+    MWriteOption(current, "ilimit", &ilimit);
   }
   return SUCCESS;
 }
@@ -158,11 +92,10 @@ int PoolProcess(pool **all, pool *current, setup *s) {
   int max_pools, ilimit, dtrue;
   double dlimit;
 
-  // Getting the integer data
-  max_pools = Option2Int("mymodule", "max-pools", s->head);
-  ilimit = Option2Int("mymodule", "ilimit", s->head);
-  dtrue = Option2Int("mymodule", "dtrue", s->head);
-  dlimit = Option2Double("mymodule", "dlimit", s->head);
+  MReadOption(current, "ilimit", &ilimit);
+  MReadOption(current, "max-pools", &max_pools);
+  MReadOption(current, "dtrue", &dtrue);
+  MReadOption(current, "dlimit", &dlimit);
 
   Message(MESSAGE_COMMENT, "Pool %d processed with option ilimit %d\n", current->pid, ilimit);
 

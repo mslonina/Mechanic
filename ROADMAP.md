@@ -20,12 +20,18 @@ Mechanic 2.x roadmap
   - [DONE] Save configuration as attributes (for better efficiency) of the task board
   - [DONE] Restart mode read 
   - [DONE] Remove the Config dataset
-2. Loadable run modes (such as taskfarm, masteralone, collective etc.)
-  - Refactor code headers (public and private)
-  - Mode API functions: Init(), Master(), Worker()
-  - [DONE] Min CPU option in Init() 
-3. [DONE] Mechanic ICE check 
-4. Intermediate storage
+  - Remove Option2Int etc. from API, use new MReadOption/MWriteOption macros instead,
+    operating directly on attributes of p->board
+2. [DONE] Mechanic ICE check 
+3. Intermediate storage
   - [DONE] Task states
   - [DONE] Intermediate checkpoint storage
   - [DONE] Support for the restart mode
+
+2.4.x
+-----
+
+1. Loadable run modes (such as taskfarm, masteralone, collective etc.)
+  - Refactor code headers (public and private)
+  - Mode API functions: Init(), Master(), Worker()
+  - [DONE] Min CPU option in Init() 
