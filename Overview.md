@@ -110,7 +110,7 @@ create a `mechanic_module_map.c` file and put in it the following code:
 
     #include "mechanic.h"
 
-    int Storage(pool *p, setup *s) {
+    int Storage(pool *p, void *s) {
       p->task->storage[0].layout = (schema) {
         // the name of the output dataset
         .name = "result",
@@ -139,7 +139,7 @@ the output dataset in this case will be task_pool_size x 3.
 The second step is to create the `TaskProcess()` function, in which we will compute the
 state of the system:
 
-    int TaskProcess(pool *p, task *t, setup *s) {
+    int TaskProcess(pool *p, task *t, void *s) {
       double buffer[1][3];
 
       // the vertical position of the current task

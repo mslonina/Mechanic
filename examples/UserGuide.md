@@ -183,7 +183,7 @@ the master node will combine all of such arrays into one result. The result will
 the location of the task and the task id, and will be suitable to process with Gnuplot
 PM3D. The storage information for the task is:
 
-    int Storage(pool *p, setup *s) {
+    int Storage(pool *p, void *s) {
       p->task->storage[0].layout = (schema) {
         .name = "result", // the name of the HDF5 dataset
         .rank = 2, // the rank of the dataset
@@ -198,7 +198,7 @@ PM3D. The storage information for the task is:
 
 Finally, we write the `TaskProcess()` function, where the numerics goes on:
 
-    int TaskProcess(pool *p, task *t, setup *s) {
+    int TaskProcess(pool *p, task *t, void *s) {
       double buffer[1][3]; // fits the storage information provided in Storage()
       
       buffer[0][0] = t->location[1]; // horizontal position of the task
@@ -506,7 +506,7 @@ The configuration order is:
 Options are stored as attributes to the task board dataset. To access them, `MReadOption`
 macro may be used:
 
-    int TaskProcess(pool *p, task *t, setup *s) {
+    int TaskProcess(pool *p, task *t, void *s) {
       int driver;
       double xmin, xmax, step;
 
@@ -527,7 +527,7 @@ Mechanic allows to store module data in datasets of any basic datatypes, with mi
 2 up to rank `H5S_MAX_RANK` (32). The storage information must be provided through the `Storage()` hook.
 To define the dataset, any C99 struct initialization is allowed. i.e.:
 
-    int Storage(pool *p, setup *s) {
+    int Storage(pool *p, void *s) {
       p->storage[0].layout = (schema) {
         .name = "sample-data",
         .rank = 2,
@@ -552,7 +552,7 @@ where:
 
 The `storage[0]` is the storage bank index:
 
-    int Storage(pool *p, setup *s) {
+    int Storage(pool *p, void *s) {
       p->storage[0].layout = (schema) {
         .name = "first-dataset",
         .rank = 2,
@@ -591,7 +591,7 @@ You can adjust the number of available storage banks by implementing the `Init()
 The storage layout may be defined per pool (different storage layout for different task
 pools), i.e.
 
-    int Storage(pool *p, setup *s) {
+    int Storage(pool *p, void *s) {
       p->storage[0].layout = (schema) {
         .name = "sample-data",
         .rank = 2,
@@ -928,7 +928,7 @@ During the task pool loop, the following status codes are defined, and available
 
 i.e.
 
-    NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
+    NodeProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
       if (p->state == POOL_PREPARED) {
         ...
       }
@@ -946,7 +946,7 @@ The `PoolProcess()` hook must return one of the following codes:
 In the following example, the Pool will be reset 10 times. After that, the next pool will
 be created. If the number of pools reach 5, the pool loop is finalized:
 
-    int PoolProcess(pool **all, pool *p, setup *s) {
+    int PoolProcess(pool **all, pool *p, void *s) {
       if (p->rid < 10) return POOL_RESET;
       if (p->pid < 5) return POOL_CREATE_NEW;
       return POOL_FINALIZE;
@@ -960,29 +960,29 @@ Hooks
 
 - `int Init(init *i)` - initialize low level core variables
 - `int Setup(setup *s)` - define configuration options
-- `int Storage(pool *p, setup *s)` - define the storage layout per task pool
-- `int PoolPrepare(pool **all, pool *p, setup *s)` - prepare the current task pool
-- `int PoolProcess(pool **all, pool *p, setup *s)` - process the current task pool
-- `int TaskPrepare(pool *p, task *t, setup *s)` - prepare the current task
-- `int TaskProcess(pool *p, task *t, setup *s)` - process the current task
+- `int Storage(pool *p, void *s)` - define the storage layout per task pool
+- `int PoolPrepare(pool **all, pool *p, void *s)` - prepare the current task pool
+- `int PoolProcess(pool **all, pool *p, void *s)` - process the current task pool
+- `int TaskPrepare(pool *p, task *t, void *s)` - prepare the current task
+- `int TaskProcess(pool *p, task *t, void *s)` - process the current task
 
 #### Advanced hooks
 
-- `int TaskBoardMap(pool *p, task *t, setup *s)` - map the task on the task board
-- `int CheckpointPrepare(pool *p, checkpoint *c, setup *s)` - prepare the checkpoint 
-- `int Prepare(int node, char *masterfile, setup *s)` - prepare the run 
-- `int Process(int node, char *masterfile, pool **all, setup *s)` - process the run 
-- `int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s)` -
+- `int TaskBoardMap(pool *p, task *t, void *s)` - map the task on the task board
+- `int CheckpointPrepare(pool *p, checkpoint *c, void *s)` - prepare the checkpoint 
+- `int Prepare(int node, char *masterfile, void *s)` - prepare the run 
+- `int Process(int node, char *masterfile, pool **all, void *s)` - process the run 
+- `int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s)` -
   prepare the dataset
-- `int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s)` -
+- `int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s)` -
   process the dataset
-- `int NodePrepare(int mpi_size, int node, pool **all, pool *p, setup *s)` - prepare the
+- `int NodePrepare(int mpi_size, int node, pool **all, pool *p, void *s)` - prepare the
   task pool loop on the specific node
-- `int NodeProcess(int mpi_size, int node, pool **all, pool *p, setup *s)` - process the
+- `int NodeProcess(int mpi_size, int node, pool **all, pool *p, void *s)` - process the
   task pool loop on the specific node
-- `int LoopPrepare(int mpi_size, int node, pool **all, pool *p, setup *s)` - prepare the
+- `int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s)` - prepare the
   task loop on the specific node
-- `int LoopProcess(int mpi_size, int node, pool **all, pool *p, setup *s)` - process the
+- `int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s)` - process the
   task loop on the specific node
 
 API helpers
@@ -1166,7 +1166,7 @@ Return codes
 Mechanic checks the core and module return codes. In the case of success, the
 function should return `SUCCESS` code, i.e.
 
-    Storage(pool *p, setup *s) {
+    Storage(pool *p, void *s) {
       return SUCCESS;
     }
 
