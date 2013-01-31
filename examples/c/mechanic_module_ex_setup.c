@@ -159,7 +159,7 @@ int Setup(setup *s) {
   return SUCCESS;
 }
 
-int Storage(pool *current, setup *s) {
+int Storage(pool *current, void *s) {
   int max_pools, ilimit, dtrue;
   double dlimit;
   char host[CONFIG_LEN];
@@ -192,7 +192,7 @@ int Storage(pool *current, setup *s) {
  * We read options, and print the primary setup on the first pool. Options may be modified
  * per pool using `MWriteOption` macro.
  */
-int PoolProcess(pool **all, pool *current, setup *s) {
+int PoolProcess(pool **all, pool *current, void *s) {
   int max_pools, ilimit, dtrue;
   double dlimit;
   char host[CONFIG_LEN];

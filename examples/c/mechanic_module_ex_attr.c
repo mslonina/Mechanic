@@ -52,7 +52,7 @@
  * will be available at /Pools/pool-0000/Tasks/result.
  *
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   p->storage[0].layout = (schema) {
     .name = "pool-data",
     .rank = 2,
@@ -162,7 +162,7 @@ int Storage(pool *p, setup *s) {
  * We can prepare some attributes here. The attributes are broadcasted among with pool
  * data, so you may use them during the TaskProcess().
  */
-int PoolPrepare(pool **all, pool *p, setup *s) {
+int PoolPrepare(pool **all, pool *p, void *s) {
   int iattr;
   double dattr;
 
@@ -184,7 +184,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
  *
  * Here we read some pool attributes, and use them to prepare the task result
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   double buffer_one[1][3];
   int iattr;
   double dattr;
@@ -218,7 +218,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * PoolProcess() hook is invoked. It is the best place to adjust data for an attribute by
  * using WriteAttr() function.
  */
-int PoolProcess(pool **all, pool *p, setup *s) {
+int PoolProcess(pool **all, pool *p, void *s) {
   double dattr;
   double t_attr;
   double s_attr[1][4];

@@ -96,7 +96,7 @@ int Setup(setup *s) {
 /**
  * Implements Storage()
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   int pool_size;
   int genes;
 
@@ -188,7 +188,7 @@ int Storage(pool *p, setup *s) {
  * the children of the previous generation to the population dataset. The previous
  * population is accessed through the **all pointer.
  */
-int PoolPrepare(pool **all, pool *p, setup *s) {
+int PoolPrepare(pool **all, pool *p, void *s) {
   int i, j, genes, alleles;
   int **current, **model;
 
@@ -225,7 +225,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
  * We compute here the fitness function (in parallel, each worker receives an organism to
  * check). We return here only the fitness of the specified organism.
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   int genes;
   int **fitness, **population, **model;
 
@@ -254,7 +254,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * We decide here, whether the model has been reached or not. When the model is not
  * reached, we generate the next population (children of the current population).
  */
-int PoolProcess(pool **all, pool *p, setup *s) {
+int PoolProcess(pool **all, pool *p, void *s) {
   int perfectGeneration = 0;
   int maxgen, max_fitness, genes, alleles;
   double mutation_rate;

@@ -32,7 +32,7 @@
  * By default, we have 8 memory/storage banks per each task pool + 8 memory/storage banks
  * per task available. You may change the defaults by using the Init() hook.
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
@@ -53,7 +53,7 @@ int Storage(pool *p, setup *s) {
  * state of the dynamical system. In this example the position is represented by
  * task location, and the state of the system by the task unique identifier.
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   double buffer[1][3];
 
   // The vertical position of the pixel
@@ -81,7 +81,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * are passed, so that any HDF5 operation may be performed here.
  * You may use standard HDF5 API, as well as HDF5_HL API.
  */
-int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
+int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s) {
   double amin, amax;
   hsize_t adims;
   hid_t hstat;
@@ -110,7 +110,7 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup
  * as well as the parent group `h5location` are passed, so that
  * you can operate on the entire dataset with HDF5 API.
  */
-int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, setup *s) {
+int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s) {
   Message(MESSAGE_INFO, "Dataset name: %s\n", d->layout.name);
   return SUCCESS;
 }

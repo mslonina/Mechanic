@@ -32,7 +32,7 @@
  * will be available at /Pools/pool-0000/Tasks/result.
  *
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   p->storage[0].layout = (schema) {
     .name = "pool-double-data",
     .rank = 2,
@@ -61,7 +61,7 @@ int Storage(pool *p, setup *s) {
 /**
  * Implements PoolPrepare()
  */
-int PoolPrepare(pool **all, pool *p, setup *s) {
+int PoolPrepare(pool **all, pool *p, void *s) {
   double **pdata;
   int **idata;
   int i, j, dims[MAX_RANK], mstat;
@@ -107,7 +107,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
 /**
  * Implements PoolProcess()
  */
-int PoolProcess(pool **all, pool *p, setup *s) {
+int PoolProcess(pool **all, pool *p, void *s) {
   double **pdata;
   int **idata;
   int i, j, dims[MAX_RANK], mstat;

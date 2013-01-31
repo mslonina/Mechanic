@@ -29,7 +29,7 @@
 /**
  * Implements Storage();
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   p->storage[0].layout = (schema) {
     .name = "global-double-data",
     .rank = 2,
@@ -69,7 +69,7 @@ int Storage(pool *p, setup *s) {
  * storage banks contains all previous data. That is, you may use these data to prepare
  * the better revision of the pool.
  */
-int PoolPrepare(pool **all, pool *p, setup *s) {
+int PoolPrepare(pool **all, pool *p, void *s) {
   double **data;
   int dims[MAX_RANK], i = 0, j = 0;
 
@@ -109,7 +109,7 @@ int PoolPrepare(pool **all, pool *p, setup *s) {
  * As a simple example, each worker will return simple result: the task id, the pool id
  * and the reset id
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   int **buffer;
 
   MAllocate2(t, "task-integer-data", buffer, int);
@@ -131,7 +131,7 @@ int TaskProcess(pool *p, task *t, setup *s) {
  * Each pool will be reset REVISIONS times (the data of the pool is kept until
  * next PoolPrepare(), so it may be reused). After REVISIONS we create new task pool.
  */
-int PoolProcess(pool *all, pool *p, setup *s) {
+int PoolProcess(pool *all, pool *p, void *s) {
   if (p->rid <= REVISIONS) return POOL_RESET;
   if (p->pid <= POOLS) return POOL_CREATE_NEW;
   return POOL_FINALIZE;

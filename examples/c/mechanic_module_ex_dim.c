@@ -46,7 +46,7 @@
 /**
  * Implements Storage()
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
 
   /**
    * 3D integer dataset
@@ -189,7 +189,7 @@ int Storage(pool *p, setup *s) {
 /**
  * Implements PoolPrepare()
  */
-int PoolPrepare(pool **allpools, pool *current, setup *s) {
+int PoolPrepare(pool **allpools, pool *current, void *s) {
   int ***data;
   float **floa;
   double ****buff;
@@ -254,7 +254,7 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
 /**
  * Implements PoolProcess()
  */
-int PoolProcess(pool **allpools, pool *current, setup *s) {
+int PoolProcess(pool **allpools, pool *current, void *s) {
   int i,j,k;
   int dims[MAX_RANK];
   int ***idata, ***tp;
@@ -388,7 +388,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
  * We use here dynamic allocation of buffer data with help of Allocate functions provided
  * by the Mechanic2.
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   int **idata;
   int ***bdata;
   int ***cdata;

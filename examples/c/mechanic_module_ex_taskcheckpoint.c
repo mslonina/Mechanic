@@ -27,7 +27,7 @@
 /**
  * Implements Storage()
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   // STORAGE_BOARD example
   p->task->storage[0].layout = (schema) {
     .name = "result",
@@ -69,7 +69,7 @@ int Storage(pool *p, setup *s) {
  *
  * To finalize the task processing, use `TASK_FINALIZE` return code.
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   double buffer[1][1][MAX_SNAPSHOTS];
   int group[1][1][MAX_SNAPSHOTS];
 

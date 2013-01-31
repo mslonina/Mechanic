@@ -30,7 +30,7 @@
  * result arrays into one dataset suitable to process with Gnuplot PM3D. The final dataset
  * will be available at /Pools/pool-0000/Tasks/result.
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
@@ -52,7 +52,7 @@ int Storage(pool *p, setup *s) {
  * state of the dynamical system. In this example the position is represented by
  * task location, and the state of the system by the task unique identifier.
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   double buffer[1][3];
 
   // The vertical position of the pixel

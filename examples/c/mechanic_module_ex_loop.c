@@ -29,7 +29,7 @@ int info;
  *
  * According to the pool id we send additional message to all nodes
  */
-int LoopPrepare(int mpi_size, int node, pool **all, pool *p, setup *s) {
+int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
   if (p->pid == 2) {
     if (node == MASTER) info = 99;
     MPI_Bcast(&info, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
@@ -49,7 +49,7 @@ int LoopPrepare(int mpi_size, int node, pool **all, pool *p, setup *s) {
  *
  * We check for additional message/setting
  */
-int LoopProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
+int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
   if (p->rid == 1 && info == 99) {
     Message(MESSAGE_OUTPUT, "Node %d, pool %d, reset id = %d\n", node, p->pid, p->rid); 
   }
@@ -62,7 +62,7 @@ int LoopProcess(int mpi_size, int node, pool **all, pool *p, setup *s) {
  * Here, we reset the pool until the p->rid < 3. Then, we create new pool. If we reach 5
  * pools, we finalize the pool loop.
  */
-int PoolProcess(pool **all, pool *p, setup *s) {
+int PoolProcess(pool **all, pool *p, void *s) {
   if (p->rid < 3) return POOL_RESET;
   if (p->pid < 5) return POOL_CREATE_NEW;
   return POOL_FINALIZE;

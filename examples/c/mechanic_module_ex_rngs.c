@@ -25,7 +25,7 @@
 /**
  * Implements Prepare()
  */
-int Prepare(int node, char *masterfile, setup *s) {
+int Prepare(int node, char *masterfile, void *s) {
   long x = -1;
   
   // Initialize random seeds

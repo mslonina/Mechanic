@@ -44,7 +44,7 @@
 /**
  * Implements Storage()
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
 
   p->storage[0].layout = (schema) {
     .name = PSET0,
@@ -142,7 +142,7 @@ int Storage(pool *p, setup *s) {
 /**
  * Implements PoolPrepare()
  */
-int PoolPrepare(pool **allpools, pool *current, setup *s) {
+int PoolPrepare(pool **allpools, pool *current, void *s) {
   int data[DIM0][DIM1];
   double buff[DIM0][DIM1];
   float floa[DIM0][DIM1];
@@ -166,7 +166,7 @@ int PoolPrepare(pool **allpools, pool *current, setup *s) {
 /**
  * Implements PoolProcess()
  */
-int PoolProcess(pool **allpools, pool *current, setup *s) {
+int PoolProcess(pool **allpools, pool *current, void *s) {
   int i, j, k, l;
   int **ibuff, ***cbuff;
   double ***dbuff;
@@ -284,7 +284,7 @@ int PoolProcess(pool **allpools, pool *current, setup *s) {
 /**
  * Implements TaskProcess()
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   double data[DIM0][DIM1][1];
   int idata[DIM0][DIM1];
   int cdata[DIM0][DIM1][1];

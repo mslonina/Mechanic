@@ -27,7 +27,7 @@ int fractal(double a, double b, double c);
 /**
  * Implements Storage()
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = TASK_BOARD_RANK,
@@ -46,7 +46,7 @@ int Storage(pool *p, setup *s) {
 /**
  * Implements TaskProcess()
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   double real_min, real_max, imag_min, imag_max;
   double scale_real, scale_imag;
   double c, xres, yres, zres;
