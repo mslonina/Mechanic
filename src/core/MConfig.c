@@ -299,8 +299,8 @@ configNamespace* ConfigNewNamespace(char* cfg) {
 
   newNM = calloc(sizeof(configNamespace), sizeof(configNamespace));
   if (!newNM) {
-    perror("ConfigNewNamespace: line 374 alloc failed.");
-    return NULL;
+    Message(MESSAGE_ERR, "ConfigNewNamespace: allocation failed.");
+    Error(CORE_ERR_MEM);
   }
 
   strncpy(newNM->space, cfg, strlen(cfg));
@@ -346,7 +346,7 @@ int ConfigAsciiParser(FILE* read, char* SEP, char* COMM, configNamespace* head){
   size_t valuelen = 0;
 
   if (!head) {
-    perror("ConfigAsciiParser: No config assigned");
+    Message(MESSAGE_ERR, "ConfigAsciiParser: No config assigned");
     return -1;
   }
 
@@ -444,7 +444,7 @@ int ConfigAsciiParser(FILE* read, char* SEP, char* COMM, configNamespace* head){
       valuelen = strlen(c);
 			value = calloc(valuelen+sizeof(char), sizeof(char));
       if (!value) {
-        perror("ConfigAsciiParser: line 542 alloc failed");
+        Message(MESSAGE_ERR, "ConfigAsciiParser: allocation failed");
         goto failure;
       }
 			strncpy(value, c, valuelen);
@@ -512,7 +512,7 @@ int ConfigAsciiWriter(FILE* write, char* sep, char* comm, configNamespace* head)
   configNamespace* current = NULL;
 
   if (!head) {
-    perror("ConfigAsciiWriter: no config assigned");
+    Message(MESSAGE_ERR, "ConfigAsciiWriter: no config assigned");
     return -1;
   }
 
@@ -636,8 +636,8 @@ configNamespace* ConfigAssignDefaults(options* cd){
         if (currentOP == NULL) {  	
 					newOP = calloc(sizeof(config), sizeof(config));
           if (!newOP) {
-            perror("ConfigAssignDefaults: line 1108 alloc failed");
-            return NULL;
+            Message(MESSAGE_ERR, "ConfigAssignDefaults: allocation failed");
+            Error(CORE_ERR_MEM);
           }
           newOP->type = C_INT;
           newOP->next = NULL;
