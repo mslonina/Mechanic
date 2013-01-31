@@ -172,7 +172,7 @@ static int  initialized   = 0;          /* test for stream initialization */
   GetSeed(&x);                      /* get the state of stream 1       */
   ok = ok && (x == A256);           /* x should be the jump multiplier */    
   if (ok)
-    printf("\n The implementation of rngs.c is correct.\n\n");
+    printf("\n The implementation of rngs.c is correct with generated random number %f\n\n", u);
   else
     printf("\n\a ERROR -- the implementation of rngs.c is not correct.\n\n");
 }

@@ -5,20 +5,13 @@
 #include "MConfig.h"
 
 /**
- * @fn void ConfigMessage(int j, int type, char* message)
- * @brief Prints error messages.
+ * @brief Prints error messages
  * 
- * @param j
- *  The line in the config file where the error exist.
- *
- * @param type
- *  Type of the error.
- *
- * @param message
- *  Error message to print.
+ * @param j The line in the config file where the error exist
+ * @param type Type of the error
+ * @param message Error message to print
  */
-void ConfigMessage(int line, int type, char* message){
-
+void ConfigMessage(int line, int type, char *message) {
   switch (type) {
     case CONFIG_ERR_CONFIG_SYNTAX:
       Message(MESSAGE_ERR, "%s at line %d: %s\n", CONFIG_MSG_CONFIG_SYNTAX, line, message);
@@ -29,34 +22,30 @@ void ConfigMessage(int line, int type, char* message){
     default:
       break;
   }
-
 }
 
 /**
- * @fn char* ConfigTrim(char* str)
+ * @brief Remove leading, trailing, & excess embedded spaces
  *
- * @brief Remove leading, trailing, & excess embedded spaces.
- *
- * Public domain by Bob Stout.
+ * Public domain by Bob Stout
  * @see http://www.cs.umu.se/~isak/snippets/trim.c
  *
- * @param str
- *   String to trim.
+ * @param str String to trim.
  */
-char* ConfigTrim(char* str){
+char* ConfigTrim(char *str) {
   char *ibuf = str, *obuf = str;
   int i = 0, cnt = 0;
 
-  /* Trap NULL.*/
+  /* Trap NULL */
   if (str != NULL) {
  
-    /* Remove leading spaces (from RMLEAD.C).*/
+    /* Remove leading spaces (from RMLEAD.C) */
     for (ibuf = str; *ibuf && isspace(*ibuf); ++ibuf)
       ;
     if (str != ibuf)
       memmove(str, ibuf, ibuf - str);
 
-    /* Collapse embedded spaces (from LV1WS.C).*/
+    /* Collapse embedded spaces (from LV1WS.C) */
     while (*ibuf) {
       if (isspace(*ibuf) && cnt) ibuf++;
         else{
@@ -70,7 +59,7 @@ char* ConfigTrim(char* str){
           }
           obuf[i] = CONFIG_NULL;
 
-     /* Remove trailing spaces (from RMTRAIL.C).*/
+     /* Remove trailing spaces (from RMTRAIL.C) */
      while (--i >= 0) {if (!isspace(obuf[i])) break;}
      obuf[++i] = CONFIG_NULL;
     }
@@ -79,21 +68,18 @@ char* ConfigTrim(char* str){
 }
 
 /**
- * @fn char* ConfigNameTrim(char* l)
- * @brief Check namespace name and trim it.
+ * @brief Check namespace name and trim it
  *
- * @param l
- *   Name of the namespace.
+ * @param l Name of the namespace
  *
- * @return
- *   Trimmed name of the namespace.
+ * @return Trimmed name of the namespace
  */
-char* ConfigNameTrim(char* l){
+char* ConfigNameTrim(char *l) {
   int len = 0;
 
   len = strlen(l);
 
-  /* Quick and dirty solution using trim function. */
+  /* Quick and dirty solution using trim function */
   l[0] = ' ';
   l[len-1] = ' ';
   l = ConfigTrim(l);  
@@ -102,200 +88,30 @@ char* ConfigNameTrim(char* l){
 }
 
 /**
- * @fn int ConfigCharCount(char* l, char* s)
- * @brief Count the number of separators in the current line.
+ * @brief Count the number of separators in the current line
  *
- * @param l
- *   Current line.
+ * @param l Current line
+ * @param s The separator to count
  *
- * @param s
- *   The separator to count.
- *
- * @return
- *   Number of separators in the current line.
+ * @return Number of separators in the current line
  */
-int ConfigCharCount(char* l, char* s){
-  int i = 0; int sep = 0; int len = 0; 
+int ConfigCharCount(char *l, char *s) {
+  int i = 0, sep = 0, len = 0; 
 
   len = strlen(l);
 
-  for (i = 0; i < len; i++){
-    if((int) *s == l[i] ) sep++;
+  for (i = 0; i < len; i++) {
+    if ((int) *s == l[i]) sep++;
   }
   
   return sep;
 }
 
 /**
- * @fn int ConfigCheckName(char* varname, options* ct, int numCT)
- * @brief Checks if variable is allowed.
- *
- * @param varname
- *   The name of the variable to check.
- *
- * @param ct
- *   Pointer to the structure with allowed config datatypes.
- *
- * @param numCT
- *   Number of allowed config datatypes.
- *
- * @return
- *   0 on success, -1 otherwise.  
- */
-/*int ConfigCheckName(char* varname, options* ct, int numCT){
-   
-  int i = 0, count = 0;
-
-  for(i = 0; i < numCT; i++){
-      if(strcmp(varname, ct[i].name) == 0) count++;
-  }
-  
-  if(count > 0) 
-    return 0;
-  else
-    return -1;
-
-}
-*/
-/**
- * @fn int ConfigMatchType(char* varname, char* value, options* ct, int numCT)
- * @brief Match input type.
- *
- * @param varname
- *   Variable name.
- *
- * @param value
- *   The value of the variable.
- *
- * @param ct
- *   Pointer to the structure with allowed config datatypes.
- *
- * @param numCT
- *   Number of config datatypes allowed.
- *   
- * @return
- *   Returns type (integer value) on success, -1 otherwise.
- *   @see options
- */
-/*int ConfigMatchType(char* varname, char* value, options* ct, int numCT){
-  
-  int i = 0;
-
-  while(i < numCT){
-    if(strcmp(ct[i].name,varname) == 0){
-      if(ConfigheckType(value, ct[i].type) != 0){ 
-        return -1;
-      }else{
-        return ct[i].type;
-      }
-    }
-      i++;
-  }
-  return 0;
-
-}
-*/
-/**
- * @fn int ConfigCheckType(char* value, int type)
- * @brief Check type of the value.
- *
- * @param value
- *   The value to check.
- *
- * @param type
- *   The datatype for given value.
- *   @see options
- *
- * @return
- *   0 on success, -1 otherwise.
- */
-/*int ConfigCheckType(char* value, int type){
-  
-  int i = 0, ret = 0, k = 0;
-  char *p;
-
-  switch(type){
-    
-    case C_INT:
-      for(i = 0; i < strlen(value); i++){
-        if(isdigit(value[i]) || value[0] == '-'){ 
-          ret = 0;
-        }else{
-          ret = -1;
-          break;
-        }
-      }
-      break;
-
-    case C_FLOAT:
-      k = strtol(value, &p, 10);
-      if(value[0] != '\n' && (*p == '\n' || *p != '\0')){
-        ret = 0;
-      }else{
-        ret = -1;
-      }
-      break;
-
-    case C_DOUBLE:
-      k = strtol(value, &p, 10);
-      if(value[0] != '\n' && (*p == '\n' || *p != '\0')){
-        ret = 0;
-      }else{
-        ret = -1;
-      }
-      break;
-
-    case C_STRING:
-      for(i = 0; i < strlen(value); i++){
-        if(isalpha(value[i]) || ConfigIsAllowed(value[i]) == 0){
-          ret = 0;
-        }else{
-          ret = -1;
-          break;
-        }
-      }
-      break;
-  
-    default:
-      break;
-
-  }
-
-  return ret;
-
-}
-*/
-/** 
- * @fn int ConfigIsAllowed(int c)
- * @brief Check if given char is one of the allowed chars.
- *
- * @param c
- *   The char to check.
- *
- * @return
- *   0 on succes, -1 otherwise.
- *
- * @todo
- *   Allow user to override allowed char string.
- */
-/*int ConfigIsAllowed(int c){
-
-  char* allowed = "_-. ";
-  int i = 0;
-
-  for(i = 0; i < strlen(allowed); i++){
-    if(c == allowed[i]) return 0;
- }
-
-  return 1;
-}
-*/
-/**
- * @fn void newNamespace(char* cfg)
  * @brief Helper function for creating new namespaces
  */
-configNamespace* ConfigNewNamespace(char* cfg) {
-  configNamespace* newNM = NULL;
+configNamespace* ConfigNewNamespace(char *cfg) {
+  configNamespace *newNM = NULL;
 
   newNM = calloc(sizeof(configNamespace), sizeof(configNamespace));
   if (!newNM) {
@@ -312,36 +128,25 @@ configNamespace* ConfigNewNamespace(char* cfg) {
 }
 
 /**
- *  Text parser
+ *  ASCII parser
  *
- *  @fn int ConfigAsciiParser(FILE* read, char* SEP, char* COMM, configNamespace* head)
  *  @brief Reads config file, namespaces, variable names and values,
  *  into the options structure @see configNamespace.
  *
- *  @param read
- *    Handler of the config file to read.
- *    
- *  @param SEP
- *    The separator name/value.
+ *  @param read Handler of the config file to read
+ *  @param sep The separator name/value
+ *  @param comm The comment mark
+ *  @param head Pointer to the structure with datatypes allowed in the config file
  *
- *  @param COMM
- *    The comment mark.
- *
- *  @param head
- *    Pointer to the structure with datatypes allowed in the config file.
- *
- *  @return
- *    Number of namespaces found in the config file on success, -1 otherwise.
- *
+ *  @return Number of namespaces found in the config file on success, -1 otherwise
  */
-int ConfigAsciiParser(FILE* read, char* SEP, char* COMM, configNamespace* head){
-  int j = 0; int sepc = 0; int n = 0;
-  char* line; char l[CONFIG_MAX_LINE_LENGTH]; char* b; char* c;
-  char* value; 
+int ConfigAsciiParser(FILE *read, char *sep, char *comm, configNamespace *head) {
+  int j = 0, sepc = 0, n = 0;
+  char *line, l[CONFIG_MAX_LINE_LENGTH], *b, *c, *value; 
 
-  config* newOP = NULL;
-  configNamespace* nextNM = NULL;
-  configNamespace* current = NULL;
+  config *newOP = NULL;
+  configNamespace *nextNM = NULL;
+  configNamespace *current = NULL;
 
   size_t valuelen = 0;
 
@@ -367,17 +172,17 @@ int ConfigAsciiParser(FILE* read, char* SEP, char* COMM, configNamespace* head){
     line = ConfigTrim(line);
 
     /* Check for full line comments and skip them */
-    if (strspn(line, COMM) > 0) continue;
+    if (strspn(line, comm) > 0) continue;
     
     /* Check for the separator at the beginning */
-    if (strspn(line, SEP) > 0) {
+    if (strspn(line, sep) > 0) {
       ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_VAR); 
       goto failure;
     }
 
     /* First split var/value and inline comments.
      * Trim leading and trailing spaces */
-    b = ConfigTrim(strtok(line,COMM));
+    b = ConfigTrim(strtok(line, comm));
 
     /* Check for namespaces */
     if (b[0] == '[') {
@@ -409,27 +214,27 @@ int ConfigAsciiParser(FILE* read, char* SEP, char* COMM, configNamespace* head){
     }
 
     /* Check if in the var/value string the separator exist.*/
-    if (strstr(b,SEP) == NULL) {
+    if (strstr(b, sep) == NULL) {
       ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_SEP); 
       goto failure;
     }
     
     /* Check some special case:
      * we have separator, but no value */
-    if ((strlen(b) - 1) == strcspn(b,SEP)) {
+    if ((strlen(b) - 1) == strcspn(b, sep)) {
       ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_VAL); 
       goto failure;
     }
 
     /* We allow to have only one separator in line */
-    sepc = ConfigCharCount(b, SEP);
+    sepc = ConfigCharCount(b, sep);
     if (sepc > 1) {
       ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_TOOMANY_SEP); 
       goto failure;
     }
     
     /* Ok, now we are prepared */
-    c = ConfigTrim(strtok(b,SEP));
+    c = ConfigTrim(strtok(b, sep));
 
 		newOP = ConfigFindOption(c, current);
 		
@@ -438,11 +243,11 @@ int ConfigAsciiParser(FILE* read, char* SEP, char* COMM, configNamespace* head){
       goto failure;
 		}
 
-    while (c!=NULL) {
+    while (c != NULL) {
       if (c[0] == '\n') break;
 
       valuelen = strlen(c);
-			value = calloc(valuelen+sizeof(char), sizeof(char));
+			value = calloc(valuelen + sizeof(char), sizeof(char));
       if (!value) {
         Message(MESSAGE_ERR, "ConfigAsciiParser: allocation failed");
         goto failure;
@@ -453,7 +258,7 @@ int ConfigAsciiParser(FILE* read, char* SEP, char* COMM, configNamespace* head){
 			strncpy(newOP->value, value, valuelen);
 			newOP->value[valuelen] = CONFIG_NULL;
 			
-			c = ConfigTrim(strtok(NULL,"\n"));
+			c = ConfigTrim(strtok(NULL, "\n"));
 
 			if (value) free(value);
     }  
@@ -466,14 +271,13 @@ failure:
 }
 
 /**
- * @fn void ConfigCleanup(configNamespace* head)
- * @brief Cleanup assign pointers. This is required for proper memory managment.
+ * @brief Cleanup assign pointers. This is required for proper memory managment
  */
-void ConfigCleanup(configNamespace* head){
-  config* currentOP = NULL;
-  config* nextOP = NULL;
-  configNamespace* nextNM = NULL;
-  configNamespace* current = NULL;
+void ConfigCleanup(configNamespace *head) {
+  config *currentOP = NULL;
+  config *nextOP = NULL;
+  configNamespace *nextNM = NULL;
+  configNamespace *current = NULL;
 
   if (head) {
     current = head;
@@ -492,7 +296,6 @@ void ConfigCleanup(configNamespace* head){
 
       if (current) free(current);
       current=nextNM;
-      
     }
 
     head = NULL;
@@ -500,16 +303,14 @@ void ConfigCleanup(configNamespace* head){
 }
 
 /**
- * @fn void ConfigAsciiWriter(FILE*, char* sep, char* comm, configNamespace* head)
- * @brief Write ASCII config file.
- * @return
- *  Should return 0 on success, errcode otherwise
+ * @brief Write ASCII config file
+ * @return 0 on success, errcode otherwise
  */
-int ConfigAsciiWriter(FILE* write, char* sep, char* comm, configNamespace* head){
-  config* currentOP = NULL;
-  config* nextOP = NULL;
-  configNamespace* nextNM = NULL;
-  configNamespace* current = NULL;
+int ConfigAsciiWriter(FILE *write, char *sep, char *comm, configNamespace *head) {
+  config *currentOP = NULL;
+  config *nextOP = NULL;
+  configNamespace *nextNM = NULL;
+  configNamespace *current = NULL;
 
   if (!head) {
     Message(MESSAGE_ERR, "ConfigAsciiWriter: no config assigned");
@@ -518,11 +319,11 @@ int ConfigAsciiWriter(FILE* write, char* sep, char* comm, configNamespace* head)
 
   current = head;
 
-  fprintf(write,"%s Written by Mechanic Config \n",comm);
+  fprintf(write, "%s Written by Mechanic Config \n", comm);
 
   do {
     if (current) {
-      fprintf(write, "[%s]\n",current->space);
+      fprintf(write, "[%s]\n", current->space);
       currentOP = current->options; 
       do {
         if (currentOP) {
@@ -543,14 +344,13 @@ int ConfigAsciiWriter(FILE* write, char* sep, char* comm, configNamespace* head)
 }
 
 /**
- * @fn void ConfigPrintAll(configNamespace* head)
- * @brief Prints all options.
+ * @brief Prints all options
  */
-void ConfigPrintAll(configNamespace* head){
-  config* currentOP = NULL;
-  config* nextOP = NULL;
-  configNamespace* nextNM = NULL;
-  configNamespace* current = NULL;
+void ConfigPrintAll(configNamespace *head) {
+  config *currentOP = NULL;
+  config *nextOP = NULL;
+  configNamespace *nextNM = NULL;
+  configNamespace *current = NULL;
 
   if (head) current = head;
 
@@ -578,19 +378,17 @@ void ConfigPrintAll(configNamespace* head){
 }
 
 /**
- * @fn int ConfigAssignDefaults(options* cd)
  * @brief Assign default values
  *
- * @return
- *  Should return 0 on success, errcode otherwise
+ * @return 0 on success, errcode otherwise
  */
-configNamespace* ConfigAssignDefaults(options* cd){
-  configNamespace* nextNM = NULL;
-  configNamespace* current = NULL;
-  configNamespace* head = NULL;
-  config* newOP = NULL;
-  config* nextOP = NULL;
-  config* currentOP = NULL;
+configNamespace* ConfigAssignDefaults(options *cd) {
+  configNamespace *nextNM = NULL;
+  configNamespace *current = NULL;
+  configNamespace *head = NULL;
+  config *newOP = NULL;
+  config *nextOP = NULL;
+  config *currentOP = NULL;
   size_t slen, nlen, vlen;
   char space[CONFIG_LEN]; 
   char name[CONFIG_LEN]; 
@@ -684,21 +482,18 @@ configNamespace* ConfigAssignDefaults(options* cd){
 }
 
 /**
- * @fn int ConfigAllOptions(configNamespace* head)
  * @brief Count all available options
  *
- * @param head
- * First namespace in the options list
+ * @param head First namespace in the options list
  *
- * @return
- * Number of options (all available namespaces)
+ * @return Number of options (all available namespaces)
  */
-int ConfigAllOptions(configNamespace* head) {
+int ConfigAllOptions(configNamespace *head) {
   int allopts = 0;
-  config* currentOP = NULL;
-  config* nextOP = NULL;
-  configNamespace* nextNM = NULL;
-  configNamespace* current = NULL;
+  config *currentOP = NULL;
+  config *nextOP = NULL;
+  configNamespace *nextNM = NULL;
+  configNamespace *current = NULL;
 
   if (head) current = head;
 
@@ -721,17 +516,14 @@ int ConfigAllOptions(configNamespace* head) {
 }
 
 /**
- * @fn configNamespace* ConfigFindNamespace(char* namespace)
  * @brief Search for given namespace
  *
- * @param namespace
- *  The name of the namespace to be searched for
+ * @param namespace The name of the namespace to be searched for
  *
- * @return
- *  Pointer to the namespace or NULL if namespace was not found
+ * @return Pointer to the namespace or NULL if namespace was not found
  */
-configNamespace* ConfigFindNamespace(char* namespace, configNamespace* head){
-  configNamespace* test = NULL;
+configNamespace* ConfigFindNamespace(char *namespace, configNamespace *head) {
+  configNamespace *test = NULL;
   
   if (head && namespace) {
     test = head;
@@ -746,8 +538,15 @@ configNamespace* ConfigFindNamespace(char* namespace, configNamespace* head){
   return NULL;
 }
 
-configNamespace* ConfigLastLeaf(configNamespace* head) {
-  configNamespace* test = NULL;
+/**
+ * @brief Get the last leaf of the linked list
+ *
+ * @param head The configuration namespace
+ *
+ * @return The last leaf on success, head pointer on failure
+ */
+configNamespace* ConfigLastLeaf(configNamespace *head) {
+  configNamespace *test = NULL;
 
   if (head) {
     test = head;
@@ -764,18 +563,15 @@ configNamespace* ConfigLastLeaf(configNamespace* head) {
 }
 
 /**
- * @fn config* ConfigFindOption(char* varname, configNamespace* current)
  * @brief Search for given variable
  *
- * @param varname
- *  The name of the variable to be searched for
+ * @param varname The name of the variable to be searched for
  *
- * @return
- *  The pointer to the variable or NULL if the variable was not found
+ * @return The pointer to the variable or NULL if the variable was not found
  *
  */
-config* ConfigFindOption(char* varname, configNamespace* current){
-  config* testOP = NULL;
+config* ConfigFindOption(char *varname, configNamespace *current) {
+  config *testOP = NULL;
   size_t vlen, olen;
   char var[CONFIG_LEN];
   char opt[CONFIG_LEN];
@@ -807,15 +603,13 @@ config* ConfigFindOption(char* varname, configNamespace* current){
 }
 
 /**
- * @fn config* ModifyOption(char* varname, char* newvalue, int newtype, configNamespace* head)
- * @brief Modifies value and type of given option.
+ * @brief Modifies value and type of given option
  *
- * @return
- *  The pointer to modified option or NULL if option was not found
+ * @return The pointer to modified option or NULL if option was not found
  */
-config* ModifyOption(char* namespace, char* varname, char* newvalue, int newtype, configNamespace* head){
-	config* option = NULL;
-  configNamespace* current = NULL;
+config* ModifyOption(char *namespace, char *varname, char *newvalue, int newtype, configNamespace *head) {
+	config *option = NULL;
+  configNamespace *current = NULL;
 	size_t vlen;
 
   if (head) {
@@ -840,15 +634,13 @@ config* ModifyOption(char* namespace, char* varname, char* newvalue, int newtype
 }
 
 /**
- * @fn Option2String(char* namespace, char* varname, configNamespace* head)
  * @brief Converts the option to string
  *
- * @return
- *  Converted option
+ * @return Converted option
  */
-char* Option2String(char* namespace, char* var, configNamespace* head){
-	config* option = NULL;
-  configNamespace* current = NULL;
+char* Option2String(char *namespace, char *var, configNamespace *head) {
+	config *option = NULL;
+  configNamespace *current = NULL;
 
   if (head) {
     current = ConfigFindNamespace(namespace, head);
@@ -861,15 +653,13 @@ char* Option2String(char* namespace, char* var, configNamespace* head){
 }
 
 /**
- * @fn Option2Int(char* namespace, char* varname, configNamespace* head)
  * @brief Converts the option to integer
  *
- * @return
- *  Converted option
+ * @return Converted option
  */
-int Option2Int(char* namespace, char* varname, configNamespace* head){
-  config* option = NULL;
-  configNamespace* current = NULL;
+int Option2Int(char *namespace, char *varname, configNamespace *head) {
+  config *option = NULL;
+  configNamespace *current = NULL;
   int value = 0;
   
   if (head && namespace) {
@@ -889,15 +679,13 @@ int Option2Int(char* namespace, char* varname, configNamespace* head){
 }
 
 /**
- * @fn Option2Long(char* namespace, char* varname, configNamespace* head)
  * @brief Converts the option to long integer
  *
- * @return
- *  Converted option
+ * @return Converted option
  */
-long Option2Long(char* namespace, char* varname, configNamespace* head){
-  config* option = NULL;
-  configNamespace* current = NULL;
+long Option2Long(char *namespace, char *varname, configNamespace *head) {
+  config *option = NULL;
+  configNamespace *current = NULL;
   long value = 0;
   
   if (head && namespace) {
@@ -917,17 +705,15 @@ long Option2Long(char* namespace, char* varname, configNamespace* head){
 }
 
 /**
- * @fn Option2Float(char* namespace, char* varname, configNamespace* head)
  * @brief Converts the option to float
  *
- * @return
- *  Converted option
+ * @return Converted option
  */
-float Option2Float(char* namespace, char* varname, configNamespace* head){
-  config* option = NULL;
-  configNamespace* current = NULL;
+float Option2Float(char *namespace, char *varname, configNamespace *head) {
+  config *option = NULL;
+  configNamespace *current = NULL;
   float value = 0.0;
-  char* p = NULL;
+  char *p = NULL;
   
   if (head && namespace) {
     current = ConfigFindNamespace(namespace, head);
@@ -946,17 +732,15 @@ float Option2Float(char* namespace, char* varname, configNamespace* head){
 }
 
 /**
- * @fn Option2Double(char* namespace, char* varname, configNamespace* head)
  * @brief Converts the option to double
  *
- * @return
- *  Converted option
+ * @return Converted option
  */
-double Option2Double(char* namespace, char* varname, configNamespace* head){
-  config* option = NULL;
-  configNamespace* current = NULL;
+double Option2Double(char *namespace, char *varname, configNamespace *head) {
+  config *option = NULL;
+  configNamespace *current = NULL;
   double value = 0.0;
-  char* p = NULL;
+  char *p = NULL;
   
   if (head && namespace) {
     current = ConfigFindNamespace(namespace, head);
@@ -975,15 +759,13 @@ double Option2Double(char* namespace, char* varname, configNamespace* head){
 }
 
 /**
- * @fn ConfigCountOptions(char* nm, configNamespace* head)
  * @brief Counts number of options in given namespace
  *
- * @return
- *  Number of options in given namespace, 0 otherwise
+ * @return Number of options in given namespace, 0 otherwise
  */
-int ConfigCountOptions(char* nm, configNamespace* head){
-  configNamespace* nspace;
-  config* option;
+int ConfigCountOptions(char *nm, configNamespace *head) {
+  configNamespace *nspace;
+  config *option;
   int opts = 0;
 
   if (head && nm) {
@@ -1002,40 +784,7 @@ int ConfigCountOptions(char* nm, configNamespace* head){
 }
 
 /**
- * @fn int ConfigItoa(char* str, char* intval)
- * @brief Implementation of itoa function
- *
- * The function converts numerical values to string. 
- * For using it with integers, try:
- * ConfigItoa(str, (int*)value, C_INT)
- *
- * For using it with floats and doubles, try:
- * ConfigItoa(str, &value, C_FLOAT/C_DOUBLE) etc.
- *
- * It is not clear for me if this is a good implementation. However, this is the
- * only way I can do it in one function for all types of numerical values.
- *
- * For future me: implement it better, if this is possible in C
- * 
- * @todo
- *  Error checking
- *
- * @return
- *  Should return 0 on success, errcode otherwise
- */
-int ConfigItoa(char* str, int val, int type){
-  if (type == C_INT) sprintf(str, "%d", val);
-
-/*  if(type == C_LONGINT) sprintf(str, "%ld", (long int)val);
-  if(type == C_FLOAT) sprintf(str, "%f", *(float*)val);
-  if(type == C_DOUBLE) sprintf(str, "%lf", *(double*)val);
-  if(type == C_LONGDOUBLE) sprintf(str, "%Lf", *(long double*)val);
-*/
-  return 0;
-}
-
-/**
- * @function
+ * @brief
  * Counts the number of all options in the default Config options structure. The option
  * structure must end with OPTIONS_END
  */
@@ -1052,16 +801,13 @@ int ConfigCountDefaultOptions(options *in) {
 }
 
 /**
- * @function
+ * @brief
  * Merges two Config default option structures
  *
- * @param options*
- *  Input structure
- * @param options*
- *  The structure, that we want to merge with the Input one
+ * @param options Input structure
+ * @param options The structure, that we want to merge with the Input one
  *
- * @return
- *  Error code or 0 otherwise. The Input structure is extended with the second one.
+ * @return Error code or 0 otherwise. The Input structure is extended with the second one.
  */
 int ConfigMergeDefaults(options *in, options *add) {
   int status;
@@ -1086,7 +832,7 @@ int ConfigMergeDefaults(options *in, options *add) {
 }
 
 /**
- * @function
+ * @brief
  * Counts all options in all namespaces
  */
 int ConfigCountAllOptions(configNamespace *head) {
@@ -1104,11 +850,10 @@ int ConfigCountAllOptions(configNamespace *head) {
 }
 
 /**
- * @function
+ * @brief
  * Converts the linked list back to structure
  *
- * @return
- * Dynamically allocated options structure. You must free it.
+ * @return Dynamically allocated options structure. You must free it.
  */
 int ConfigHead2StructNoalloc(configNamespace *head, options *c) {
   int i = 0;
@@ -1150,11 +895,12 @@ int ConfigHead2StructNoalloc(configNamespace *head, options *c) {
 }
 
 options* ConfigHead2Struct(configNamespace *head) {
-  options *c;
+  options *c = NULL;
   int opts = 0;
+
   opts = ConfigAllOptions(head);
 
-  c = calloc(opts*sizeof(options), sizeof(options));
+  c = calloc(opts * sizeof(options), sizeof(options));
   
   ConfigHead2StructNoalloc(head, c);
   return c;
