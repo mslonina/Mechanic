@@ -251,13 +251,14 @@ int Storage(pool *p, void *s) {
  *
  * This function is used to prepare the task pool. All memory banks defined in Storage()
  * hook are available for usage. This hook is followed by an automatic broadcast of all
- * memory banks with flag sync = 1 and storage (when use_hdf = 1).
+ * memory banks with flag `sync = 1` and storage (when `use_hdf = 1`), as well as runtime
+ * configuration. 
  *
  * Example usage:
  * - reading additional configuration, input files etc.
  * - assign default values, preparing global data etc.
  *
- * During the task pool loop, the data from all previous pools is available in allpools.
+ * During the task pool loop, the data from all previous pools is available in `allpools`.
  *
  * If the PoolPrepare() hook is present in a custom module, it will be used instead of the
  * core hook.
@@ -337,9 +338,9 @@ int PoolProcess(pool **allpools, pool *current, void *s) {
  *      4  5  6  7
  *      8  9 10 11
  *
- * The current task location is available at t->location array. The pool resolution
- * is available at p->board->layout.dims array. The pool_size is a multiplication of
- * p->board->layout.dims[i], where i < p->board->layout.rank.
+ * The current task location is available at `t->location array`. The pool resolution
+ * is available at `p->board->layout.dims` array. The `pool_size` is a multiplication of
+ * `p->board->layout.dims[i]`, where `i < p->board->layout.rank`.
  *
  * This function is called during the TaskPrepare() phase.
  *
@@ -385,11 +386,12 @@ int TaskBoardMap(pool *p, task *t, void *s) {
  *
  * This function is used to do any task-specific preparation, i.e. changing initial
  * conditions according to the current task location. The task ID and task location, as
- * well as global pool data and setup is available, i.e.:
+ * well as global pool data and runtime configuration is available, i.e.:
  *
  * - t->tid - the ID of the current task
  * - t->location[0] - the horizontal position of the current task
  * - t->location[1] - the vertical position of the current task
+ * - t->location[2] - the depth of the current task
  *
  * If the TaskPrepare() is present in a custom module, it will be used instead of the core
  * hook.
@@ -411,6 +413,14 @@ int TaskPrepare(pool *p, task *t, void *s) {
  * This function is used to process the current task, i.e. to perform main computations.
  * The data for the current task may be prepared in the TaskPrepare() hook.
  *
+ * Return codes:
+ * 
+ * - TASK_FINALIZE - the task has been successfully processed
+ * - TASK_CHECKPOINT - the task processing will be paused and all stored data will be
+ *   returned to the checkpoint buffer. After that, the task processing resumes. To
+ *   distingiush between task snapshots, the `t->cid` counter is available. The last
+ *   snapshot number is stored in the task board dataset.
+ *
  * If the TaskProcess() is present in a custom module, it will be used instead of the core
  * hook.
  *
@@ -427,7 +437,6 @@ int TaskProcess(pool *p, task *t, void *s) {
 
 /**
  * @brief Prepare the checkpoint
- * @todo Needs updating
  *
  * This function is used to prepare the checkpoint. You may do some data-related
  * operations. The data for the current checkpoint may be accessed by Read/WriteData()
@@ -437,13 +446,13 @@ int TaskProcess(pool *p, task *t, void *s) {
  *
  * which is a one-dimensional, flattened array, filled with c->size tasks, in a form:
  *
- *    header | task 0 datasets | header | task 1 datasets | ...
+ *    task 0 header | task 0 datasets | task 1 header | task 1 datasets | ...
  *
  * The header contains HEADER_SIZE integer elements:
  *  - the MPI message tag
  *  - the received task ID
- *  - the received task status (TASK_FINISHED)
- *  - the received task location (TASK_BOARD_RANK, currently 2)
+ *  - the received task status (TASK_FINISHED or TASK_CHECKPOINT)
+ *  - the received task location (TASK_BOARD_RANK, currently 3)
  *
  * It is best to keep this hook untouched, since the memory banks are used then to
  * physically store the data in the HDF5 master datafile. This hook should not be normally
@@ -459,7 +468,6 @@ int TaskProcess(pool *p, task *t, void *s) {
  * @return SUCCESS or error code otherwise
  */
 int CheckpointPrepare(pool *p, checkpoint *c, void *s) {
-  Message(MESSAGE_INFO, "Checkpoint %04d processed\n", c->cid);
   return SUCCESS;
 }
 
@@ -486,7 +494,7 @@ int Prepare(int node, char *masterfile, void *s) {
 /**
  * @brief The process hook
  *
- * This function is used to perform any simulation post operations, such as specific data
+ * This function is used to perform any post-simulation operations, such as specific data
  * manipulation in the master data file. It is invoked after the pool loop is finished.
  *
  * If the Process() hook is present in a custom module, it will be used instead of the core
@@ -509,7 +517,7 @@ int Process(int node, char *masterfile, pool **all, void *s) {
  *
  * This function may be used to prepare given dataset. The HDF5 dataset pointer is passed,
  * as well as top level group/file pointer. It is invoked right after the dataset is
- * created in the master data file, only one the master node. 
+ * created in the master data file, only on the master node. 
  *
  * As an example, you may write any initial data to the dataset, as well as different
  * attributes.
@@ -535,7 +543,7 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void 
  *
  * This function may be used to process given dataset. The HDF5 dataset pointer is passed,
  * as well as top level group/file pointer. It is invoked during PoolProcess(), 
- * only one the master node. 
+ * only on the master node. 
  *
  * As an example, you may process any data in the dataset, as well as different
  * attributes.
@@ -657,7 +665,7 @@ int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
 /**
  * @brief The MPI Send hook
  *
- * This hook is performed after MPI_Send.
+ * This hook is performed after MPI_Send
  *
  * @ingroup all_nodes
  * @param mpi_size The MPI_COMM_WORLD size
@@ -676,7 +684,7 @@ int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s) {
 /**
  * @brief The MPI Receive hook
  *
- * This hook is performed after MPI_Send.
+ * This hook is performed after MPI_Receive
  *
  * @ingroup all_nodes
  * @param mpi_size The MPI_COMM_WORLD size
