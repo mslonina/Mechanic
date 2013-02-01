@@ -4,7 +4,6 @@
 #include "mechanic.h"
 #include "MCommon.h"
 #include "MTypes.h"
-#include "MLog.h"
 #include "MPool.h"
 #include "MMpi.h"
 #include "MCheckpoint.h"
