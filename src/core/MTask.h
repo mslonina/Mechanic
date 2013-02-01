@@ -8,7 +8,6 @@
 #include "mechanic.h"
 #include "MTypes.h"
 #include "MCommon.h"
-#include "MLog.h"
 #include "MStorage.h"
 
 task* TaskLoad(module *m, pool *p, int tid);

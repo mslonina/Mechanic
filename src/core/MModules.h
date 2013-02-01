@@ -8,7 +8,6 @@
 #include "mechanic.h"
 #include "MTypes.h"
 #include "MCommon.h"
-#include "MLog.h"
 
 #define LOAD_DEFAULT 0
 #define NO_FALLBACK 1

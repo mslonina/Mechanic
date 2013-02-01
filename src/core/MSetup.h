@@ -9,7 +9,6 @@
 #include "MCommon.h"
 #include "MTypes.h"
 #include "MConfig.h"
-#include "MLog.h"
 #include "MMpi.h"
 
 #define SEPARATOR "=" /**< The variable/value separator */
