@@ -105,7 +105,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
   header_size = sizeof(int) * (HEADER_SIZE);
 
-  Backup(m, &m->layer.setup);
+  Backup(m, p);
 
   /* Commit data for the task board */
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -371,24 +371,25 @@ void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
  * @brief Create incremental backup
  *
  * @param m The module pointer
- * @param s The setup pointer
+ * @param p The pool pointer
  *
  * @return 0 on success, error code otherwise
  */
-int Backup(module *m, setup *s) {
+int Backup(module *m, pool *p) {
   int i = 0, b = 0, mstat = SUCCESS;
-  char *current_name, *backup_name, iter[4];
+  char *current_name, *backup_name, iter[4], name[CONFIG_LEN];
   struct stat current;
   struct stat backup;
 
-  b = Option2Int("core", "checkpoint-files", s->head);
+  MReadOption(p, "checkpoint-files", &b);
+  MReadOption(p, "name", &name);
 
   for (i = b-2; i >= 0; i--) {
     snprintf(iter, 3, "%02d", i+1);
-    backup_name = Name(Option2String("core", "name", s->head), "-master-", iter, ".h5");
+    backup_name = Name(name, "-master-", iter, ".h5");
 
     snprintf(iter, 3,"%02d", i);
-    current_name = Name(Option2String("core", "name", s->head), "-master-", iter, ".h5");
+    current_name = Name(name, "-master-", iter, ".h5");
 
     if (stat(current_name, &current) == 0) {
       if (stat(backup_name, &backup) < 0) {
