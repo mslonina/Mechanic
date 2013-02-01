@@ -47,6 +47,7 @@ set (
   M2Task.h
   M2Storage.h
   M2Setup.h
+  M2Mpi.h
 )
 
 add_library(libmechanic SHARED ${libsources} $<TARGET_OBJECTS:mechanic_rngs>)
