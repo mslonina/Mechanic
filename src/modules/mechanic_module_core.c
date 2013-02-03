@@ -25,7 +25,6 @@
 /** @} */
 
 #include "mechanic.h"
-#include "mechanic_module_core.h"
 
 /**
  * @defgroup public_api The Public API
