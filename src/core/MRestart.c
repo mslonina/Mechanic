@@ -57,7 +57,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
       ReadDataset(group, 1, pools[i]->board, 1);
 
       /* Read pool storage banks */
-      for (j = 0; j < m->pool_banks; j++) {
+      for (j = 0; j < pools[i]->pool_banks; j++) {
         size = GetSize(pools[i]->storage[j].layout.rank, pools[i]->storage[j].layout.dims);
         if (size > 0 && pools[i]->storage[j].layout.use_hdf) {
           ReadDataset(group, 1, &(pools[i]->storage[j]), 1);
@@ -69,7 +69,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
       H5CheckStatus(tasks);
 
       /* Read simple datasets */
-      for (j = 0; j < m->task_banks; j++) {
+      for (j = 0; j < pools[i]->task_banks; j++) {
         size = GetSize(pools[i]->task->storage[j].layout.rank, pools[i]->task->storage[j].layout.dims);
         if (size > 0 && pools[i]->task->storage[j].layout.use_hdf) {
           if (pools[i]->task->storage[j].layout.storage_type == STORAGE_PM3D
@@ -82,7 +82,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
 
       /* Read datasets inside TaskID groups */
       for (j = 0; j < pools[i]->pool_size; j++) {
-        for (k = 0; k < m->task_banks; k++) {
+        for (k = 0; k < pools[i]->task_banks; k++) {
           if (pools[i]->task->storage[k].layout.use_hdf
               && pools[i]->task->storage[k].layout.storage_type == STORAGE_GROUP) {
             size = GetSize(pools[i]->task->storage[k].layout.rank, pools[i]->task->storage[k].layout.dims);
@@ -107,7 +107,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
 
   /* Broadcast pool data */
   for (i = 0; i <= *pool_counter; i++) {
-    for (j = 0; j < m->pool_banks; j++) {
+    for (j = 0; j < pools[i]->pool_banks; j++) {
       if (pools[i]->storage[j].layout.sync) {
         if (pools[i]->storage[j].layout.elements > 0) {
           MPI_Bcast(&(pools[i]->storage[j].memory[0]), pools[i]->storage[j].layout.elements, 

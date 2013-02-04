@@ -85,7 +85,7 @@ int Pack(module *m, void *buffer, pool *p, task *t, int tag) {
   if (tag != TAG_TERMINATE) {
 
     /* Task data */
-    for (i = 0; i < m->task_banks; i++) {
+    for (i = 0; i < p->task_banks; i++) {
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dims) * t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
         Message(MESSAGE_DEBUG, "[%s:%d] Packed dataset %s of rank %d = %zu bytes\n", __FILE__, __LINE__,
@@ -133,7 +133,7 @@ int Unpack(module *m, void *buffer, pool *p, task *t, int *tag) {
   if (*tag != TAG_TERMINATE) {
 
     /* Task data */
-    for (i = 0; i < m->task_banks; i++) {
+    for (i = 0; i < p->task_banks; i++) {
       size = GetSize(t->storage[i].layout.rank, t->storage[i].layout.dims) * t->storage[i].layout.datatype_size;
       if (t->storage[i].layout.sync) {
         mstat = CopyData(buffer + position, t->storage[i].memory, size);

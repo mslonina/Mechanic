@@ -110,7 +110,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   }
 
   /* Broadcast pool data */
-  for (i = 0; i < m->pool_banks; i++) {
+  for (i = 0; i < p->pool_banks; i++) {
     if (p->storage[i].layout.sync) {
       if (p->storage[i].layout.elements > 0) {
         MPI_Bcast(&(p->storage[i].memory[0]), p->storage[i].layout.elements,
@@ -205,7 +205,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   H5Dclose(h5dataset);
   
   /* Write pool data */
-  mstat = CommitData(h5pool, m->pool_banks, p->storage);
+  mstat = CommitData(h5pool, p->pool_banks, p->storage);
   CheckStatus(mstat);
 
   /* Write global attributes */
@@ -244,7 +244,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   }
 
   /* Process all datasets in the current pool */
-  for (i = 0; i < m->pool_banks; i++) {
+  for (i = 0; i < p->pool_banks; i++) {
     if (p->storage[i].layout.use_hdf) {
       h5dataset = H5Dopen(h5pool, p->storage[i].layout.name, H5P_DEFAULT);
       H5CheckStatus(h5dataset);
@@ -265,7 +265,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   h5tasks = H5Gopen(h5pool, TASKS_GROUP, H5P_DEFAULT);
 
   /* Process all task datasets in the current pool */
-  for (i = 0; i < m->task_banks; i++) {
+  for (i = 0; i < p->task_banks; i++) {
     if (p->task->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.storage_type != STORAGE_GROUP) {
         h5dataset = H5Dopen(h5tasks, p->task->storage[i].layout.name, H5P_DEFAULT);
@@ -293,7 +293,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
       sprintf(path, TASK_PATH, i);
       h5task = H5Gopen(h5tasks, path, H5P_DEFAULT);
 
-      for (j = 0; j < m->task_banks; j++) {
+      for (j = 0; j < p->task_banks; j++) {
         if (p->task->storage[j].layout.use_hdf &&
             p->task->storage[j].layout.storage_type == STORAGE_GROUP) {
 
@@ -377,7 +377,7 @@ void PoolFinalize(module *m, pool *p) {
     for (i = 0; i < m->layer.init.banks_per_pool; i++) {
       free(p->storage[i].attr);
     }
-    FreeMemoryLayout(m->pool_banks, p->storage);
+    FreeMemoryLayout(p->pool_banks, p->storage);
     free(p->storage);
   }
 
@@ -386,7 +386,7 @@ void PoolFinalize(module *m, pool *p) {
       for (i = 0; i < m->layer.init.banks_per_pool; i++) {
         free(p->task->storage[i].attr);
       }
-      FreeMemoryLayout(m->task_banks, p->task->storage);
+      FreeMemoryLayout(p->task_banks, p->task->storage);
       free(p->task->storage);
     }
 

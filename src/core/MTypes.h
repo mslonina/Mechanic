@@ -25,9 +25,6 @@ typedef struct {
   hid_t h5location; /**< The HDF5 location pointer */
   int node; /**< The node ID */
   int mpi_size; /**< The MPI_COMM_WORLD size */
-  int pool_banks; /**< The number of pool memory banks */
-  int task_banks; /**< The number of task memory banks */
-  int attr_banks; /**< The number of attributes banks */
   int mode; /**< The running mode */
   int communication_type; /**< MPI communication type */
   layer layer; /**< The layer pointer */

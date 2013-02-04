@@ -50,7 +50,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
   }
 
   /* Initialize the task */
-  for (i = 0; i < m->task_banks; i++) {
+  for (i = 0; i < p->task_banks; i++) {
     t->storage[i].layout.use_hdf = p->task->storage[i].layout.use_hdf;
 
     /* The dataset name, we need this only when use_hdf = 1 */
@@ -92,7 +92,7 @@ task* TaskLoad(module *m, pool *p, int tid) {
      */
   }
 
-  CommitMemoryLayout(m->task_banks, t->storage);
+  CommitMemoryLayout(p->task_banks, t->storage);
 
   return t;
 }
@@ -166,7 +166,7 @@ int TaskRestore(module *m, pool *p, task *t) {
     dims[l] = p->board->layout.dims[l];
   }
 
-  for (j = 0; j < m->task_banks; j++) {
+  for (j = 0; j < p->task_banks; j++) {
 
     for (l = 0; l < MAX_RANK; l++) {
       offsets[l] = 0;
@@ -341,7 +341,7 @@ void TaskReset(module *m, pool *p, task *t, int tid) {
 void TaskFinalize(module *m, pool *p, task *t) {
   int i = 0, j = 0;
 
-  for (i = 0; i < m->task_banks; i++) {
+  for (i = 0; i < p->task_banks; i++) {
     if (t->storage[i].layout.use_hdf) {
       if (t->storage[i].layout.name) free(t->storage[i].layout.name);
     }
@@ -350,7 +350,7 @@ void TaskFinalize(module *m, pool *p, task *t) {
     }
   }
 
-  FreeMemoryLayout(m->task_banks, t->storage);
+  FreeMemoryLayout(p->task_banks, t->storage);
 
   if (t->storage) free(t->storage);
   if (t) free(t);

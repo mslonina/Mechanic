@@ -39,7 +39,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   c->storage->layout.size = sizeof(int) * (HEADER_SIZE);
   c->storage->layout.elements = HEADER_SIZE;
 
-  for (i = 0; i < m->task_banks; i++) {
+  for (i = 0; i < p->task_banks; i++) {
     c->storage->layout.dims[1] +=
       GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.dims);
     c->storage->layout.size +=
@@ -120,7 +120,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   CheckStatus(mstat);
 
   /* Update pool data */
-  mstat = CommitData(group, m->pool_banks, p->storage);
+  mstat = CommitData(group, p->pool_banks, p->storage);
   CheckStatus(mstat);
 
   tasks = H5Gopen(group, TASKS_GROUP, H5P_DEFAULT);
@@ -132,7 +132,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
     dims[l] = p->board->layout.dims[l];
   }
 
-  for (j = 0; j < m->task_banks; j++) {
+  for (j = 0; j < p->task_banks; j++) {
 
     if (p->task->storage[j].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[j].layout.storage_type == STORAGE_LIST ||

@@ -78,7 +78,7 @@ int Master(module *m, pool *p) {
 
   /* Initialize data buffers */
   send_buffer->layout.size = header_size;
-  for (k = 0; k < m->task_banks; k++) {
+  for (k = 0; k < p->task_banks; k++) {
     send_buffer->layout.size +=
       GetSize(p->task->storage[k].layout.rank, p->task->storage[k].layout.dims)*p->task->storage[k].layout.datatype_size;
   }

@@ -30,6 +30,9 @@ typedef struct {
   int completed; /**< The pool task completed counter */
   int node; /**< The node ID */
   int mpi_size; /**< The MPI COMM size */
+  int pool_banks; /**< The number of pool memory banks */
+  int task_banks; /**< The number of task memory banks */
+  int attr_banks; /**< The number of attributes banks */
 } pool;
 
 int ReadPool(pool *p, char *storage_name, void *data); /**< Read pool data */

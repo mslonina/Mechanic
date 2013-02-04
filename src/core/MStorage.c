@@ -118,9 +118,9 @@ int Storage(module *m, pool *p) {
   CheckStatus(mstat);
 
   /* Pool banks */
-  m->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
+  p->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
 
-  for (i = 0; i < m->pool_banks; i++) {
+  for (i = 0; i < p->pool_banks; i++) {
     p->storage[i].attr_banks = 0;
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       if (p->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
@@ -131,12 +131,12 @@ int Storage(module *m, pool *p) {
   }
   
   /* Right now, there is no support for different storage types of pool datasets */
-  for (i = 0; i < m->pool_banks; i++) {
+  for (i = 0; i < p->pool_banks; i++) {
     p->storage[i].layout.storage_type = STORAGE_GROUP;
   }
   
-  CheckLayout(m, m->pool_banks, p->storage);
-  CommitMemoryLayout(m->pool_banks, p->storage);
+  CheckLayout(m, p->pool_banks, p->storage);
+  CommitMemoryLayout(p->pool_banks, p->storage);
 
   /* The task board size might be overriden by now, check and fix the layout */
   CheckLayout(m, 1, p->board);
@@ -147,8 +147,8 @@ int Storage(module *m, pool *p) {
   CheckStatus(mstat);
 
   /* Task Banks */
-  m->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
-  for (i = 0; i < m->task_banks; i++) {
+  p->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
+  for (i = 0; i < p->task_banks; i++) {
     p->task->storage[i].attr_banks = 0;
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       if (p->task->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
@@ -158,13 +158,13 @@ int Storage(module *m, pool *p) {
     }
   }
 
-  CheckLayout(m, m->task_banks, p->task->storage);
+  CheckLayout(m, p->task_banks, p->task->storage);
 
   /* Master only memory/storage operations */
   if (m->node == MASTER) {
 
     /* Commit memory for task banks (whole datasets) */
-    for (i = 0; i < m->task_banks; i++) {
+    for (i = 0; i < p->task_banks; i++) {
       if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
         task_groups = 1;
         mstat = CommitAttrMemoryLayout(p->task->storage[i].attr_banks, &p->task->storage[i]);
@@ -497,7 +497,7 @@ int CommitStorageLayout(module *m, pool *p) {
   CreateDataset(h5group, p->board, m, p);
 
   /* The Pool-ID datasets */
-  for (i = 0; i < m->pool_banks; i++) {
+  for (i = 0; i < p->pool_banks; i++) {
     if (p->storage[i].layout.use_hdf) {
       CreateDataset(h5group, &p->storage[i], m, p);
     }
@@ -508,7 +508,7 @@ int CommitStorageLayout(module *m, pool *p) {
   H5CheckStatus(h5tasks);
 
   /* The task datasets */
-  for (i = 0; i < m->task_banks; i++) {
+  for (i = 0; i < p->task_banks; i++) {
     if (p->task->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[i].layout.storage_type == STORAGE_LIST ||
