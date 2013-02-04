@@ -153,9 +153,6 @@ int MechanicHeader(module *m, hid_t h5location) {
 /**
  * @brief Validate the checkpoint file
  *
- * @todo
- * - Write this function
- *
  * @param m The module pointer
  * @param filename The name of the file to be validated
  *
@@ -163,20 +160,41 @@ int MechanicHeader(module *m, hid_t h5location) {
  */
 int Validate(module *m, char *filename) {
   double api;
-  hid_t h5location, attr;
+  char module_name[CONFIG_LEN];
+  hid_t h5location, attr, atype;
   herr_t h5status;
 
   h5location = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-  // Check the API
+  // Get the API
   attr = H5Aopen_name(h5location, "API");
   h5status = H5Aread(attr, H5T_NATIVE_DOUBLE, &api);
   H5CheckStatus(h5status);
   H5Aclose(attr);
 
+  // Get the module
+  attr = H5Aopen_name(h5location, "MODULE");
+  atype  = H5Aget_type(attr);
+  h5status = H5Aread(attr, atype, &module_name);
+  H5CheckStatus(h5status);
+  H5Aclose(attr);
+
   H5Fclose(h5location);
-  
-  if (api < PACKAGE_VERSION_API) return -CORE_ERR_RESTART;
+
+  Message(MESSAGE_INFO, "Restart mode validation: API = %.2f, MODULE = %s\n", api, module_name);
+
+  // Validate the module
+  if (strcmp(module_name, Option2String("core", "module", m->layer.setup.head)) != 0) {
+    Message(MESSAGE_ERR, "Module mismatch. Expected '%s', got '%s'\n", module_name, Option2String("core", "module", m->layer.setup.head)); 
+    return -CORE_ERR_RESTART;
+  }
+
+  // Validate the API
+  if (api < PACKAGE_VERSION_API) {
+    Message(MESSAGE_ERR, "API mismatch. Expected %.2f, got %.2f\n", PACKAGE_VERSION_API, api);
+    return -CORE_ERR_RESTART;
+  }
+
   return SUCCESS;
 }
 
