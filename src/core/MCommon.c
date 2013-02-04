@@ -130,8 +130,12 @@ int MechanicHeader(module *m, hid_t h5location) {
 
   ctype = H5Tcopy(H5T_C_S1);
   h5status = H5Tset_size(ctype, CONFIG_LEN);
+  H5CheckStatus(h5status);
+  
   memtype = H5Tcopy(H5T_C_S1);
   h5status = H5Tset_size(memtype, CONFIG_LEN);
+  H5CheckStatus(h5status);
+
   attr_s = H5Screate_simple(1, sdims, NULL);
       
   attr_d = H5Acreate(h5location, "MODULE", memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
@@ -151,14 +155,28 @@ int MechanicHeader(module *m, hid_t h5location) {
  *
  * @todo
  * - Write this function
- * - Write module_name as an attribute, so that we could validate the restart file
- * - Maybe write some other attributes?
  *
+ * @param m The module pointer
  * @param filename The name of the file to be validated
  *
  * @return 0 on success, error code otherwise
  */
-int Validate(char *filename) {
+int Validate(module *m, char *filename) {
+  double api;
+  hid_t h5location, attr;
+  herr_t h5status;
+
+  h5location = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+
+  // Check the API
+  attr = H5Aopen_name(h5location, "API");
+  h5status = H5Aread(attr, H5T_NATIVE_DOUBLE, &api);
+  H5CheckStatus(h5status);
+  H5Aclose(attr);
+
+  H5Fclose(h5location);
+  
+  if (api < PACKAGE_VERSION_API) return -CORE_ERR_RESTART;
   return SUCCESS;
 }
 

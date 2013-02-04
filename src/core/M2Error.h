@@ -13,22 +13,23 @@
 #define CORE_SETUP_USAGE 213 /**< The core usage message return code */
 
 /* Error codes */
-#define CORE_ERR_CORE 901 /**< The core-related error */
-#define CORE_ERR_MPI 911 /**< The core MPI-related error */
-#define CORE_ERR_HDF 912 /**< The core HDF-related error */
-#define CORE_ERR_MODULE 913 /**< The core module-related error */
-#define CORE_ERR_SETUP 914 /**< The core setup-related error */
-#define CORE_ERR_MEM 915 /**< The core memory-related error */
-#define CORE_ERR_CHECKPOINT 916 /**< The core checkpoint-related error */
-#define CORE_ERR_STORAGE 917 /**< The core storage-related error */
+#define CORE_ERR_CORE 901 /**< The core related error */
+#define CORE_ERR_MPI 911 /**< The core MPI related error */
+#define CORE_ERR_HDF 912 /**< The core HDF related error */
+#define CORE_ERR_MODULE 913 /**< The core module related error */
+#define CORE_ERR_SETUP 914 /**< The core setup related error */
+#define CORE_ERR_MEM 915 /**< The core memory related error */
+#define CORE_ERR_CHECKPOINT 916 /**< The core checkpoint related error */
+#define CORE_ERR_STORAGE 917 /**< The core storage related error */
+#define CORE_ERR_RESTART 918 /**< The core restart mode related error */
 #define CORE_ERR_OTHER 999 /**< The core any other error */
 
-#define MODULE_ERR_CORE 801 /**< The module-related error */
-#define MODULE_ERR_MPI 811 /**< The module MPI-related error */
-#define MODULE_ERR_HDF 812 /**< The module HDF-related error */
-#define MODULE_ERR_SETUP 814 /**< The module setup-related error */
-#define MODULE_ERR_MEM 815 /**< The module memory-related error */
-#define MODULE_ERR_CHECKPOINT 816 /**< The module checkpoint-related error */
+#define MODULE_ERR_CORE 801 /**< The module related error */
+#define MODULE_ERR_MPI 811 /**< The module MPI related error */
+#define MODULE_ERR_HDF 812 /**< The module HDF related error */
+#define MODULE_ERR_SETUP 814 /**< The module setup related error */
+#define MODULE_ERR_MEM 815 /**< The module memory related error */
+#define MODULE_ERR_CHECKPOINT 816 /**< The module checkpoint related error */
 #define MODULE_ERR_OTHER 888 /**< The module any other error */
 
 /**
