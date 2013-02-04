@@ -24,7 +24,7 @@ int Worker(module *m, pool *p) {
   storage *send_buffer = NULL, *recv_buffer = NULL;
 
   /* Initialize the task and checkpoint */
-  t = TaskLoad(m, p, 0);
+  t = M2TaskLoad(m, p, 0);
   c = CheckpointLoad(m, p, 0);
 
   /* Data buffers */
@@ -57,7 +57,7 @@ int Worker(module *m, pool *p) {
     mstat = Unpack(m, &(recv_buffer->memory[0]), p, t, &tag);
     CheckStatus(mstat);
 
-    mstat = Receive(m->node, MASTER, tag, m, p, &(recv_buffer->memory[0]));
+    mstat = M2Receive(m->node, MASTER, tag, m, p, &(recv_buffer->memory[0]));
     CheckStatus(mstat);
 
     if (tag == TAG_TERMINATE) {
@@ -67,10 +67,10 @@ int Worker(module *m, pool *p) {
       Message(MESSAGE_DEBUG, "Worker recv: %d %d %d %d\n", t->tid,
           t->location[0], t->location[1], t->location[2]);
 
-      mstat = TaskPrepare(m, p, t);
+      mstat = M2TaskPrepare(m, p, t);
       CheckStatus(mstat);
 
-      mstat = TaskProcess(m, p, t);
+      mstat = M2TaskProcess(m, p, t);
       CheckStatus(mstat);
 
       if (mstat == TASK_CHECKPOINT) {
@@ -90,7 +90,7 @@ int Worker(module *m, pool *p) {
       MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
           MASTER, TAG_DATA, MPI_COMM_WORLD);
 
-      mstat = Send(m->node, MASTER, TAG_DATA, m, p);
+      mstat = M2Send(m->node, MASTER, TAG_DATA, m, p);
       CheckStatus(mstat);
 
       if (t->status == TASK_FINISHED) {

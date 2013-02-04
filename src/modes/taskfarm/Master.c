@@ -70,8 +70,8 @@ int Master(module *m, pool *p) {
   if (!temp_buffer) Error(CORE_ERR_MEM);
 
   /* Initialize the task and checkpoint */
-  t = TaskLoad(m, p, 0);
-  tc = TaskLoad(m, p, 0);
+  t = M2TaskLoad(m, p, 0);
+  tc = M2TaskLoad(m, p, 0);
   c = CheckpointLoad(m, p, 0);
 
   header_size = sizeof(int) * (HEADER_SIZE);
@@ -120,7 +120,7 @@ int Master(module *m, pool *p) {
     MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
         
-    mstat = Send(MASTER, i, TAG_DATA, m, p);
+    mstat = M2Send(MASTER, i, TAG_DATA, m, p);
     CheckStatus(mstat);
   }
 
@@ -137,7 +137,7 @@ int Master(module *m, pool *p) {
     if ((c->counter > (c->size-1)) || ice == CORE_ICE) {
 
       WriteData(p->board, &board_buffer[0][0][0][0]);
-      mstat = CheckpointPrepare(m, p, c);
+      mstat = M2CheckpointPrepare(m, p, c);
       CheckStatus(mstat);
 
       mstat = CheckpointProcess(m, p, c);
@@ -164,7 +164,7 @@ int Master(module *m, pool *p) {
 
     if (header[0] == TAG_RESULT) p->completed++;
 
-    mstat = Receive(MASTER, send_node, header[0], m, p, recv_buffer->memory);
+    mstat = M2Receive(MASTER, send_node, header[0], m, p, recv_buffer->memory);
     CheckStatus(mstat);
 
     c_offset = c->counter * recv_buffer->layout.size;
@@ -192,7 +192,7 @@ int Master(module *m, pool *p) {
         MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
             send_node, TAG_DATA, MPI_COMM_WORLD);
 
-        mstat = Send(MASTER, send_node, TAG_DATA, m, p);
+        mstat = M2Send(MASTER, send_node, TAG_DATA, m, p);
         CheckStatus(mstat);
 
       } else {
@@ -218,7 +218,7 @@ int Master(module *m, pool *p) {
       MPI_Send(&(temp_buffer->memory[0]), temp_buffer->layout.size, MPI_CHAR,
           send_node, TAG_DATA, MPI_COMM_WORLD);
 
-      mstat = Send(MASTER, send_node, TAG_DATA, m, p);
+      mstat = M2Send(MASTER, send_node, TAG_DATA, m, p);
       CheckStatus(mstat);
     }
 
@@ -228,7 +228,7 @@ int Master(module *m, pool *p) {
   Message(MESSAGE_DEBUG, "Completed %d tasks\n", p->completed);
 
   WriteData(p->board, &board_buffer[0][0][0][0]);
-  mstat = CheckpointPrepare(m, p, c);
+  mstat = M2CheckpointPrepare(m, p, c);
   CheckStatus(mstat);
 
   mstat = CheckpointProcess(m, p, c);
@@ -245,7 +245,7 @@ finalize:
     MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,
         i, TAG_DATA, MPI_COMM_WORLD);
         
-    mstat = Send(MASTER, i, tag, m, p);
+    mstat = M2Send(MASTER, i, tag, m, p);
     CheckStatus(mstat);
   }
 
