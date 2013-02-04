@@ -73,7 +73,7 @@ int CheckpointPrepare(module *m, pool *p, checkpoint *c) {
   query *q = NULL;
   void *s = NULL;
 
-  if (m->node == MASTER) {
+  if (p->node == MASTER) {
     q = LoadSym(m, "CheckpointPrepare", LOAD_DEFAULT);
     if (q) mstat = q(p, c, s);
     CheckStatus(mstat);

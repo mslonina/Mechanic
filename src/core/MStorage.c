@@ -105,17 +105,12 @@ int Storage(module *m, pool *p) {
     p->pool_size *= p->board->layout.dims[i];
   }
 
-  /* First load the fallback (core) storage layout */
+  /* Load the module storage layout */
   if (m->fallback.handler) {
-    q = LoadSym(m, "Storage", FALLBACK_ONLY);
+    q = LoadSym(m, "Storage", LOAD_DEFAULT);
     if (q) mstat = q(p, v);
     CheckStatus(mstat);
   }
-
-  /* Load the module setup */
-  q = LoadSym(m, "Storage", NO_FALLBACK);
-  if (q) mstat = q(p, v);
-  CheckStatus(mstat);
 
   /* Pool banks */
   p->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);

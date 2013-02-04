@@ -232,8 +232,8 @@ int Setup(setup *s) {
  * This function is used to define the storage layout. The layout may be defined per pool
  * (different storage layout during different task pools).
  *
- * If the Storage() hook is present in a custom module, the storage layout will be
- * merged with the core storage layout.
+ * If the Storage() hook is present in a custom module, it will be used instead of the
+ * core hook.
  *
  * @ingroup all_nodes
  * @param p The pool structure
