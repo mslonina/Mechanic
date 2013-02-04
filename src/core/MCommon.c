@@ -110,17 +110,38 @@ int Copy(char* in, char* out) {
  * @brief Creates the valid Mechanic file header
  */
 int MechanicHeader(module *m, hid_t h5location) {
-  char *api = PACKAGE_VERSION_API;
-  hid_t attr_s, attr_d;
+  double api;
+  hid_t attr_s, attr_d, ctype, memtype;
+  herr_t h5status;
+  hsize_t sdims[1] = {1};
+  char *module_name;
 
-//  sprintf(api, "%s", PACKAGE_VERSION_API);
-//  printf("API = %s\n", api);
+  // The API version
+  api = PACKAGE_VERSION_API;
 
   attr_s = H5Screate(H5S_SCALAR);
-  attr_d = H5Acreate(h5location, "API", H5T_C_S1, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-  H5Awrite(attr_d, H5T_C_S1, &api);
+  attr_d = H5Acreate(h5location, "API", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+  H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &api);
   H5Sclose(attr_s);
   H5Aclose(attr_d);
+
+  // The module name
+  module_name = Option2String("core", "module", m->layer.setup.head);
+
+  ctype = H5Tcopy(H5T_C_S1);
+  h5status = H5Tset_size(ctype, CONFIG_LEN);
+  memtype = H5Tcopy(H5T_C_S1);
+  h5status = H5Tset_size(memtype, CONFIG_LEN);
+  attr_s = H5Screate_simple(1, sdims, NULL);
+      
+  attr_d = H5Acreate(h5location, "MODULE", memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+  H5CheckStatus(attr_d);
+  H5Awrite(attr_d, memtype, module_name);
+      
+  H5Aclose(attr_d);
+  H5Sclose(attr_s);
+  H5Tclose(ctype);
+  H5Tclose(memtype);
 
   return SUCCESS;
 }

@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
   }
 
   /**
-   * (I) Write the configuration to the master file
+   * (I) Create the master file
    */
   if (node == MASTER && module.mode != RESTART_MODE) {
     module.filename = Name(Option2String("core", "name", module.layer.setup.head),
@@ -208,6 +208,8 @@ int main(int argc, char** argv) {
 
     h5location = H5Fcreate(module.filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     H5CheckStatus(h5location);
+
+    MechanicHeader(&module, h5location);
 
     H5Fclose(h5location);
   }

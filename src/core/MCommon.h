@@ -7,6 +7,7 @@
 
 #include "mechanic.h"
 #include "MTypes.h"
+#include "MConfig.h"
 
 #if HAVE_CONFIG_H
   #include <config.h>

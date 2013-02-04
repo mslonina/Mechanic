@@ -4,7 +4,7 @@ project (mechanic)
 set (Mechanic_VERSION_MAJOR 2)
 set (Mechanic_VERSION_MINOR 3)
 set (Mechanic_VERSION_PATCH 0)
-set (Mechanic_VERSION_API 0220)
+set (Mechanic_VERSION_API 2.30)
 set (PYTHON_PACKAGE_VERSION
   "${Mechanic_VERSION_MAJOR}.${Mechanic_VERSION_MINOR}.${Mechanic_VERSION_PATCH}")
 
@@ -18,7 +18,7 @@ set (package_url "\"http://git.ca.umk.pl\"")
 set (package_version_major "\"${Mechanic_VERSION_MAJOR}\"")
 set (package_version_minor "\"${Mechanic_VERSION_MINOR}\"")
 set (package_version_patch "\"${Mechanic_VERSION_PATCH}\"")
-set (package_version_api "\"${Mechanic_VERSION_API}\"")
+set (package_version_api "${Mechanic_VERSION_API}")
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set (platform_darwin 1)
