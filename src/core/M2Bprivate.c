@@ -234,7 +234,6 @@ int ModuleSetup(module *m, int argc, char **argv) {
  */
 void FinalizeLayer(layer *l) {
   if (l->handler) dlclose(l->handler);
-  if (l->mode_handler) dlclose(l->mode_handler);
   if (l->setup.options) free(l->setup.options);
   if (l->setup.popt->popt) free(l->setup.popt->popt);
   if (l->setup.popt->string_args) free(l->setup.popt->string_args);
