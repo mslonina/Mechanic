@@ -64,6 +64,8 @@ Key features
   and configuration
 - **MPI Task Farm** model (master -- worker relationships between nodes in a computing
   pool)
+- **Loadable runtime mode** support (that is, the user may replace the default `taskfarm`
+  mode)
 - **The pool-based simulations.** Each pool may have different number of tasks to compute
   (the task loop follows the _MPI Task Farm_ model), and data from all pools may be used 
   at the every stage of the simulation
