@@ -221,7 +221,11 @@ int Setup(setup *s) {
     .space="core", .name="usage", .shortName='\0', .value="0", .type=C_VAL,
     .description="Display brief message"
   };
-  s->options[36] = (options) OPTIONS_END;
+  s->options[36] = (options) {
+    .space="core", .name="mode", .shortName='m', .value="taskfarm", .type=C_STRING,
+    .description="The runtime mode (default: taskfarm)"
+  };
+  s->options[37] = (options) OPTIONS_END;
 
   return SUCCESS;
 }

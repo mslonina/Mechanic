@@ -86,10 +86,10 @@ int Work(module *m) {
        * The Task loop
        */
       if (m->node == MASTER) {
-        mstat = Master(m, p[pid]);
+        mstat = M2Master(m, p[pid]);
         CheckStatus(mstat);
       } else {
-        mstat = Worker(m, p[pid]);
+        mstat = M2Worker(m, p[pid]);
         CheckStatus(mstat);
       }
       
@@ -152,6 +152,54 @@ int Work(module *m) {
     PoolFinalize(m, p[pid]);
   }
   free(p);
+
+  return mstat;
+}
+
+/**
+ * @brief The master node hook
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
+ */
+int M2Master(module *m, pool *p) {
+  int mstat = SUCCESS;
+  char *err;
+  query *q;
+
+  q = (query*) dlsym(m->layer.mode_handler, "Master");
+  err = dlerror();
+  if (err == NULL) {
+    if (q) mstat = q(m, p);
+  }
+
+  CheckStatus(mstat);
+
+  return mstat;
+}
+
+/**
+ * @brief The worker node hook
+ *
+ * @param m The module pointer
+ * @param p The current pool pointer
+ *
+ * @return 0 on success, error code otherwise
+ */
+int M2Worker(module *m, pool *p) {
+  int mstat = SUCCESS;
+  char *err;
+  query *q;
+
+  q = (query*) dlsym(m->layer.mode_handler, "Worker");
+  err = dlerror();
+  if (err == NULL) {
+    if (q) mstat = q(m, p);
+  }
+
+  CheckStatus(mstat);
 
   return mstat;
 }

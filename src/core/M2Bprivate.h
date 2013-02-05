@@ -14,12 +14,14 @@
 
 module Bootstrap(int node, int mpisize, int argc, char **argv, char *name, module *f);
 module ModuleLoad(char *name);
+void* RuntimeModeLoad(char *name);
 int ModuleInit(module *m);
 int ModuleSetup(module *m, int argc, char **argv);
 void FinalizeLayer(layer *l);
 void ModuleFinalize(module *m);
 
 #define MECHANIC_MODULE_PREFIX "libmechanic_module_"
+#define MECHANIC_MODE_PREFIX "libmechanic_mode_"
 
 #if PLATFORM_DARWIN == 1
   #define LIBEXT ".dylib"

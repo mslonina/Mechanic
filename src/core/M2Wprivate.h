@@ -12,8 +12,8 @@
 
 #include "M2Wpublic.h"
 
-#include "Taskfarm.h"
-
 int Work(module *m);
+int M2Master(module *m, pool *p);
+int M2Worker(module *m, pool *p);
 
 #endif

@@ -1,6 +1,5 @@
 # http://stackoverflow.com/questions/11429055/cmake-how-create-a-single-shared-library-from-all-static-libraries-of-subprojec
-include_directories(. .. ../modes/taskfarm ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
-  ${PROJECT_BINARY_DIR}/src/modes/taskfarm
+include_directories(. .. ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
   ${PROJECT_BINARY_DIR}/src/vendor
   ${PROJECT_BINARY_DIR}/src/vendor/rngs
   ../vendor/rngs
@@ -63,7 +62,7 @@ add_library(core ${coresources})
 target_link_libraries(core hdf5 hdf5_hl m mpi libmechanic)
 
 add_executable(mechanic ${mainsources})
-target_link_libraries(mechanic core taskfarm popt mpi hdf5 hdf5_hl m libmechanic)
+target_link_libraries(mechanic core popt mpi hdf5 hdf5_hl m libmechanic)
 
 install (TARGETS libmechanic DESTINATION lib)
 install (TARGETS mechanic DESTINATION bin)

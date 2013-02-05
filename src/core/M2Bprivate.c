@@ -34,6 +34,7 @@
  *
  * The Bootstrap function is a wrapper for proper module loading:
  * - Loads the specified module
+ * - Loads the specified runtime mode
  * - Allocates the memory
  * - Loads the Setup function, if present
  * - Boots LRC API
@@ -73,6 +74,21 @@ module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, modu
   }
 
   return m;
+}
+
+void* RuntimeModeLoad(char *name) {
+  char *fname = NULL;
+  void *handler = NULL;
+  fname = Name(MECHANIC_MODE_PREFIX, name, "", LIBEXT);
+
+  handler = dlopen(fname, RTLD_NOW|RTLD_GLOBAL);
+  if (!handler) {
+    Message(MESSAGE_ERR, "Cannot load runtime mode '%s': %s\n", name, dlerror());
+    Error(CORE_ERR_MODULE);
+  }
+
+  free(fname);
+  return handler;
 }
 
 /**
@@ -218,6 +234,7 @@ int ModuleSetup(module *m, int argc, char **argv) {
  */
 void FinalizeLayer(layer *l) {
   if (l->handler) dlclose(l->handler);
+  if (l->mode_handler) dlclose(l->mode_handler);
   if (l->setup.options) free(l->setup.options);
   if (l->setup.popt->popt) free(l->setup.popt->popt);
   if (l->setup.popt->string_args) free(l->setup.popt->string_args);

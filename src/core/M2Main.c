@@ -217,6 +217,13 @@ int main(int argc, char** argv) {
   /**
    * (J) The Work pool
    */
+
+  // Load the runtime mode
+  module.layer.mode_handler = RuntimeModeLoad(Option2String("core", "mode", module.layer.setup.head));
+  if (node == MASTER && module.layer.mode_handler) {
+    Message(MESSAGE_INFO, "We are in '%s' mode\n", Option2String("core", "mode", module.layer.setup.head));
+  }
+
   if (mpi_size < module.layer.init.min_cpu_required) {
     Message(MESSAGE_WARN, "You must use min. %d MPI threads to run Mechanic.\n", module.layer.init.min_cpu_required);
     Message(MESSAGE_WARN, "Try: mpirun -np %d mechanic -p %s\n", module.layer.init.min_cpu_required, module_name);

@@ -47,6 +47,7 @@ typedef struct {
  */
 typedef struct {
   void *handler; /**< The module handler */
+  void *mode_handler; /**< The runtime mode handler */
   init init; /**< The init structure */
   setup setup; /**< The setup structure */
 } layer;
