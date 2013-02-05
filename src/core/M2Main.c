@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
       masterfile_backup = Name("backup-", masterfile, "", "");
 
       if (stat(masterfile, &file) == 0) {
-        Message(MESSAGE_INFO, "Backup '%s' -> '%s'\n", masterfile, masterfile_backup);
+        Message(MESSAGE_INFO, "Backup '%s' -> '%s'\n\n", masterfile, masterfile_backup);
         Copy(masterfile, masterfile_backup);
       }
 
@@ -221,7 +221,7 @@ int main(int argc, char** argv) {
   // Load the runtime mode (no fallback this time)
   module.layer.mode_handler = RuntimeModeLoad(Option2String("core", "mode", module.layer.setup.head));
   if (node == MASTER && module.layer.mode_handler) {
-    Message(MESSAGE_INFO, "\nWe are in '%s' mode\n", Option2String("core", "mode", module.layer.setup.head));
+    Message(MESSAGE_INFO, "We are in '%s' mode\n", Option2String("core", "mode", module.layer.setup.head));
   }
 
   if (mpi_size < module.layer.init.min_cpu_required) {
