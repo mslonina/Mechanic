@@ -5,4 +5,5 @@ set (rngs
 )
 
 add_library (mechanic_rngs OBJECT ${rngs})
+set_target_properties(mechanic_rngs PROPERTIES COMPILE_FLAGS "-fPIC" )
 install (FILES mechanic_rngs.h DESTINATION include)
