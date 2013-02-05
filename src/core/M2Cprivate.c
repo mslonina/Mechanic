@@ -304,6 +304,7 @@ void ConfigCleanup(configNamespace *head) {
 
 /**
  * @brief Write ASCII config file
+ *
  * @return 0 on success, errcode otherwise
  */
 int ConfigAsciiWriter(FILE *write, char *sep, char *comm, configNamespace *head) {
@@ -784,9 +785,10 @@ int ConfigCountOptions(char *nm, configNamespace *head) {
 }
 
 /**
- * @brief
- * Counts the number of all options in the default Config options structure. The option
+ * @brief Counts the number of all options in the default Config options structure. The option
  * structure must end with OPTIONS_END
+ *
+ * @return Number of options
  */
 int ConfigCountDefaultOptions(options *in) {
   int options;
@@ -801,8 +803,7 @@ int ConfigCountDefaultOptions(options *in) {
 }
 
 /**
- * @brief
- * Merges two Config default option structures
+ * @brief Merges two Config default option structures
  *
  * @param options Input structure
  * @param options The structure, that we want to merge with the Input one
@@ -832,8 +833,9 @@ int ConfigMergeDefaults(options *in, options *add) {
 }
 
 /**
- * @brief
- * Counts all options in all namespaces
+ * @brief Counts all options in all namespaces
+ *
+ * @return The number of options
  */
 int ConfigCountAllOptions(configNamespace *head) {
   int opts = 0, allopts = 0;
@@ -850,10 +852,9 @@ int ConfigCountAllOptions(configNamespace *head) {
 }
 
 /**
- * @brief
- * Converts the linked list back to structure
+ * @brief Converts the linked list back to a structure without memory allocation
  *
- * @return Dynamically allocated options structure. You must free it.
+ * @return The options structure
  */
 int ConfigHead2StructNoalloc(configNamespace *head, options *c) {
   int i = 0;
@@ -894,6 +895,11 @@ int ConfigHead2StructNoalloc(configNamespace *head, options *c) {
   return 0;
 }
 
+/**
+ * @brief Converts the linked list back to a structure
+ *
+ * @return The option structure. You must free it
+ */
 options* ConfigHead2Struct(configNamespace *head) {
   options *c = NULL;
   int opts = 0;

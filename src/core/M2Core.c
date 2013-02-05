@@ -18,6 +18,11 @@ void Welcome() {
 
 /**
  * @brief Creates the valid Mechanic file header
+ *
+ * @param m The module pointer
+ * @param h5location The HDF5 location (should be the master file)
+ *
+ * @return 0 on success, error code otherwise
  */
 int MechanicHeader(module *m, hid_t h5location) {
   double api;
