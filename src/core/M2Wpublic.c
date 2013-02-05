@@ -1,7 +1,11 @@
+/**
+ * @file
+ * Public hooks
+ */
 #include "M2Wpublic.h"
 
 /**
- * @brief The M2Prepare hook
+ * @brief The Prepare hook
  *
  * @param m The module pointer
  *
@@ -20,7 +24,7 @@ int M2Prepare(module *m) {
 }
 
 /**
- * @brief The M2Process hook
+ * @brief The Process hook
  *
  * @param m The module pointer
  *

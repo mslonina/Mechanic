@@ -34,7 +34,6 @@
  *
  * The Bootstrap function is a wrapper for proper module loading:
  * - Loads the specified module
- * - Loads the specified runtime mode
  * - Allocates the memory
  * - Loads the Setup function, if present
  * - Boots LRC API
@@ -76,6 +75,13 @@ module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, modu
   return m;
 }
 
+/**
+ * @brief Loads the runtime mode library
+ *
+ * @param name The of the runtime mode to load
+ *
+ * @return The module handler, NULL otherwise
+ */
 void* RuntimeModeLoad(char *name) {
   char *fname = NULL;
   void *handler = NULL;

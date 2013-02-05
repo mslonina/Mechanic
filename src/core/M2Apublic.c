@@ -1,10 +1,14 @@
+/**
+ * @file
+ * Common functions
+ */
 #include "M2Apublic.h"
 
 /**
- * @brief Creates name
+ * @brief Creates name string
  *
  * @param prefix The prefix for the name
- * @param name The name
+ * @param name The name string
  * @param suffix The suffix for the name
  * @param extension The extension for the name
  *

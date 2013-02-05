@@ -150,7 +150,6 @@ int ReadConfig(module *m, char *filename, configNamespace *head, int setup_mode)
     Error(CORE_ERR_SETUP);
   }
 
-
   inif = fopen(filename, "ro");
   if (inif) {
     if (setup_mode == MODULE_SETUP) {
@@ -182,7 +181,7 @@ int ReadConfig(module *m, char *filename, configNamespace *head, int setup_mode)
  *
  * Note:
  * Since Popt tables does not hold the option namespace, options must have unique name
- * (i.e. it is not possible to have same options in different LRC namespaces)
+ * (i.e. it is not possible to have same options in different Config namespaces)
  *
  * @return 0 on success, error code otherwise
  */
@@ -282,7 +281,7 @@ int PoptOptions(module *m, setup *s) {
 }
 
 /**
- * @brief Updates the LRC options table with popt values
+ * @brief Updates the Config options table with popt values
  *
  * @param s The setup pointer
  *
