@@ -27,11 +27,7 @@ Mechanic 2.x roadmap
   - [DONE] Task states
   - [DONE] Intermediate checkpoint storage
   - [DONE] Support for the restart mode
-
-2.4.x
------
-
-1. Loadable run modes (such as taskfarm, masteralone, collective etc.)
-  - Refactor code headers (public and private)
-  - Mode API functions: Init(), Master(), Worker()
+4. Loadable run modes (such as taskfarm, masteralone, collective etc.)
+  - [DONE] Refactor code headers (public and private)
+  - [DONE] Mode API functions: Master(), Worker()
   - [DONE] Min CPU option in Init() 

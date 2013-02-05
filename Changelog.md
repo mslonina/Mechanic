@@ -23,6 +23,14 @@ Mechanic short changelog
 - New hooks: Send() and Receive(), we are invoked after MPI_Send and MPI_Receive
   respectively, on each node
 
+### Loadable runtime mode support
+
+- Now, the user may create additional library with the runtime mode (this is an advanced
+  case of using the Mechanic, and we suggest to look into the core taskfarm mode). The
+  library prefix is `libmechanic_mode_${LIBRARY}` and is should contain `Master()` and
+  `Worker()` functions. No core fallback is provided. This fully fits the original idea of
+  the Mechanic. You can switch to different runtime mode with `--mode` option.
+
 ### Other
 
 - Initial work for python postprocessing pipeline

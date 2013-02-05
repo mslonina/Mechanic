@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
    * (J) The Work pool
    */
 
-  // Load the runtime mode
+  // Load the runtime mode (no fallback this time)
   module.layer.mode_handler = RuntimeModeLoad(Option2String("core", "mode", module.layer.setup.head));
   if (node == MASTER && module.layer.mode_handler) {
     Message(MESSAGE_INFO, "We are in '%s' mode\n", Option2String("core", "mode", module.layer.setup.head));
