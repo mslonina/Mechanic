@@ -17,7 +17,7 @@ Mechanic short changelog
 - The `setup` object has been removed from the API. Runtime configuration may be now modified
   per task pool through the `MReadOption` and `MWriteOption` macros
 - New core configuration options: x/y/z-axis element, x/y/z-label, as well as common
-  module-like options such as: debug, dense etc.
+  module-like options such as: `debug`, `dense` etc.
 
 #### Loadable runtime mode support
 
@@ -71,26 +71,26 @@ See the examples for the in-depth usage of the new Module API.
 
 #### Hooks
 
-- New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
+- New advanced hooks: `NodePrepare()`, `NodeProcess()`, `LoopPrepare()` and `LoopProcess()`
 - New public functions for reading and writing data:
-  ReadData(), WriteData(), ReadAttr(), WriteAttr()
+  `ReadData()`, `WriteData()`, `ReadAttr()`, `WriteAttr()`
 - Corresponding generic-type macros for reading and writing data:
-  MReadData(), MWriteData(), MReadAttr(), MWriteAttr()
+  `MReadData()`, `MWriteData()`, `MReadAttr()`, `MWriteAttr()`
 
 #### Other
 
 - Build system improvements
 - Several bug fixes and minor improvements
 - Documentation updates and new examples (i.e. fortran)
-- Examples are installed in share/mechanic/examples
+- Examples are installed in `share/mechanic/examples`
 
 2.1
 ---
 
-- The MPI Blocking communication mode (--blocking option)
-- New hooks: DatasetPrepare() and DatasetProcess(), which may be used for advanced stuff
+- The MPI Blocking communication mode (`--blocking` option)
+- New hooks: `DatasetPrepare()` and `DatasetProcess()`, which may be used for advanced stuff
   on HDF5 datasets (such as attributes)
-- New options: xmin, xmax, ymin, ymax, xorigin, yorigin, common for many scientific modules
+- New options: `xmin`, `xmax`, `ymin`, `ymax`, `xorigin`, `yorigin`, common for many scientific modules
 - Better memory management and smaller memory footprint
 
 2.0
