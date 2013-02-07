@@ -272,7 +272,6 @@ int main(int argc, char** argv) {
 finalize:
   MPI_Barrier(MPI_COMM_WORLD);
 
-  if (module.layer.mode_handler) dlclose(module.layer.mode_handler);
   if (module.layer.handler) ModuleFinalize(&module);
   if (core.layer.handler) ModuleFinalize(&core);
 
