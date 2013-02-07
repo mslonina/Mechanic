@@ -4,26 +4,22 @@ Mechanic short changelog
 2.3
 ---
 
-- Task snapshots - possibility to save current state of the task to the checkpoint buffer,
-  and continue task processing (instead of storing the task state after the task has
-  been processed)
-- ICE check. If the master node founds mechanic.ice file, it will abort the run
-- Support for numeric and string attributes
+#### Task management
 
-### Configuration
+- Task snapshots - possibility to save current state of the task to the checkpoint buffer,
+  and continue task processing (instead of storing the task final state)
+- ICE check. If the master node founds `mechanic.ice` file, it will abort the run 
+  (the current checkpoint state will be stored in the master file)
+
+#### Configuration
 
 - Runtime configuration is stored as attributes attached to the task board. No more `/Config` dataset
 - The `setup` object has been removed from the API. Runtime configuration may be now modified
   per task pool through the `MReadOption` and `MWriteOption` macros
 - New core configuration options: x/y/z-axis element, x/y/z-label, as well as common
-  module-like options such as: debug, dense etc.
+  module-like options such as: `debug`, `dense` etc.
 
-### Hooks
-
-- New hooks: Send() and Receive(), we are invoked after MPI_Send and MPI_Receive
-  respectively, on each node
-
-### Loadable runtime mode support
+#### Loadable runtime mode support
 
 - Now, the user may create additional library with the runtime mode (this is an advanced
   case of using the Mechanic, and we suggest to look into the core taskfarm mode). The
@@ -31,8 +27,14 @@ Mechanic short changelog
   `Worker()` functions. No core fallback is provided. This fully fits the original idea of
   the Mechanic. You can switch to different runtime mode with `--mode` option.
 
-### Other
+#### Hooks
 
+- New hooks: `Send()` and `Receive()`, that are invoked after `MPI_Send` and `MPI_Receive`
+  respectively, on each node
+
+#### Other
+
+- Support for numeric and string attributes
 - Initial work for python postprocessing pipeline
 - Mechanic now ships with the RNGS random number library 
 - Documentation updates
@@ -69,26 +71,26 @@ See the examples for the in-depth usage of the new Module API.
 
 #### Hooks
 
-- New advanced hooks: NodePrepare(), NodeProcess(), LoopPrepare() and LoopProcess()
+- New advanced hooks: `NodePrepare()`, `NodeProcess()`, `LoopPrepare()` and `LoopProcess()`
 - New public functions for reading and writing data:
-  ReadData(), WriteData(), ReadAttr(), WriteAttr()
+  `ReadData()`, `WriteData()`, `ReadAttr()`, `WriteAttr()`
 - Corresponding generic-type macros for reading and writing data:
-  MReadData(), MWriteData(), MReadAttr(), MWriteAttr()
+  `MReadData()`, `MWriteData()`, `MReadAttr()`, `MWriteAttr()`
 
 #### Other
 
 - Build system improvements
 - Several bug fixes and minor improvements
 - Documentation updates and new examples (i.e. fortran)
-- Examples are installed in share/mechanic/examples
+- Examples are installed in `share/mechanic/examples`
 
 2.1
 ---
 
-- The MPI Blocking communication mode (--blocking option)
-- New hooks: DatasetPrepare() and DatasetProcess(), which may be used for advanced stuff
+- The MPI Blocking communication mode (`--blocking` option)
+- New hooks: `DatasetPrepare()` and `DatasetProcess()`, which may be used for advanced stuff
   on HDF5 datasets (such as attributes)
-- New options: xmin, xmax, ymin, ymax, xorigin, yorigin, common for many scientific modules
+- New options: `xmin`, `xmax`, `ymin`, `ymax`, `xorigin`, `yorigin`, common for many scientific modules
 - Better memory management and smaller memory footprint
 
 2.0
