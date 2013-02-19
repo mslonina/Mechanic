@@ -66,6 +66,7 @@ int SelectOneOrganism(pool *p);
  */
 int Init(init *i) {
   i->pools = MAX_GENERATIONS;
+  i->banks_per_pool = 5;
   return SUCCESS;
 }
 

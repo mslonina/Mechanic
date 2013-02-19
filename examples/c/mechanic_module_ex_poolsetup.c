@@ -20,6 +20,14 @@
 #include "mechanic.h"
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->pools = 12;
+  return SUCCESS;
+}
+
+/**
  * Implements Setup()
  */
 int Setup(setup *s) {

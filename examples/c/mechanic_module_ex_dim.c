@@ -43,6 +43,15 @@
 #define TSET5 "4d-result"
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->banks_per_pool = 5;
+  i->banks_per_task = 6;
+  return SUCCESS;
+}
+
+/**
  * Implements Storage()
  */
 int Storage(pool *p, void *s) {

@@ -25,6 +25,14 @@
 int info;
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->pools = 10;
+  return SUCCESS;
+}
+
+/**
  * Implements LoopPrepare()
  *
  * According to the pool id we send additional message to all nodes

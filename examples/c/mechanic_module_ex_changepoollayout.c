@@ -32,6 +32,14 @@
 #include "mechanic.h"
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->pools = 10;
+  return SUCCESS;
+}
+
+/**
  * Implements Storage()
  *
  * Each worker will return 1x3 result array. The master node will combine the worker

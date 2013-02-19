@@ -27,6 +27,14 @@
 #define REVISIONS 5
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->pools = POOLS;
+  return SUCCESS;
+}
+
+/**
  * Implements Storage();
  */
 int Storage(pool *p, void *s) {

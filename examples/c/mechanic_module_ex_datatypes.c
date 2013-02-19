@@ -41,6 +41,15 @@
 #define TSET4 "TSET4"
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->banks_per_pool = 4;
+  i->banks_per_task = 5;
+  return SUCCESS;
+}
+
+/**
  * Implements Storage()
  */
 int Storage(pool *p, void *s) {

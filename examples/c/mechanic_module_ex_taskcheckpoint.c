@@ -25,6 +25,14 @@
 #define MAX_SNAPSHOTS 10
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->banks_per_task = 2;
+  return SUCCESS;
+}
+
+/**
  * Implements Storage()
  */
 int Storage(pool *p, void *s) {
