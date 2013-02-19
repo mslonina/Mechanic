@@ -147,8 +147,8 @@ ALLOCATE4(AllocateDouble4,double)
  *
  * @return The 1D size of the array
  */
-int GetSize(int rank, int *dims){
-  int i = 0, size = 0;
+unsigned int GetSize(unsigned int rank, unsigned int *dims){
+  unsigned int i = 0, size = 0;
 
   size = dims[0];
   for (i = 1; i < rank; i++) {
@@ -166,8 +166,8 @@ int GetSize(int rank, int *dims){
  * @param s The storage object
  * @param dims The result array
  */
-void GetDims(storage *s, int *dims) {
-  int i = 0;
+void GetDims(storage *s, unsigned int *dims) {
+  unsigned int i = 0;
 
   for (i = 0; i < s->layout.rank; i++) {
     dims[i] = s->layout.storage_dim[i];
