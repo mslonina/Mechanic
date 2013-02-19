@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i, j, task_groups, size;
+  int i = 0, j = 0, task_groups = 0, size = 0;
   size_t len;
   query *q;
   void *v = NULL;
@@ -210,7 +210,7 @@ int Storage(module *m, pool *p) {
     }
 
     /* @todo FIX IT! THIS PART IS TRAGIC FOR MEMORY ALLOCATION IN HUGE RUNS */
-    if (task_groups) {
+    if (task_groups == 1) {
       p->tasks = calloc(p->pool_size, sizeof(task));
       for (i = 0; i < p->pool_size; i++) {
         p->tasks[i] = M2TaskLoad(m, p, i);
