@@ -50,7 +50,7 @@
  * @return SUCCESS on success, error code otherwise
  */
 int Init(init *i) {
-  i->options = 128; /**< Maximum number of configurations option for the module */
+  i->options = 72; /**< Maximum number of configurations option for the module */
   i->pools = 2; /**< Maximum number of task pools */
   i->banks_per_pool = 2; /**< Maximum number of memory bank per pool */
   i->banks_per_task = 2; /**< Maximum number of memory banks per task */

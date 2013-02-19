@@ -20,12 +20,10 @@ int Worker(module *m, pool *p) {
   MPI_Status recv_status;
 
   task *t = NULL;
-  checkpoint *c = NULL;
   storage *send_buffer = NULL, *recv_buffer = NULL;
 
-  /* Initialize the task and checkpoint */
+  /* Initialize the task */
   t = M2TaskLoad(m, p, 0);
-  c = CheckpointLoad(m, p, 0);
 
   /* Data buffers */
   send_buffer = calloc(1, sizeof(storage));
@@ -100,7 +98,6 @@ int Worker(module *m, pool *p) {
   }
 
   /* Finalize */
-  CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
 
   if (send_buffer) {

@@ -31,21 +31,21 @@
  */
 typedef struct {
   char *name; /**< The name of the dataset */
-  int rank; /**< The rank of the dataset */
-  int storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
-  int use_hdf; /**< Enables HDF5 storage for the memory block */
-  int sync; /**< Whether to synchronize memory bank between master and worker */
-  int dims[MAX_RANK]; /**< The dimensions of the memory dataset */
+  /*unsigned*/ short rank; /**< The rank of the dataset */
+  /*unsigned*/ short storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
+  /*unsigned*/ short use_hdf; /**< Enables HDF5 storage for the memory block */
+  /*unsigned*/ short sync; /**< Whether to synchronize memory bank between master and worker */
+  /*unsigned*/ int dims[MAX_RANK]; /**< The dimensions of the memory dataset */
   hid_t datatype; /**< The datatype of the dataset */
-  int storage_dim[MAX_RANK]; /**< @internal The dimensions of the storage dataset */
-  int offsets[MAX_RANK]; /**< @internal The offsets (calculated automatically) */
+  /*unsigned*/ int storage_dim[MAX_RANK]; /**< @internal The dimensions of the storage dataset */
+  /*unsigned*/ int offsets[MAX_RANK]; /**< @internal The offsets (calculated automatically) */
   H5S_class_t dataspace; /**< @internal The type of the HDF5 dataspace (H5S_SIMPLE) */
   MPI_Datatype mpi_datatype; /**< @internal The MPI datatype of the dataset */
   size_t size; /**< @internal The size of the memory block */
   size_t storage_size; /**< @internal The size of the storage block */
   size_t datatype_size; /** @internal The size of the datatype */
-  int elements; /**< @internal Number of data elements in the memory block */
-  int storage_elements; /**< @internal Number of data elements in the storage block */
+  /*unsigned*/ int elements; /**< @internal Number of data elements in the memory block */
+  /*unsigned*/ int storage_elements; /**< @internal Number of data elements in the storage block */
 } schema;
 
 /**
@@ -65,7 +65,7 @@ typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   char *memory; /**< The memory block */
   attr *attr; /**< The dataset attributes */
-  int attr_banks; /**< Number of attribute banks in use */
+  /*unsigned*/ short attr_banks; /**< Number of attribute banks in use */
 } storage;
 
 /**
@@ -73,14 +73,14 @@ typedef struct {
  * The task
  */
 typedef struct {
-  int pid; /**< The parent pool id */
-  int tid; /**< The task id */
-  int rid; /**< The task reset id */
-  int cid; /**< The task checkpoint id */
-  int status; /**< The task status */
-  int state; /**< The task processing state */
-  int location[TASK_BOARD_RANK]; /**< Coordinates of the task */
-  short node; /** The computing node */
+  /*unsigned*/ int pid; /**< The parent pool id */
+  /*unsigned*/ int tid; /**< The task id */
+  /*unsigned*/ int rid; /**< The task reset id */
+  /*unsigned*/ int cid; /**< The task checkpoint id */
+  /*unsigned*/ short status; /**< The task status */
+  /*unsigned*/ short state; /**< The task processing state */
+  /*unsigned*/ short location[TASK_BOARD_RANK]; /**< Coordinates of the task */
+  /*unsigned*/ short node; /** The computing node */
   storage *storage; /**< The storage schema and data */
 } task;
 
@@ -89,22 +89,22 @@ typedef struct {
  * The pool
  */
 typedef struct {
-  int pid; /**< The pool id */
-  int rid; /**< The reset id */
-  int status; /**< The pool create status */
-  int state; /**< The pool processing state */
+  /*unsigned*/ int pid; /**< The pool id */
+  /*unsigned*/ int rid; /**< The reset id */
+  /*unsigned*/ short status; /**< The pool create status */
+  /*unsigned*/ short state; /**< The pool processing state */
   storage *board; /**< The task board */
   storage *storage; /**< The global pool storage scheme */
   task *task; /**< The task scheme */
   task **tasks; /**< All tasks */
-  int checkpoint_size; /**< The checkpoint size */
-  int pool_size; /**< The pool size (number of tasks to do) */
-  int completed; /**< The pool task completed counter */
-  int node; /**< The node ID */
-  int mpi_size; /**< The MPI COMM size */
-  int pool_banks; /**< The number of pool memory banks */
-  int task_banks; /**< The number of task memory banks */
-  int attr_banks; /**< The number of attributes banks */
+  /*unsigned*/ int checkpoint_size; /**< The checkpoint size */
+  /*unsigned*/ int pool_size; /**< The pool size (number of tasks to do) */
+  /*unsigned*/ int completed; /**< The pool task completed counter */
+  /*unsigned*/ short node; /**< The node ID */
+  /*unsigned*/ short mpi_size; /**< The MPI COMM size */
+  /*unsigned*/ short pool_banks; /**< The number of pool memory banks */
+  /*unsigned*/ short task_banks; /**< The number of task memory banks */
+  /*unsigned*/ short attr_banks; /**< The number of attributes banks */
 } pool;
 
 /**

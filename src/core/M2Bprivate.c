@@ -159,25 +159,25 @@ int ModuleInit(module *m) {
   m->layer.setup.popt = calloc(1, sizeof(popt));
   if (!m->layer.setup.popt) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->popt = calloc(3*opts, sizeof(struct poptOption));
+  m->layer.setup.popt->popt = calloc(opts, sizeof(struct poptOption));
   if (!m->layer.setup.popt->popt) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->string_args = calloc(3*opts, sizeof(char));
+  m->layer.setup.popt->string_args = calloc(opts, sizeof(char));
   if (!m->layer.setup.popt->string_args) Error(CORE_ERR_MEM);
   
-  m->layer.setup.popt->val_args = calloc(3*opts, sizeof(int));
+  m->layer.setup.popt->val_args = calloc(opts, sizeof(int));
   if (!m->layer.setup.popt->val_args) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->int_args = calloc(3*opts, sizeof(int));
+  m->layer.setup.popt->int_args = calloc(opts, sizeof(int));
   if (!m->layer.setup.popt->int_args) Error(CORE_ERR_MEM);
   
-  m->layer.setup.popt->long_args = calloc(3*opts, sizeof(long));
+  m->layer.setup.popt->long_args = calloc(opts, sizeof(long));
   if (!m->layer.setup.popt->long_args) Error(CORE_ERR_MEM);
   
-  m->layer.setup.popt->float_args = calloc(3*opts, sizeof(float));
+  m->layer.setup.popt->float_args = calloc(opts, sizeof(float));
   if (!m->layer.setup.popt->float_args) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->double_args = calloc(3*opts, sizeof(double));
+  m->layer.setup.popt->double_args = calloc(opts, sizeof(double));
   if (!m->layer.setup.popt->double_args) Error(CORE_ERR_MEM);
 
   m->layer.setup.head = NULL;
