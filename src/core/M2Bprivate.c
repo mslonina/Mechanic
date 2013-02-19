@@ -185,6 +185,18 @@ int ModuleInit(module *m) {
   m->filename = NULL;
   m->communication_type = MPI_NONBLOCKING;
 
+  /** 
+   * General Init fixes:
+   * - we need at least one task pool
+   * - we need at least one storage bank per pool
+   * - we need at least one storage bank per task
+   * - we need at least one attribute bank per dataset
+   */
+  if (m->layer.init.pools < 1) m->layer.init.pools = 1;
+  if (m->layer.init.banks_per_pool < 1) m->layer.init.banks_per_pool = 1;
+  if (m->layer.init.banks_per_task < 1) m->layer.init.banks_per_task = 1;
+  if (m->layer.init.attr_per_dataset < 1) m->layer.init.attr_per_dataset = 1;
+
   return mstat;
 }
 

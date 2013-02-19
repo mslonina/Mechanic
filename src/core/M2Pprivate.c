@@ -288,7 +288,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   }
 
   /* This may be memory heavy */
-  if (task_groups) {
+  if (task_groups == 1) {
     for (i = 0; i < p->pool_size; i++) {
       sprintf(path, TASK_PATH, i);
       h5task = H5Gopen(h5tasks, path, H5P_DEFAULT);

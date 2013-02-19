@@ -51,10 +51,10 @@
  */
 int Init(init *i) {
   i->options = 72; /**< Maximum number of configurations option for the module */
-  i->pools = 2; /**< Maximum number of task pools */
-  i->banks_per_pool = 2; /**< Maximum number of memory bank per pool */
-  i->banks_per_task = 2; /**< Maximum number of memory banks per task */
-  i->attr_per_dataset = 2; /**< Maximum number of attributes that may be assigned to the dataset */
+  i->pools = 1; /**< Maximum number of task pools */
+  i->banks_per_pool = 1; /**< Maximum number of memory bank per pool */
+  i->banks_per_task = 1; /**< Maximum number of memory banks per task */
+  i->attr_per_dataset = 1; /**< Maximum number of attributes that may be assigned to the dataset */
   i->min_cpu_required = 2; /**< Minimum number of CPUs required */
 
   return SUCCESS;
