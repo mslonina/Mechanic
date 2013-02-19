@@ -374,7 +374,7 @@ void PoolFinalize(module *m, pool *p) {
   int i = 0;
 
   if (p->storage) {
-    for (i = 0; i < m->layer.init.banks_per_pool; i++) {
+    for (i = 0; i < p->pool_banks; i++) {
       free(p->storage[i].attr);
     }
     FreeMemoryLayout(p->pool_banks, p->storage);
@@ -383,7 +383,7 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p->task) {
     if (p->task->storage) {
-      for (i = 0; i < m->layer.init.banks_per_pool; i++) {
+      for (i = 0; i < p->task_banks; i++) {
         free(p->task->storage[i].attr);
       }
       FreeMemoryLayout(p->task_banks, p->task->storage);
