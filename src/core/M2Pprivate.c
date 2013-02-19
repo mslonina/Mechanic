@@ -44,9 +44,9 @@ pool* PoolLoad(module *m, int pid) {
   p->board->memory = NULL;
 
   /* Task board attributes */
-  p->board->attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+  p->board->attr = calloc(m->layer.init.options, sizeof(storage));
   if (!p->board->attr) Error(CORE_ERR_MEM);
-  for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+  for (j = 0; j < m->layer.init.options; j++) {
     p->board->attr[j].layout = (schema) ATTR_STORAGE_END;
     p->board->attr[j].memory = NULL;
   }
