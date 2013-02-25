@@ -21,6 +21,7 @@
  *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
  */
 #include "mechanic.h"
+#include "hdf5_hl.h"
 
 /**
  * Implements Storage()
