@@ -162,7 +162,7 @@ int ModuleInit(module *m) {
   m->layer.setup.popt->popt = calloc(opts, sizeof(struct poptOption));
   if (!m->layer.setup.popt->popt) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->string_args = calloc(opts, sizeof(char));
+  m->layer.setup.popt->string_args = calloc(opts, sizeof(char*));
   if (!m->layer.setup.popt->string_args) Error(CORE_ERR_MEM);
   
   m->layer.setup.popt->val_args = calloc(opts, sizeof(int));

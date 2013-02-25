@@ -126,15 +126,15 @@ int Setup(setup *s) {
     .description="The z-axis label"
   };
   s->options[12] = (options) {
-    .space="core", .name="xorigin", .shortName='\0', .value="0.5", .type=C_DOUBLE,
+    .space="core", .name="xorigin", .shortName='\0', .value="0.543", .type=C_DOUBLE,
     .description="The x-axis origin"
   };
   s->options[13] = (options) {
-    .space="core", .name="yorigin", .shortName='\0', .value="0.5", .type=C_DOUBLE,
+    .space="core", .name="yorigin", .shortName='\0', .value="0.567", .type=C_DOUBLE,
     .description="The y-axis origin"
   };
   s->options[14] = (options) {
-    .space="core", .name="zorigin", .shortName='\0', .value="0.5", .type=C_DOUBLE,
+    .space="core", .name="zorigin", .shortName='\0', .value="0.512", .type=C_DOUBLE,
     .description="The z-axis origin"
   };
   s->options[15] = (options) {
@@ -150,27 +150,27 @@ int Setup(setup *s) {
     .description="The task pool board depth resolution"
   };
   s->options[18] = (options) {
-    .space="core", .name="xmin", .shortName='\0', .value="0.0", .type=C_DOUBLE,
+    .space="core", .name="xmin", .shortName='\0', .value="0.0005", .type=C_DOUBLE,
     .description="The x-axis minimum"
   };
   s->options[19] = (options) {
-    .space="core", .name="xmax", .shortName='\0', .value="1.0", .type=C_DOUBLE,
+    .space="core", .name="xmax", .shortName='\0', .value="1.0005", .type=C_DOUBLE,
     .description="The x-axis maximum"
   };
   s->options[20] = (options) {
-    .space="core", .name="ymin", .shortName='\0', .value="0.0", .type=C_DOUBLE,
+    .space="core", .name="ymin", .shortName='\0', .value="0.001", .type=C_DOUBLE,
     .description="The y-axis minimum"
   };
   s->options[21] = (options) {
-    .space="core", .name="ymax", .shortName='\0', .value="1.0", .type=C_DOUBLE,
+    .space="core", .name="ymax", .shortName='\0', .value="1.001", .type=C_DOUBLE,
     .description="The y-axis maximum"
   };
   s->options[22] = (options) {
-    .space="core", .name="zmin", .shortName='\0', .value="0.0", .type=C_DOUBLE,
+    .space="core", .name="zmin", .shortName='\0', .value="0.003", .type=C_DOUBLE,
     .description="The z-axis minimum"
   };
   s->options[23] = (options) {
-    .space="core", .name="zmax", .shortName='\0', .value="1.0", .type=C_DOUBLE,
+    .space="core", .name="zmax", .shortName='\0', .value="1.003", .type=C_DOUBLE,
     .description="The z-axis maximum"
   };
   s->options[24] = (options) {
