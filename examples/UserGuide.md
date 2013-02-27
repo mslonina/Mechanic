@@ -262,6 +262,8 @@ look at following examples:
     [mechanic_module_ex_chpoollayout2.c](./c/mechanic_module_ex_chpoollayout2.c)
   - Override the task pool size:
     [mechanic_module_ex_poolsize.c](./c/mechanic_module_ex_poolsize.c)
+  - Using pool stages:
+    [mechanic_module_ex_stage.c](./c/mechanic_module_ex_stage.c)
 
 #### Configuration
 
@@ -962,6 +964,29 @@ In the following example, the Pool will be reset 10 times. After that, the next 
 be created. If the number of pools reach 5, the pool loop is finalized:
 
     int PoolProcess(pool **all, pool *p, void *s) {
+      if (p->rid < 10) return POOL_RESET;
+      if (p->pid < 5) return POOL_CREATE_NEW;
+      return POOL_FINALIZE;
+    }
+
+#### Pool stages
+
+During the pool, pool stages are available. Some cpu-intensive code may require to split
+the algorithm into stages, that may be run on workers. To use pool stages, the
+`PoolProcess()` hook must return `POOL_STAGE` code:
+
+    int PoolProcess(pool **all, pool *p, void *s) {
+      if (p->sid < 4) return POOL_STAGE;
+      if (p->rid < 10) return POOL_RESET;
+      if (p->pid < 5) return POOL_CREATE_NEW;
+      return POOL_FINALIZE;
+    }
+
+Each stage may also be reset, with the return code `POOL_STAGE_RESET`:
+
+    int PoolProcess(pool **all, pool *p, void *s) {
+      if (p->srid < 7) return POOL_STAGE_RESET;
+      if (p->sid < 4) return POOL_STAGE;
       if (p->rid < 10) return POOL_RESET;
       if (p->pid < 5) return POOL_CREATE_NEW;
       return POOL_FINALIZE;
