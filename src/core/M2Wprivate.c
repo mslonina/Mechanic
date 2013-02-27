@@ -57,7 +57,7 @@ int Work(module *m) {
    */
   do {
 
-    /* Pool storage */
+    // Pool storage
     if (m->mode != RESTART_MODE) Storage(m, p[pid]);
 
     if (m->node == MASTER) {
@@ -66,40 +66,50 @@ int Work(module *m) {
 
     time_in = clock();
     
-    do {
-      
-      mstat = M2NodePrepare(m, p, p[pid]);
-      CheckStatus(mstat);
-      
+    do { // The pool reset loop
+
       if (m->mode != RESTART_MODE) {
         mstat = PoolReset(m, p[pid]);
         CheckStatus(mstat);
       }
 
-      mstat = PoolPrepare(m, p, p[pid]);
-      CheckStatus(mstat);
+      do { // The pool stage loop
 
-      mstat = M2LoopPrepare(m, p, p[pid]);
-      CheckStatus(mstat);
+        p[pid]->srid = 0;
+        
+        do { // The paol stage reset loop
+
+          mstat = M2NodePrepare(m, p, p[pid]);
+          CheckStatus(mstat);
+
+          mstat = PoolPrepare(m, p, p[pid]);
+          CheckStatus(mstat);
+
+          mstat = M2LoopPrepare(m, p, p[pid]);
+          CheckStatus(mstat);
+          
+          // The Task loop
+          if (m->node == MASTER) {
+            mstat = M2Master(m, p[pid]);
+            CheckStatus(mstat);
+          } else {
+            mstat = M2Worker(m, p[pid]);
+            CheckStatus(mstat);
+          }
+          
+          mstat = M2LoopProcess(m, p, p[pid]);
+          CheckStatus(mstat);
+          
+          pool_create = PoolProcess(m, p, p[pid]);
       
-      /**
-       * The Task loop
-       */
-      if (m->node == MASTER) {
-        mstat = M2Master(m, p[pid]);
-        CheckStatus(mstat);
-      } else {
-        mstat = M2Worker(m, p[pid]);
-        CheckStatus(mstat);
-      }
-      
-      mstat = M2LoopProcess(m, p, p[pid]);
-      CheckStatus(mstat);
-      
-      pool_create = PoolProcess(m, p, p[pid]);
-  
-      mstat = M2NodeProcess(m, p, p[pid]);
-      CheckStatus(mstat);
+          mstat = M2NodeProcess(m, p, p[pid]);
+          CheckStatus(mstat);
+
+          p[pid]->srid++;
+        } while (pool_create == POOL_STAGE_RESET);
+
+        p[pid]->sid++;
+      } while (pool_create == POOL_STAGE);
       
       p[pid]->rid++;
     } while (pool_create == POOL_RESET);

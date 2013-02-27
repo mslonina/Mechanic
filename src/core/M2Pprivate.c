@@ -74,6 +74,8 @@ pool* PoolLoad(module *m, int pid) {
 
   p->pid = pid;
   p->rid = 0;
+  p->sid = 0;
+  p->srid = 0;
   p->node = m->node;
   p->mpi_size = m->mpi_size;
   p->completed = 0;
@@ -360,6 +362,10 @@ int PoolReset(module *m, pool *p) {
 
     free(board);
   }
+
+  // Reset stages
+  p->sid = 0;
+  p->srid = 0;
 
   return mstat;
 }

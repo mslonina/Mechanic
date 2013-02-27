@@ -244,72 +244,72 @@ look at following examples:
 #### The basics
 
   - A simple map or image:
-    [mechanic_module_ex_map.c](./c/mechanic_module_ex_attr.c)
+    [mechanic_module_ex_map.c](c/mechanic_module_ex_attr.c)
   - The Mandelbrot set:
-    [mechanic_module_ex_mandelbrot.c](./c/mechanic_module_ex_mandelbrot.c)
+    [mechanic_module_ex_mandelbrot.c](c/mechanic_module_ex_mandelbrot.c)
 
 #### Working with task pools
 
   - Creating task pools:
-    [mechanic_module_ex_createpool.c](./c/mechanic_module_ex_createpool.c)
+    [mechanic_module_ex_createpool.c](c/mechanic_module_ex_createpool.c)
   - Reading and writing task pool data:
-    [mechanic_module_ex_pool.c](./c/mechanic_module_ex_pool.c)
+    [mechanic_module_ex_pool.c](c/mechanic_module_ex_pool.c)
   - Resetting the task pool:
-    [mechanic_module_ex_reset.c](./c/mechanic_module_ex_reset.c)
+    [mechanic_module_ex_reset.c](c/mechanic_module_ex_reset.c)
   - Different storage layout per task pool (basic):
-    [mechanic_module_ex_chpoollayout.c](./c/mechanic_module_ex_chpoollayout.c)
+    [mechanic_module_ex_chpoollayout.c](c/mechanic_module_ex_chpoollayout.c)
   - Different storage layout per task pool (advanced):
-    [mechanic_module_ex_chpoollayout2.c](./c/mechanic_module_ex_chpoollayout2.c)
+    [mechanic_module_ex_chpoollayout2.c](c/mechanic_module_ex_chpoollayout2.c)
   - Override the task pool size:
-    [mechanic_module_ex_poolsize.c](./c/mechanic_module_ex_poolsize.c)
+    [mechanic_module_ex_poolsize.c](c/mechanic_module_ex_poolsize.c)
   - Using pool stages:
-    [mechanic_module_ex_stage.c](./c/mechanic_module_ex_stage.c)
+    [mechanic_module_ex_stage.c](c/mechanic_module_ex_stage.c)
 
 #### Configuration
 
   - Defining and using configuration options (`Init()` and `Setup()`):
-    [mechanic_module_ex_setup.c](./c/mechanic_module_ex_setup.c)
+    [mechanic_module_ex_setup.c](c/mechanic_module_ex_setup.c)
   - Changing runtime configuration per task pool:
-    [mechanic_module_ex_poolsetup.c](./c/mechanic_module_ex_poolsetup.c)
+    [mechanic_module_ex_poolsetup.c](c/mechanic_module_ex_poolsetup.c)
 
 #### Datatypes and dimensionality
 
   - Using different datatypes, reading and writing data to the memory banks:
-    [mechanic_module_ex_datatypes.c](./c/mechanic_module_ex_datatypes.c)
+    [mechanic_module_ex_datatypes.c](c/mechanic_module_ex_datatypes.c)
   - Using datasets of different datatypes and dimensionality:
-    [mechanic_module_ex_dim.c](./c/mechanic_module_ex_dim.c)
+    [mechanic_module_ex_dim.c](c/mechanic_module_ex_dim.c)
 
 #### Attributes
 
   - Using HDF5 attributes:
-    [mechanic_module_ex_attr.c](./c/mechanic_module_ex_attr.c)
+    [mechanic_module_ex_attr.c](c/mechanic_module_ex_attr.c)
 
 #### Advanced hooks
 
   - Using `Prepare()` and `Process()` hooks:
-    [mechanic_module_ex_prepareprocess.c](./c/mechanic_module_ex_prepareprocess.c)
+    [mechanic_module_ex_prepareprocess.c](c/mechanic_module_ex_prepareprocess.c)
   - Using `DatasetPrepare()` and `DatasetProcess()` hooks:
-    [mechanic_module_ex_dataset.c](./c/mechanic_module_ex_dataset.c)
+    [mechanic_module_ex_dataset.c](c/mechanic_module_ex_dataset.c)
   - Using `NodePrepare()` and `NodeProcess()` hooks:
-    [mechanic_module_ex_node.c](./c/mechanic_module_ex_node.c)
+    [mechanic_module_ex_node.c](c/mechanic_module_ex_node.c)
   - Using `LoopPrepare()` and `LoopProcess()` hooks:
-    [mechanic_module_ex_loop.c](./c/mechanic_module_ex_loop.c)
+    [mechanic_module_ex_loop.c](c/mechanic_module_ex_loop.c)
 
 #### External libraries shipped with the core
 
   - Using RNGS library:
-    [mechanic_module_ex_rngs.c](./c/mechanic_module_ex_rngs.c)
+    [mechanic_module_ex_rngs.c](c/mechanic_module_ex_rngs.c)
 
 #### Real-life examples
 
   - Reading input file and storing it in the master datafile (`Storage()` and `PoolPrepare()` hooks):
-    [mechanic_module_ex_readfile.c](./c/mechanic_module_ex_readfile.c)
+    [mechanic_module_ex_readfile.c](c/mechanic_module_ex_readfile.c)
   - Reading input file and storing it in the master datafile with `Setup()`:
-    [mechanic_module_ex_readfile_setup.c](./c/mechanic_module_ex_readfile_setup.c)
+    [mechanic_module_ex_readfile_setup.c](c/mechanic_module_ex_readfile_setup.c)
   - Very simple genetic algorithm:
-    [mechanic_module_ex_ga.c](./c/mechanic_module_ex_ga.c)
+    [mechanic_module_ex_ga.c](c/mechanic_module_ex_ga.c)
   - Task snapshots:
-    [mechanic_module_ex_taskcheckpoint.c](./c/mechanic_module_taskcheckpoint.c)
+    [mechanic_module_ex_taskcheckpoint.c](c/mechanic_module_taskcheckpoint.c)
 
 #### The core module
 
@@ -319,7 +319,7 @@ document and uses all available hooks.
 #### Fortran
 
   - Connecting external Fortran subroutine:
-    [mechanic_module_ex_ffc.c](./fortran/mechanic_module_ex_ffc.c)
+    [mechanic_module_ex_ffc.c](fortran/mechanic_module_ex_ffc.c)
 
 #### Compilation
 

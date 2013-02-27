@@ -90,7 +90,9 @@ typedef struct {
  */
 typedef struct {
   unsigned int pid; /**< The pool id */
-  unsigned int rid; /**< The reset id */
+  unsigned int rid; /**< The pool reset id */
+  unsigned int sid; /**< The stage id */
+  unsigned int srid; /**< The stage reset id */
   unsigned short status; /**< The pool create status */
   unsigned short state; /**< The pool processing state */
   storage *board; /**< The task board */
