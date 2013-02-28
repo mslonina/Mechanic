@@ -1,6 +1,6 @@
 /**
  * @file
- * Public logging interface
+ * Error and message handlers (public API)
  */
 #include "M2Epublic.h"
 

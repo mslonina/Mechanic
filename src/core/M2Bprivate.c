@@ -21,7 +21,7 @@
 
 /**
  * @file
- * The Bootstrap stage
+ * The bootstrap stage
  */
 #include "M2Bprivate.h"
 
@@ -183,7 +183,7 @@ int ModuleInit(module *m) {
   m->layer.setup.head = NULL;
   m->layer.setup.popt->poptcontext = NULL;
   m->filename = NULL;
-  m->communication_type = MPI_NONBLOCKING;
+  m->communication_type = MPI_BLOCKING;
 
   /** 
    * General Init fixes:

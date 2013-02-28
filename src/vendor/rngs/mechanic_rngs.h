@@ -5,9 +5,8 @@
  * Latest Revision : 09-22-98
  * ----------------------------------------------------------------------- 
  */
-
-#ifndef _RNGS_
-#define _RNGS_
+#ifndef MECHANIC_VENDOR_RNGS
+#define MECHANIC_VENDOR_RNGS
 
 double Random(void);
 void   PlantSeeds(long x);

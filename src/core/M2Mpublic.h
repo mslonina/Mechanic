@@ -1,6 +1,6 @@
 /**
  * @file
- * Public MPI-communication interface
+ * MPI-communication (public API)
  */
 #ifndef MECHANIC_M2M_PUBLIC_H
 #define MECHANIC_M2M_PUBLIC_H

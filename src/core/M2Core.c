@@ -1,6 +1,6 @@
 /**
  * @file
- * The core-related functions
+ * Core-related functions
  */
 #include "M2Core.h"
 

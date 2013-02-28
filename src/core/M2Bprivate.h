@@ -1,6 +1,6 @@
 /**
  * @file
- * The Bootstrap stage
+ * The bootstrap stage
  */
 #ifndef MECHANIC_M2B_PRIVATE_H
 #define MECHANIC_M2B_PRIVATE_H

@@ -1,6 +1,6 @@
 /**
  * @file
- * The MPI-related functions and wrappers
+ * MPI-communication (public API)
  */
 #include "M2Mpublic.h"
 

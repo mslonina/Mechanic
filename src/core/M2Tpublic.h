@@ -1,6 +1,6 @@
 /**
  * @file
- * Public task interface
+ * The task (public API)
  */
 #ifndef MECHANIC_M2T_PUBLIC_H
 #define MECHANIC_M2T_PUBLIC_H

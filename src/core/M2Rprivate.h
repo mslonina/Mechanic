@@ -1,6 +1,6 @@
 /**
  * @file
- * The restart mode header
+ * The restart mode
  */
 #ifndef MECHANIC_M2R_PRIVATE_H
 #define MECHANIC_M2R_PRIVATE_H

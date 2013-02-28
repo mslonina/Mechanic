@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The work loop hooks (public API)
+ */
 #ifndef MECHANIC_M2W_PUBLIC_H
 #define MECHANIC_M2W_PUBLIC_H
 

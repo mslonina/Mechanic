@@ -199,7 +199,7 @@ int Popt(module *m, int argc, char** argv, setup *s, int setup_mode) {
     return CORE_SETUP_HELP;
   }
 
-  /* Update the LRC options struct with values from command line */
+  /* Update the Config options struct with values from command line */
   ConfigUpdate(s);
 
   if (Option2Int("core", "help", s->head)) {
@@ -329,7 +329,7 @@ int ConfigUpdate(setup *s) {
 /**
  * @brief Build MPI derived type for options
  *
- * @param c The input LRC defaults structure
+ * @param c The input Config defaults structure
  * @param mpi_t The output MPI derived type
  *
  * @return 0 on success, error code otherwise

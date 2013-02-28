@@ -1,6 +1,6 @@
 /**
  * @file
- * Public logging interface
+ * Error and message handlers (public API)
  */
 #ifndef MECHANIC_M2E_PUBLIC_H
 #define MECHANIC_M2E_PUBLIC_H
@@ -54,7 +54,7 @@ typedef enum {
 } MessageType;
 
 /**
- * Message and log helpers
+ * Error and message helpers
  */
 int Ice(); /**< Checks for the ICE file */
 void Message(int type, char* message, ...); /**< Common printf wrapper */

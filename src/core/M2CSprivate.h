@@ -1,6 +1,6 @@
 /**
  * @file
- * The setup interface header
+ * The setup stage
  */
 #ifndef MECHANIC_M2CS_PRIVATE_H
 #define MECHANIC_M2CS_PRIVATE_H

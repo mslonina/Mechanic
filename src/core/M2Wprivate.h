@@ -1,3 +1,7 @@
+/**
+ * @file
+ * The work loop
+ */
 #ifndef MECHANIC_M2W_PRIVATE_H
 #define MECHANIC_M2W_PRIVATE_H
 

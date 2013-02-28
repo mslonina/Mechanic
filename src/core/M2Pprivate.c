@@ -1,6 +1,6 @@
 /**
  * @file
- * The Task Pool related functions
+ * The task pool
  */
 #include "M2Pprivate.h"
 

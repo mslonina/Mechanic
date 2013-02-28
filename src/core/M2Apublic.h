@@ -1,3 +1,7 @@
+/**
+ * @file
+ * Datatypes and function prototypes (public API)
+ */
 #ifndef MECHANIC_M2A_PUBLIC_H
 #define MECHANIC_M2A_PUBLIC_H
 

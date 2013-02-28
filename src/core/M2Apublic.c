@@ -1,6 +1,6 @@
 /**
  * @file
- * Common functions
+ * Common functions (public API)
  */
 #include "M2Apublic.h"
 

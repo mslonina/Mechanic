@@ -1,6 +1,6 @@
 /**
  * @file
- * The storage interface header
+ * Data storage and management
  */
 #ifndef MECHANIC_M2S_PRIVATE_H
 #define MECHANIC_M2S_PRIVATE_H

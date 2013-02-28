@@ -27,7 +27,6 @@ set (
 
 set (
   coresources
-  ${libsources}
   M2Aprivate.c
   M2Bprivate.c
   M2Cprivate.c
@@ -56,13 +55,13 @@ set (
 
 add_library(libmechanic SHARED ${libsources} $<TARGET_OBJECTS:mechanic_rngs>)
 set_target_properties(libmechanic PROPERTIES OUTPUT_NAME mechanic)
-target_link_libraries(libmechanic hdf5 hdf5_hl m mpi)
+target_link_libraries(libmechanic hdf5 mpi)
 
 add_library(core ${coresources})
-target_link_libraries(core hdf5 hdf5_hl m mpi libmechanic)
+target_link_libraries(core hdf5 mpi m libmechanic)
 
 add_executable(mechanic ${mainsources})
-target_link_libraries(mechanic core popt mpi hdf5 hdf5_hl m libmechanic)
+target_link_libraries(mechanic core popt mpi hdf5 libmechanic)
 
 install (TARGETS libmechanic DESTINATION lib)
 install (TARGETS mechanic DESTINATION bin)

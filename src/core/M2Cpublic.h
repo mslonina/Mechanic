@@ -1,6 +1,6 @@
 /**
  * @file
- * Public runtime configuration interface
+ * Runtime configuration (public API)
  */
 #ifndef MECHANIC_M2C_PUBLIC_H
 #define MECHANIC_M2C_PUBLIC_H

@@ -1,6 +1,6 @@
 /**
  * @file
- * The checkpoint interface 
+ * The restart mode (public API)
  */
 #include "M2Rpublic.h"
 

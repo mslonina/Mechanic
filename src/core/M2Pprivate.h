@@ -1,6 +1,6 @@
 /**
  * @file
- * The Pool interface header
+ * The task pool
  */
 #ifndef MECHANIC_M2P_PRIVATE_H
 #define MECHANIC_M2P_PRIVATE_H

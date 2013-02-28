@@ -1,6 +1,6 @@
 /**
  * @file
- * The checkpoint subsystem header
+ * The restart mode (public API)
  */
 #ifndef MECHANIC_M2R_PUBLIC_H
 #define MECHANIC_M2R_PUBLIC_H

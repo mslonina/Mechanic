@@ -1,6 +1,6 @@
 /**
  * @file
- * The module interface header
+ * Module handlers (public API) 
  */
 #ifndef MECHANIC_M2H_PUBLIC_H
 #define MECHANIC_M2H_PUBLIC_H

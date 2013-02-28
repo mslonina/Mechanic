@@ -1,6 +1,6 @@
 /**
  * @file
- * Public hooks
+ * The work loop hooks (public API)
  */
 #include "M2Wpublic.h"
 
@@ -27,6 +27,7 @@ int M2Prepare(module *m) {
  * @brief The Process hook
  *
  * @param m The module pointer
+ * @param p The pointer to all pools
  *
  * @return 0 on success, error code otherwise
  */
@@ -172,7 +173,6 @@ int M2Receive(int node, int sender, int tag, module *m, pool *p, void *buffer) {
 
   return mstat;
 }
-
 
 /**
  * @brief Pack the task data into memory buffer 

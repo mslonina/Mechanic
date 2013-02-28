@@ -1,6 +1,6 @@
 /**
  * @file
- * The Work loop
+ * The work loop
  */
 #include "M2Wprivate.h"
 
@@ -161,6 +161,7 @@ int Work(module *m) {
   for (pid = 0; pid < m->layer.init.pools; pid++) {
     PoolFinalize(m, p[pid]);
   }
+
   free(p);
 
   return mstat;

@@ -1,6 +1,6 @@
 /**
  * @file
- * The Main function header
+ * The Main function
  */
 #ifndef MECHANIC_M2_MAIN_H
 #define MECHANIC_M2_MAIN_H

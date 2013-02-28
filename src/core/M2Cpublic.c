@@ -1,5 +1,5 @@
 /**
  * @file
- * Public runtime configuration interface
+ * Runtime configuration (public API)
  */
 #include "M2Cpublic.h"

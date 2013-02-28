@@ -1,6 +1,6 @@
 /**
  * @file
- * M2A :: Internal datatypes and function prototypes
+ * Datatypes and function prototypes
  */
 #ifndef MECHANIC_M2A_PRIVATE_H
 #define MECHANIC_M2A_PRIVATE_H

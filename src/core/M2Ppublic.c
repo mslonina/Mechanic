@@ -1,5 +1,5 @@
 /**
  * @file
- * Public task pool interface
+ * The task pool (public API)
  */
 #include "M2Ppublic.h"

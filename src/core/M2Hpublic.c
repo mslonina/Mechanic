@@ -1,6 +1,6 @@
 /**
  * @file
- * The module interface
+ * Module handlers (public API)
  */
 #include "M2Hpublic.h"
 

@@ -1,6 +1,6 @@
 /**
  * @file
- * The restart mode interface
+ * The restart mode
  */
 #include "M2Rprivate.h"
 

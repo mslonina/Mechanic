@@ -1,6 +1,6 @@
 /**
  * @file
- * Public data management interface
+ * Data storage and management (public API)
  */
 #ifndef MECHANIC_M2S_PUBLIC_H
 #define MECHANIC_M2S_PUBLIC_H

@@ -6,7 +6,7 @@
 
 /**
  * @file
- * The task related functions
+ * The task (public API)
  */
 #include "M2Tpublic.h"
 

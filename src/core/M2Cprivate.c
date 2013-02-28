@@ -1,6 +1,6 @@
 /**
  * @file
- * Runtime configuration interface
+ * Runtime configuration
  */
 #include "M2Cprivate.h"
 

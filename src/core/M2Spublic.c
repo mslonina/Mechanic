@@ -1,6 +1,6 @@
 /**
  * @file
- * Public data management interface
+ * Data storage and management (public API)
  */
 #include "M2Spublic.h"
 
@@ -398,6 +398,15 @@ int CommitMemoryLayout(int banks, storage *s) {
   return mstat;
 }
 
+/**
+ * @brief Commits the attribute memory layout
+ *
+ * @param banks The number of memory/storage banks
+ * @param s The storage structure
+ *
+ * @return 0 on success, error code otherwise
+ *
+ */
 int CommitAttrMemoryLayout(int banks, storage *s) {
   int mstat = SUCCESS, i = 0;
 
@@ -411,7 +420,6 @@ int CommitAttrMemoryLayout(int banks, storage *s) {
 
   return mstat;
 }
-
 
 /**
  * @brief Frees the memory layout

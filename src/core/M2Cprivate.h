@@ -1,6 +1,6 @@
 /**
  * @file
- * Runtime configuration interface
+ * Runtime configuration
  */
 #ifndef MECHANIC_M2C_PRIVATE_H
 #define MECHANIC_M2C_PRIVATE_H

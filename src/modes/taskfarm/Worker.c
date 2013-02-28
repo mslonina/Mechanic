@@ -1,6 +1,6 @@
 /**
  * @file
- * The Worker node (MPI Blocking communication)
+ * The worker node (MPI Blocking communication)
  */
 #include "Taskfarm.h"
 

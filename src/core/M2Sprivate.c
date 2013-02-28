@@ -1,6 +1,6 @@
 /**
  * @file
- * The storage stage
+ * Data storage and management
  */
 #include "M2Sprivate.h"
 
@@ -539,5 +539,4 @@ int GetBanks(int allocated_banks, storage *s) {
 
   return banks_in_use;
 }
-
 
