@@ -31,8 +31,8 @@ Mechanic short changelog
 
 - Now, inside a pool the pool stages are possible, i.e. to split the cpu-expensive part of
   computation (some genetic algorithms may require such things). The pool stages are
-  created with POOL_STAGE return code. The pool stages may also be reset with
-  POOL_STAGE_RESET code.
+  created with `POOL_STAGE` return code. The pool stages may also be reset with
+  `POOL_STAGE_RESET` code.
 
 #### Hooks
 

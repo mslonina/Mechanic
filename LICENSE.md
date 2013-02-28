@@ -12,6 +12,7 @@ its parts, please consider referring to the Authors by the following paper:
 Gozdziewski K., Slonina M., Migaszewski C., Rozenkiewicz A, MNRAS 2012
 
 http://git.ca.umk.pl
+http://github.com/mslonina/Mechanic
 
 Redistribution and use in source and binary forms,
 with or without modification, are permitted provided
