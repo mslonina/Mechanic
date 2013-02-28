@@ -22,7 +22,7 @@ modules and is freely available at [the project page](http://git.ca.umk.pl).
 
 - [Installation](INSTALL.md)
 - [Short introduction](Overview.md)
-- [User and developer guide](UserGuide.md)
+- [User and developer guide](examples/UserGuide.md)
 
 _This project is supported by the Polish Ministry of Science and Higher Education through
 the grant N/N203/402739. This work is conducted within the POWIEW project of the European
