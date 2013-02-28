@@ -20,9 +20,9 @@ systems are actively maintained).
 Mechanic is BSD-licensed. The source code package comes with few example
 modules and is freely available at [the project page](http://git.ca.umk.pl).
 
-- [Installation](https://github.com/mslonina/Mechanic/blob/2.x/INSTALL.md)
-- [Short introduction](https://github.com/mslonina/Mechanic/blob/2.x/Overview.md)
-- [User and developer guide](https://github.com/mslonina/Mechanic/blob/2.x/examples/UserGuide.md)
+- [Installation](INSTALL.md)
+- [Short introduction](Overview.md)
+- [User and developer guide](UserGuide.md)
 
 _This project is supported by the Polish Ministry of Science and Higher Education through
 the grant N/N203/402739. This work is conducted within the POWIEW project of the European
