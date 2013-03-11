@@ -68,6 +68,7 @@ typedef struct {
   int mpi_size; /**< The MPI_COMM_WORLD size */
   int mode; /**< The running mode */
   int communication_type; /**< MPI communication type */
+  int showtime; /**< Show detailed CPU time */
   layer layer; /**< The layer pointer */
   layer fallback; /**< The fallback layer pointer */
 } module;

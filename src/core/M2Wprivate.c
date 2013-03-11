@@ -19,6 +19,7 @@ int Work(module *m) {
 
   double cpu_time;
   clock_t time_in, time_out;
+  clock_t taskloop_in, taskloop_out;
 
   hid_t h5location, h5pool, attr_s, attr_d;
   char path[CONFIG_LEN];
@@ -89,6 +90,7 @@ int Work(module *m) {
           CheckStatus(mstat);
           
           // The Task loop
+          taskloop_in = clock();
           if (m->node == MASTER) {
             mstat = M2Master(m, p[pid]);
             CheckStatus(mstat);
@@ -96,6 +98,9 @@ int Work(module *m) {
             mstat = M2Worker(m, p[pid]);
             CheckStatus(mstat);
           }
+          taskloop_out = clock();
+          cpu_time = (double)(taskloop_out - taskloop_in)/CLOCKS_PER_SEC;
+          if (m->node == MASTER && m->showtime) Message(MESSAGE_INFO, "Taskloop completed. CPU time: %f\n", cpu_time);
           
           mstat = M2LoopProcess(m, p, p[pid]);
           CheckStatus(mstat);

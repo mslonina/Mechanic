@@ -128,6 +128,8 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
     ConfigPrintAll(m->layer.setup.head);
   }
 
+  m->showtime = Option2Int("core", "show-time", m->layer.setup.head);
+
   return mstat;
 }
 
