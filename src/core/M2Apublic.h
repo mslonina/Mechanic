@@ -70,7 +70,12 @@ typedef struct {
   int mpi_size; /**< The MPI_COMM_WORLD size */
   int mode; /**< The running mode */
   int communication_type; /**< MPI communication type */
+  int test; /**< Test mode */
+  int dense; /**< Dense output */
+  int yes; /**< Confirmation mode */
+  int debug; /**< Debug mode */
   int showtime; /**< Show detailed CPU time */
+  int verbose; /**< Be verbose */
   layer layer; /**< The layer pointer */
   layer fallback; /**< The fallback layer pointer */
 } module;

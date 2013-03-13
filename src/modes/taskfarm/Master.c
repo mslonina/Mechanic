@@ -34,7 +34,7 @@ int Master(module *m, pool *p) {
   board_buffer = AllocateShort4(p->board);
   ReadData(p->board, &board_buffer[0][0][0][0]);
 
-  Message(MESSAGE_INFO, "Completed %04d of %04d tasks\n", p->completed, p->pool_size);
+  if (m->verbose) Message(MESSAGE_INFO, "Completed %04d of %04d tasks\n", p->completed, p->pool_size);
 
   /* Data buffers */
   send_buffer = calloc(1, sizeof(storage));

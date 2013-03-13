@@ -129,6 +129,11 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
   }
 
   m->showtime = Option2Int("core", "show-time", m->layer.setup.head);
+  m->verbose = Option2Int("core", "verbose", m->layer.setup.head);
+  m->debug = Option2Int("core", "debug", m->layer.setup.head);
+  m->yes = Option2Int("core", "yes", m->layer.setup.head);
+  m->test = Option2Int("core", "test", m->layer.setup.head);
+  m->dense = Option2Int("core", "dense", m->layer.setup.head);
 
   return mstat;
 }
