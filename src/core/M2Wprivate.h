@@ -5,8 +5,6 @@
 #ifndef MECHANIC_M2W_PRIVATE_H
 #define MECHANIC_M2W_PRIVATE_H
 
-#include <time.h>
-
 #include "M2Spublic.h"
 #include "M2Tpublic.h"
 #include "M2Ppublic.h"

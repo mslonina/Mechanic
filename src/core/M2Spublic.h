@@ -101,6 +101,7 @@ typedef struct {
   task **tasks; /**< All tasks */
   unsigned int checkpoint_size; /**< The checkpoint size */
   unsigned int pool_size; /**< The pool size (number of tasks to do) */
+  unsigned int mask_size; /**< The mask size (number of tasks to mask on a given reset loop) */
   unsigned int completed; /**< The pool task completed counter */
   unsigned short node; /**< The node ID */
   unsigned short mpi_size; /**< The MPI COMM size */

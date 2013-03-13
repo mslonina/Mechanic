@@ -20,7 +20,6 @@ int Master(module *m, pool *p) {
   int c_offset = 0;
   short ****board_buffer = NULL;
   int send_node;
-  int x, y, z;
   size_t header_size;
 
   MPI_Status mpi_status;
@@ -31,26 +30,9 @@ int Master(module *m, pool *p) {
   task *tc = NULL;
   checkpoint *c = NULL;
 
-  /* Reset the completed counter */
-  p->completed = 0;
-
   /* Initialize the temporary task board buffer */
   board_buffer = AllocateShort4(p->board);
   ReadData(p->board, &board_buffer[0][0][0][0]);
-
-  /* Prepare the task board */
-  for (x = 0; x < p->board->layout.dims[0]; x++) {
-    for (y = 0; y < p->board->layout.dims[1]; y++) {
-      for (z = 0; z < p->board->layout.dims[2]; z++) {
-        if (m->mode == RESTART_MODE && board_buffer[x][y][z][0] == TASK_IN_USE) {
-          board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
-        }
-        if (board_buffer[x][y][z][0] == TASK_FINISHED) {
-          p->completed++;
-        }
-      }
-    }
-  }
 
   Message(MESSAGE_INFO, "Completed %04d of %04d tasks\n", p->completed, p->pool_size);
 

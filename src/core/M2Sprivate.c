@@ -104,6 +104,7 @@ int Storage(module *m, pool *p) {
   for (i = 0; i < TASK_BOARD_RANK; i++) {
     p->pool_size *= p->board->layout.dims[i];
   }
+  p->mask_size = p->pool_size;
 
   /* Load the module storage layout */
   if (m->fallback.handler) {

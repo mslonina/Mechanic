@@ -100,14 +100,21 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
   task *t;
   short ****board_buffer;
+  clock_t time_in, time_out;
+  double cpu_time;
+  int reversed = 0;
+  int x = 0, y = 0, z = 0;
 
   if (m->node == MASTER) {
+
+    p->mask_size = p->pool_size;
 
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(all, p, v);
     CheckStatus(mstat);
 
     p->state = POOL_PREPARED;
+    if (p->mask_size > p->pool_size) p->mask_size = p->pool_size;
 
     mstat = PoolProcessData(m, p, s);
     CheckStatus(mstat);
@@ -115,9 +122,36 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     // Prepare the task board
     t = M2TaskLoad(m, p, 0);
     board_buffer = AllocateShort4(p->board);
-    memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
+
+    if (p->mask_size != p->pool_size) reversed = 1;
+
+    // Initialize the task board
+    for (x = 0; x < p->board->layout.dims[0]; x++) {
+      for (y = 0; y < p->board->layout.dims[1]; y++) {
+        for (z = 0; z < p->board->layout.dims[2]; z++) {
+
+          // restart mode
+          if (m->mode == RESTART_MODE && board_buffer[x][y][z][0] == TASK_IN_USE) {
+            board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
+          }
+          
+          if (reversed) {
+            board_buffer[x][y][z][0] = TASK_FINISHED;
+          } else {
+            board_buffer[x][y][z][0] = TASK_AVAILABLE;
+          }
+
+          // kept here since it covers also the restart mode
+          if (board_buffer[x][y][z][0] == TASK_FINISHED) {
+            p->completed++;
+          }
+        }
+      }
+    }
+
+    time_in = clock();
     
-    for (i = 0; i < p->pool_size; i++) {
+    for (i = 0; i < p->mask_size; i++) {
       t->tid = i;
 
       // do we have to load task data here? (CPU overhead), the pool datasets are
@@ -130,10 +164,21 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
       if (q) t->state = q(all, p, t, v);
 
+      if (t->state == TASK_ENABLED) {
+        board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
+        if (reversed) p->completed--;
+      }
+
       if (t->state == TASK_DISABLED) {
         board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
+        p->completed++;
       }
+      
     }
+
+    time_out = clock();
+    cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
+    if (m->showtime) Message(MESSAGE_INFO, "BoardPrepare completed. CPU time: %f\n", cpu_time);
 
     WriteData(p->board, &board_buffer[0][0][0][0]);
 

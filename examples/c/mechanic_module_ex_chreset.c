@@ -25,7 +25,7 @@
 #include "mechanic.h"
 
 #define POOLS 4
-#define REVISIONS 5
+#define REVISIONS 3
 
 /**
  * Implements Init()
@@ -109,6 +109,8 @@ int PoolPrepare(pool **all, pool *p, void *s) {
   /* Release the resources */
   free(data);
 
+  if (p->rid > 0) p->mask_size = 4;
+
   return SUCCESS;
 }
 
@@ -118,7 +120,7 @@ int PoolPrepare(pool **all, pool *p, void *s) {
  * We change here the number of tasks to compute at each reset
  */
 int BoardPrepare(pool **all, pool *p, task *t, void *s) {
-  if (p->rid > 0 && t->tid > 10) return TASK_DISABLED;
+  if (p->rid > 0 && t->tid > 3) return TASK_DISABLED;
   return TASK_ENABLED;
 }
 
