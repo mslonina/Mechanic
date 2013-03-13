@@ -214,22 +214,26 @@ int Setup(setup *s) {
     .description="Show detailed CPU time"
   };
   s->options[34] = (options) {
+    .space="core", .name="verbose", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Verbose output (for modules)"
+  };
+  s->options[35] = (options) {
     .space="core", .name="debug", .shortName='\0', .value="0", .type=C_VAL,
     .description="Switch to debug mode (for modules)"
   };
-  s->options[35] = (options) {
+  s->options[36] = (options) {
     .space="core", .name="print-defaults", .shortName='\0', .value="0", .type=C_VAL,
     .description="Print default settings"
   };
-  s->options[36] = (options) {
+  s->options[37] = (options) {
     .space="core", .name="help", .shortName='?', .value="0", .type=C_VAL,
     .description="Show this help message"
   };
-  s->options[37] = (options) {
+  s->options[38] = (options) {
     .space="core", .name="usage", .shortName='\0', .value="0", .type=C_VAL,
     .description="Display brief message"
   };
-  s->options[38] = (options) OPTIONS_END;
+  s->options[39] = (options) OPTIONS_END;
 
   return SUCCESS;
 }
