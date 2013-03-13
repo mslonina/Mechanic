@@ -34,6 +34,12 @@ Mechanic short changelog
   created with `POOL_STAGE` return code. The pool stages may also be reset with
   `POOL_STAGE_RESET` code.
 
+#### Pool reset and changing the number of tasks to compute
+
+- The `BoardPrepare()` hook allows to change the number of tasks to compute during the
+  pool reset loop. This will reduce the CPU overhead for applications that do not require
+  computing all tasks at each reset.
+
 #### Hooks
 
 - New hooks: `Send()` and `Receive()`, that are invoked after `MPI_Send` and `MPI_Receive`

@@ -112,6 +112,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     mstat = PoolProcessData(m, p, s);
     CheckStatus(mstat);
 
+    // Prepare the task board
     t = M2TaskLoad(m, p, 0);
     board_buffer = AllocateShort4(p->board);
     memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
