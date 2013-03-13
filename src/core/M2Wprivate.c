@@ -20,6 +20,7 @@ int Work(module *m) {
   double cpu_time;
   clock_t time_in, time_out;
   clock_t taskloop_in, taskloop_out;
+  clock_t resetloop_in, resetloop_out;
 
   hid_t h5location, h5pool, attr_s, attr_d;
   char path[CONFIG_LEN];
@@ -69,6 +70,8 @@ int Work(module *m) {
     
     do { // The pool reset loop
 
+      resetloop_in = clock();
+
       if (m->mode != RESTART_MODE) {
         mstat = PoolReset(m, p[pid]);
         CheckStatus(mstat);
@@ -115,6 +118,10 @@ int Work(module *m) {
 
         p[pid]->sid++;
       } while (pool_create == POOL_STAGE);
+
+      resetloop_out = clock();
+      cpu_time = (double)(resetloop_out - resetloop_in)/CLOCKS_PER_SEC;
+      if (m->node == MASTER && m->showtime) Message(MESSAGE_INFO, "Resetloop %4d completed. CPU time: %f\n", p[pid]->rid, cpu_time);
       
       p[pid]->rid++;
     } while (pool_create == POOL_RESET);
