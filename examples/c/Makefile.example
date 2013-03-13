@@ -15,6 +15,7 @@ examples=\
 	mechanic_module_ex_dim.${EXT} \
 	mechanic_module_ex_attr.${EXT} \
 	mechanic_module_ex_reset.${EXT} \
+	mechanic_module_ex_chreset.${EXT} \
 	mechanic_module_ex_pool.${EXT} \
 	mechanic_module_ex_poolsize.${EXT} \
 	mechanic_module_ex_dset.${EXT} \

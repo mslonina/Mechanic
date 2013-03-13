@@ -98,6 +98,9 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   setup *s = &(m->layer.setup);
   void *v = NULL;
 
+  task *t;
+  short ****board_buffer;
+
   if (m->node == MASTER) {
 
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
@@ -108,6 +111,29 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
     mstat = PoolProcessData(m, p, s);
     CheckStatus(mstat);
+
+    t = M2TaskLoad(m, p, 0);
+    board_buffer = AllocateShort4(p->board);
+    memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
+    
+    for (i = 0; i < p->pool_size; i++) {
+      t->tid = i;
+      q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
+      if (q) mstat = q(p, t, v);
+      CheckStatus(mstat);
+      
+      q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
+      if (q) t->state = q(all, p, t, v);
+
+      if (t->state == TASK_DISABLED) {
+        board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
+      }
+    }
+
+    WriteData(p->board, &board_buffer[0][0][0][0]);
+
+    TaskFinalize(m, p, t);
+    free(board_buffer);
 
   }
 

@@ -389,6 +389,13 @@ int TaskBoardMap(pool *p, task *t, void *s) {
 }
 
 /**
+ * @brief Prepare the task board
+ */
+int BoardPrepare(pool **all, pool *p, task *t, void *s) {
+  return TASK_ENABLED;
+}
+
+/**
  * @brief Prepare the task
  *
  * This function is used to do any task-specific preparation, i.e. changing initial

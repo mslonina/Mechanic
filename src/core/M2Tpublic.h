@@ -12,6 +12,8 @@
 
 /* Task */
 #define TASK_EMPTY -88 /**< The task empty return code */
+#define TASK_ENABLED 0 /**< The task enabled return code */
+#define TASK_DISABLED 1 /**< The task disabled return code */
 #define TASK_FINISHED 1 /**< The task finished return code */
 #define TASK_AVAILABLE 0 /**< The task available return code */
 #define TASK_IN_USE -1 /**< The task in use return code */

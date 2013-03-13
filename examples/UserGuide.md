@@ -256,6 +256,8 @@ look at following examples:
     [mechanic_module_ex_pool.c](c/mechanic_module_ex_pool.c)
   - Resetting the task pool:
     [mechanic_module_ex_reset.c](c/mechanic_module_ex_reset.c)
+  - Resetting the task pool and changing the number of tasks computed during reset:
+    [mechanic_module_ex_chreset.c](c/mechanic_module_ex_chreset.c)
   - Different storage layout per task pool (basic):
     [mechanic_module_ex_chpoollayout.c](c/mechanic_module_ex_chpoollayout.c)
   - Different storage layout per task pool (advanced):

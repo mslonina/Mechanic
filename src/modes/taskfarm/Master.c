@@ -36,9 +36,22 @@ int Master(module *m, pool *p) {
 
   /* Initialize the temporary task board buffer */
   board_buffer = AllocateShort4(p->board);
+  ReadData(p->board, &board_buffer[0][0][0][0]);
+
   if (m->mode != RESTART_MODE) {
-    memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
-    WriteData(p->board, &board_buffer[0][0][0][0]);
+    //memset(&board_buffer[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
+    //WriteData(p->board, &board_buffer[0][0][0][0]);
+    /* Prepare the task board */
+    for (x = 0; x < p->board->layout.dims[0]; x++) {
+      for (y = 0; y < p->board->layout.dims[1]; y++) {
+        for (z = 0; z < p->board->layout.dims[2]; z++) {
+          if (board_buffer[x][y][z][0] == TASK_FINISHED) {
+            p->completed++;
+          }
+        }
+      }
+    }
+
   } else {
     ReadData(p->board, &board_buffer[0][0][0][0]);
 
