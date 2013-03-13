@@ -41,13 +41,13 @@
  *
  * The core module must implement this function, so that some sensible defaults are set.
  *
- * If the Init() hook is present in a custom module, the variables will be merged with
+ * If the `Init()` hook is present in a custom module, the variables will be merged with
  * the core defaults.
  *
  * @ingroup all_nodes
  *
  * @param i The init structure
- * @return SUCCESS on success, error code otherwise
+ * @return `SUCCESS` on success, error code otherwise
  */
 int Init(init *i) {
   i->options = 72; /**< Maximum number of configurations option for the module */
@@ -66,7 +66,7 @@ int Init(init *i) {
  * This function is used to define configuration options. 
  * Configuration options are automatically available in the command line.
  *
- * If the Setup() hook is present in a custom module, the options are merged with the core
+ * If the `Setup()` hook is present in a custom module, the options are merged with the core
  * options. It is not possible to override core defaults from this hook. The only way to
  * do this is to use command line or configuration file.
  *
@@ -74,7 +74,7 @@ int Init(init *i) {
  *
  * @param s The setup structure
  *
- * @return SUCCESS on success, error code otherwise
+ * @return `SUCCESS` on success, error code otherwise
  */
 int Setup(setup *s) {
   s->options[ 0] = (options) {
@@ -244,14 +244,14 @@ int Setup(setup *s) {
  * This function is used to define the storage layout. The layout may be defined per pool
  * (different storage layout during different task pools).
  *
- * If the Storage() hook is present in a custom module, it will be used instead of the
+ * If the `Storage()` hook is present in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup all_nodes
  * @param p The pool structure
  * @param s @unused (for future development)
  *
- * @return SUCCESS on success, error code otherwise
+ * @return `SUCCESS` on success, error code otherwise
  */
 int Storage(pool *p, void *s) {
   return SUCCESS;
@@ -260,7 +260,7 @@ int Storage(pool *p, void *s) {
 /**
  * @brief Prepare the task pool
  *
- * This function is used to prepare the task pool. All memory banks defined in Storage()
+ * This function is used to prepare the task pool. All memory banks defined in `Storage()`
  * hook are available for usage. This hook is followed by an automatic broadcast of all
  * memory banks with flag `sync = 1` and storage (when `use_hdf = 1`), as well as runtime
  * configuration. 
@@ -271,7 +271,7 @@ int Storage(pool *p, void *s) {
  *
  * During the task pool loop, the data from all previous pools is available in `allpools`.
  *
- * If the PoolPrepare() hook is present in a custom module, it will be used instead of the
+ * If the `PoolPrepare()` hook is present in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup master_only
@@ -279,7 +279,7 @@ int Storage(pool *p, void *s) {
  * @param current The current pool structure
  * @param s @unused (for future development)
  *
- * @return SUCCESS on success, error code otherwise
+ * @return `SUCCESS` on success, error code otherwise
  */
 int PoolPrepare(pool **allpools, pool *current, void *s) {
   return SUCCESS;
@@ -292,22 +292,22 @@ int PoolPrepare(pool **allpools, pool *current, void *s) {
  * decide whether to continue the pool loop or finish the overall simulation. The data of
  * current pool as well as all previous pools is available.
  *
- * If the PoolProcess() hook is present in a custom module, it will be used instead of the
+ * If the `PoolProcess()` hook is present in a custom module, it will be used instead of the
  * core hook.
  *
  * ### Return values
  *
- * - POOL_CREATE_NEW - if the pool loop should continue (the new pool will be created)
- * - POOL_RESET - reset the current pool: the task board will be reset. The task loop can
+ * - `POOL_CREATE_NEW` - if the pool loop should continue (the new pool will be created)
+ * - `POOL_RESET` - reset the current pool: the task board will be reset. The task loop can
  *   be restarted within the same loop, i.e. from sligthly different startup values
  *
  *   Hybrid Genetic Algoriths example:
  *   1. Compute first iteration of children
- *   2. Loop N-times in the children loop using POOL_RESET (and p->rid counter), to
+ *   2. Loop N-times in the children loop using `POOL_RESET` (and `p->rid` counter), to
  *   improve the current generation
- *   3. Create new generation with POOL_CREATE_NEW
+ *   3. Create new generation with `POOL_CREATE_NEW`
  *
- * - POOL_FINALIZE - finalizes the pool loop and simulation
+ * - `POOL_FINALIZE` - finalizes the pool loop and simulation
  *
  * ### Example
  *
@@ -325,7 +325,7 @@ int PoolPrepare(pool **allpools, pool *current, void *s) {
  * @param current The current pool structure
  * @param s @unused (for future development)
  *
- * @return POOL_FINALIZE, POOL_CREATE_NEW, POOL_RESET
+ * @return `POOL_FINALIZE`, `POOL_CREATE_NEW`, `POOL_RESET`
  */
 int PoolProcess(pool **allpools, pool *current, void *s) {
   return POOL_FINALIZE;
@@ -353,9 +353,9 @@ int PoolProcess(pool **allpools, pool *current, void *s) {
  * is available at `p->board->layout.dims` array. The `pool_size` is a multiplication of
  * `p->board->layout.dims[i]`, where `i < p->board->layout.rank`.
  *
- * This function is called during the TaskPrepare() phase.
+ * This function is called during the `TaskPrepare()` phase.
  *
- * If the TaskBoardMap() hook is present in a custom module, it will be used instead of the
+ * If the `TaskBoardMap()` hook is present in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup master_only
@@ -363,7 +363,7 @@ int PoolProcess(pool **allpools, pool *current, void *s) {
  * @param t The current task structure
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int TaskBoardMap(pool *p, task *t, void *s) {
   int px, vert, horiz;
@@ -394,6 +394,25 @@ int TaskBoardMap(pool *p, task *t, void *s) {
 
 /**
  * @brief Prepare the task board
+ *
+ * This function allows to change the number of tasks to compute on a given pool reset
+ * loop, i.e. when `p->rid > 0`. The current pool data, as well as task data is available
+ * through the current pool object. The data from previous pools is available too. The
+ * fake task object is passed, so that you may easily check the task location and id
+ * (`TaskBoardMap()` hook is invoked before).
+ * 
+ * This function is called after the `PoolPrepare()` hook.
+ *
+ * If the `BoardPrepare()` is present in a custom module, it will be used instead of the
+ * core hook.
+ *
+ * @ingroup master_only
+ * @param all The pointer to all pools
+ * @param p The current pool structure
+ * @param t The fake task object (only location and id, no data -- use pool storage instead)
+ * @param s @unused (for future development)
+ *
+ * @return `TASK_ENABLED` if the task has to be computed, `TASK_DISABLED` otherwise
  */
 int BoardPrepare(pool **all, pool *p, task *t, void *s) {
   return TASK_ENABLED;
@@ -411,7 +430,7 @@ int BoardPrepare(pool **all, pool *p, task *t, void *s) {
  * - t->location[1] - the vertical position of the current task
  * - t->location[2] - the depth of the current task
  *
- * If the TaskPrepare() is present in a custom module, it will be used instead of the core
+ * If the `TaskPrepare()` is present in a custom module, it will be used instead of the core
  * hook.
  *
  * @ingroup worker_only
@@ -419,7 +438,7 @@ int BoardPrepare(pool **all, pool *p, task *t, void *s) {
  * @param t The current task structure
  * @param s @unused (for future development)
  *
- * @return SUCCESS on success of error code otherwise
+ * @return `SUCCESS` on success of error code otherwise
  */
 int TaskPrepare(pool *p, task *t, void *s) {
   return SUCCESS;
@@ -429,17 +448,17 @@ int TaskPrepare(pool *p, task *t, void *s) {
  * @brief Process the task
  *
  * This function is used to process the current task, i.e. to perform main computations.
- * The data for the current task may be prepared in the TaskPrepare() hook.
+ * The data for the current task may be prepared in the `TaskPrepare()` hook.
  *
  * Return codes:
  * 
- * - TASK_FINALIZE - the task has been successfully processed
- * - TASK_CHECKPOINT - the task processing will be paused and all stored data will be
+ * - `TASK_FINALIZE` - the task has been successfully processed
+ * - `TASK_CHECKPOINT` - the task processing will be paused and all stored data will be
  *   returned to the checkpoint buffer. After that, the task processing resumes. To
  *   distingiush between task snapshots, the `t->cid` counter is available. The last
  *   snapshot number is stored in the task board dataset.
  *
- * If the TaskProcess() is present in a custom module, it will be used instead of the core
+ * If the `TaskProcess()` is present in a custom module, it will be used instead of the core
  * hook.
  *
  * @ingroup worker_only
@@ -447,7 +466,7 @@ int TaskPrepare(pool *p, task *t, void *s) {
  * @param t The current task structure
  * @param s @unused (for future development)
  *
- * @return SUCCESS on success or error code otherwise
+ * @return `SUCCESS` on success or error code otherwise
  */
 int TaskProcess(pool *p, task *t, void *s) {
   return TASK_FINALIZE;
@@ -457,7 +476,7 @@ int TaskProcess(pool *p, task *t, void *s) {
  * @brief Prepare the checkpoint
  *
  * This function is used to prepare the checkpoint. You may do some data-related
- * operations. The data for the current checkpoint may be accessed by Read/WriteData()
+ * operations. The data for the current checkpoint may be accessed by `Read/WriteData()`
  * through the current checkpoint memory pointer:
  *
  *     c->storage->memory
@@ -466,11 +485,11 @@ int TaskProcess(pool *p, task *t, void *s) {
  *
  *    task 0 header | task 0 datasets | task 1 header | task 1 datasets | ...
  *
- * The header contains HEADER_SIZE integer elements:
+ * The header contains `HEADER_SIZE` integer elements:
  *  - the MPI message tag
  *  - the received task ID
- *  - the received task status (TASK_FINISHED or TASK_CHECKPOINT)
- *  - the received task location (TASK_BOARD_RANK, currently 3)
+ *  - the received task status (`TASK_FINISHED` or `TASK_CHECKPOINT`)
+ *  - the received task location (`TASK_BOARD_RANK`, currently 3)
  *
  * It is best to keep this hook untouched, since the memory banks are used then to
  * physically store the data in the HDF5 master datafile. This hook should not be normally
@@ -483,7 +502,7 @@ int TaskProcess(pool *p, task *t, void *s) {
  * @param c The current checkpoint structrue
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int CheckpointPrepare(pool *p, checkpoint *c, void *s) {
   return SUCCESS;
@@ -495,7 +514,7 @@ int CheckpointPrepare(pool *p, checkpoint *c, void *s) {
  * This function is used to do any simulation-related prepare operations. It is invoked
  * before the pool loop starts.
  *
- * If the Prepare() hook is present in a custom module, it will be used instead of the core
+ * If the `Prepare()` hook is present in a custom module, it will be used instead of the core
  * hook.
  *
  * @ingroup all_nodes
@@ -503,7 +522,7 @@ int CheckpointPrepare(pool *p, checkpoint *c, void *s) {
  * @param masterfile The name of the master data file
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int Prepare(int node, char *masterfile, void *s) {
   return SUCCESS;
@@ -515,7 +534,7 @@ int Prepare(int node, char *masterfile, void *s) {
  * This function is used to perform any post-simulation operations, such as specific data
  * manipulation in the master data file. It is invoked after the pool loop is finished.
  *
- * If the Process() hook is present in a custom module, it will be used instead of the core
+ * If the `Process()` hook is present in a custom module, it will be used instead of the core
  * hook.
  *
  * @ingroup all_nodes
@@ -524,7 +543,7 @@ int Prepare(int node, char *masterfile, void *s) {
  * @param all The pointer to all pools 
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int Process(int node, char *masterfile, pool **all, void *s) {
   return SUCCESS;
@@ -540,7 +559,7 @@ int Process(int node, char *masterfile, pool **all, void *s) {
  * As an example, you may write any initial data to the dataset, as well as different
  * attributes.
  *
- * If the DatasetPrepare() hook is used in a custom module, it will be used instead of the
+ * If the `DatasetPrepare()` hook is used in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup master_only
@@ -550,7 +569,7 @@ int Process(int node, char *masterfile, pool **all, void *s) {
  * @param d The current dataset storage pointer
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s) {
   return SUCCESS;
@@ -560,13 +579,13 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void 
  * @brief The dataset process hook
  *
  * This function may be used to process given dataset. The HDF5 dataset pointer is passed,
- * as well as top level group/file pointer. It is invoked during PoolProcess(), 
+ * as well as top level group/file pointer. It is invoked during `PoolProcess()`, 
  * only on the master node. 
  *
  * As an example, you may process any data in the dataset, as well as different
  * attributes.
  *
- * If the DatasetProcess() hook is used in a custom module, it will be used instead of the
+ * If the `DatasetProcess()` hook is used in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup master_only
@@ -576,7 +595,7 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void 
  * @param d The current dataset storage pointer
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s) {
   return SUCCESS;
@@ -588,20 +607,20 @@ int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void 
  * This is an advanced hook. It allows to perform additional stuff, such as direct memory
  * management or MPI communication. 
  *
- * This hook is invoked before the PoolReset() and PoolPrepare(), after the Setup(),
- * Prepare() and Storage() hooks.
+ * This hook is invoked before the `PoolReset()` and `PoolPrepare()`, after the `Setup()`,
+ * `Prepare()` and `Storage()` hooks.
  *
- * If the NodePrepare() hook is used in a custom module, it will be used instead of the
+ * If the `NodePrepare()` hook is used in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup all_nodes
- * @param mpi_size The MPI_COMM_WORLD size
+ * @param mpi_size The `MPI_COMM_WORLD` size
  * @param node The current node id
  * @param all The pointer to the all pools array
  * @param p The current pool pointer
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int NodePrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
   return SUCCESS;
@@ -613,19 +632,19 @@ int NodePrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
  * This is an advanced hook. It allows to perform additional stuff, such as direct memory
  * management or MPI communication.
  *
- * This hook is invoked after the PoolProcess().
+ * This hook is invoked after the `PoolProcess()`.
  *
- * If the NodeProcess() hook is used in a custom module, it will be used instead of the
+ * If the `NodeProcess()` hook is used in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup all_nodes
- * @param mpi_size The MPI_COMM_WORLD size
+ * @param mpi_size The `MPI_COMM_WORLD` size
  * @param node The current node id
  * @param all The pointer to the all pools array
  * @param p The current pool pointer
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int NodeProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
   return SUCCESS;
@@ -637,20 +656,20 @@ int NodeProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
  * This is an advanced hook. It allows to perform additional stuff, such as direct memory
  * management or MPI communication. 
  *
- * This hook is invoked after the PoolReset() and PoolPrepare(), before entering the task
+ * This hook is invoked after the `PoolReset()` and `PoolPrepare()`, before entering the task
  * loop.
  *
- * If the LoopProcess() hook is used in a custom module, it will be used instead of the
+ * If the `LoopProcess()` hook is used in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup all_nodes
- * @param mpi_size The MPI_COMM_WORLD size
+ * @param mpi_size The `MPI_COMM_WORLD` size
  * @param node The current node id
  * @param all The pointer to the all pools array
  * @param p The current pool pointer
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
   return SUCCESS;
@@ -662,19 +681,19 @@ int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
  * This is an advanced hook. It allows to perform additional stuff, such as direct memory
  * management or MPI communication.
  *
- * This hook is invoked after the task loop is completed, before the PoolProcess().
+ * This hook is invoked after the task loop is completed, before the `PoolProcess()`.
  *
- * If the LoopProcess() hook is used in a custom module, it will be used instead of the
+ * If the `LoopProcess()` hook is used in a custom module, it will be used instead of the
  * core hook.
  *
  * @ingroup all_nodes
- * @param mpi_size The MPI_COMM_WORLD size
+ * @param mpi_size The `MPI_COMM_WORLD` size
  * @param node The current node id
  * @param all The pointer to the all pools array
  * @param p The current pool pointer
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
   return SUCCESS;
@@ -683,17 +702,17 @@ int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
 /**
  * @brief The MPI Send hook
  *
- * This hook is performed after MPI_Send
+ * This hook is performed after `MPI_Send`
  *
  * @ingroup all_nodes
- * @param mpi_size The MPI_COMM_WORLD size
+ * @param mpi_size The `MPI_COMM_WORLD` size
  * @param node The current node
  * @param dest The destination node
  * @param tag The message tag
  * @param p The current pool pointer
  * @param s @unused (for future development)
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s) {
   return SUCCESS;
@@ -702,10 +721,10 @@ int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s) {
 /**
  * @brief The MPI Receive hook
  *
- * This hook is performed after MPI_Receive
+ * This hook is performed after `MPI_Receive`
  *
  * @ingroup all_nodes
- * @param mpi_size The MPI_COMM_WORLD size
+ * @param mpi_size The `MPI_COMM_WORLD` size
  * @param node The current node
  * @param sender The sender node
  * @param tag The message tag
@@ -713,7 +732,7 @@ int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s) {
  * @param s @unused (for future development)
  * @param buffer The raw data buffer received
  *
- * @return SUCCESS or error code otherwise
+ * @return `SUCCESS` or error code otherwise
  */
 int Receive(int mpi_size, int node, int sender, int tag, pool *p, void *s, void *buffer) {
   if (node == MASTER) {

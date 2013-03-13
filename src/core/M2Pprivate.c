@@ -119,6 +119,10 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     
     for (i = 0; i < p->pool_size; i++) {
       t->tid = i;
+
+      // do we have to load task data here? (CPU overhead), the pool datasets are
+      // available though
+
       q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
       if (q) mstat = q(p, t, v);
       CheckStatus(mstat);

@@ -1012,6 +1012,7 @@ Hooks
 #### Advanced hooks
 
 - `int TaskBoardMap(pool *p, task *t, void *s)` - map the task on the task board
+- `int BoardPrepare(pool **all, pool *p, task *t, void *s)` - prepare the task board
 - `int CheckpointPrepare(pool *p, checkpoint *c, void *s)` - prepare the checkpoint 
 - `int Prepare(int node, char *masterfile, void *s)` - prepare the run 
 - `int Process(int node, char *masterfile, pool **all, void *s)` - process the run 
