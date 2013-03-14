@@ -18,6 +18,7 @@ examples=\
 	mechanic_module_ex_chreset.${EXT} \
 	mechanic_module_ex_pool.${EXT} \
 	mechanic_module_ex_poolsize.${EXT} \
+	mechanic_module_ex_poolmask.${EXT} \
 	mechanic_module_ex_dset.${EXT} \
 	mechanic_module_ex_node.${EXT} \
 	mechanic_module_ex_loop.${EXT} \

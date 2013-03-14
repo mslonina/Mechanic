@@ -1,20 +1,31 @@
 /**
- * Using POOL_RESET and BoardPrepare()
- * ===================================
+ * Using POOL_RESET, pool mask and BoardPrepare()
+ * ==============================================
  *
- * This example shows how to reset the current task pool with the BoardPrepare() hook,
+ * This example shows how to reset the current task pool with the pool mask and a BoardPrepare() hook,
  * which allows us to change the number of tasks computed during the pool reset.
+ *
+ * The difference between `p->mask_size` and `BoardPrepare()`
+ * ----------------------------------------------------------
+ *
+ * The `BoardPrepare()` hook is invoked for **all** tasks in the pool, and it may lead
+ * to huge CPU-overhead. If the number of tasks to compute on each pool reset loop is
+ * known, we may easily gain the performance with `p->mask_size`. By default the mask size
+ * equals the pool size and all tasks are checked with the `BoardPrepare()`. Otherwise,
+ * only the first `p->mask_size` tasks are checked. In combination with `BoardPrepare()`
+ * and task location it is possible to choose arbitrary tasks from the task board to
+ * compute.
  *
  * Compilation
  * -----------
  *
  *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
- *        mechanic_module_ex_chreset.c -o libmechanic_module_ex_chreset.so
+ *        mechanic_module_ex_poolmask.c -o libmechanic_module_ex_poolmask.so
  *
  * Using the module
  * ----------------
  *
- *    mpirun -np 4 mechanic -p ex_chreset -x 10 -y 20
+ *    mpirun -np 4 mechanic -p ex_poolmask -x 10 -y 20
  *
  * Getting the data
  * ----------------
@@ -77,6 +88,9 @@ int Storage(pool *p, void *s) {
  * The current pool is available through the p pointer. If the pool has been reset,
  * storage banks contains all previous data. That is, you may use these data to prepare
  * the better revision of the pool.
+ *
+ * At the end, we adjust the number of tasks to compute for the reset loops with the
+ * `p->mask_size`.
  */
 int PoolPrepare(pool **all, pool *p, void *s) {
   double **data;
@@ -109,16 +123,18 @@ int PoolPrepare(pool **all, pool *p, void *s) {
   /* Release the resources */
   free(data);
 
+  /* Change the number of tasks to compute (mask the task board) */
+  if (p->rid > 0) p->mask_size = 4;
+
   return SUCCESS;
 }
 
 /**
  * Implements BoardPrepare()
  *
- * We change here the number of tasks to compute at each reset
  */
 int BoardPrepare(pool **all, pool *p, task *t, void *s) {
-  if (p->rid > 0 && t->tid > 3) return TASK_DISABLED;
+//  if (p->rid > 0 && t->tid > 3) return TASK_DISABLED;
   return TASK_ENABLED;
 }
 
