@@ -243,9 +243,10 @@ The more natural way to store image-like data is to use `STORAGE_BOARD` instead 
     int Storage(pool *p, void *s) {
       p->task->storage[0].layout = (schema) {
         .name = "result", // the name of the HDF5 dataset
-        .rank = 2, // the rank of the dataset
+        .rank = TASK_BOARD_RANK, // the rank of the dataset
         .dims[0] = 1, // the horizontal size of the task result
         .dims[1] = 1, // the vertical size of the task result
+        .dims[2] = 1, // the depth of the task result
         .datatype = H5T_NATIVE_DOUBLE, // the datatype
         .use_hdf = 1, // whether to store the data in the file or not
         .storage_type = STORAGE_BOARD // the storage type, here, suitable for Gnuplot PM3D
@@ -256,11 +257,11 @@ The more natural way to store image-like data is to use `STORAGE_BOARD` instead 
 The `TaskProcess()` function, where the numerics goes on:
 
     int TaskProcess(pool *p, task *t, void *s) {
-      double buffer[1][1]; // fits the storage information provided in Storage()
+      double buffer[1][1][1]; // fits the storage information provided in Storage()
       
-      buffer[0][0] = t->tid; // the task id
+      buffer[0][0][0] = t->tid; // the task id
 
-      MWriteData(t, "result", &buffer[0][0]);
+      MWriteData(t, "result", &buffer[0][0][0]);
 
       return TASK_FINALIZE;
     }
