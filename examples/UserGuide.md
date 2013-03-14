@@ -368,7 +368,10 @@ You may change any of these variables, i.e.
 
     int Init(init *i) {
       i->min_cpu_required = 4;
-
+      i->attr_per_dataset = 8;
+      i->banks_per_task = 3;
+      i->banks_per_pool = 2;
+      i->pools = 10;
       return SUCCESS;
     }
 
@@ -469,6 +472,7 @@ To obtain all configuration options available in the core, try:
 - `--yes` -- this flag may be used for specfic force runs (skip checks etc.) of a custom module 
 - `--dense` -- this flag may be used for specific, dense, module output
 - `--show-time` -- switches detailed CPU usage on
+- `--verbose` -- switches verbode output on
 - `--debug` -- this flag may be used for specific debug output of a custom module
 - `--print-defaults` -- print the default options
 - `--help`, `-?` -- show help message
@@ -545,7 +549,7 @@ Storage
 
 Mechanic allows to store module data in datasets of any basic datatypes, with minimum rank
 2 up to rank `H5S_MAX_RANK` (32). The storage information must be provided through the `Storage()` hook.
-To define the dataset, any C99 struct initialization is allowed. i.e.:
+To define a dataset, any C99 struct initialization is allowed. i.e.:
 
     int Storage(pool *p, void *s) {
       p->storage[0].layout = (schema) {
@@ -598,7 +602,6 @@ The `storage[0]` is the storage bank index:
       return SUCCESS;
     }
 
-By default, there are eight storage banks available, both for the task pools and tasks.
 You can adjust the number of available storage banks by implementing the `Init()` hook:
 
     int Init(init *i) {
@@ -636,7 +639,7 @@ pools), i.e.
 The Pool stores its global data in the `/Pools/pool-ID` group, where the ID is the unique pool identifier.
 The task data is stored in `/Pools/pool-ID/Tasks` group.
 
-The size of the storage dataset and the memory is the same. In the case of pool, whole
+The size of the storage dataset and the memory is the same. In the case of a pool, whole
 memory block is stored at once, if `use_hdf = 1` (only `STORAGE_GROUP` is supported for
 pools).
 
@@ -874,8 +877,7 @@ dataspace, and fill out additional information, such as rank and dimensions:
       .dims[1] = 4,
     }
 
-By default, 24 attributes are available for each storage bank (both for tasks and
-pools). You can change it through the `Init()` hook:
+You can adjust the number of available attributes through the `Init()` hook:
 
     i->attr_per_dataset = 32;
 
@@ -915,6 +917,27 @@ the checkpoint storage, however, there might be cases, where underlying memory r
 are not enough to handle your simulation. In such a case, you should refine the checkpoint
 settings (i.e. by reducing the requested number of completed tasks). 
 
+#### The task checkpoint
+
+By default, the checkpoint data is stored after the task has been processed.
+To store the partial runtime data, the `TASK_CHECKPOINT` during `TaskProcess()` hook must
+be used:
+
+    int TaskProcess(pool *p, task *t, void *s) {
+      //ReadData(...);
+      //ProcessData(...);
+      //WriteData(...);
+      
+      if (t->cid < 10) return TASK_CHECKPOINT;
+      return TASK_FINALIZE;
+    }
+
+By using the `TASK_CHECKPOINT` return code, you tell the Mechanic to send the data stored in 
+the task storage banks to the master node (this require writing data before). The master node 
+sends them back, and the task processing is continued with the checkpoint id `t->cid`
+adjusted (you may need to read the data before the numerical part is evaluated). 
+
+During the restart mode, the task processing will be continued from the last stored checkpoint.
 
 Datatypes
 ---------
@@ -995,6 +1018,38 @@ Each stage may also be reset, with the return code `POOL_STAGE_RESET`:
       return POOL_FINALIZE;
     }
 
+#### The `BoardPrepare()` hook and pool mask
+
+During the pool reset loop it is possible to adjust the number of tasks to compute by
+using `BoardPrepare()` hook, i.e.:
+
+    int BoardPrepare(pool **all, pool *p, task *t, void *s) {
+      if (p->rid > 0 && t->tid > 10) return TASK_DISABLED;
+      return TASK_ENABLED;
+    }
+
+This hook is iterated through all tasks in the task pool. The task `t` object is
+non-complete -- no data is provided (performance), however, you can access it with the pool `p` object.
+The task location and ID is provided, so that it is possible to adjust the task board for
+specific tasks on a specific reset loop.
+
+By default, this hook returns all tasks to be processed (this is also valid for one pool,
+and no pool reset at all).
+
+If your application takes arbitrary number of tasks at each reset loop, you may reduce the
+CPU-overhead by using the task board mask `mask_size`:
+
+    int PoolPrepare(pool **all, pool *p, void *s) {
+      if (p->rid > 0) {
+        p->mask_size = 10;
+      }
+      return SUCCESS;
+    }
+
+By default, the `p->mask_size = p->pool_size`. If adjusted, only the specified number of
+tasks will be computed. Again, default is to use first tasks on the task board. You can tell 
+the Mechanic which tasks to choose, using the `BoardPrepare()` hook and the task location.
+
 
 Hooks
 -----
@@ -1028,6 +1083,10 @@ Hooks
   task loop on the specific node
 - `int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s)` - process the
   task loop on the specific node
+- `int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s)` -
+  hook invoked after `MPI_Send`
+- `int Receive(int mpi_size, int node, int sender, int tag, pool *p, void *s, void
+  *buffer)` - hook invoked after `MPI_Receive`
 
 API helpers
 -----------
@@ -1229,9 +1288,11 @@ Otherwise, following error codes should be returned:
 
 Mechanic will try to safely abort job (with the `MPI_Abort()`) on any error code.
 
-There are two exceptions:
+There are some exceptions:
 
 - `TaskProcess()`: `TASK_FINALIZE` for the completed task, `TASK_CHECKPOINT` for task
   snapshots, error code otherwise
 - `PoolProcess()`: `POOL_CREATE_NEW` for the new pool, `POOL_FINALIZE` for the completed
   run, and `POOL_RESET` to reset the current pool
+- `BoardPrepare()`: `TASK_ENABLED` to enable the task, `TASK_DISABLED` to disable the task
+

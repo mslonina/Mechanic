@@ -702,7 +702,7 @@ int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
 /**
  * @brief The MPI Send hook
  *
- * This hook is performed after `MPI_Send`
+ * This hook is invoked after `MPI_Send`
  *
  * @ingroup all_nodes
  * @param mpi_size The `MPI_COMM_WORLD` size
@@ -721,7 +721,7 @@ int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s) {
 /**
  * @brief The MPI Receive hook
  *
- * This hook is performed after `MPI_Receive`
+ * This hook is invoked after `MPI_Receive`
  *
  * @ingroup all_nodes
  * @param mpi_size The `MPI_COMM_WORLD` size
