@@ -235,6 +235,45 @@ independent numerical simulations, creating a map suitable to process with Gnupl
 The data will be stored in the master file: `mechanic-master-00.h5` in the dataset
 `/Pools/pool-0000/Tasks/result`.
 
+### The same example. Storage simplified
+
+The more natural way to store image-like data is to use `STORAGE_BOARD` instead of
+`STORAGE_PM3D`. The resulting dataset mimics then the task board:
+
+    int Storage(pool *p, void *s) {
+      p->task->storage[0].layout = (schema) {
+        .name = "result", // the name of the HDF5 dataset
+        .rank = 2, // the rank of the dataset
+        .dims[0] = 1, // the horizontal size of the task result
+        .dims[1] = 1, // the vertical size of the task result
+        .datatype = H5T_NATIVE_DOUBLE, // the datatype
+        .use_hdf = 1, // whether to store the data in the file or not
+        .storage_type = STORAGE_BOARD // the storage type, here, suitable for Gnuplot PM3D
+      };
+      return SUCCESS;
+    }
+
+The `TaskProcess()` function, where the numerics goes on:
+
+    int TaskProcess(pool *p, task *t, void *s) {
+      double buffer[1][1]; // fits the storage information provided in Storage()
+      
+      buffer[0][0] = t->tid; // the task id
+
+      MWriteData(t, "result", &buffer[0][0]);
+
+      return TASK_FINALIZE;
+    }
+
+For the 5x5 task board the result will have the form:
+
+     0  1  2  3  4
+     5  6  7  8  9
+    10 11 12 13 14
+    15 16 17 18 19
+    20 21 22 23 24
+
+
 Examples
 --------
 
@@ -244,7 +283,7 @@ look at following examples:
 #### The basics
 
   - A simple map or image:
-    [mechanic_module_ex_map.c](c/mechanic_module_ex_attr.c)
+    [mechanic_module_ex_map.c](c/mechanic_module_ex_map.c)
   - The Mandelbrot set:
     [mechanic_module_ex_mandelbrot.c](c/mechanic_module_ex_mandelbrot.c)
 
