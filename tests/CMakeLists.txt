@@ -35,7 +35,7 @@ set (
   ex_stage
 )
 
-configure_file(treadfile.txt readfile.txt COPYONLY)
+configure_file(../examples/c/readfile.txt readfile.txt COPYONLY)
 
 foreach(module ${modules})
   add_library(mechanic_module_t${module} SHARED ../examples/c/mechanic_module_${module}.c)

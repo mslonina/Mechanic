@@ -233,7 +233,6 @@ int PoolProcess(pool **all, pool *p, void *s) {
   double t_attr;
   double s_attr[1][4];
   int iattr;
-  int mstat;
 
   iattr = 197;
   dattr = 12345.6789;
@@ -247,14 +246,14 @@ int PoolProcess(pool **all, pool *p, void *s) {
   MWriteAttr(p->task, "input", "Sample double attribute", &dattr);
 
   /* You may use explicit interface, instead: */
-  //mstat = WriteAttr(&p->task->storage[0].attr[0], &attr);
-  //mstat = WriteAttr(&p->task->storage[0].attr[1], &s_attr);
+  //WriteAttr(&p->task->storage[0].attr[0], &attr);
+  //WriteAttr(&p->task->storage[0].attr[1], &s_attr);
   MWriteAttr(p->task, "result", "Some special attribute", &s_attr);
 
   MReadAttr(p->task, "input", "Sample double attribute", &t_attr);
   
   /* Or using explicit interface: */
-  //mstat = ReadAttr(&p->task->storage[0].attr[1], &t_attr);
+  //ReadAttr(&p->task->storage[0].attr[1], &t_attr);
   
   Message(MESSAGE_OUTPUT, "Attribute = %f\n", t_attr);
 

@@ -49,7 +49,7 @@ int Storage(pool *p, void *s) {
 int TaskProcess(pool *p, task *t, void *s) {
   double real_min, real_max, imag_min, imag_max;
   double scale_real, scale_imag;
-  double c, xres, yres, zres;
+  double c, xres, yres;
   double x,y;
   double buffer[1][1][1];
 
@@ -61,7 +61,6 @@ int TaskProcess(pool *p, task *t, void *s) {
 
   xres = p->board->layout.dims[1];
   yres = p->board->layout.dims[0];
-  zres = p->board->layout.dims[2];
 
   /* Coordinate system */
   scale_real = (real_max - real_min) / ((double) xres - 1.0);

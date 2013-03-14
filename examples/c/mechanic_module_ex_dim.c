@@ -201,8 +201,8 @@ int PoolPrepare(pool **allpools, pool *current, void *s) {
   int ***data;
   float **floa;
   double ****buff;
-  int i,j,k,l;
-  int dims[MAX_RANK];
+  unsigned int i,j,k,l;
+  unsigned int dims[MAX_RANK];
 
   /**
    * Allocate and fill the 3D integer dataset
@@ -263,8 +263,8 @@ int PoolPrepare(pool **allpools, pool *current, void *s) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool **allpools, pool *current, void *s) {
-  int i,j,k;
-  int dims[MAX_RANK];
+  unsigned int i,j,k;
+  unsigned int dims[MAX_RANK];
   int ***idata, ***tp;
   double ***data;
   double ****four;
@@ -402,8 +402,8 @@ int TaskProcess(pool *p, task *t, void *s) {
   int ***cdata;
   double ***ddata;
   double ****four;
-  int i,j,k,l;
-  int dims[MAX_RANK];
+  unsigned int i,j,k;
+  unsigned int dims[MAX_RANK];
 
   /**
    * Allocate and fill the 3D double-type data buffer for t->storage[0]
