@@ -155,6 +155,7 @@ add_subdirectory(src/modes)
 add_subdirectory(src/modules)
 #add_subdirectory(src/vendor)
 add_subdirectory(examples)
+add_subdirectory(tests)
 
 if (BUILD_PYTHON_TOOLKIT)
   add_subdirectory(src/toolkits/python)
@@ -174,6 +175,7 @@ SET (CPACK_SOURCE_IGNORE_FILES
   "/build/;/.DS_Store;/.gitignore;/.git/;~$;*.so;*.dylib;*.h5;${CPACK_SOURCE_IGNORE_FILES}")
 
 include (CPack)
+include (CTest)
 
 add_custom_target(dist COMMAND ${CMAKE_MAKE_PROGRAM} package_source)
 

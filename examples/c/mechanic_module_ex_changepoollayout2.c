@@ -137,7 +137,7 @@ int TaskProcess(pool *p, task *t, void *s) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool **allpools, pool *current, void *s) {
-  int i,j;
+  int i;
   double buffer[1][5];
 
   // Access the stored data in the current pool for STORAGE_GROUP

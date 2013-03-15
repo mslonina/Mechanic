@@ -161,6 +161,7 @@ int GetAttributeIndex(attr *a, char *storage_name); /**< Get the index for given
       Error(CORE_ERR_MEM);\
     } else {\
       _mmstat = WriteData(&_mobject->storage[_msindex], _mdata);\
+      CheckStatus(_mmstat);\
     }\
   } else {\
     Message(MESSAGE_ERR, "MWriteData: Invalid object\n");\

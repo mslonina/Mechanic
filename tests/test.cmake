@@ -1,0 +1,1 @@
+execute_process(COMMAND ${TEST} RESULT_VAR HAD_ERROR)

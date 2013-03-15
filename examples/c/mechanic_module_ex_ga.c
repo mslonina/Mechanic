@@ -190,7 +190,7 @@ int Storage(pool *p, void *s) {
  * population is accessed through the **all pointer.
  */
 int PoolPrepare(pool **all, pool *p, void *s) {
-  int i, j, genes, alleles;
+  int genes, alleles;
   int **current, **model;
 
   MAllocate2(p, "children", current, int);

@@ -79,7 +79,7 @@ int Storage(pool *p, void *s) {
  */
 int PoolPrepare(pool **all, pool *p, void *s) {
   double **data;
-  int dims[MAX_RANK], i = 0, j = 0;
+  unsigned int dims[MAX_RANK], i = 0, j = 0;
 
   MGetDims(p,"global-double-data", dims);
   MAllocate2(p, "global-double-data", data, double);

@@ -72,7 +72,7 @@ int Storage(pool *p, void *s) {
 int PoolPrepare(pool **all, pool *p, void *s) {
   double **pdata;
   int **idata;
-  int i, j, dims[MAX_RANK], mstat;
+  unsigned int i, j, dims[MAX_RANK];
 
   MGetDims(p, "pool-double-data" , dims);
   
@@ -118,7 +118,7 @@ int PoolPrepare(pool **all, pool *p, void *s) {
 int PoolProcess(pool **all, pool *p, void *s) {
   double **pdata;
   int **idata;
-  int i, j, dims[MAX_RANK], mstat;
+  unsigned int i, j, dims[MAX_RANK];
 
   MGetDims(p, "pool-double-data", dims);
   MAllocate2(p, "pool-double-data", pdata, double);

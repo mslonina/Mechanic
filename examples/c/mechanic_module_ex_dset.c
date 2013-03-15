@@ -96,9 +96,11 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void 
     adims = 1;
     attr_data[0] = amin;
     hstat = H5LTset_attribute_double(h5location, d->layout.name, "xmin", attr_data, adims);
+    H5CheckStatus(hstat);
     
     attr_data[0] = amax;
     hstat = H5LTset_attribute_double(h5location, d->layout.name, "xmax", attr_data, adims);
+    H5CheckStatus(hstat);
   }
 
   return SUCCESS;
