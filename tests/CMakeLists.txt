@@ -1,7 +1,10 @@
 include_directories(. .. ${PROJECT_BINARY_DIR} 
+  ${PROJECT_BINARY_DIR}/src
+  ${PROJECT_BINARY_DIR}/src/core
   ${PROJECT_BINARY_DIR}/examples
   ${PROJECT_BINARY_DIR}/examples/c
   ../examples/c
+  ../src/core
   )
 enable_testing()
 
