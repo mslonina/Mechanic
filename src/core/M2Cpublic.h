@@ -53,7 +53,7 @@ typedef struct {
   char name[CONFIG_LEN]; /**< The name of the variable */
   char shortName; /**< The short name of the variable */
   char value[CONFIG_LEN]; /**< The default value of the variable */
-  char description[CONFIG_LEN]; /**< The description of the variable */
+  char description[4*CONFIG_LEN]; /**< The description of the variable */
   int type; /**< The datatype of the variable */
 } options;
 
