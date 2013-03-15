@@ -10,31 +10,31 @@ enable_testing()
 
 set (
   modules
-  #ex_map
+  ex_map
   ex_mandelbrot
-  #ex_setup
-  #ex_poolsetup
-  #ex_prepareprocess
-  #ex_createpool
-  #ex_changepoollayout
-  #ex_changepoollayout2
-  #ex_datatypes
-  #ex_dim
-  #ex_attr
-  #ex_reset
-  #ex_chreset
-  #ex_pool
-  #ex_poolsize
-  #ex_poolmask
-  #ex_dset
-  #ex_node
-  #ex_loop
-  #ex_readfile
-  #ex_readfile_setup
+  ex_setup
+  ex_poolsetup
+  ex_prepareprocess
+  ex_createpool
+  ex_changepoollayout
+  ex_changepoollayout2
+  ex_datatypes
+  ex_dim
+  ex_attr
+  ex_reset
+  ex_chreset
+  ex_pool
+  ex_poolsize
+  ex_poolmask
+  ex_dset
+  ex_node
+  ex_loop
+  ex_readfile
+  ex_readfile_setup
   #ex_ga
   #ex_rngs
-  #ex_taskcheckpoint
-  #ex_stage
+  ex_taskcheckpoint
+  ex_stage
 )
 
 file(COPY ../examples/c/readfile.txt DESTINATION .)
@@ -48,5 +48,5 @@ endforeach()
 foreach(module ${modules})
   add_test(NAME ${module} COMMAND ${CMAKE_COMMAND} -DMODULE=t${module}
     -DSOURCEDIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
-  file(COPY t${module}.cmake DESTINATION .)
+  #  file(COPY t${module}.cmake DESTINATION .)
 endforeach()
