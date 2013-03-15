@@ -153,7 +153,7 @@ add_subdirectory(src)
 add_subdirectory(src/core)
 add_subdirectory(src/modes)
 add_subdirectory(src/modules)
-#add_subdirectory(src/vendor)
+add_subdirectory(src/vendor)
 add_subdirectory(examples)
 add_subdirectory(tests)
 
