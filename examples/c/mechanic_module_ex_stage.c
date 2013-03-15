@@ -93,13 +93,13 @@ int PoolPrepare(pool **all, pool *p, void *s) {
     MReadData(all[p->pid-1], "global-double-data", &data[0][0]);
     for (i = 0; i < dims[0]; i++) {
       for (j = 0; j < dims[1]; j++) {
-        data[i][j] += 2;
+        data[i][j] += 2.0;
       }
     }
   } else {
     for (i = 0; i < dims[0]; i++) {
       for (j = 0; j < dims[1]; j++) {
-        data[i][j] = p->pid - 1;
+        data[i][j] = i + j + p->pid - 1.0;
       }
     }
   }
@@ -127,6 +127,8 @@ int TaskProcess(pool *p, task *t, void *s) {
   buffer[0][0] = t->tid;
   buffer[0][1] = p->pid;
   buffer[0][2] = p->rid;
+  buffer[0][3] = 0;
+  buffer[0][4] = 0;
 
   MWriteData(t, "task-integer-data", &buffer[0][0]);
 
