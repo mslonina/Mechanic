@@ -85,7 +85,7 @@ int Master(module *m, pool *p) {
       mstat = Pack(m, send_buffer->memory, p, t, TAG_DATA);
       CheckStatus(mstat);
       board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_IN_USE;
-      board_buffer[t->location[0]][t->location[1]][t->location[2]][1] = t->node;
+      if (m->stats) board_buffer[t->location[0]][t->location[1]][t->location[2]][1] = t->node;
       board_buffer[t->location[0]][t->location[1]][t->location[2]][2] = t->cid;
     } else {
       tag = TAG_TERMINATE;
@@ -148,7 +148,7 @@ int Master(module *m, pool *p) {
     mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
 
     board_buffer[header[3]][header[4]][header[5]][0] = header[2];
-    board_buffer[header[3]][header[4]][header[5]][1] = send_node;
+    if (m->stats) board_buffer[header[3]][header[4]][header[5]][1] = send_node;
     board_buffer[header[3]][header[4]][header[5]][2] = header[6];
 
     c->counter++;
@@ -163,7 +163,7 @@ int Master(module *m, pool *p) {
         CheckStatus(mstat);
 
         board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_IN_USE;
-        board_buffer[t->location[0]][t->location[1]][t->location[2]][1] = send_node;
+        if (m->stats) board_buffer[t->location[0]][t->location[1]][t->location[2]][1] = send_node;
         board_buffer[t->location[0]][t->location[1]][t->location[2]][2] = t->cid;
 
         MPI_Send(&(send_buffer->memory[0]), send_buffer->layout.size, MPI_CHAR,

@@ -76,6 +76,7 @@ typedef struct {
   int debug; /**< Debug mode */
   int showtime; /**< Show detailed CPU time */
   int verbose; /**< Be verbose */
+  int stats; /**< Enable detailed stats */
   layer layer; /**< The layer pointer */
   layer fallback; /**< The fallback layer pointer */
 } module;

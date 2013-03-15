@@ -134,6 +134,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
   m->yes = Option2Int("core", "yes", m->layer.setup.head);
   m->test = Option2Int("core", "test", m->layer.setup.head);
   m->dense = Option2Int("core", "dense", m->layer.setup.head);
+  m->stats = Option2Int("core", "stats", m->layer.setup.head);
 
   return mstat;
 }
@@ -143,7 +144,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
  *
  * @param m The module pointer
  * @param filename The name of the configuration file
- * @param head The LRC linked list pointer
+ * @param head The Config linked list pointer
  * @param setup_mode One of the flags: CORE_SETUP, MODULE_SETUP
  *
  * @return 0 on success, error code otherwise
