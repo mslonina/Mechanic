@@ -138,7 +138,7 @@ int Work(module *m) {
       h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
       
       sprintf(path, POOL_PATH, p[pid]->pid);
-      h5pool = H5Gopen(h5location, path, H5P_DEFAULT);
+      h5pool = H5Gopen2(h5location, path, H5P_DEFAULT);
       H5CheckStatus(h5pool);
       
       if (H5Aexists(h5pool, "CPU Time [s]") > 0) {
@@ -146,7 +146,7 @@ int Work(module *m) {
         H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time); 
       } else {
         attr_s = H5Screate(H5S_SCALAR);
-        attr_d = H5Acreate(h5pool, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+        attr_d = H5Acreate2(h5pool, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
         H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time); 
         H5Sclose(attr_s);
       }

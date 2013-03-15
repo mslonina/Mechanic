@@ -35,7 +35,7 @@ int MechanicHeader(module *m, hid_t h5location) {
   api = PACKAGE_VERSION_API;
 
   attr_s = H5Screate(H5S_SCALAR);
-  attr_d = H5Acreate(h5location, "API", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+  attr_d = H5Acreate2(h5location, "API", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
   H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &api);
   H5Sclose(attr_s);
   H5Aclose(attr_d);
@@ -53,7 +53,7 @@ int MechanicHeader(module *m, hid_t h5location) {
 
   attr_s = H5Screate_simple(1, sdims, NULL);
       
-  attr_d = H5Acreate(h5location, "MODULE", memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+  attr_d = H5Acreate2(h5location, "MODULE", memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
   H5CheckStatus(attr_d);
   H5Awrite(attr_d, memtype, module_name);
       

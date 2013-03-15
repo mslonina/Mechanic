@@ -36,7 +36,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
       h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
       H5CheckStatus(h5location);
 
-      h5board = H5Dopen(h5location, "/Pools/last/board", H5P_DEFAULT);
+      h5board = H5Dopen2(h5location, "/Pools/last/board", H5P_DEFAULT);
       H5CheckStatus(h5location);
 
       i = 0;

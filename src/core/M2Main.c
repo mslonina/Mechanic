@@ -251,13 +251,13 @@ int main(int argc, char** argv) {
     h5location = H5Fopen(module.filename, H5F_ACC_RDWR, H5P_DEFAULT);
     
     attr_s = H5Screate(H5S_SCALAR);
-    attr_d = H5Acreate(h5location, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    attr_d = H5Acreate2(h5location, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time); 
     H5Aclose(attr_d);
     H5Sclose(attr_s);
 
     attr_s = H5Screate(H5S_SCALAR);
-    attr_d = H5Acreate(h5location, "MPI size", H5T_NATIVE_INT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    attr_d = H5Acreate2(h5location, "MPI size", H5T_NATIVE_INT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
     H5Awrite(attr_d, H5T_NATIVE_INT, &mpi_size); 
     H5Aclose(attr_d);
     H5Sclose(attr_s);

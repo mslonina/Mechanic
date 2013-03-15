@@ -53,7 +53,8 @@ set (
   M2Wpublic.h
 )
 
-add_library(libmechanic SHARED ${libsources} $<TARGET_OBJECTS:mechanic_rngs>)
+#add_library(libmechanic SHARED ${libsources} $<TARGET_OBJECTS:mechanic_rngs>)
+add_library(libmechanic SHARED ${libsources})
 set_target_properties(libmechanic PROPERTIES OUTPUT_NAME mechanic)
 target_link_libraries(libmechanic hdf5 mpi)
 

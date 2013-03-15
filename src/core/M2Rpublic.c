@@ -113,7 +113,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
   sprintf(path, POOL_PATH, p->pid);
 
-  group = H5Gopen(h5location, path, H5P_DEFAULT);
+  group = H5Gopen2(h5location, path, H5P_DEFAULT);
   H5CheckStatus(group);
 
   mstat = CommitData(group, 1, p->board);
@@ -123,7 +123,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   mstat = CommitData(group, p->pool_banks, p->storage);
   CheckStatus(mstat);
 
-  tasks = H5Gopen(group, TASKS_GROUP, H5P_DEFAULT);
+  tasks = H5Gopen2(group, TASKS_GROUP, H5P_DEFAULT);
   H5CheckStatus(tasks);
 
   t = M2TaskLoad(m, p, 0);
@@ -308,7 +308,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           // Commit data to master datafile
           if (p->task->storage[j].layout.use_hdf) {
             sprintf(path, TASK_PATH, t->tid);
-            datapath = H5Gopen(tasks, path, H5P_DEFAULT);
+            datapath = H5Gopen2(tasks, path, H5P_DEFAULT);
             H5CheckStatus(datapath);
             mstat = CommitData(datapath, 1, &t->storage[j]);
             CheckStatus(mstat);

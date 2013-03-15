@@ -461,7 +461,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
   for (i = 0; i < banks; i++) {
     if (s[i].layout.use_hdf && s[i].layout.size > 0) {
 
-      dataset = H5Dopen(h5location, s[i].layout.name, H5P_DEFAULT);
+      dataset = H5Dopen2(h5location, s[i].layout.name, H5P_DEFAULT);
       H5CheckStatus(dataset);
       dataspace = H5Dget_space(dataset);
       H5CheckStatus(dataspace);
@@ -565,7 +565,7 @@ int CommitAttribute(hid_t h5location, attr *a) {
       h5status = H5Tset_size(memtype, CONFIG_LEN);
       attr_s = H5Screate_simple(1, sdims, NULL);
 
-      attr_d = H5Acreate(h5location, a->layout.name, memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+      attr_d = H5Acreate2(h5location, a->layout.name, memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
       H5CheckStatus(attr_d);
       H5Awrite(attr_d, memtype, buffer);
       
@@ -590,7 +590,7 @@ int CommitAttribute(hid_t h5location, attr *a) {
         H5CheckStatus(h5status);
       }
     
-      attr_d = H5Acreate(h5location, a->layout.name, a->layout.datatype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+      attr_d = H5Acreate2(h5location, a->layout.name, a->layout.datatype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
       H5CheckStatus(attr_d);
       
       H5Awrite(attr_d, a->layout.datatype, buffer); 
@@ -629,7 +629,7 @@ int ReadDataset(hid_t h5location, int banks, storage *s, int size) {
       buffer = calloc(elements, s[i].layout.datatype_size);
 
       Message(MESSAGE_DEBUG, "Read Data storage name: %s\n", s[i].layout.name);
-      dataset = H5Dopen(h5location, s[i].layout.name, H5P_DEFAULT);
+      dataset = H5Dopen2(h5location, s[i].layout.name, H5P_DEFAULT);
       hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
       H5CheckStatus(hstat);
       H5Dclose(dataset);
