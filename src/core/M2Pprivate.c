@@ -139,6 +139,8 @@ int PoolPrepare(module *m, pool **all, pool *p) {
             board_buffer[x][y][z][0] = TASK_FINISHED;
           } else {
             board_buffer[x][y][z][0] = TASK_AVAILABLE;
+            board_buffer[x][y][z][1] = 0; // reset computing node
+            board_buffer[x][y][z][2] = 0; // reset task checkpoint id
           }
 
           // kept here since it covers also the restart mode
