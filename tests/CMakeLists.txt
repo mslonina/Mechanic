@@ -8,7 +8,6 @@ include_directories(. .. ${PROJECT_BINARY_DIR}
   )
 enable_testing()
 
-#file(GLOB modules "../examples/c/*.c")
 set (
   modules
   ex_map
@@ -46,9 +45,6 @@ foreach(module ${modules})
 endforeach()
 
 foreach(module ${modules})
-  set (test mpirun -np 4 mechanic -p t${module} -n t${module})
-  add_test(NAME ${module} COMMAND mpirun -np 4 mechanic -p t${module} -x 10 -y 10 -n t${module})
-  #message(${test})
-  #  add_test(NAME ${module} COMMAND ${CMAKE_COMMAND} -DTEST=${test}
-  #  -DSOURCEDIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
+  add_test(NAME ${module} COMMAND ${CMAKE_COMMAND} -DMODULE=t${module}
+    -DSOURCEDIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
 endforeach()
