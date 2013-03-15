@@ -515,8 +515,9 @@ To obtain all configuration options available in the core, try:
 - `--yes` -- this flag may be used for specfic force runs (skip checks etc.) of a custom module 
 - `--dense` -- this flag may be used for specific, dense, module output
 - `--show-time` -- switches detailed CPU usage on
-- `--verbose` -- switches verbode output on
+- `--verbose`, `-V` -- switches verbode output on
 - `--debug` -- this flag may be used for specific debug output of a custom module
+- `--stats` -- enable detailed runtime statistics to be written to the master file
 - `--print-defaults` -- print the default options
 - `--help`, `-?` -- show help message
 - `--usage` -- show short help message
