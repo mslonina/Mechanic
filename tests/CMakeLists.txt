@@ -48,5 +48,4 @@ endforeach()
 foreach(module ${modules})
   add_test(NAME ${module} COMMAND ${CMAKE_COMMAND} -DMODULE=t${module}
     -DSOURCEDIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
-  #  file(COPY t${module}.cmake DESTINATION .)
 endforeach()

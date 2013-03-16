@@ -91,7 +91,7 @@ int TaskProcess(pool *p, task *t, void *s) {
 
   // Add data to the task result
   buffer[0][0][0] = t->tid;
-  buffer[0][0][t->cid+1] = t->tid + t->cid;
+  buffer[0][0][t->cid+1] = (double)t->tid + (double)t->cid;
   
   group[0][0][0] = t->tid;
   group[0][0][t->cid+1] = t->tid + t->cid;

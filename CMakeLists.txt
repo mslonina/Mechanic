@@ -52,7 +52,7 @@ check_c_compiler_flag(-Wall HAS_WALL)
 check_c_compiler_flag(-std=c99 HAS_STD_C99)
 
 if (HAS_WALL)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -ggdb")
 endif (HAS_WALL)
 
 if (HAS_STD_C99)
