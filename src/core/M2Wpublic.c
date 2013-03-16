@@ -17,7 +17,7 @@ int M2Prepare(module *m) {
   query *q;
 
   q = LoadSym(m, "Prepare", LOAD_DEFAULT);
-  if (q) mstat = q(m->node, m->filename, s);
+  if (q) mstat = q(m->mpi_size, m->node, m->filename, s);
   CheckStatus(mstat);
 
   return mstat;
@@ -37,7 +37,7 @@ int M2Process(module *m, pool **p) {
   query *q;
 
   q = LoadSym(m, "Process", LOAD_DEFAULT);
-  if (q) mstat = q(m->node, m->filename, p, s);
+  if (q) mstat = q(m->mpi_size, m->node, m->filename, p, s);
   CheckStatus(mstat);
 
   return mstat;

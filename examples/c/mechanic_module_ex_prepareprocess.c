@@ -39,7 +39,7 @@
  * Example:
  * We open here the master file, create a simple dataset and write some sample data
  */
-int Prepare(int node, char *masterfile, void *s) {
+int Prepare(int mpi_size, int node, char *masterfile, void *s) {
   hid_t h5location, dataspace, dataset;
   hsize_t dimsf[2];
   double data[DIM0][DIM1];
@@ -59,15 +59,18 @@ int Prepare(int node, char *masterfile, void *s) {
 
     // Open the master datafile
     h5location = H5Fopen(masterfile, H5F_ACC_RDWR, H5P_DEFAULT);
+    H5CheckStatus(h5location);
 
-    // Create sample dataset and write data into it
-    dataspace = H5Screate_simple(2, dimsf, NULL);
-    dataset = H5Dcreate(h5location, "prepare-dataset", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,H5P_DEFAULT, &data[0][0]);
+    if (!H5Lexists(h5location, "prepare-dataset", H5P_DEFAULT)) {
+      // Create sample dataset and write data into it
+      dataspace = H5Screate_simple(2, dimsf, NULL);
+      dataset = H5Dcreate(h5location, "prepare-dataset", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,H5P_DEFAULT, &data[0][0]);
 
-    // Release the resources
-    H5Dclose(dataset);
-    H5Sclose(dataspace);
+      // Release the resources
+      H5Dclose(dataset);
+      H5Sclose(dataspace);
+    }
     H5Fclose(h5location);
   }
   return SUCCESS;
@@ -84,7 +87,7 @@ int Prepare(int node, char *masterfile, void *s) {
  * Example:
  * We open here the master file and read sample data
  */
-int Process(int node, char *masterfile, pool **all, void *s) {
+int Process(int mpi_size, int node, char *masterfile, pool **all, void *s) {
   hid_t h5location, dataset;
   double data[DIM0][DIM1];
   int i, j;

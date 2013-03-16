@@ -167,7 +167,6 @@ int Work(module *m) {
     if (pid == m->layer.init.pools) pool_create = POOL_FINALIZE;
 
     /* Revert to normal mode, after the restarted pool is finished */
-//    if (m->mode == RESTART_MODE && pool_create == POOL_CREATE_NEW) m->mode = NORMAL_MODE;
   } while (pool_create != POOL_FINALIZE);
 
   /* M2Process the simulation */

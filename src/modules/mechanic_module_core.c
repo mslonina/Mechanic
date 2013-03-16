@@ -522,13 +522,14 @@ int CheckpointPrepare(pool *p, checkpoint *c, void *s) {
  * hook.
  *
  * @ingroup all_nodes
+ * @param mpi_size The size of the `MPI_COMM_WORLD`
  * @param node The node id
  * @param masterfile The name of the master data file
  * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int Prepare(int node, char *masterfile, void *s) {
+int Prepare(int mpi_size, int node, char *masterfile, void *s) {
   return SUCCESS;
 }
 
@@ -542,6 +543,7 @@ int Prepare(int node, char *masterfile, void *s) {
  * hook.
  *
  * @ingroup all_nodes
+ * @param mpi_size The size of the `MPI_COMM_WORLD`
  * @param node The node id
  * @param masterfile The name of the master data file
  * @param all The pointer to all pools 
@@ -549,7 +551,7 @@ int Prepare(int node, char *masterfile, void *s) {
  *
  * @return `SUCCESS` or error code otherwise
  */
-int Process(int node, char *masterfile, pool **all, void *s) {
+int Process(int mpi_size, int node, char *masterfile, pool **all, void *s) {
   return SUCCESS;
 }
 

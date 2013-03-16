@@ -20,6 +20,7 @@ int Restart(module *m, pool **pools, int *pool_counter) {
   hid_t h5location, group, tasks, task_id, attr_id, hstat;
 
   if (m->node == MASTER) {
+    Message(MESSAGE_INFO, "Restart filename: %s\n", m->filename);
     h5location = H5Fopen(m->filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     H5CheckStatus(h5location);
 
