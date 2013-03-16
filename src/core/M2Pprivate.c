@@ -149,6 +149,11 @@ int PoolPrepare(module *m, pool **all, pool *p) {
             if (board_buffer[x][y][z][0] == TASK_IN_USE) {
               board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
             }
+            if (reversed) {
+              if (board_buffer[x][y][z][0] == TASK_AVAILABLE) {
+                board_buffer[x][y][z][0] = TASK_FINISHED;
+              }
+            }
           } else {
             if (reversed) {
               board_buffer[x][y][z][0] = TASK_FINISHED;
@@ -184,40 +189,51 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
     time_in = clock();
     
-      for (i = 0; i < p->mask_size; i++) {
-        t->tid = i;
+    for (i = 0; i < p->mask_size; i++) {
+      t->tid = i;
 
-        // do we have to load task data here? (CPU overhead), the pool datasets are
-        // available though
+      // do we have to load task data here? (CPU overhead), the pool datasets are
+      // available though
 
-        q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
-        if (q) mstat = q(p, t, v);
-        CheckStatus(mstat);
+      q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
+      if (q) mstat = q(p, t, v);
+      CheckStatus(mstat);
+      
+      q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
+      if (q) t->state = q(all, p, t, v);
+
+      if (m->mode != RESTART_MODE) {
+        if (t->state == TASK_ENABLED) {
+          board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
+          if (reversed) p->completed--;
+        }
+
+        if (t->state == TASK_DISABLED) {
+          board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
+          p->completed++;
+        }
+      } 
+      
+      // the logic below somehow works...
+      if (m->mode == RESTART_MODE) {
+        // skip already finished tasks
+        if (board_buffer[t->location[0]][t->location[1]][t->location[2]][0] == TASK_FINISHED) continue;
         
-        q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
-        if (q) t->state = q(all, p, t, v);
-
-        if (m->mode != RESTART_MODE) {
-          if (t->state == TASK_ENABLED) {
-            board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
-            if (reversed) p->completed--;
-          }
-
+        if (t->state == TASK_ENABLED) {
+          board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
+          if (reversed) p->completed--;
+        }
+        
+        if (board_buffer[t->location[0]][t->location[1]][t->location[2]][0] == TASK_AVAILABLE) {
           if (t->state == TASK_DISABLED) {
             board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
             p->completed++;
           }
-        } /*else {
-          if (board_buffer[t->location[0]][t->location[1]][t->location[2]][0] == TASK_AVAILABLE) {
-            if (t->state == TASK_DISABLED)  
-              board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
-              p->completed++;
-            }
-          }*/
-      
         }
+      }
+    }
 
-     if (m->debug) {
+    if (m->debug) {
       for (x = 0; x < p->board->layout.dims[0]; x++) {
         for (y = 0; y < p->board->layout.dims[1]; y++) {
           printf("%3d ", board_buffer[x][y][0][0]);
