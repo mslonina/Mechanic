@@ -52,6 +52,8 @@ int Work(module *m) {
     }
     mstat = Restart(m, p, &pid);
     CheckStatus(mstat);
+    Message(MESSAGE_DEBUG, "Node %d :: PID %d RID %d SID %d SRID %d\n",
+        m->node, pid, p[pid]->rid, p[pid]->sid, p[pid]->srid);
   }
   
   /**
@@ -79,7 +81,7 @@ int Work(module *m) {
 
       do { // The pool stage loop
 
-        p[pid]->srid = 0;
+        if (m->mode != RESTART_MODE) p[pid]->srid = 0;
         
         do { // The paol stage reset loop
 

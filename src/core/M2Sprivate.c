@@ -96,6 +96,14 @@ int Storage(module *m, pool *p) {
       double_attr = Option2Double(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
       WriteAttr(&p->board->attr[i], &double_attr);
     }
+
+    // Special treating for the unit tests
+    if (m->test) {
+      if (strcmp(m->layer.setup.options[i].name, "restart-mode") == 0) {
+        int_attr = 0;
+        WriteAttr(&p->board->attr[i], &int_attr);
+      }
+    }
   }
 
   /* Update the pool size

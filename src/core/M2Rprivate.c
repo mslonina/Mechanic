@@ -27,10 +27,10 @@ int Restart(module *m, pool **pools, int *pool_counter) {
     group = H5Gopen2(h5location, LAST_GROUP, H5P_DEFAULT);
     H5CheckStatus(group);
 
-    attr_id = H5Aopen_name(group, "Id");
+    attr_id = H5Aopen_name(group, "ID");
     H5CheckStatus(attr_id);
 
-    hstat = H5Aread(attr_id, H5T_NATIVE_INT, pool_counter);
+    hstat = H5Aread(attr_id, H5T_NATIVE_UINT, pool_counter);
     H5CheckStatus(hstat);
 
     H5Aclose(attr_id);
@@ -52,6 +52,33 @@ int Restart(module *m, pool **pools, int *pool_counter) {
       sprintf(path, POOL_PATH, pools[i]->pid);
       group = H5Gopen2(h5location, path, H5P_DEFAULT);
       H5CheckStatus(group);
+
+      /* Read pool reset and stage counters */
+      attr_id = H5Aopen_name(group, "RID");
+      H5CheckStatus(attr_id);
+    
+      hstat = H5Aread(attr_id, H5T_NATIVE_UINT, &pools[i]->rid);
+      H5CheckStatus(hstat);
+
+      H5Aclose(attr_id);
+
+      attr_id = H5Aopen_name(group, "SID");
+      H5CheckStatus(attr_id);
+    
+      hstat = H5Aread(attr_id, H5T_NATIVE_UINT, &pools[i]->sid);
+      H5CheckStatus(hstat);
+
+      H5Aclose(attr_id);
+      
+      attr_id = H5Aopen_name(group, "SRID");
+      H5CheckStatus(attr_id);
+    
+      hstat = H5Aread(attr_id, H5T_NATIVE_UINT, &pools[i]->srid);
+      H5CheckStatus(hstat);
+
+      H5Aclose(attr_id);
+      
+      Message(MESSAGE_DEBUG, "Pool %d RID: %d SID: %d SRID: %d\n", pools[i]->pid, pools[i]->rid, pools[i]->sid, pools[i]->srid);
 
       /* Read pool board */
       ReadDataset(group, 1, pools[i]->board, 1);
@@ -115,6 +142,11 @@ int Restart(module *m, pool **pools, int *pool_counter) {
         }
       }
     }
+    // Counters
+    MPI_Bcast(&(pools[i]->pid), 1, MPI_UNSIGNED, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&(pools[i]->rid), 1, MPI_UNSIGNED, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&(pools[i]->sid), 1, MPI_UNSIGNED, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&(pools[i]->srid), 1, MPI_UNSIGNED, MASTER, MPI_COMM_WORLD);
   }
 
   return mstat;

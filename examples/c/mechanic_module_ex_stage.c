@@ -127,8 +127,8 @@ int TaskProcess(pool *p, task *t, void *s) {
   buffer[0][0] = t->tid;
   buffer[0][1] = p->pid;
   buffer[0][2] = p->rid;
-  buffer[0][3] = 0;
-  buffer[0][4] = 0;
+  buffer[0][3] = p->sid;
+  buffer[0][4] = p->srid;
 
   MWriteData(t, "task-integer-data", &buffer[0][0]);
 

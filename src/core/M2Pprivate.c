@@ -184,7 +184,6 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
     time_in = clock();
     
-    if (m->mode != RESTART_MODE) {
       for (i = 0; i < p->mask_size; i++) {
         t->tid = i;
 
@@ -198,19 +197,35 @@ int PoolPrepare(module *m, pool **all, pool *p) {
         q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
         if (q) t->state = q(all, p, t, v);
 
-        if (t->state == TASK_ENABLED) {
-          board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
-          if (reversed) p->completed--;
+        if (m->mode != RESTART_MODE) {
+          if (t->state == TASK_ENABLED) {
+            board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
+            if (reversed) p->completed--;
+          }
+
+          if (t->state == TASK_DISABLED) {
+            board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
+            p->completed++;
+          }
+        } /*else {
+          if (board_buffer[t->location[0]][t->location[1]][t->location[2]][0] == TASK_AVAILABLE) {
+            if (t->state == TASK_DISABLED)  
+              board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
+              p->completed++;
+            }
+          }*/
+      
         }
 
-        if (t->state == TASK_DISABLED) {
-          board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
-          p->completed++;
+     if (m->debug) {
+      for (x = 0; x < p->board->layout.dims[0]; x++) {
+        for (y = 0; y < p->board->layout.dims[1]; y++) {
+          printf("%3d ", board_buffer[x][y][0][0]);
         }
-        
+        printf("\n");
       }
     }
-
+    
     time_out = clock();
     cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
     if (m->showtime) Message(MESSAGE_INFO, "BoardPrepare completed. CPU time: %f\n", cpu_time);
@@ -324,23 +339,59 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   /* Write global attributes */
   if (H5Aexists(h5pool, "Status") > 0) {
     attr_d = H5Aopen(h5pool, "Status", H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_SHORT, &p->state);
+    H5Awrite(attr_d, H5T_NATIVE_USHORT, &p->state);
   } else {
     attr_s = H5Screate(H5S_SCALAR);
-    attr_d = H5Acreate2(h5pool, "Status", H5T_NATIVE_SHORT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &p->state); 
+    attr_d = H5Acreate2(h5pool, "Status", H5T_NATIVE_USHORT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_USHORT, &p->state); 
     H5Sclose(attr_s);
   }
       
   H5Aclose(attr_d);
 
-  if (H5Aexists(h5pool, "Id") > 0) {
-    attr_d = H5Aopen(h5pool, "Id", H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_INT, &p->pid);
+  if (H5Aexists(h5pool, "ID") > 0) {
+    attr_d = H5Aopen(h5pool, "ID", H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->pid);
   } else {
     attr_s = H5Screate(H5S_SCALAR);
-    attr_d = H5Acreate2(h5pool, "Id", H5T_NATIVE_INT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &p->pid); 
+    attr_d = H5Acreate2(h5pool, "ID", H5T_NATIVE_UINT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->pid); 
+    H5Sclose(attr_s);
+  }
+      
+  H5Aclose(attr_d);
+
+  if (H5Aexists(h5pool, "RID") > 0) {
+    attr_d = H5Aopen(h5pool, "RID", H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->rid);
+  } else {
+    attr_s = H5Screate(H5S_SCALAR);
+    attr_d = H5Acreate2(h5pool, "RID", H5T_NATIVE_UINT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->rid); 
+    H5Sclose(attr_s);
+  }
+      
+  H5Aclose(attr_d);
+
+  if (H5Aexists(h5pool, "SID") > 0) {
+    attr_d = H5Aopen(h5pool, "SID", H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->sid);
+  } else {
+    attr_s = H5Screate(H5S_SCALAR);
+    attr_d = H5Acreate2(h5pool, "SID", H5T_NATIVE_UINT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->sid); 
+    H5Sclose(attr_s);
+  }
+      
+  H5Aclose(attr_d);
+
+  if (H5Aexists(h5pool, "SRID") > 0) {
+    attr_d = H5Aopen(h5pool, "SRID", H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->srid);
+  } else {
+    attr_s = H5Screate(H5S_SCALAR);
+    attr_d = H5Acreate2(h5pool, "SRID", H5T_NATIVE_UINT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->srid); 
     H5Sclose(attr_s);
   }
       
@@ -348,6 +399,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
 
   /* The last pool link */
   if (p->state == POOL_PREPARED) {
+    Message(MESSAGE_DEBUG, "Last group: %s\n", path);
     if (H5Lexists(h5location, LAST_GROUP, H5P_DEFAULT)) {
       H5Ldelete(h5location, LAST_GROUP, H5P_DEFAULT);
     }
