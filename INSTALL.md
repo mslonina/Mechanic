@@ -39,6 +39,12 @@ By default, CMake installs to `/usr/local`. You can change the installation path
     
     -DCMAKE_INSTALL_PREFIX:PATH=/your/custom/path
 
+To run unit tests try:
+
+    make test
+
+Tests are available as examples in the `examples/c` directory.
+
 Using the installation script
 -----------------------------
 

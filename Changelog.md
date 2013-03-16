@@ -50,6 +50,7 @@ Mechanic short changelog
 - Support for numeric and string attributes
 - Initial work for python postprocessing pipeline
 - Mechanic now ships with the RNGS random number library 
+- Full unit test coverage
 - Documentation updates
 - Bug fixes
 
