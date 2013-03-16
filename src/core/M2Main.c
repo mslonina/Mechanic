@@ -170,6 +170,7 @@ int main(int argc, char** argv) {
    * (H) Backup the master data file
    */
   if (node == MASTER) {
+    Message(MESSAGE_DEBUG, "Name: %s\n", Option2String("core", "name", core.layer.setup.head));
     if (!Option2Int("core", "no-backup", core.layer.setup.head)) {
       masterfile = Name(Option2String("core", "name", core.layer.setup.head),
         "-master-", "00", ".h5");
@@ -188,6 +189,7 @@ int main(int argc, char** argv) {
     if (module.mode == RESTART_MODE) {
       masterfile = Name(Option2String("core", "name", core.layer.setup.head),
         "-master-", "00", ".h5");
+      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Restart file: %s\n", masterfile);
       Copy(module.filename, masterfile);
       free(masterfile);
 
@@ -195,7 +197,9 @@ int main(int argc, char** argv) {
       free(core.filename);
       free(module.filename);
       core.filename = Name(Option2String("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
+      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", core.filename);
       module.filename = Name(Option2String("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
+      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module.filename);
     }
   }
 

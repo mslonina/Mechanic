@@ -108,6 +108,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   if (m->node == MASTER) {
 
     p->mask_size = p->pool_size;
+    p->completed = 0;
 
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
     if (q) mstat = q(all, p, v);
@@ -125,22 +126,39 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
     if (p->mask_size != p->pool_size) reversed = 1;
 
+    if (m->mode == RESTART_MODE) {
+      ReadData(p->board, &board_buffer[0][0][0][0]);
+    }
+
+    if (m->debug) {
+      for (x = 0; x < p->board->layout.dims[0]; x++) {
+        for (y = 0; y < p->board->layout.dims[1]; y++) {
+          printf("%3d ", board_buffer[x][y][0][0]);
+        }
+        printf("\n");
+      }
+    }
+
     // Initialize the task board
     for (x = 0; x < p->board->layout.dims[0]; x++) {
       for (y = 0; y < p->board->layout.dims[1]; y++) {
         for (z = 0; z < p->board->layout.dims[2]; z++) {
 
           // restart mode
-          if (m->mode == RESTART_MODE && board_buffer[x][y][z][0] == TASK_IN_USE) {
-            board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
-          }
-          
-          if (reversed) {
-            board_buffer[x][y][z][0] = TASK_FINISHED;
+          if (m->mode == RESTART_MODE) {
+            if (board_buffer[x][y][z][0] == TASK_IN_USE) {
+              board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
+            }
           } else {
-            board_buffer[x][y][z][0] = TASK_AVAILABLE;
-            board_buffer[x][y][z][1] = 0; // reset computing node
-            board_buffer[x][y][z][2] = 0; // reset task checkpoint id
+            if (reversed) {
+              board_buffer[x][y][z][0] = TASK_FINISHED;
+              board_buffer[x][y][z][1] = 0; // reset computing node
+              board_buffer[x][y][z][2] = 0; // reset task checkpoint id
+            } else {
+              board_buffer[x][y][z][0] = TASK_AVAILABLE;
+              board_buffer[x][y][z][1] = 0; // reset computing node
+              board_buffer[x][y][z][2] = 0; // reset task checkpoint id
+            }
           }
 
           // kept here since it covers also the restart mode
@@ -151,31 +169,46 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       }
     }
 
+    if (m->debug) {
+      for (x = 0; x < p->board->layout.dims[0]; x++) {
+        for (y = 0; y < p->board->layout.dims[1]; y++) {
+          printf("%3d ", board_buffer[x][y][0][0]);
+        }
+        printf("\n");
+      }
+    }
+
+    if (m->mode == RESTART_MODE) {
+      Message(MESSAGE_INFO, "Completed %d tasks\n", p->completed);
+    }
+
     time_in = clock();
     
-    for (i = 0; i < p->mask_size; i++) {
-      t->tid = i;
+    if (m->mode != RESTART_MODE) {
+      for (i = 0; i < p->mask_size; i++) {
+        t->tid = i;
 
-      // do we have to load task data here? (CPU overhead), the pool datasets are
-      // available though
+        // do we have to load task data here? (CPU overhead), the pool datasets are
+        // available though
 
-      q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
-      if (q) mstat = q(p, t, v);
-      CheckStatus(mstat);
-      
-      q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
-      if (q) t->state = q(all, p, t, v);
+        q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
+        if (q) mstat = q(p, t, v);
+        CheckStatus(mstat);
+        
+        q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
+        if (q) t->state = q(all, p, t, v);
 
-      if (t->state == TASK_ENABLED) {
-        board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
-        if (reversed) p->completed--;
+        if (t->state == TASK_ENABLED) {
+          board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
+          if (reversed) p->completed--;
+        }
+
+        if (t->state == TASK_DISABLED) {
+          board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
+          p->completed++;
+        }
+        
       }
-
-      if (t->state == TASK_DISABLED) {
-        board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
-        p->completed++;
-      }
-      
     }
 
     time_out = clock();

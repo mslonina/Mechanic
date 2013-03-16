@@ -48,6 +48,7 @@ int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
           H5Aread(h5attr, h5atype, &string_attr);
           len = strlen(ConfigTrim(string_attr));
           strncpy(m->layer.setup.options[i].value, ConfigTrim(string_attr), len);
+          m->layer.setup.options[i].value[len] = CONFIG_NULL;
         }
         
         if (m->layer.setup.options[i].type == C_INT
