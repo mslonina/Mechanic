@@ -1,5 +1,5 @@
-set (ENV{LD_LIBRARY_PATH} ".")
-set (ENV{DYLD_LIBRARY_PATH} ".")
+set (ENV{LD_LIBRARY_PATH} $ENV{LD_LIBRARY_PATH}:.)
+set (ENV{DYLD_LIBRARY_PATH} $ENV{DYLD_LIBRARY_PATH}:.)
 
 #
 # The normal mode
