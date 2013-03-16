@@ -31,14 +31,16 @@ set (
   ex_loop
   ex_readfile
   ex_readfile_setup
-  #ex_ga
-  #ex_rngs
   ex_taskcheckpoint
   ex_stage
 )
 
 file(COPY ../examples/c/readfile.txt DESTINATION .)
 file(COPY references DESTINATION .)
+
+# the Core test
+add_test(NAME core COMMAND ${CMAKE_COMMAND} -DMODULE=core
+  -DSOURCEDIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
 
 foreach(module ${modules})
   add_library(mechanic_module_t${module} SHARED ../examples/c/mechanic_module_${module}.c)
