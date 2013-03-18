@@ -16,8 +16,5 @@
 #include "M2Rpublic.h"
 #include "M2Wpublic.h"
 
-/* Vendor */
-#include "mechanic_rngs.h"
-
 #endif
 

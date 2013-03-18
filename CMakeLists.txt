@@ -31,6 +31,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 OPTION (BUILD_PYTHON_TOOLKIT "Build python postprocessing toolkit" OFF)
+OPTION (BUILD_VENDOR_RNGS "Build RNGS library" OFF)
 
 set (USES_MPICC 0)
 if ("${CMAKE_C_COMPILER}" MATCHES "mpicc")
@@ -145,21 +146,24 @@ if (NOT HAVE_HDF5_H OR NOT HAVE_HDF5_LIB)
 endif (NOT HAVE_HDF5_H OR NOT HAVE_HDF5_LIB)
 
 CONFIGURE_FILE (
-  ${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in 
-  ${CMAKE_CURRENT_BINARY_DIR}/src/config.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/mechanic_config.h.in 
+  ${CMAKE_CURRENT_BINARY_DIR}/src/mechanic_config.h
 )
 
 add_subdirectory(src)
 add_subdirectory(src/core)
 add_subdirectory(src/modes)
 add_subdirectory(src/modules)
-add_subdirectory(src/vendor)
 add_subdirectory(examples)
 add_subdirectory(tests)
 
 if (BUILD_PYTHON_TOOLKIT)
   add_subdirectory(src/toolkits/python)
 endif (BUILD_PYTHON_TOOLKIT)
+
+if (BUILD_VENDOR_RNGS)
+  add_subdirectory(src/vendor/rngs)
+endif (BUILD_VENDOR_RNGS)
 
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mechanic")
 SET (CPACK_PACKAGE_VENDOR "Celestial Mechanics Group (TCFA/NCU)")

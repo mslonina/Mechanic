@@ -25,9 +25,11 @@ examples=\
 	mechanic_module_ex_readfile.${EXT} \
 	mechanic_module_ex_readfile_setup.${EXT} \
 	mechanic_module_ex_ga.${EXT} \
-	mechanic_module_ex_rngs.${EXT} \
 	mechanic_module_ex_taskcheckpoint.${EXT} \
 	mechanic_module_ex_stage.${EXT}
+
+rngs:
+	${CC} ${CFLAGS} -lmechanic_rngs mechanic_module_ex_rngs.c -o libmechanic_module_ex_rngs.${EXT}
 
 %.so: %.c
 	${CC} -o lib$@ $< ${CFLAGS}

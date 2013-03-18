@@ -1,6 +1,4 @@
-include_directories(. .. ../../core ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
-  ../../vendor/rngs
-)
+include_directories(. .. ../../core ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src)
 
 set (
   farmsources

@@ -24,3 +24,4 @@
 #cmakedefine HAVE_POPT_H 1
 #cmakedefine HAVE_MPI_H 1
 #cmakedefine HAVE_HDF5_H 1
+#cmakedefine VENDOR_RNGS 1
