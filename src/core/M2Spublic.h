@@ -14,6 +14,7 @@
 
 /* Storage */
 #define MAX_RANK H5S_MAX_RANK /**< The maximum dataset rank */
+#define STORAGE_NULL 0 /**< The NULL storage */
 #define STORAGE_GROUP 11 /**< The basic data storage type */
 #define STORAGE_PM3D 12 /**< The pm3d data storage type */
 #define STORAGE_BOARD 13 /**< The board data storage type */
@@ -21,7 +22,6 @@
 
 #define TASK_BOARD_RANK 3 /**< The minimum task board rank */
 
-#define STORAGE_NULL -1
 #define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
 #define ATTR_STORAGE_END {.name = NULL, .dataspace = -1, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
 

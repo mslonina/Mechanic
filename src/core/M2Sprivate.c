@@ -298,10 +298,16 @@ int CheckLayout(module *m, int banks, storage *s) {
       Error(CORE_ERR_STORAGE);
     }
 
-    if (s[i].layout.storage_type < 0) {
+    if (s[i].layout.storage_type < STORAGE_GROUP) {
       Message(MESSAGE_ERR, "The storage type is missing\n");
       Error(CORE_ERR_STORAGE);
     }
+    
+    if (s[i].layout.storage_type > STORAGE_LIST) {
+      Message(MESSAGE_ERR, "Unknown storage type\n");
+      Error(CORE_ERR_STORAGE);
+    }
+
 
     if (s[i].layout.use_hdf) {
       s[i].layout.dataspace = H5S_SIMPLE;
