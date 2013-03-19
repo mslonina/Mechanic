@@ -51,6 +51,7 @@ add_definitions (-DHAVE_CONFIG_H)
 
 check_c_compiler_flag(-Wall HAS_WALL)
 check_c_compiler_flag(-std=c99 HAS_STD_C99)
+check_c_compiler_flag(-Wpointer-arith HAS_POINTER_ARITH)
 
 if (HAS_WALL)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -ggdb")
@@ -59,6 +60,10 @@ endif (HAS_WALL)
 if (HAS_STD_C99)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 endif (HAS_STD_C99)
+
+if (HAS_POINTER_ARITH)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpointer-arith")
+endif (HAS_POINTER_ARITH)
   
 CHECK_INCLUDE_FILES (inttypes.h HAVE_INTTYPES_H)
 if (NOT HAVE_INTTYPES_H)
