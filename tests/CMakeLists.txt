@@ -14,6 +14,7 @@ set (
   ex_mandelbrot
   ex_setup
   ex_poolsetup
+  ex_poolsetup2
   ex_prepareprocess
   ex_createpool
   ex_changepoollayout

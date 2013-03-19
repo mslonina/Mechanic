@@ -316,6 +316,8 @@ look at following examples:
     [mechanic_module_ex_setup.c](c/mechanic_module_ex_setup.c)
   - Changing runtime configuration per task pool:
     [mechanic_module_ex_poolsetup.c](c/mechanic_module_ex_poolsetup.c)
+  - Changing runtime configuration per task pool and reading it on workers:
+    [mechanic_module_ex_poolsetup.c](c/mechanic_module_ex_poolsetup2.c)
 
 #### Datatypes and dimensionality
 
