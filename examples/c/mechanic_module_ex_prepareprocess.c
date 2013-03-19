@@ -64,7 +64,7 @@ int Prepare(int mpi_size, int node, char *masterfile, void *s) {
     if (!H5Lexists(h5location, "prepare-dataset", H5P_DEFAULT)) {
       // Create sample dataset and write data into it
       dataspace = H5Screate_simple(2, dimsf, NULL);
-      dataset = H5Dcreate(h5location, "prepare-dataset", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      dataset = H5Dcreate2(h5location, "prepare-dataset", H5T_NATIVE_DOUBLE, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
       H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,H5P_DEFAULT, &data[0][0]);
 
       // Release the resources
@@ -97,7 +97,7 @@ int Process(int mpi_size, int node, char *masterfile, pool **all, void *s) {
 
     // Open the master datafile and the dataset
     h5location = H5Fopen(masterfile, H5F_ACC_RDWR, H5P_DEFAULT);
-    dataset = H5Dopen(h5location, "prepare-dataset", H5P_DEFAULT);
+    dataset = H5Dopen2(h5location, "prepare-dataset", H5P_DEFAULT);
 
     // Read the whole dataset
     H5Dread(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &data[0][0]);

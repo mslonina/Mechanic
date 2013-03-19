@@ -6,7 +6,7 @@
 #define MECHANIC_M2A_PRIVATE_H
 
 #if HAVE_CONFIG_H
-  #include <config.h>
+  #include "mechanic_config.h"
 #endif
 
 #include "M2Apublic.h"

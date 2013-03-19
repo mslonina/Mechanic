@@ -11,7 +11,7 @@
  * Compilation
  * -----------
  *
- *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lhdf5 -lhdf5_hl \
+ *    mpicc -std=c99 -fPIC -Dpic -shared -lmechanic -lmechanic_rngs -lhdf5 -lhdf5_hl \
  *        mechanic_module_ex_rngs.c -o libmechanic_module_ex_rngs.so
  *
  * Using the module
@@ -21,11 +21,12 @@
  *
  */
 #include "mechanic.h"
+#include "mechanic_rngs.h"
 
 /**
  * Implements Prepare()
  */
-int Prepare(int node, char *masterfile, void *s) {
+int Prepare(int mpi_size, int node, char *masterfile, void *s) {
   long x = -1;
   
   // Initialize random seeds

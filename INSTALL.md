@@ -99,3 +99,10 @@ To install Python toolkit, based on matplotlib and h5py, use the following:
     CC=mpicc cmake .. -DBUILD_PYTHON_TOOLKIT:BOOL=ON
 
 
+RNGS library
+------------
+
+To build RNGS library, use the following:
+
+  CC=mpicc cmake .. -DBUILD_VENDOR_RNGS:BOOL=ON
+

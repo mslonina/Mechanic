@@ -4,6 +4,5 @@ set (rngs
   rngs.c mechanic_rngs.h
 )
 
-add_library (mechanic_rngs OBJECT ${rngs})
-set_target_properties(mechanic_rngs PROPERTIES COMPILE_FLAGS "-fPIC" )
+add_library (mechanic_rngs SHARED ${rngs})
 install (FILES mechanic_rngs.h DESTINATION include)

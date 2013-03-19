@@ -1,9 +1,5 @@
 # http://stackoverflow.com/questions/11429055/cmake-how-create-a-single-shared-library-from-all-static-libraries-of-subprojec
-include_directories(. .. ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src
-  ${PROJECT_BINARY_DIR}/src/vendor
-  ${PROJECT_BINARY_DIR}/src/vendor/rngs
-  ../vendor/rngs
-  )
+include_directories(. .. ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src)
 
 set (
   mainsources
@@ -53,8 +49,7 @@ set (
   M2Wpublic.h
 )
 
-add_library(libmechanic SHARED ${libsources} $<TARGET_OBJECTS:mechanic_rngs>)
-#add_library(libmechanic SHARED ${libsources})
+add_library(libmechanic SHARED ${libsources})
 set_target_properties(libmechanic PROPERTIES OUTPUT_NAME mechanic)
 target_link_libraries(libmechanic hdf5 mpi)
 
