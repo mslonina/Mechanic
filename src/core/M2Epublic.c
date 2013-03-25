@@ -72,7 +72,7 @@ void Message(int type, char *message, ...) {
  *
  * @return CORE_ICE if the file has been found, SUCCESS otherwise
  */
-int Ice() {
+int Ice(void) {
   struct stat file;
   if (stat(ICE_FILENAME, &file) == 0) return CORE_ICE;
   return SUCCESS;
