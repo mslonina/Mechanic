@@ -143,7 +143,7 @@ int TaskProcess(pool *p, task *t, void *s) {
  * Each pool will be reset REVISIONS times (the data of the pool is kept until
  * next PoolPrepare(), so it may be reused). After REVISIONS we create new task pool.
  */
-int PoolProcess(pool *all, pool *p, void *s) {
+int PoolProcess(pool **all, pool *p, void *s) {
 
   Message(MESSAGE_INFO, "Stage %d rev. %d completed\n", p->sid, p->srid);
 
