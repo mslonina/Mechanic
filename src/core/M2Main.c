@@ -18,7 +18,7 @@
  *
  * @return EXIT_SUCCESS on success, error code otherwise
  */
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
   int mpi_rank, mpi_size, node, ice = 0;
   module core, module, fallback;
 

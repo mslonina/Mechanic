@@ -54,7 +54,7 @@ typedef struct {
  */
 typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
-  char* memory; /**< The memory block */
+  unsigned char* memory; /**< The memory block */
 } attr;
 
 /**
@@ -63,7 +63,7 @@ typedef struct {
  */
 typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
-  char *memory; /**< The memory block */
+  unsigned char *memory; /**< The memory block */
   attr *attr; /**< The dataset attributes */
   unsigned short attr_banks; /**< Number of attribute banks in use */
 } storage;
@@ -120,10 +120,10 @@ int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
 /**
  * Direct read/write interface
  */
-int WriteData(storage *s, void* data); /**< Copy local data buffers to memory (by storage index) */
-int ReadData(storage *s, void* data); /**< Copy memory buffers to local data buffers (by storage index) */
-int WriteAttr(attr *a, void* data); /**< Copy local attribute buffers to memory (by attribute index) */
-int ReadAttr(attr *a, void* data); /**< Copy attribute buffers to local data buffers (by attribute index */
+int WriteData(storage *s, void *data); /**< Copy local data buffers to memory (by storage index) */
+int ReadData(storage *s, void *data); /**< Copy memory buffers to local data buffers (by storage index) */
+int WriteAttr(attr *a, void *data); /**< Copy local attribute buffers to memory (by attribute index) */
+int ReadAttr(attr *a, void *data); /**< Copy attribute buffers to local data buffers (by attribute index */
 
 int GetStorageIndex(storage *s, char *storage_name); /**< Get the index for given storage bank */
 int GetAttributeIndex(attr *a, char *storage_name); /**< Get the index for given attribute */

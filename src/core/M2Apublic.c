@@ -15,8 +15,8 @@
  * @return The allocated char array with the name built with prefix, name, suffix and
  * extension values. It must be freed after usage.
  */
-char* Name(char *prefix, char* name, char *suffix, char *extension) {
-  char* fname;
+char* Name(char *prefix, char *name, char *suffix, char *extension) {
+  char *fname;
   size_t preflen, nlen, sufflen, extlen, filelen;
 
   preflen = strlen(prefix);
@@ -52,7 +52,7 @@ char* Name(char *prefix, char* name, char *suffix, char *extension) {
  *
  * @return 0 on success, error code otherwise
  */
-int Copy(char* in, char* out) {
+int Copy(char *in, char *out) {
   int input;
   int output;
   int mstat = 0;

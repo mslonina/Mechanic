@@ -272,7 +272,7 @@ void FinalizeLayer(layer *l) {
  *
  * @param m The module pointer to finalize
  */
-void ModuleFinalize(module* m) {
+void ModuleFinalize(module *m) {
   if (m->layer.handler) FinalizeLayer(&m->layer);
   if (m->filename) free(m->filename);
 }

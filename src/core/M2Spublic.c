@@ -36,15 +36,15 @@
     return array; \
   } \
 
-ALLOCATE2(AllocateInt2,int)
-ALLOCATE2(AllocateShort2,short)
-ALLOCATE2(AllocateLong2,long)
-ALLOCATE2(AllocateLLong2,long long)
-ALLOCATE2(AllocateUInt2,unsigned int)
-ALLOCATE2(AllocateUShort2,unsigned short)
-ALLOCATE2(AllocateULLong2,unsigned long long)
-ALLOCATE2(AllocateFloat2,float)
-ALLOCATE2(AllocateDouble2,double)
+ALLOCATE2(AllocateInt2, int)
+ALLOCATE2(AllocateShort2, short)
+ALLOCATE2(AllocateLong2, long)
+ALLOCATE2(AllocateLLong2, long long)
+ALLOCATE2(AllocateUInt2, unsigned int)
+ALLOCATE2(AllocateUShort2, unsigned short)
+ALLOCATE2(AllocateULLong2, unsigned long long)
+ALLOCATE2(AllocateFloat2, float)
+ALLOCATE2(AllocateDouble2, double)
 
 /**
  * Generic-type macro for 3D memory allocation
@@ -81,15 +81,15 @@ ALLOCATE2(AllocateDouble2,double)
     return array;\
   }\
 
-ALLOCATE3(AllocateInt3,int)
-ALLOCATE3(AllocateShort3,short)
-ALLOCATE3(AllocateLong3,long)
-ALLOCATE3(AllocateLLong3,long long)
-ALLOCATE3(AllocateUInt3,unsigned int)
-ALLOCATE3(AllocateUShort3,unsigned short)
-ALLOCATE3(AllocateULLong3,unsigned long long)
-ALLOCATE3(AllocateFloat3,float)
-ALLOCATE3(AllocateDouble3,double)
+ALLOCATE3(AllocateInt3, int)
+ALLOCATE3(AllocateShort3, short)
+ALLOCATE3(AllocateLong3, long)
+ALLOCATE3(AllocateLLong3, long long)
+ALLOCATE3(AllocateUInt3, unsigned int)
+ALLOCATE3(AllocateUShort3, unsigned short)
+ALLOCATE3(AllocateULLong3, unsigned long long)
+ALLOCATE3(AllocateFloat3, float)
+ALLOCATE3(AllocateDouble3, double)
 
 /**
  * Generic-type macro for 4D memory allocation
@@ -129,15 +129,15 @@ ALLOCATE3(AllocateDouble3,double)
     return array;\
   }\
 
-ALLOCATE4(AllocateInt4,int)
-ALLOCATE4(AllocateShort4,short)
-ALLOCATE4(AllocateLong4,long)
-ALLOCATE4(AllocateLLong4,long long)
-ALLOCATE4(AllocateUInt4,unsigned int)
-ALLOCATE4(AllocateUShort4,unsigned short)
-ALLOCATE4(AllocateULLong4,unsigned long long)
-ALLOCATE4(AllocateFloat4,float)
-ALLOCATE4(AllocateDouble4,double)
+ALLOCATE4(AllocateInt4, int)
+ALLOCATE4(AllocateShort4, short)
+ALLOCATE4(AllocateLong4, long)
+ALLOCATE4(AllocateLLong4, long long)
+ALLOCATE4(AllocateUInt4, unsigned int)
+ALLOCATE4(AllocateUShort4, unsigned short)
+ALLOCATE4(AllocateULLong4, unsigned long long)
+ALLOCATE4(AllocateFloat4, float)
+ALLOCATE4(AllocateDouble4, double)
 
 /**
  * @brief Get the 1D size of the array
