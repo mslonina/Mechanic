@@ -73,13 +73,13 @@ typedef struct {
  * The task
  */
 typedef struct {
-  unsigned int pid; /**< The parent pool id */
-  unsigned int tid; /**< The task id */
-  unsigned int rid; /**< The task reset id */
-  unsigned int cid; /**< The task checkpoint id */
-  unsigned short status; /**< The task status */
-  unsigned short state; /**< The task processing state */
-  unsigned short location[TASK_BOARD_RANK]; /**< Coordinates of the task */
+  int pid; /**< The parent pool id */
+  int tid; /**< The task id */
+  int rid; /**< The task reset id */
+  int cid; /**< The task checkpoint id */
+  short status; /**< The task status */
+  short state; /**< The task processing state */
+  short location[TASK_BOARD_RANK]; /**< Coordinates of the task */
   unsigned short node; /** The computing node */
   storage *storage; /**< The storage schema and data */
 } task;
@@ -89,12 +89,12 @@ typedef struct {
  * The pool
  */
 typedef struct {
-  unsigned int pid; /**< The pool id */
-  unsigned int rid; /**< The pool reset id */
-  unsigned int sid; /**< The stage id */
-  unsigned int srid; /**< The stage reset id */
-  unsigned short status; /**< The pool create status */
-  unsigned short state; /**< The pool processing state */
+  int pid; /**< The pool id */
+  int rid; /**< The pool reset id */
+  int sid; /**< The stage id */
+  int srid; /**< The stage reset id */
+  short status; /**< The pool create status */
+  short state; /**< The pool processing state */
   storage *board; /**< The task board */
   storage *storage; /**< The global pool storage scheme */
   task *task; /**< The task scheme */
