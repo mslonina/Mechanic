@@ -18,7 +18,7 @@
  *
  * @return 0 on success, error code otherwise
  */
-int Setup(module *m, char *filename, int argc, char** argv, int setup_mode) {
+int Setup(module *m, char *filename, int argc, char **argv, int setup_mode) {
   int mstat = SUCCESS, opts = 0, i = 0, n = 0;
   MPI_Datatype mpi_t;
   MPI_Status mpi_status;
@@ -194,7 +194,7 @@ int ReadConfig(module *m, char *filename, configNamespace *head, int setup_mode)
  *
  * @return 0 on success, error code otherwise
  */
-int Popt(module *m, int argc, char** argv, setup *s, int setup_mode) {
+int Popt(module *m, int argc, char **argv, setup *s, int setup_mode) {
   int rc, mstat = SUCCESS;
 
   /* Get the command line args */

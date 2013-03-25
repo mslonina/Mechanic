@@ -57,7 +57,7 @@ typedef enum {
  * Error and message helpers
  */
 int Ice(); /**< Checks for the ICE file */
-void Message(int type, char* message, ...); /**< Common printf wrapper */
+void Message(int type, char *message, ...); /**< Common printf wrapper */
 void Error(int status); /**< Error reporting */
 void Abort(int status); /**< Abort handler */
 void CheckStatus(int status); /**< Status checking utility*/

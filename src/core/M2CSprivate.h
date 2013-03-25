@@ -18,7 +18,7 @@
 
 int Setup(module *m, char *filename, int argc, char **argv, int setup_mode);
 int ReadConfig(module *m, char *filename, configNamespace *head, int setup_mode);
-int Popt(module *m, int argc, char** argv, setup *s, int setup_mode);
+int Popt(module *m, int argc, char **argv, setup *s, int setup_mode);
 int PoptOptions(module *m, setup *s);
 int ConfigUpdate(setup *s);
 int ConfigDatatype(options c, MPI_Datatype *mpi_t);

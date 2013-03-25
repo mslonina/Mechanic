@@ -31,7 +31,7 @@ typedef struct config{
   char name[CONFIG_LEN]; /**< The name of the variable */
   char value[CONFIG_LEN]; /**< The value of the variable */
   int type; /**< The datatype of the variable */
-  struct config* next; /**< The next option pointer */
+  struct config *next; /**< The next option pointer */
 } config;
 
 /**
@@ -40,8 +40,8 @@ typedef struct config{
  */
 typedef struct configNamespace{
   char space[CONFIG_LEN]; /**< The name of the namespace */
-  config* options; /**< The options structure for given namespace */
-  struct configNamespace* next; /**< The pointer to the next namespace */
+  config *options; /**< The options structure for given namespace */
+  struct configNamespace *next; /**< The pointer to the next namespace */
 } configNamespace;
 
 /**

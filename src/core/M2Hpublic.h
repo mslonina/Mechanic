@@ -14,6 +14,6 @@
 #define NO_FALLBACK 1
 #define FALLBACK_ONLY 2
 
-query* LoadSym(module *m, char* name, int flag);
+query* LoadSym(module *m, char *name, int flag);
 
 #endif

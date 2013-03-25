@@ -17,11 +17,11 @@
  *
  * @return The function handler
  */
-query* LoadSym(module *m, char* function, int flag) {
+query* LoadSym(module *m, char *function, int flag) {
   char *err;
   void *handler;
   void *fallback;
-  query* q = NULL;
+  query *q = NULL;
 
   /* Reset dlerror() */
   dlerror();
