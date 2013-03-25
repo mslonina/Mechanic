@@ -38,6 +38,7 @@ int ConfigAllOptions(configNamespace *head);
 int ConfigCountOptions(char *space, configNamespace *head);
 int ConfigCountDefaultOptions(options *in);
 int ConfigMergeDefaults(options *in, options *add);
+int ConfigCountAllOptions(configNamespace *head);
 int ConfigHead2StructNoalloc(configNamespace *head, options *c);
 
 char* ConfigTrim(char *s);
