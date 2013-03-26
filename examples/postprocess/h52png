@@ -9,7 +9,7 @@ E_BADARGS=65
 
 if [ $# -ne $EXPECTED_ARGS ]
 then
-  echo "Usage: h5topng DATASET FILE {arg}"
+  echo "Usage: h5topng DATASET FILE"
   exit $E_BADARGS
 fi
 

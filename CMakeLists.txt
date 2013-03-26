@@ -52,11 +52,16 @@ add_definitions (-DHAVE_CONFIG_H)
 check_c_compiler_flag(-Wall HAS_WALL)
 check_c_compiler_flag(-std=c99 HAS_STD_C99)
 check_c_compiler_flag(-Wpointer-arith HAS_POINTER_ARITH)
-check_c_compiler_flag(-Wsign-conversion HAS_SIGN_CONVERSION)
-check_c_compiler_flag(-Wstrict-prototypes HAS_STRICT_PROTOTYPES)
-check_c_compiler_flag(-Wpointer-sign HAS_POINTER_SIGN)
 check_c_compiler_flag(-Wmissing-prototypes HAS_MISSING_PROTOTYPES)
 check_c_compiler_flag(-Wmissing-declarations HAS_MISSING_DECLARATIONS)
+check_c_compiler_flag(-Wstrict-prototypes HAS_STRICT_PROTOTYPES)
+
+# GCC
+check_c_compiler_flag(-Wsign-conversion HAS_SIGN_CONVERSION)
+check_c_compiler_flag(-Wpointer-sign HAS_POINTER_SIGN)
+
+# Intel
+check_c_compiler_flag(-Wsign-compare HAS_SIGN_COMPARE)
 
 if (HAS_WALL)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -ggdb")
@@ -81,6 +86,10 @@ endif (HAS_SIGN_CONVERSION)
 if (HAS_MISSING_PROTOTYPES)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-prototypes")
 endif (HAS_MISSING_PROTOTYPES)
+
+if (HAS_SIGN_COMPARE)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsign-compare")
+endif (HAS_SIGN_COMPARE)
 
 CHECK_INCLUDE_FILES (inttypes.h HAVE_INTTYPES_H)
 if (NOT HAVE_INTTYPES_H)
