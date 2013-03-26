@@ -4,4 +4,16 @@
 # Simple script to obtain the image map directly from the master file
 #
 
-h5topng -d/Pools/pool-0000/Tasks/image -c jet -T -z 0 -o image.png mechanic-master-00.h5 
+EXPECTED_ARGS=2
+E_BADARGS=65
+
+if [ $# -ne $EXPECTED_ARGS ]
+then
+  echo "Usage: h5topng DATASET FILE {arg}"
+  exit $E_BADARGS
+fi
+
+DSET=$1
+FILE=$2
+
+h5topng -d/Pools/pool-0000/Tasks/${DSET} -c jet -T -z 0 -o ${DSET}.png ${FILE}
