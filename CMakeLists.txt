@@ -31,7 +31,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 OPTION (BUILD_PYTHON_TOOLKIT "Build python postprocessing toolkit" OFF)
-OPTION (BUILD_VENDOR_RNGS "Build RNGS library" OFF)
+OPTION (BUILD_VENDOR_RNGS "Build RNGS library" ON)
 
 set (USES_MPICC 0)
 if ("${CMAKE_C_COMPILER}" MATCHES "mpicc")
