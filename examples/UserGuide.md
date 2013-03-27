@@ -890,7 +890,7 @@ available. For the 2-dimensional buffers:
 
 To get the dimensionality of the data block, one can use:
 
-    int dims[MAX_RANK];
+    unsigned int dims[MAX_RANK];
     ...
     GetDims(&t->storage[0], dims);
 
@@ -1276,7 +1276,7 @@ i.e.
 This macro gets the dimensions of the specified 
 storage bank `storage_name` of a given `object` (pool or task), i.e.
 
-    int dims[MAX_RANK];
+    unsigned int dims[MAX_RANK];
     MGetDims(t, "result", dims);
 
 Low level interface is available:
@@ -1284,7 +1284,7 @@ Low level interface is available:
 
 i.e.
 
-    int dims[MAX_RANK];
+    unsigned int dims[MAX_RANK];
     GetDims(t->storage[0], dims);
 
 **Note: the dims array must be at least of length `MAX_RANK`.**
