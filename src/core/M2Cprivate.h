@@ -34,7 +34,7 @@ enum configMessagesType {
   CONFIG_ERR_FILE_CLOSE,
 } configMessages;
 
-int ConfigAllOptions(configNamespace *head);
+unsigned int ConfigAllOptions(configNamespace *head);
 int ConfigCountOptions(char *space, configNamespace *head);
 int ConfigCountDefaultOptions(options *in);
 int ConfigMergeDefaults(options *in, options *add);

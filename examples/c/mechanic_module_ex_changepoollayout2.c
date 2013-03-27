@@ -93,7 +93,7 @@ int Storage(pool *p, void *s) {
  * Implements TaskProcess()
  */
 int TaskProcess(pool *p, task *t, void *s) {
-  int i,j;
+  unsigned int i,j;
   double buffer_one[1][3];
   double buffer_two[3][3];
   double buffer_three[1][5];
@@ -137,7 +137,7 @@ int TaskProcess(pool *p, task *t, void *s) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool **allpools, pool *current, void *s) {
-  int i;
+  unsigned int i;
   double buffer[1][5];
 
   // Access the stored data in the current pool for STORAGE_GROUP

@@ -7,7 +7,7 @@
 
 #include "M2Ppublic.h"
 
-pool* PoolLoad(module *m, int pid);
+pool* PoolLoad(module *m, unsigned int pid);
 int PoolPrepare(module *m, pool **all, pool *p);
 int PoolProcess(module *m, pool **all, pool *p);
 int PoolReset(module *m, pool *p);

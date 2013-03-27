@@ -19,7 +19,8 @@
  * @return 0 on success, error code otherwise
  */
 int Setup(module *m, char *filename, int argc, char **argv, int setup_mode) {
-  int mstat = SUCCESS, opts = 0, i = 0, n = 0;
+  int mstat = SUCCESS, n = 0;
+  unsigned int i = 0, opts = 0;
   MPI_Datatype mpi_t;
   MPI_Status mpi_status;
   hid_t h5location, h5board, h5attr, h5atype;

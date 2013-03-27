@@ -54,10 +54,9 @@ check_c_compiler_flag(-std=c99 HAS_STD_C99)
 check_c_compiler_flag(-Wpointer-arith HAS_POINTER_ARITH)
 check_c_compiler_flag(-Wmissing-prototypes HAS_MISSING_PROTOTYPES)
 check_c_compiler_flag(-Wmissing-declarations HAS_MISSING_DECLARATIONS)
-check_c_compiler_flag(-Wstrict-prototypes HAS_STRICT_PROTOTYPES)
 
 # GCC
-check_c_compiler_flag(-Wsign-conversion HAS_SIGN_CONVERSION)
+#check_c_compiler_flag(-Wsign-conversion HAS_SIGN_CONVERSION)
 check_c_compiler_flag(-Wpointer-sign HAS_POINTER_SIGN)
 
 # Intel
@@ -75,17 +74,17 @@ if (HAS_POINTER_ARITH)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wpointer-arith")
 endif (HAS_POINTER_ARITH)
 
-if (HAS_SIGN_CONVERSION)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsign-conversion")
-endif (HAS_SIGN_CONVERSION)
+#if (HAS_SIGN_CONVERSION)
+#  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsign-conversion")
+#endif (HAS_SIGN_CONVERSION)
   
-#if (HAS_STRICT_PROTOTYPES)
-#  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wstrict-prototypes")
-#endif (HAS_STRICT_PROTOTYPES)
-
 if (HAS_MISSING_PROTOTYPES)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-prototypes")
 endif (HAS_MISSING_PROTOTYPES)
+
+if (HAS_MISSING_DECLARATIONS)
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wmissing-declarations")
+endif (HAS_MISSING_DECLARATIONS)
 
 if (HAS_SIGN_COMPARE)
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wsign-compare")

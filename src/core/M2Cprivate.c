@@ -489,8 +489,8 @@ configNamespace* ConfigAssignDefaults(options *cd) {
  *
  * @return Number of options (all available namespaces)
  */
-int ConfigAllOptions(configNamespace *head) {
-  int allopts = 0;
+unsigned int ConfigAllOptions(configNamespace *head) {
+  unsigned int allopts = 0;
   config *currentOP = NULL;
   config *nextOP = NULL;
   configNamespace *nextNM = NULL;
@@ -902,7 +902,7 @@ int ConfigHead2StructNoalloc(configNamespace *head, options *c) {
  */
 options* ConfigHead2Struct(configNamespace *head) {
   options *c = NULL;
-  int opts = 0;
+  unsigned int opts = 0;
 
   opts = ConfigAllOptions(head);
 

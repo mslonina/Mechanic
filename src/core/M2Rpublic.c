@@ -95,9 +95,9 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
   char path[CONFIG_LEN];
   int header[HEADER_SIZE];
-  int i = 0, j = 0, k = 0, l = 0, r = 0;
-  int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
-  int s_offset = 0, r_offset = 0, dim_offset = 0;
+  unsigned int i = 0, j = 0, k = 0, l = 0, r = 0;
+  unsigned int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
+  unsigned int s_offset = 0, r_offset = 0, dim_offset = 0;
   size_t elements, header_size;
   task *t;
   hid_t h5location, group, tasks, datapath;
@@ -156,7 +156,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         Message(MESSAGE_DEBUG, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
             header[0], t->tid, t->status, t->location[0], t->location[1]);
 
-        if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
+        if (t->status != TASK_EMPTY) {
 
           for (l = 0; l < MAX_RANK; l++) {
             offsets[l] = 0;
@@ -288,7 +288,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           t->storage[j].layout.offsets[l] = 0;
         }
 
-        if (t->tid != TASK_EMPTY && t->status != TASK_EMPTY) {
+        if (t->status != TASK_EMPTY) {
 
           c_offset = c->storage->layout.size * i + header_size;
           mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
@@ -340,7 +340,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
  */
 void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
   int header[HEADER_SIZE] = HEADER_INIT;
-  int i = 0, c_offset = 0;
+  unsigned int i = 0, c_offset = 0;
   int mstat = SUCCESS;
   size_t header_size = 0;
 

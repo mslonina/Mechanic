@@ -12,8 +12,8 @@
  *
  * @return The pool pointer, NULL otherwise
  */
-pool* PoolLoad(module *m, int pid) {
-  int i = 0, j = 0;
+pool* PoolLoad(module *m, unsigned int pid) {
+  unsigned int i = 0, j = 0;
   pool *p = NULL;
 
   /* Allocate pool pointer */
@@ -93,7 +93,7 @@ pool* PoolLoad(module *m, int pid) {
  * @return 0 on success, error code otherwise
  */
 int PoolPrepare(module *m, pool **all, pool *p) {
-  int mstat = SUCCESS, i = 0, j = 0;
+  int mstat = SUCCESS;
   query *q;
   setup *s = &(m->layer.setup);
   void *v = NULL;
@@ -103,7 +103,8 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   clock_t time_in, time_out;
   double cpu_time;
   int reversed = 0;
-  int x = 0, y = 0, z = 0;
+  unsigned int i = 0, j = 0;
+  unsigned int x = 0, y = 0, z = 0;
 
   if (m->node == MASTER) {
 
@@ -321,7 +322,7 @@ int PoolProcess(module *m, pool **all, pool *p) {
  */
 int PoolProcessData(module *m, pool *p, setup *s) {
   int mstat = SUCCESS;
-  int i = 0, j = 0, k = 0, task_groups = 0;
+  unsigned int i = 0, j = 0, k = 0, task_groups = 0;
   char path[CONFIG_LEN];
   query *q;
   hid_t h5location, h5pool, h5tasks, h5task, h5dataset;
@@ -514,6 +515,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
  */
 int PoolReset(module *m, pool *p) {
   int mstat = SUCCESS;
+  unsigned int i, j, k, l;
   hid_t h5location, group;
   char path[CONFIG_LEN];
   short ****board;
@@ -522,7 +524,18 @@ int PoolReset(module *m, pool *p) {
   if (m->node == MASTER) {
     p->completed = 0;
     board = AllocateShort4(p->board);
-    memset(&board[0][0][0][0], TASK_AVAILABLE, p->board->layout.storage_elements * sizeof(short));
+
+    // Memset
+    for (i = 0; i < p->board->layout.dims[0]; i++) {
+      for (j = 0; j < p->board->layout.dims[1]; j++) {
+        for (k = 0; k < p->board->layout.dims[2]; k++) {
+          for (l = 0; l < p->board->layout.dims[3]; l++) {
+            board[i][j][k][l] = TASK_AVAILABLE;
+          }
+        }
+      }
+    }
+    
     WriteData(p->board, &board[0][0][0][0]);
 
     /* Reset the board storage banks */
@@ -556,7 +569,7 @@ int PoolReset(module *m, pool *p) {
  * @param p The pool pointer to finalize
  */
 void PoolFinalize(module *m, pool *p) {
-  int i = 0;
+  unsigned int i = 0;
 
   if (p->storage) {
     for (i = 0; i < p->pool_banks; i++) {

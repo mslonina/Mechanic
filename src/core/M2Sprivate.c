@@ -14,7 +14,7 @@
  */
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
-  int i = 0, j = 0, task_groups = 0, size = 0;
+  unsigned int i = 0, j = 0, task_groups = 0, size = 0;
   size_t len;
   query *q;
   void *v = NULL;
@@ -421,7 +421,8 @@ int CheckAttributeLayout(attr *a) {
  * @return 0 on success, error code otherwise
  */
 int CommitStorageLayout(module *m, pool *p) {
-  int mstat = SUCCESS, i = 0, j = 0;
+  int mstat = SUCCESS;
+  unsigned int i = 0, j = 0;
   char path[CONFIG_LEN];
   hid_t h5location, h5group, h5pools, h5tasks, h5task;
 
@@ -542,9 +543,9 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
  *
  * @return The number of memory/storage banks in use, 0 otherwise
  */
-int GetBanks(int allocated_banks, storage *s) {
-  int banks_in_use = 0;
-  int i = 0;
+unsigned int GetBanks(unsigned int allocated_banks, storage *s) {
+  unsigned banks_in_use = 0;
+  unsigned i = 0;
 
   for (i = 0; i < allocated_banks; i++) {
     if (s[i].layout.rank > 0) {

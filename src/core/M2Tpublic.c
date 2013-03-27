@@ -19,8 +19,8 @@
  *
  * @return The task object, NULL otherwise
  */
-task* M2TaskLoad(module *m, pool *p, int tid) {
-  int i = 0, j = 0;
+task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
+  unsigned int i = 0, j = 0;
   size_t len;
   task* t = NULL;
 
@@ -156,9 +156,9 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
  */
 int TaskRestore(module *m, pool *p, task *t) {
   int mstat = SUCCESS;
-  int j = 0, k = 0, l = 0, r = 0;
-  int e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
-  int s_offset = 0, r_offset = 0, dim_offset = 0;
+  unsigned int j = 0, k = 0, l = 0, r = 0;
+  unsigned int e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
+  unsigned int s_offset = 0, r_offset = 0, dim_offset = 0;
   size_t elements = 0;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
 
@@ -324,8 +324,8 @@ int M2TaskProcess(module *m, pool *p, task *t) {
  * @param t The task to reset
  * @param tid The task new id
  */
-void TaskReset(module *m, pool *p, task *t, int tid) {
-  t->tid = TASK_EMPTY;
+void TaskReset(module *m, pool *p, task *t, unsigned int tid) {
+  t->tid = tid;
   t->status = TASK_EMPTY;
   t->cid = 0;
   t->rid = 0;

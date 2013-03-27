@@ -30,20 +30,24 @@
 #define NORMAL_MODE 600 /**< The normal operation mode */
 #define RESTART_MODE 601 /**< The restart mode */
 
+#define TASK_BOARD_RANK 3 /**< The minimum task board rank */
+#define TASK_NO_LOCATION 0 /**< Task location defaults */
+#define TASK_EMPTY -88 /**< The task empty return code */
+
 /* Data */
 #define HEADER_SIZE 4+TASK_BOARD_RANK /**< The data header size */
-#define HEADER_INIT {TAG_TERMINATE,TASK_EMPTY,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION,TASK_NO_LOCATION,0}
+#define HEADER_INIT {TAG_TERMINATE,0,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION,TASK_NO_LOCATION,0}
 
 /**
  * @struct init
  * Bootstrap initializations
  */
 typedef struct {
-  int options; /**< The maxium size of the Config options table */
-  int pools; /**< The maximum size of the pools array */
-  int banks_per_pool; /**< The maximum number of memory/storage banks per pool */
-  int banks_per_task; /**< The maximum number of memory/storage banks per task */
-  int attr_per_dataset; /**< The maximum number of attributes per dataset */
+  unsigned int options; /**< The maxium size of the Config options table */
+  unsigned int pools; /**< The maximum size of the pools array */
+  unsigned int banks_per_pool; /**< The maximum number of memory/storage banks per pool */
+  unsigned int banks_per_task; /**< The maximum number of memory/storage banks per task */
+  unsigned int attr_per_dataset; /**< The maximum number of attributes per dataset */
   int min_cpu_required; /**< The minimum number of CPUs required */
 } init;
 

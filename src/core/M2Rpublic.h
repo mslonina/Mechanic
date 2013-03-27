@@ -19,8 +19,8 @@
  */
 typedef struct {
   int cid; /**< The checkpoint id */
-  int counter; /**< The checkpoint internal counter */
-  int size; /**< The actual checkpoint size */
+  unsigned int counter; /**< The checkpoint internal counter */
+  unsigned int size; /**< The actual checkpoint size */
   storage *storage; /**< The checkpoint data */
 } checkpoint;
 

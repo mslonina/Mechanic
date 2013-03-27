@@ -13,7 +13,7 @@
  */
 int Work(module *m) {
   int mstat = SUCCESS;
-  int pid = 0;
+  unsigned int pid = 0;
   pool **p = NULL;
   int pool_create;
 

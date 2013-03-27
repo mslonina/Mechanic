@@ -19,8 +19,8 @@
 #define ALLOCATE2(y,x)\
   x** y(storage *s) {\
     x** array = NULL;\
-    int i = 0;\
-    int dim0, dim1;\
+    unsigned int i = 0;\
+    unsigned int dim0, dim1;\
     dim0 = s->layout.storage_dim[0];\
     dim1 = s->layout.storage_dim[1];\
     if (s->layout.storage_size > 0) { \
@@ -60,8 +60,8 @@ ALLOCATE2(AllocateDouble2, double)
 #define ALLOCATE3(y,x)\
   x*** y(storage *s) {\
     x*** array = NULL;\
-    int i = 0, j = 0;\
-    int dim0, dim1, dim2;\
+    unsigned int i = 0, j = 0;\
+    unsigned int dim0, dim1, dim2;\
     dim0 = s->layout.storage_dim[0];\
     dim1 = s->layout.storage_dim[1];\
     dim2 = s->layout.storage_dim[2];\
@@ -103,8 +103,8 @@ ALLOCATE3(AllocateDouble3, double)
 #define ALLOCATE4(y,x)\
   x**** y(storage *s) {\
     x**** array = NULL;\
-    int i = 0, j = 0, k = 0;\
-    int dim0, dim1, dim2, dim3;\
+    unsigned int i = 0, j = 0, k = 0;\
+    unsigned int dim0, dim1, dim2, dim3;\
     dim0 = s->layout.storage_dim[0];\
     dim1 = s->layout.storage_dim[1];\
     dim2 = s->layout.storage_dim[2];\
@@ -148,7 +148,8 @@ ALLOCATE4(AllocateDouble4, double)
  * @return The 1D size of the array
  */
 unsigned int GetSize(unsigned int rank, unsigned int *dims){
-  unsigned int i = 0, size = 0;
+  unsigned int i = 0;
+  unsigned int size = 0;
 
   size = dims[0];
   for (i = 1; i < rank; i++) {
@@ -167,7 +168,7 @@ unsigned int GetSize(unsigned int rank, unsigned int *dims){
  * @param dims The result array
  */
 void GetDims(storage *s, unsigned int *dims) {
-  unsigned int i = 0;
+  int i = 0;
 
   for (i = 0; i < s->layout.rank; i++) {
     dims[i] = s->layout.storage_dim[i];
@@ -613,9 +614,9 @@ int CommitAttribute(hid_t h5location, attr *a) {
  *
  * @return 0 on success, error code otherwise
  */
-int ReadDataset(hid_t h5location, int banks, storage *s, int size) {
+int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size) {
   int mstat = SUCCESS, i = 0;
-  int elements;
+  unsigned int elements;
   void *buffer = NULL;
   hid_t dataset;
   herr_t hstat;

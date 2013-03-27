@@ -214,7 +214,7 @@ int PoolProcess(pool **all, pool *current, void *s) {
 
   Message(MESSAGE_COMMENT, "Pool %d processed\n", current->pid);
 
-  if (current->pid < max_pools) return POOL_CREATE_NEW;
+  if (current->pid < (unsigned int)max_pools) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }
 

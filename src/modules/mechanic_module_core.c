@@ -370,7 +370,7 @@ int PoolProcess(pool **allpools, pool *current, void *s) {
  * @return `SUCCESS` or error code otherwise
  */
 int TaskBoardMap(pool *p, task *t, void *s) {
-  int px, vert, horiz;
+  unsigned int px, vert, horiz;
 
   px = t->tid;
   horiz = p->board->layout.dims[0];

@@ -20,8 +20,6 @@
 #define STORAGE_BOARD 13 /**< The board data storage type */
 #define STORAGE_LIST 14 /**< The list data storage type */
 
-#define TASK_BOARD_RANK 3 /**< The minimum task board rank */
-
 #define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
 #define ATTR_STORAGE_END {.name = NULL, .dataspace = -1, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
 
@@ -73,13 +71,13 @@ typedef struct {
  * The task
  */
 typedef struct {
-  int pid; /**< The parent pool id */
-  int tid; /**< The task id */
-  int rid; /**< The task reset id */
-  int cid; /**< The task checkpoint id */
+  unsigned int pid; /**< The parent pool id */
+  unsigned int tid; /**< The task id */
+  unsigned int rid; /**< The task reset id */
+  unsigned int cid; /**< The task checkpoint id */
   short status; /**< The task status */
   short state; /**< The task processing state */
-  short location[TASK_BOARD_RANK]; /**< Coordinates of the task */
+  unsigned short location[TASK_BOARD_RANK]; /**< Coordinates of the task */
   unsigned short node; /** The computing node */
   storage *storage; /**< The storage schema and data */
 } task;
@@ -89,10 +87,10 @@ typedef struct {
  * The pool
  */
 typedef struct {
-  int pid; /**< The pool id */
-  int rid; /**< The pool reset id */
-  int sid; /**< The stage id */
-  int srid; /**< The stage reset id */
+  unsigned int pid; /**< The pool id */
+  unsigned int rid; /**< The pool reset id */
+  unsigned int sid; /**< The stage id */
+  unsigned int srid; /**< The stage reset id */
   short status; /**< The pool create status */
   short state; /**< The pool processing state */
   storage *board; /**< The task board */
@@ -104,7 +102,7 @@ typedef struct {
   unsigned int mask_size; /**< The mask size (number of tasks to mask on a given reset loop) */
   unsigned int completed; /**< The pool task completed counter */
   unsigned short node; /**< The node ID */
-  unsigned short mpi_size; /**< The MPI COMM size */
+  int mpi_size; /**< The MPI COMM size */
   unsigned short pool_banks; /**< The number of pool memory banks */
   unsigned short task_banks; /**< The number of task memory banks */
   unsigned short attr_banks; /**< The number of attributes banks */
@@ -291,8 +289,8 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
  */
 #define MAllocate2(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
-    int _msindex, _i = 0;\
-    int _dim0, _dim1;\
+    int _msindex;\
+    unsigned int _i = 0, _dim0, _dim1;\
     _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
     if (_msindex < 0) {\
       Message(MESSAGE_ERR, "MAllocate2: Storage bank '%s' could not be found\n", _mstorage_name);\
@@ -322,8 +320,8 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
  */
 #define MAllocate3(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
-    int _msindex, _i = 0, _j = 0;\
-    int _dim0, _dim1, _dim2;\
+    int _msindex;\
+    unsigned int _i = 0, _j = 0, _dim0, _dim1, _dim2;\
     _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
     if (_msindex < 0) {\
       Message(MESSAGE_ERR, "MAllocate3: Storage bank '%s' could not be found\n", _mstorage_name);\
@@ -357,8 +355,8 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
  */
 #define MAllocate4(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
-    int _msindex, _i = 0, _j = 0, _k = 0;\
-    int _dim0, _dim1, _dim2, _dim3;\
+    int _msindex;\
+    unsigned int _i = 0, _j = 0, _k = 0, _dim0, _dim1, _dim2, _dim3;\
     _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
     if (_msindex < 0) {\
       Message(MESSAGE_ERR, "MAllocate4: Storage bank '%s' could not be found\n", _mstorage_name);\
@@ -398,6 +396,6 @@ int CommitAttribute(hid_t h5location, attr *a);
 void FreeMemoryLayout(int banks, storage *s);
 
 int CommitData(hid_t h5location, int banks, storage *s);
-int ReadDataset(hid_t h5location, int banks, storage *s, int size);
+int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size);
 
 #endif

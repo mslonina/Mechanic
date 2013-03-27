@@ -10,7 +10,7 @@
 #include "M2Sprivate.h"
 #include "M2Rpublic.h"
 
-int Restart(module *m, pool **all, int *pool_counter);
+int Restart(module *m, pool **all, unsigned int *pool_counter);
 int Validate(module *m, char *filename);
 
 #endif

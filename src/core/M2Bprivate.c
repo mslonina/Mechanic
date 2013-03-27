@@ -138,7 +138,7 @@ module ModuleLoad(char *name) {
  */
 int ModuleInit(module *m) {
   query *q = NULL;
-  int opts = 0;
+  unsigned int opts = 0;
   int mstat = SUCCESS;
 
   /* Load fallback layer, at least core module must implement this */

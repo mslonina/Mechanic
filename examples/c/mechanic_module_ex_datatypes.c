@@ -175,10 +175,9 @@ int PoolPrepare(pool **allpools, pool *current, void *s) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool **allpools, pool *current, void *s) {
-  int i, j;
+  unsigned int i, j, dims[MAX_RANK];
   int **ibuff, ***cbuff;
   double ***dbuff;
-  unsigned int dims[MAX_RANK];
   
   /**
    * Read the dataset inside the Tasks/task-[i] group
