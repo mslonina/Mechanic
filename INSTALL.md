@@ -102,7 +102,7 @@ To install Python toolkit, based on matplotlib and h5py, use the following:
 RNGS library
 ------------
 
-To build RNGS library, use the following:
+The RNGS library is built by default, to turn it off use:
 
-  CC=mpicc cmake .. -DBUILD_VENDOR_RNGS:BOOL=ON
+  CC=mpicc cmake .. -DBUILD_VENDOR_RNGS:BOOL=OFF
 
