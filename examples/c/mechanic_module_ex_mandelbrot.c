@@ -21,8 +21,7 @@
  *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
  */
 #include "mechanic.h"
-
-int fractal(double a, double b, double c);
+#include "mechanic_module_ex_mandelbrot.h"
 
 /**
  * Implements Storage()

@@ -30,12 +30,11 @@
  *
  */
 #include "mechanic.h"
+#include "mechanic_module_ex_readfile_setup.h"
 
 #define MAX_ENTRIES 4
 #define ENTRY_LENGTH 7
 #define DATAFILE "readfile.txt"
-
-int ReadFile(char *filename, double **buffer);
 
 /**
  * Very simple function to read a file
