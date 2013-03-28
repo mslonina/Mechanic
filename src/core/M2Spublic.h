@@ -77,7 +77,7 @@ typedef struct {
   unsigned int cid; /**< The task checkpoint id */
   short status; /**< The task status */
   short state; /**< The task processing state */
-  unsigned short location[TASK_BOARD_RANK]; /**< Coordinates of the task */
+  unsigned int location[TASK_BOARD_RANK]; /**< Coordinates of the task */
   unsigned short node; /** The computing node */
   storage *storage; /**< The storage schema and data */
 } task;
