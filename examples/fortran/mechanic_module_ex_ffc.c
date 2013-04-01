@@ -19,8 +19,7 @@
  *
  */
 #include "mechanic.h"
-
-typedef int (*cfunc_ptr)(int n, double *x);
+#include "mechanic_module_ex_ffc.h"
 
 /* Function to use in Fortran */
 int cfunc(int n, double *x) {
@@ -28,13 +27,10 @@ int cfunc(int n, double *x) {
   return 9;
 }
 
-/* Fortran interface */
-void integrator(cfunc_ptr func, int n, double *ctrl, double *x, double *f, int *pstatus);
-
 /**
  * Implements Storage()
  */
-int Storage(pool *p, setup *s) {
+int Storage(pool *p, void *s) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
@@ -50,7 +46,7 @@ int Storage(pool *p, setup *s) {
 /**
  * Implements TaskProcess()
  */
-int TaskProcess(pool *p, task *t, setup *s) {
+int TaskProcess(pool *p, task *t, void *s) {
   int n, pstatus;
   double ctrl[10], x[24], f;
   double buffer[1][10];
