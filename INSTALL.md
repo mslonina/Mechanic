@@ -8,7 +8,7 @@ Mechanic should run on any Unix-like platforms (Linux and OS X are actively
 maintained), if the following requirements are met:
 
 - GCC >= 4.2 (CLang, Intel)
-- CMake >= 2.8
+- CMake >= 2.6
 - OpenMPI >= 1.4 (or other MPI2 implementation)
 - HDF5 >= 1.8
 - Popt library >= 1.14
