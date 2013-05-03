@@ -36,7 +36,7 @@
  * - Loads the specified module
  * - Allocates the memory
  * - Loads the Setup function, if present
- * - Boots LRC API
+ * - Boots Config API
  *
  * @param node The current node ID
  * @param mpi_size The MPI_COMM_WORLD size
@@ -203,7 +203,7 @@ int ModuleInit(module *m) {
 /**
  * @brief Initializes the Setup
  *
- * This function calls the Setup() from the module to initialize the LRC default option
+ * This function calls the Setup() from the module to initialize the Config default option
  * structure. It merges with the fallback structure, so that all setup is available in one
  * layer (and only one config file can be used, with i.e. core setup included, but not
  * necessary).

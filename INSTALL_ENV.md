@@ -5,6 +5,9 @@ Prepare the environment
 =======================
 
     mkdir ~/mechanic-env
+    mkdir ~/mechanic-env/src
+    cd ~/mechanic-env/src
+
     export PATH=~/mechanic-env/bin:$PATH
     export LD_LIBRARY_PATH=~/mechanic-env/lib:$LD_LIBRARY_PATH
 
@@ -17,6 +20,13 @@ Compiler
     export CXX=icpc
     export FC=ifort
     export F77=ifort
+
+CMake
+=====
+
+Download CMake from http://www.cmake.org/cmake/resources/software.html
+
+    ./bootstrap --prefix=~/mechanic-env
 
 HDF5
 ====
