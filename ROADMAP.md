@@ -31,3 +31,13 @@ Mechanic 2.x roadmap
   - [DONE] Refactor code headers (public and private)
   - [DONE] Mode API functions: Master(), Worker()
   - [DONE] Min CPU option in Init() 
+
+2.4.x
+-----
+
+- (HDF) Named datatypes and datasets
+- (MPI) Collective communication mode
+- (MPI) Genetic algorithm mode
+- (MPI) Consider task dependencies
+- (CONFIG) Consider switching to yaml specification for configuration and input files
+
