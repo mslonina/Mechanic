@@ -3,7 +3,7 @@
 # Helper script to install the Mechanic environment,
 # including installation of OpenMPI and HDF5
 #
-# Requirements: wget/curl, cmake
+# Requirements: wget/curl, cmake 2.8+
 #
 
 # Your setting goes here
@@ -19,7 +19,7 @@ FC=gfortran #ifort
 # software versions
 MECHANIC=2.3.0
 HDF=1.8.10
-MPI=1.6.3
+MPI=1.6.4
 
 # make opts
 opts=-j4

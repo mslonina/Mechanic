@@ -24,6 +24,8 @@ Compiler
 Mechanic should compile on any recent compiler (usually GCC4.6+ family will be used, which
 is critical for proper Fortran support), however, some steps are neccessary for successfull compilation.
 
+**It is critical to build the environment with the same compiler family**
+
 ### Using GCC compiler family
     
     export CC=gcc
