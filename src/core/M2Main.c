@@ -113,8 +113,9 @@ int main(int argc, char **argv) {
   CheckStatus(mstat);
   free(filename);
 
-  if (node == MASTER)
+  if (node == MASTER) {
     Message(MESSAGE_INFO, "The core has been bootstrapped and configured\n");
+  }
 
   /**
    * (F) Bootstrap the module
@@ -123,7 +124,10 @@ int main(int argc, char **argv) {
   module_name = Option2String("core", "module", core.layer.setup.head);
   module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
   module.mode = core.mode;
-  if (node == MASTER && core.mode == RESTART_MODE) module.filename = Name(core.filename, "", "", "");
+  
+  if (node == MASTER && core.mode == RESTART_MODE) {
+    module.filename = Name(core.filename, "", "", "");
+  }
 
   /**
    * (G) Configure the module
@@ -134,8 +138,9 @@ int main(int argc, char **argv) {
   CheckStatus(mstat);
   free(filename);
 
-  if (node == MASTER)
+  if (node == MASTER) {
     Message(MESSAGE_INFO, "The '%s' module has been bootstrapped and configured\n", module_name);
+  }
 
   /* Check for ICE file */
   if (node == MASTER) {
@@ -170,9 +175,9 @@ int main(int argc, char **argv) {
    * (H) Backup the master data file
    */
   if (node == MASTER) {
-    Message(MESSAGE_DEBUG, "Name: %s\n", Option2String("core", "name", core.layer.setup.head));
-    if (!Option2Int("core", "no-backup", core.layer.setup.head)) {
-      masterfile = Name(Option2String("core", "name", core.layer.setup.head),
+    Message(MESSAGE_DEBUG, "Name: %s\n", Option2String("core", "name", module.layer.setup.head));
+    if (!Option2Int("core", "no-backup", module.layer.setup.head)) {
+      masterfile = Name(Option2String("core", "name", module.layer.setup.head),
         "-master-", "00", ".h5");
       masterfile_backup = Name("backup-", masterfile, "", "");
 
@@ -187,7 +192,7 @@ int main(int argc, char **argv) {
 
     /* Copy the restart file to the master file */
     if (module.mode == RESTART_MODE) {
-      masterfile = Name(Option2String("core", "name", core.layer.setup.head),
+      masterfile = Name(Option2String("core", "name", module.layer.setup.head),
         "-master-", "00", ".h5");
       if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Restart file: %s\n", masterfile);
       Copy(module.filename, masterfile);
@@ -196,9 +201,9 @@ int main(int argc, char **argv) {
       /* Our restart file now becomes the master file */
       free(core.filename);
       free(module.filename);
-      core.filename = Name(Option2String("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
-      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", core.filename);
-      module.filename = Name(Option2String("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
+      core.filename = Name(Option2String("core", "name", module.layer.setup.head), "-master-", "00", ".h5");
+      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module.filename);
+      module.filename = Name(Option2String("core", "name", module.layer.setup.head), "-master-", "00", ".h5");
       if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module.filename);
     }
   }
