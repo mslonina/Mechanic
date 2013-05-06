@@ -26,7 +26,7 @@ char* Name(char *prefix, char *name, char *suffix, char *extension) {
 
   filelen = preflen + nlen + sufflen + extlen + 1;
 
-  fname = calloc(filelen, sizeof(char));
+  fname = calloc(filelen, sizeof(char*));
   if (!fname) Error(CORE_ERR_MEM);
 
   strncpy(fname, prefix, preflen);

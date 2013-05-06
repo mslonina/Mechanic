@@ -22,8 +22,8 @@ int main(int argc, char **argv) {
   int mpi_rank, mpi_size, node, ice = 0;
   module core, module, fallback;
 
-  char *filename, *module_name;
-  char *masterfile, *masterfile_backup;
+  char *filename = NULL, *module_name = NULL;
+  char *masterfile = NULL, *masterfile_backup = NULL;
   char cwd[MAXPATHLEN+1], hostname[MPI_MAX_PROCESSOR_NAME];
   int hostname_len = MPI_MAX_PROCESSOR_NAME;
 
@@ -171,23 +171,24 @@ int main(int argc, char **argv) {
     goto finalize; // Special help message handling
   }
 
+
   /**
    * (H) Backup the master data file
    */
   if (node == MASTER) {
-    Message(MESSAGE_DEBUG, "Name: %s\n", Option2String("core", "name", module.layer.setup.head));
+    Message(MESSAGE_DEBUG, "(Core)   Name: %s\n", Option2String("core", "name", core.layer.setup.head));
+    Message(MESSAGE_DEBUG, "(Module) Name: %s\n", Option2String("core", "name", module.layer.setup.head));
     if (!Option2Int("core", "no-backup", module.layer.setup.head)) {
-      masterfile = Name(Option2String("core", "name", module.layer.setup.head),
-        "-master-", "00", ".h5");
-      masterfile_backup = Name("backup-", masterfile, "", "");
+      masterfile = Name(Option2String("core", "name", module.layer.setup.head), "-master-", "00", ".h5");
+      masterfile_backup = Name("backup-", Option2String("core", "name", module.layer.setup.head), "-master-00", ".h5");
 
       if (stat(masterfile, &file) == 0) {
         Message(MESSAGE_INFO, "Backup '%s' -> '%s'\n\n", masterfile, masterfile_backup);
         Copy(masterfile, masterfile_backup);
       }
 
-      free(masterfile);
-      free(masterfile_backup);
+      if (masterfile) free(masterfile);
+      if (masterfile_backup) free(masterfile_backup);
     }
 
     /* Copy the restart file to the master file */
@@ -198,7 +199,7 @@ int main(int argc, char **argv) {
       Copy(module.filename, masterfile);
       free(masterfile);
 
-      /* Our restart file now becomes the master file */
+      // Our restart file now becomes the master file 
       free(core.filename);
       free(module.filename);
       core.filename = Name(Option2String("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
