@@ -45,7 +45,7 @@ int Storage(module *m, pool *p) {
   p->board->attr_banks = 0;
   while (m->layer.setup.options[i].name[0] != CONFIG_NULL) {
     len = strlen(m->layer.setup.options[i].name);
-    p->board->attr[i].layout.name = calloc(len + 1, sizeof(char));
+    p->board->attr[i].layout.name = calloc(len + 1, sizeof(char*));
     if (!p->board->attr[i].layout.name) Error(CORE_ERR_MEM);
         
     strncpy(p->board->attr[i].layout.name, m->layer.setup.options[i].name, len);

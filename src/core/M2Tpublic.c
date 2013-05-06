@@ -57,7 +57,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
     if (t->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.name != NULL) {
         len = strlen(p->task->storage[i].layout.name);
-        t->storage[i].layout.name = calloc(len+1, sizeof(char));
+        t->storage[i].layout.name = calloc(len+1, sizeof(char*));
         if (!t->storage[i].layout.name) Error(CORE_ERR_MEM);
 
         strncpy(t->storage[i].layout.name, p->task->storage[i].layout.name, len);
