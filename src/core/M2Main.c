@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
       /* Our restart file now becomes the master file */
       free(core.filename);
       free(module.filename);
-      core.filename = Name(Option2String("core", "name", module.layer.setup.head), "-master-", "00", ".h5");
+      core.filename = Name(Option2String("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
       if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module.filename);
       module.filename = Name(Option2String("core", "name", module.layer.setup.head), "-master-", "00", ".h5");
       if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module.filename);
@@ -212,6 +212,8 @@ int main(int argc, char **argv) {
    * (I) Create the master file
    */
   if (node == MASTER && module.mode != RESTART_MODE) {
+    core.filename = Name(Option2String("core", "name", module.layer.setup.head),
+      "-master", "-00", ".h5");
     module.filename = Name(Option2String("core", "name", module.layer.setup.head),
       "-master", "-00", ".h5");
 
