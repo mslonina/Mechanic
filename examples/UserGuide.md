@@ -520,6 +520,12 @@ To obtain all configuration options available in the core, try:
 - `--verbose`, `-V` -- switches verbode output on
 - `--debug` -- this flag may be used for specific debug output of a custom module
 - `--stats` -- enable detailed runtime statistics to be written to the master file
+- `--partial` -- this flag may be used to force only the part of a simulation to be
+computed
+- `--partial-index` -- specify which part of the simulation to compute (global index)
+- `--partial-x-index` -- the x-index of the partial simulation
+- `--partial-y-index` -- the y-index of the partial simulation
+- `--partial-z-index` -- the z-index of the partial simulation
 - `--print-defaults` -- print the default options
 - `--help`, `-?` -- show help message
 - `--usage` -- show short help message
