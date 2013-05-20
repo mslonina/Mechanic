@@ -226,18 +226,38 @@ int Setup(setup *s) {
     .description="Run detailed runtime statistics"
   };
   s->options[37] = (options) {
+    .space="core", .name="partial", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Run in partial mode (for modules)"
+  };
+  s->options[38] = (options) {
+    .space="core", .name="partial-index", .shortName='\0', .value="0", .type=C_INT,
+    .description="Partial mode index (for modules)"
+  };
+  s->options[39] = (options) {
+    .space="core", .name="partial-xindex", .shortName='\0', .value="0", .type=C_INT,
+    .description="Partial mode x-index (for modules)"
+  };
+  s->options[40] = (options) {
+    .space="core", .name="partial-yindex", .shortName='\0', .value="0", .type=C_INT,
+    .description="Partial mode y-index (for modules)"
+  };
+  s->options[41] = (options) {
+    .space="core", .name="partial-zindex", .shortName='\0', .value="0", .type=C_INT,
+    .description="Partial mode z-index (for modules)"
+  };
+  s->options[42] = (options) {
     .space="core", .name="print-defaults", .shortName='\0', .value="0", .type=C_VAL,
     .description="Print default settings"
   };
-  s->options[38] = (options) {
+  s->options[43] = (options) {
     .space="core", .name="help", .shortName='?', .value="0", .type=C_VAL,
     .description="Show this help message"
   };
-  s->options[39] = (options) {
+  s->options[44] = (options) {
     .space="core", .name="usage", .shortName='\0', .value="0", .type=C_VAL,
     .description="Display brief message"
   };
-  s->options[40] = (options) OPTIONS_END;
+  s->options[45] = (options) OPTIONS_END;
 
   return SUCCESS;
 }
