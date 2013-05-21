@@ -136,6 +136,8 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
     }
 
     if (board_buffer[x][y][z][0] == TASK_AVAILABLE) {
+      TaskReset(m, p, t, t->tid);
+      t->status = TASK_IN_USE;
       break;
     }
     t->tid++;

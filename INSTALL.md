@@ -21,7 +21,7 @@ however, we recommend the [Gentoo Prefix](http://www.gentoo.org/proj/en/gentoo-a
 Notes:
 - GCC 4.6+ is required for the support of the Fortran2003+ `iso_c_binding` (C
 interoperability)
-- GCC up to version 4.5 is supported by the CUDA 5.0
+- CUDA 5.0 supports up to GCC 4.6
 - GCC support is OS X is provided by the command line tools of the XCode distribution
 
 Manual Compilation

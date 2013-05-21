@@ -34,6 +34,8 @@
 #define TASK_NO_LOCATION 0 /**< Task location defaults */
 #define TASK_EMPTY -88 /**< The task empty return code */
 
+#define TAG_TERMINATE 12763 /** The node terminate tag */
+
 /* Data */
 #define HEADER_SIZE 4+TASK_BOARD_RANK /**< The data header size */
 #define HEADER_INIT {TAG_TERMINATE,0,TASK_EMPTY,TASK_NO_LOCATION,TASK_NO_LOCATION,TASK_NO_LOCATION,0}

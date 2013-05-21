@@ -175,9 +175,7 @@ int Master(module *m, pool *p) {
       } else {
         Message(MESSAGE_DEBUG, "Master: no more tasks after %d of %d completed\n", p->completed, p->pool_size);
       }
-    }
-
-    if (header[0] == TAG_CHECKPOINT) {
+    } else if (header[0] == TAG_CHECKPOINT) {
       tc->tid = header[1];
       tc->status = header[2];
       tc->location[0] = header[3];
@@ -197,11 +195,16 @@ int Master(module *m, pool *p) {
 
       mstat = M2Send(MASTER, send_node, TAG_DATA, m, p);
       CheckStatus(mstat);
+    } else {
+      // This should not happen
+      Message(MESSAGE_ERR, "Unknown receive tag: %d\n");
+      Abort(CORE_ERR_MPI);
     }
 
     if (p->completed == p->pool_size) break;
   }
 
+completed:
   Message(MESSAGE_DEBUG, "Completed %d tasks\n", p->completed);
 
   WriteData(p->board, &board_buffer[0][0][0][0]);

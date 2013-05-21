@@ -15,7 +15,6 @@
 #define TAG_STANDBY 49 /**< The node standby tag */
 #define TAG_RESULT 59 /**< The data result tag */
 #define TAG_CHECKPOINT 69 /**< The data checkpoint tag */
-#define TAG_TERMINATE 32763 /** The node terminate tag */
 
 #define MASTER 0 /**< The master node */
 #define DEST 0

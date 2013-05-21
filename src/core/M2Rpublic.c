@@ -94,7 +94,7 @@ int M2CheckpointPrepare(module *m, pool *p, checkpoint *c) {
 int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
   char path[CONFIG_LEN];
-  int header[HEADER_SIZE];
+  int header[HEADER_SIZE] = HEADER_INIT;
   unsigned int i = 0, j = 0, k = 0, l = 0, r = 0;
   unsigned int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
   unsigned int s_offset = 0, r_offset = 0, dim_offset = 0;
@@ -156,7 +156,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         Message(MESSAGE_DEBUG, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
             header[0], t->tid, t->status, t->location[0], t->location[1]);
 
-        if (t->status != TASK_EMPTY) {
+        if (t->status != TASK_EMPTY && (header[0] == TAG_CHECKPOINT || header[0] == TAG_RESULT)) {
 
           for (l = 0; l < MAX_RANK; l++) {
             offsets[l] = 0;
@@ -272,7 +272,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
       for (i = 0; i < c->size; i++) {
 
         // Get the data header
-        c_offset = c->storage->layout.size * i;
+        c_offset = i * c->storage->layout.size;
         
         mstat = CopyData(c->storage->memory + c_offset, header, header_size);
         CheckStatus(mstat);
@@ -284,11 +284,14 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[2] = header[5];
         t->cid = header[6];
 
+        Message(MESSAGE_DEBUG, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
+            header[0], header[1], header[2], t->location[0], t->location[1]);
+
         for (l = 0; l < MAX_RANK; l++) {
           t->storage[j].layout.offsets[l] = 0;
         }
 
-        if (t->status != TASK_EMPTY) {
+        if (t->status != TASK_EMPTY && (header[0] == TAG_CHECKPOINT || header[0] == TAG_RESULT)) {
 
           c_offset = c->storage->layout.size * i + header_size;
           mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
