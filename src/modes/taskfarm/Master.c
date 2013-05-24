@@ -38,13 +38,13 @@ int Master(module *m, pool *p) {
   task *tc = NULL;
   checkpoint *c = NULL;
 
-  /* Initialize the temporary task board buffer */
+  // Initialize the temporary task board buffer
   board_buffer = AllocateShort4(p->board);
   ReadData(p->board, &board_buffer[0][0][0][0]);
 
   if (m->verbose) Message(MESSAGE_INFO, "Completed %04d of %04d tasks\n", p->completed, p->pool_size);
 
-  /* Data buffers */
+  // Data buffers
   send_buffer = calloc(1, sizeof(storage));
   if (!send_buffer) Error(CORE_ERR_MEM);
 
@@ -54,14 +54,14 @@ int Master(module *m, pool *p) {
   temp_buffer = calloc(1, sizeof(storage));
   if (!temp_buffer) Error(CORE_ERR_MEM);
 
-  /* Initialize the task and checkpoint */
+  // Initialize the task and checkpoint
   t = M2TaskLoad(m, p, 0);
   tc = M2TaskLoad(m, p, 0);
   c = CheckpointLoad(m, p, 0);
 
   header_size = sizeof(int) * (HEADER_SIZE);
 
-  /* Initialize data buffers */
+  // Initialize data buffers
   send_buffer->layout.size = header_size;
   for (k = 0; k < p->task_banks; k++) {
     send_buffer->layout.size +=
@@ -83,7 +83,7 @@ int Master(module *m, pool *p) {
   // Specific for the restart mode. The restart file is already full of completed tasks
   if (p->completed == p->pool_size) goto finalize;
 
-  /* Send initial tasks to all workers */
+  // Send initial tasks to all workers
   for (i = 1; i < m->mpi_size; i++) {
     mstat = GetNewTask(m, p, t, board_buffer);
     CheckStatus(mstat);
@@ -109,16 +109,16 @@ int Master(module *m, pool *p) {
     CheckStatus(mstat);
   }
 
-  /* The task farm loop (Blocking communication) */
+  // The task farm loop (Blocking communication)
   while (1) {
 
-    /* Check for ICE file */
+    // Check for ICE file
     ice = Ice();
     if (ice == CORE_ICE) {
       Message(MESSAGE_WARN, "The ICE file has been detected. Flushing checkpoints\n");
     }
 
-    /* Flush checkpoint buffer and write data, reset counter */
+    // Flush checkpoint buffer and write data, reset counter
     if ((c->counter > (c->size-1)) || ice == CORE_ICE) {
 
       WriteData(p->board, &board_buffer[0][0][0][0]);
@@ -130,20 +130,20 @@ int Master(module *m, pool *p) {
 
       cid++;
 
-      /* Reset the checkpoint */
+      // Reset the checkpoint
       CheckpointReset(m, p, c, cid);
     }
 
-    /* Do simple Abort on ICE */
+    // Do simple Abort on ICE
     if (ice == CORE_ICE) Abort(CORE_ICE);
 
-    /* Wait for any operation to complete */
+    // Wait for any operation to complete
     MPI_Recv(&(recv_buffer->memory[0]), recv_buffer->layout.size, MPI_CHAR,
       MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &mpi_status);
 
     send_node = mpi_status.MPI_SOURCE;
 
-    /* Get the data header */
+    // Get the data header
     mstat = CopyData(recv_buffer->memory, header, header_size);
     CheckStatus(mstat);
 
@@ -152,7 +152,7 @@ int Master(module *m, pool *p) {
     mstat = M2Receive(MASTER, send_node, header[0], m, p, recv_buffer->memory);
     CheckStatus(mstat);
 
-    /* Copy data to the checkpoint buffer */
+    // Copy data to the checkpoint buffer
     if (header[0] == TAG_RESULT || header[0] == TAG_CHECKPOINT) {
       c_offset = c->counter * recv_buffer->layout.size;
       mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
@@ -226,7 +226,7 @@ int Master(module *m, pool *p) {
 
 finalize:
 
-  /* Terminate all workers */
+  // Terminate all workers
   for (i = 1; i < m->mpi_size - terminated_nodes; i++) {
     tag = TAG_TERMINATE;
     mstat = CopyData(&tag, send_buffer->memory, sizeof(int));

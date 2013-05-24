@@ -32,7 +32,7 @@ int Master(module *m, pool *p) {
   task *t = NULL;
   checkpoint *c = NULL;
 
-  /* Initialize the temporary task board buffer */
+  // Initialize the temporary task board buffer 
   board_buffer = AllocateShort4(p->board);
   ReadData(p->board, &board_buffer[0][0][0][0]);
 
@@ -53,7 +53,7 @@ int Master(module *m, pool *p) {
   // Specific for the restart mode. The restart file is already full of completed tasks
   if (p->completed == p->pool_size) goto finalize;
 
-  // Do all available task on the master node
+  // Do all available tasks on the master node
   while (1) {
 
     // Check for ICE file
@@ -74,11 +74,11 @@ int Master(module *m, pool *p) {
 
       cid++;
 
-      /* Reset the checkpoint */
+      // Reset the checkpoint
       CheckpointReset(m, p, c, cid);
     }
 
-    /* Do simple Abort on ICE */
+    // Do simple Abort on ICE
     if (ice == CORE_ICE) Abort(CORE_ICE);
 
     mstat = GetNewTask(m, p, t, board_buffer);

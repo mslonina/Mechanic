@@ -22,17 +22,17 @@ int Worker(module *m, pool *p) {
   task *t = NULL;
   storage *send_buffer = NULL, *recv_buffer = NULL;
 
-  /* Initialize the task */
+  // Initialize the task
   t = M2TaskLoad(m, p, 0);
 
-  /* Data buffers */
+  // Data buffers
   send_buffer = calloc(1, sizeof(storage));
   if (!send_buffer) Error(CORE_ERR_MEM);
 
   recv_buffer = calloc(1, sizeof(storage));
   if (!recv_buffer) Error(CORE_ERR_MEM);
 
-  /* Initialize data buffers */
+  // Initialize data buffers
   send_buffer->layout.size = sizeof(int) * (HEADER_SIZE);
   for (k = 0; k < p->task_banks; k++) {
     send_buffer->layout.size +=
@@ -97,7 +97,7 @@ int Worker(module *m, pool *p) {
     }
   }
 
-  /* Finalize */
+  // Finalize 
   TaskFinalize(m, p, t);
 
   if (send_buffer) {
