@@ -140,6 +140,9 @@ int Master(module *m, pool *p) {
       board_buffer[header[3]][header[4]][header[5]][2] = t->cid;
 
       if (t->status == TASK_FINISHED) {
+        mstat = M2Receive(MASTER, MASTER, TAG_RESULT, m, p, c->storage->memory);
+        CheckStatus(mstat);
+
         TaskReset(m, p, t, 0);
         p->completed++;
       }
