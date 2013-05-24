@@ -15,6 +15,7 @@
 module Bootstrap(int node, int mpisize, int argc, char **argv, char *name, module *f);
 module ModuleLoad(char *name);
 void* RuntimeModeLoad(char *name);
+int RuntimeModeInit(module *m);
 int ModuleInit(module *m);
 int ModuleSetup(module *m, int argc, char **argv);
 void FinalizeLayer(layer *l);

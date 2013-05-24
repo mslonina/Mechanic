@@ -55,7 +55,7 @@ int Init(init *i) {
   i->banks_per_pool = 1; /**< Maximum number of memory bank per pool */
   i->banks_per_task = 1; /**< Maximum number of memory banks per task */
   i->attr_per_dataset = 1; /**< Maximum number of attributes that may be assigned to the dataset */
-  i->min_cpu_required = 2; /**< Minimum number of CPUs required */
+  i->min_cpu_required = 1; /**< Minimum number of CPUs required */
 
   return SUCCESS;
 }

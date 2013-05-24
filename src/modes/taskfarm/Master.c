@@ -5,6 +5,14 @@
 #include "Taskfarm.h"
 
 /**
+ * Implements Init()
+ */
+int Init(init *i) {
+  i->min_cpu_required = 2;
+  return SUCCESS;
+}
+
+/**
  * @brief Performs master node operations
  *
  * @param m The module pointer

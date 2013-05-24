@@ -98,6 +98,34 @@ void* RuntimeModeLoad(char *name) {
 }
 
 /**
+ * @brief Initialize the runtime mode
+ *
+ * @param handler The runtime mode handler
+ * @param m The module pointer
+ * 
+ * @return SUCCESS on success, error code otherwise
+ */
+int RuntimeModeInit(module *m) {
+  query *q = NULL;
+  char *err;
+  int mstat = SUCCESS;
+  init i;
+  
+  q = (query*) dlsym(m->layer.mode_handler, "Init");
+  err = dlerror();
+  if (err == NULL) {
+    if (q) mstat = q(&i);
+    CheckStatus(mstat);
+
+    if (i.min_cpu_required > m->layer.init.min_cpu_required) {
+      m->layer.init.min_cpu_required = i.min_cpu_required;
+    }
+  }
+
+  return mstat;
+}
+
+/**
  * @brief Wrapper to dlopen()
  *
  * @param name The name of the module to load

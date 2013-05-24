@@ -235,6 +235,7 @@ int main(int argc, char **argv) {
     Message(MESSAGE_INFO, "We are in '%s' mode\n", Option2String("core", "mode", module.layer.setup.head));
   }
 
+  mstat = RuntimeModeInit(&module);
   if (mpi_size < module.layer.init.min_cpu_required) {
     Message(MESSAGE_WARN, "You must use min. %d MPI threads to run Mechanic.\n", module.layer.init.min_cpu_required);
     Message(MESSAGE_WARN, "Try: mpirun -np %d mechanic -p %s\n", module.layer.init.min_cpu_required, module_name);
