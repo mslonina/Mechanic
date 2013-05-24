@@ -99,7 +99,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
   unsigned int c_offset = 0, d_offset = 0, e_offset = 0, l_offset = 0, k_offset = 0, z_offset = 0;
   unsigned int s_offset = 0, r_offset = 0, dim_offset = 0;
   size_t elements, header_size;
-  task *t;
+  task *t = NULL;
   hid_t h5location, group, tasks, datapath;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
 
@@ -153,7 +153,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[2] = header[5];
         t->cid = header[6];
 
-        Message(MESSAGE_DEBUG, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
+        Message(MESSAGE_OUTPUT, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
             header[0], t->tid, t->status, t->location[0], t->location[1]);
 
         if (t->status != TASK_EMPTY && (header[0] == TAG_CHECKPOINT || header[0] == TAG_RESULT)) {
@@ -284,8 +284,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[2] = header[5];
         t->cid = header[6];
 
-        Message(MESSAGE_DEBUG, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
-            header[0], header[1], header[2], t->location[0], t->location[1]);
+       // Message(MESSAGE_OUTPUT, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
+       //     header[0], t->tid, t->status, t->location[0], t->location[1]);
 
         for (l = 0; l < MAX_RANK; l++) {
           t->storage[j].layout.offsets[l] = 0;

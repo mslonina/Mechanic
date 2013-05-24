@@ -15,9 +15,9 @@
 int Master(module *m, pool *p) {
   int mstat = SUCCESS, ice = 0;
   int i = 0, k = 0, cid = 0, terminated_nodes = 0;
-  int tag;
+  int tag = TAG_TERMINATE;
   int header[HEADER_SIZE] = HEADER_INIT;
-  int c_offset = 0;
+  unsigned int c_offset = 0;
   short ****board_buffer = NULL;
   int send_node;
   size_t header_size;
@@ -144,14 +144,17 @@ int Master(module *m, pool *p) {
     mstat = M2Receive(MASTER, send_node, header[0], m, p, recv_buffer->memory);
     CheckStatus(mstat);
 
-    c_offset = c->counter * recv_buffer->layout.size;
-    mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
+    /* Copy data to the checkpoint buffer */
+    if (header[0] == TAG_RESULT || header[0] == TAG_CHECKPOINT) {
+      c_offset = c->counter * recv_buffer->layout.size;
+      mstat = CopyData(recv_buffer->memory, c->storage->memory + c_offset, recv_buffer->layout.size);
+      
+      c->counter++;
+    }
 
     board_buffer[header[3]][header[4]][header[5]][0] = header[2];
     if (m->stats) board_buffer[header[3]][header[4]][header[5]][1] = send_node;
     board_buffer[header[3]][header[4]][header[5]][2] = header[6];
-
-    c->counter++;
 
     if (header[0] == TAG_RESULT) {
       mstat = GetNewTask(m, p, t, board_buffer);
@@ -204,7 +207,6 @@ int Master(module *m, pool *p) {
     if (p->completed == p->pool_size) break;
   }
 
-completed:
   Message(MESSAGE_DEBUG, "Completed %d tasks\n", p->completed);
 
   WriteData(p->board, &board_buffer[0][0][0][0]);
