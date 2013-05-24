@@ -55,39 +55,40 @@ int Master(module *m, pool *p) {
 
   // Do all available tasks on the master node
   while (1) {
-
-    // Check for ICE file
-    ice = Ice();
-    if (ice == CORE_ICE) {
-      Message(MESSAGE_WARN, "The ICE file has been detected. Flushing checkpoints\n");
-    }
-
-    // Flush checkpoint buffer and write data, reset counter 
-    if ((c->counter > (c->size-1)) || ice == CORE_ICE) {
-
-      WriteData(p->board, &board_buffer[0][0][0][0]);
-      mstat = M2CheckpointPrepare(m, p, c);
-      CheckStatus(mstat);
-
-      mstat = CheckpointProcess(m, p, c);
-      CheckStatus(mstat);
-
-      cid++;
-
-      // Reset the checkpoint
-      CheckpointReset(m, p, c, cid);
-    }
-
-    // Do simple Abort on ICE
-    if (ice == CORE_ICE) Abort(CORE_ICE);
-
+    
     mstat = GetNewTask(m, p, t, board_buffer);
     CheckStatus(mstat);
     t->node = MASTER;
-
+    
     if (mstat != NO_MORE_TASKS) {
-      
+
       do {
+        // Check for ICE file
+        ice = Ice();
+        if (ice == CORE_ICE) {
+          Message(MESSAGE_WARN, "The ICE file has been detected. Flushing checkpoints\n");
+        }
+
+        // Flush checkpoint buffer and write data, reset counter 
+        if ((c->counter > (c->size-1)) || ice == CORE_ICE) {
+
+          WriteData(p->board, &board_buffer[0][0][0][0]);
+          mstat = M2CheckpointPrepare(m, p, c);
+          CheckStatus(mstat);
+
+          mstat = CheckpointProcess(m, p, c);
+          CheckStatus(mstat);
+
+          cid++;
+
+          // Reset the checkpoint
+          CheckpointReset(m, p, c, cid);
+        }
+
+        // Do simple Abort on ICE
+        if (ice == CORE_ICE) Abort(CORE_ICE);
+
+        // Ok, process the task
         board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_IN_USE;
         if (m->stats) board_buffer[t->location[0]][t->location[1]][t->location[2]][1] = MASTER;
         board_buffer[t->location[0]][t->location[1]][t->location[2]][2] = t->cid;

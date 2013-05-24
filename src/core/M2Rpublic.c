@@ -141,6 +141,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
       for (i = 0; i < c->size; i++) {
 
         // Get the data header
+        header[0] = TAG_TERMINATE;
         c_offset = i * c->storage->layout.size;
 
         mstat = CopyData(c->storage->memory + c_offset, header, header_size);
