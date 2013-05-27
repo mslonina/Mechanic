@@ -468,7 +468,6 @@ int CommitStorageLayout(module *m, pool *p) {
       if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
         for (j = 0; j < p->pool_size; j++) {
           sprintf(path, TASK_PATH, j);
-          printf("path: %s\n", path);
           if (!H5Lexists(h5tasks, path, H5P_DEFAULT)) {
             h5task = H5Gcreate2(h5tasks, path, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
             H5CheckStatus(h5task);
