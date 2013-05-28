@@ -280,19 +280,21 @@ int ModuleSetup(module *m, int argc, char **argv) {
  * @param l The layer pointer to finalize
  */
 void FinalizeLayer(layer *l) {
-  if (l->handler) dlclose(l->handler);
-  if (l->mode_handler) dlclose(l->mode_handler);
-  if (l->setup.options) free(l->setup.options);
-  if (l->setup.popt->popt) free(l->setup.popt->popt);
-  if (l->setup.popt->string_args) free(l->setup.popt->string_args);
-  if (l->setup.popt->val_args) free(l->setup.popt->val_args);
-  if (l->setup.popt->int_args) free(l->setup.popt->int_args);
-  if (l->setup.popt->long_args) free(l->setup.popt->long_args);
-  if (l->setup.popt->float_args) free(l->setup.popt->float_args);
-  if (l->setup.popt->double_args) free(l->setup.popt->double_args);
-  if (l->setup.popt->poptcontext) poptFreeContext(l->setup.popt->poptcontext);
-  if (l->setup.popt) free(l->setup.popt);
-  if (l->setup.head) ConfigCleanup(l->setup.head);
+  if (l) {
+    if (l->handler) dlclose(l->handler);
+    if (l->mode_handler) dlclose(l->mode_handler);
+    if (l->setup.options) free(l->setup.options);
+    if (l->setup.popt->popt) free(l->setup.popt->popt);
+    if (l->setup.popt->string_args) free(l->setup.popt->string_args);
+    if (l->setup.popt->val_args) free(l->setup.popt->val_args);
+    if (l->setup.popt->int_args) free(l->setup.popt->int_args);
+    if (l->setup.popt->long_args) free(l->setup.popt->long_args);
+    if (l->setup.popt->float_args) free(l->setup.popt->float_args);
+    if (l->setup.popt->double_args) free(l->setup.popt->double_args);
+    if (l->setup.popt->poptcontext) poptFreeContext(l->setup.popt->poptcontext);
+    if (l->setup.popt) free(l->setup.popt);
+    if (l->setup.head) ConfigCleanup(l->setup.head);
+  }
 }
 
 /**
@@ -301,7 +303,9 @@ void FinalizeLayer(layer *l) {
  * @param m The module pointer to finalize
  */
 void ModuleFinalize(module *m) {
-  if (m->layer.handler) FinalizeLayer(&m->layer);
-  if (m->filename) free(m->filename);
+  if (m) {
+    if (m->layer.handler) FinalizeLayer(&m->layer);
+    if (m->filename) free(m->filename);
+  }
 }
 
