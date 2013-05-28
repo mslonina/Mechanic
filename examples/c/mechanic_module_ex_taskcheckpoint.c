@@ -28,7 +28,7 @@
  * Implements Init()
  */
 int Init(init *i) {
-  i->banks_per_task = 2;
+  i->banks_per_task = 3;
   return SUCCESS;
 }
 
@@ -52,6 +52,18 @@ int Storage(pool *p, void *s) {
   // STORAGE_GROUP example
   p->task->storage[1].layout = (schema) {
     .name = "result-group",
+    .rank = TASK_BOARD_RANK,
+    .dims[0] = 1,
+    .dims[1] = 1,
+    .dims[2] = MAX_SNAPSHOTS,
+    .sync = 1,
+    .use_hdf = 1,
+    .storage_type = STORAGE_GROUP,
+    .datatype = H5T_NATIVE_INT
+  };
+
+  p->task->storage[2].layout = (schema) {
+    .name = "state-group",
     .rank = TASK_BOARD_RANK,
     .dims[0] = 1,
     .dims[1] = 1,
@@ -87,6 +99,7 @@ int TaskProcess(pool *p, task *t, void *s) {
   if (t->cid > 0) {
     MReadData(t, "result", &buffer[0][0][0]);
     MReadData(t, "result-group", &group[0][0][0]);
+    MReadData(t, "state-group", &group[0][0][0]);
   }
 
   // Add data to the task result
@@ -99,6 +112,7 @@ int TaskProcess(pool *p, task *t, void *s) {
   // Write the data (snapshot)
   MWriteData(t, "result", &buffer[0][0][0]);
   MWriteData(t, "result-group", &group[0][0][0]);
+  MWriteData(t, "state-group", &group[0][0][0]);
 
   return TASK_CHECKPOINT;
 }
