@@ -51,7 +51,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   Message(MESSAGE_DEBUG, "[%s:%d] Checkpoint size %d %d\n", __FILE__, __LINE__,
       c->size, c->size * c->storage->layout.size);
 
-  c->storage->memory = malloc(c->size * c->storage->layout.size);
+  c->storage->memory = malloc(c->size * c->storage->layout.size * sizeof(unsigned char));
   if (!c->storage->memory) Error(CORE_ERR_MEM);
 
   CheckpointReset(m, p, c, 0);
@@ -285,7 +285,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
         t->location[2] = header[5];
         t->cid = header[6];
 
-        Message(MESSAGE_OUTPUT, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
+        Message(MESSAGE_DEBUG, "[%s:%d] TASK   %2d %2d %2d location %2d %2d\n", __FILE__, __LINE__,
             header[0], t->tid, t->status, t->location[0], t->location[1]);
 
         for (l = 0; l < MAX_RANK; l++) {
@@ -367,8 +367,10 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
  * @param c The checkpoint pointer
  */
 void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
-  if (c->storage->memory) free(c->storage->memory);
-  if (c) free(c);
+  if (c) {
+    if (c->storage->memory) free(c->storage->memory);
+    free(c);
+  }
 }
 
 /**

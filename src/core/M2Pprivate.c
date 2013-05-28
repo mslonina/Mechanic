@@ -571,43 +571,45 @@ int PoolReset(module *m, pool *p) {
 void PoolFinalize(module *m, pool *p) {
   unsigned int i = 0;
 
-  if (p->storage) {
-    for (i = 0; i < p->pool_banks; i++) {
-      free(p->storage[i].attr);
-    }
-    FreeMemoryLayout(p->pool_banks, p->storage);
-    free(p->storage);
-  }
-
-  if (p->task) {
-    if (p->task->storage) {
-      for (i = 0; i < p->task_banks; i++) {
-        free(p->task->storage[i].attr);
+  if (p) {
+    if (p->storage) {
+      for (i = 0; i < p->pool_banks; i++) {
+        free(p->storage[i].attr);
       }
-      FreeMemoryLayout(p->task_banks, p->task->storage);
-      free(p->task->storage);
+      FreeMemoryLayout(p->pool_banks, p->storage);
+      free(p->storage);
     }
 
-    free(p->task);
-  }
+    if (p->task) {
+      if (p->task->storage) {
+        for (i = 0; i < p->task_banks; i++) {
+          free(p->task->storage[i].attr);
+        }
+        FreeMemoryLayout(p->task_banks, p->task->storage);
+        free(p->task->storage);
+      }
 
-  if (p->tasks && m->node == MASTER) {
-    for (i = 0; i < p->pool_size; i++) {
-      TaskFinalize(m, p, p->tasks[i]);
+      free(p->task);
     }
 
-    free(p->tasks);
-  }
+    if (p->tasks && m->node == MASTER) {
+      for (i = 0; i < p->pool_size; i++) {
+        TaskFinalize(m, p, p->tasks[i]);
+      }
 
-  if (p->board) {
-    for (i = 0; i < p->board->attr_banks; i++) {
-      free(p->board->attr[i].layout.name);
+      free(p->tasks);
     }
-    FreeMemoryLayout(1, p->board);
-    free(p->board->attr);
-    free(p->board);
-  }
 
-  if (p) free(p);
+    if (p->board) {
+      for (i = 0; i < p->board->attr_banks; i++) {
+        free(p->board->attr[i].layout.name);
+      }
+      FreeMemoryLayout(1, p->board);
+      free(p->board->attr);
+      free(p->board);
+    }
+
+    free(p);
+  }
 }
 

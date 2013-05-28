@@ -343,18 +343,20 @@ void TaskReset(module *m, pool *p, task *t, unsigned int tid) {
 void TaskFinalize(module *m, pool *p, task *t) {
   int i = 0, j = 0;
 
-  for (i = 0; i < p->task_banks; i++) {
-    if (t->storage[i].layout.use_hdf) {
-      if (t->storage[i].layout.name) free(t->storage[i].layout.name);
+  if (t) {
+    for (i = 0; i < p->task_banks; i++) {
+      if (t->storage[i].layout.use_hdf) {
+        if (t->storage[i].layout.name) free(t->storage[i].layout.name);
+      }
+      for (j = 0; j < t->storage[i].attr_banks; j++) {
+        if (t->storage[i].attr[j].layout.name) free(t->storage[i].attr[j].layout.name);
+      }
     }
-    for (j = 0; j < t->storage[i].attr_banks; j++) {
-      if (t->storage[i].attr[j].layout.name) free(t->storage[i].attr[j].layout.name);
-    }
+
+    FreeMemoryLayout(p->task_banks, t->storage);
+
+    if (t->storage) free(t->storage);
+    free(t);
   }
-
-  FreeMemoryLayout(p->task_banks, t->storage);
-
-  if (t->storage) free(t->storage);
-  if (t) free(t);
 }
 
