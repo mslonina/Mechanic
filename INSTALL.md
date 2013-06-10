@@ -45,6 +45,19 @@ To run unit tests try:
 
 Tests are available as examples in the `examples/c` directory.
 
+It may happen on some environments, that custom installation of the Mechanic is not
+properly detected (i.e. during module compilation). In such a case, try setting the 
+following variables (bash):
+
+    export MECHANIC_PATH=/your/custom/path
+    export PATH=$MECHANIC_PATH/bin:$PATH
+    export LD_LIBRARY_PATH=$MECHANIC_PATH/lib:$LD_LIBRARY_PATH
+    export C_INCLUDE_PATH=$MECHANIC_PATH/include
+    export CPLUS_INCLUDE_PATH=$MECHANIC_PATH/include
+    export LDFLAGS=-L$MECHANIC_PATH/lib
+    export LDPATH=$MECHANIC_PATH/lib
+    export LD_RUN_PATH=$MECHANIC_PATH/lib
+
 Using the installation script
 -----------------------------
 
