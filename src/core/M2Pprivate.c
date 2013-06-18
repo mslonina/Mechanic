@@ -142,15 +142,6 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       ReadData(p->board, &board_buffer[0][0][0][0]);
     }
 
-    if (m->debug) {
-      for (x = 0; x < p->board->layout.dims[0]; x++) {
-        for (y = 0; y < p->board->layout.dims[1]; y++) {
-          printf("%3d ", board_buffer[x][y][0][0]);
-        }
-        printf("\n");
-      }
-    }
-
     // Initialize the task board
     for (x = 0; x < p->board->layout.dims[0]; x++) {
       for (y = 0; y < p->board->layout.dims[1]; y++) {
