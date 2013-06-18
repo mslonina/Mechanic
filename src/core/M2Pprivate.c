@@ -99,12 +99,12 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   void *v = NULL;
 
   task *t;
-  short ****board_buffer;
+  short ****board_buffer = NULL;
   clock_t time_in, time_out;
   double cpu_time;
   int reversed = 0;
   unsigned int i = 0, j = 0;
-  unsigned int x = 0, y = 0, z = 0;
+  unsigned int x = 0, y = 0, z = 0, k = 0;
 
   if (m->node == MASTER) {
 
@@ -124,6 +124,17 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     // Prepare the task board
     t = M2TaskLoad(m, p, 0);
     board_buffer = AllocateShort4(p->board);
+
+    // Initialize the task board
+    for (x = 0; x < p->board->layout.dims[0]; x++) {
+      for (y = 0; y < p->board->layout.dims[1]; y++) {
+        for (z = 0; z < p->board->layout.dims[2]; z++) {
+          for (k = 0; k < p->board->layout.dims[3]; k++) {
+            board_buffer[x][y][z][k] = 0.0;
+          }
+        }
+      }
+    }
 
     if (p->mask_size != p->pool_size) reversed = 1;
 
@@ -172,15 +183,6 @@ int PoolPrepare(module *m, pool **all, pool *p) {
             p->completed++;
           }
         }
-      }
-    }
-
-    if (m->debug) {
-      for (x = 0; x < p->board->layout.dims[0]; x++) {
-        for (y = 0; y < p->board->layout.dims[1]; y++) {
-          printf("%3d ", board_buffer[x][y][0][0]);
-        }
-        printf("\n");
       }
     }
 
@@ -234,15 +236,6 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       }
     }
 
-    if (m->debug) {
-      for (x = 0; x < p->board->layout.dims[0]; x++) {
-        for (y = 0; y < p->board->layout.dims[1]; y++) {
-          printf("%3d ", board_buffer[x][y][0][0]);
-        }
-        printf("\n");
-      }
-    }
-    
     time_out = clock();
     cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
     if (m->showtime) Message(MESSAGE_INFO, "BoardPrepare completed. CPU time: %f\n", cpu_time);
