@@ -13,11 +13,10 @@
  */
 int M2Prepare(module *m) {
   int mstat = SUCCESS;
-  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "Prepare", LOAD_DEFAULT);
-  if (q) mstat = q(m->mpi_size, m->node, m->filename, s);
+  if (q) mstat = q(m->mpi_size, m->node, m->filename);
   CheckStatus(mstat);
 
   return mstat;
@@ -33,11 +32,10 @@ int M2Prepare(module *m) {
  */
 int M2Process(module *m, pool **p) {
   int mstat = SUCCESS;
-  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "Process", LOAD_DEFAULT);
-  if (q) mstat = q(m->mpi_size, m->node, m->filename, p, s);
+  if (q) mstat = q(m->mpi_size, m->node, m->filename, p);
   CheckStatus(mstat);
 
   return mstat;
@@ -54,11 +52,10 @@ int M2Process(module *m, pool **p) {
  */
 int M2NodePrepare(module *m, pool **all, pool *current) {
   int mstat = SUCCESS;
-  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "NodePrepare", LOAD_DEFAULT);
-  if (q) mstat = q(m->mpi_size, m->node, all, current, s);
+  if (q) mstat = q(m->mpi_size, m->node, all, current);
   CheckStatus(mstat);
 
   return mstat;
@@ -75,11 +72,10 @@ int M2NodePrepare(module *m, pool **all, pool *current) {
  */
 int M2NodeProcess(module *m, pool **all, pool *current) {
   int mstat = SUCCESS;
-  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "NodeProcess", LOAD_DEFAULT);
-  if (q) mstat = q(m->mpi_size, m->node, all, current, s);
+  if (q) mstat = q(m->mpi_size, m->node, all, current);
   CheckStatus(mstat);
 
   return mstat;
@@ -96,11 +92,10 @@ int M2NodeProcess(module *m, pool **all, pool *current) {
  */
 int M2LoopPrepare(module *m, pool **all, pool *current) {
   int mstat = SUCCESS;
-  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "LoopPrepare", LOAD_DEFAULT);
-  if (q) mstat = q(m->mpi_size, m->node, all, current, s);
+  if (q) mstat = q(m->mpi_size, m->node, all, current);
   CheckStatus(mstat);
 
   return mstat;
@@ -117,11 +112,10 @@ int M2LoopPrepare(module *m, pool **all, pool *current) {
  */
 int M2LoopProcess(module *m, pool **all, pool *current) {
   int mstat = SUCCESS;
-  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "LoopProcess", LOAD_DEFAULT);
-  if (q) mstat = q(m->mpi_size, m->node, all, current, s);
+  if (q) mstat = q(m->mpi_size, m->node, all, current);
   CheckStatus(mstat);
 
   return mstat;
@@ -140,11 +134,10 @@ int M2LoopProcess(module *m, pool **all, pool *current) {
  */
 int M2Send(int node, int dest, int tag, module *m, pool *p) {
   int mstat = SUCCESS;
-  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "Send", LOAD_DEFAULT);
-  if (q) mstat = q(m->mpi_size, m->node, dest, tag, p, s);
+  if (q) mstat = q(m->mpi_size, m->node, dest, tag, p);
   CheckStatus(mstat);
 
   return mstat;
@@ -164,11 +157,10 @@ int M2Send(int node, int dest, int tag, module *m, pool *p) {
  */
 int M2Receive(int node, int sender, int tag, module *m, pool *p, void *buffer) {
   int mstat = SUCCESS;
-  void *s = NULL;
   query *q;
 
   q = LoadSym(m, "Receive", LOAD_DEFAULT);
-  if (q) mstat = q(m->mpi_size, m->node, sender, tag, p, s, buffer);
+  if (q) mstat = q(m->mpi_size, m->node, sender, tag, p, buffer);
   CheckStatus(mstat);
 
   return mstat;

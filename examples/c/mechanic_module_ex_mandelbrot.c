@@ -26,7 +26,7 @@
 /**
  * Implements Storage()
  */
-int Storage(pool *p, void *s) {
+int Storage(pool *p) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = TASK_BOARD_RANK,
@@ -45,7 +45,7 @@ int Storage(pool *p, void *s) {
 /**
  * Implements TaskProcess()
  */
-int TaskProcess(pool *p, task *t, void *s) {
+int TaskProcess(pool *p, task *t) {
   double real_min, real_max, imag_min, imag_max;
   double scale_real, scale_imag;
   double c, xres, yres;

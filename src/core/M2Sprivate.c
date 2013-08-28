@@ -17,7 +17,6 @@ int Storage(module *m, pool *p) {
   unsigned int i = 0, j = 0, task_groups = 0, size = 0;
   size_t len;
   query *q;
-  void *v = NULL;
 
   int int_attr;
   long long_attr;
@@ -117,7 +116,7 @@ int Storage(module *m, pool *p) {
   /* Load the module storage layout */
   if (m->fallback.handler) {
     q = LoadSym(m, "Storage", LOAD_DEFAULT);
-    if (q) mstat = q(p, v);
+    if (q) mstat = q(p);
     CheckStatus(mstat);
   }
 
@@ -506,7 +505,6 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   hid_t h5dataset, h5dataspace;
   hsize_t dims[MAX_RANK];
   herr_t h5status;
-  void *v = NULL;
 
   h5dataspace = H5Screate(s->layout.dataspace);
   H5CheckStatus(h5dataspace);
@@ -526,7 +524,7 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   H5CheckStatus(h5dataset);
 
   q = LoadSym(m, "DatasetPrepare", LOAD_DEFAULT);
-  if (q) mstat = q(h5location, h5dataset, p, s, v);
+  if (q) mstat = q(h5location, h5dataset, p, s);
   CheckStatus(mstat);
 
   H5Dclose(h5dataset);

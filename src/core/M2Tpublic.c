@@ -108,13 +108,12 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
   int mstat = SUCCESS;
   int x, y, z;
   query *q;
-  void *s = NULL;
 
   while(1) {
     if (t->tid >= p->pool_size) return NO_MORE_TASKS;
 
     q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
-    if (q) mstat = q(p, t, s);
+    if (q) mstat = q(p, t);
     CheckStatus(mstat);
 
     x = t->location[0];
@@ -285,10 +284,9 @@ int TaskRestore(module *m, pool *p, task *t) {
 int M2TaskPrepare(module *m, pool *p, task *t) {
   int mstat = SUCCESS;
   query *q;
-  void *s = NULL;
 
   q = LoadSym(m, "TaskPrepare", LOAD_DEFAULT);
-  if (q) mstat = q(p, t, s);
+  if (q) mstat = q(p, t);
   CheckStatus(mstat);
 
   return mstat;
@@ -306,10 +304,9 @@ int M2TaskPrepare(module *m, pool *p, task *t) {
 int M2TaskProcess(module *m, pool *p, task *t) {
   int mstat = SUCCESS;
   query *q;
-  void *s = NULL;
 
   q = LoadSym(m, "TaskProcess", LOAD_DEFAULT);
-  if (q) mstat = q(p, t, s);
+  if (q) mstat = q(p, t);
   CheckStatus(mstat);
 
   return mstat;

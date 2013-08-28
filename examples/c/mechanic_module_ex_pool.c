@@ -40,7 +40,7 @@ int Init(init *i) {
  * will be available at /Pools/pool-0000/Tasks/result.
  *
  */
-int Storage(pool *p, void *s) {
+int Storage(pool *p) {
   p->storage[0].layout = (schema) {
     .name = "pool-double-data",
     .rank = 2,
@@ -69,7 +69,7 @@ int Storage(pool *p, void *s) {
 /**
  * Implements PoolPrepare()
  */
-int PoolPrepare(pool **all, pool *p, void *s) {
+int PoolPrepare(pool **all, pool *p) {
   double **pdata;
   int **idata;
   unsigned int i, j, dims[MAX_RANK];
@@ -115,7 +115,7 @@ int PoolPrepare(pool **all, pool *p, void *s) {
 /**
  * Implements PoolProcess()
  */
-int PoolProcess(pool **all, pool *p, void *s) {
+int PoolProcess(pool **all, pool *p) {
   double **pdata;
   int **idata;
   unsigned int i, j, dims[MAX_RANK];

@@ -18,25 +18,25 @@
 
 int Init(init *i);
 int Setup(setup *s);
-int Storage(pool *p, void *s);
-int PoolPrepare(pool **allpools, pool *current, void *s);
-int PoolProcess(pool **allpools, pool *current, void *s);
-int TaskBoardMap(pool *p, task *t, void *s);
-int BoardPrepare(pool **all, pool *p, task *t, void *s);
-int TaskPrepare(pool *p, task *t, void *s);
-int TaskProcess(pool *p, task *t, void *s);
-int CheckpointPrepare(pool *p, checkpoint *c, void *s);
-int Prepare(int mpi_size, int node, char *masterfile, void *s);
-int Process(int mpi_size, int node, char *masterfile, pool **all, void *s);
-int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s);
-int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s);
-int NodePrepare(int mpi_size, int node, pool **all, pool *p, void *s);
-int NodeProcess(int mpi_size, int node, pool **all, pool *p, void *s);
-int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s);
-int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s);
-int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s);
-int Receive(int mpi_size, int node, int sender, int tag, pool *p, void *s, void *buffer);
-int Receive(int mpi_size, int node, int sender, int tag, pool *p, void *s, void *buffer);
+int Storage(pool *p);
+int PoolPrepare(pool **allpools, pool *current);
+int PoolProcess(pool **allpools, pool *current);
+int TaskBoardMap(pool *p, task *t);
+int BoardPrepare(pool **all, pool *p, task *t);
+int TaskPrepare(pool *p, task *t);
+int TaskProcess(pool *p, task *t);
+int CheckpointPrepare(pool *p, checkpoint *c);
+int Prepare(int mpi_size, int node, char *masterfile);
+int Process(int mpi_size, int node, char *masterfile, pool **all);
+int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d);
+int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d);
+int NodePrepare(int mpi_size, int node, pool **all, pool *p);
+int NodeProcess(int mpi_size, int node, pool **all, pool *p);
+int LoopPrepare(int mpi_size, int node, pool **all, pool *p);
+int LoopProcess(int mpi_size, int node, pool **all, pool *p);
+int Send(int mpi_size, int node, int dest, int tag, pool *p);
+int Receive(int mpi_size, int node, int sender, int tag, pool *p, void *buffer);
+int Receive(int mpi_size, int node, int sender, int tag, pool *p, void *buffer);
 
 #endif
 

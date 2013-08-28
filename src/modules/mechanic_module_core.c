@@ -277,11 +277,10 @@ int Setup(setup *s) {
  *
  * @ingroup all_nodes
  * @param p The pool structure
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` on success, error code otherwise
  */
-int Storage(pool *p, void *s) {
+int Storage(pool *p) {
   return SUCCESS;
 }
 
@@ -305,11 +304,10 @@ int Storage(pool *p, void *s) {
  * @ingroup master_only
  * @param allpools The pointer to all pools
  * @param current The current pool structure
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` on success, error code otherwise
  */
-int PoolPrepare(pool **allpools, pool *current, void *s) {
+int PoolPrepare(pool **allpools, pool *current) {
   return SUCCESS;
 }
 
@@ -351,11 +349,10 @@ int PoolPrepare(pool **allpools, pool *current, void *s) {
  * @ingroup master_only
  * @param allpools The pointer to all pools
  * @param current The current pool structure
- * @param s @unused (for future development)
  *
  * @return `POOL_FINALIZE`, `POOL_CREATE_NEW`, `POOL_RESET`
  */
-int PoolProcess(pool **allpools, pool *current, void *s) {
+int PoolProcess(pool **allpools, pool *current) {
   return POOL_FINALIZE;
 }
 
@@ -389,11 +386,10 @@ int PoolProcess(pool **allpools, pool *current, void *s) {
  * @ingroup master_only
  * @param p The current pool structure
  * @param t The current task structure
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int TaskBoardMap(pool *p, task *t, void *s) {
+int TaskBoardMap(pool *p, task *t) {
   unsigned int px, vert, horiz;
 
   px = t->tid;
@@ -438,11 +434,10 @@ int TaskBoardMap(pool *p, task *t, void *s) {
  * @param all The pointer to all pools
  * @param p The current pool structure
  * @param t The fake task object (only location and id, no data -- use pool storage instead)
- * @param s @unused (for future development)
  *
  * @return `TASK_ENABLED` if the task has to be computed, `TASK_DISABLED` otherwise
  */
-int BoardPrepare(pool **all, pool *p, task *t, void *s) {
+int BoardPrepare(pool **all, pool *p, task *t) {
   return TASK_ENABLED;
 }
 
@@ -464,11 +459,10 @@ int BoardPrepare(pool **all, pool *p, task *t, void *s) {
  * @ingroup worker_only
  * @param p The current pool structure
  * @param t The current task structure
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` on success of error code otherwise
  */
-int TaskPrepare(pool *p, task *t, void *s) {
+int TaskPrepare(pool *p, task *t) {
   return SUCCESS;
 }
 
@@ -492,11 +486,10 @@ int TaskPrepare(pool *p, task *t, void *s) {
  * @ingroup worker_only
  * @param p The current pool structure
  * @param t The current task structure
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` on success or error code otherwise
  */
-int TaskProcess(pool *p, task *t, void *s) {
+int TaskProcess(pool *p, task *t) {
   return TASK_FINALIZE;
 }
 
@@ -528,11 +521,10 @@ int TaskProcess(pool *p, task *t, void *s) {
  * @ingroup master_only
  * @param p The current pool structure
  * @param c The current checkpoint structrue
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int CheckpointPrepare(pool *p, checkpoint *c, void *s) {
+int CheckpointPrepare(pool *p, checkpoint *c) {
   return SUCCESS;
 }
 
@@ -549,11 +541,10 @@ int CheckpointPrepare(pool *p, checkpoint *c, void *s) {
  * @param mpi_size The size of the `MPI_COMM_WORLD`
  * @param node The node id
  * @param masterfile The name of the master data file
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int Prepare(int mpi_size, int node, char *masterfile, void *s) {
+int Prepare(int mpi_size, int node, char *masterfile) {
   return SUCCESS;
 }
 
@@ -571,11 +562,10 @@ int Prepare(int mpi_size, int node, char *masterfile, void *s) {
  * @param node The node id
  * @param masterfile The name of the master data file
  * @param all The pointer to all pools 
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int Process(int mpi_size, int node, char *masterfile, pool **all, void *s) {
+int Process(int mpi_size, int node, char *masterfile, pool **all) {
   return SUCCESS;
 }
 
@@ -597,11 +587,10 @@ int Process(int mpi_size, int node, char *masterfile, pool **all, void *s) {
  * @param h5dataset The dataset pointer
  * @param p The current pool pointer
  * @param d The current dataset storage pointer
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s) {
+int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d) {
   return SUCCESS;
 }
 
@@ -623,11 +612,10 @@ int DatasetPrepare(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void 
  * @param h5dataset The dataset pointer
  * @param p The current pool pointer
  * @param d The current dataset storage pointer
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void *s) {
+int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d) {
   return SUCCESS;
 }
 
@@ -648,11 +636,10 @@ int DatasetProcess(hid_t h5location, hid_t h5dataset, pool *p, storage *d, void 
  * @param node The current node id
  * @param all The pointer to the all pools array
  * @param p The current pool pointer
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int NodePrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
+int NodePrepare(int mpi_size, int node, pool **all, pool *p) {
   return SUCCESS;
 } 
 
@@ -672,11 +659,10 @@ int NodePrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
  * @param node The current node id
  * @param all The pointer to the all pools array
  * @param p The current pool pointer
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int NodeProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
+int NodeProcess(int mpi_size, int node, pool **all, pool *p) {
   return SUCCESS;
 } 
 
@@ -697,11 +683,10 @@ int NodeProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
  * @param node The current node id
  * @param all The pointer to the all pools array
  * @param p The current pool pointer
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
+int LoopPrepare(int mpi_size, int node, pool **all, pool *p) {
   return SUCCESS;
 } 
 
@@ -721,11 +706,10 @@ int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
  * @param node The current node id
  * @param all The pointer to the all pools array
  * @param p The current pool pointer
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
+int LoopProcess(int mpi_size, int node, pool **all, pool *p) {
   return SUCCESS;
 } 
 
@@ -740,11 +724,10 @@ int LoopProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
  * @param dest The destination node
  * @param tag The message tag
  * @param p The current pool pointer
- * @param s @unused (for future development)
  *
  * @return `SUCCESS` or error code otherwise
  */
-int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s) {
+int Send(int mpi_size, int node, int dest, int tag, pool *p) {
   return SUCCESS;
 }
 
@@ -759,12 +742,11 @@ int Send(int mpi_size, int node, int dest, int tag, pool *p, void *s) {
  * @param sender The sender node
  * @param tag The message tag
  * @param p The current pool pointer
- * @param s @unused (for future development)
  * @param buffer The raw data buffer received
  *
  * @return `SUCCESS` or error code otherwise
  */
-int Receive(int mpi_size, int node, int sender, int tag, pool *p, void *s, void *buffer) {
+int Receive(int mpi_size, int node, int sender, int tag, pool *p, void *buffer) {
   if (node == MASTER) {
     if (tag == TAG_RESULT) {
       Message(MESSAGE_RESULT, "Completed %4d of %4d tasks\n", p->completed, p->pool_size);

@@ -71,11 +71,10 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
 int M2CheckpointPrepare(module *m, pool *p, checkpoint *c) {
   int mstat = SUCCESS;
   query *q = NULL;
-  void *s = NULL;
 
   if (p->node == MASTER) {
     q = LoadSym(m, "CheckpointPrepare", LOAD_DEFAULT);
-    if (q) mstat = q(p, c, s);
+    if (q) mstat = q(p, c);
     CheckStatus(mstat);
   }
 

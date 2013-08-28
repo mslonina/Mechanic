@@ -26,7 +26,7 @@
 /**
  * Implements Prepare()
  */
-int Prepare(int mpi_size, int node, char *masterfile, void *s) {
+int Prepare(int mpi_size, int node, char *masterfile) {
   long x = -1;
   
   // Initialize random seeds

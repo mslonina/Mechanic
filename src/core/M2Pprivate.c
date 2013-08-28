@@ -96,7 +96,6 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = SUCCESS;
   query *q;
   setup *s = &(m->layer.setup);
-  void *v = NULL;
 
   task *t;
   short ****board_buffer = NULL;
@@ -112,7 +111,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     p->completed = 0;
 
     q = LoadSym(m, "PoolPrepare", LOAD_DEFAULT);
-    if (q) mstat = q(all, p, v);
+    if (q) mstat = q(all, p);
     CheckStatus(mstat);
 
     p->state = POOL_PREPARED;
@@ -190,11 +189,11 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       // available though
 
       q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
-      if (q) mstat = q(p, t, v);
+      if (q) mstat = q(p, t);
       CheckStatus(mstat);
       
       q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
-      if (q) t->state = q(all, p, t, v);
+      if (q) t->state = q(all, p, t);
 
       if (m->mode != RESTART_MODE) {
         if (t->state == TASK_ENABLED) {
@@ -275,12 +274,11 @@ int PoolProcess(module *m, pool **all, pool *p) {
   int mstat = SUCCESS;
   int pool_create = 0;
   setup *s = &(m->layer.setup);
-  void *v = NULL;
   query *q;
 
   if (m->node == MASTER) {
     q = LoadSym(m, "PoolProcess", LOAD_DEFAULT);
-    if (q) pool_create = q(all, p, v);
+    if (q) pool_create = q(all, p);
 
     p->state = POOL_PROCESSED;
 
@@ -312,7 +310,6 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   hid_t h5location, h5pool, h5tasks, h5task, h5dataset;
   hid_t attr_s, attr_d;
   hid_t hstat;
-  void *v = NULL;
 
   /* Do some data processing */
   h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -416,7 +413,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
       H5CheckStatus(h5dataset);
 
       q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
-      if (q) mstat = q(h5pool, h5dataset, p, &(p->storage[i]), v);
+      if (q) mstat = q(h5pool, h5dataset, p, &(p->storage[i]));
       CheckStatus(mstat);
 
       for (j = 0; j < p->storage[i].attr_banks; j++) {
@@ -438,7 +435,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
         H5CheckStatus(h5dataset);
 
         q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
-        if (q) mstat = q(h5tasks, h5dataset, p, &(p->task->storage[i]), v);
+        if (q) mstat = q(h5tasks, h5dataset, p, &(p->task->storage[i]));
         CheckStatus(mstat);
 
         for (j = 0; j < p->task->storage[i].attr_banks; j++) {
@@ -467,7 +464,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
           H5CheckStatus(h5dataset);
           
           q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
-          if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]), v);
+          if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]));
           CheckStatus(mstat);
 
           for (k = 0; k < p->task->storage[j].attr_banks; k++) {

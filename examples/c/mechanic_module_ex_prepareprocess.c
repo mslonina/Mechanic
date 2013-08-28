@@ -39,7 +39,7 @@
  * Example:
  * We open here the master file, create a simple dataset and write some sample data
  */
-int Prepare(int mpi_size, int node, char *masterfile, void *s) {
+int Prepare(int mpi_size, int node, char *masterfile) {
   hid_t h5location, dataspace, dataset;
   hsize_t dimsf[2];
   double data[DIM0][DIM1];
@@ -87,7 +87,7 @@ int Prepare(int mpi_size, int node, char *masterfile, void *s) {
  * Example:
  * We open here the master file and read sample data
  */
-int Process(int mpi_size, int node, char *masterfile, pool **all, void *s) {
+int Process(int mpi_size, int node, char *masterfile, pool **all) {
   hid_t h5location, dataset;
   double data[DIM0][DIM1];
   int i, j;

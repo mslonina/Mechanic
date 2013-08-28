@@ -83,7 +83,7 @@ int Setup(setup *s) {
  * is called, all configuration options are broadcasted to all workers and stored as
  * attribtues to the task board dataset.
  */
-int PoolPrepare(pool **all, pool *current, void *s) {
+int PoolPrepare(pool **all, pool *current) {
   int ilimit; 
   // Modify an option depending on the task pool
   if (current->pid == 2) {
@@ -96,7 +96,7 @@ int PoolPrepare(pool **all, pool *current, void *s) {
 /**
  * Implements PoolProcess()
  */
-int PoolProcess(pool **all, pool *current, void *s) {
+int PoolProcess(pool **all, pool *current) {
   int max_pools, ilimit, dtrue;
   double dlimit;
 

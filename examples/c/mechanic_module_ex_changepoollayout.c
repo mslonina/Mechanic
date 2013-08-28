@@ -46,7 +46,7 @@ int Init(init *i) {
  * result arrays into one dataset suitable to process with Gnuplot PM3D. The final dataset
  * will be available at /Pools/pool-ID/Tasks/result.
  */
-int Storage(pool *p, void *s) {
+int Storage(pool *p) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
@@ -69,7 +69,7 @@ int Storage(pool *p, void *s) {
 /**
  * Implements TaskProcess()
  */
-int TaskProcess(pool *p, task *t, void *s) {
+int TaskProcess(pool *p, task *t) {
   double buffer_one[1][3];
   double buffer_two[1][5];
 
@@ -100,7 +100,7 @@ int TaskProcess(pool *p, task *t, void *s) {
 /**
  * Implements PoolProcess()
  */
-int PoolProcess(pool **allpools, pool *current, void *s) {
+int PoolProcess(pool **allpools, pool *current) {
   if (current->pid < 5) return POOL_CREATE_NEW;
   return POOL_FINALIZE;
 }

@@ -84,7 +84,7 @@ int Setup(setup *s) {
 /**
  * Implements Storage()
  */
-int Storage(pool *p, void *s) {
+int Storage(pool *p) {
   p->storage[0].layout = (schema) {
     .name = "input",
     .rank = 2,
@@ -101,7 +101,7 @@ int Storage(pool *p, void *s) {
 /**
  * Implements PoolPrepare()
  */
-int PoolPrepare(pool **all, pool *p, void *s) {
+int PoolPrepare(pool **all, pool *p) {
   double **buffer;
   int mstat = SUCCESS;
   char filename[CONFIG_LEN];

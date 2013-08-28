@@ -92,7 +92,7 @@ int Setup(setup *s) {
  *
  * For testing purpose we will store some worker data
  */
-int Storage(pool *p, void *s) {
+int Storage(pool *p) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = TASK_BOARD_RANK,
@@ -115,7 +115,7 @@ int Storage(pool *p, void *s) {
  * is called, all configuration options are broadcasted to all workers and stored as
  * attribtues to the task board dataset.
  */
-int PoolPrepare(pool **all, pool *current, void *s) {
+int PoolPrepare(pool **all, pool *current) {
   int ilimit; 
   // Modify an option depending on the task pool
   if (current->pid == 2) {
@@ -133,7 +133,7 @@ int PoolPrepare(pool **all, pool *current, void *s) {
  * `PoolPrepare()` may be used to convert the attribute-based configuration to local
  * runtime configuration.
  */
-int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
+int LoopPrepare(int mpi_size, int node, pool **all, pool *p) {
 
   MReadOption(p, "max-pools", &runtime_opts.max_pools);
   MReadOption(p, "dlimit", &runtime_opts.dlimit);
@@ -149,7 +149,7 @@ int LoopPrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
 /**
  * Implements TaskProcess()
  */
-int TaskProcess(pool *p, task *t, void *s) {
+int TaskProcess(pool *p, task *t) {
   int result[1][1][3];
 
   result[0][0][0] = runtime_opts.ilimit + t->tid;
@@ -164,7 +164,7 @@ int TaskProcess(pool *p, task *t, void *s) {
 /**
  * Implements PoolProcess()
  */
-int PoolProcess(pool **all, pool *current, void *s) {
+int PoolProcess(pool **all, pool *current) {
   int max_pools, ilimit, dtrue;
   double dlimit;
 

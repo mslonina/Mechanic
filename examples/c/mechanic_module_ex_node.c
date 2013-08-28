@@ -35,7 +35,7 @@ pass *g;
 /**
  * Implements NodePrepare()
  */
-int NodePrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
+int NodePrepare(int mpi_size, int node, pool **all, pool *p) {
   double data;
 
   if (node == MASTER) {
@@ -81,7 +81,7 @@ int NodePrepare(int mpi_size, int node, pool **all, pool *p, void *s) {
  * Here, we free the previously allocated struct. We do this only when the pool is about
  * to finish (not reset).
  */
-int NodeProcess(int mpi_size, int node, pool **all, pool *p, void *s) {
+int NodeProcess(int mpi_size, int node, pool **all, pool *p) {
 
   if (node != MASTER) {
     Message(MESSAGE_OUTPUT, "g->node %d, g->data = %f\n", g->node, g->data);

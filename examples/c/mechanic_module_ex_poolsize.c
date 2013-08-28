@@ -23,7 +23,7 @@
 /**
  * Implements Storage()
  */
-int Storage(pool *p, void *s) {
+int Storage(pool *p) {
   // Override the pool size
   p->pool_size = 4096;
 
