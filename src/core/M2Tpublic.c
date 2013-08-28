@@ -53,16 +53,13 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
   for (i = 0; i < p->task_banks; i++) {
     t->storage[i].layout.use_hdf = p->task->storage[i].layout.use_hdf;
 
-    /* The dataset name, we need this only when use_hdf = 1 */
-    if (t->storage[i].layout.use_hdf) {
-      if (p->task->storage[i].layout.name != NULL) {
-        len = strlen(p->task->storage[i].layout.name);
-        t->storage[i].layout.name = calloc(len+1, sizeof(char*));
-        if (!t->storage[i].layout.name) Error(CORE_ERR_MEM);
+    if (p->task->storage[i].layout.name != NULL) {
+      len = strlen(p->task->storage[i].layout.name);
+      t->storage[i].layout.name = calloc(len+1, sizeof(char*));
+      if (!t->storage[i].layout.name) Error(CORE_ERR_MEM);
 
-        strncpy(t->storage[i].layout.name, p->task->storage[i].layout.name, len);
-        t->storage[i].layout.name[len] = CONFIG_NULL;
-      }
+      strncpy(t->storage[i].layout.name, p->task->storage[i].layout.name, len);
+      t->storage[i].layout.name[len] = CONFIG_NULL;
     }
 
     t->storage[i].layout.rank = p->task->storage[i].layout.rank;
@@ -345,9 +342,7 @@ void TaskFinalize(module *m, pool *p, task *t) {
 
   if (t) {
     for (i = 0; i < p->task_banks; i++) {
-      if (t->storage[i].layout.use_hdf) {
-        if (t->storage[i].layout.name) free(t->storage[i].layout.name);
-      }
+      if (t->storage[i].layout.name) free(t->storage[i].layout.name);
       for (j = 0; j < t->storage[i].attr_banks; j++) {
         if (t->storage[i].attr[j].layout.name) free(t->storage[i].attr[j].layout.name);
       }
