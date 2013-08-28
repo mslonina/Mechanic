@@ -20,6 +20,10 @@
 #define STORAGE_BOARD 13 /**< The board data storage type */
 #define STORAGE_LIST 14 /**< The list data storage type */
 
+#define HDF_NO_STORAGE 0 /**< No HDF5 file storage */
+#define HDF_NORMAL_STORAGE 1 /**< HDF5 file storage */
+#define HDF_TEMP_STORAGE 2 /**< Only temporary HDF5 file storage */
+
 #define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
 #define ATTR_STORAGE_END {.name = NULL, .dataspace = H5S_NO_CLASS, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
 
