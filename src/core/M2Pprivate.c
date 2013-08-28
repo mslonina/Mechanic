@@ -409,19 +409,26 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   /* Process all datasets in the current pool */
   for (i = 0; i < p->pool_banks; i++) {
     if (p->storage[i].layout.use_hdf) {
-      h5dataset = H5Dopen2(h5pool, p->storage[i].layout.name, H5P_DEFAULT);
-      H5CheckStatus(h5dataset);
+      if (p->storage[i].layout.use_hdf == HDF_NORMAL_STORAGE) {
+        h5dataset = H5Dopen2(h5pool, p->storage[i].layout.name, H5P_DEFAULT);
+        H5CheckStatus(h5dataset);
 
-      q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
-      if (q) mstat = q(h5pool, h5dataset, p, &(p->storage[i]));
-      CheckStatus(mstat);
-
-      for (j = 0; j < p->storage[i].attr_banks; j++) {
-        mstat = CommitAttribute(h5dataset, &p->storage[i].attr[j]);
+        q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
+        if (q) mstat = q(h5pool, h5dataset, p, &(p->storage[i]));
         CheckStatus(mstat);
+
+        for (j = 0; j < p->storage[i].attr_banks; j++) {
+          mstat = CommitAttribute(h5dataset, &p->storage[i].attr[j]);
+          CheckStatus(mstat);
+        }
+
+        H5Dclose(h5dataset);
       }
 
-      H5Dclose(h5dataset);
+      // Remove the temporary dataset
+      if (p->storage[i].layout.use_hdf == HDF_TEMP_STORAGE) {
+        H5Ldelete(h5pool, p->storage[i].layout.name, H5P_DEFAULT);
+      }
     }
   }
 
@@ -431,19 +438,26 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   for (i = 0; i < p->task_banks; i++) {
     if (p->task->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.storage_type != STORAGE_GROUP) {
-        h5dataset = H5Dopen2(h5tasks, p->task->storage[i].layout.name, H5P_DEFAULT);
-        H5CheckStatus(h5dataset);
+        if (p->task->storage[i].layout.use_hdf == HDF_NORMAL_STORAGE) {
+          h5dataset = H5Dopen2(h5tasks, p->task->storage[i].layout.name, H5P_DEFAULT);
+          H5CheckStatus(h5dataset);
 
-        q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
-        if (q) mstat = q(h5tasks, h5dataset, p, &(p->task->storage[i]));
-        CheckStatus(mstat);
-
-        for (j = 0; j < p->task->storage[i].attr_banks; j++) {
-          mstat = CommitAttribute(h5dataset, &p->task->storage[i].attr[j]);
+          q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
+          if (q) mstat = q(h5tasks, h5dataset, p, &(p->task->storage[i]));
           CheckStatus(mstat);
+
+          for (j = 0; j < p->task->storage[i].attr_banks; j++) {
+            mstat = CommitAttribute(h5dataset, &p->task->storage[i].attr[j]);
+            CheckStatus(mstat);
+          }
+
+          H5Dclose(h5dataset);
         }
 
-        H5Dclose(h5dataset);
+        // Remove the temporary dataset
+        if (p->task->storage[i].layout.use_hdf == HDF_TEMP_STORAGE) {
+          H5Ldelete(h5tasks, p->task->storage[i].layout.name, H5P_DEFAULT);
+        }
       } else {
         task_groups = 1;
       }
@@ -460,19 +474,27 @@ int PoolProcessData(module *m, pool *p, setup *s) {
         if (p->task->storage[j].layout.use_hdf &&
             p->task->storage[j].layout.storage_type == STORAGE_GROUP) {
 
-          h5dataset = H5Dopen2(h5task, p->task->storage[j].layout.name, H5P_DEFAULT);
-          H5CheckStatus(h5dataset);
-          
-          q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
-          if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]));
-          CheckStatus(mstat);
+          if (p->task->storage[j].layout.use_hdf == HDF_NORMAL_STORAGE) {
 
-          for (k = 0; k < p->task->storage[j].attr_banks; k++) {
-            mstat = CommitAttribute(h5dataset, &p->task->storage[j].attr[k]);
+            h5dataset = H5Dopen2(h5task, p->task->storage[j].layout.name, H5P_DEFAULT);
+            H5CheckStatus(h5dataset);
+          
+            q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
+            if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]));
             CheckStatus(mstat);
+
+            for (k = 0; k < p->task->storage[j].attr_banks; k++) {
+              mstat = CommitAttribute(h5dataset, &p->task->storage[j].attr[k]);
+              CheckStatus(mstat);
+            }
+
+            H5Dclose(h5dataset);
           }
 
-          H5Dclose(h5dataset);
+          // Remove the temporary dataset
+          if (p->task->storage[i].layout.use_hdf == HDF_TEMP_STORAGE) {
+            H5Ldelete(h5task, p->task->storage[i].layout.name, H5P_DEFAULT);
+          }
         }
       }
       H5Gclose(h5task);
