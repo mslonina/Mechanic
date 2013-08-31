@@ -27,6 +27,7 @@ Mechanic 2.x roadmap
   - [DONE] Task states
   - [DONE] Intermediate checkpoint storage
   - [DONE] Support for the restart mode
+  - Temporary storage with HDF_TEMP_STORAGE
 4. Loadable run modes (such as taskfarm, masteralone, collective etc.)
   - [DONE] Refactor code headers (public and private)
   - [DONE] Mode API functions: Master(), Worker()
@@ -40,4 +41,6 @@ Mechanic 2.x roadmap
 - (MPI) Genetic algorithm mode
 - (MPI) Consider task dependencies
 - (CONFIG) Consider switching to yaml specification for configuration and input files
+- (CONFIG) Configuration sets
+- (CONFIG) Minimum, maximum config values with error handling
 
