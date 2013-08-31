@@ -36,7 +36,7 @@ int Storage(module *m, pool *p) {
   p->board->layout.dims[3] = 3; // task status, computing node, task checkpoint number
   p->board->layout.datatype = H5T_NATIVE_SHORT;
   p->board->layout.sync = 1;
-  p->board->layout.use_hdf = 1;
+  p->board->layout.use_hdf = HDF_NORMAL_STORAGE;
   p->board->layout.storage_type = STORAGE_GROUP;
 
   /* Programatically create configuration attributes for the task board */

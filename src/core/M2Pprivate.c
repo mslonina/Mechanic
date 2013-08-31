@@ -427,7 +427,9 @@ int PoolProcessData(module *m, pool *p, setup *s) {
 
       // Remove the temporary dataset
       if (p->storage[i].layout.use_hdf == HDF_TEMP_STORAGE) {
-        H5Ldelete(h5pool, p->storage[i].layout.name, H5P_DEFAULT);
+        if (p->state == POOL_PROCESSED) {
+          H5Ldelete(h5pool, p->storage[i].layout.name, H5P_DEFAULT);
+        }
       }
     }
   }
@@ -456,7 +458,9 @@ int PoolProcessData(module *m, pool *p, setup *s) {
 
         // Remove the temporary dataset
         if (p->task->storage[i].layout.use_hdf == HDF_TEMP_STORAGE) {
-          H5Ldelete(h5tasks, p->task->storage[i].layout.name, H5P_DEFAULT);
+          if (p->state == POOL_PROCESSED) {
+            H5Ldelete(h5tasks, p->task->storage[i].layout.name, H5P_DEFAULT);
+          }
         }
       } else {
         task_groups = 1;
@@ -493,7 +497,9 @@ int PoolProcessData(module *m, pool *p, setup *s) {
 
           // Remove the temporary dataset
           if (p->task->storage[i].layout.use_hdf == HDF_TEMP_STORAGE) {
-            H5Ldelete(h5task, p->task->storage[i].layout.name, H5P_DEFAULT);
+            if (p->state == POOL_PROCESSED) {
+              H5Ldelete(h5task, p->task->storage[i].layout.name, H5P_DEFAULT);
+            }
           }
         }
       }

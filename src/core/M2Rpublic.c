@@ -261,6 +261,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
           // Commit data to master datafile
           if (p->task->storage[j].layout.use_hdf) {
+            Message(MESSAGE_DEBUG, "CommitData for '%s' with use_hdf = %d\n",
+                p->task->storage[j].layout.name, p->task->storage[j].layout.use_hdf);
             mstat = CommitData(tasks, 1, &t->storage[j]);
             CheckStatus(mstat);
           }
