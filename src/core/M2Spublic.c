@@ -392,7 +392,7 @@ int CommitMemoryLayout(int banks, storage *s) {
     mstat = Allocate(&s[i], s[i].layout.storage_elements, s[i].layout.datatype_size);
     CheckStatus(mstat);
   
-    mstat = CommitAttrMemoryLayout(s[i].attr_banks, s);
+    mstat = CommitAttrMemoryLayout(s[i].attr_banks, &s[i]);
     CheckStatus(mstat);
   }
 

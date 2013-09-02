@@ -268,6 +268,7 @@ int Storage(module *m, pool *p) {
     }
 
   }
+  
     
   /* Set the checkpoint size at the very end of the storage stage */
   MReadOption(p, "checkpoint", &p->checkpoint_size);

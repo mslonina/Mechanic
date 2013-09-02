@@ -112,9 +112,9 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
       t->storage[i].attr[j].layout.datatype         = p->task->storage[i].attr[j].layout.datatype;
       t->storage[i].attr[j].layout.mpi_datatype     = p->task->storage[i].attr[j].layout.mpi_datatype;
       t->storage[i].attr[j].layout.size             = p->task->storage[i].attr[j].layout.size;
-      t->storage[i].attr[j].layout.storage_size     = p->task->storage[i].attr[j].layout.size;
+      t->storage[i].attr[j].layout.storage_size     = p->task->storage[i].attr[j].layout.storage_size;
       t->storage[i].attr[j].layout.elements         = p->task->storage[i].attr[j].layout.elements;
-      t->storage[i].attr[j].layout.storage_elements = p->task->storage[i].attr[j].layout.elements;
+      t->storage[i].attr[j].layout.storage_elements = p->task->storage[i].attr[j].layout.storage_elements;
       t->storage[i].attr[j].layout.datatype_size    = p->task->storage[i].attr[j].layout.datatype_size;
    
     }
