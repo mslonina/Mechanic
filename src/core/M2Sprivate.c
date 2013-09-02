@@ -238,6 +238,36 @@ int Storage(module *m, pool *p) {
     }
 
   }
+
+  /* Worker operations */
+  if (m->node != MASTER) {
+    for (i = 0; i < p->task_banks; i++) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_BOARD ||
+          p->task->storage[i].layout.storage_type == STORAGE_LIST ||
+          p->task->storage[i].layout.storage_type == STORAGE_PM3D) {
+
+        for (j = 0; j < MAX_RANK; j++) {
+          p->task->storage[i].layout.storage_dim[j] =
+            p->task->storage[i].layout.dims[j];
+        }
+
+        size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
+        p->task->storage[i].layout.storage_elements = size;
+        p->task->storage[i].layout.storage_size = size * p->task->storage[i].layout.datatype_size;
+        mstat = Allocate(&(p->task->storage[i]), size, p->task->storage[i].layout.datatype_size);
+        mstat = CommitAttrMemoryLayout(p->task->storage[i].attr_banks, &p->task->storage[i]);
+
+        for (j = 0; j < MAX_RANK; j++) {
+          p->task->storage[i].layout.offsets[j] = 0;
+        }
+      }
+
+      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
+        // @todo
+      }
+    }
+
+  }
     
   /* Set the checkpoint size at the very end of the storage stage */
   MReadOption(p, "checkpoint", &p->checkpoint_size);
