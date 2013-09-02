@@ -611,9 +611,13 @@ void PoolFinalize(module *m, pool *p) {
       free(p->task);
     }
 
-    if (p->tasks && m->node == MASTER) {
-      for (i = 0; i < p->pool_size; i++) {
-        TaskFinalize(m, p, p->tasks[i]);
+    if (p->tasks) {
+      if (m->node == MASTER) {
+        for (i = 0; i < p->pool_size; i++) {
+          TaskFinalize(m, p, p->tasks[i]);
+        }
+      } else {
+        TaskFinalize(m, p, p->tasks[0]);
       }
 
       free(p->tasks);

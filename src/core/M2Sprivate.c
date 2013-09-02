@@ -260,15 +260,16 @@ int Storage(module *m, pool *p) {
         for (j = 0; j < MAX_RANK; j++) {
           p->task->storage[i].layout.offsets[j] = 0;
         }
+      } else {
+        task_groups = 1;
       }
 
-      if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {
-        // @todo
+      if (task_groups == 1) {
+        p->tasks = calloc(1, sizeof(task));
+        p->tasks[0] = M2TaskLoad(m, p, 0);
       }
     }
-
   }
-  
     
   /* Set the checkpoint size at the very end of the storage stage */
   MReadOption(p, "checkpoint", &p->checkpoint_size);
