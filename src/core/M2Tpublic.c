@@ -20,7 +20,7 @@
  * @return The task object, NULL otherwise
  */
 task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
-  unsigned int i = 0, j = 0;
+  unsigned int i = 0, j = 0, k = 0;
   size_t len;
   task* t = NULL;
 
@@ -81,15 +81,54 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
     t->storage[i].layout.elements         = p->task->storage[i].layout.elements;
     t->storage[i].layout.storage_elements = p->task->storage[i].layout.elements;
     t->storage[i].layout.datatype_size    = p->task->storage[i].layout.datatype_size;
+    t->storage[i].attr_banks              = p->task->storage[i].attr_banks;
     
     /**
-     * @todo Attributes
-     *
-     * If only worker nodes knew about attributes...
+     * Attributes
      */
+    
+    for (j = 0; j < t->storage[i].attr_banks; j++) {
+
+      if (p->task->storage[i].attr[j].layout.name != NULL) {
+        len = strlen(p->task->storage[i].attr[j].layout.name);
+        t->storage[i].attr[j].layout.name = calloc(len+1, sizeof(char*));
+        if (!t->storage[i].attr[j].layout.name) Error(CORE_ERR_MEM);
+
+        strncpy(t->storage[i].attr[j].layout.name, p->task->storage[i].attr[j].layout.name, len);
+        t->storage[i].attr[j].layout.name[len] = CONFIG_NULL;
+      }
+      
+      t->storage[i].attr[j].layout.rank = p->task->storage[i].attr[j].layout.rank;
+      
+      for (k = 0; k < t->storage[i].attr[j].layout.rank; k++) {
+        t->storage[i].attr[j].layout.storage_dim[k] =
+          t->storage[i].attr[j].layout.dims[k] =
+          p->task->storage[i].attr[j].layout.dims[k];
+      }
+      
+      t->storage[i].attr[j].layout.sync             = p->task->storage[i].attr[j].layout.sync;
+      t->storage[i].attr[j].layout.storage_type     = p->task->storage[i].attr[j].layout.storage_type;
+      t->storage[i].attr[j].layout.dataspace        = p->task->storage[i].attr[j].layout.dataspace;
+      t->storage[i].attr[j].layout.datatype         = p->task->storage[i].attr[j].layout.datatype;
+      t->storage[i].attr[j].layout.mpi_datatype     = p->task->storage[i].attr[j].layout.mpi_datatype;
+      t->storage[i].attr[j].layout.size             = p->task->storage[i].attr[j].layout.size;
+      t->storage[i].attr[j].layout.storage_size     = p->task->storage[i].attr[j].layout.size;
+      t->storage[i].attr[j].layout.elements         = p->task->storage[i].attr[j].layout.elements;
+      t->storage[i].attr[j].layout.storage_elements = p->task->storage[i].attr[j].layout.elements;
+      t->storage[i].attr[j].layout.datatype_size    = p->task->storage[i].attr[j].layout.datatype_size;
+   
+    }
   }
 
   CommitMemoryLayout(p->task_banks, t->storage);
+
+  /* Copy attributes from p->task to the task object */
+  for (i = 0; i < p->task_banks; i++) {
+    for (j = 0; j < t->storage[i].attr_banks; j++) {
+      CopyData(p->task->storage[i].attr[j].memory, t->storage[i].attr[j].memory, 
+          p->task->storage[i].attr[j].layout.size);
+    }
+  }
 
   return t;
 }
