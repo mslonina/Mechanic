@@ -27,7 +27,7 @@ Mechanic 2.x roadmap
   - [DONE] Task states
   - [DONE] Intermediate checkpoint storage
   - [DONE] Support for the restart mode
-  - Temporary storage with HDF_TEMP_STORAGE
+  - [DONE] Temporary storage with HDF_TEMP_STORAGE
 4. Loadable run modes (such as taskfarm, masteralone, collective etc.)
   - [DONE] Refactor code headers (public and private)
   - [DONE] Mode API functions: Master(), Worker()
