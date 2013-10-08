@@ -237,7 +237,7 @@ The data will be stored in the master file: `mechanic-master-00.h5` in the datas
 
 ### The same example. Storage simplified
 
-The more natural way to store image-like data is to use `STORAGE_BOARD` instead of
+The more natural way to store image-like data is to use `STORAGE_TEXTURE` instead of
 `STORAGE_PM3D`. The resulting dataset mimics then the task board:
 
     int Storage(pool *p) {
@@ -249,7 +249,7 @@ The more natural way to store image-like data is to use `STORAGE_BOARD` instead 
         .dims[2] = 1, // the depth of the task result
         .datatype = H5T_NATIVE_DOUBLE, // the datatype
         .use_hdf = 1, // whether to store the data in the file or not
-        .storage_type = STORAGE_BOARD // the storage type, here, suitable for Gnuplot PM3D
+        .storage_type = STORAGE_TEXTURE // the storage type, here, suitable for Gnuplot PM3D
       };
       return SUCCESS;
     }
@@ -814,7 +814,7 @@ the output is stored in `/Pools/pool-ID/Tasks/list-dataset`:
 
 The size of the final dataset is `p->pool_size * dims[1]`.
 
-#### `STORAGE_BOARD`
+#### `STORAGE_TEXTURE`
 
 The memory block is stored in a dataset with a {row,column,depth}-offset
 according to the board-location of the task. The minimum rank must be `TASK_BOARD_RANK`.
@@ -827,7 +827,7 @@ Suppose we have a dataset defined like this:
       .dims[1] = 3,
       .dims[2] = 1;
       .use_hdf = 1,
-      .storage_type = STORAGE_BOARD,
+      .storage_type = STORAGE_TEXTURE,
       .datatype = H5T_NATIVE_INT,
       .sync = 1,
     };
@@ -858,7 +858,7 @@ The data may be accessed directly, by using the memory pointer:
 
 You may use `ReadData()` and `WriteData()` or corresponding macros to manipulate the data.
 For example, suppose integer-type task dataset of dimensionality dims = {2,3} per task with
-storage type `STORAGE_BOARD`, and task board = {5,5}. The allocated memory block is
+storage type `STORAGE_TEXTURE`, and task board = {5,5}. The allocated memory block is
 `p->pool_size x dims x sizeof(int)`. To access it, we need to copy the data:
 
     int buffer[10][15]; // dims0: 2x5, dims1: 3x5

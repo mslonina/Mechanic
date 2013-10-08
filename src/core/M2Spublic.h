@@ -17,7 +17,7 @@
 #define STORAGE_NULL 0 /**< The NULL storage */
 #define STORAGE_GROUP 11 /**< The basic data storage type */
 #define STORAGE_PM3D 12 /**< The pm3d data storage type */
-#define STORAGE_BOARD 13 /**< The board data storage type */
+#define STORAGE_TEXTURE 13 /**< The board data storage type */
 #define STORAGE_LIST 14 /**< The list data storage type */
 
 #define HDF_NO_STORAGE 0 /**< No HDF5 file storage */
@@ -34,7 +34,7 @@
 typedef struct {
   char *name; /**< The name of the dataset */
   unsigned short rank; /**< The rank of the dataset */
-  unsigned short storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_BOARD, STORAGE_LIST */
+  unsigned short storage_type; /**< The storage type: STORAGE_GROUP, STORAGE_PM3D, STORAGE_TEXTURE, STORAGE_LIST */
   unsigned short use_hdf; /**< Enables HDF5 storage for the memory block */
   unsigned short sync; /**< Whether to synchronize memory bank between master and worker */
   unsigned int dims[MAX_RANK]; /**< The dimensions of the memory dataset */

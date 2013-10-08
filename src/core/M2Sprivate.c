@@ -191,7 +191,7 @@ int Storage(module *m, pool *p) {
         mstat = CommitAttrMemoryLayout(p->task->storage[i].attr_banks, &p->task->storage[i]);
       }
 
-      if (p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
+      if (p->task->storage[i].layout.storage_type == STORAGE_TEXTURE) {
         p->task->storage[i].layout.storage_dim[0] =
           p->task->storage[i].layout.dims[0] * p->board->layout.dims[0];
         p->task->storage[i].layout.storage_dim[1] =
@@ -242,7 +242,7 @@ int Storage(module *m, pool *p) {
   /* Worker operations */
   if (m->node != MASTER) {
     for (i = 0; i < p->task_banks; i++) {
-      if (p->task->storage[i].layout.storage_type == STORAGE_BOARD ||
+      if (p->task->storage[i].layout.storage_type == STORAGE_TEXTURE ||
           p->task->storage[i].layout.storage_type == STORAGE_LIST ||
           p->task->storage[i].layout.storage_type == STORAGE_PM3D) {
 
@@ -310,9 +310,9 @@ int CheckLayout(module *m, int banks, storage *s) {
       Error(CORE_ERR_STORAGE);
     }
 
-    if (s[i].layout.storage_type == STORAGE_BOARD &&
+    if (s[i].layout.storage_type == STORAGE_TEXTURE &&
         s[i].layout.rank < TASK_BOARD_RANK) {
-      Message(MESSAGE_ERR, "Minimum rank for STORAGE_BOARD is TASK_BOARD_RANK (= 3)\n");
+      Message(MESSAGE_ERR, "Minimum rank for STORAGE_TEXTURE is TASK_BOARD_RANK (= 3)\n");
       Error(CORE_ERR_STORAGE);
     }
 
@@ -493,7 +493,7 @@ int CommitStorageLayout(module *m, pool *p) {
     if (p->task->storage[i].layout.use_hdf) {
       if (p->task->storage[i].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[i].layout.storage_type == STORAGE_LIST ||
-        p->task->storage[i].layout.storage_type == STORAGE_BOARD) {
+        p->task->storage[i].layout.storage_type == STORAGE_TEXTURE) {
           CreateDataset(h5tasks, &p->task->storage[i], m, p);
       }
       if (p->task->storage[i].layout.storage_type == STORAGE_GROUP) {

@@ -96,7 +96,7 @@ int Storage(pool *p) {
     .datatype = H5T_NATIVE_DOUBLE,
     .sync = 1,
     .use_hdf = 1,
-    .storage_type = STORAGE_BOARD,
+    .storage_type = STORAGE_TEXTURE,
   };
 
   p->task->storage[1].layout = (schema) {
@@ -108,7 +108,7 @@ int Storage(pool *p) {
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
-    .storage_type = STORAGE_BOARD,
+    .storage_type = STORAGE_TEXTURE,
   };
 
   p->task->storage[2].layout = (schema) {
@@ -200,7 +200,7 @@ int PoolProcess(pool **allpools, pool *current) {
   /**
    * Read the p->task->storage[0] dataset
    *
-   * This is the STORAGE_BOARD dataset, which means, that the buffer must have the size
+   * This is the STORAGE_TEXTURE dataset, which means, that the buffer must have the size
    * dims[0] = p->task->storage[0].layout.dims[0] * p->board->layout.dims[0]
    * dims[1] = p->task->storage[0].layout.dims[1] * p->board->layout.dims[1]
    */
@@ -209,7 +209,7 @@ int PoolProcess(pool **allpools, pool *current) {
 
   MGetDims(current->task, TSET0, dims);
 
-  Message(MESSAGE_OUTPUT, "\nDouble dataset of STORAGE_BOARD\n");
+  Message(MESSAGE_OUTPUT, "\nDouble dataset of STORAGE_TEXTURE\n");
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       Message(MESSAGE_OUTPUT, "%5.2f ", dbuff[i][j][0]);
@@ -222,7 +222,7 @@ int PoolProcess(pool **allpools, pool *current) {
   /**
    * Read the p->task->storage[1] dataset
    *
-   * This is the STORAGE_BOARD dataset, which means, that the buffer must have the size
+   * This is the STORAGE_TEXTURE dataset, which means, that the buffer must have the size
    *.dims[0] = p->task->storage[1].layout.dims[0] * p->board->layout.dims[0]
    *.dims[1] = p->task->storage[1].layout.dims[1] * p->board->layout.dims[1]
    */
@@ -231,7 +231,7 @@ int PoolProcess(pool **allpools, pool *current) {
 
   MGetDims(current->task, TSET1, dims);
 
-  Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_BOARD\n");
+  Message(MESSAGE_OUTPUT, "\nInteger dataset of STORAGE_TEXTURE\n");
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       Message(MESSAGE_OUTPUT, "%2d ", cbuff[i][j][0]);

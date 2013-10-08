@@ -73,7 +73,7 @@ int Storage(pool *p) {
       .dims[2] = 1,
       .sync = 1,
       .use_hdf = 1,
-      .storage_type = STORAGE_BOARD,
+      .storage_type = STORAGE_TEXTURE,
       .datatype = H5T_NATIVE_DOUBLE
     };
   }

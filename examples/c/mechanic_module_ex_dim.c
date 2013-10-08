@@ -102,7 +102,7 @@ int Storage(pool *p) {
   };
 
   /**
-   * 3D double dataset of type STORAGE_BOARD
+   * 3D double dataset of type STORAGE_TEXTURE
    */
   p->task->storage[0].layout = (schema) {
     .name = TSET0,
@@ -113,11 +113,11 @@ int Storage(pool *p) {
     .datatype = H5T_NATIVE_DOUBLE,
     .sync = 1,
     .use_hdf = 1,
-    .storage_type = STORAGE_BOARD,
+    .storage_type = STORAGE_TEXTURE,
   };
 
   /**
-   * 2D integer dataset of type STORAGE_BOARD
+   * 2D integer dataset of type STORAGE_TEXTURE
    */
   p->task->storage[1].layout = (schema) {
     .name = TSET1,
@@ -128,7 +128,7 @@ int Storage(pool *p) {
     .datatype = H5T_NATIVE_INT,
     .sync = 1,
     .use_hdf = 1,
-    .storage_type = STORAGE_BOARD,
+    .storage_type = STORAGE_TEXTURE,
   };
 
   /**
@@ -176,7 +176,7 @@ int Storage(pool *p) {
   };
 
   /**
-   * 4D double dataset of type STORAGE_BOARD
+   * 4D double dataset of type STORAGE_TEXTURE
    */
   p->task->storage[5].layout = (schema) {
     .name = TSET5,
@@ -188,7 +188,7 @@ int Storage(pool *p) {
     .datatype = H5T_NATIVE_DOUBLE,
     .sync = 1,
     .use_hdf = 1,
-    .storage_type = STORAGE_BOARD,
+    .storage_type = STORAGE_TEXTURE,
   };
 
   return SUCCESS;
@@ -317,7 +317,7 @@ int PoolProcess(pool **allpools, pool *current) {
   }
 
   /* Read whole dataset from the pool->task->storage[0] */
-  Message(MESSAGE_OUTPUT, "\n3D Double dataset of STORAGE_BOARD (XY slice DIM2-1)\n\n");
+  Message(MESSAGE_OUTPUT, "\n3D Double dataset of STORAGE_TEXTURE (XY slice DIM2-1)\n\n");
 
   MAllocate3(current->task, TSET0, data, double);
   
@@ -342,7 +342,7 @@ int PoolProcess(pool **allpools, pool *current) {
     printf("\n");
   }
 
-  Message(MESSAGE_OUTPUT, "\n2D Integer dataset of STORAGE_BOARD (XY only)\n\n");
+  Message(MESSAGE_OUTPUT, "\n2D Integer dataset of STORAGE_TEXTURE (XY only)\n\n");
 
   MGetDims(current->task, TSET1, dims);
   MAllocate3(current->task, TSET1, idata, int);
@@ -409,7 +409,7 @@ int TaskProcess(pool *p, task *t) {
    * Allocate and fill the 3D double-type data buffer for t->storage[0]
    * (see p->task->storage[0].layout in Storage())
    * 
-   * Since this is STORAGE_BOARD-type storage, the data will be stored in one 
+   * Since this is STORAGE_TEXTURE-type storage, the data will be stored in one 
    * dataset with offsets calculated automatically. Each task will return dims-size
    * datablock.
    */
@@ -429,7 +429,7 @@ int TaskProcess(pool *p, task *t) {
    * Allocate and fill the 3D (2D and 1) integer-type data for t->storage[1]
    * (see p->task->storage[1].layout in Storage())
    *
-   * This is STORAGE_BOARD-type as well.
+   * This is STORAGE_TEXTURE-type as well.
    */
   MGetDims(t, TSET1, dims);
   MAllocate3(t, TSET1, bdata, int);
@@ -486,7 +486,7 @@ int TaskProcess(pool *p, task *t) {
 
   /**
    * Now, here is the real fun
-   * We would like to return 4D double dataset of STORAGE_BOARD for the 3D TASK BOARD
+   * We would like to return 4D double dataset of STORAGE_TEXTURE for the 3D TASK BOARD
    *
    * This is real example of what scientific things Mechanic can do
    */

@@ -135,7 +135,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
     if (p->task->storage[j].layout.storage_type == STORAGE_PM3D ||
         p->task->storage[j].layout.storage_type == STORAGE_LIST ||
-        p->task->storage[j].layout.storage_type == STORAGE_BOARD) {
+        p->task->storage[j].layout.storage_type == STORAGE_TEXTURE) {
 
       for (i = 0; i < c->size; i++) {
 
@@ -196,8 +196,8 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             z_offset = 0;
           }
           
-          // Prepare STORAGE_BOARD
-          if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
+          // Prepare STORAGE_TEXTURE
+          if (t->storage[j].layout.storage_type == STORAGE_TEXTURE) {
             offsets[0] = t->location[0] * t->storage[j].layout.dims[0];
             offsets[1] = t->location[1] * t->storage[j].layout.dims[1];
             offsets[2] = t->location[2] * t->storage[j].layout.dims[2];
@@ -217,7 +217,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           CheckStatus(mstat);
 
           // Commit data to the pool
-          if (t->storage[j].layout.storage_type == STORAGE_BOARD) {
+          if (t->storage[j].layout.storage_type == STORAGE_TEXTURE) {
 
             elements = 1;
             for (k = 2; k < t->storage[j].layout.rank; k++) {

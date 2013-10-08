@@ -36,7 +36,7 @@ int Init(init *i) {
  * Implements Storage()
  */
 int Storage(pool *p) {
-  // STORAGE_BOARD example
+  // STORAGE_TEXTURE example
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = TASK_BOARD_RANK,
@@ -45,7 +45,7 @@ int Storage(pool *p) {
     .dims[2] = MAX_SNAPSHOTS,
     .sync = 1,
     .use_hdf = 1,
-    .storage_type = STORAGE_BOARD,
+    .storage_type = STORAGE_TEXTURE,
     .datatype = H5T_NATIVE_DOUBLE
   };
 

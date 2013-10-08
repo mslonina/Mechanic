@@ -102,7 +102,7 @@ int Restart(module *m, pool **pools, unsigned int *pool_counter) {
         if (size > 0 && pools[i]->task->storage[j].layout.use_hdf) {
           if (pools[i]->task->storage[j].layout.storage_type == STORAGE_PM3D
             || pools[i]->task->storage[j].layout.storage_type == STORAGE_LIST
-            || pools[i]->task->storage[j].layout.storage_type == STORAGE_BOARD) {
+            || pools[i]->task->storage[j].layout.storage_type == STORAGE_TEXTURE) {
             ReadDataset(tasks, 1, &(pools[i]->task->storage[j]), pools[i]->pool_size);
           }
         }
