@@ -527,6 +527,7 @@ computed
 - `--partial-y-index` -- the y-index of the partial simulation
 - `--partial-z-index` -- the z-index of the partial simulation
 - `--task-checkpoints` -- specify number of task checkpoints to use (for modules)
+- `--reset-checkpoints` -- reset the task checkpoints (during the restart mode)
 - `--print-defaults` -- print the default options
 - `--help`, `-?` -- show help message
 - `--usage` -- show short help message

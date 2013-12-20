@@ -102,6 +102,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   clock_t time_in, time_out;
   double cpu_time;
   int reversed = 0;
+  int reset_checkpoints = 0;
   unsigned int i = 0, j = 0;
   unsigned int x = 0, y = 0, z = 0, k = 0;
 
@@ -129,7 +130,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       for (y = 0; y < p->board->layout.dims[1]; y++) {
         for (z = 0; z < p->board->layout.dims[2]; z++) {
           for (k = 0; k < p->board->layout.dims[3]; k++) {
-            board_buffer[x][y][z][k] = 0.0;
+            board_buffer[x][y][z][k] = 0;
           }
         }
       }
@@ -141,6 +142,8 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       ReadData(p->board, &board_buffer[0][0][0][0]);
     }
 
+    MReadOption(p, "reset-checkpoints", &reset_checkpoints);
+    
     // Initialize the task board
     for (x = 0; x < p->board->layout.dims[0]; x++) {
       for (y = 0; y < p->board->layout.dims[1]; y++) {
@@ -150,6 +153,9 @@ int PoolPrepare(module *m, pool **all, pool *p) {
           if (m->mode == RESTART_MODE) {
             if (board_buffer[x][y][z][0] == TASK_IN_USE) {
               board_buffer[x][y][z][0] = TASK_TO_BE_RESTARTED;
+              if (reset_checkpoints == 1) {
+                board_buffer[x][y][z][2] = 0;
+              }
             }
             if (reversed) {
               if (board_buffer[x][y][z][0] == TASK_AVAILABLE) {

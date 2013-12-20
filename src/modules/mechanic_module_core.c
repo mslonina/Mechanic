@@ -261,7 +261,11 @@ int Setup(setup *s) {
     .space="core", .name="usage", .shortName='\0', .value="0", .type=C_VAL,
     .description="Display brief message"
   };
-  s->options[46] = (options) OPTIONS_END;
+  s->options[46] = (options) {
+    .space="core", .name="reset-checkpoints", .shortName='\0', .value="0", .type=C_VAL,
+    .description="Reset the task checkpoints (during the restart mode)"
+  };
+  s->options[47] = (options) OPTIONS_END;
 
   return SUCCESS;
 }
