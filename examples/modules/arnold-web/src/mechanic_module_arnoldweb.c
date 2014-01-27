@@ -104,18 +104,7 @@
  * h5py.
  */
 #include "mechanic.h"
-#include <math.h>
-
-#define MAX_SETS 10
-#define MAX_SNAPSHOTS 10
-#define CRITICAL_MEGNO 5.0
-
-double smegno2(double *state, double step, unsigned long int *loop_step, 
-  double tstart, double tend, double eps, double *err);
-double smegno3(double *state, double step, unsigned long int *loop_step,
-  double tstart, double tend, double eps, double *err);
-double smegno4(double *state, double step, unsigned long int *loop_step,
-  double tstart, double tend, double eps, double *err);
+#include "mechanic_module_arnoldweb.h"
 
 /* Implements Init() */
 int Init(init *i) {
@@ -218,7 +207,7 @@ int Storage(pool *p) {
     .dims[2] = MAX_SNAPSHOTS,
     .dims[3] = 2,
     .use_hdf = HDF_NORMAL_STORAGE, // file storage
-    .storage_type = STORAGE_BOARD, // texture storage mode
+    .storage_type = STORAGE_TEXTURE, // texture storage mode
     .datatype = H5T_NATIVE_DOUBLE
   };
 
@@ -546,9 +535,10 @@ void vinteraction(double *y,  double *a,
   dif3 = dif2/dif;
 
   // right hand sides
+  I3 = 1.0;
   a[0] =  I1;
   a[1] =  I2;
-  a[2] =  1.0;
+  a[2] =  I3;
   a[3] = -sf1*dif2;
   a[4] = -sf2*dif2;
   a[5] = -sf3*dif2;

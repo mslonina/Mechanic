@@ -119,3 +119,11 @@ The RNGS library is built by default, to turn it off use:
 
     CC=mpicc cmake .. -DBUILD_VENDOR_RNGS:BOOL=OFF
 
+Full featured modules
+---------------------
+
+The package ships with sample full featured modules (examples/modules). To build them, use
+the following:
+    
+    CC=mpicc cmake .. -DBUILD_MODULES:BOOL=ON
+

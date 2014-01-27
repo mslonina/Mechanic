@@ -195,6 +195,10 @@ if (BUILD_VENDOR_RNGS)
   add_subdirectory(src/vendor/rngs)
 endif (BUILD_VENDOR_RNGS)
 
+if (BUILD_MODULES)
+  add_subdirectory(examples/modules)
+endif (BUILD_MODULES)
+
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mechanic")
 SET (CPACK_PACKAGE_VENDOR "Celestial Mechanics Group (TCFA/NCU)")
 SET (CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md")
