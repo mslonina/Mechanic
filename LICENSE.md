@@ -9,9 +9,11 @@ tools for improving scalability and functionality of the code. MECHANIC was
 released in belief it will be useful. If you are going to use this code, or
 its parts, please consider referring to the Authors by the following paper:
 
-Gozdziewski K., Slonina M., Migaszewski C., Rozenkiewicz A, MNRAS 2012
+Slonina M., Gozdziewski K., Migaszewski C.
+"Mechanic: the MPI/HDF code framework for dynamical astronomy"
+New Astronomy 2014
+http://arxiv.org/abs/1401.6344
 
-http://git.ca.umk.pl
 http://github.com/mslonina/Mechanic
 
 Redistribution and use in source and binary forms,

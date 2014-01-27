@@ -24,6 +24,14 @@ modules and is freely available at [the project page](http://git.ca.umk.pl).
 - [Short introduction](Overview.md)
 - [User and developer guide](examples/UserGuide.md)
 
+Ifyou are going to use this code, or its parts, please consider referring to the Authors
+by the following paper:
+
+Slonina M., Gozdziewski K., Migaszewski C.
+"Mechanic: the MPI/HDF code framework for dynamical astronomy"
+New Astronomy 2014
+http://arxiv.org/abs/1401.6344
+
 _This project is supported by the Polish Ministry of Science and Higher Education through
 the grant N/N203/402739. This work is conducted within the POWIEW project of the European
 Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08._
