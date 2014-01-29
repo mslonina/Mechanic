@@ -514,9 +514,9 @@ int PoolProcessData(module *m, pool *p, setup *s) {
           }
 
           // Remove the temporary dataset
-          if (p->task->storage[i].layout.use_hdf == HDF_TEMP_STORAGE) {
+          if (p->task->storage[j].layout.use_hdf == HDF_TEMP_STORAGE) {
             if (p->state == POOL_PROCESSED) {
-              H5Ldelete(h5task, p->task->storage[i].layout.name, H5P_DEFAULT);
+              H5Ldelete(h5task, p->task->storage[j].layout.name, H5P_DEFAULT);
             }
           }
         }
