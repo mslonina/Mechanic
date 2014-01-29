@@ -32,7 +32,7 @@ pool* PoolLoad(module *m, unsigned int pid) {
     p->storage[i].compound_fields = 0;
     p->storage[i].attr_banks = 0;
     
-    p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+    p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
     if (!p->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
@@ -67,7 +67,7 @@ pool* PoolLoad(module *m, unsigned int pid) {
   p->board->memory = NULL;
 
   /* Task board attributes */
-  p->board->attr = calloc(m->layer.init.options, sizeof(storage));
+  p->board->attr = calloc(m->layer.init.options, sizeof(attr));
   if (!p->board->attr) Error(CORE_ERR_MEM);
   for (j = 0; j < m->layer.init.options; j++) {
     p->board->attr[j].layout = (schema) ATTR_STORAGE_END;
@@ -89,7 +89,7 @@ pool* PoolLoad(module *m, unsigned int pid) {
     p->task->storage[i].compound_fields = 0;
     p->task->storage[i].attr_banks = 0;
 
-    p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+    p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
     if (!p->task->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->task->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
@@ -545,9 +545,9 @@ int PoolProcessData(module *m, pool *p, setup *s) {
           }
 
           // Remove the temporary dataset
-          if (p->task->storage[i].layout.use_hdf == HDF_TEMP_STORAGE) {
+          if (p->task->storage[j].layout.use_hdf == HDF_TEMP_STORAGE) {
             if (p->state == POOL_PROCESSED) {
-              H5Ldelete(h5task, p->task->storage[i].layout.name, H5P_DEFAULT);
+              H5Ldelete(h5task, p->task->storage[j].layout.name, H5P_DEFAULT);
             }
           }
         }
