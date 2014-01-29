@@ -49,10 +49,14 @@ typedef struct {
   size_t datatype_size; /** @internal The size of the datatype */
   unsigned int elements; /**< @internal Number of data elements in the memory block */
   unsigned int storage_elements; /**< @internal Number of data elements in the storage block */
-  size_t compound_size;
-  size_t field_offset;
+  size_t compound_size; /**< @internal Compound datatype size */
+  size_t field_offset; /**< Compound datatype field offset */
 } schema;
 
+/**
+ * @struct field
+ * Defines the compound datatype field schema
+ */
 typedef struct {
   schema layout;
 } field;
@@ -74,9 +78,9 @@ typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   unsigned char *memory; /**< The memory block */
   attr *attr; /**< The dataset attributes */
-  field *field;
+  field *field; /**< Compound datatype fields */
   unsigned short attr_banks; /**< Number of attribute banks in use */
-  unsigned int compound_fields;
+  unsigned int compound_fields; /**< Number of compound datatype fields in use */
 } storage;
 
 /**

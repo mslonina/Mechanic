@@ -651,6 +651,14 @@ int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size) {
   return mstat;
 }
 
+/**
+ * @brief
+ * Commit the compound datatype to the memory
+ *
+ * @param s The storage structure
+ *
+ * @return The committed datatype on success, CORE_ERR_HDF on failure
+ */
 hid_t CommitDatatype(storage *s) {
   hid_t h5datatype, type;
   hsize_t adims[MAX_RANK];
@@ -680,6 +688,14 @@ hid_t CommitDatatype(storage *s) {
   return h5datatype;
 }
 
+/**
+ * @brief
+ * Commit the compound datatype to the file
+ *
+ * @param s The storage structure
+ *
+ * @return The committed datatype on success, CORE_ERR_HDF on failure
+ */
 hid_t CommitFileDatatype(storage *s) {
   hid_t h5datatype, type;
   hsize_t adims[MAX_RANK];
@@ -709,10 +725,24 @@ hid_t CommitFileDatatype(storage *s) {
   return h5datatype;
 }
 
+/**
+ * @brief Helper for GetPadding(). Calculates proper padding for the datatype
+ *
+ * @param type The datatype size
+ *
+ * @return Calculated padding
+ */
 size_t CalculatePadding(size_t type) {
   return sizeof(double) - type;
 }
 
+/**
+ * @brief Get the proper padding for a datatype
+ *
+ * @param datatype The HDF5 datatype
+ *
+ * @return Calculated padding
+ */
 size_t GetPadding(hid_t datatype) {
   size_t padding = 0;
 
@@ -767,28 +797,3 @@ size_t GetPadding(hid_t datatype) {
   return padding;
 }
 
-field* FieldLoad() {
-  field* field = NULL;
-  unsigned int i = 0;
-
-  field = calloc(1, sizeof(field));
-  if (!field) Error(CORE_ERR_MEM);
-
-  field->layout.name = NULL;
-  field->layout.rank = 0;
-
-  for (i = 0; i < MAX_RANK; i++) {
-    field->layout.dims[i] = 0;
-  }
-  
-  field->layout.datatype = H5S_NO_CLASS;
-  field->layout.mpi_datatype = MPI_CHAR;
-  field->layout.size = 0;
-  field->layout.storage_size = 0;
-  field->layout.datatype_size = 0;
-  field->layout.elements = 0;
-  field->layout.storage_elements = 0;
-  field->layout.field_offset = 0;
-
-  return field;
-}

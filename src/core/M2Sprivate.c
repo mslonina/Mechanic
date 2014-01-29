@@ -399,12 +399,7 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
           // Calculate the final size
           storage_size += s[i].field[j].layout.storage_size;
           datatype_size += s[i].field[j].layout.size;
-
-          //printf("field name: %s, datatype: %d\n", s[i].field[j].name,
-          //    s[i].field[j].datatype);
         }
-//        printf("CMPD storage_elements = %d\n", s[i].layout.storage_elements);
-//        printf("CMPD datatype_size = %zu, storage_size = %zu\n", datatype_size, storage_size);
       }
     } else {
       storage_size = s[i].layout.datatype_size;
@@ -415,13 +410,10 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
     s[i].layout.storage_size = s[i].layout.storage_elements * storage_size;
     s[i].layout.size = s[i].layout.elements * datatype_size;
 
-//    printf("storage_size = %zu, size = %zu\n", s[i].layout.storage_size, s[i].layout.size);
-
     /* Check attributes */
     for (j = 0; j < s[i].attr_banks; j++) {
       mstat = CheckAttributeLayout(&s[i].attr[j]);
     }
-
   }
 
   return mstat;
@@ -652,6 +644,14 @@ unsigned int GetBanks(unsigned int allocated_banks, storage *s) {
   return banks_in_use;
 }
 
+/**
+ * @brief Get the number of used compound fields
+ *
+ * @param allocate_fields Number of allocated compound fields
+ * @param field The field structure
+ *
+ * @return The number of compound fields in use, 0 otherwise
+ */
 unsigned int GetFields(unsigned int allocated_fields, field *f) {
   unsigned int fields_in_use = 0;
   unsigned int i = 0;

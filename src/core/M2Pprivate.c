@@ -44,19 +44,6 @@ pool* PoolLoad(module *m, unsigned int pid) {
     for (j = 0; j < m->layer.init.compound_fields; j++) {
       p->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
     }
-
-/*
-    for (j = 0; j < m->layer.init.compound_fields; j++) {
-      printf("field.name = %s, .rank = %d, .dims = (%d, %d, %d, %d), datatype = %d\n",
-          p->storage[i].layout.fields[j].name,
-          p->storage[i].layout.fields[j].rank,
-          p->storage[i].layout.fields[j].dims[0],
-          p->storage[i].layout.fields[j].dims[1],
-          p->storage[i].layout.fields[j].dims[2],
-          p->storage[i].layout.fields[j].dims[3],
-          p->storage[i].layout.fields[j].datatype
-          );
-    }*/
   }
 
   /* Allocate task board pointer */
