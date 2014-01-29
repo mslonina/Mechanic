@@ -430,4 +430,6 @@ size_t GetPadding(hid_t datatype);
 hid_t CommitDatatype(storage *s);
 hid_t CommitFileDatatype(storage *s);
 
+fields_type* FieldLoad();
+
 #endif

@@ -766,3 +766,10 @@ size_t GetPadding(hid_t datatype) {
 
   return padding;
 }
+
+fields_type* FieldLoad() {
+  fields_type* field = NULL;
+
+  field = calloc(1, sizeof(fields_type));
+  return field;
+}

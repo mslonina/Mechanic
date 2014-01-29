@@ -63,17 +63,17 @@ int Storage(pool *p) {
     .compound_size = sizeof(sensor_t),
   };
 
-  p->storage[0].layout->fields[0] = 
+  p->storage[0].layout.fields[0] = 
     (fields_type) {
       .name = "id", .datatype = H5T_NATIVE_INT, 
       .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, id)
     };
 
-  p->storage[0].layout->fields[1] = 
+  p->storage[0].layout.fields[1] = 
     (fields_type) {.name = "temperature", .datatype = H5T_NATIVE_DOUBLE, 
       .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, temperature)};
 
-  p->storage[0].layout->fields[2] = 
+  p->storage[0].layout.fields[2] = 
     (fields_type) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
       .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, pressure)};
 
