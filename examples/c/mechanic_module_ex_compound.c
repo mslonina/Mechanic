@@ -59,27 +59,24 @@ int Storage(pool *p) {
     .sync = 1,
     .use_hdf = 1,
     .storage_type = STORAGE_GROUP,
-    .datatype = H5T_NATIVE_INT,
+    .datatype = H5T_COMPOUND,
     .compound_size = sizeof(sensor_t),
   };
 
-  p->storage[0].layout.fields[0] = 
-    (fields_type) {
-      .name = "id", .datatype = H5T_NATIVE_INT, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, id)
-    };
+  p->storage[0].field[0].layout = 
+    (schema) {.name = "id", .datatype = H5T_NATIVE_INT, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, id)};
 
-  p->storage[0].layout.fields[1] = 
-    (fields_type) {.name = "temperature", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, temperature)};
+  p->storage[0].field[1].layout = 
+    (schema) {.name = "temperature", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, temperature)};
 
-  p->storage[0].layout.fields[2] = 
-    (fields_type) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, pressure)};
+  p->storage[0].field[2].layout = 
+    (schema) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, pressure)};
 
-  return SUCCESS;
-  /*
-  *p->storage[1].layout = (schema) {
+  
+  p->storage[1].layout = (schema) {
     .name = "pool-particles",
     .rank = 2,
     .dims[0] = 5,
@@ -91,27 +88,27 @@ int Storage(pool *p) {
     .compound_size = sizeof(particle_t)
   };
 
-  p->storage[1].layout->fields[0] = 
-    (fields_type) {.name = "id", .datatype = H5T_NATIVE_LONG, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(particle_t, id)};
+  p->storage[1].field[0].layout = 
+    (schema) {.name = "id", .datatype = H5T_NATIVE_LONG, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(particle_t, id)};
 
-  p->storage[1].layout->fields[1] = 
-    (fields_type) {.name = "position", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {3}, .offset = HOFFSET(particle_t, position)};
+  p->storage[1].field[1].layout = 
+    (schema) {.name = "position", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {3}, .field_offset = HOFFSET(particle_t, position)};
 
-  p->storage[1].layout->fields[2] = 
-    (fields_type) {.name = "velocity", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {3}, .offset = HOFFSET(particle_t, velocity)};
+  p->storage[1].field[2].layout = 
+    (schema) {.name = "velocity", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {3}, .field_offset = HOFFSET(particle_t, velocity)};
  
-  p->storage[1].layout->fields[3] = 
-    (fields_type) {.name = "heat-map", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 3, .dims = {4,5,6}, .offset = HOFFSET(particle_t, heat_map)};
+  p->storage[1].field[3].layout = 
+    (schema) {.name = "heat-map", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 3, .dims = {4,5,6}, .field_offset = HOFFSET(particle_t, heat_map)};
  
-  p->storage[1].layout->fields[4] = 
-    (fields_type) {.name = "geo-data", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 3, .dims = {4,5,6}, .offset = HOFFSET(particle_t, geo_data)};
+  p->storage[1].field[4].layout = 
+    (schema) {.name = "geo-data", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 3, .dims = {4,5,6}, .field_offset = HOFFSET(particle_t, geo_data)};
  
-  *p->task->storage[0].layout = (schema) {
+  p->task->storage[0].layout = (schema) {
     .name = "sensors",
     .rank = 2,
     .dims[0] = 5,
@@ -123,19 +120,19 @@ int Storage(pool *p) {
     .compound_size = sizeof(sensor_t)
   };
   
-  p->task->storage[0].layout->fields[0] = 
-    (fields_type) {.name = "id", .datatype = H5T_NATIVE_INT, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, id)};
+  p->task->storage[0].field[0].layout = 
+    (schema) {.name = "id", .datatype = H5T_NATIVE_INT, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, id)};
 
-  p->task->storage[0].layout->fields[1] = 
-    (fields_type) {.name = "temperature", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, temperature)};
+  p->task->storage[0].field[1].layout = 
+    (schema) {.name = "temperature", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, temperature)};
 
-  p->task->storage[0].layout->fields[2] = 
-    (fields_type) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, pressure)};
+  p->task->storage[0].field[2].layout = 
+    (schema) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, pressure)};
  
-  *p->task->storage[1].layout = (schema) {
+  p->task->storage[1].layout = (schema) {
     .name = "sensors-board",
     .rank = TASK_BOARD_RANK,
     .dims[0] = 5,
@@ -148,19 +145,19 @@ int Storage(pool *p) {
     .compound_size = sizeof(sensor_t)
   };
   
-  p->task->storage[1].layout->fields[0] = 
-    (fields_type) {.name = "id", .datatype = H5T_NATIVE_INT, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, id)};
+  p->task->storage[1].field[0].layout = 
+    (schema) {.name = "id", .datatype = H5T_NATIVE_INT, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, id)};
 
-  p->task->storage[1].layout->fields[1] = 
-    (fields_type) {.name = "temperature", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, temperature)};
+  p->task->storage[1].field[1].layout = 
+    (schema) {.name = "temperature", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, temperature)};
 
-  p->task->storage[1].layout->fields[2] = 
-    (fields_type) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(sensor_t, pressure)};
+  p->task->storage[1].field[2].layout = 
+    (schema) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, pressure)};
 
-  *p->task->storage[2].layout = (schema) {
+  p->task->storage[2].layout = (schema) {
     .name = "particles",
     .rank = TASK_BOARD_RANK,
     .dims[0] = 1,
@@ -173,27 +170,26 @@ int Storage(pool *p) {
     .compound_size = sizeof(particle_t)
   };
 
-  p->task->storage[2].layout->fields[0] = 
-    (fields_type) {.name = "id", .datatype = H5T_NATIVE_LONG, 
-      .rank = 1, .dims = {1}, .offset = HOFFSET(particle_t, id)};
+  p->task->storage[2].field[0].layout = 
+    (schema) {.name = "id", .datatype = H5T_NATIVE_LONG, 
+      .rank = 1, .dims = {1}, .field_offset = HOFFSET(particle_t, id)};
 
-  p->task->storage[2].layout->fields[1] = 
-    (fields_type) {.name = "position", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {3}, .offset = HOFFSET(particle_t, position)};
+  p->task->storage[2].field[1].layout = 
+    (schema) {.name = "position", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {3}, .field_offset = HOFFSET(particle_t, position)};
 
-  p->task->storage[2].layout->fields[2] = 
-    (fields_type) {.name = "velocity", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 1, .dims = {3}, .offset = HOFFSET(particle_t, velocity)};
+  p->task->storage[2].field[2].layout = 
+    (schema) {.name = "velocity", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 1, .dims = {3}, .field_offset = HOFFSET(particle_t, velocity)};
  
-  p->task->storage[2].layout->fields[3] = 
-    (fields_type) {.name = "heat-map", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 3, .dims = {4,5,6}, .offset = HOFFSET(particle_t, heat_map)};
+  p->task->storage[2].field[3].layout = 
+    (schema) {.name = "heat-map", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 3, .dims = {4,5,6}, .field_offset = HOFFSET(particle_t, heat_map)};
  
-  p->task->storage[2].layout->fields[4] = 
-    (fields_type) {.name = "geo-data", .datatype = H5T_NATIVE_DOUBLE, 
-      .rank = 3, .dims = {4,5,6}, .offset = HOFFSET(particle_t, geo_data)};
- */
-
+  p->task->storage[2].field[4].layout = 
+    (schema) {.name = "geo-data", .datatype = H5T_NATIVE_DOUBLE, 
+      .rank = 3, .dims = {4,5,6}, .field_offset = HOFFSET(particle_t, geo_data)};
+ 
   return SUCCESS;
 }
 
@@ -209,7 +205,6 @@ int PoolPrepare(pool **all, pool *p) {
   particle_t particles[5][5];
   particle_t read_particles[5][5];
 
-  return SUCCESS;
   MGetDims(p, "pool-sensors", dims);
 
   for (i = 0; i < dims[0]; i++) {
@@ -229,7 +224,7 @@ int PoolPrepare(pool **all, pool *p) {
   MWriteData(p, "pool-sensors", &sensors[0][0]);
   MReadData(p, "pool-sensors", &read_sensors[0][0]);
 
-  /*for (i = 0; i < dims[0]; i++) {
+  for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
       printf("sensor[%02d][%02d] id %04d = (%.5f, %.5f)\n", 
           i, j,
@@ -237,7 +232,7 @@ int PoolPrepare(pool **all, pool *p) {
           read_sensors[i][j].temperature,
           read_sensors[i][j].pressure);
     }
-  }*/
+  }
 
   MWriteData(p, "pool-particles", &particles[0][0]);
 
@@ -255,7 +250,6 @@ int PoolProcess(pool **all, pool *p) {
  * Implements TaskProcess()
  */
 int TaskProcess(pool *p, task *t) {
-  return TASK_FINALIZE;
   sensor_t sensors[5][5], pool_sensors[5][5];
   sensor_t sensors_b[5][5][1];
   particle_t particle[1][1][1];

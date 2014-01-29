@@ -19,6 +19,6 @@ int CheckAttributeLayout(attr *a);
 int CreateDataset(hid_t location, storage *s, module *m, pool *p);
 
 unsigned int GetBanks(unsigned int allocated_banks, storage *s);
-unsigned int GetFields(unsigned int allocated_fields, storage *s);
+unsigned int GetFields(unsigned int allocated_fields, field *f);
 
 #endif

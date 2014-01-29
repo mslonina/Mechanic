@@ -41,6 +41,10 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     t->storage[i].layout = (schema) STORAGE_END;
     t->storage[i].memory = NULL;
+
+    t->storage[i].compound_fields = 0;
+    t->storage[i].attr_banks = 0;
+
     t->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
     if (!t->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset;  j++) {
@@ -48,11 +52,11 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
       t->storage[i].attr[j].memory = NULL;
     }
     
-    /*t->storage[i].layout.fields = calloc(m->layer.init.compound_fields, sizeof(fields_type));
-    if (!t->storage[i].layout.fields) Error(CORE_ERR_MEM);
+    t->storage[i].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    if (!t->storage[i].field) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.compound_fields; j++) {
-      t->storage[i].layout.fields[j] = (fields_type) COMPOUND_END;
-    }*/
+      t->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
+    }
   }
 
   /* Initialize the task */
@@ -95,38 +99,38 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
      * Compound fields
      */
     for (j = 0; j < t->storage[i].compound_fields; j++) {
-      if (p->task->storage[i].layout.fields[j].datatype > 0) {
-        t->storage[i].layout.fields[j].datatype =
-          p->task->storage[i].layout.fields[j].datatype;
-        t->storage[i].layout.fields[j].mpi_datatype =
-          p->task->storage[i].layout.fields[j].mpi_datatype;
-        t->storage[i].layout.fields[j].size =
-          p->task->storage[i].layout.fields[j].size;
-        t->storage[i].layout.fields[j].storage_size =
-          p->task->storage[i].layout.fields[j].storage_size;
-        t->storage[i].layout.fields[j].datatype_size =
-          p->task->storage[i].layout.fields[j].datatype_size;
-        t->storage[i].layout.fields[j].elements =
-          p->task->storage[i].layout.fields[j].elements;
-        t->storage[i].layout.fields[j].storage_elements =
-          p->task->storage[i].layout.fields[j].elements;
-        t->storage[i].layout.fields[j].offset =
-          p->task->storage[i].layout.fields[j].offset;
-        t->storage[i].layout.fields[j].rank =
-          p->task->storage[i].layout.fields[j].rank;
+      if (p->task->storage[i].field[j].layout.datatype > 0) {
+        t->storage[i].field[j].layout.datatype =
+          p->task->storage[i].field[j].layout.datatype;
+        t->storage[i].field[j].layout.mpi_datatype =
+          p->task->storage[i].field[j].layout.mpi_datatype;
+        t->storage[i].field[j].layout.size =
+          p->task->storage[i].field[j].layout.size;
+        t->storage[i].field[j].layout.storage_size =
+          p->task->storage[i].field[j].layout.storage_size;
+        t->storage[i].field[j].layout.datatype_size =
+          p->task->storage[i].field[j].layout.datatype_size;
+        t->storage[i].field[j].layout.elements =
+          p->task->storage[i].field[j].layout.elements;
+        t->storage[i].field[j].layout.storage_elements =
+          p->task->storage[i].field[j].layout.elements;
+        t->storage[i].field[j].layout.field_offset =
+          p->task->storage[i].field[j].layout.field_offset;
+        t->storage[i].field[j].layout.rank =
+          p->task->storage[i].field[j].layout.rank;
 
         for (k = 0; k < MAX_RANK; k++) {
-          t->storage[i].layout.fields[j].dims[k] = 
-            p->task->storage[i].layout.fields[j].dims[k];
+          t->storage[i].field[j].layout.dims[k] = 
+            p->task->storage[i].field[j].layout.dims[k];
         }
 
         // field name
-        len = strlen(p->task->storage[i].layout.fields[j].name);
-        t->storage[i].layout.fields[j].name = calloc(len+1, sizeof(char*));
-        if (!t->storage[i].layout.fields[j].name) Error(CORE_ERR_MEM);
+        len = strlen(p->task->storage[i].field[j].layout.name);
+        t->storage[i].field[j].layout.name = calloc(len+1, sizeof(char*));
+        if (!t->storage[i].field[j].layout.name) Error(CORE_ERR_MEM);
         
-        strncpy(t->storage[i].layout.fields[j].name, p->task->storage[i].layout.fields[j].name, len);
-        t->storage[i].layout.fields[j].name[len] = CONFIG_NULL;
+        strncpy(t->storage[i].field[j].layout.name, p->task->storage[i].field[j].layout.name, len);
+        t->storage[i].field[j].layout.name[len] = CONFIG_NULL;
       }
     }
     
@@ -426,13 +430,20 @@ void TaskFinalize(module *m, pool *p, task *t) {
   if (t) {
     for (i = 0; i < p->task_banks; i++) {
       if (t->storage[i].layout.name) free(t->storage[i].layout.name);
-      for (j = 0; j < t->storage[i].attr_banks; j++) {
-        if (t->storage[i].attr[j].layout.name) free(t->storage[i].attr[j].layout.name);
+      
+      if (t->storage[i].attr) {
+        for (j = 0; j < t->storage[i].attr_banks; j++) {
+          if (t->storage[i].attr[j].layout.name) free(t->storage[i].attr[j].layout.name);
+        }
+        free(t->storage[i].attr);
       }
-//      for (j = 0; j < t->storage[i].compound_fields; j++) {
-//        if (t->storage[i].layout.fields[j].name) free(t->storage[i].layout.fields[j].name);
-//      }
-//      if (t->storage[i].layout.fields) free(t->storage[i].layout.fields);
+
+      if (t->storage[i].field) {
+        for (j = 0; j < t->storage[i].compound_fields; j++) {
+          if (t->storage[i].field[j].layout.name) free(t->storage[i].field[j].layout.name);
+        }
+        free(t->storage[i].field);
+      }
     }
 
     FreeMemoryLayout(p->task_banks, t->storage);

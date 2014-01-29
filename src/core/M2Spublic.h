@@ -25,27 +25,8 @@
 #define HDF_TEMP_STORAGE 2 /**< Only temporary HDF5 file storage */
 
 #define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
+#define FIELD_STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
 #define ATTR_STORAGE_END {.name = NULL, .dataspace = H5S_NO_CLASS, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
-#define COMPOUND_END {.name = NULL, .datatype = -1, .elements = 0, .offset = 0}
-#define COMPOUND_TEST {.name = "Ala", .datatype = H5T_NATIVE_INT, .elements = 0, .rank = 4, .dims = {1,2,3,5}, .offset = 0}
-
-/**
- * @struct fields
- * Defines the memory/storage for the compound datatypes
- */
-typedef struct {
-  char *name;
-  unsigned short rank; /**< The rank of the dataset */
-  unsigned int dims[MAX_RANK]; /**< The dimensions of the memory dataset */
-  hid_t datatype;
-  MPI_Datatype mpi_datatype; /**< @internal The MPI datatype of the dataset */
-  size_t size; /**< @internal The size of the memory block */
-  size_t storage_size; /**< @internal The size of the storage block */
-  size_t datatype_size; /** @internal The size of the datatype */
-  unsigned int elements;
-  unsigned int storage_elements; /**< @internal Number of data elements in the storage block */
-  size_t offset;
-} fields_type;
 
 /**
  * @struct schema
@@ -69,8 +50,12 @@ typedef struct {
   unsigned int elements; /**< @internal Number of data elements in the memory block */
   unsigned int storage_elements; /**< @internal Number of data elements in the storage block */
   size_t compound_size;
-  fields_type fields[64];
+  size_t field_offset;
 } schema;
+
+typedef struct {
+  schema layout;
+} field;
 
 /**
  * @struct attr
@@ -89,6 +74,7 @@ typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   unsigned char *memory; /**< The memory block */
   attr *attr; /**< The dataset attributes */
+  field *field;
   unsigned short attr_banks; /**< Number of attribute banks in use */
   unsigned int compound_fields;
 } storage;
@@ -429,7 +415,5 @@ size_t CalculatePadding(size_t type);
 size_t GetPadding(hid_t datatype);
 hid_t CommitDatatype(storage *s);
 hid_t CommitFileDatatype(storage *s);
-
-fields_type* FieldLoad();
 
 #endif

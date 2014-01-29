@@ -138,9 +138,10 @@ int Storage(module *m, pool *p) {
     p->storage[i].layout.storage_type = STORAGE_GROUP;
   }
 
+
   /* Compound fields, if any */
   for (i = 0; i < p->pool_banks; i++) {
-    p->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, &p->storage[i]);
+    p->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, p->storage[i].field);
   }
   
   CheckLayout(m, p->pool_banks, p->storage);
@@ -168,7 +169,7 @@ int Storage(module *m, pool *p) {
 
   /* Compound fields, if any */
   for (i = 0; i < p->task_banks; i++) {
-    p->task->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, &p->task->storage[i]);
+    p->task->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, p->task->storage[i].field);
   }
   
   CheckLayout(m, p->task_banks, p->task->storage);
@@ -375,32 +376,32 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
     /* Calculate storage for H5T_COMPOUND */
     if (s[i].layout.datatype == H5T_COMPOUND) {
       for (j = 0; j < s[i].compound_fields; j++) {
-        if (s[i].layout.fields[j].datatype > 0) {
-          s[i].layout.fields[j].mpi_datatype = 
-            GetMpiDatatype(s[i].layout.fields[j].datatype);
-          s[i].layout.fields[j].datatype_size =
-            H5Tget_size(s[i].layout.fields[j].datatype);
+        if (s[i].field[j].layout.datatype > 0) {
+          s[i].field[j].layout.mpi_datatype = 
+            GetMpiDatatype(s[i].field[j].layout.datatype);
+          s[i].field[j].layout.datatype_size =
+            H5Tget_size(s[i].field[j].layout.datatype);
 
-          s[i].layout.fields[j].elements = 1;
-          for (k = 0; k < s[i].layout.fields[j].rank; k++) {
-            s[i].layout.fields[j].elements *= s[i].layout.fields[j].dims[k];
+          s[i].field[j].layout.elements = 1;
+          for (k = 0; k < s[i].field[j].layout.rank; k++) {
+            s[i].field[j].layout.elements *= s[i].field[j].layout.dims[k];
           }
-          s[i].layout.fields[j].storage_elements = 
-            s[i].layout.fields[j].elements;
+          s[i].field[j].layout.storage_elements = 
+            s[i].field[j].layout.elements;
 
           // Calculate padding
-          padding = GetPadding(s[i].layout.fields[j].datatype);
-          s[i].layout.fields[j].storage_size = 
-            s[i].layout.fields[j].storage_elements * (s[i].layout.fields[j].datatype_size + padding);
-          s[i].layout.fields[j].size = 
-            s[i].layout.fields[j].elements * (s[i].layout.fields[j].datatype_size + padding);
+          padding = GetPadding(s[i].field[j].layout.datatype);
+          s[i].field[j].layout.storage_size = 
+            s[i].field[j].layout.storage_elements * (s[i].field[j].layout.datatype_size + padding);
+          s[i].field[j].layout.size = 
+            s[i].field[j].layout.elements * (s[i].field[j].layout.datatype_size + padding);
 
           // Calculate the final size
-          storage_size += s[i].layout.fields[j].storage_size;
-          datatype_size += s[i].layout.fields[j].size;
+          storage_size += s[i].field[j].layout.storage_size;
+          datatype_size += s[i].field[j].layout.size;
 
-          //printf("field name: %s, datatype: %d\n", s[i].layout.fields[j].name,
-          //    s[i].layout.fields[j].datatype);
+          //printf("field name: %s, datatype: %d\n", s[i].field[j].name,
+          //    s[i].field[j].datatype);
         }
 //        printf("CMPD storage_elements = %d\n", s[i].layout.storage_elements);
 //        printf("CMPD datatype_size = %zu, storage_size = %zu\n", datatype_size, storage_size);
@@ -611,7 +612,6 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
         H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5CheckStatus(h5dataset);
   } else {
-    //printf("CMP: %d\n", s->compound_fields);
     h5datatype = CommitFileDatatype(s);
     h5dataset = H5Dcreate2(h5location, s->layout.name, h5datatype, h5dataspace,
         H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
@@ -652,12 +652,12 @@ unsigned int GetBanks(unsigned int allocated_banks, storage *s) {
   return banks_in_use;
 }
 
-unsigned int GetFields(unsigned int allocated_fields, storage *s) {
+unsigned int GetFields(unsigned int allocated_fields, field *f) {
   unsigned int fields_in_use = 0;
   unsigned int i = 0;
 
   for (i = 0; i < allocated_fields; i++) {
-    if (s->layout.fields[i].datatype > 0) {
+    if (f[i].layout.rank > 0) {
       fields_in_use++;
     }
   }

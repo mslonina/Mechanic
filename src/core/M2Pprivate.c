@@ -28,6 +28,9 @@ pool* PoolLoad(module *m, unsigned int pid) {
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
     p->storage[i].layout = (schema) STORAGE_END;
     p->storage[i].memory = NULL;
+
+    p->storage[i].compound_fields = 0;
+    p->storage[i].attr_banks = 0;
     
     p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
     if (!p->storage[i].attr) Error(CORE_ERR_MEM);
@@ -35,14 +38,14 @@ pool* PoolLoad(module *m, unsigned int pid) {
       p->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->storage[i].attr[j].memory = NULL;
     }
-
-    /*p->storage[i].layout.fields = calloc(m->layer.init.compound_fields, sizeof(fields_type));
-    if (!p->storage[i].layout.fields) Error(CORE_ERR_MEM);
-
+    
+    p->storage[i].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    if (!p->storage[i].field) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.compound_fields; j++) {
-      p->storage[i].layout.fields[j] = (fields_type) COMPOUND_TEST;
+      p->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
     }
 
+/*
     for (j = 0; j < m->layer.init.compound_fields; j++) {
       printf("field.name = %s, .rank = %d, .dims = (%d, %d, %d, %d), datatype = %d\n",
           p->storage[i].layout.fields[j].name,
@@ -83,6 +86,9 @@ pool* PoolLoad(module *m, unsigned int pid) {
     p->task->storage[i].layout = (schema) STORAGE_END;
     p->task->storage[i].memory = NULL;
     
+    p->task->storage[i].compound_fields = 0;
+    p->task->storage[i].attr_banks = 0;
+
     p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
     if (!p->task->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
@@ -90,11 +96,11 @@ pool* PoolLoad(module *m, unsigned int pid) {
       p->task->storage[i].attr[j].memory = NULL;
     }
 
-    /*p->task->storage[i].layout.fields = calloc(m->layer.init.compound_fields, sizeof(fields_type));
-    if (!p->task->storage[i].layout.fields) Error(CORE_ERR_MEM);
+    p->task->storage[i].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    if (!p->task->storage[i].field) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.compound_fields; j++) {
-      p->task->storage[i].layout.fields[j] = (fields_type) COMPOUND_END;
-    }*/
+      p->task->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
+    }
   }
 
   p->tasks = NULL;
@@ -627,7 +633,7 @@ void PoolFinalize(module *m, pool *p) {
     if (p->storage) {
       for (i = 0; i < p->pool_banks; i++) {
         free(p->storage[i].attr);
-//        free(p->storage[i].layout.fields);
+        free(p->storage[i].field);
       }
       FreeMemoryLayout(p->pool_banks, p->storage);
       free(p->storage);
@@ -637,7 +643,7 @@ void PoolFinalize(module *m, pool *p) {
       if (p->task->storage) {
         for (i = 0; i < p->task_banks; i++) {
           free(p->task->storage[i].attr);
-//          free(p->task->storage[i].layout.fields);
+          free(p->task->storage[i].field);
         }
         FreeMemoryLayout(p->task_banks, p->task->storage);
         free(p->task->storage);

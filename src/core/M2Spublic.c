@@ -659,20 +659,20 @@ hid_t CommitDatatype(storage *s) {
 
   h5datatype = H5Tcreate(H5T_COMPOUND, s->layout.compound_size);
   for (i = 0; i < s->compound_fields; i++) {
-    if (s->layout.fields[i].datatype > 0) {
-      if (s->layout.fields[i].elements > 1) {
+    if (s->field[i].layout.datatype > 0) {
+      if (s->field[i].layout.elements > 1) {
         for (j = 0; j < MAX_RANK; j++) {
-          adims[j] = s->layout.fields[i].dims[j];
+          adims[j] = s->field[i].layout.dims[j];
         }
-        type = H5Tarray_create(s->layout.fields[i].datatype, s->layout.fields[i].rank, adims);
-        h5status = H5Tinsert(h5datatype, s->layout.fields[i].name,
-            s->layout.fields[i].offset, type);
+        type = H5Tarray_create(s->field[i].layout.datatype, s->field[i].layout.rank, adims);
+        h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+            s->field[i].layout.field_offset, type);
         H5CheckStatus(h5status);
         H5Tclose(type);
       } else {
-        type = s->layout.fields[i].datatype;
-        h5status = H5Tinsert(h5datatype, s->layout.fields[i].name,
-            s->layout.fields[i].offset, type);
+        type = s->field[i].layout.datatype;
+        h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+            s->field[i].layout.field_offset, type);
         H5CheckStatus(h5status);
       }
     }
@@ -688,20 +688,20 @@ hid_t CommitFileDatatype(storage *s) {
 
   h5datatype = H5Tcreate(H5T_COMPOUND, s->layout.compound_size);
   for (i = 0; i < s->compound_fields; i++) {
-    if (s->layout.fields[i].datatype > 0) {
-      if (s->layout.fields[i].elements > 1) {
+    if (s->field[i].layout.datatype > 0) {
+      if (s->field[i].layout.elements > 1) {
         for (j = 0; j < MAX_RANK; j++) {
-          adims[j] = s->layout.fields[i].dims[j];
+          adims[j] = s->field[i].layout.dims[j];
         }
-        type = H5Tarray_create(s->layout.fields[i].datatype, s->layout.fields[i].rank, adims);
-        h5status = H5Tinsert(h5datatype, s->layout.fields[i].name,
-            s->layout.fields[i].offset, type);
+        type = H5Tarray_create(s->field[i].layout.datatype, s->field[i].layout.rank, adims);
+        h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+            s->field[i].layout.field_offset, type);
         H5CheckStatus(h5status);
         H5Tclose(type);
        } else {
-        type = s->layout.fields[i].datatype;
-        h5status = H5Tinsert(h5datatype, s->layout.fields[i].name,
-            s->layout.fields[i].offset, type);
+        type = s->field[i].layout.datatype;
+        h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+            s->field[i].layout.field_offset, type);
         H5CheckStatus(h5status);
       }
     }
@@ -767,9 +767,28 @@ size_t GetPadding(hid_t datatype) {
   return padding;
 }
 
-fields_type* FieldLoad() {
-  fields_type* field = NULL;
+field* FieldLoad() {
+  field* field = NULL;
+  unsigned int i = 0;
 
-  field = calloc(1, sizeof(fields_type));
+  field = calloc(1, sizeof(field));
+  if (!field) Error(CORE_ERR_MEM);
+
+  field->layout.name = NULL;
+  field->layout.rank = 0;
+
+  for (i = 0; i < MAX_RANK; i++) {
+    field->layout.dims[i] = 0;
+  }
+  
+  field->layout.datatype = H5S_NO_CLASS;
+  field->layout.mpi_datatype = MPI_CHAR;
+  field->layout.size = 0;
+  field->layout.storage_size = 0;
+  field->layout.datatype_size = 0;
+  field->layout.elements = 0;
+  field->layout.storage_elements = 0;
+  field->layout.field_offset = 0;
+
   return field;
 }
