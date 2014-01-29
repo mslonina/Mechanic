@@ -28,7 +28,8 @@ pool* PoolLoad(module *m, unsigned int pid) {
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
     p->storage[i].layout = (schema) STORAGE_END;
     p->storage[i].memory = NULL;
-    p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+
+    p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
     if (!p->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
@@ -44,7 +45,7 @@ pool* PoolLoad(module *m, unsigned int pid) {
   p->board->memory = NULL;
 
   /* Task board attributes */
-  p->board->attr = calloc(m->layer.init.options, sizeof(storage));
+  p->board->attr = calloc(m->layer.init.options, sizeof(attr));
   if (!p->board->attr) Error(CORE_ERR_MEM);
   for (j = 0; j < m->layer.init.options; j++) {
     p->board->attr[j].layout = (schema) ATTR_STORAGE_END;
@@ -62,7 +63,8 @@ pool* PoolLoad(module *m, unsigned int pid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     p->task->storage[i].layout = (schema) STORAGE_END;
     p->task->storage[i].memory = NULL;
-    p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+
+    p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
     if (!p->task->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->task->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;

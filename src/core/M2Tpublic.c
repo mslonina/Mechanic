@@ -41,7 +41,8 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     t->storage[i].layout = (schema) STORAGE_END;
     t->storage[i].memory = NULL;
-    t->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
+
+    t->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
     if (!t->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset;  j++) {
       t->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
