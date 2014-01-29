@@ -455,6 +455,7 @@ void FreeMemoryLayout(int banks, storage *s) {
 int CommitData(hid_t h5location, int banks, storage *s) {
   int mstat = SUCCESS, i = 0, j = 0;
   hid_t dataspace, dataset, memspace;
+  hid_t h5datatype;
   herr_t hdf_status = 0;
   hsize_t dims[MAX_RANK], offsets[MAX_RANK];
   char *buffer = NULL;
@@ -470,10 +471,17 @@ int CommitData(hid_t h5location, int banks, storage *s) {
       buffer = calloc(s[i].layout.elements, s[i].layout.datatype_size);
       ReadData(&s[i], buffer);
 
+      h5datatype = s[i].layout.datatype;
+
+      if (s[i].layout.datatype == H5T_COMPOUND) {
+        h5datatype = CommitDatatype(&s[i]);
+        H5CheckStatus(h5datatype);
+      }
+
       /* Whole dataset at once */
       if (s[i].layout.storage_type == STORAGE_GROUP) {
 
-        hdf_status = H5Dwrite(dataset, s[i].layout.datatype,
+        hdf_status = H5Dwrite(dataset, h5datatype,
             H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
         H5CheckStatus(hdf_status);
 
@@ -485,7 +493,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
 
         memspace = H5Screate_simple(s[i].layout.rank, dims, NULL);
         H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offsets, NULL, dims, NULL);
-        hdf_status = H5Dwrite(dataset, s[i].layout.datatype,
+        hdf_status = H5Dwrite(dataset, h5datatype,
             memspace, dataspace, H5P_DEFAULT, buffer);
         H5CheckStatus(hdf_status);
 
@@ -643,3 +651,118 @@ int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size) {
   return mstat;
 }
 
+hid_t CommitDatatype(storage *s) {
+  hid_t h5datatype, type;
+  hsize_t adims[MAX_RANK];
+  herr_t h5status;
+  unsigned int i = 0, j = 0;
+
+  h5datatype = H5Tcreate(H5T_COMPOUND, s->layout.compound_size);
+  for (i = 0; i < s->compound_fields; i++) {
+    if (s->layout.fields[i].datatype > 0) {
+      if (s->layout.fields[i].elements > 1) {
+        for (j = 0; j < MAX_RANK; j++) {
+          adims[j] = s->layout.fields[i].dims[j];
+        }
+        type = H5Tarray_create(s->layout.fields[i].datatype, s->layout.fields[i].rank, adims);
+        h5status = H5Tinsert(h5datatype, s->layout.fields[i].name,
+            s->layout.fields[i].offset, type);
+        H5CheckStatus(h5status);
+        H5Tclose(type);
+      } else {
+        type = s->layout.fields[i].datatype;
+        h5status = H5Tinsert(h5datatype, s->layout.fields[i].name,
+            s->layout.fields[i].offset, type);
+        H5CheckStatus(h5status);
+      }
+    }
+  }
+  return h5datatype;
+}
+
+hid_t CommitFileDatatype(storage *s) {
+  hid_t h5datatype, type;
+  hsize_t adims[MAX_RANK];
+  herr_t h5status;
+  unsigned int i = 0, j = 0;
+
+  h5datatype = H5Tcreate(H5T_COMPOUND, s->layout.compound_size);
+  for (i = 0; i < s->compound_fields; i++) {
+    if (s->layout.fields[i].datatype > 0) {
+      if (s->layout.fields[i].elements > 1) {
+        for (j = 0; j < MAX_RANK; j++) {
+          adims[j] = s->layout.fields[i].dims[j];
+        }
+        type = H5Tarray_create(s->layout.fields[i].datatype, s->layout.fields[i].rank, adims);
+        h5status = H5Tinsert(h5datatype, s->layout.fields[i].name,
+            s->layout.fields[i].offset, type);
+        H5CheckStatus(h5status);
+        H5Tclose(type);
+       } else {
+        type = s->layout.fields[i].datatype;
+        h5status = H5Tinsert(h5datatype, s->layout.fields[i].name,
+            s->layout.fields[i].offset, type);
+        H5CheckStatus(h5status);
+      }
+    }
+  }
+  return h5datatype;
+}
+
+size_t CalculatePadding(size_t type) {
+  return sizeof(double) - type;
+}
+
+size_t GetPadding(hid_t datatype) {
+  size_t padding = 0;
+
+  if (datatype == H5T_NATIVE_CHAR) {
+    padding = CalculatePadding(sizeof(char));
+  }
+
+  if (datatype == H5T_NATIVE_UCHAR) {
+    padding = CalculatePadding(sizeof(unsigned char));
+  }
+
+  if (datatype == H5T_NATIVE_INT) {
+    padding = CalculatePadding(sizeof(int));
+  }
+
+  if (datatype == H5T_NATIVE_UINT) {
+    padding = CalculatePadding(sizeof(unsigned int));
+  }
+
+  if (datatype == H5T_NATIVE_SHORT) {
+    padding = CalculatePadding(sizeof(short));
+  }
+
+  if (datatype == H5T_NATIVE_USHORT) {
+    padding = CalculatePadding(sizeof(unsigned short));
+  }
+
+  if (datatype == H5T_NATIVE_LONG) {
+    padding = CalculatePadding(sizeof(long));
+  }
+
+  if (datatype == H5T_NATIVE_ULONG) {
+    padding = CalculatePadding(sizeof(unsigned long));
+  }
+
+  if (datatype == H5T_NATIVE_LLONG) {
+    padding = CalculatePadding(sizeof(long long));
+  }
+
+  if (datatype == H5T_NATIVE_ULLONG) {
+    padding = CalculatePadding(sizeof(unsigned long long));
+  }
+
+  if (datatype == H5T_NATIVE_FLOAT) {
+    padding = CalculatePadding(sizeof(float));
+  }
+
+  if (datatype == H5T_NATIVE_DOUBLE) {
+    padding = CalculatePadding(sizeof(double));
+  }
+
+  return padding;
+}

@@ -137,6 +137,11 @@ int Storage(module *m, pool *p) {
   for (i = 0; i < p->pool_banks; i++) {
     p->storage[i].layout.storage_type = STORAGE_GROUP;
   }
+
+  /* Compound fields, if any */
+  for (i = 0; i < p->pool_banks; i++) {
+    p->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, &p->storage[i]);
+  }
   
   CheckLayout(m, p->pool_banks, p->storage);
   CommitMemoryLayout(p->pool_banks, p->storage);
@@ -161,6 +166,11 @@ int Storage(module *m, pool *p) {
     }
   }
 
+  /* Compound fields, if any */
+  for (i = 0; i < p->task_banks; i++) {
+    p->task->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, &p->task->storage[i]);
+  }
+  
   CheckLayout(m, p->task_banks, p->task->storage);
 
   /* Master only memory/storage operations */
@@ -290,10 +300,13 @@ int Storage(module *m, pool *p) {
  *
  * @return 0 on success, error code otherwise
  */
-int CheckLayout(module *m, int banks, storage *s) {
-  int i = 0, j = 0, mstat = SUCCESS;
+int CheckLayout(module *m, unsigned int banks, storage *s) {
+  unsigned int i = 0, j = 0, k = 0, mstat = SUCCESS;
+  size_t datatype_size = 0, storage_size = 0;
+  size_t padding = 0;
 
   for (i = 0; i < banks; i++) {
+    datatype_size = 0; storage_size = 0;
       
     if (s[i].layout.name == NULL) {
       Message(MESSAGE_ERR, "The storage name is required\n");
@@ -339,7 +352,6 @@ int CheckLayout(module *m, int banks, storage *s) {
       Error(CORE_ERR_STORAGE);
     }
 
-
     if (s[i].layout.use_hdf) {
       s[i].layout.dataspace = H5S_SIMPLE;
       for (j = 0; j < MAX_RANK; j++) {
@@ -352,14 +364,57 @@ int CheckLayout(module *m, int banks, storage *s) {
       }
     }
 
-    s[i].layout.mpi_datatype = GetMpiDatatype(s[i].layout.datatype);
-    s[i].layout.datatype_size = H5Tget_size(s[i].layout.datatype);
+    if (s[i].layout.datatype != H5T_COMPOUND) {
+      s[i].layout.mpi_datatype = GetMpiDatatype(s[i].layout.datatype);
+      s[i].layout.datatype_size = H5Tget_size(s[i].layout.datatype);
+    }
     
     s[i].layout.storage_elements = 
       s[i].layout.elements = GetSize(s[i].layout.rank, s[i].layout.dims);
 
-    s[i].layout.storage_size = s[i].layout.storage_elements * s[i].layout.datatype_size;
-    s[i].layout.size = s[i].layout.elements * s[i].layout.datatype_size;
+    /* Calculate storage for H5T_COMPOUND */
+    if (s[i].layout.datatype == H5T_COMPOUND) {
+      for (j = 0; j < s[i].compound_fields; j++) {
+        if (s[i].layout.fields[j].datatype > 0) {
+          s[i].layout.fields[j].mpi_datatype = 
+            GetMpiDatatype(s[i].layout.fields[j].datatype);
+          s[i].layout.fields[j].datatype_size =
+            H5Tget_size(s[i].layout.fields[j].datatype);
+
+          s[i].layout.fields[j].elements = 1;
+          for (k = 0; k < s[i].layout.fields[j].rank; k++) {
+            s[i].layout.fields[j].elements *= s[i].layout.fields[j].dims[k];
+          }
+          s[i].layout.fields[j].storage_elements = 
+            s[i].layout.fields[j].elements;
+
+          // Calculate padding
+          padding = GetPadding(s[i].layout.fields[j].datatype);
+          s[i].layout.fields[j].storage_size = 
+            s[i].layout.fields[j].storage_elements * (s[i].layout.fields[j].datatype_size + padding);
+          s[i].layout.fields[j].size = 
+            s[i].layout.fields[j].elements * (s[i].layout.fields[j].datatype_size + padding);
+
+          // Calculate the final size
+          storage_size += s[i].layout.fields[j].storage_size;
+          datatype_size += s[i].layout.fields[j].size;
+
+          //printf("field name: %s, datatype: %d\n", s[i].layout.fields[j].name,
+          //    s[i].layout.fields[j].datatype);
+        }
+//        printf("CMPD storage_elements = %d\n", s[i].layout.storage_elements);
+//        printf("CMPD datatype_size = %zu, storage_size = %zu\n", datatype_size, storage_size);
+      }
+    } else {
+      storage_size = s[i].layout.datatype_size;
+      datatype_size = s[i].layout.datatype_size;
+    }
+
+    s[i].layout.datatype_size = datatype_size;
+    s[i].layout.storage_size = s[i].layout.storage_elements * storage_size;
+    s[i].layout.size = s[i].layout.elements * datatype_size;
+
+//    printf("storage_size = %zu, size = %zu\n", s[i].layout.storage_size, s[i].layout.size);
 
     /* Check attributes */
     for (j = 0; j < s[i].attr_banks; j++) {
@@ -534,7 +589,7 @@ int CommitStorageLayout(module *m, pool *p) {
 int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   int mstat = SUCCESS, i;
   query *q;
-  hid_t h5dataset, h5dataspace;
+  hid_t h5dataset, h5dataspace, h5datatype;
   hsize_t dims[MAX_RANK];
   herr_t h5status;
 
@@ -551,14 +606,25 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
     H5CheckStatus(h5status);
   }
 
-  h5dataset = H5Dcreate2(h5location, s->layout.name, s->layout.datatype, h5dataspace,
-      H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-  H5CheckStatus(h5dataset);
+  if (s->layout.datatype != H5T_COMPOUND) {
+    h5dataset = H5Dcreate2(h5location, s->layout.name, s->layout.datatype, h5dataspace,
+        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5CheckStatus(h5dataset);
+  } else {
+    //printf("CMP: %d\n", s->compound_fields);
+    h5datatype = CommitFileDatatype(s);
+    h5dataset = H5Dcreate2(h5location, s->layout.name, h5datatype, h5dataspace,
+        H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    H5CheckStatus(h5dataset);
+  }
 
   q = LoadSym(m, "DatasetPrepare", LOAD_DEFAULT);
   if (q) mstat = q(h5location, h5dataset, p, s);
   CheckStatus(mstat);
 
+  if (s->layout.datatype == H5T_COMPOUND) {
+    H5Tclose(h5datatype);
+  }
   H5Dclose(h5dataset);
   H5Sclose(h5dataspace);
 
@@ -574,8 +640,8 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
  * @return The number of memory/storage banks in use, 0 otherwise
  */
 unsigned int GetBanks(unsigned int allocated_banks, storage *s) {
-  unsigned banks_in_use = 0;
-  unsigned i = 0;
+  unsigned int banks_in_use = 0;
+  unsigned int i = 0;
 
   for (i = 0; i < allocated_banks; i++) {
     if (s[i].layout.rank > 0) {
@@ -584,5 +650,17 @@ unsigned int GetBanks(unsigned int allocated_banks, storage *s) {
   }
 
   return banks_in_use;
+}
+
+unsigned int GetFields(unsigned int allocated_fields, storage *s) {
+  unsigned int fields_in_use = 0;
+  unsigned int i = 0;
+
+  for (i = 0; i < allocated_fields; i++) {
+    if (s->layout.fields[i].datatype > 0) {
+      fields_in_use++;
+    }
+  }
+  return fields_in_use;
 }
 

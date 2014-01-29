@@ -28,12 +28,32 @@ pool* PoolLoad(module *m, unsigned int pid) {
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
     p->storage[i].layout = (schema) STORAGE_END;
     p->storage[i].memory = NULL;
+    
     p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
     if (!p->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->storage[i].attr[j].memory = NULL;
     }
+
+    /*p->storage[i].layout.fields = calloc(m->layer.init.compound_fields, sizeof(fields_type));
+    if (!p->storage[i].layout.fields) Error(CORE_ERR_MEM);
+
+    for (j = 0; j < m->layer.init.compound_fields; j++) {
+      p->storage[i].layout.fields[j] = (fields_type) COMPOUND_TEST;
+    }
+
+    for (j = 0; j < m->layer.init.compound_fields; j++) {
+      printf("field.name = %s, .rank = %d, .dims = (%d, %d, %d, %d), datatype = %d\n",
+          p->storage[i].layout.fields[j].name,
+          p->storage[i].layout.fields[j].rank,
+          p->storage[i].layout.fields[j].dims[0],
+          p->storage[i].layout.fields[j].dims[1],
+          p->storage[i].layout.fields[j].dims[2],
+          p->storage[i].layout.fields[j].dims[3],
+          p->storage[i].layout.fields[j].datatype
+          );
+    }*/
   }
 
   /* Allocate task board pointer */
@@ -62,12 +82,19 @@ pool* PoolLoad(module *m, unsigned int pid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     p->task->storage[i].layout = (schema) STORAGE_END;
     p->task->storage[i].memory = NULL;
+    
     p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(storage));
     if (!p->task->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->task->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->task->storage[i].attr[j].memory = NULL;
     }
+
+    /*p->task->storage[i].layout.fields = calloc(m->layer.init.compound_fields, sizeof(fields_type));
+    if (!p->task->storage[i].layout.fields) Error(CORE_ERR_MEM);
+    for (j = 0; j < m->layer.init.compound_fields; j++) {
+      p->task->storage[i].layout.fields[j] = (fields_type) COMPOUND_END;
+    }*/
   }
 
   p->tasks = NULL;
@@ -247,12 +274,12 @@ int PoolPrepare(module *m, pool **all, pool *p) {
   for (i = 0; i < p->pool_banks; i++) {
     if (p->storage[i].layout.sync) {
       if (p->storage[i].layout.elements > 0) {
-        MPI_Bcast(&(p->storage[i].memory[0]), p->storage[i].layout.elements,
-            p->storage[i].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
+        MPI_Bcast(&(p->storage[i].memory[0]), p->storage[i].layout.storage_size,
+            MPI_CHAR, MASTER, MPI_COMM_WORLD);
         // Broadcast pool attributes
         for (j = 0; j < p->storage[i].attr_banks; j++) {
-          MPI_Bcast(&(p->storage[i].attr[j].memory[0]), p->storage[i].attr[j].layout.elements,
-              p->storage[i].attr[j].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
+          MPI_Bcast(&(p->storage[i].attr[j].memory[0]), p->storage[i].attr[j].layout.storage_size,
+              MPI_CHAR, MASTER, MPI_COMM_WORLD);
         }
       }
     }
@@ -600,6 +627,7 @@ void PoolFinalize(module *m, pool *p) {
     if (p->storage) {
       for (i = 0; i < p->pool_banks; i++) {
         free(p->storage[i].attr);
+//        free(p->storage[i].layout.fields);
       }
       FreeMemoryLayout(p->pool_banks, p->storage);
       free(p->storage);
@@ -609,6 +637,7 @@ void PoolFinalize(module *m, pool *p) {
       if (p->task->storage) {
         for (i = 0; i < p->task_banks; i++) {
           free(p->task->storage[i].attr);
+//          free(p->task->storage[i].layout.fields);
         }
         FreeMemoryLayout(p->task_banks, p->task->storage);
         free(p->task->storage);
