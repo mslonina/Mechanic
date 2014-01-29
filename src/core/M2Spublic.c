@@ -626,7 +626,7 @@ int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size) {
   int mstat = SUCCESS, i = 0;
   unsigned int elements;
   void *buffer = NULL;
-  hid_t dataset;
+  hid_t dataset, h5datatype;
   herr_t hstat;
 
   for (i = 0; i < banks; i++) {
@@ -639,8 +639,20 @@ int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size) {
 
       Message(MESSAGE_DEBUG, "Read Data storage name: %s\n", s[i].layout.name);
       dataset = H5Dopen2(h5location, s[i].layout.name, H5P_DEFAULT);
-      hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
-      H5CheckStatus(hstat);
+
+      if (s[i].layout.datatype == H5T_COMPOUND) {
+        h5datatype = CommitDatatype(&s[i]);
+        hstat = H5Dread(dataset, h5datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+        H5CheckStatus(hstat);
+
+        H5Tclose(h5datatype);
+
+      } else {
+        hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
+        H5CheckStatus(hstat);
+      }
+
+      
       H5Dclose(dataset);
 
       WriteData(&s[i], buffer);
