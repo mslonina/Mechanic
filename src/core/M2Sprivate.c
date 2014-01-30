@@ -390,11 +390,11 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
             s[i].field[j].layout.elements;
 
           // Calculate padding
-          padding = GetPadding(s[i].field[j].layout.datatype);
+          padding = GetPadding(s[i].field[j].layout.elements, s[i].field[j].layout.datatype_size);
           s[i].field[j].layout.storage_size = 
-            s[i].field[j].layout.storage_elements * (s[i].field[j].layout.datatype_size + padding);
+            s[i].field[j].layout.storage_elements * s[i].field[j].layout.datatype_size + padding;
           s[i].field[j].layout.size = 
-            s[i].field[j].layout.elements * (s[i].field[j].layout.datatype_size + padding);
+            s[i].field[j].layout.elements * s[i].field[j].layout.datatype_size + padding;
 
           // Calculate the final size
           storage_size += s[i].field[j].layout.storage_size;

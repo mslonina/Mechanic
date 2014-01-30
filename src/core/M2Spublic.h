@@ -415,8 +415,7 @@ void FreeMemoryLayout(int banks, storage *s);
 int CommitData(hid_t h5location, int banks, storage *s);
 int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size);
 
-size_t CalculatePadding(size_t type);
-size_t GetPadding(hid_t datatype);
+size_t GetPadding(unsigned int elements, size_t datatype_size);
 hid_t CommitDatatype(storage *s);
 hid_t CommitFileDatatype(storage *s);
 

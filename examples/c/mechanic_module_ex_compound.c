@@ -27,6 +27,9 @@ typedef struct {
   int id;
   double temperature;
   double pressure;
+  int tags[35];
+  char name[257];
+  short points[3];
 } sensor_t;
 
 typedef struct {
@@ -74,8 +77,19 @@ int Storage(pool *p) {
   p->storage[0].field[2].layout = 
     (schema) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
       .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, pressure)};
-
   
+  p->storage[0].field[3].layout = 
+    (schema) {.name = "name", .datatype = H5T_NATIVE_CHAR, 
+      .rank = 1, .dims = {257}, .field_offset = HOFFSET(sensor_t, name)};
+
+  p->storage[0].field[4].layout = 
+    (schema) {.name = "tags", .datatype = H5T_NATIVE_INT, 
+      .rank = 1, .dims = {33}, .field_offset = HOFFSET(sensor_t, tags)};
+
+  p->storage[0].field[5].layout = 
+    (schema) {.name = "points", .datatype = H5T_NATIVE_SHORT, 
+      .rank = 1, .dims = {3}, .field_offset = HOFFSET(sensor_t, points)};
+
   p->storage[1].layout = (schema) {
     .name = "pool-particles",
     .rank = 2,
@@ -132,6 +146,18 @@ int Storage(pool *p) {
     (schema) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
       .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, pressure)};
  
+  p->task->storage[0].field[3].layout = 
+    (schema) {.name = "name", .datatype = H5T_NATIVE_CHAR, 
+      .rank = 1, .dims = {257}, .field_offset = HOFFSET(sensor_t, name)};
+
+  p->task->storage[0].field[4].layout = 
+    (schema) {.name = "tags", .datatype = H5T_NATIVE_INT, 
+      .rank = 1, .dims = {33}, .field_offset = HOFFSET(sensor_t, tags)};
+
+  p->task->storage[0].field[5].layout = 
+    (schema) {.name = "points", .datatype = H5T_NATIVE_SHORT, 
+      .rank = 1, .dims = {3}, .field_offset = HOFFSET(sensor_t, points)};
+
   p->task->storage[1].layout = (schema) {
     .name = "sensors-board",
     .rank = TASK_BOARD_RANK,
@@ -156,6 +182,18 @@ int Storage(pool *p) {
   p->task->storage[1].field[2].layout = 
     (schema) {.name = "pressure", .datatype = H5T_NATIVE_DOUBLE, 
       .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, pressure)};
+
+  p->task->storage[1].field[3].layout = 
+    (schema) {.name = "name", .datatype = H5T_NATIVE_CHAR, 
+      .rank = 1, .dims = {257}, .field_offset = HOFFSET(sensor_t, name)};
+
+  p->task->storage[1].field[4].layout = 
+    (schema) {.name = "tags", .datatype = H5T_NATIVE_INT, 
+      .rank = 1, .dims = {33}, .field_offset = HOFFSET(sensor_t, tags)};
+
+  p->task->storage[1].field[5].layout = 
+    (schema) {.name = "points", .datatype = H5T_NATIVE_SHORT, 
+      .rank = 1, .dims = {3}, .field_offset = HOFFSET(sensor_t, points)};
 
   p->task->storage[2].layout = (schema) {
     .name = "particles",
@@ -197,7 +235,7 @@ int Storage(pool *p) {
  * Implements PoolPrepare()
  */
 int PoolPrepare(pool **all, pool *p) {
-  unsigned int i, j, l, m, n, id = 0;
+  unsigned int i, j, k, l, m, n, id = 0;
   unsigned int dims[MAX_RANK];
   sensor_t sensors[5][5];
   particle_t particles[5][5];
@@ -209,6 +247,12 @@ int PoolPrepare(pool **all, pool *p) {
       sensors[i][j].id = id;
       sensors[i][j].temperature = 33.6 + i - j;
       sensors[i][j].pressure = 1013.3 + i * j;
+      sensors[i][j].points[0] = 1;
+      sensors[i][j].points[1] = 4;
+      sensors[i][j].points[2] = 3;
+      
+      sprintf(sensors[i][j].name, "Sensor %4d", id);
+      for (k = 0; k < 33; k++) sensors[i][j].tags[k] = k;
 
       particles[i][j].id = id;
       particles[i][j].position[0] = 0.1 + i;
@@ -241,7 +285,6 @@ int PoolPrepare(pool **all, pool *p) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool **all, pool *p) {
-  printf("sizeof long int %zu\n", sizeof(long));
   return POOL_FINALIZE;
 }
 
@@ -265,6 +308,20 @@ int TaskProcess(pool *p, task *t) {
       sensors_b[i][j][0].id = pool_sensors[i][j].id;
       sensors_b[i][j][0].temperature = pool_sensors[i][j].temperature;
       sensors_b[i][j][0].pressure = pool_sensors[i][j].pressure;
+      
+      sprintf(sensors[i][j].name, "Sensor %4d", i + j);
+      sprintf(sensors_b[i][j][0].name, "Sensor %4d", i + j);
+
+      for (k = 0; k < 3; k++) {
+        sensors[i][j].points[k] = k + i - j;
+        sensors_b[i][j][0].points[k] = k - i + j;
+      }
+      
+      for (k = 0; k < 33; k++) {
+        sensors[i][j].tags[k] = k*i + j;
+        sensors_b[i][j][0].tags[k] = k*j - i;
+      }
+
     }
   }
 

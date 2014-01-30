@@ -474,7 +474,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
       h5datatype = s[i].layout.datatype;
 
       if (s[i].layout.datatype == H5T_COMPOUND) {
-        h5datatype = CommitDatatype(&s[i]);
+        h5datatype = CommitFileDatatype(&s[i]);
         H5CheckStatus(h5datatype);
       }
 
@@ -641,7 +641,7 @@ int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size) {
       dataset = H5Dopen2(h5location, s[i].layout.name, H5P_DEFAULT);
 
       if (s[i].layout.datatype == H5T_COMPOUND) {
-        h5datatype = CommitDatatype(&s[i]);
+        h5datatype = CommitFileDatatype(&s[i]);
         hstat = H5Dread(dataset, h5datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
         H5CheckStatus(hstat);
 
@@ -713,24 +713,39 @@ hid_t CommitFileDatatype(storage *s) {
   hsize_t adims[MAX_RANK];
   herr_t h5status;
   unsigned int i = 0, j = 0;
+  size_t c_size = 0;
 
   h5datatype = H5Tcreate(H5T_COMPOUND, s->layout.compound_size);
   for (i = 0; i < s->compound_fields; i++) {
     if (s->field[i].layout.datatype > 0) {
-      if (s->field[i].layout.elements > 1) {
-        for (j = 0; j < MAX_RANK; j++) {
-          adims[j] = s->field[i].layout.dims[j];
-        }
-        type = H5Tarray_create(s->field[i].layout.datatype, s->field[i].layout.rank, adims);
+
+      // Special handling for char datatype
+      if (s->field[i].layout.datatype == H5T_NATIVE_CHAR ||
+          s->field[i].layout.datatype == H5T_NATIVE_UCHAR) {
+        type = H5Tcopy(H5T_C_S1);
+        c_size = s->field[i].layout.elements;
+        H5Tset_size(type, c_size);
         h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
             s->field[i].layout.field_offset, type);
         H5CheckStatus(h5status);
         H5Tclose(type);
-       } else {
-        type = s->field[i].layout.datatype;
-        h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
-            s->field[i].layout.field_offset, type);
-        H5CheckStatus(h5status);
+
+      } else {
+        if (s->field[i].layout.elements > 1) {
+          for (j = 0; j < MAX_RANK; j++) {
+            adims[j] = s->field[i].layout.dims[j];
+          }
+          type = H5Tarray_create(s->field[i].layout.datatype, s->field[i].layout.rank, adims);
+          h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+              s->field[i].layout.field_offset, type);
+          H5CheckStatus(h5status);
+          H5Tclose(type);
+        } else {
+          type = s->field[i].layout.datatype;
+          h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+              s->field[i].layout.field_offset, type);
+          H5CheckStatus(h5status);
+        }
       }
     }
   }
@@ -738,74 +753,29 @@ hid_t CommitFileDatatype(storage *s) {
 }
 
 /**
- * @brief Helper for GetPadding(). Calculates proper padding for the datatype
- *
- * @param type The datatype size
- *
- * @return Calculated padding
- */
-size_t CalculatePadding(size_t type) {
-  return sizeof(double) - type;
-}
-
-/**
  * @brief Get the proper padding for a datatype
- *
- * @param datatype The HDF5 datatype
+ * 
+ * @param elements The number of data elements
+ * @param datatype_size The datatype size of the data element
  *
  * @return Calculated padding
  */
-size_t GetPadding(hid_t datatype) {
-  size_t padding = 0;
+size_t GetPadding(unsigned int elements, size_t datatype_size) {
+  size_t size, reminder = 0, alignment = 0;
 
-  if (datatype == H5T_NATIVE_CHAR) {
-    padding = CalculatePadding(sizeof(char));
+  alignment = sizeof(double);
+  size = elements * datatype_size;
+
+  if (size > alignment) {
+    reminder = size % alignment;
+    if (reminder > 0) return alignment - reminder;
   }
 
-  if (datatype == H5T_NATIVE_UCHAR) {
-    padding = CalculatePadding(sizeof(unsigned char));
+  if (size < alignment) {
+    return alignment - size; 
   }
 
-  if (datatype == H5T_NATIVE_INT) {
-    padding = CalculatePadding(sizeof(int));
-  }
-
-  if (datatype == H5T_NATIVE_UINT) {
-    padding = CalculatePadding(sizeof(unsigned int));
-  }
-
-  if (datatype == H5T_NATIVE_SHORT) {
-    padding = CalculatePadding(sizeof(short));
-  }
-
-  if (datatype == H5T_NATIVE_USHORT) {
-    padding = CalculatePadding(sizeof(unsigned short));
-  }
-
-  if (datatype == H5T_NATIVE_LONG) {
-    padding = CalculatePadding(sizeof(long));
-  }
-
-  if (datatype == H5T_NATIVE_ULONG) {
-    padding = CalculatePadding(sizeof(unsigned long));
-  }
-
-  if (datatype == H5T_NATIVE_LLONG) {
-    padding = CalculatePadding(sizeof(long long));
-  }
-
-  if (datatype == H5T_NATIVE_ULLONG) {
-    padding = CalculatePadding(sizeof(unsigned long long));
-  }
-
-  if (datatype == H5T_NATIVE_FLOAT) {
-    padding = CalculatePadding(sizeof(float));
-  }
-
-  if (datatype == H5T_NATIVE_DOUBLE) {
-    padding = CalculatePadding(sizeof(double));
-  }
-
-  return padding;
+  if (size == alignment) return 0;
+  return 0;
 }
 
