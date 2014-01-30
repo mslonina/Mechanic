@@ -138,8 +138,8 @@ int Restart(module *m, pool **pools, unsigned int *pool_counter) {
     for (j = 0; j < pools[i]->pool_banks; j++) {
       if (pools[i]->storage[j].layout.sync) {
         if (pools[i]->storage[j].layout.elements > 0) {
-          MPI_Bcast(&(pools[i]->storage[j].memory[0]), pools[i]->storage[j].layout.elements, 
-              pools[i]->storage[j].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
+          MPI_Bcast(&(pools[i]->storage[j].memory[0]), pools[i]->storage[j].layout.storage_size, 
+              MPI_CHAR, MASTER, MPI_COMM_WORLD);
         }
       }
     }
