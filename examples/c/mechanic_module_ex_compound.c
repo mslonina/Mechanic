@@ -197,43 +197,41 @@ int Storage(pool *p) {
  * Implements PoolPrepare()
  */
 int PoolPrepare(pool **all, pool *p) {
-  unsigned int i, j, dims[MAX_RANK];
-
+  unsigned int i, j, l, m, n, id = 0;
+  unsigned int dims[MAX_RANK];
   sensor_t sensors[5][5];
-  sensor_t read_sensors[5][5];
-
   particle_t particles[5][5];
-  particle_t read_particles[5][5];
 
   MGetDims(p, "pool-sensors", dims);
 
   for (i = 0; i < dims[0]; i++) {
     for (j = 0; j < dims[1]; j++) {
-      sensors[i][j].id = i + j;
-      sensors[i][j].temperature = 33.6;
-      sensors[i][j].pressure = 1013.3;
-      particles[i][j].position[0] = 0.1;
-      particles[i][j].position[1] = 0.2;
-      particles[i][j].position[2] = 0.3;
-      particles[i][j].velocity[0] = 1.1;
-      particles[i][j].velocity[1] = 1.2;
-      particles[i][j].velocity[2] = 1.3;
+      sensors[i][j].id = id;
+      sensors[i][j].temperature = 33.6 + i - j;
+      sensors[i][j].pressure = 1013.3 + i * j;
+
+      particles[i][j].id = id;
+      particles[i][j].position[0] = 0.1 + i;
+      particles[i][j].position[1] = 0.2 - j;
+      particles[i][j].position[2] = 0.3 * j;
+      
+      particles[i][j].velocity[0] = 1.1 * i;
+      particles[i][j].velocity[1] = 1.2 - j;
+      particles[i][j].velocity[2] = 1.3 + i;
+      
+      for (l = 0; l < 4; l++) {
+        for (m = 0; m < 5; m++) {
+          for (n = 0; n < 6; n++) {
+            particles[i][j].heat_map[l][m][n] = l * m + n;
+            particles[i][j].geo_data[l][m][n] = l * m * (n + 0.023);
+          }
+        }
+      }
+      id++;
     }
   }
 
   MWriteData(p, "pool-sensors", &sensors[0][0]);
-  MReadData(p, "pool-sensors", &read_sensors[0][0]);
-
-  for (i = 0; i < dims[0]; i++) {
-    for (j = 0; j < dims[1]; j++) {
-      printf("sensor[%02d][%02d] id %04d = (%.5f, %.5f)\n", 
-          i, j,
-          read_sensors[i][j].id,
-          read_sensors[i][j].temperature,
-          read_sensors[i][j].pressure);
-    }
-  }
-
   MWriteData(p, "pool-particles", &particles[0][0]);
 
   return SUCCESS;
@@ -243,6 +241,7 @@ int PoolPrepare(pool **all, pool *p) {
  * Implements PoolProcess()
  */
 int PoolProcess(pool **all, pool *p) {
+  printf("sizeof long int %zu\n", sizeof(long));
   return POOL_FINALIZE;
 }
 
@@ -253,7 +252,7 @@ int TaskProcess(pool *p, task *t) {
   sensor_t sensors[5][5], pool_sensors[5][5];
   sensor_t sensors_b[5][5][1];
   particle_t particle[1][1][1];
-  unsigned i, j, dims[MAX_RANK];
+  unsigned i, j, k, dims[MAX_RANK];
 
   MReadData(p, "pool-sensors", &pool_sensors[0][0]);
   MGetDims(p, "pool-sensors", dims);
@@ -273,6 +272,21 @@ int TaskProcess(pool *p, task *t) {
   MWriteData(t, "sensors-board", &sensors_b[0][0][0]);
 
   particle[0][0][0].id = t->tid;
+  particle[0][0][0].position[0] = 2.1 * t->tid;
+  particle[0][0][0].position[1] = 2.2 - t->tid;
+  particle[0][0][0].position[2] = 1.1 + t->tid;
+  particle[0][0][0].velocity[0] = 0.1 + t->tid;
+  particle[0][0][0].velocity[1] = 0.13 - t->tid;
+  particle[0][0][0].velocity[2] = 2.21 * t->tid;
+
+  for (i = 0; i < 4; i++) {
+    for (j = 0; j < 5; j++) {
+      for (k = 0; k < 6; k++) {
+        particle[0][0][0].heat_map[i][j][k] = i + j * t->tid + k;
+        particle[0][0][0].geo_data[i][j][k] = i * j * k * (t->tid + 0.023);
+      }
+    }
+  }
   MWriteData(t, "particles", &particle[0][0][0]);
 
   return TASK_FINALIZE;
