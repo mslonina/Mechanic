@@ -380,7 +380,7 @@ int CheckLayout(module *m, int banks, storage *s) {
  * @return 0 on success, error code otherwise
  */
 int CheckAttributeLayout(attr *a) {
-  int i = 0, j = 0, mstat = SUCCESS;
+  int j = 0, mstat = SUCCESS;
 
     if (a->layout.name == NULL) {
       Message(MESSAGE_ERR, "Attribute name is required\n");
@@ -391,7 +391,7 @@ int CheckAttributeLayout(attr *a) {
     if (a->layout.dataspace == H5S_SCALAR) {
       a->layout.rank = 1;
       for (j = 0; j < a->layout.rank; j++){
-        a->layout.dims[i] = 1;
+        a->layout.dims[j] = 1;
       }
     }
 
@@ -408,7 +408,7 @@ int CheckAttributeLayout(attr *a) {
 
       for (j = 0; j < a->layout.rank; j++) {
         if (a->layout.dims[j] <= 0) {
-          Message(MESSAGE_ERR, "Invalid size for attribute dimension %d = %d\n", i, a->layout.dims[j]);
+          Message(MESSAGE_ERR, "Invalid size for attribute dimension %d = %d\n", j, a->layout.dims[j]);
           Error(CORE_ERR_STORAGE);
         }
         a->layout.storage_dim[j] = a->layout.dims[j];
