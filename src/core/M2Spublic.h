@@ -25,7 +25,7 @@
 #define HDF_TEMP_STORAGE 2 /**< Only temporary HDF5 file storage */
 
 #define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
-#define FIELD_STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
+#define FIELD_STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL, .field_offset = -1} /**< The storage scheme default initializer */
 #define ATTR_STORAGE_END {.name = NULL, .dataspace = H5S_NO_CLASS, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
 
 /**

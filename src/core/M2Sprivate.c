@@ -302,9 +302,8 @@ int Storage(module *m, pool *p) {
  * @return 0 on success, error code otherwise
  */
 int CheckLayout(module *m, unsigned int banks, storage *s) {
-  unsigned int i = 0, j = 0, k = 0, mstat = SUCCESS;
+  unsigned int i = 0, j = 0, mstat = SUCCESS;
   size_t datatype_size = 0, storage_size = 0;
-  size_t padding = 0;
 
   for (i = 0; i < banks; i++) {
     datatype_size = 0; storage_size = 0;
@@ -376,30 +375,9 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
     /* Calculate storage for H5T_COMPOUND */
     if (s[i].layout.datatype == H5T_COMPOUND) {
       for (j = 0; j < s[i].compound_fields; j++) {
-        if (s[i].field[j].layout.datatype > 0) {
-          s[i].field[j].layout.mpi_datatype = 
-            GetMpiDatatype(s[i].field[j].layout.datatype);
-          s[i].field[j].layout.datatype_size =
-            H5Tget_size(s[i].field[j].layout.datatype);
-
-          s[i].field[j].layout.elements = 1;
-          for (k = 0; k < s[i].field[j].layout.rank; k++) {
-            s[i].field[j].layout.elements *= s[i].field[j].layout.dims[k];
-          }
-          s[i].field[j].layout.storage_elements = 
-            s[i].field[j].layout.elements;
-
-          // Calculate padding
-          padding = GetPadding(s[i].field[j].layout.elements, s[i].field[j].layout.datatype_size);
-          s[i].field[j].layout.storage_size = 
-            s[i].field[j].layout.storage_elements * s[i].field[j].layout.datatype_size + padding;
-          s[i].field[j].layout.size = 
-            s[i].field[j].layout.elements * s[i].field[j].layout.datatype_size + padding;
-
-          // Calculate the final size
-          storage_size += s[i].field[j].layout.storage_size;
-          datatype_size += s[i].field[j].layout.size;
-        }
+        mstat = CheckFieldLayout(&s[i].field[j]);
+        storage_size += s[i].field[j].layout.storage_size;
+        datatype_size += s[i].field[j].layout.size;
       }
     } else {
       storage_size = s[i].layout.datatype_size;
@@ -422,13 +400,12 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
 /**
  * @brief Check for any inconsistencies in the storage layout for attributes
  *
- * @param banks The number of memory/storage banks
- * @param s The storage structure to check
+ * @param s The attribute structure to check
  *
  * @return 0 on success, error code otherwise
  */
 int CheckAttributeLayout(attr *a) {
-  int i = 0, j = 0, mstat = SUCCESS;
+  int j = 0, mstat = SUCCESS;
 
     if (a->layout.name == NULL) {
       Message(MESSAGE_ERR, "Attribute name is required\n");
@@ -439,7 +416,7 @@ int CheckAttributeLayout(attr *a) {
     if (a->layout.dataspace == H5S_SCALAR) {
       a->layout.rank = 1;
       for (j = 0; j < a->layout.rank; j++){
-        a->layout.dims[i] = 1;
+        a->layout.dims[j] = 1;
       }
     }
 
@@ -456,7 +433,7 @@ int CheckAttributeLayout(attr *a) {
 
       for (j = 0; j < a->layout.rank; j++) {
         if (a->layout.dims[j] <= 0) {
-          Message(MESSAGE_ERR, "Invalid size for attribute dimension %d = %d\n", i, a->layout.dims[j]);
+          Message(MESSAGE_ERR, "Invalid size for attribute dimension %d = %d\n", j, a->layout.dims[j]);
           Error(CORE_ERR_STORAGE);
         }
         a->layout.storage_dim[j] = a->layout.dims[j];
@@ -487,6 +464,70 @@ int CheckAttributeLayout(attr *a) {
     a->layout.size = a->layout.elements * a->layout.datatype_size;
     Message(MESSAGE_DEBUG, "Layout attr '%s': elements %d, storage_elements %d, size = %zu, storage_size = %zu\n",
         a->layout.name, a->layout.storage_elements, a->layout.elements, a->layout.size, a->layout.storage_size);
+
+  return mstat;
+}
+
+/**
+ * @brief Check for any inconsistencies in the storage layout for compound fields
+ *
+ * @param s The field structure to check
+ *
+ * @return 0 on success, error code otherwise
+ */
+int CheckFieldLayout(field *field) {
+  int mstat = SUCCESS;
+  unsigned int j = 0, k = 0;
+  size_t padding = 0;
+
+  if (field->layout.name == NULL) {
+    Message(MESSAGE_ERR, "Field name is required\n");
+    Error(CORE_ERR_STORAGE);
+  }
+
+  if (field->layout.datatype <= 0) {
+    Message(MESSAGE_ERR, "Field datatype is required\n");
+    Error(CORE_ERR_STORAGE);
+  }
+
+  if (field->layout.field_offset < 0) {
+    Message(MESSAGE_ERR, "Field offset is required\n");
+    Error(CORE_ERR_STORAGE);
+  }
+
+  if (field->layout.rank < 1) {
+    Message(MESSAGE_ERR, "Field rank must be > 1\n");
+    Error(CORE_ERR_STORAGE);
+  }
+
+  if (field->layout.rank > MAX_RANK) {
+    Message(MESSAGE_ERR, "Field rank  must be <= %d\n", MAX_RANK);
+    Error(CORE_ERR_STORAGE);
+  }
+
+  for (j = 0; j < field->layout.rank; j++) {
+    if (field->layout.dims[j] <= 0) {
+      Message(MESSAGE_ERR, "Invalid size for field dimension %d = %d\n", j, field->layout.dims[j]);
+      Error(CORE_ERR_STORAGE);
+    }
+    field->layout.storage_dim[j] = field->layout.dims[j];
+  }
+
+  field->layout.mpi_datatype = GetMpiDatatype(field->layout.datatype);
+  field->layout.datatype_size = H5Tget_size(field->layout.datatype);
+
+  field->layout.elements = 1;
+  for (k = 0; k < field->layout.rank; k++) {
+    field->layout.elements *= field->layout.dims[k];
+  }
+  field->layout.storage_elements = field->layout.elements;
+
+  // Calculate padding
+  padding = GetPadding(field->layout.elements, field->layout.datatype_size);
+  field->layout.storage_size = 
+     field->layout.storage_elements * field->layout.datatype_size + padding;
+  field->layout.size = 
+     field->layout.elements * field->layout.datatype_size + padding;
 
   return mstat;
 }
