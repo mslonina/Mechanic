@@ -17,7 +17,7 @@ F77=gfortran #ifort
 FC=gfortran #ifort
 
 # software versions
-MECHANIC=2.3.0
+MECHANIC=2.3.1
 HDF=1.8.10
 MPI=1.6.4
 
