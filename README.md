@@ -24,7 +24,7 @@ modules and is freely available at [the project page](http://git.ca.umk.pl).
 - [Short introduction](Overview.md)
 - [User and developer guide](examples/UserGuide.md)
 
-Ifyou are going to use this code, or its parts, please consider referring to the Authors
+If you are going to use this code, or its parts, please consider referring to the Authors
 by the following paper:
 
 Slonina M., Gozdziewski K., Migaszewski C.
