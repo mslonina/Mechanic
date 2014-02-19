@@ -514,6 +514,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
       H5Sclose(dataspace);
       H5Dclose(dataset);
 
+      if (s[i].layout.datatype == H5T_COMPOUND) H5Tclose(h5datatype);
     }
   }
 
@@ -529,7 +530,7 @@ int CommitData(hid_t h5location, int banks, storage *s) {
  */
 int CommitAttribute(hid_t h5location, attr *a) {
   int mstat = SUCCESS, i = 0;
-  hid_t attr_s, attr_d, ctype, memtype;
+  hid_t attr_s, attr_d, ctype, memtype, attr_t;
   herr_t h5status = 0;
   hsize_t dims[MAX_RANK], sdims[1] = {1};
   char *buffer = NULL;
@@ -563,11 +564,19 @@ int CommitAttribute(hid_t h5location, attr *a) {
     } else {
 
       /**
-       * Existing numeric attributes
+       * Existing numeric and compound attributes
        */
+      attr_t = a->layout.datatype;
+      if (a->layout.datatype == H5T_COMPOUND) {
+        attr_t = CommitAttrFileDatatype(a);
+        H5CheckStatus(attr_t);
+      }
+
       attr_d = H5Aopen(h5location, a->layout.name, H5P_DEFAULT);
-      H5Awrite(attr_d, a->layout.datatype, buffer); 
+      H5Awrite(attr_d, attr_t, buffer); 
       H5Aclose(attr_d);
+
+      if (a->layout.datatype == H5T_COMPOUND) H5Tclose(attr_t);
     }
   } else {
     if (a->layout.datatype == H5T_NATIVE_CHAR || a->layout.datatype == H5T_C_S1) {
@@ -594,7 +603,7 @@ int CommitAttribute(hid_t h5location, attr *a) {
     } else {
      
       /**
-       * Numeric attributes
+       * Numeric and compound attributes
        */
       attr_s = H5Screate(a->layout.dataspace);
       H5CheckStatus(attr_s);
@@ -607,13 +616,22 @@ int CommitAttribute(hid_t h5location, attr *a) {
         h5status = H5Sset_extent_simple(attr_s, a->layout.rank, dims, NULL);
         H5CheckStatus(h5status);
       }
+
+      attr_t = a->layout.datatype;
+
+      if (a->layout.datatype == H5T_COMPOUND) {
+        attr_t = CommitAttrFileDatatype(a);
+        H5CheckStatus(attr_t);
+      }
     
-      attr_d = H5Acreate2(h5location, a->layout.name, a->layout.datatype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
+      attr_d = H5Acreate2(h5location, a->layout.name, attr_t, attr_s, H5P_DEFAULT, H5P_DEFAULT);
       H5CheckStatus(attr_d);
       
-      H5Awrite(attr_d, a->layout.datatype, buffer); 
+      H5Awrite(attr_d, attr_t, buffer); 
       H5Sclose(attr_s);
       H5Aclose(attr_d);
+
+      if (a->layout.datatype == H5T_COMPOUND) H5Tclose(attr_t);
     }
   }
 
@@ -660,7 +678,6 @@ int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size) {
         hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
         H5CheckStatus(hstat);
       }
-
       
       H5Dclose(dataset);
 
@@ -718,6 +735,58 @@ hid_t CommitDatatype(storage *s) {
  * @return The committed datatype on success, CORE_ERR_HDF on failure
  */
 hid_t CommitFileDatatype(storage *s) {
+  hid_t h5datatype, type;
+  hsize_t adims[MAX_RANK];
+  herr_t h5status;
+  unsigned int i = 0, j = 0;
+  size_t c_size = 0;
+
+  h5datatype = H5Tcreate(H5T_COMPOUND, s->layout.compound_size);
+  for (i = 0; i < s->compound_fields; i++) {
+    if (s->field[i].layout.datatype > 0) {
+
+      // Special handling for char datatype
+      if (s->field[i].layout.datatype == H5T_NATIVE_CHAR ||
+          s->field[i].layout.datatype == H5T_NATIVE_UCHAR) {
+        type = H5Tcopy(H5T_C_S1);
+        c_size = s->field[i].layout.elements;
+        H5Tset_size(type, c_size);
+        h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+            s->field[i].layout.field_offset, type);
+        H5CheckStatus(h5status);
+        H5Tclose(type);
+
+      } else {
+        if (s->field[i].layout.elements > 1) {
+          for (j = 0; j < MAX_RANK; j++) {
+            adims[j] = s->field[i].layout.dims[j];
+          }
+          type = H5Tarray_create(s->field[i].layout.datatype, s->field[i].layout.rank, adims);
+          h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+              s->field[i].layout.field_offset, type);
+          H5CheckStatus(h5status);
+          H5Tclose(type);
+        } else {
+          type = s->field[i].layout.datatype;
+          h5status = H5Tinsert(h5datatype, s->field[i].layout.name,
+              s->field[i].layout.field_offset, type);
+          H5CheckStatus(h5status);
+        }
+      }
+    }
+  }
+  return h5datatype;
+}
+
+/**
+ * @brief
+ * Commit the compound datatype for attribute to the file
+ *
+ * @param s The attribute structure
+ *
+ * @return The committed datatype on success, CORE_ERR_HDF on failure
+ */
+hid_t CommitAttrFileDatatype(attr *s) {
   hid_t h5datatype, type;
   hsize_t adims[MAX_RANK];
   herr_t h5status;

@@ -44,6 +44,7 @@ pool* PoolLoad(module *m, unsigned int pid) {
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->storage[i].attr[j].memory = NULL;
+      p->storage[i].attr[j].compound_fields = 0;
     
       /* Pool dataset attribute fields */
       p->storage[i].attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));
@@ -67,6 +68,7 @@ pool* PoolLoad(module *m, unsigned int pid) {
   for (j = 0; j < m->layer.init.options; j++) {
     p->board->attr[j].layout = (schema) ATTR_STORAGE_END;
     p->board->attr[j].memory = NULL;
+    p->board->attr[j].compound_fields = 0;
       
     /* Board attribute fields */
     p->board->attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));
@@ -102,6 +104,7 @@ pool* PoolLoad(module *m, unsigned int pid) {
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->task->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->task->storage[i].attr[j].memory = NULL;
+      p->task->storage[i].attr[j].compound_fields = 0;
 
       /* Task dataset attribute fields */
       p->task->storage[i].attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));

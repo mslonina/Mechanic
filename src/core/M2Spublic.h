@@ -420,5 +420,6 @@ int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size);
 size_t GetPadding(unsigned int elements, size_t datatype_size);
 hid_t CommitDatatype(storage *s);
 hid_t CommitFileDatatype(storage *s);
+hid_t CommitAttrFileDatatype(attr *s);
 
 #endif

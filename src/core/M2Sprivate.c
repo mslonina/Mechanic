@@ -474,6 +474,9 @@ int CheckAttributeLayout(attr *a) {
       }
       storage_size = a->layout.compound_size;
       datatype_size = a->layout.compound_size;
+      
+      a->layout.storage_elements = GetSize(a->layout.rank, a->layout.dims);
+      a->layout.elements = GetSize(a->layout.rank, a->layout.dims);
     } else {
       storage_size = a->layout.datatype_size;
       datatype_size = a->layout.datatype_size;
