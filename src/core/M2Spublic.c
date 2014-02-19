@@ -433,8 +433,14 @@ void FreeMemoryLayout(int banks, storage *s) {
 
   for (i = 0; i < banks; i++) {
     if (s[i].layout.rank > 0) {
-      for (j = 0; j < s[i].attr_banks; j++) {
-        FreeAttribute(&s[i].attr[j]);
+      if (s[i].attr) {
+        for (j = 0; j < s[i].attr_banks; j++) {
+          FreeAttribute(&s[i].attr[j]);
+        }
+        free(s[i].attr);
+      }
+      if (s[i].field) {
+        free(s[i].field);
       }
       if (s[i].memory) {
         Free(&s[i]);

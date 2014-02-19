@@ -435,14 +435,12 @@ void TaskFinalize(module *m, pool *p, task *t) {
         for (j = 0; j < t->storage[i].attr_banks; j++) {
           if (t->storage[i].attr[j].layout.name) free(t->storage[i].attr[j].layout.name);
         }
-        free(t->storage[i].attr);
       }
 
       if (t->storage[i].field) {
         for (j = 0; j < t->storage[i].compound_fields; j++) {
           if (t->storage[i].field[j].layout.name) free(t->storage[i].field[j].layout.name);
         }
-        free(t->storage[i].field);
       }
     }
 

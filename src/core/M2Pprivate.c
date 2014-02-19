@@ -618,20 +618,12 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p) {
     if (p->storage) {
-      for (i = 0; i < p->pool_banks; i++) {
-        free(p->storage[i].attr);
-        free(p->storage[i].field);
-      }
       FreeMemoryLayout(p->pool_banks, p->storage);
       free(p->storage);
     }
 
     if (p->task) {
       if (p->task->storage) {
-        for (i = 0; i < p->task_banks; i++) {
-          free(p->task->storage[i].attr);
-          free(p->task->storage[i].field);
-        }
         FreeMemoryLayout(p->task_banks, p->task->storage);
         free(p->task->storage);
       }
@@ -656,7 +648,6 @@ void PoolFinalize(module *m, pool *p) {
         free(p->board->attr[i].layout.name);
       }
       FreeMemoryLayout(1, p->board);
-      free(p->board->attr);
       free(p->board);
     }
 
