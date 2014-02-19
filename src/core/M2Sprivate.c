@@ -141,8 +141,11 @@ int Storage(module *m, pool *p) {
   /* Compound fields, if any */
   for (i = 0; i < p->pool_banks; i++) {
     p->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, p->storage[i].field);
+    for (j = 0; j < p->storage[i].attr_banks; j++) {
+      p->storage[i].attr[j].compound_fields = GetFields(m->layer.init.compound_fields, p->storage[i].attr[j].field);
+    }
   }
-  
+
   CheckLayout(m, p->pool_banks, p->storage);
   CommitMemoryLayout(p->pool_banks, p->storage);
 
@@ -169,6 +172,9 @@ int Storage(module *m, pool *p) {
   /* Compound fields, if any */
   for (i = 0; i < p->task_banks; i++) {
     p->task->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, p->task->storage[i].field);
+    for (j = 0; j < p->task->storage[i].attr_banks; j++) {
+      p->task->storage[i].attr[j].compound_fields = GetFields(m->layer.init.compound_fields, p->task->storage[i].attr[j].field);
+    }
   }
   
   CheckLayout(m, p->task_banks, p->task->storage);
@@ -375,9 +381,9 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
     if (s[i].layout.datatype == H5T_COMPOUND) {
       for (j = 0; j < s[i].compound_fields; j++) {
         mstat = CheckFieldLayout(&s[i].field[j]);
-        storage_size += s[i].field[j].layout.storage_size;
-        datatype_size += s[i].field[j].layout.size;
       }
+      storage_size = s[i].layout.compound_size;
+      datatype_size = s[i].layout.compound_size;
     } else {
       storage_size = s[i].layout.datatype_size;
       datatype_size = s[i].layout.datatype_size;
@@ -405,6 +411,7 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
  */
 int CheckAttributeLayout(attr *a) {
   int j = 0, mstat = SUCCESS;
+  size_t storage_size = 0, datatype_size = 0;
 
     if (a->layout.name == NULL) {
       Message(MESSAGE_ERR, "Attribute name is required\n");
@@ -448,19 +455,33 @@ int CheckAttributeLayout(attr *a) {
       a->layout.offsets[j] = 0; // Offsets are calculated automatically
     }
 
-    a->layout.mpi_datatype = GetMpiDatatype(a->layout.datatype);
-    a->layout.datatype_size = H5Tget_size(a->layout.datatype);
+    if (a->layout.datatype != H5T_COMPOUND) {
+      a->layout.mpi_datatype = GetMpiDatatype(a->layout.datatype);
+      a->layout.datatype_size = H5Tget_size(a->layout.datatype);
     
-    if (a->layout.datatype == H5T_NATIVE_CHAR || a->layout.datatype == H5T_C_S1) {
-      a->layout.storage_elements = CONFIG_LEN;
-      a->layout.elements = CONFIG_LEN;
-    } else {
-      a->layout.storage_elements = GetSize(a->layout.rank, a->layout.dims);
-      a->layout.elements = GetSize(a->layout.rank, a->layout.dims);
+      if (a->layout.datatype == H5T_NATIVE_CHAR || a->layout.datatype == H5T_C_S1) {
+        a->layout.storage_elements = CONFIG_LEN;
+        a->layout.elements = CONFIG_LEN;
+      } else {
+        a->layout.storage_elements = GetSize(a->layout.rank, a->layout.dims);
+        a->layout.elements = GetSize(a->layout.rank, a->layout.dims);
+      }
     }
 
-    a->layout.storage_size = a->layout.storage_elements * a->layout.datatype_size;
-    a->layout.size = a->layout.elements * a->layout.datatype_size;
+    if (a->layout.datatype == H5T_COMPOUND) {
+      for (j = 0; j < a->compound_fields; j++) {
+        mstat = CheckFieldLayout(&a->field[j]);
+      }
+      storage_size = a->layout.compound_size;
+      datatype_size = a->layout.compound_size;
+    } else {
+      storage_size = a->layout.datatype_size;
+      datatype_size = a->layout.datatype_size;
+    }
+
+    a->layout.datatype_size = datatype_size;
+    a->layout.storage_size = a->layout.storage_elements * storage_size;
+    a->layout.size = a->layout.elements * datatype_size;
     Message(MESSAGE_DEBUG, "Layout attr '%s': elements %d, storage_elements %d, size = %zu, storage_size = %zu\n",
         a->layout.name, a->layout.storage_elements, a->layout.elements, a->layout.size, a->layout.storage_size);
 

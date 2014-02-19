@@ -69,6 +69,7 @@ typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   unsigned char* memory; /**< The memory block */
   field *field; /**< Compound datatype fields */
+  unsigned short compound_fields; /**< Number of compound datatype fields in use */
 } attr;
 
 /**
