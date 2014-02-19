@@ -370,6 +370,9 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype) {
  * @param s The storage object
  */
 void FreeAttribute(attr *s) {
+  if (s->field) {
+    free(s->field);
+  }
   if (s->memory) free(s->memory);
 }
 

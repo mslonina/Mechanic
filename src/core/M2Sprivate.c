@@ -138,7 +138,6 @@ int Storage(module *m, pool *p) {
     p->storage[i].layout.storage_type = STORAGE_GROUP;
   }
 
-
   /* Compound fields, if any */
   for (i = 0; i < p->pool_banks; i++) {
     p->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, p->storage[i].field);
