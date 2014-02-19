@@ -368,6 +368,13 @@ document and uses all available hooks.
   - Connecting external Fortran subroutine:
     [mechanic_module_ex_ffc.c](fortran/mechanic_module_ex_ffc.c)
 
+#### Experimental features
+  - Using compound datatypes (structures):
+    [mechanic_module_ex_compound.c](c/mechanic_module_ex_compound.c)
+
+  - Using compound datatypes with compound attributes:
+    [mechanic_module_ex_compound_attr.c](c/mechanic_module_ex_compound_attr.c)
+
 #### Compilation
 
     mpicc -std=c99 -fPIC -Dpic -shared -lhdf5 -lhdf5_hl -lmechanic \

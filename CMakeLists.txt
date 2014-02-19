@@ -196,7 +196,7 @@ if (BUILD_VENDOR_RNGS)
 endif (BUILD_VENDOR_RNGS)
 
 if (BUILD_MODULES)
-  add_subdirectory(examples/modules)
+    add_subdirectory(examples/modules)
 endif (BUILD_MODULES)
 
 SET (CPACK_PACKAGE_DESCRIPTION_SUMMARY "Mechanic")

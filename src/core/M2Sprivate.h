@@ -13,11 +13,13 @@
 
 int CommitStorageLayout(module *m, pool *p);
 int Storage(module *m, pool *p);
-int CheckLayout(module *m, int banks, storage *s);
+int CheckLayout(module *m, unsigned int banks, storage *s);
 int CheckAttributeLayout(attr *a);
+int CheckFieldLayout(field *f);
 
 int CreateDataset(hid_t location, storage *s, module *m, pool *p);
 
 unsigned int GetBanks(unsigned int allocated_banks, storage *s);
+unsigned int GetFields(unsigned int allocated_fields, field *f);
 
 #endif

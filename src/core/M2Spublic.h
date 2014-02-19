@@ -25,6 +25,7 @@
 #define HDF_TEMP_STORAGE 2 /**< Only temporary HDF5 file storage */
 
 #define STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The storage scheme default initializer */
+#define FIELD_STORAGE_END {.name = NULL, .dataspace = H5S_SIMPLE, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL, .field_offset = -1} /**< The storage scheme default initializer */
 #define ATTR_STORAGE_END {.name = NULL, .dataspace = H5S_NO_CLASS, .datatype = -1, .mpi_datatype = MPI_DOUBLE, .rank = 0, .dims = {0, 0, 0, 0}, .offsets = {0, 0, 0, 0}, .use_hdf = 0, .sync = 0, .storage_type = STORAGE_NULL} /**< The attribute storage scheme default initializer */
 
 /**
@@ -48,7 +49,17 @@ typedef struct {
   size_t datatype_size; /** @internal The size of the datatype */
   unsigned int elements; /**< @internal Number of data elements in the memory block */
   unsigned int storage_elements; /**< @internal Number of data elements in the storage block */
+  size_t compound_size; /**< @internal Compound datatype size */
+  size_t field_offset; /**< Compound datatype field offset */
 } schema;
+
+/**
+ * @struct field
+ * Defines the compound datatype field schema
+ */
+typedef struct {
+  schema layout;
+} field;
 
 /**
  * @struct attr
@@ -57,6 +68,8 @@ typedef struct {
 typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   unsigned char* memory; /**< The memory block */
+  field *field; /**< Compound datatype fields */
+  unsigned short compound_fields; /**< Number of compound datatype fields in use */
 } attr;
 
 /**
@@ -67,7 +80,9 @@ typedef struct {
   schema layout; /**< The memory/storage schema, @see schema */
   unsigned char *memory; /**< The memory block */
   attr *attr; /**< The dataset attributes */
+  field *field; /**< Compound datatype fields */
   unsigned short attr_banks; /**< Number of attribute banks in use */
+  unsigned short compound_fields; /**< Number of compound datatype fields in use */
 } storage;
 
 /**
@@ -401,5 +416,10 @@ void FreeMemoryLayout(int banks, storage *s);
 
 int CommitData(hid_t h5location, int banks, storage *s);
 int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size);
+
+size_t GetPadding(unsigned int elements, size_t datatype_size);
+hid_t CommitDatatype(storage *s);
+hid_t CommitFileDatatype(storage *s);
+hid_t CommitAttrFileDatatype(attr *s);
 
 #endif

@@ -13,7 +13,7 @@
  * @return The pool pointer, NULL otherwise
  */
 pool* PoolLoad(module *m, unsigned int pid) {
-  unsigned int i = 0, j = 0;
+  unsigned int i = 0, j = 0, k = 0;
   pool *p = NULL;
 
   /* Allocate pool pointer */
@@ -24,16 +24,34 @@ pool* PoolLoad(module *m, unsigned int pid) {
   p->storage = calloc(m->layer.init.banks_per_pool, sizeof(storage));
   if (!p->storage) Error(CORE_ERR_MEM);
 
-  /* Pool dataset attributes */
   for (i = 0; i < m->layer.init.banks_per_pool; i++) {
     p->storage[i].layout = (schema) STORAGE_END;
     p->storage[i].memory = NULL;
 
+    p->storage[i].compound_fields = 0;
+    p->storage[i].attr_banks = 0;
+   
+    /* Pool dataset fields */
+    p->storage[i].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    if (!p->storage[i].field) Error(CORE_ERR_MEM);
+    for (j = 0; j < m->layer.init.compound_fields; j++) {
+      p->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
+    }
+
+    /* Pool dataset attributes */
     p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
     if (!p->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->storage[i].attr[j].memory = NULL;
+      p->storage[i].attr[j].compound_fields = 0;
+    
+      /* Pool dataset attribute fields */
+      p->storage[i].attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));
+      if (!p->storage[i].attr[j].field) Error(CORE_ERR_MEM);
+      for (k = 0; k < m->layer.init.compound_fields; k++) {
+        p->storage[i].attr[j].field[k].layout = (schema) FIELD_STORAGE_END;
+      }
     }
   }
 
@@ -50,6 +68,14 @@ pool* PoolLoad(module *m, unsigned int pid) {
   for (j = 0; j < m->layer.init.options; j++) {
     p->board->attr[j].layout = (schema) ATTR_STORAGE_END;
     p->board->attr[j].memory = NULL;
+    p->board->attr[j].compound_fields = 0;
+      
+    /* Board attribute fields */
+    p->board->attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    if (!p->board->attr[j].field) Error(CORE_ERR_MEM);
+    for (k = 0; k < m->layer.init.compound_fields; k++) {
+      p->board->attr[j].field[k].layout = (schema) FIELD_STORAGE_END;
+    }
   }
 
   /* Allocate task pointer */
@@ -63,12 +89,29 @@ pool* PoolLoad(module *m, unsigned int pid) {
   for (i = 0; i < m->layer.init.banks_per_task; i++) {
     p->task->storage[i].layout = (schema) STORAGE_END;
     p->task->storage[i].memory = NULL;
+    
+    p->task->storage[i].compound_fields = 0;
+    p->task->storage[i].attr_banks = 0;
+
+    p->task->storage[i].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    if (!p->task->storage[i].field) Error(CORE_ERR_MEM);
+    for (j = 0; j < m->layer.init.compound_fields; j++) {
+      p->task->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
+    }
 
     p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
     if (!p->task->storage[i].attr) Error(CORE_ERR_MEM);
     for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
       p->task->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->task->storage[i].attr[j].memory = NULL;
+      p->task->storage[i].attr[j].compound_fields = 0;
+
+      /* Task dataset attribute fields */
+      p->task->storage[i].attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));
+      if (!p->task->storage[i].attr[j].field) Error(CORE_ERR_MEM);
+      for (k = 0; k < m->layer.init.compound_fields; k++) {
+        p->task->storage[i].attr[j].field[k].layout = (schema) FIELD_STORAGE_END;
+      }
     }
   }
 
@@ -600,18 +643,12 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p) {
     if (p->storage) {
-      for (i = 0; i < p->pool_banks; i++) {
-        free(p->storage[i].attr);
-      }
       FreeMemoryLayout(p->pool_banks, p->storage);
       free(p->storage);
     }
 
     if (p->task) {
       if (p->task->storage) {
-        for (i = 0; i < p->task_banks; i++) {
-          free(p->task->storage[i].attr);
-        }
         FreeMemoryLayout(p->task_banks, p->task->storage);
         free(p->task->storage);
       }
@@ -636,7 +673,6 @@ void PoolFinalize(module *m, pool *p) {
         free(p->board->attr[i].layout.name);
       }
       FreeMemoryLayout(1, p->board);
-      free(p->board->attr);
       free(p->board);
     }
 

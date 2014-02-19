@@ -50,6 +50,7 @@ typedef struct {
   unsigned int banks_per_pool; /**< The maximum number of memory/storage banks per pool */
   unsigned int banks_per_task; /**< The maximum number of memory/storage banks per task */
   unsigned int attr_per_dataset; /**< The maximum number of attributes per dataset */
+  unsigned int compound_fields;
   int min_cpu_required; /**< The minimum number of CPUs required */
 } init;
 

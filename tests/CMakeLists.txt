@@ -34,6 +34,8 @@ set (
   ex_readfile_setup
   ex_taskcheckpoint
   ex_stage
+  ex_compound
+  ex_compound_attr
 )
 
 file(COPY ../examples/c/readfile.txt DESTINATION .)

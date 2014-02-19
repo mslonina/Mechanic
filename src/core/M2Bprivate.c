@@ -224,6 +224,7 @@ int ModuleInit(module *m) {
   if (m->layer.init.banks_per_pool < 1) m->layer.init.banks_per_pool = 1;
   if (m->layer.init.banks_per_task < 1) m->layer.init.banks_per_task = 1;
   if (m->layer.init.attr_per_dataset < 1) m->layer.init.attr_per_dataset = 1;
+  if (m->layer.init.compound_fields < 1) m->layer.init.compound_fields = 1;
 
   return mstat;
 }
