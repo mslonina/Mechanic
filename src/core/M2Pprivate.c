@@ -302,16 +302,16 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 
   /* Broadcast pool setup */
   for (i = 0; i < p->board->attr_banks; i++) {
-    MPI_Bcast(&(p->board->attr[i].memory[0]), p->board->attr[i].layout.elements,
-        p->board->attr[i].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(&(p->board->attr[i].memory[0]), p->board->attr[i].layout.storage_size,
+        MPI_CHAR, MASTER, MPI_COMM_WORLD);
   }
 
   /* Broadcast task banks attributes */
   for (i = 0; i < p->task_banks; i++) {
     if (p->task->storage[i].layout.storage_type != STORAGE_GROUP) {
       for (j = 0; j < p->task->storage[i].attr_banks; j++) {
-        MPI_Bcast(&(p->task->storage[i].attr[j].memory[0]), p->task->storage[i].attr[j].layout.elements,
-            p->task->storage[i].attr[j].layout.mpi_datatype, MASTER, MPI_COMM_WORLD);
+        MPI_Bcast(&(p->task->storage[i].attr[j].memory[0]), p->task->storage[i].attr[j].layout.storage_size,
+            MPI_CHAR, MASTER, MPI_COMM_WORLD);
       }
     }
   }
