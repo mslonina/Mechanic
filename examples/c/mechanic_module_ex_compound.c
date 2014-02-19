@@ -20,9 +20,17 @@
  *
  *    h5dump -d/Pools/pool-0000/Tasks/result mechanic-master-00.h5
  *
+ * Limitations
+ * -----------
+ *
+ * - No support for pointers (including char*)
+ * - No support for nested structs
  */
 #include "mechanic.h"
 
+/**
+ * Datatypes
+ */
 typedef struct {
   int id;
   double temperature;
@@ -54,6 +62,8 @@ int Init(init *i) {
  * Implements Storage()
  */
 int Storage(pool *p) {
+
+  // Pool bank 0
   p->storage[0].layout = (schema) {
     .name = "pool-sensors",
     .rank = 2,
@@ -66,6 +76,7 @@ int Storage(pool *p) {
     .compound_size = sizeof(sensor_t),
   };
 
+  // Field definition for the pool bank 0
   p->storage[0].field[0].layout = 
     (schema) {.name = "id", .datatype = H5T_NATIVE_INT, 
       .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, id)};
@@ -90,6 +101,7 @@ int Storage(pool *p) {
     (schema) {.name = "points", .datatype = H5T_NATIVE_SHORT, 
       .rank = 1, .dims = {3}, .field_offset = HOFFSET(sensor_t, points)};
 
+  // Pool bank 1
   p->storage[1].layout = (schema) {
     .name = "pool-particles",
     .rank = 2,
@@ -102,6 +114,7 @@ int Storage(pool *p) {
     .compound_size = sizeof(particle_t)
   };
 
+  // Field definition for the pool bank 1
   p->storage[1].field[0].layout = 
     (schema) {.name = "id", .datatype = H5T_NATIVE_LONG, 
       .rank = 1, .dims = {1}, .field_offset = HOFFSET(particle_t, id)};
@@ -122,6 +135,7 @@ int Storage(pool *p) {
     (schema) {.name = "geo-data", .datatype = H5T_NATIVE_DOUBLE, 
       .rank = 3, .dims = {4,5,6}, .field_offset = HOFFSET(particle_t, geo_data)};
  
+  // Task bank 0
   p->task->storage[0].layout = (schema) {
     .name = "sensors",
     .rank = 2,
@@ -134,6 +148,7 @@ int Storage(pool *p) {
     .compound_size = sizeof(sensor_t)
   };
   
+  // Field definition for the task bank 0
   p->task->storage[0].field[0].layout = 
     (schema) {.name = "id", .datatype = H5T_NATIVE_INT, 
       .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, id)};
@@ -158,6 +173,7 @@ int Storage(pool *p) {
     (schema) {.name = "points", .datatype = H5T_NATIVE_SHORT, 
       .rank = 1, .dims = {3}, .field_offset = HOFFSET(sensor_t, points)};
 
+  // Task bank 1
   p->task->storage[1].layout = (schema) {
     .name = "sensors-board",
     .rank = TASK_BOARD_RANK,
@@ -171,6 +187,7 @@ int Storage(pool *p) {
     .compound_size = sizeof(sensor_t)
   };
   
+  // Field definition for the task bank 1
   p->task->storage[1].field[0].layout = 
     (schema) {.name = "id", .datatype = H5T_NATIVE_INT, 
       .rank = 1, .dims = {1}, .field_offset = HOFFSET(sensor_t, id)};
@@ -195,6 +212,7 @@ int Storage(pool *p) {
     (schema) {.name = "points", .datatype = H5T_NATIVE_SHORT, 
       .rank = 1, .dims = {3}, .field_offset = HOFFSET(sensor_t, points)};
 
+  // Task bank 2
   p->task->storage[2].layout = (schema) {
     .name = "particles",
     .rank = TASK_BOARD_RANK,
@@ -208,6 +226,7 @@ int Storage(pool *p) {
     .compound_size = sizeof(particle_t)
   };
 
+  // Field definition for the task bank 2
   p->task->storage[2].field[0].layout = 
     (schema) {.name = "id", .datatype = H5T_NATIVE_LONG, 
       .rank = 1, .dims = {1}, .field_offset = HOFFSET(particle_t, id)};
@@ -279,13 +298,6 @@ int PoolPrepare(pool **all, pool *p) {
   MWriteData(p, "pool-particles", &particles[0][0]);
 
   return SUCCESS;
-}
-
-/**
- * Implements PoolProcess()
- */
-int PoolProcess(pool **all, pool *p) {
-  return POOL_FINALIZE;
 }
 
 /**
