@@ -80,7 +80,7 @@ typedef struct {
   attr *attr; /**< The dataset attributes */
   field *field; /**< Compound datatype fields */
   unsigned short attr_banks; /**< Number of attribute banks in use */
-  unsigned int compound_fields; /**< Number of compound datatype fields in use */
+  unsigned short compound_fields; /**< Number of compound datatype fields in use */
 } storage;
 
 /**
