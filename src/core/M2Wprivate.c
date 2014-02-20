@@ -16,6 +16,7 @@ int Work(module *m) {
   unsigned int pid = 0;
   pool **p = NULL;
   int pool_create;
+  int disable_task_loop = 0;
 
   double cpu_time;
   clock_t time_in, time_out;
@@ -96,13 +97,22 @@ int Work(module *m) {
           
           // The Task loop
           taskloop_in = clock();
-          if (m->node == MASTER) {
-            mstat = M2Master(m, p[pid]);
-            CheckStatus(mstat);
+
+          MReadOption(p[pid], "disable-task-loop", &disable_task_loop);
+          if (disable_task_loop == 0) {
+            if (m->node == MASTER) {
+              mstat = M2Master(m, p[pid]);
+              CheckStatus(mstat);
+            } else {
+              mstat = M2Worker(m, p[pid]);
+              CheckStatus(mstat);
+            }
           } else {
-            mstat = M2Worker(m, p[pid]);
-            CheckStatus(mstat);
+            if (m->node == MASTER) {
+              Message(MESSAGE_INFO, "Task loop has been disabled for the pool %04d\n", p[pid]->pid);
+            }
           }
+          
           taskloop_out = clock();
           cpu_time = (double)(taskloop_out - taskloop_in)/CLOCKS_PER_SEC;
           if (m->node == MASTER && m->showtime) Message(MESSAGE_INFO, "Taskloop completed. CPU time: %f\n", cpu_time);
