@@ -29,6 +29,8 @@ int Master(module *m, pool *p) {
   short ****board_buffer = NULL;
   int send_node;
   size_t header_size;
+  clock_t loop_in, loop_out;
+  double cpu_time;
 
   MPI_Status mpi_status;
   
@@ -82,6 +84,9 @@ int Master(module *m, pool *p) {
 
   // Specific for the restart mode. The restart file is already full of completed tasks
   if (p->completed == p->pool_size) goto finalize;
+
+  // Start the clock
+  loop_in = clock();
 
   // Send initial tasks to all workers
   for (i = 1; i < m->mpi_size; i++) {
@@ -214,6 +219,10 @@ int Master(module *m, pool *p) {
 
     if (p->completed == p->pool_size) break;
   }
+
+  loop_out = clock();
+  cpu_time = (double)(loop_out - loop_in)/CLOCKS_PER_SEC;
+  if (m->showtime) Message(MESSAGE_INFO, "Computation loop completed. CPU time: %f\n", cpu_time);
 
   Message(MESSAGE_DEBUG, "Completed %d tasks\n", p->completed);
 

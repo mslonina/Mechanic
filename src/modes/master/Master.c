@@ -28,6 +28,8 @@ int Master(module *m, pool *p) {
   size_t header_size;
   int tag = TAG_TERMINATE;
   int header[HEADER_SIZE] = HEADER_INIT;
+  clock_t loop_in, loop_out;
+  double cpu_time;
 
   task *t = NULL;
   checkpoint *c = NULL;
@@ -52,6 +54,9 @@ int Master(module *m, pool *p) {
 
   // Specific for the restart mode. The restart file is already full of completed tasks
   if (p->completed == p->pool_size) goto finalize;
+
+  // Start the clock
+  loop_in = clock();
 
   // Do all available tasks on the master node
   while (1) {
@@ -154,6 +159,10 @@ int Master(module *m, pool *p) {
 
     if (p->completed == p->pool_size) break;
   }
+
+  loop_out = clock();
+  cpu_time = (double)(loop_out - loop_in)/CLOCKS_PER_SEC;
+  if (m->showtime) Message(MESSAGE_INFO, "Computation loop completed. CPU time: %f\n", cpu_time);
 
   Message(MESSAGE_DEBUG, "Completed %d tasks\n", p->completed);
 
