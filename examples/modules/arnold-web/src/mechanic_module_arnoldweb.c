@@ -484,7 +484,7 @@ int TaskProcess(pool *p, task *t) {
 
   MWriteData(t, "state", &state[0]);
 
-  if (t->cid + 1 == snapshots) return TASK_FINALIZE;
+  if (t->cid + 1 == (unsigned int) snapshots) return TASK_FINALIZE;
   if (task_finalize == 1) return TASK_FINALIZE;
   return TASK_CHECKPOINT;
 }
