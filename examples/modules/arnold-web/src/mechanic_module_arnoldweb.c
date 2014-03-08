@@ -156,7 +156,7 @@ int Setup(setup *s) {
   };
   s->options[6] = (options) {
     .space="aweb", .name="configuration-set", 
-    .shortName='\0', .value="0", 
+    .shortName='\0', .value="-1", 
     .type=C_INT,
     .description="The configuration set to use"
   };
