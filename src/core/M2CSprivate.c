@@ -376,7 +376,7 @@ int ConfigDatatype(options c, MPI_Datatype *mpi_t) {
     displacements[i] = addresses[i+1] - addresses[0];
   }
 
-  mstat = MPI_Type_struct(6, block_lengths, displacements, types, mpi_t);
+  mstat = MPI_Type_create_struct(6, block_lengths, displacements, types, mpi_t);
   if (mstat != MPI_SUCCESS) Error(CORE_ERR_MPI);
 
   mstat = MPI_Type_commit(mpi_t);
