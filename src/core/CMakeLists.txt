@@ -51,13 +51,13 @@ set (
 
 add_library(libmechanic SHARED ${libsources})
 set_target_properties(libmechanic PROPERTIES OUTPUT_NAME mechanic)
-target_link_libraries(libmechanic hdf5 mpi)
+target_link_libraries(libmechanic hdf5 mpi dl)
 
 add_library(core ${coresources})
-target_link_libraries(core hdf5 mpi m libmechanic)
+target_link_libraries(core hdf5 mpi m libmechanic dl)
 
 add_executable(mechanic ${mainsources})
-target_link_libraries(mechanic core popt mpi hdf5 libmechanic)
+target_link_libraries(mechanic core popt mpi hdf5 libmechanic dl)
 
 install (TARGETS libmechanic DESTINATION lib)
 install (TARGETS mechanic DESTINATION bin)
