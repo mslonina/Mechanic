@@ -1,7 +1,7 @@
 Mechanic, the numerical framework and task managment system
 ===========================================================
 
-Copyright (c) 2009-2013, Authors (Torun Centre for Astronomy / Nicolaus Copernicus University)
+Copyright (c) 2009-2014, Authors (Torun Centre for Astronomy / Nicolaus Copernicus University)
 All rights reserved.
 
 MECHANIC was created to help solving many numerical problems by providing
@@ -11,7 +11,9 @@ its parts, please consider referring to the Authors by the following paper:
 
 Slonina M., Gozdziewski K., Migaszewski C.
 "Mechanic: the MPI/HDF code framework for dynamical astronomy"
-New Astronomy 2014
+New Astronomy, 2015, Vol. 34, pp.98-107
+DOI: 10.1016/j.newast.2014.05.006
+
 http://arxiv.org/abs/1401.6344
 
 http://github.com/mslonina/Mechanic

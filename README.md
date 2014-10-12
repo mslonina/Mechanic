@@ -18,7 +18,7 @@ as well as desktop computers and works equally well (the Linux and Mac OS X oper
 systems are actively maintained).
 
 Mechanic is BSD-licensed. The source code package comes with few example
-modules and is freely available at [the project page](http://git.ca.umk.pl).
+modules and is freely available at [the project page](http://github.com/mslonina/mechanic).
 
 - [Installation](INSTALL.md)
 - [Short introduction](Overview.md)
@@ -29,7 +29,9 @@ by the following paper:
 
 Slonina M., Gozdziewski K., Migaszewski C.
 "Mechanic: the MPI/HDF code framework for dynamical astronomy"
-New Astronomy 2014
+New Astronomy, 2015, Vol. 34, pp.98-107
+DOI: 10.1016/j.newast.2014.05.006
+
 http://arxiv.org/abs/1401.6344
 
 _This project is supported by the Polish Ministry of Science and Higher Education through
