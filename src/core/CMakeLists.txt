@@ -1,10 +1,12 @@
 # http://stackoverflow.com/questions/11429055/cmake-how-create-a-single-shared-library-from-all-static-libraries-of-subprojec
-include_directories(. .. ${PROJECT_BINARY_DIR} ${PROJECT_BINARY_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/src/core ${PROJECT_BINARY_DIR}/src)
 
 set (
   mainsources
   M2Main.c
+  M2Main.h
   M2Core.c
+  M2Core.h
 )
 
 set (
@@ -24,13 +26,21 @@ set (
 set (
   coresources
   M2Aprivate.c
+  M2Aprivate.h
   M2Bprivate.c
+  M2Bprivate.h
   M2Cprivate.c
+  M2Cprivate.h
   M2CSprivate.c
+  M2CSprivate.h
   M2Pprivate.c
+  M2Pprivate.h
   M2Rprivate.c
+  M2Rprivate.h
   M2Sprivate.c
+  M2Sprivate.h
   M2Wprivate.c
+  M2Wprivate.h
 )
 
 set (
