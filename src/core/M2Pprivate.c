@@ -385,7 +385,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   H5CheckStatus(h5dataset);
 
   for (j = 0; j < p->board->attr_banks; j++) {
-    mstat = CommitAttribute(h5dataset, &p->board->attr[j]);
+    mstat = CommitAttribute(h5pool, &p->board->attr[j]);
     CheckStatus(mstat);
   }
 
