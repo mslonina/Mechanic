@@ -253,11 +253,12 @@ int main(int argc, char **argv) {
   cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
 
   /**
-   * Write global attributes here, such as master cpu_time
+   * Perform final file operations
    */
   if (node == MASTER && module->mode != RESTART_MODE) {
+    h5location = H5Fopen(module->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+
     if (module->stats) {
-      h5location = H5Fopen(module->filename, H5F_ACC_RDWR, H5P_DEFAULT);
 
       attr_s = H5Screate(H5S_SCALAR);
       attr_d = H5Acreate2(h5location, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
@@ -271,8 +272,9 @@ int main(int argc, char **argv) {
       H5Aclose(attr_d);
       H5Sclose(attr_s);
 
-      H5Fclose(h5location);
     }
+
+    H5Fclose(h5location);
   }
 
   /**
