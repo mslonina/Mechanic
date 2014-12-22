@@ -293,6 +293,18 @@ unsigned long long**** AllocateULLong4(storage *s);
 float**** AllocateFloat4(storage *s);
 double**** AllocateDouble4(storage *s);
 
+/* 5D */
+int***** AllocateInt5(storage *s);
+short***** AllocateShort5(storage *s);
+long***** AllocateLong5(storage *s);
+long long***** AllocateLLong5(storage *s);
+unsigned int***** AllocateUInt5(storage *s);
+unsigned short***** AllocateUShort5(storage *s);
+unsigned long long***** AllocateULLong5(storage *s);
+float***** AllocateFloat5(storage *s);
+double***** AllocateDouble5(storage *s);
+
+
 int Allocate(storage *s, size_t size, size_t datatype); /**< Memory allocator */
 void Free(storage *s); /**< Garbage cleaner */
 int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory allocator */
@@ -387,7 +399,7 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
       _dim3 = _mobject->storage[_msindex].layout.storage_dim[3];\
       if (_mobject->storage[_msindex].layout.storage_size > 0) {\
         _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype***))\
-            + (_dim0 * _dim1 * _dim2 * _dim3 * sizeof(_mtype)));\
+          + (_dim0 * _dim1 * _dim2 * _dim3 * sizeof(_mtype)));\
         if (_mbuffer) {\
           for (_i = 0; _i < _dim0; _i++) {\
             _mbuffer[_i] = (_mtype***)(_mbuffer + _dim0) + _i * _dim1;\
@@ -406,6 +418,52 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
     }\
   } else {\
     Message(MESSAGE_ERR, "MAllocate4: Invalid object\n");\
+    Error(CORE_ERR_MEM);\
+  }
+
+/**
+ * @macro
+ * Allocate the 5D contiguous array
+ */
+#define MAllocate5(_mobject, _mstorage_name, _mbuffer, _mtype)\
+  if (_mobject) {\
+    int _msindex;\
+    unsigned int _i = 0, _j = 0, _k = 0, _l = 0, _dim0, _dim1, _dim2, _dim3, _dim4;\
+    _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
+    if (_msindex < 0) {\
+      Message(MESSAGE_ERR, "MAllocate5: Storage bank '%s' could not be found\n", _mstorage_name);\
+      Error(CORE_ERR_MEM);\
+    } else {\
+      _dim0 = _mobject->storage[_msindex].layout.storage_dim[0];\
+      _dim1 = _mobject->storage[_msindex].layout.storage_dim[1];\
+      _dim2 = _mobject->storage[_msindex].layout.storage_dim[2];\
+      _dim3 = _mobject->storage[_msindex].layout.storage_dim[3];\
+      _dim4 = _mobject->storage[_msindex].layout.storage_dim[4];\
+      if (_mobject->storage[_msindex].layout.storage_size > 0) {\
+        _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype***))\
+            + (_dim0 * _dim1 * _dim2 * _dim3 * sizeof(_mtype****)) + (_dim0 * _dim1 * _dim2 * _dim3 * _dim4 * sizeof(_mtype)));\
+        if (_mbuffer) {\
+          for (_i = 0; _i < _dim0; _i++) {\
+            _mbuffer[_i] = (_mtype****)(_mbuffer + _dim0) + _i * _dim1;\
+            for (_j = 0; _j < _dim1; _j++) {\
+              _mbuffer[_i][_j] = (_mtype***)(_mbuffer + _dim0 + _dim0 * _dim1) + _i * _dim1 * _dim2 + _j * _dim2;\
+              for (_k = 0; _k < _dim2; _k++) {\
+                _mbuffer[_i][_j][_k] = (_mtype**)(_mbuffer + _dim0 + _dim0 * _dim1 + _dim0 * _dim1 * _dim2) + \
+                  _i * _dim1 * _dim2 * _dim3 + _j * _dim2 * _dim3 + _k * _dim3;\
+                for (_l = 0; _l < _dim3; _l++) {\
+                  _mbuffer[_i][_j][_k][_l] = (_mtype*)(_mbuffer + _dim0 + _dim0 * _dim1 + _dim0 * _dim1 * _dim2 + _dim0 * _dim1 * _dim2 * _dim3) + \
+                    _i * _dim1 * _dim2 * _dim3 * _dim4 + _j * _dim2 * _dim3 * _dim4 + _k * _dim3 * _dim4 + _l * _dim4;\
+                }\
+              }\
+            }\
+          }\
+        } else {\
+          Error(CORE_ERR_MEM);\
+        }\
+      }\
+    }\
+  } else {\
+    Message(MESSAGE_ERR, "MAllocate5: Invalid object\n");\
     Error(CORE_ERR_MEM);\
   }
 

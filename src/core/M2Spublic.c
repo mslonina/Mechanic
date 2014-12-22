@@ -140,6 +140,59 @@ ALLOCATE4(AllocateFloat4, float)
 ALLOCATE4(AllocateDouble4, double)
 
 /**
+ * Generic-type macro for 5D memory allocation
+ *
+ * @brief Allocate 5D memory buffer
+ *
+ * @param s The storage object for which the array has to be allocated
+ *
+ * @return Allocated array, NULL otherwise
+ */
+#define ALLOCATE5(y,x)\
+  x***** y(storage *s) {\
+    x***** array = NULL;\
+    unsigned int i = 0, j = 0, k = 0, l = 0;\
+    unsigned int dim0, dim1, dim2, dim3, dim4;\
+    dim0 = s->layout.storage_dim[0];\
+    dim1 = s->layout.storage_dim[1];\
+    dim2 = s->layout.storage_dim[2];\
+    dim3 = s->layout.storage_dim[3];\
+    dim4 = s->layout.storage_dim[4];\
+    if (s->layout.storage_size > 0) {\
+      array = malloc((dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x***))\
+          + (dim0*dim1*dim2*dim3 * sizeof(x****)) + (dim0*dim1*dim2*dim3*dim4 * sizeof(x)));\
+      if (array) {\
+        for (i = 0; i < dim0; i++) {\
+          array[i] = (x****)(array + dim0) + i * dim1;\
+          for (j = 0; j < dim1; j++) {\
+            array[i][j] = (x***)(array + dim0 + dim0*dim1) + i*dim1*dim2 + j*dim2;\
+            for (k = 0; k < dim2; k++) {\
+              array[i][j][k] = (x**)(array + dim0 + dim0*dim1 + dim0*dim1*dim2) + i*dim1*dim2*dim3 + j*dim2*dim3 + k*dim3;\
+              for (l = 0; l < dim3; l++) {\
+                array[i][j][k][l] = (x*)(array + dim0 + dim0*dim1 + dim0*dim1*dim2 + dim0*dim1*dim2*dim3) + \
+                  i*dim1*dim2*dim3*dim4 + j*dim2*dim3*dim4 + k*dim3*dim4 + l*dim4;\
+              }\
+            }\
+          }\
+        }\
+      } else {\
+        Error(CORE_ERR_MEM);\
+      }\
+    }\
+    return array;\
+  }\
+
+ALLOCATE5(AllocateInt5, int)
+ALLOCATE5(AllocateShort5, short)
+ALLOCATE5(AllocateLong5, long)
+ALLOCATE5(AllocateLLong5, long long)
+ALLOCATE5(AllocateUInt5, unsigned int)
+ALLOCATE5(AllocateUShort5, unsigned short)
+ALLOCATE5(AllocateULLong5, unsigned long long)
+ALLOCATE5(AllocateFloat5, float)
+ALLOCATE5(AllocateDouble5, double)
+
+/**
  * @brief Get the 1D size of the array
  *
  * @param rank The rank of the array
