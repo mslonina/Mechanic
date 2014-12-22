@@ -34,27 +34,27 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
   t->cid = 0;
   t->node = p->node;
 
-  t->storage = calloc(m->layer.init.banks_per_task, sizeof(storage));
+  t->storage = calloc(m->layer->init->banks_per_task, sizeof(storage));
   if (!t->storage) Error(CORE_ERR_MEM);
 
   /* Initialize task banks */
-  for (i = 0; i < m->layer.init.banks_per_task; i++) {
+  for (i = 0; i < m->layer->init->banks_per_task; i++) {
     t->storage[i].layout = (schema) STORAGE_END;
     t->storage[i].memory = NULL;
 
     t->storage[i].compound_fields = 0;
     t->storage[i].attr_banks = 0;
 
-    t->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
+    t->storage[i].attr = calloc(m->layer->init->attr_per_dataset, sizeof(attr));
     if (!t->storage[i].attr) Error(CORE_ERR_MEM);
-    for (j = 0; j < m->layer.init.attr_per_dataset;  j++) {
+    for (j = 0; j < m->layer->init->attr_per_dataset;  j++) {
       t->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       t->storage[i].attr[j].memory = NULL;
     }
-    
-    t->storage[i].field = calloc(m->layer.init.compound_fields, sizeof(field));
+
+    t->storage[i].field = calloc(m->layer->init->compound_fields, sizeof(field));
     if (!t->storage[i].field) Error(CORE_ERR_MEM);
-    for (j = 0; j < m->layer.init.compound_fields; j++) {
+    for (j = 0; j < m->layer->init->compound_fields; j++) {
       t->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
     }
   }
@@ -76,8 +76,8 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
 
     /* Memory size */
     for (j = 0; j < t->storage[i].layout.rank; j++) {
-      t->storage[i].layout.storage_dim[j] = 
-        t->storage[i].layout.dims[j] = 
+      t->storage[i].layout.storage_dim[j] =
+        t->storage[i].layout.dims[j] =
         p->task->storage[i].layout.dims[j];
     }
 
@@ -120,7 +120,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
           p->task->storage[i].field[j].layout.rank;
 
         for (k = 0; k < MAX_RANK; k++) {
-          t->storage[i].field[j].layout.dims[k] = 
+          t->storage[i].field[j].layout.dims[k] =
             p->task->storage[i].field[j].layout.dims[k];
         }
 
@@ -128,16 +128,16 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
         len = strlen(p->task->storage[i].field[j].layout.name);
         t->storage[i].field[j].layout.name = calloc(len+1, sizeof(char*));
         if (!t->storage[i].field[j].layout.name) Error(CORE_ERR_MEM);
-        
+
         strncpy(t->storage[i].field[j].layout.name, p->task->storage[i].field[j].layout.name, len);
         t->storage[i].field[j].layout.name[len] = CONFIG_NULL;
       }
     }
-    
+
     /**
      * Attributes
      */
-    
+
     for (j = 0; j < t->storage[i].attr_banks; j++) {
 
       if (p->task->storage[i].attr[j].layout.name != NULL) {
@@ -148,15 +148,15 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
         strncpy(t->storage[i].attr[j].layout.name, p->task->storage[i].attr[j].layout.name, len);
         t->storage[i].attr[j].layout.name[len] = CONFIG_NULL;
       }
-      
+
       t->storage[i].attr[j].layout.rank = p->task->storage[i].attr[j].layout.rank;
-      
+
       for (k = 0; k < t->storage[i].attr[j].layout.rank; k++) {
         t->storage[i].attr[j].layout.storage_dim[k] =
           t->storage[i].attr[j].layout.dims[k] =
           p->task->storage[i].attr[j].layout.dims[k];
       }
-      
+
       t->storage[i].attr[j].layout.sync             = p->task->storage[i].attr[j].layout.sync;
       t->storage[i].attr[j].layout.storage_type     = p->task->storage[i].attr[j].layout.storage_type;
       t->storage[i].attr[j].layout.dataspace        = p->task->storage[i].attr[j].layout.dataspace;
@@ -192,7 +192,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
             p->task->storage[i].attr[j].field[k].layout.rank;
 
           for (l = 0; l < MAX_RANK; l++) {
-            t->storage[i].attr[j].field[k].layout.dims[l] = 
+            t->storage[i].attr[j].field[k].layout.dims[l] =
               p->task->storage[i].attr[j].field[k].layout.dims[l];
           }
 
@@ -200,7 +200,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
           len = strlen(p->task->storage[i].attr[j].field[k].layout.name);
           t->storage[i].attr[j].field[k].layout.name = calloc(len+1, sizeof(char*));
           if (!t->storage[i].attr[j].field[k].layout.name) Error(CORE_ERR_MEM);
-          
+
           strncpy(t->storage[i].attr[j].field[k].layout.name, p->task->storage[i].attr[j].field[k].layout.name, len);
           t->storage[i].attr[j].field[k].layout.name[len] = CONFIG_NULL;
         }
@@ -214,7 +214,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
   /* Copy attributes from p->task to the task object */
   for (i = 0; i < p->task_banks; i++) {
     for (j = 0; j < t->storage[i].attr_banks; j++) {
-      CopyData(p->task->storage[i].attr[j].memory, t->storage[i].attr[j].memory, 
+      CopyData(p->task->storage[i].attr[j].memory, t->storage[i].attr[j].memory,
           p->task->storage[i].attr[j].layout.size);
     }
   }
@@ -255,7 +255,7 @@ int GetNewTask(module *m, pool *p, task *t, short ****board_buffer) {
         t->cid = board_buffer[x][y][z][2];
       }
 
-      if (board_buffer[x][y][z][0] == TASK_AVAILABLE 
+      if (board_buffer[x][y][z][0] == TASK_AVAILABLE
           || board_buffer[x][y][z][0] == TASK_TO_BE_RESTARTED) break;
     }
 
@@ -311,12 +311,12 @@ int TaskRestore(module *m, pool *p, task *t) {
 
     // Prepare STORAGE_PM3D
     if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
-      offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dims[0] 
+      offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dims[0]
         + t->location[2]*dims[0]*dims[1]*t->storage[j].layout.dims[0];
       offsets[1] = 0;
       Message(MESSAGE_DEBUG, "[%s:%d] PM3D[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
           j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
-      
+
       l_offset = elements;
       z_offset = 0;
     }
@@ -327,11 +327,11 @@ int TaskRestore(module *m, pool *p, task *t) {
       offsets[1] = 0;
       Message(MESSAGE_DEBUG, "[%s:%d] LIST[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
           j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
-      
+
       l_offset = elements;
       z_offset = 0;
     }
-    
+
     // Prepare STORAGE_TEXTURE
     if (t->storage[j].layout.storage_type == STORAGE_TEXTURE) {
       offsets[0] = t->location[0] * t->storage[j].layout.dims[0];
@@ -340,7 +340,7 @@ int TaskRestore(module *m, pool *p, task *t) {
 
       Message(MESSAGE_DEBUG, "[%s:%d] BOARD[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
           j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
-      
+
     }
 
     for (l = 0; l < MAX_RANK; l++) {
@@ -359,7 +359,7 @@ int TaskRestore(module *m, pool *p, task *t) {
       s_offset = dims[1] * dims[2] * elements * t->storage[j].layout.dims[1];
 
       for (k = 0; k < t->storage[j].layout.dims[0]; k++) {
-        
+
         k_offset = k * s_offset;
         k_offset += t->location[0] * t->storage[j].layout.dims[0] * s_offset;
         k_offset += t->location[1] * t->storage[j].layout.dims[1] * dims[2] * elements;
@@ -384,7 +384,7 @@ int TaskRestore(module *m, pool *p, task *t) {
         k_offset += z_offset;
 
         e_offset = k * elements;
-      
+
         mstat = CopyData(p->task->storage[j].memory + k_offset, t->storage[j].memory + e_offset, elements);
         CheckStatus(mstat);
       }
@@ -468,7 +468,7 @@ void TaskFinalize(module *m, pool *p, task *t) {
   if (t) {
     for (i = 0; i < p->task_banks; i++) {
       if (t->storage[i].layout.name) free(t->storage[i].layout.name);
-      
+
       if (t->storage[i].attr) {
         for (j = 0; j < t->storage[i].attr_banks; j++) {
           for (k = 0; k < t->storage[i].attr[j].compound_fields; k++) {

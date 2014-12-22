@@ -304,7 +304,7 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
 
 /**
  * @macro
- * Allocate the 2D contiguous array 
+ * Allocate the 2D contiguous array
  */
 #define MAllocate2(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
@@ -335,7 +335,7 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
 
 /**
  * @macro
- * Allocate the 3D contiguous array 
+ * Allocate the 3D contiguous array
  */
 #define MAllocate3(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\
@@ -370,7 +370,7 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
 
 /**
  * @macro
- * Allocate the 4D contiguous array 
+ * Allocate the 4D contiguous array
  */
 #define MAllocate4(_mobject, _mstorage_name, _mbuffer, _mtype)\
   if (_mobject) {\

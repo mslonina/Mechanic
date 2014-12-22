@@ -145,7 +145,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
         mstat = CopyData(c->storage->memory + c_offset, header, header_size);
         CheckStatus(mstat);
-        
+
         t->tid = header[1];
         t->status = header[2];
         t->location[0] = header[3];
@@ -175,12 +175,12 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
           // Prepare STORAGE_PM3D
           if (t->storage[j].layout.storage_type == STORAGE_PM3D) {
-            offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dims[0] 
+            offsets[0] = (t->location[0] + dims[0]*t->location[1]) * t->storage[j].layout.dims[0]
               + t->location[2]*dims[0]*dims[1]*t->storage[j].layout.dims[0];
             offsets[1] = 0;
             Message(MESSAGE_DEBUG, "[%s:%d] PM3D[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
                 j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
-            
+
             l_offset = elements;
             z_offset = 0;
           }
@@ -191,11 +191,11 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             offsets[1] = 0;
             Message(MESSAGE_DEBUG, "[%s:%d] LIST[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
                 j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
-            
+
             l_offset = elements;
             z_offset = 0;
           }
-          
+
           // Prepare STORAGE_TEXTURE
           if (t->storage[j].layout.storage_type == STORAGE_TEXTURE) {
             offsets[0] = t->location[0] * t->storage[j].layout.dims[0];
@@ -204,7 +204,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
             Message(MESSAGE_DEBUG, "[%s:%d] BOARD[%d] task %d %d %d with offsets %d %d %d\n", __FILE__, __LINE__,
                 j, t->tid, t->location[0], t->location[1], (int)offsets[0], (int)offsets[1], (int)offsets[2]);
-            
+
           }
 
           for (l = 0; l < MAX_RANK; l++) {
@@ -212,7 +212,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
           }
 
           c_offset = c->storage->layout.size * i + header_size;
-          
+
           mstat = CopyData(c->storage->memory + c_offset + d_offset, t->storage[j].memory, t->storage[j].layout.size);
           CheckStatus(mstat);
 
@@ -228,7 +228,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
             s_offset = dims[1] * dims[2] * elements * t->storage[j].layout.dims[1];
 
             for (k = 0; k < t->storage[j].layout.dims[0]; k++) {
-              
+
               k_offset = k * s_offset;
               k_offset += t->location[0] * t->storage[j].layout.dims[0] * s_offset;
               k_offset += t->location[1] * t->storage[j].layout.dims[1] * dims[2] * elements;
@@ -243,7 +243,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
                 CheckStatus(mstat);
               }
             }
-            
+
           // For STORAGE_LIST and STORAGE_PM3D it is simpler
           } else {
             for (k = 0; k < t->storage[j].layout.dims[0]; k++) {
@@ -253,7 +253,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
               k_offset += z_offset;
 
               e_offset = k * elements;
-            
+
               mstat = CopyData(t->storage[j].memory + e_offset, p->task->storage[j].memory + k_offset, elements);
               CheckStatus(mstat);
             }
@@ -275,7 +275,7 @@ int CheckpointProcess(module *m, pool *p, checkpoint *c) {
 
         // Get the data header
         c_offset = i * c->storage->layout.size;
-        
+
         mstat = CopyData(c->storage->memory + c_offset, header, header_size);
         CheckStatus(mstat);
 

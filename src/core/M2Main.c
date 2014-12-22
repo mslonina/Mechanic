@@ -20,7 +20,7 @@
  */
 int main(int argc, char **argv) {
   int mpi_rank, mpi_size, node, ice = 0;
-  module core, module, fallback;
+  module *core = NULL, *module = NULL;
 
   char *filename = NULL, *module_name = NULL;
   char *masterfile = NULL, *masterfile_backup = NULL;
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
   MPI_Get_processor_name(hostname, &hostname_len);
-  
+
   node = mpi_rank;
   getcwd(cwd,MAXPATHLEN+1);
 
@@ -65,51 +65,47 @@ int main(int argc, char **argv) {
   /**
    * (C) Bootstrap core
    */
-  core.layer.handler = NULL;
-  module.layer.handler = NULL;
-  fallback.layer.handler = NULL;
-
-  core = Bootstrap(node, mpi_size, argc, argv, CORE_MODULE, &fallback);
-  if (!core.layer.handler) {
+  core = Bootstrap(node, mpi_size, argc, argv, CORE_MODULE, NULL);
+  if (!core->layer->handler) {
     Message(MESSAGE_ERR, "Something is screwed! At least Core module should be loaded");
     Error(CORE_ERR_CORE);
   }
 
-  core.mode = NORMAL_MODE;
+  core->mode = NORMAL_MODE;
 
   /**
    * (D) Handle the restart mode
    */
   if (node == MASTER) {
-    if (Option2Int("core", "restart-mode", core.layer.setup.head)) {
-      core.filename = Name(Option2String("core", "restart-file", core.layer.setup.head), "", "", "");
+    if (Option2Int("core", "restart-mode", core->layer->setup->head)) {
+      core->filename = Name(Option2String("core", "restart-file", core->layer->setup->head), "", "", "");
       Message(MESSAGE_INFO,
-          "Switching to restart mode with checkpoint file: '%s'\n", core.filename);
-      if (stat(core.filename, &file) < 0) {
+          "Switching to restart mode with checkpoint file: '%s'\n", core->filename);
+      if (stat(core->filename, &file) < 0) {
         Message(MESSAGE_ERR, "The checkpoint file could not be opened. Aborting\n");
         Abort(CORE_ERR_RESTART);
       } else {
-        if (!H5Fis_hdf5(core.filename)) { // Validate HDF5
+        if (!H5Fis_hdf5(core->filename)) { // Validate HDF5
           Message(MESSAGE_ERR, "The checkpoint file is not a valid HDF5 file. Aborting\n");
           Abort(CORE_ERR_RESTART);
         } else { // Validate the Mechanic file
-          if (Validate(&core, core.filename) < 0) {
+          if (Validate(core, core->filename) < 0) {
             Message(MESSAGE_ERR, "The checkpoint file is not a valid Mechanic file. Aborting\n");
             Abort(CORE_ERR_RESTART);
           }
         }
       }
-      core.mode = RESTART_MODE;
+      core->mode = RESTART_MODE;
     }
   }
 
-  MPI_Bcast(&core.mode, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
+  MPI_Bcast(&core->mode, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
 
   /**
    * (E) Core setup
    */
-  filename = Name(Option2String("core", "config", core.layer.setup.head), "", "", "");
-  mstat = Setup(&core, filename, argc, argv, CORE_SETUP);
+  filename = Name(Option2String("core", "config", core->layer->setup->head), "", "", "");
+  mstat = Setup(core, filename, argc, argv, CORE_SETUP);
   CheckStatus(mstat);
   free(filename);
 
@@ -121,20 +117,20 @@ int main(int argc, char **argv) {
    * (F) Bootstrap the module
    * Fallback to core if module not specified
    */
-  module_name = Option2String("core", "module", core.layer.setup.head);
-  module = Bootstrap(node, mpi_size, argc, argv, module_name, &core);
-  module.mode = core.mode;
-  
-  if (node == MASTER && core.mode == RESTART_MODE) {
-    module.filename = Name(core.filename, "", "", "");
+  module_name = Option2String("core", "module", core->layer->setup->head);
+  module = Bootstrap(node, mpi_size, argc, argv, module_name, core);
+  module->mode = core->mode;
+
+  if (node == MASTER && core->mode == RESTART_MODE) {
+    module->filename = Name(core->filename, "", "", "");
   }
 
   /**
    * (G) Configure the module
    */
-  filename = Name(Option2String("core", "config", module.layer.setup.head), "", "", "");
+  filename = Name(Option2String("core", "config", module->layer->setup->head), "", "", "");
 
-  mstat = Setup(&module, filename, argc, argv, MODULE_SETUP);
+  mstat = Setup(module, filename, argc, argv, MODULE_SETUP);
   CheckStatus(mstat);
   free(filename);
 
@@ -148,7 +144,7 @@ int main(int argc, char **argv) {
   }
 
   MPI_Bcast(&ice, 1, MPI_INT, MASTER, MPI_COMM_WORLD);
-  
+
   if (ice == CORE_ICE) {
     if (node == MASTER) {
       Message(MESSAGE_ERR, "The core ICE file '%s' is present. Please remove it to proceed with the simulation\n", ICE_FILENAME);
@@ -159,14 +155,14 @@ int main(int argc, char **argv) {
   /* Help message */
   if (mstat == CORE_SETUP_HELP) {
     if (node == MASTER) {
-      poptPrintHelp(module.layer.setup.popt->poptcontext, stdout, 0);
+      poptPrintHelp(module->layer->setup->popt->poptcontext, stdout, 0);
     }
     goto finalize; // Special help message handling
   }
 
   if (mstat == CORE_SETUP_USAGE) {
     if (node == MASTER) {
-      poptPrintUsage(module.layer.setup.popt->poptcontext, stdout, 0);
+      poptPrintUsage(module->layer->setup->popt->poptcontext, stdout, 0);
     }
     goto finalize; // Special help message handling
   }
@@ -175,11 +171,11 @@ int main(int argc, char **argv) {
    * (H) Backup the master data file
    */
   if (node == MASTER) {
-    Message(MESSAGE_DEBUG, "(Core)   Name: %s\n", Option2String("core", "name", core.layer.setup.head));
-    Message(MESSAGE_DEBUG, "(Module) Name: %s\n", Option2String("core", "name", module.layer.setup.head));
-    if (!Option2Int("core", "no-backup", module.layer.setup.head)) {
-      masterfile = Name(Option2String("core", "name", module.layer.setup.head), "-master-", "00", ".h5");
-      masterfile_backup = Name("backup-", Option2String("core", "name", module.layer.setup.head), "-master-00", ".h5");
+    Message(MESSAGE_DEBUG, "(Core)   Name: %s\n", Option2String("core", "name", core->layer->setup->head));
+    Message(MESSAGE_DEBUG, "(Module) Name: %s\n", Option2String("core", "name", module->layer->setup->head));
+    if (!Option2Int("core", "no-backup", module->layer->setup->head)) {
+      masterfile = Name(Option2String("core", "name", module->layer->setup->head), "-master-", "00", ".h5");
+      masterfile_backup = Name("backup-", Option2String("core", "name", module->layer->setup->head), "-master-00", ".h5");
 
       if (stat(masterfile, &file) == 0) {
         Message(MESSAGE_INFO, "Backup '%s' -> '%s'\n\n", masterfile, masterfile_backup);
@@ -191,36 +187,36 @@ int main(int argc, char **argv) {
     }
 
     /* Copy the restart file to the master file */
-    if (module.mode == RESTART_MODE) {
-      masterfile = Name(Option2String("core", "name", module.layer.setup.head),
+    if (module->mode == RESTART_MODE) {
+      masterfile = Name(Option2String("core", "name", module->layer->setup->head),
         "-master-", "00", ".h5");
       if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Restart file: %s\n", masterfile);
-      Copy(module.filename, masterfile);
+      Copy(module->filename, masterfile);
       free(masterfile);
 
-      // Our restart file now becomes the master file 
-      free(core.filename);
-      free(module.filename);
-      core.filename = Name(Option2String("core", "name", core.layer.setup.head), "-master-", "00", ".h5");
-      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module.filename);
-      module.filename = Name(Option2String("core", "name", module.layer.setup.head), "-master-", "00", ".h5");
-      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module.filename);
+      // Our restart file now becomes the master file
+      free(core->filename);
+      free(module->filename);
+      core->filename = Name(Option2String("core", "name", core->layer->setup->head), "-master-", "00", ".h5");
+      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module->filename);
+      module->filename = Name(Option2String("core", "name", module->layer->setup->head), "-master-", "00", ".h5");
+      if (node == MASTER) Message(MESSAGE_DEBUG, "(Restart) Master file: %s\n", module->filename);
     }
   }
 
   /**
    * (I) Create the master file
    */
-  if (node == MASTER && module.mode != RESTART_MODE) {
-    core.filename = Name(Option2String("core", "name", module.layer.setup.head),
+  if (node == MASTER && module->mode != RESTART_MODE) {
+    core->filename = Name(Option2String("core", "name", module->layer->setup->head),
       "-master", "-00", ".h5");
-    module.filename = Name(Option2String("core", "name", module.layer.setup.head),
+    module->filename = Name(Option2String("core", "name", module->layer->setup->head),
       "-master", "-00", ".h5");
 
-    h5location = H5Fcreate(module.filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    h5location = H5Fcreate(module->filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     H5CheckStatus(h5location);
 
-    MechanicHeader(&module, h5location);
+    MechanicHeader(module, h5location);
 
     H5Fclose(h5location);
   }
@@ -230,27 +226,27 @@ int main(int argc, char **argv) {
    */
 
   // Load the runtime mode (no fallback this time)
-  module.layer.mode_handler = RuntimeModeLoad(Option2String("core", "mode", module.layer.setup.head));
-  if (node == MASTER && module.layer.mode_handler) {
-    Message(MESSAGE_INFO, "We are in '%s' mode\n", Option2String("core", "mode", module.layer.setup.head));
+  module->layer->mode_handler = RuntimeModeLoad(Option2String("core", "mode", module->layer->setup->head));
+  if (node == MASTER && module->layer->mode_handler) {
+    Message(MESSAGE_INFO, "We are in '%s' mode\n", Option2String("core", "mode", module->layer->setup->head));
   }
 
-  mstat = RuntimeModeInit(&module);
-  if (mpi_size < module.layer.init.min_cpu_required) {
-    Message(MESSAGE_WARN, "You must use min. %d MPI threads to run Mechanic.\n", module.layer.init.min_cpu_required);
-    Message(MESSAGE_WARN, "Try: mpirun -np %d mechanic -p %s\n", module.layer.init.min_cpu_required, module_name);
+  mstat = RuntimeModeInit(module);
+  if (mpi_size < module->layer->init->min_cpu_required) {
+    Message(MESSAGE_WARN, "You must use min. %d MPI threads to run Mechanic.\n", module->layer->init->min_cpu_required);
+    Message(MESSAGE_WARN, "Try: mpirun -np %d mechanic -p %s\n", module->layer->init->min_cpu_required, module_name);
     goto finalize;
   }
 
   time_in = clock();
 
   if (node == MASTER) {
-    Message(MESSAGE_INFO, "Master file: %s\n", module.filename);
+    Message(MESSAGE_INFO, "Master file: %s\n", module->filename);
     Message(MESSAGE_INFO, "Entering the pool loop\n");
     Message(MESSAGE_OUTPUT, "\n");
   }
 
-  mstat = Work(&module);
+  mstat = Work(module);
   CheckStatus(mstat);
 
   time_out = clock();
@@ -259,19 +255,19 @@ int main(int argc, char **argv) {
   /**
    * Write global attributes here, such as master cpu_time
    */
-  if (node == MASTER && module.mode != RESTART_MODE) {
-    if (module.stats) {
-      h5location = H5Fopen(module.filename, H5F_ACC_RDWR, H5P_DEFAULT);
-    
+  if (node == MASTER && module->mode != RESTART_MODE) {
+    if (module->stats) {
+      h5location = H5Fopen(module->filename, H5F_ACC_RDWR, H5P_DEFAULT);
+
       attr_s = H5Screate(H5S_SCALAR);
       attr_d = H5Acreate2(h5location, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-      H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time); 
+      H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time);
       H5Aclose(attr_d);
       H5Sclose(attr_s);
 
       attr_s = H5Screate(H5S_SCALAR);
       attr_d = H5Acreate2(h5location, "MPI size", H5T_NATIVE_INT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-      H5Awrite(attr_d, H5T_NATIVE_INT, &mpi_size); 
+      H5Awrite(attr_d, H5T_NATIVE_INT, &mpi_size);
       H5Aclose(attr_d);
       H5Sclose(attr_s);
 
@@ -286,8 +282,8 @@ int main(int argc, char **argv) {
 finalize:
   MPI_Barrier(MPI_COMM_WORLD);
 
-  if (module.layer.handler) ModuleFinalize(&module);
-  if (core.layer.handler) ModuleFinalize(&core);
+  if (core) ModuleFinalize(core);
+  //if (module) ModuleFinalize(module);
 
   H5close();
   MPI_Finalize();

@@ -61,8 +61,8 @@ typedef struct {
 typedef struct {
   void *handler; /**< The module handler */
   void *mode_handler; /**< The runtime mode handler */
-  init init; /**< The init structure */
-  setup setup; /**< The setup structure */
+  init *init; /**< The init structure */
+  setup *setup; /**< The setup structure */
 } layer;
 
 /**
@@ -84,8 +84,8 @@ typedef struct {
   int showtime; /**< Show detailed CPU time */
   int verbose; /**< Be verbose */
   int stats; /**< Enable detailed stats */
-  layer layer; /**< The layer pointer */
-  layer fallback; /**< The fallback layer pointer */
+  layer *layer; /**< The layer pointer */
+  layer *fallback; /**< The fallback layer pointer */
 } module;
 
 /**

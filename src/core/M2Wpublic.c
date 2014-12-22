@@ -167,7 +167,7 @@ int M2Receive(int node, int sender, int tag, module *m, pool *p, void *buffer) {
 }
 
 /**
- * @brief Pack the task data into memory buffer 
+ * @brief Pack the task data into memory buffer
  *
  * @param m The module pointer
  * @param buffer The output pack buffer

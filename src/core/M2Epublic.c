@@ -6,7 +6,7 @@
 
 /**
  * @brief Common error handler
- * 
+ *
  * We abort on any error code
  * @param errcode The error code to use
  */

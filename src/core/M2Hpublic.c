@@ -19,19 +19,44 @@
  */
 query* LoadSym(module *m, char *function, int flag) {
   char *err;
-  void *handler;
-  void *fallback;
+  void *handler = NULL;
+  void *fallback = NULL;
   query *q = NULL;
 
   /* Reset dlerror() */
   dlerror();
 
-  handler = m->layer.handler;
-  fallback = m->fallback.handler;
+  if (!m->layer) {
+    Message(MESSAGE_ERR, "LoadSym: no module layer\n");
+    Error(CORE_ERR_MEM);
+  } else {
+    if (!m->layer->handler) {
+      Message(MESSAGE_ERR, "LoadSym: no module layer handler\n");
+      Error(CORE_ERR_MEM);
+    } else {
+      handler = m->layer->handler;
+    }
+  }
+
+  if (m->fallback) {
+    if (m->fallback->handler) {
+      fallback = m->fallback->handler;
+    }
+  }
 
   if (flag == FALLBACK_ONLY) {
-    handler = m->fallback.handler;
-    fallback = NULL;
+    if (!m->fallback) {
+      Message(MESSAGE_ERR, "LoadSym: FALLBACK USED but no fallback layer found\n");
+      Error(CORE_ERR_MEM);
+    } else {
+      if (!m->fallback->handler) {
+        Message(MESSAGE_ERR, "LoadSym: FALLBACK USED but no fallback layer handler found\n");
+        Error(CORE_ERR_MEM);
+      } else {
+        handler = m->fallback->handler;
+        fallback = NULL;
+      }
+    }
   }
 
   q = (query*) dlsym(handler, function);
@@ -46,7 +71,8 @@ query* LoadSym(module *m, char *function, int flag) {
       if (err == NULL) {
         return q;
       } else {
-        Message(MESSAGE_DEBUG, "This should never happen on fallback function '%s'\n", function);
+        Message(MESSAGE_ERR, "This should never happen on fallback function '%s'\n", function);
+        Error(CORE_ERR_MEM);
       }
     }
   }

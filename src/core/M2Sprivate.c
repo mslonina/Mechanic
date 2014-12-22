@@ -30,9 +30,9 @@ int Storage(module *m, pool *p) {
   /* Create the task board programatically */
   p->board->layout.name = "board";
   p->board->layout.rank = TASK_BOARD_RANK + 1;
-  p->board->layout.dims[0] = Option2Int("core", "yres", m->layer.setup.head); // vertical res
-  p->board->layout.dims[1] = Option2Int("core", "xres", m->layer.setup.head); // horizontal res
-  p->board->layout.dims[2] = Option2Int("core", "zres", m->layer.setup.head); // depth res
+  p->board->layout.dims[0] = Option2Int("core", "yres", m->layer->setup->head); // vertical res
+  p->board->layout.dims[1] = Option2Int("core", "xres", m->layer->setup->head); // horizontal res
+  p->board->layout.dims[2] = Option2Int("core", "zres", m->layer->setup->head); // depth res
   p->board->layout.dims[3] = 3; // task status, computing node, task checkpoint number
   p->board->layout.datatype = H5T_NATIVE_SHORT;
   p->board->layout.sync = 1;
@@ -42,16 +42,16 @@ int Storage(module *m, pool *p) {
   /* Programatically create configuration attributes for the task board */
   i = 0;
   p->board->attr_banks = 0;
-  while (m->layer.setup.options[i].name[0] != CONFIG_NULL) {
-    len = strlen(m->layer.setup.options[i].name);
+  while (m->layer->setup->options[i].name[0] != CONFIG_NULL) {
+    len = strlen(m->layer->setup->options[i].name);
     p->board->attr[i].layout.name = calloc(len + 1, sizeof(char*));
     if (!p->board->attr[i].layout.name) Error(CORE_ERR_MEM);
-        
-    strncpy(p->board->attr[i].layout.name, m->layer.setup.options[i].name, len);
+
+    strncpy(p->board->attr[i].layout.name, m->layer->setup->options[i].name, len);
     p->board->attr[i].layout.name[len] = CONFIG_NULL;
 
     p->board->attr[i].layout.dataspace = H5S_SCALAR;
-    p->board->attr[i].layout.datatype = GetHDF5Datatype(m->layer.setup.options[i].type);
+    p->board->attr[i].layout.datatype = GetHDF5Datatype(m->layer->setup->options[i].type);
 
     p->board->attr_banks++;
     i++;
@@ -59,46 +59,46 @@ int Storage(module *m, pool *p) {
 
   /* Check and fix the board layout */
   CheckLayout(m, 1, p->board);
-  
+
   /* Commit task board attributes memory as soon as possible, since we need it during
    * Storage() */
   mstat = CommitAttrMemoryLayout(p->board->attr_banks, p->board);
   CheckStatus(mstat);
 
   /**
-   * Initial runtime configuration 
+   * Initial runtime configuration
    * The user can overwrite them in Storage() and PoolPrepare() hooks
    *
    * This is the last time we use the Config linked list
    */
   for (i = 0; i < p->board->attr_banks; i++) {
-    if (m->layer.setup.options[i].type == C_STRING) {
-      WriteAttr(&p->board->attr[i], m->layer.setup.options[i].value);
+    if (m->layer->setup->options[i].type == C_STRING) {
+      WriteAttr(&p->board->attr[i], m->layer->setup->options[i].value);
     }
 
-    if (m->layer.setup.options[i].type == C_INT || m->layer.setup.options[i].type == C_VAL) {
-      int_attr = Option2Int(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
+    if (m->layer->setup->options[i].type == C_INT || m->layer->setup->options[i].type == C_VAL) {
+      int_attr = Option2Int(m->layer->setup->options[i].space, m->layer->setup->options[i].name, m->layer->setup->head);
       WriteAttr(&p->board->attr[i], &int_attr);
     }
-    
-    if (m->layer.setup.options[i].type == C_LONG) {
-      long_attr = Option2Int(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
+
+    if (m->layer->setup->options[i].type == C_LONG) {
+      long_attr = Option2Int(m->layer->setup->options[i].space, m->layer->setup->options[i].name, m->layer->setup->head);
       WriteAttr(&p->board->attr[i], &long_attr);
     }
-    
-    if (m->layer.setup.options[i].type == C_FLOAT) {
-      float_attr = Option2Float(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
+
+    if (m->layer->setup->options[i].type == C_FLOAT) {
+      float_attr = Option2Float(m->layer->setup->options[i].space, m->layer->setup->options[i].name, m->layer->setup->head);
       WriteAttr(&p->board->attr[i], &float_attr);
     }
 
-    if (m->layer.setup.options[i].type == C_DOUBLE) {
-      double_attr = Option2Double(m->layer.setup.options[i].space, m->layer.setup.options[i].name, m->layer.setup.head);
+    if (m->layer->setup->options[i].type == C_DOUBLE) {
+      double_attr = Option2Double(m->layer->setup->options[i].space, m->layer->setup->options[i].name, m->layer->setup->head);
       WriteAttr(&p->board->attr[i], &double_attr);
     }
 
     // Special treating for the unit tests
     if (m->test) {
-      if (strcmp(m->layer.setup.options[i].name, "restart-mode") == 0) {
+      if (strcmp(m->layer->setup->options[i].name, "restart-mode") == 0) {
         int_attr = 0;
         WriteAttr(&p->board->attr[i], &int_attr);
       }
@@ -114,25 +114,25 @@ int Storage(module *m, pool *p) {
   p->mask_size = p->pool_size;
 
   /* Load the module storage layout */
-  if (m->fallback.handler) {
+  if (m->fallback->handler) {
     q = LoadSym(m, "Storage", LOAD_DEFAULT);
     if (q) mstat = q(p);
     CheckStatus(mstat);
   }
 
   /* Pool banks */
-  p->pool_banks = GetBanks(m->layer.init.banks_per_pool, p->storage);
+  p->pool_banks = GetBanks(m->layer->init->banks_per_pool, p->storage);
 
   for (i = 0; i < p->pool_banks; i++) {
     p->storage[i].attr_banks = 0;
-    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+    for (j = 0; j < m->layer->init->attr_per_dataset; j++) {
       if (p->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
           p->storage[i].attr[j].layout.dataspace == H5S_SCALAR) {
         p->storage[i].attr_banks++;
       }
     }
   }
-  
+
   /* Right now, there is no support for different storage types of pool datasets */
   for (i = 0; i < p->pool_banks; i++) {
     p->storage[i].layout.storage_type = STORAGE_GROUP;
@@ -140,9 +140,9 @@ int Storage(module *m, pool *p) {
 
   /* Compound fields, if any */
   for (i = 0; i < p->pool_banks; i++) {
-    p->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, p->storage[i].field);
+    p->storage[i].compound_fields = GetFields(m->layer->init->compound_fields, p->storage[i].field);
     for (j = 0; j < p->storage[i].attr_banks; j++) {
-      p->storage[i].attr[j].compound_fields = GetFields(m->layer.init.compound_fields, p->storage[i].attr[j].field);
+      p->storage[i].attr[j].compound_fields = GetFields(m->layer->init->compound_fields, p->storage[i].attr[j].field);
     }
   }
 
@@ -151,17 +151,17 @@ int Storage(module *m, pool *p) {
 
   /* The task board size might be overriden by now, check and fix the layout */
   CheckLayout(m, 1, p->board);
-  
+
   /* Commit the task board as late as possible, since we allow to override the size of it
    * during Storage() */
   mstat = Allocate(p->board, p->board->layout.storage_elements, p->board->layout.datatype_size);
   CheckStatus(mstat);
 
   /* Task Banks */
-  p->task_banks = GetBanks(m->layer.init.banks_per_task, p->task->storage);
+  p->task_banks = GetBanks(m->layer->init->banks_per_task, p->task->storage);
   for (i = 0; i < p->task_banks; i++) {
     p->task->storage[i].attr_banks = 0;
-    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+    for (j = 0; j < m->layer->init->attr_per_dataset; j++) {
       if (p->task->storage[i].attr[j].layout.dataspace == H5S_SIMPLE ||
           p->task->storage[i].attr[j].layout.dataspace == H5S_SCALAR) {
         p->task->storage[i].attr_banks++;
@@ -171,12 +171,12 @@ int Storage(module *m, pool *p) {
 
   /* Compound fields, if any */
   for (i = 0; i < p->task_banks; i++) {
-    p->task->storage[i].compound_fields = GetFields(m->layer.init.compound_fields, p->task->storage[i].field);
+    p->task->storage[i].compound_fields = GetFields(m->layer->init->compound_fields, p->task->storage[i].field);
     for (j = 0; j < p->task->storage[i].attr_banks; j++) {
-      p->task->storage[i].attr[j].compound_fields = GetFields(m->layer.init.compound_fields, p->task->storage[i].attr[j].field);
+      p->task->storage[i].attr[j].compound_fields = GetFields(m->layer->init->compound_fields, p->task->storage[i].attr[j].field);
     }
   }
-  
+
   CheckLayout(m, p->task_banks, p->task->storage);
 
   /* Master only memory/storage operations */
@@ -194,12 +194,12 @@ int Storage(module *m, pool *p) {
 
         p->task->storage[i].layout.storage_dim[0] =
           p->task->storage[i].layout.dims[0] * p->pool_size;
-        
+
         for (j = 1; j < MAX_RANK; j++) {
           p->task->storage[i].layout.storage_dim[j] =
             p->task->storage[i].layout.dims[j];
         }
-        
+
         size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
         p->task->storage[i].layout.storage_elements = size;
         p->task->storage[i].layout.storage_size = size * p->task->storage[i].layout.datatype_size;
@@ -219,7 +219,7 @@ int Storage(module *m, pool *p) {
           p->task->storage[i].layout.storage_dim[j] =
             p->task->storage[i].layout.dims[j];
         }
-        
+
         size = GetSize(p->task->storage[i].layout.rank, p->task->storage[i].layout.storage_dim);
         p->task->storage[i].layout.storage_elements = size;
         p->task->storage[i].layout.storage_size = size * p->task->storage[i].layout.datatype_size;
@@ -286,7 +286,7 @@ int Storage(module *m, pool *p) {
       }
     }
   }
-    
+
   /* Set the checkpoint size at the very end of the storage stage */
   MReadOption(p, "checkpoint", &p->checkpoint_size);
 
@@ -312,7 +312,7 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
 
   for (i = 0; i < banks; i++) {
     datatype_size = 0; storage_size = 0;
-      
+
     if (s[i].layout.name == NULL) {
       Message(MESSAGE_ERR, "The storage name is required\n");
       Error(CORE_ERR_STORAGE);
@@ -351,7 +351,7 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
       Message(MESSAGE_ERR, "The storage type is missing\n");
       Error(CORE_ERR_STORAGE);
     }
-    
+
     if (s[i].layout.storage_type > STORAGE_LIST) {
       Message(MESSAGE_ERR, "Unknown storage type\n");
       Error(CORE_ERR_STORAGE);
@@ -373,8 +373,8 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
       s[i].layout.mpi_datatype = GetMpiDatatype(s[i].layout.datatype);
       s[i].layout.datatype_size = H5Tget_size(s[i].layout.datatype);
     }
-    
-    s[i].layout.storage_elements = 
+
+    s[i].layout.storage_elements =
       s[i].layout.elements = GetSize(s[i].layout.rank, s[i].layout.dims);
 
     /* Calculate storage for H5T_COMPOUND */
@@ -458,7 +458,7 @@ int CheckAttributeLayout(attr *a) {
     if (a->layout.datatype != H5T_COMPOUND) {
       a->layout.mpi_datatype = GetMpiDatatype(a->layout.datatype);
       a->layout.datatype_size = H5Tget_size(a->layout.datatype);
-    
+
       if (a->layout.datatype == H5T_NATIVE_CHAR || a->layout.datatype == H5T_C_S1) {
         a->layout.storage_elements = CONFIG_LEN;
         a->layout.elements = CONFIG_LEN;
@@ -474,7 +474,7 @@ int CheckAttributeLayout(attr *a) {
       }
       storage_size = a->layout.compound_size;
       datatype_size = a->layout.compound_size;
-      
+
       a->layout.storage_elements = GetSize(a->layout.rank, a->layout.dims);
       a->layout.elements = GetSize(a->layout.rank, a->layout.dims);
     } else {
@@ -547,9 +547,9 @@ int CheckFieldLayout(field *field) {
 
   // Calculate padding
   padding = GetPadding(field->layout.elements, field->layout.datatype_size);
-  field->layout.storage_size = 
+  field->layout.storage_size =
      field->layout.storage_elements * field->layout.datatype_size + padding;
-  field->layout.size = 
+  field->layout.size =
      field->layout.elements * field->layout.datatype_size + padding;
 
   return mstat;
@@ -654,7 +654,7 @@ int CreateDataset(hid_t h5location, storage *s, module *m, pool *p) {
   H5CheckStatus(h5dataspace);
 
   if (s->layout.dataspace == H5S_SIMPLE) {
-    
+
     for (i = 0; i < MAX_RANK; i++) {
       dims[i] = s->layout.storage_dim[i];
     }

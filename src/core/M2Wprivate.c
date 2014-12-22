@@ -33,10 +33,10 @@ int Work(module *m) {
   /**
    * (A) Initialize the pool bank
    */
-  p = calloc(m->layer.init.pools * sizeof(pool*), sizeof(pool*));
+  p = calloc(m->layer->init->pools * sizeof(pool*), sizeof(pool*));
   if (!p) Error(CORE_ERR_MEM);
 
-  for (pid = 0; pid < m->layer.init.pools; pid++) {
+  for (pid = 0; pid < m->layer->init->pools; pid++) {
     p[pid] = PoolLoad(m, pid);
   }
 
@@ -56,7 +56,7 @@ int Work(module *m) {
     Message(MESSAGE_DEBUG, "Node %d :: PID %d RID %d SID %d SRID %d\n",
         m->node, pid, p[pid]->rid, p[pid]->sid, p[pid]->srid);
   }
-  
+
   /**
    * (C) The Pool loop
    */
@@ -70,7 +70,7 @@ int Work(module *m) {
     }
 
     time_in = clock();
-    
+
     do { // The pool reset loop
 
       resetloop_in = clock();
@@ -83,7 +83,7 @@ int Work(module *m) {
       do { // The pool stage loop
 
         if (m->mode != RESTART_MODE) p[pid]->srid = 0;
-        
+
         do { // The paol stage reset loop
 
           mstat = M2NodePrepare(m, p, p[pid]);
@@ -94,7 +94,7 @@ int Work(module *m) {
 
           mstat = M2LoopPrepare(m, p, p[pid]);
           CheckStatus(mstat);
-          
+
           // The Task loop
           taskloop_in = clock();
 
@@ -112,16 +112,16 @@ int Work(module *m) {
               Message(MESSAGE_INFO, "Task loop has been disabled for the pool %04d\n", p[pid]->pid);
             }
           }
-          
+
           taskloop_out = clock();
           cpu_time = (double)(taskloop_out - taskloop_in)/CLOCKS_PER_SEC;
           if (m->node == MASTER && m->showtime) Message(MESSAGE_INFO, "Taskloop completed. CPU time: %f\n", cpu_time);
-          
+
           mstat = M2LoopProcess(m, p, p[pid]);
           CheckStatus(mstat);
-          
+
           pool_create = PoolProcess(m, p, p[pid]);
-      
+
           mstat = M2NodeProcess(m, p, p[pid]);
           CheckStatus(mstat);
 
@@ -135,10 +135,10 @@ int Work(module *m) {
       resetloop_out = clock();
       cpu_time = (double)(resetloop_out - resetloop_in)/CLOCKS_PER_SEC;
       if (m->node == MASTER && m->showtime) Message(MESSAGE_INFO, "Resetloop %4d completed. CPU time: %f\n", p[pid]->rid, cpu_time);
-      
+
       p[pid]->rid++;
     } while (pool_create == POOL_RESET);
-    
+
     time_out = clock();
     cpu_time = (double)(time_out - time_in)/CLOCKS_PER_SEC;
 
@@ -150,18 +150,18 @@ int Work(module *m) {
        */
       if (m->stats) {
         h5location = H5Fopen(m->filename, H5F_ACC_RDWR, H5P_DEFAULT);
-      
+
         sprintf(path, POOL_PATH, p[pid]->pid);
         h5pool = H5Gopen2(h5location, path, H5P_DEFAULT);
         H5CheckStatus(h5pool);
-      
+
         if (H5Aexists(h5pool, "CPU Time [s]") > 0) {
           attr_d = H5Aopen(h5pool, "CPU Time [s]", H5P_DEFAULT);
-          H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time); 
+          H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time);
         } else {
           attr_s = H5Screate(H5S_SCALAR);
           attr_d = H5Acreate2(h5pool, "CPU Time [s]", H5T_NATIVE_DOUBLE, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-          H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time); 
+          H5Awrite(attr_d, H5T_NATIVE_DOUBLE, &cpu_time);
           H5Sclose(attr_s);
         }
 
@@ -174,7 +174,7 @@ int Work(module *m) {
     pid++;
 
     /* Security check */
-    if (pid == m->layer.init.pools) pool_create = POOL_FINALIZE;
+    if (pid == m->layer->init->pools) pool_create = POOL_FINALIZE;
 
     /* Revert to normal mode, after the restarted pool is finished */
   } while (pool_create != POOL_FINALIZE);
@@ -184,7 +184,7 @@ int Work(module *m) {
   CheckStatus(mstat);
 
   /* Finalize the pool bank */
-  for (pid = 0; pid < m->layer.init.pools; pid++) {
+  for (pid = 0; pid < m->layer->init->pools; pid++) {
     PoolFinalize(m, p[pid]);
   }
 
@@ -206,7 +206,7 @@ int M2Master(module *m, pool *p) {
   char *err;
   query *q;
 
-  q = (query*) dlsym(m->layer.mode_handler, "Master");
+  q = (query*) dlsym(m->layer->mode_handler, "Master");
   err = dlerror();
   if (err == NULL) {
     if (q) mstat = q(m, p);
@@ -230,7 +230,7 @@ int M2Worker(module *m, pool *p) {
   char *err;
   query *q;
 
-  q = (query*) dlsym(m->layer.mode_handler, "Worker");
+  q = (query*) dlsym(m->layer->mode_handler, "Worker");
   err = dlerror();
   if (err == NULL) {
     if (q) mstat = q(m, p);

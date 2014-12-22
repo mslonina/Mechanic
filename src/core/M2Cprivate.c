@@ -6,7 +6,7 @@
 
 /**
  * @brief Prints error messages
- * 
+ *
  * @param j The line in the config file where the error exist
  * @param type Type of the error
  * @param message Error message to print
@@ -38,7 +38,7 @@ char* ConfigTrim(char *str) {
 
   /* Trap NULL */
   if (str != NULL) {
- 
+
     /* Remove leading spaces (from RMLEAD.C) */
     for (ibuf = str; *ibuf && isspace(*ibuf); ++ibuf)
       ;
@@ -82,7 +82,7 @@ char* ConfigNameTrim(char *l) {
   /* Quick and dirty solution using trim function */
   l[0] = ' ';
   l[len-1] = ' ';
-  l = ConfigTrim(l);  
+  l = ConfigTrim(l);
 
   return l;
 }
@@ -96,14 +96,14 @@ char* ConfigNameTrim(char *l) {
  * @return Number of separators in the current line
  */
 int ConfigCharCount(char *l, char *s) {
-  int i = 0, sep = 0, len = 0; 
+  int i = 0, sep = 0, len = 0;
 
   len = strlen(l);
 
   for (i = 0; i < len; i++) {
     if ((int) *s == l[i]) sep++;
   }
-  
+
   return sep;
 }
 
@@ -142,7 +142,7 @@ configNamespace* ConfigNewNamespace(char *cfg) {
  */
 int ConfigAsciiParser(FILE *read, char *sep, char *comm, configNamespace *head) {
   int j = 0, sepc = 0, n = 0;
-  char *line, l[CONFIG_MAX_LINE_LENGTH], *b, *c, *value; 
+  char *line, l[CONFIG_MAX_LINE_LENGTH], *b, *c, *value;
 
   config *newOP = NULL;
   configNamespace *nextNM = NULL;
@@ -158,25 +158,25 @@ int ConfigAsciiParser(FILE *read, char *sep, char *comm, configNamespace *head) 
   current = head;
 
   while (!feof(read)) {
-    
+
     /* Count lines */
-    j++; 
-  
+    j++;
+
     line = fgets(l, CONFIG_MAX_LINE_LENGTH, read);
-    
+
     /* Skip blank lines and any NULL */
     if (line == NULL) break;
     if (line[0] == '\n') continue;
-    
+
     /* Now we have to trim leading and trailing spaces etc */
     line = ConfigTrim(line);
 
     /* Check for full line comments and skip them */
     if (strspn(line, comm) > 0) continue;
-    
+
     /* Check for the separator at the beginning */
     if (strspn(line, sep) > 0) {
-      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_VAR); 
+      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_VAR);
       goto failure;
     }
 
@@ -187,26 +187,26 @@ int ConfigAsciiParser(FILE *read, char *sep, char *comm, configNamespace *head) 
     /* Check for namespaces */
     if (b[0] == '[') {
       if (b[strlen(b)-1] != ']') {
-        ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_BRACKET); 
+        ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_BRACKET);
         goto failure;
       }
 
       b = ConfigNameTrim(b);
-			
+
 			nextNM = ConfigFindNamespace(b, head);
-			
+
 			if (nextNM == NULL) {
 				ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_UNKNOWN_NAMESPACE);
 				goto failure;
 			} else {
 				current = nextNM;
 			}
-      
+
       n++;
 
       continue;
     }
-  
+
     /* If no namespace was specified return failure */
     if (current == NULL) {
       ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_NONAMESPACE);
@@ -215,31 +215,31 @@ int ConfigAsciiParser(FILE *read, char *sep, char *comm, configNamespace *head) 
 
     /* Check if in the var/value string the separator exist.*/
     if (strstr(b, sep) == NULL) {
-      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_SEP); 
+      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_SEP);
       goto failure;
     }
-    
+
     /* Check some special case:
      * we have separator, but no value */
     if ((strlen(b) - 1) == strcspn(b, sep)) {
-      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_VAL); 
+      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_MISSING_VAL);
       goto failure;
     }
 
     /* We allow to have only one separator in line */
     sepc = ConfigCharCount(b, sep);
     if (sepc > 1) {
-      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_TOOMANY_SEP); 
+      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_TOOMANY_SEP);
       goto failure;
     }
-    
+
     /* Ok, now we are prepared */
     c = ConfigTrim(strtok(b, sep));
 
 		newOP = ConfigFindOption(c, current);
-		
+
 		if (newOP == NULL) {
-      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_UNKNOWN_VAR); 
+      ConfigMessage(j, CONFIG_ERR_CONFIG_SYNTAX, CONFIG_MSG_UNKNOWN_VAR);
       goto failure;
 		}
 
@@ -257,12 +257,12 @@ int ConfigAsciiParser(FILE *read, char *sep, char *comm, configNamespace *head) 
 
 			strncpy(newOP->value, value, valuelen);
 			newOP->value[valuelen] = CONFIG_NULL;
-			
+
 			c = ConfigTrim(strtok(NULL, "\n"));
 
 			if (value) free(value);
-    }  
-		
+    }
+
   }
   return n;
 
@@ -285,7 +285,7 @@ void ConfigCleanup(configNamespace *head) {
     while (current) {
       nextNM = current->next;
       currentOP = current->options;
-        
+
       if (currentOP) {
         while (currentOP) {
           nextOP = currentOP->next;
@@ -325,7 +325,7 @@ int ConfigAsciiWriter(FILE *write, char *sep, char *comm, configNamespace *head)
   do {
     if (current) {
       fprintf(write, "[%s]\n", current->space);
-      currentOP = current->options; 
+      currentOP = current->options;
       do {
         if (currentOP) {
           fprintf(write, "%s %s %s\n", currentOP->name, sep, currentOP->value);
@@ -333,7 +333,7 @@ int ConfigAsciiWriter(FILE *write, char *sep, char *comm, configNamespace *head)
           currentOP = nextOP;
         }
       } while(currentOP);
-      
+
       nextNM = current->next;
       current = nextNM;
     }
@@ -367,11 +367,11 @@ void ConfigPrintAll(configNamespace *head) {
           currentOP = nextOP;
         }
       } while(currentOP);
-      
+
       current=nextNM;
     }
 		printf("\n");
-    
+
   } while(current);
 
   current = NULL;
@@ -391,9 +391,9 @@ configNamespace* ConfigAssignDefaults(options *cd) {
   config *nextOP = NULL;
   config *currentOP = NULL;
   size_t slen, nlen, vlen;
-  char space[CONFIG_LEN]; 
-  char name[CONFIG_LEN]; 
-  char value[CONFIG_LEN]; 
+  char space[CONFIG_LEN];
+  char name[CONFIG_LEN];
+  char value[CONFIG_LEN];
 
   int i = 0;
 
@@ -423,7 +423,7 @@ configNamespace* ConfigAssignDefaults(options *cd) {
 			  }
       }
 
-      if (current) { 
+      if (current) {
 
 				/* Prepare var name*/
        	nlen = strlen(cd[i].name);
@@ -432,7 +432,7 @@ configNamespace* ConfigAssignDefaults(options *cd) {
 
 				currentOP = ConfigFindOption(name, current);
 
-        if (currentOP == NULL) {  	
+        if (currentOP == NULL) {
 					newOP = calloc(sizeof(config), sizeof(config));
           if (!newOP) {
             Message(MESSAGE_ERR, "ConfigAssignDefaults: allocation failed");
@@ -440,7 +440,7 @@ configNamespace* ConfigAssignDefaults(options *cd) {
           }
           newOP->type = C_INT;
           newOP->next = NULL;
-				
+
 				  if (current->options == NULL) {
          	  current->options = newOP;
             current->options->next = NULL;
@@ -457,18 +457,18 @@ configNamespace* ConfigAssignDefaults(options *cd) {
 					  currentOP->next = newOP;
 					  currentOP = newOP;
 				  }
-				
+
        	  strncpy(currentOP->name, name, nlen);
 				  currentOP->name[nlen] = CONFIG_NULL;
-				
+
           /* Prepare the value */
           vlen = strlen(cd[i].value);
           strncpy(value, cd[i].value, vlen);
           value[vlen] = CONFIG_NULL;
-            
+
           strncpy(currentOP->value, value, vlen);
           currentOP->value[vlen] = CONFIG_NULL;
-        
+
           /* Assign type */
           currentOP->type = cd[i].type;
 				} else {
@@ -525,7 +525,7 @@ unsigned int ConfigAllOptions(configNamespace *head) {
  */
 configNamespace* ConfigFindNamespace(char *namespace, configNamespace *head) {
   configNamespace *test = NULL;
-  
+
   if (head && namespace) {
     test = head;
 
@@ -590,7 +590,7 @@ config* ConfigFindOption(char *varname, configNamespace *current) {
           olen = strlen(testOP->name);
           strncpy(opt, testOP->name, olen);
           opt[olen] = CONFIG_NULL;
-          
+
           if (strcmp(opt, var) == 0) {
             return testOP;
           }
@@ -662,7 +662,7 @@ int Option2Int(char *namespace, char *varname, configNamespace *head) {
   config *option = NULL;
   configNamespace *current = NULL;
   int value = 0;
-  
+
   if (head && namespace) {
     current = ConfigFindNamespace(namespace, head);
     if (current && varname) {
@@ -688,7 +688,7 @@ long Option2Long(char *namespace, char *varname, configNamespace *head) {
   config *option = NULL;
   configNamespace *current = NULL;
   long value = 0;
-  
+
   if (head && namespace) {
     current = ConfigFindNamespace(namespace, head);
     if (current && varname) {
@@ -715,7 +715,7 @@ float Option2Float(char *namespace, char *varname, configNamespace *head) {
   configNamespace *current = NULL;
   float value = 0.0;
   char *p = NULL;
-  
+
   if (head && namespace) {
     current = ConfigFindNamespace(namespace, head);
     if (current && varname) {
@@ -728,7 +728,7 @@ float Option2Float(char *namespace, char *varname, configNamespace *head) {
       }
     }
   }
-  
+
   return value;
 }
 
@@ -742,7 +742,7 @@ double Option2Double(char *namespace, char *varname, configNamespace *head) {
   configNamespace *current = NULL;
   double value = 0.0;
   char *p = NULL;
-  
+
   if (head && namespace) {
     current = ConfigFindNamespace(namespace, head);
     if (current && varname) {
@@ -755,7 +755,7 @@ double Option2Double(char *namespace, char *varname, configNamespace *head) {
       }
     }
   }
-  
+
   return value;
 }
 
@@ -824,7 +824,7 @@ int ConfigMergeDefaults(options *in, options *add) {
       if (strcmp(in[j].name,add[i].name) == 0) {
         in[j] = add[i];
         flag = 1;
-      } 
+      }
     }
     if (flag == 0) in[index + i] = add[i];
   }
@@ -847,7 +847,7 @@ int ConfigCountAllOptions(configNamespace *head) {
     allopts = allopts + opts;
     current = current->next;
   }
-    
+
   return allopts;
 }
 
@@ -868,27 +868,27 @@ int ConfigHead2StructNoalloc(configNamespace *head, options *c) {
   if (head) {
     current = head;
 
-    do { 
+    do {
       if (current) {
         nextNM = current->next;
         currentOP = current->options;
-        do { 
+        do {
           if (currentOP) {
-            len = strlen(current->space) + 1; 
+            len = strlen(current->space) + 1;
             strncpy(c[i].space, current->space, len);
-            len = strlen(currentOP->name) + 1; 
+            len = strlen(currentOP->name) + 1;
             strncpy(c[i].name, currentOP->name, len);
-            len = strlen(currentOP->value) + 1; 
+            len = strlen(currentOP->value) + 1;
             strncpy(c[i].value, currentOP->value, len);
             c[i].type = currentOP->type;
-            
-            i++; 
+
+            i++;
             nextOP = currentOP->next;
             currentOP = nextOP;
-          }    
+          }
         } while(currentOP);
         current = nextNM;
-      }    
+      }
     } while(current);
   }
 
@@ -907,7 +907,7 @@ options* ConfigHead2Struct(configNamespace *head) {
   opts = ConfigAllOptions(head);
 
   c = calloc(opts * sizeof(options), sizeof(options));
-  
+
   ConfigHead2StructNoalloc(head, c);
   return c;
 }

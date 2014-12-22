@@ -47,29 +47,38 @@
  *
  * @return The module pointer, NULL otherwise
  */
-module Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, module *f) {
-  module m;
+module* Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, module *f) {
+  module *m = NULL;
 
   m = ModuleLoad(name);
 
-  m.node = node;
-  m.mpi_size = mpi_size;
+  if (m) {
 
-  /* Fallback module */
-  if (f->layer.handler) {
-    m.fallback.handler = f->layer.handler;
-    m.fallback.init = f->layer.init;
-    m.fallback.setup = f->layer.setup;
-  }
+    m->node = node;
+    m->mpi_size = mpi_size;
 
-  if (m.layer.handler) {
+    /* Fallback module */
+    if (f) {
+      if (f->layer) {
+        if (f->layer->handler) {
+          m->fallback->handler = f->layer->handler;
+          m->fallback->mode_handler = f->layer->mode_handler;
+          m->fallback->init = f->layer->init;
+          m->fallback->setup = f->layer->setup;
+        }
+      }
+    }
 
-    /* Initialize the module */
-    ModuleInit(&m);
+    if (m->layer) {
+      if (m->layer->handler) {
 
-    /* Load module Setup */
-    ModuleSetup(&m, argc, argv);
+      /* Initialize the module */
+      ModuleInit(m);
 
+      /* Load module Setup */
+      ModuleSetup(m, argc, argv);
+      }
+    }
   }
 
   return m;
@@ -102,7 +111,7 @@ void* RuntimeModeLoad(char *name) {
  *
  * @param handler The runtime mode handler
  * @param m The module pointer
- * 
+ *
  * @return SUCCESS on success, error code otherwise
  */
 int RuntimeModeInit(module *m) {
@@ -110,19 +119,58 @@ int RuntimeModeInit(module *m) {
   char *err;
   int mstat = SUCCESS;
   init i;
-  
-  q = (query*) dlsym(m->layer.mode_handler, "Init");
+
+  q = (query*) dlsym(m->layer->mode_handler, "Init");
   err = dlerror();
   if (err == NULL) {
     if (q) mstat = q(&i);
     CheckStatus(mstat);
 
-    if (i.min_cpu_required > m->layer.init.min_cpu_required) {
-      m->layer.init.min_cpu_required = i.min_cpu_required;
+    if (i.min_cpu_required > m->layer->init->min_cpu_required) {
+      m->layer->init->min_cpu_required = i.min_cpu_required;
     }
   }
 
   return mstat;
+}
+
+/**
+ * @brief Load the module layer
+ *
+ * @return The layer pointer on success, NULL otherwise
+ */
+layer* LayerLoad(void) {
+  layer *l = NULL;
+
+  l = calloc(1, sizeof(layer));
+  if (!l) {
+    Message(MESSAGE_ERR, "Cannot allocate module layer\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  l->init = NULL;
+  l->setup = NULL;
+
+  l->init = calloc(1, sizeof(init));
+  if (!l->init) {
+    Message(MESSAGE_ERR, "Cannot allocate module layer init\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  l->setup = calloc(1, sizeof(setup));
+  if (!l->setup) {
+    Message(MESSAGE_ERR, "Cannot allocate module layer setup\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  l->setup->options = NULL;
+  l->setup->head = NULL;
+  l->setup->popt = NULL;
+
+  l->handler = NULL;
+  l->mode_handler = NULL;
+
+  return l;
 }
 
 /**
@@ -132,22 +180,29 @@ int RuntimeModeInit(module *m) {
  *
  * @return The module pointer, NULL otherwise
  */
-module ModuleLoad(char *name) {
-  module m;
+module* ModuleLoad(char *name) {
+  module *m = NULL;
   char *fname = NULL;
 
-  m.layer.handler = NULL;
-  m.layer.mode_handler = NULL;
+  m = calloc(1, sizeof(module));
+  if (!m) {
+    Message(MESSAGE_ERR, "Cannot allocate memory for the module handler\n");
+    Error(CORE_ERR_MEM);
+  }
+
+  m->layer = NULL;
+  m->fallback = NULL;
+
+  m->layer = LayerLoad();
+  m->fallback = LayerLoad();
 
   fname = Name(MECHANIC_MODULE_PREFIX, name, "", LIBEXT);
 
-  m.layer.handler = dlopen(fname, RTLD_NOW|RTLD_GLOBAL);
-  if (!m.layer.handler) {
+  m->layer->handler = dlopen(fname, RTLD_NOW|RTLD_GLOBAL);
+  if (!m->layer->handler) {
     Message(MESSAGE_ERR, "Cannot load module '%s': %s\n", name, dlerror());
     Error(CORE_ERR_MODULE);
   }
-
-  m.fallback.handler = NULL;
 
   free(fname);
 
@@ -170,61 +225,66 @@ int ModuleInit(module *m) {
   int mstat = SUCCESS;
 
   /* Load fallback layer, at least core module must implement this */
-  if (m->fallback.handler) {
-    m->layer.init = m->fallback.init;
+  if (m->fallback) {
+    if (m->fallback->handler) {
+      m->layer->init = m->fallback->init;
+    }
   }
 
   q = LoadSym(m, "Init", NO_FALLBACK);
-  if (q) mstat = q(&m->layer.init);
+  if (q) mstat = q(m->layer->init);
   CheckStatus(mstat);
 
-  opts = m->layer.init.options;
-  if (m->fallback.handler) opts = opts + m->fallback.init.options;
+  opts = m->layer->init->options;
+  if (m->fallback) {
+    if (m->fallback->handler) opts = opts + m->fallback->init->options;
+  }
 
-  m->layer.setup.options = calloc(opts, sizeof(options));
-  if (!m->layer.setup.options) Error(CORE_ERR_MEM);
+  m->layer->setup->options = calloc(opts, sizeof(options));
+  if (!m->layer->setup->options) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt = calloc(1, sizeof(popt));
-  if (!m->layer.setup.popt) Error(CORE_ERR_MEM);
+  m->layer->setup->popt = calloc(1, sizeof(popt));
+  if (!m->layer->setup->popt) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->popt = calloc(opts, sizeof(struct poptOption));
-  if (!m->layer.setup.popt->popt) Error(CORE_ERR_MEM);
+  m->layer->setup->popt->popt = NULL;
+  m->layer->setup->popt->poptcontext = NULL;
 
-  m->layer.setup.popt->string_args = calloc(opts, sizeof(char*));
-  if (!m->layer.setup.popt->string_args) Error(CORE_ERR_MEM);
-  
-  m->layer.setup.popt->val_args = calloc(opts, sizeof(int));
-  if (!m->layer.setup.popt->val_args) Error(CORE_ERR_MEM);
+  m->layer->setup->popt->popt = calloc(opts, sizeof(struct poptOption));
+  if (!m->layer->setup->popt->popt) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->int_args = calloc(opts, sizeof(int));
-  if (!m->layer.setup.popt->int_args) Error(CORE_ERR_MEM);
-  
-  m->layer.setup.popt->long_args = calloc(opts, sizeof(long));
-  if (!m->layer.setup.popt->long_args) Error(CORE_ERR_MEM);
-  
-  m->layer.setup.popt->float_args = calloc(opts, sizeof(float));
-  if (!m->layer.setup.popt->float_args) Error(CORE_ERR_MEM);
+  m->layer->setup->popt->string_args = calloc(opts, sizeof(char*));
+  if (!m->layer->setup->popt->string_args) Error(CORE_ERR_MEM);
 
-  m->layer.setup.popt->double_args = calloc(opts, sizeof(double));
-  if (!m->layer.setup.popt->double_args) Error(CORE_ERR_MEM);
+  m->layer->setup->popt->val_args = calloc(opts, sizeof(int));
+  if (!m->layer->setup->popt->val_args) Error(CORE_ERR_MEM);
 
-  m->layer.setup.head = NULL;
-  m->layer.setup.popt->poptcontext = NULL;
+  m->layer->setup->popt->int_args = calloc(opts, sizeof(int));
+  if (!m->layer->setup->popt->int_args) Error(CORE_ERR_MEM);
+
+  m->layer->setup->popt->long_args = calloc(opts, sizeof(long));
+  if (!m->layer->setup->popt->long_args) Error(CORE_ERR_MEM);
+
+  m->layer->setup->popt->float_args = calloc(opts, sizeof(float));
+  if (!m->layer->setup->popt->float_args) Error(CORE_ERR_MEM);
+
+  m->layer->setup->popt->double_args = calloc(opts, sizeof(double));
+  if (!m->layer->setup->popt->double_args) Error(CORE_ERR_MEM);
+
   m->filename = NULL;
   m->communication_type = MPI_BLOCKING;
 
-  /** 
+  /**
    * General Init fixes:
    * - we need at least one task pool
    * - we need at least one storage bank per pool
    * - we need at least one storage bank per task
    * - we need at least one attribute bank per dataset
    */
-  if (m->layer.init.pools < 1) m->layer.init.pools = 1;
-  if (m->layer.init.banks_per_pool < 1) m->layer.init.banks_per_pool = 1;
-  if (m->layer.init.banks_per_task < 1) m->layer.init.banks_per_task = 1;
-  if (m->layer.init.attr_per_dataset < 1) m->layer.init.attr_per_dataset = 1;
-  if (m->layer.init.compound_fields < 1) m->layer.init.compound_fields = 1;
+  if (m->layer->init->pools < 1) m->layer->init->pools = 1;
+  if (m->layer->init->banks_per_pool < 1) m->layer->init->banks_per_pool = 1;
+  if (m->layer->init->banks_per_task < 1) m->layer->init->banks_per_task = 1;
+  if (m->layer->init->attr_per_dataset < 1) m->layer->init->attr_per_dataset = 1;
+  if (m->layer->init->compound_fields < 1) m->layer->init->compound_fields = 1;
 
   return mstat;
 }
@@ -249,28 +309,30 @@ int ModuleSetup(module *m, int argc, char **argv) {
 
   q = LoadSym(m, "Setup", NO_FALLBACK);
   if (q) {
-    mstat = q(&m->layer.setup);
+    mstat = q(m->layer->setup);
     CheckStatus(mstat);
 
     /**
      * Note:
      * Since we merge core layer to module layer, the user cannot change the core defaults
      */
-    if (m->fallback.handler) {
-      mstat = ConfigMergeDefaults(m->layer.setup.options, m->fallback.setup.options);
-      CheckStatus(mstat);
+    if (m->fallback) {
+      if (m->fallback->handler) {
+        mstat = ConfigMergeDefaults(m->layer->setup->options, m->fallback->setup->options);
+        CheckStatus(mstat);
+      }
     }
   }
 
-  m->layer.setup.head = ConfigAssignDefaults(m->layer.setup.options);
+  m->layer->setup->head = ConfigAssignDefaults(m->layer->setup->options);
 
   /* Popt options */
-  mstat = PoptOptions(m, &m->layer.setup);
+  mstat = PoptOptions(m, m->layer->setup);
   CheckStatus(mstat);
-  m->layer.setup.popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, m->layer.setup.popt->popt, 0);
-  poptGetNextOpt(m->layer.setup.popt->poptcontext);
+  m->layer->setup->popt->poptcontext = poptGetContext(NULL, argc, (const char **) argv, m->layer->setup->popt->popt, 0);
+  poptGetNextOpt(m->layer->setup->popt->poptcontext);
 
-  ConfigUpdate(&m->layer.setup);
+  ConfigUpdate(m->layer->setup);
 
   return mstat;
 }
@@ -284,17 +346,27 @@ void FinalizeLayer(layer *l) {
   if (l) {
     if (l->handler) dlclose(l->handler);
     if (l->mode_handler) dlclose(l->mode_handler);
-    if (l->setup.options) free(l->setup.options);
-    if (l->setup.popt->popt) free(l->setup.popt->popt);
-    if (l->setup.popt->string_args) free(l->setup.popt->string_args);
-    if (l->setup.popt->val_args) free(l->setup.popt->val_args);
-    if (l->setup.popt->int_args) free(l->setup.popt->int_args);
-    if (l->setup.popt->long_args) free(l->setup.popt->long_args);
-    if (l->setup.popt->float_args) free(l->setup.popt->float_args);
-    if (l->setup.popt->double_args) free(l->setup.popt->double_args);
-    if (l->setup.popt->poptcontext) poptFreeContext(l->setup.popt->poptcontext);
-    if (l->setup.popt) free(l->setup.popt);
-    if (l->setup.head) ConfigCleanup(l->setup.head);
+    if (l->setup) {
+      if (l->setup->options) free(l->setup->options);
+      if (l->setup->popt) {
+        if (l->setup->popt->popt) free(l->setup->popt->popt);
+        if (l->setup->popt->string_args) free(l->setup->popt->string_args);
+        if (l->setup->popt->val_args) free(l->setup->popt->val_args);
+        if (l->setup->popt->int_args) free(l->setup->popt->int_args);
+        if (l->setup->popt->long_args) free(l->setup->popt->long_args);
+        if (l->setup->popt->float_args) free(l->setup->popt->float_args);
+        if (l->setup->popt->double_args) free(l->setup->popt->double_args);
+        if (l->setup->popt->poptcontext) poptFreeContext(l->setup->popt->poptcontext);
+        free(l->setup->popt);
+      }
+      if (l->setup->head) ConfigCleanup(l->setup->head);
+
+      free(l->setup);
+    }
+
+    if (l->init) free(l->init);
+
+    free(l);
   }
 }
 
@@ -305,8 +377,10 @@ void FinalizeLayer(layer *l) {
  */
 void ModuleFinalize(module *m) {
   if (m) {
-    if (m->layer.handler) FinalizeLayer(&m->layer);
+    if (m->fallback) FinalizeLayer(m->fallback);
+    if (m->layer) FinalizeLayer(m->layer);
     if (m->filename) free(m->filename);
+    free(m);
   }
 }
 

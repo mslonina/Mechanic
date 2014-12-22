@@ -394,7 +394,7 @@ int CommitMemoryLayout(int banks, storage *s) {
   for (i = 0; i < banks; i++) {
     mstat = Allocate(&s[i], s[i].layout.storage_elements, s[i].layout.datatype_size);
     CheckStatus(mstat);
-  
+
     mstat = CommitAttrMemoryLayout(s[i].attr_banks, &s[i]);
     CheckStatus(mstat);
   }
@@ -534,28 +534,28 @@ int CommitAttribute(hid_t h5location, attr *a) {
   herr_t h5status = 0;
   hsize_t dims[MAX_RANK], sdims[1] = {1};
   char *buffer = NULL;
-      
+
   buffer = calloc(a->layout.elements, a->layout.datatype_size);
   ReadAttr(a, buffer);
 
   if (H5Aexists(h5location, a->layout.name) > 0) {
     if (a->layout.datatype == H5T_NATIVE_CHAR || a->layout.datatype == H5T_C_S1) {
-      
+
       /**
        * Existing string attributes
        */
       Message(MESSAGE_DEBUG, "String attribute '%s' committed: %s\n", a->layout.name, a->memory);
-      
+
       ctype = H5Tcopy(H5T_C_S1);
       h5status = H5Tset_size(ctype, CONFIG_LEN);
       memtype = H5Tcopy(H5T_C_S1);
       h5status = H5Tset_size(memtype, CONFIG_LEN);
       attr_s = H5Screate_simple(1, sdims, NULL);
-      
+
       attr_d = H5Aopen(h5location, a->layout.name, H5P_DEFAULT);
       H5CheckStatus(attr_d);
       H5Awrite(attr_d, memtype, buffer);
-      
+
       H5Sclose(attr_s);
       H5Aclose(attr_d);
       H5Tclose(ctype);
@@ -573,7 +573,7 @@ int CommitAttribute(hid_t h5location, attr *a) {
       }
 
       attr_d = H5Aopen(h5location, a->layout.name, H5P_DEFAULT);
-      H5Awrite(attr_d, attr_t, buffer); 
+      H5Awrite(attr_d, attr_t, buffer);
       H5Aclose(attr_d);
 
       if (a->layout.datatype == H5T_COMPOUND) H5Tclose(attr_t);
@@ -585,7 +585,7 @@ int CommitAttribute(hid_t h5location, attr *a) {
        * String attributes
        */
       Message(MESSAGE_DEBUG, "String attribute '%s' created: %s\n", a->layout.name, a->memory);
-      
+
       ctype = H5Tcopy(H5T_C_S1);
       h5status = H5Tset_size(ctype, CONFIG_LEN);
       memtype = H5Tcopy(H5T_C_S1);
@@ -595,13 +595,13 @@ int CommitAttribute(hid_t h5location, attr *a) {
       attr_d = H5Acreate2(h5location, a->layout.name, memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
       H5CheckStatus(attr_d);
       H5Awrite(attr_d, memtype, buffer);
-      
+
       H5Aclose(attr_d);
       H5Sclose(attr_s);
       H5Tclose(ctype);
       H5Tclose(memtype);
     } else {
-     
+
       /**
        * Numeric and compound attributes
        */
@@ -612,7 +612,7 @@ int CommitAttribute(hid_t h5location, attr *a) {
         for (i = 0; i < MAX_RANK; i++) {
           dims[i] = a->layout.storage_dim[i];
         }
-      
+
         h5status = H5Sset_extent_simple(attr_s, a->layout.rank, dims, NULL);
         H5CheckStatus(h5status);
       }
@@ -623,11 +623,11 @@ int CommitAttribute(hid_t h5location, attr *a) {
         attr_t = CommitAttrFileDatatype(a);
         H5CheckStatus(attr_t);
       }
-    
+
       attr_d = H5Acreate2(h5location, a->layout.name, attr_t, attr_s, H5P_DEFAULT, H5P_DEFAULT);
       H5CheckStatus(attr_d);
-      
-      H5Awrite(attr_d, attr_t, buffer); 
+
+      H5Awrite(attr_d, attr_t, buffer);
       H5Sclose(attr_s);
       H5Aclose(attr_d);
 
@@ -678,7 +678,7 @@ int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size) {
         hstat = H5Dread(dataset, s[i].layout.datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buffer);
         H5CheckStatus(hstat);
       }
-      
+
       H5Dclose(dataset);
 
       WriteData(&s[i], buffer);
@@ -832,7 +832,7 @@ hid_t CommitAttrFileDatatype(attr *s) {
 
 /**
  * @brief Get the proper padding for a datatype
- * 
+ *
  * @param elements The number of data elements
  * @param datatype_size The datatype size of the data element
  *
@@ -850,7 +850,7 @@ size_t GetPadding(unsigned int elements, size_t datatype_size) {
   }
 
   if (size < alignment) {
-    return alignment - size; 
+    return alignment - size;
   }
 
   if (size == alignment) return 0;

@@ -6,7 +6,7 @@
 
 /**
  * @brief Performs Config to HDF5 datatype mapping
- * 
+ *
  * @param ctype The config type to map
  *
  * @return The proper HDF5 datatype
@@ -17,27 +17,27 @@ hid_t GetHDF5Datatype(int ctype) {
    * CHAR
    */
   if (ctype == C_STRING) return H5T_NATIVE_CHAR;
-  
+
   /**
    * INT
    */
   if (ctype == C_INT) return H5T_NATIVE_INT;
-  
+
   /**
    * LONG INT
    */
   if (ctype == C_LONG) return H5T_NATIVE_LONG;
-  
+
   /**
    * FLOAT
    */
   if (ctype == C_FLOAT) return H5T_NATIVE_FLOAT;
-  
+
   /**
    * DOUBLE
    */
   if (ctype == C_DOUBLE) return H5T_NATIVE_DOUBLE;
-  
+
   /**
    * Default
    */

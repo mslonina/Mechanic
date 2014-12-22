@@ -8,7 +8,7 @@
  * @brief The Setup
  *
  * This function reads the configuration on the master node and broadcasts it to all
- * MPI_COMM_WORLD. Use the CORE_SETUP for core, and MODULE_SETUP for module configuration. 
+ * MPI_COMM_WORLD. Use the CORE_SETUP for core, and MODULE_SETUP for module configuration.
  *
  * @param m The module pointer
  * @param filename The filename to read
@@ -41,38 +41,38 @@ int Setup(module *m, char *filename, int argc, char **argv, int setup_mode) {
       H5CheckStatus(h5location);
 
       i = 0;
-      while (m->layer.setup.options[i].name[0] != CONFIG_NULL) {
-        h5attr = H5Aopen_name(h5board, m->layer.setup.options[i].name);
+      while (m->layer->setup->options[i].name[0] != CONFIG_NULL) {
+        h5attr = H5Aopen_name(h5board, m->layer->setup->options[i].name);
         h5atype = H5Aget_type(h5attr);
 
-        if (m->layer.setup.options[i].type == C_STRING) {
+        if (m->layer->setup->options[i].type == C_STRING) {
           H5Aread(h5attr, h5atype, &string_attr);
           len = strlen(ConfigTrim(string_attr));
-          strncpy(m->layer.setup.options[i].value, ConfigTrim(string_attr), len);
-          m->layer.setup.options[i].value[len] = CONFIG_NULL;
+          strncpy(m->layer->setup->options[i].value, ConfigTrim(string_attr), len);
+          m->layer->setup->options[i].value[len] = CONFIG_NULL;
         }
-        
-        if (m->layer.setup.options[i].type == C_INT
-            || m->layer.setup.options[i].type == C_VAL) {
+
+        if (m->layer->setup->options[i].type == C_INT
+            || m->layer->setup->options[i].type == C_VAL) {
           H5Aread(h5attr, H5T_NATIVE_INT, &int_attr);
-          snprintf(m->layer.setup.options[i].value, CONFIG_LEN, "%d", int_attr);
+          snprintf(m->layer->setup->options[i].value, CONFIG_LEN, "%d", int_attr);
         }
-        if (m->layer.setup.options[i].type == C_LONG) {
+        if (m->layer->setup->options[i].type == C_LONG) {
           H5Aread(h5attr, H5T_NATIVE_LONG, &long_attr);
-          snprintf(m->layer.setup.options[i].value, CONFIG_LEN, "%ld", long_attr);
+          snprintf(m->layer->setup->options[i].value, CONFIG_LEN, "%ld", long_attr);
         }
-        if (m->layer.setup.options[i].type == C_FLOAT) {
+        if (m->layer->setup->options[i].type == C_FLOAT) {
           H5Aread(h5attr, H5T_NATIVE_FLOAT, &float_attr);
-          snprintf(m->layer.setup.options[i].value, CONFIG_LEN, "%.19E", float_attr);
+          snprintf(m->layer->setup->options[i].value, CONFIG_LEN, "%.19E", float_attr);
         }
-        if (m->layer.setup.options[i].type == C_DOUBLE) {
+        if (m->layer->setup->options[i].type == C_DOUBLE) {
           H5Aread(h5attr, H5T_NATIVE_DOUBLE, &double_attr);
-          snprintf(m->layer.setup.options[i].value, CONFIG_LEN, "%.19E", double_attr);
+          snprintf(m->layer->setup->options[i].value, CONFIG_LEN, "%.19E", double_attr);
         }
-    
-        ModifyOption(m->layer.setup.options[i].space, m->layer.setup.options[i].name,
-          m->layer.setup.options[i].value, m->layer.setup.options[i].type, m->layer.setup.head);
-        
+
+        ModifyOption(m->layer->setup->options[i].space, m->layer->setup->options[i].name,
+          m->layer->setup->options[i].value, m->layer->setup->options[i].type, m->layer->setup->head);
+
         H5Tclose(h5atype);
         H5Aclose(h5attr);
         i++;
@@ -82,37 +82,37 @@ int Setup(module *m, char *filename, int argc, char **argv, int setup_mode) {
       H5Fclose(h5location);
     } else {
       if (setup_mode == MODULE_SETUP) {
-        mstat = ReadConfig(m, filename, m->layer.setup.head, setup_mode);
+        mstat = ReadConfig(m, filename, m->layer->setup->head, setup_mode);
         CheckStatus(mstat);
       }
     }
   }
 
-  ConfigHead2StructNoalloc(m->layer.setup.head, m->layer.setup.options);
-  opts = ConfigAllOptions(m->layer.setup.head);
+  ConfigHead2StructNoalloc(m->layer->setup->head, m->layer->setup->options);
+  opts = ConfigAllOptions(m->layer->setup->head);
 
   /* In case of config file, we need to update the popt tables with new defaults  */
-  PoptOptions(m, &m->layer.setup);
+  PoptOptions(m, m->layer->setup);
 
   /* Read popt options and overwrite the config file */
-  mstat = Popt(m, argc, argv, &m->layer.setup, setup_mode);
+  mstat = Popt(m, argc, argv, m->layer->setup, setup_mode);
   if (mstat != 0) return mstat;
 
   if (m->mode != RESTART_MODE) {
-    ConfigHead2StructNoalloc(m->layer.setup.head, m->layer.setup.options);
+    ConfigHead2StructNoalloc(m->layer->setup->head, m->layer->setup->options);
   }
 
   /* Broadcast new configuration */
-  mstat = ConfigDatatype(m->layer.setup.options[0], &mpi_t);
+  mstat = ConfigDatatype(m->layer->setup->options[0], &mpi_t);
   CheckStatus(mstat);
 
   for (i = 0; i < opts; i++) {
     if (m->node == MASTER) {
       for (n = 1; n < m->mpi_size; n++) {
-        MPI_Send(&m->layer.setup.options[i], 1, mpi_t, n, TAG_STANDBY, MPI_COMM_WORLD);
+        MPI_Send(&m->layer->setup->options[i], 1, mpi_t, n, TAG_STANDBY, MPI_COMM_WORLD);
       }
     } else {
-      MPI_Recv(&m->layer.setup.options[i], 1, mpi_t, MASTER, TAG_STANDBY, MPI_COMM_WORLD, &mpi_status);
+      MPI_Recv(&m->layer->setup->options[i], 1, mpi_t, MASTER, TAG_STANDBY, MPI_COMM_WORLD, &mpi_status);
     }
   }
   MPI_Type_free(&mpi_t);
@@ -121,22 +121,22 @@ int Setup(module *m, char *filename, int argc, char **argv, int setup_mode) {
    * Cleanup previous default configuration
    * Reassigning defaults should be faster than modifying options one-by-one
    */
-  ConfigCleanup(m->layer.setup.head);
+  ConfigCleanup(m->layer->setup->head);
 
-  m->layer.setup.head = ConfigAssignDefaults(m->layer.setup.options);
+  m->layer->setup->head = ConfigAssignDefaults(m->layer->setup->options);
   if (setup_mode == MODULE_SETUP
       && m->node == MASTER
-      && Option2Int("core", "print-defaults", m->layer.setup.head)) {
-    ConfigPrintAll(m->layer.setup.head);
+      && Option2Int("core", "print-defaults", m->layer->setup->head)) {
+    ConfigPrintAll(m->layer->setup->head);
   }
 
-  m->showtime = Option2Int("core", "show-time", m->layer.setup.head);
-  m->verbose = Option2Int("core", "verbose", m->layer.setup.head);
-  m->debug = Option2Int("core", "debug", m->layer.setup.head);
-  m->yes = Option2Int("core", "yes", m->layer.setup.head);
-  m->test = Option2Int("core", "test", m->layer.setup.head);
-  m->dense = Option2Int("core", "dense", m->layer.setup.head);
-  m->stats = Option2Int("core", "stats", m->layer.setup.head);
+  m->showtime = Option2Int("core", "show-time", m->layer->setup->head);
+  m->verbose = Option2Int("core", "verbose", m->layer->setup->head);
+  m->debug = Option2Int("core", "debug", m->layer->setup->head);
+  m->yes = Option2Int("core", "yes", m->layer->setup->head);
+  m->test = Option2Int("core", "test", m->layer->setup->head);
+  m->dense = Option2Int("core", "dense", m->layer->setup->head);
+  m->stats = Option2Int("core", "stats", m->layer->setup->head);
 
   return mstat;
 }
@@ -169,7 +169,7 @@ int ReadConfig(module *m, char *filename, configNamespace *head, int setup_mode)
     }
     fclose(inif);
   } else if (inif == NULL) {
-    if (strcmp(filename, Option2String("core", "config", m->layer.setup.head)) != 0) {
+    if (strcmp(filename, Option2String("core", "config", m->layer->setup->head)) != 0) {
       Message(MESSAGE_ERR, "The specified configuration file could not be opened\n");
       Error(CORE_ERR_SETUP);
     }
@@ -311,7 +311,7 @@ int ConfigUpdate(setup *s) {
         }
       }
     }
-    
+
     if (s->options[i].type == C_VAL) {
       sprintf(s->options[i].value, "%d", s->popt->val_args[i]);
     }

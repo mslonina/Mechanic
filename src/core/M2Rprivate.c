@@ -57,7 +57,7 @@ int Restart(module *m, pool **pools, unsigned int *pool_counter) {
       /* Read pool reset and stage counters */
       attr_id = H5Aopen_name(group, "RID");
       H5CheckStatus(attr_id);
-    
+
       hstat = H5Aread(attr_id, H5T_NATIVE_UINT, &pools[i]->rid);
       H5CheckStatus(hstat);
 
@@ -65,20 +65,20 @@ int Restart(module *m, pool **pools, unsigned int *pool_counter) {
 
       attr_id = H5Aopen_name(group, "SID");
       H5CheckStatus(attr_id);
-    
+
       hstat = H5Aread(attr_id, H5T_NATIVE_UINT, &pools[i]->sid);
       H5CheckStatus(hstat);
 
       H5Aclose(attr_id);
-      
+
       attr_id = H5Aopen_name(group, "SRID");
       H5CheckStatus(attr_id);
-    
+
       hstat = H5Aread(attr_id, H5T_NATIVE_UINT, &pools[i]->srid);
       H5CheckStatus(hstat);
 
       H5Aclose(attr_id);
-      
+
       Message(MESSAGE_DEBUG, "Pool %d RID: %d SID: %d SRID: %d\n", pools[i]->pid, pools[i]->rid, pools[i]->sid, pools[i]->srid);
 
       /* Read pool board */
@@ -138,7 +138,7 @@ int Restart(module *m, pool **pools, unsigned int *pool_counter) {
     for (j = 0; j < pools[i]->pool_banks; j++) {
       if (pools[i]->storage[j].layout.sync) {
         if (pools[i]->storage[j].layout.elements > 0) {
-          MPI_Bcast(&(pools[i]->storage[j].memory[0]), pools[i]->storage[j].layout.storage_size, 
+          MPI_Bcast(&(pools[i]->storage[j].memory[0]), pools[i]->storage[j].layout.storage_size,
               MPI_CHAR, MASTER, MPI_COMM_WORLD);
         }
       }
@@ -187,8 +187,8 @@ int Validate(module *m, char *filename) {
   Message(MESSAGE_INFO, "Restart mode validation: API = %.2f, MODULE = %s\n", api, module_name);
 
   // Validate the module
-  if (strcmp(module_name, Option2String("core", "module", m->layer.setup.head)) != 0) {
-    Message(MESSAGE_ERR, "Module mismatch. Expected '%s', got '%s'\n", module_name, Option2String("core", "module", m->layer.setup.head)); 
+  if (strcmp(module_name, Option2String("core", "module", m->layer->setup->head)) != 0) {
+    Message(MESSAGE_ERR, "Module mismatch. Expected '%s', got '%s'\n", module_name, Option2String("core", "module", m->layer->setup->head));
     return -CORE_ERR_RESTART;
   }
 

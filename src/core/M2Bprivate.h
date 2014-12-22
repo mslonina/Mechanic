@@ -12,8 +12,9 @@
 #include "M2Hpublic.h"
 #include "M2Mpublic.h"
 
-module Bootstrap(int node, int mpisize, int argc, char **argv, char *name, module *f);
-module ModuleLoad(char *name);
+module* Bootstrap(int node, int mpisize, int argc, char **argv, char *name, module *f);
+module* ModuleLoad(char *name);
+layer* LayerLoad(void);
 void* RuntimeModeLoad(char *name);
 int RuntimeModeInit(module *m);
 int ModuleInit(module *m);

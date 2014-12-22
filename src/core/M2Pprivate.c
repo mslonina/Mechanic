@@ -21,35 +21,35 @@ pool* PoolLoad(module *m, unsigned int pid) {
   if (!p) Error(CORE_ERR_MEM);
 
   /* Allocate pool data banks */
-  p->storage = calloc(m->layer.init.banks_per_pool, sizeof(storage));
+  p->storage = calloc(m->layer->init->banks_per_pool, sizeof(storage));
   if (!p->storage) Error(CORE_ERR_MEM);
 
-  for (i = 0; i < m->layer.init.banks_per_pool; i++) {
+  for (i = 0; i < m->layer->init->banks_per_pool; i++) {
     p->storage[i].layout = (schema) STORAGE_END;
     p->storage[i].memory = NULL;
 
     p->storage[i].compound_fields = 0;
     p->storage[i].attr_banks = 0;
-   
+
     /* Pool dataset fields */
-    p->storage[i].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    p->storage[i].field = calloc(m->layer->init->compound_fields, sizeof(field));
     if (!p->storage[i].field) Error(CORE_ERR_MEM);
-    for (j = 0; j < m->layer.init.compound_fields; j++) {
+    for (j = 0; j < m->layer->init->compound_fields; j++) {
       p->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
     }
 
     /* Pool dataset attributes */
-    p->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
+    p->storage[i].attr = calloc(m->layer->init->attr_per_dataset, sizeof(attr));
     if (!p->storage[i].attr) Error(CORE_ERR_MEM);
-    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+    for (j = 0; j < m->layer->init->attr_per_dataset; j++) {
       p->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->storage[i].attr[j].memory = NULL;
       p->storage[i].attr[j].compound_fields = 0;
-    
+
       /* Pool dataset attribute fields */
-      p->storage[i].attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));
+      p->storage[i].attr[j].field = calloc(m->layer->init->compound_fields, sizeof(field));
       if (!p->storage[i].attr[j].field) Error(CORE_ERR_MEM);
-      for (k = 0; k < m->layer.init.compound_fields; k++) {
+      for (k = 0; k < m->layer->init->compound_fields; k++) {
         p->storage[i].attr[j].field[k].layout = (schema) FIELD_STORAGE_END;
       }
     }
@@ -63,17 +63,17 @@ pool* PoolLoad(module *m, unsigned int pid) {
   p->board->memory = NULL;
 
   /* Task board attributes */
-  p->board->attr = calloc(m->layer.init.options, sizeof(attr));
+  p->board->attr = calloc(m->layer->init->options, sizeof(attr));
   if (!p->board->attr) Error(CORE_ERR_MEM);
-  for (j = 0; j < m->layer.init.options; j++) {
+  for (j = 0; j < m->layer->init->options; j++) {
     p->board->attr[j].layout = (schema) ATTR_STORAGE_END;
     p->board->attr[j].memory = NULL;
     p->board->attr[j].compound_fields = 0;
-      
+
     /* Board attribute fields */
-    p->board->attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    p->board->attr[j].field = calloc(m->layer->init->compound_fields, sizeof(field));
     if (!p->board->attr[j].field) Error(CORE_ERR_MEM);
-    for (k = 0; k < m->layer.init.compound_fields; k++) {
+    for (k = 0; k < m->layer->init->compound_fields; k++) {
       p->board->attr[j].field[k].layout = (schema) FIELD_STORAGE_END;
     }
   }
@@ -82,34 +82,34 @@ pool* PoolLoad(module *m, unsigned int pid) {
   p->task = calloc(1, sizeof(task));
   if (!p->task) Error(CORE_ERR_MEM);
 
-  p->task->storage = calloc(m->layer.init.banks_per_task, sizeof(storage));
+  p->task->storage = calloc(m->layer->init->banks_per_task, sizeof(storage));
   if (!p->task->storage) Error(CORE_ERR_MEM);
 
   /* Task dataset attributes */
-  for (i = 0; i < m->layer.init.banks_per_task; i++) {
+  for (i = 0; i < m->layer->init->banks_per_task; i++) {
     p->task->storage[i].layout = (schema) STORAGE_END;
     p->task->storage[i].memory = NULL;
-    
+
     p->task->storage[i].compound_fields = 0;
     p->task->storage[i].attr_banks = 0;
 
-    p->task->storage[i].field = calloc(m->layer.init.compound_fields, sizeof(field));
+    p->task->storage[i].field = calloc(m->layer->init->compound_fields, sizeof(field));
     if (!p->task->storage[i].field) Error(CORE_ERR_MEM);
-    for (j = 0; j < m->layer.init.compound_fields; j++) {
+    for (j = 0; j < m->layer->init->compound_fields; j++) {
       p->task->storage[i].field[j].layout = (schema) FIELD_STORAGE_END;
     }
 
-    p->task->storage[i].attr = calloc(m->layer.init.attr_per_dataset, sizeof(attr));
+    p->task->storage[i].attr = calloc(m->layer->init->attr_per_dataset, sizeof(attr));
     if (!p->task->storage[i].attr) Error(CORE_ERR_MEM);
-    for (j = 0; j < m->layer.init.attr_per_dataset; j++) {
+    for (j = 0; j < m->layer->init->attr_per_dataset; j++) {
       p->task->storage[i].attr[j].layout = (schema) ATTR_STORAGE_END;
       p->task->storage[i].attr[j].memory = NULL;
       p->task->storage[i].attr[j].compound_fields = 0;
 
       /* Task dataset attribute fields */
-      p->task->storage[i].attr[j].field = calloc(m->layer.init.compound_fields, sizeof(field));
+      p->task->storage[i].attr[j].field = calloc(m->layer->init->compound_fields, sizeof(field));
       if (!p->task->storage[i].attr[j].field) Error(CORE_ERR_MEM);
-      for (k = 0; k < m->layer.init.compound_fields; k++) {
+      for (k = 0; k < m->layer->init->compound_fields; k++) {
         p->task->storage[i].attr[j].field[k].layout = (schema) FIELD_STORAGE_END;
       }
     }
@@ -140,7 +140,7 @@ pool* PoolLoad(module *m, unsigned int pid) {
 int PoolPrepare(module *m, pool **all, pool *p) {
   int mstat = SUCCESS;
   query *q;
-  setup *s = &(m->layer.setup);
+  setup *s = m->layer->setup;
 
   task *t;
   short ****board_buffer = NULL;
@@ -188,7 +188,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     }
 
     MReadOption(p, "reset-checkpoints", &reset_checkpoints);
-    
+
     // Initialize the task board
     for (x = 0; x < p->board->layout.dims[0]; x++) {
       for (y = 0; y < p->board->layout.dims[1]; y++) {
@@ -232,7 +232,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
     }
 
     time_in = clock();
-    
+
     for (i = 0; i < p->mask_size; i++) {
       t->tid = i;
 
@@ -242,7 +242,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
       q = LoadSym(m, "TaskBoardMap", LOAD_DEFAULT);
       if (q) mstat = q(p, t);
       CheckStatus(mstat);
-      
+
       q = LoadSym(m, "BoardPrepare", LOAD_DEFAULT);
       if (q) t->state = q(all, p, t);
 
@@ -256,18 +256,18 @@ int PoolPrepare(module *m, pool **all, pool *p) {
           board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
           p->completed++;
         }
-      } 
-      
+      }
+
       // the logic below somehow works...
       if (m->mode == RESTART_MODE) {
         // skip already finished tasks
         if (board_buffer[t->location[0]][t->location[1]][t->location[2]][0] == TASK_FINISHED) continue;
-        
+
         if (t->state == TASK_ENABLED) {
           board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_AVAILABLE;
           if (reversed) p->completed--;
         }
-        
+
         if (board_buffer[t->location[0]][t->location[1]][t->location[2]][0] == TASK_AVAILABLE) {
           if (t->state == TASK_DISABLED) {
             board_buffer[t->location[0]][t->location[1]][t->location[2]][0] = TASK_FINISHED;
@@ -334,7 +334,7 @@ int PoolPrepare(module *m, pool **all, pool *p) {
 int PoolProcess(module *m, pool **all, pool *p) {
   int mstat = SUCCESS;
   int pool_create = 0;
-  setup *s = &(m->layer.setup);
+  setup *s = m->layer->setup;
   query *q;
 
   if (m->node == MASTER) {
@@ -390,7 +390,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   }
 
   H5Dclose(h5dataset);
-  
+
   /* Write pool data */
   mstat = CommitData(h5pool, p->pool_banks, p->storage);
   CheckStatus(mstat);
@@ -402,10 +402,10 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   } else {
     attr_s = H5Screate(H5S_SCALAR);
     attr_d = H5Acreate2(h5pool, "Status", H5T_NATIVE_USHORT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_USHORT, &p->state); 
+    H5Awrite(attr_d, H5T_NATIVE_USHORT, &p->state);
     H5Sclose(attr_s);
   }
-      
+
   H5Aclose(attr_d);
 
   if (H5Aexists(h5pool, "ID") > 0) {
@@ -414,10 +414,10 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   } else {
     attr_s = H5Screate(H5S_SCALAR);
     attr_d = H5Acreate2(h5pool, "ID", H5T_NATIVE_UINT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->pid); 
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->pid);
     H5Sclose(attr_s);
   }
-      
+
   H5Aclose(attr_d);
 
   if (H5Aexists(h5pool, "RID") > 0) {
@@ -426,10 +426,10 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   } else {
     attr_s = H5Screate(H5S_SCALAR);
     attr_d = H5Acreate2(h5pool, "RID", H5T_NATIVE_UINT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->rid); 
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->rid);
     H5Sclose(attr_s);
   }
-      
+
   H5Aclose(attr_d);
 
   if (H5Aexists(h5pool, "SID") > 0) {
@@ -438,10 +438,10 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   } else {
     attr_s = H5Screate(H5S_SCALAR);
     attr_d = H5Acreate2(h5pool, "SID", H5T_NATIVE_UINT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->sid); 
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->sid);
     H5Sclose(attr_s);
   }
-      
+
   H5Aclose(attr_d);
 
   if (H5Aexists(h5pool, "SRID") > 0) {
@@ -450,10 +450,10 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   } else {
     attr_s = H5Screate(H5S_SCALAR);
     attr_d = H5Acreate2(h5pool, "SRID", H5T_NATIVE_UINT, attr_s, H5P_DEFAULT, H5P_DEFAULT);
-    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->srid); 
+    H5Awrite(attr_d, H5T_NATIVE_UINT, &p->srid);
     H5Sclose(attr_s);
   }
-      
+
   H5Aclose(attr_d);
 
   /* The last pool link */
@@ -543,7 +543,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
 
             h5dataset = H5Dopen2(h5task, p->task->storage[j].layout.name, H5P_DEFAULT);
             H5CheckStatus(h5dataset);
-          
+
             q = LoadSym(m, "DatasetProcess", LOAD_DEFAULT);
             if (q) mstat = q(h5task, h5dataset, p, &(p->task->storage[j]));
             CheckStatus(mstat);
@@ -571,7 +571,7 @@ int PoolProcessData(module *m, pool *p, setup *s) {
   H5Gclose(h5tasks);
   H5Gclose(h5pool);
   H5Fclose(h5location);
-  
+
   return mstat;
 }
 
@@ -605,7 +605,7 @@ int PoolReset(module *m, pool *p) {
         }
       }
     }
-    
+
     WriteData(p->board, &board[0][0][0][0]);
 
     /* Reset the board storage banks */

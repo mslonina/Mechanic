@@ -41,22 +41,22 @@ int MechanicHeader(module *m, hid_t h5location) {
   H5Aclose(attr_d);
 
   // The module name
-  module_name = Option2String("core", "module", m->layer.setup.head);
+  module_name = Option2String("core", "module", m->layer->setup->head);
 
   ctype = H5Tcopy(H5T_C_S1);
   h5status = H5Tset_size(ctype, CONFIG_LEN);
   H5CheckStatus(h5status);
-  
+
   memtype = H5Tcopy(H5T_C_S1);
   h5status = H5Tset_size(memtype, CONFIG_LEN);
   H5CheckStatus(h5status);
 
   attr_s = H5Screate_simple(1, sdims, NULL);
-      
+
   attr_d = H5Acreate2(h5location, "MODULE", memtype, attr_s, H5P_DEFAULT, H5P_DEFAULT);
   H5CheckStatus(attr_d);
   H5Awrite(attr_d, memtype, module_name);
-      
+
   H5Aclose(attr_d);
   H5Sclose(attr_s);
   H5Tclose(ctype);
