@@ -380,7 +380,7 @@ int Setup(setup *s) {
   };
   s->options[75] = (options) {
     .space="core", .name="disable-task-loop", .shortName='\0', .value="0", .type=C_VAL,
-    .description="Disbale the evaluation of the task loop"
+    .description="Disable the evaluation of the task loop"
   };
   s->options[76] = (options) OPTIONS_END;
 
