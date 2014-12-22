@@ -50,7 +50,7 @@
  * @return `SUCCESS` on success, error code otherwise
  */
 int Init(init *i) {
-  i->options = 72; /**< Maximum number of configurations option for the module */
+  i->options = 82; /**< Maximum number of configurations option for the module */
   i->pools = 1; /**< Maximum number of task pools */
   i->banks_per_pool = 1; /**< Maximum number of memory bank per pool */
   i->banks_per_task = 1; /**< Maximum number of memory banks per task */
@@ -115,166 +115,274 @@ int Setup(setup *s) {
     .description="The z-axis element"
   };
   s->options[ 9] = (options) {
+    .space="core", .name="uelement", .shortName='\0', .value="0", .type=C_INT,
+    .description="The u-axis element"
+  };
+  s->options[10] = (options) {
+    .space="core", .name="velement", .shortName='\0', .value="0", .type=C_INT,
+    .description="The v-axis element"
+  };
+  s->options[11] = (options) {
+    .space="core", .name="welement", .shortName='\0', .value="0", .type=C_INT,
+    .description="The w-axis element"
+  };
+  s->options[12] = (options) {
+    .space="core", .name="telement", .shortName='\0', .value="0", .type=C_INT,
+    .description="The t-axis element"
+  };
+  s->options[13] = (options) {
     .space="core", .name="xlabel", .shortName='\0', .value="", .type=C_STRING,
     .description="The x-axis label"
   };
-  s->options[10] = (options) {
+  s->options[14] = (options) {
     .space="core", .name="ylabel", .shortName='\0', .value="", .type=C_STRING,
     .description="The y-axis label"
   };
-  s->options[11] = (options) {
+  s->options[15] = (options) {
     .space="core", .name="zlabel", .shortName='\0', .value="", .type=C_STRING,
     .description="The z-axis label"
   };
-  s->options[12] = (options) {
+  s->options[16] = (options) {
+    .space="core", .name="ulabel", .shortName='\0', .value="", .type=C_STRING,
+    .description="The u-axis label"
+  };
+  s->options[17] = (options) {
+    .space="core", .name="vlabel", .shortName='\0', .value="", .type=C_STRING,
+    .description="The v-axis label"
+  };
+  s->options[18] = (options) {
+    .space="core", .name="wlabel", .shortName='\0', .value="", .type=C_STRING,
+    .description="The w-axis label"
+  };
+  s->options[19] = (options) {
+    .space="core", .name="tlabel", .shortName='\0', .value="", .type=C_STRING,
+    .description="The t-axis label"
+  };
+  s->options[20] = (options) {
     .space="core", .name="xorigin", .shortName='\0', .value="0.543", .type=C_DOUBLE,
     .description="The x-axis origin"
   };
-  s->options[13] = (options) {
+  s->options[21] = (options) {
     .space="core", .name="yorigin", .shortName='\0', .value="0.567", .type=C_DOUBLE,
     .description="The y-axis origin"
   };
-  s->options[14] = (options) {
+  s->options[22] = (options) {
     .space="core", .name="zorigin", .shortName='\0', .value="0.512", .type=C_DOUBLE,
     .description="The z-axis origin"
   };
-  s->options[15] = (options) {
+  s->options[23] = (options) {
+    .space="core", .name="uorigin", .shortName='\0', .value="0.512", .type=C_DOUBLE,
+    .description="The u-axis origin"
+  };
+  s->options[24] = (options) {
+    .space="core", .name="vorigin", .shortName='\0', .value="0.512", .type=C_DOUBLE,
+    .description="The v-axis origin"
+  };
+  s->options[25] = (options) {
+    .space="core", .name="worigin", .shortName='\0', .value="0.512", .type=C_DOUBLE,
+    .description="The w-axis origin"
+  };
+  s->options[26] = (options) {
+    .space="core", .name="torigin", .shortName='\0', .value="0.512", .type=C_DOUBLE,
+    .description="The t-axis origin"
+  };
+  s->options[27] = (options) {
     .space="core", .name="xres", .shortName='x', .value="5", .type=C_INT,
     .description="The task pool board horizontal resolution"
   };
-  s->options[16] = (options) {
+  s->options[28] = (options) {
     .space="core", .name="yres", .shortName='y', .value="5", .type=C_INT,
     .description="The task pool board vertical resolution"
   };
-  s->options[17] = (options) {
+  s->options[29] = (options) {
     .space="core", .name="zres", .shortName='z', .value="1", .type=C_INT,
     .description="The task pool board depth resolution"
   };
-  s->options[18] = (options) {
+  s->options[30] = (options) {
+    .space="core", .name="ures", .shortName='u', .value="1", .type=C_INT,
+    .description="The task pool board u resolution"
+  };
+  s->options[31] = (options) {
+    .space="core", .name="vres", .shortName='v', .value="1", .type=C_INT,
+    .description="The task pool board v resolution"
+  };
+  s->options[32] = (options) {
+    .space="core", .name="wres", .shortName='w', .value="1", .type=C_INT,
+    .description="The task pool board w resolution"
+  };
+  s->options[33] = (options) {
+    .space="core", .name="tres", .shortName='t', .value="1", .type=C_INT,
+    .description="The task pool board t resolution"
+  };
+  s->options[34] = (options) {
     .space="core", .name="xmin", .shortName='\0', .value="0.0005", .type=C_DOUBLE,
     .description="The x-axis minimum"
   };
-  s->options[19] = (options) {
+  s->options[35] = (options) {
     .space="core", .name="xmax", .shortName='\0', .value="1.0005", .type=C_DOUBLE,
     .description="The x-axis maximum"
   };
-  s->options[20] = (options) {
+  s->options[36] = (options) {
     .space="core", .name="ymin", .shortName='\0', .value="0.001", .type=C_DOUBLE,
     .description="The y-axis minimum"
   };
-  s->options[21] = (options) {
+  s->options[37] = (options) {
     .space="core", .name="ymax", .shortName='\0', .value="1.001", .type=C_DOUBLE,
     .description="The y-axis maximum"
   };
-  s->options[22] = (options) {
+  s->options[38] = (options) {
     .space="core", .name="zmin", .shortName='\0', .value="0.003", .type=C_DOUBLE,
     .description="The z-axis minimum"
   };
-  s->options[23] = (options) {
+  s->options[39] = (options) {
     .space="core", .name="zmax", .shortName='\0', .value="1.003", .type=C_DOUBLE,
     .description="The z-axis maximum"
   };
-  s->options[24] = (options) {
+  s->options[40] = (options) {
+    .space="core", .name="umin", .shortName='\0', .value="0.003", .type=C_DOUBLE,
+    .description="The u-axis minimum"
+  };
+  s->options[41] = (options) {
+    .space="core", .name="umax", .shortName='\0', .value="1.003", .type=C_DOUBLE,
+    .description="The u-axis maximum"
+  };
+  s->options[42] = (options) {
+    .space="core", .name="vmin", .shortName='\0', .value="0.003", .type=C_DOUBLE,
+    .description="The v-axis minimum"
+  };
+  s->options[43] = (options) {
+    .space="core", .name="vmax", .shortName='\0', .value="1.003", .type=C_DOUBLE,
+    .description="The v-axis maximum"
+  };
+  s->options[44] = (options) {
+    .space="core", .name="wmin", .shortName='\0', .value="0.003", .type=C_DOUBLE,
+    .description="The w-axis minimum"
+  };
+  s->options[45] = (options) {
+    .space="core", .name="wmax", .shortName='\0', .value="1.003", .type=C_DOUBLE,
+    .description="The w-axis maximum"
+  };
+  s->options[46] = (options) {
+    .space="core", .name="tmin", .shortName='\0', .value="0.003", .type=C_DOUBLE,
+    .description="The t-axis minimum"
+  };
+  s->options[47] = (options) {
+    .space="core", .name="tmax", .shortName='\0', .value="1.003", .type=C_DOUBLE,
+    .description="The t-axis maximum"
+  };
+  s->options[48] = (options) {
     .space="core", .name="checkpoint", .shortName='d', .value="2048", .type=C_INT,
     .description="The checkpoint size (number of tasks)"
   };
-  s->options[25] = (options) {
+  s->options[49] = (options) {
     .space="core", .name="checkpoint-files", .shortName='b', .value="2", .type=C_INT,
     .description="The number of incremental backups of the master file"
   };
-  s->options[26] = (options) {
+  s->options[50] = (options) {
     .space="core", .name="no-backup", .shortName='\0', .value="0", .type=C_VAL,
     .description="Disable the initial master file backup"
   };
-  s->options[27] = (options) {
+  s->options[51] = (options) {
     .space="core", .name="restart-mode", .shortName='r', .value="0", .type=C_VAL,
     .description="The restart mode"
   };
-  s->options[28] = (options) {
+  s->options[52] = (options) {
     .space="core", .name="restart-file", .shortName='\0', .value="restart-file.h5", .type=C_STRING,
     .description="The name of the file to use in the restart mode"
   };
-  s->options[29] = (options) {
+  s->options[53] = (options) {
     .space="core", .name="blocking", .shortName='\0', .value="0", .type=C_VAL,
     .description="Switch to the blocking communication mode (for modules)"
   };
-  s->options[30] = (options) {
+  s->options[54] = (options) {
     .space="core", .name="test", .shortName='\0', .value="0", .type=C_VAL,
     .description="Switch to test mode (for modules)"
   };
-  s->options[31] = (options) {
+  s->options[55] = (options) {
     .space="core", .name="yes", .shortName='\0', .value="0", .type=C_VAL,
     .description="Skip checks (for modules)"
   };
-  s->options[32] = (options) {
+  s->options[56] = (options) {
     .space="core", .name="dense", .shortName='\0', .value="0", .type=C_VAL,
     .description="Use dense output (for modules)"
   };
-  s->options[33] = (options) {
+  s->options[57] = (options) {
     .space="core", .name="show-time", .shortName='\0', .value="0", .type=C_VAL,
     .description="Show detailed CPU time"
   };
-  s->options[34] = (options) {
+  s->options[58] = (options) {
     .space="core", .name="verbose", .shortName='V', .value="0", .type=C_VAL,
     .description="Verbose output (for modules)"
   };
-  s->options[35] = (options) {
+  s->options[59] = (options) {
     .space="core", .name="debug", .shortName='\0', .value="0", .type=C_VAL,
     .description="Switch to debug mode (for modules)"
   };
-  s->options[36] = (options) {
+  s->options[60] = (options) {
     .space="core", .name="stats", .shortName='\0', .value="0", .type=C_VAL,
     .description="Run detailed runtime statistics"
   };
-  s->options[37] = (options) {
+  s->options[61] = (options) {
     .space="core", .name="partial", .shortName='\0', .value="0", .type=C_VAL,
     .description="Run in partial mode (for modules)"
   };
-  s->options[38] = (options) {
+  s->options[62] = (options) {
     .space="core", .name="partial-index", .shortName='\0', .value="0", .type=C_INT,
     .description="Partial mode index (for modules)"
   };
-  s->options[39] = (options) {
+  s->options[63] = (options) {
     .space="core", .name="partial-xindex", .shortName='\0', .value="0", .type=C_INT,
     .description="Partial mode x-index (for modules)"
   };
-  s->options[40] = (options) {
+  s->options[64] = (options) {
     .space="core", .name="partial-yindex", .shortName='\0', .value="0", .type=C_INT,
     .description="Partial mode y-index (for modules)"
   };
-  s->options[41] = (options) {
-    .space="core", .name="task-checkpoints", .shortName='\0', .value="0", .type=C_INT,
-    .description="Number of task checkpoints (for modules)"
-  };
-  s->options[42] = (options) {
+  s->options[65] = (options) {
     .space="core", .name="partial-zindex", .shortName='\0', .value="0", .type=C_INT,
     .description="Partial mode z-index (for modules)"
   };
-  s->options[43] = (options) {
+  s->options[66] = (options) {
+    .space="core", .name="partial-uindex", .shortName='\0', .value="0", .type=C_INT,
+    .description="Partial mode u-index (for modules)"
+  };
+  s->options[67] = (options) {
+    .space="core", .name="partial-vindex", .shortName='\0', .value="0", .type=C_INT,
+    .description="Partial mode v-index (for modules)"
+  };
+  s->options[68] = (options) {
+    .space="core", .name="partial-windex", .shortName='\0', .value="0", .type=C_INT,
+    .description="Partial mode w-index (for modules)"
+  };
+  s->options[69] = (options) {
+    .space="core", .name="partial-tindex", .shortName='\0', .value="0", .type=C_INT,
+    .description="Partial mode t-index (for modules)"
+  };
+  s->options[70] = (options) {
+    .space="core", .name="task-checkpoints", .shortName='\0', .value="0", .type=C_INT,
+    .description="Number of task checkpoints (for modules)"
+  };
+  s->options[71] = (options) {
     .space="core", .name="print-defaults", .shortName='\0', .value="0", .type=C_VAL,
     .description="Print default settings"
   };
-  s->options[44] = (options) {
+  s->options[72] = (options) {
     .space="core", .name="help", .shortName='?', .value="0", .type=C_VAL,
     .description="Show this help message"
   };
-  s->options[45] = (options) {
+  s->options[73] = (options) {
     .space="core", .name="usage", .shortName='\0', .value="0", .type=C_VAL,
     .description="Display brief message"
   };
-  s->options[46] = (options) {
+  s->options[74] = (options) {
     .space="core", .name="reset-checkpoints", .shortName='\0', .value="0", .type=C_VAL,
     .description="Reset the task checkpoints (during the restart mode)"
   };
-  s->options[47] = (options) {
+  s->options[75] = (options) {
     .space="core", .name="disable-task-loop", .shortName='\0', .value="0", .type=C_VAL,
-    .description="Disable the evaluation of the task loop"
+    .description="Disbale the evaluation of the task loop"
   };
-  s->options[48] = (options) {
-    .space="core", .name="tasks-per-node", .shortName='\0', .value="1", .type=C_INT,
-    .description="The number of tasks per node"
-  };
-  s->options[49] = (options) OPTIONS_END;
+  s->options[76] = (options) OPTIONS_END;
 
   return SUCCESS;
 }
