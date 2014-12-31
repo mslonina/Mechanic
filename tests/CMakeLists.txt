@@ -41,8 +41,10 @@ set (
 file(COPY ../examples/c/readfile.txt DESTINATION .)
 file(COPY references DESTINATION .)
 
+set(MECHANIC ${PROJECT_BINARY_DIR}/src/core/mechanic)
+
 # the Core test
-add_test(NAME core COMMAND ${CMAKE_COMMAND} -DMODULE=core
+add_test(NAME core COMMAND ${CMAKE_COMMAND} -DMECHANIC=${MECHANIC} -DMODULE=core
   -DSOURCEDIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
 
 foreach(module ${modules})
@@ -51,6 +53,6 @@ foreach(module ${modules})
 endforeach()
 
 foreach(module ${modules})
-  add_test(NAME ${module} COMMAND ${CMAKE_COMMAND} -DMODULE=t${module}
+  add_test(NAME ${module} COMMAND ${CMAKE_COMMAND} -DMECHANIC=${MECHANIC} -DMODULE=t${module}
     -DSOURCEDIR=${CMAKE_CURRENT_SOURCE_DIR} -P ${CMAKE_CURRENT_SOURCE_DIR}/test.cmake)
 endforeach()

@@ -1,11 +1,13 @@
 set (ENV{LD_LIBRARY_PATH} $ENV{LD_LIBRARY_PATH}:.)
 set (ENV{DYLD_LIBRARY_PATH} $ENV{DYLD_LIBRARY_PATH}:.)
 
+message(STATUS "Mechanic path is: ${MECHANIC}")
+
 #
 # Task farm: The normal mode
 #
 message(STATUS "Testing normal mode (task farm)")
-execute_process(COMMAND mpirun -np 4 mechanic -p ${MODULE} -n ${MODULE} -x 10 -y 10 -b 3 -d 13 --test 
+execute_process(COMMAND mpirun -np 4 ${MECHANIC} -p ${MODULE} -n ${MODULE} -x 10 -y 10 -b 3 -d 13 --test
   --restart-file=${MODULE}-master-02.h5
   OUTPUT_VARIABLE TOUT RESULT_VARIABLE ROUT ERROR_VARIABLE EOUT)
 
@@ -27,7 +29,7 @@ endif (TOUT)
 #
 message(STATUS "Testing restart mode (task farm)")
 execute_process(COMMAND 
-  mpirun -np 4 mechanic -p ${MODULE} -n ${MODULE} -x 10 -y 10 -b 3 -d 13 --test 
+  mpirun -np 4 ${MECHANIC} -p ${MODULE} -n ${MODULE} -x 10 -y 10 -b 3 -d 13 --test
   --restart-mode --restart-file=${MODULE}-master-02.h5
   OUTPUT_VARIABLE TOUT RESULT_VARIABLE ROUT ERROR_VARIABLE EOUT)
 
@@ -49,7 +51,7 @@ endif (TOUT)
 #
 message(STATUS "Testing normal mode (master)")
 execute_process(COMMAND 
-  mpirun -np 4 mechanic -m master -p ${MODULE} -n ${MODULE}-master-mode -x 10 -y 10 -b 3 -d 13 --test
+  mpirun -np 4 ${MECHANIC} -m master -p ${MODULE} -n ${MODULE}-master-mode -x 10 -y 10 -b 3 -d 13 --test
   --restart-file=${MODULE}-master-mode-master-02.h5
   OUTPUT_VARIABLE TOUT RESULT_VARIABLE ROUT ERROR_VARIABLE EOUT)
 
@@ -72,7 +74,7 @@ endif (TOUT)
 #
 message(STATUS "Testing restart mode (master)")
 execute_process(COMMAND 
-  mpirun -np 4 mechanic -m master -p ${MODULE} -n ${MODULE}-master-mode -x 10 -y 10 -b 3 -d 13 --test 
+  mpirun -np 4 ${MECHANIC} -m master -p ${MODULE} -n ${MODULE}-master-mode -x 10 -y 10 -b 3 -d 13 --test
   --restart-mode --restart-file=${MODULE}-master-mode-master-02.h5
   OUTPUT_VARIABLE TOUT RESULT_VARIABLE ROUT ERROR_VARIABLE EOUT)
 
