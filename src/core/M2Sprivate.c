@@ -208,14 +208,12 @@ int Storage(module *m, pool *p) {
       }
 
       if (p->task->storage[i].layout.storage_type == STORAGE_TEXTURE) {
-        p->task->storage[i].layout.storage_dim[0] =
-          p->task->storage[i].layout.dims[0] * p->board->layout.dims[0];
-        p->task->storage[i].layout.storage_dim[1] =
-          p->task->storage[i].layout.dims[1] * p->board->layout.dims[1];
-        p->task->storage[i].layout.storage_dim[2] =
-          p->task->storage[i].layout.dims[2] * p->board->layout.dims[2];
+        for (j = 0; j < TASK_BOARD_RANK; j++) {
+          p->task->storage[i].layout.storage_dim[j] =
+            p->task->storage[i].layout.dims[j] * p->board->layout.dims[j];
+        }
 
-        for (j = 3; j < MAX_RANK; j++) {
+        for (j = TASK_BOARD_RANK; j < MAX_RANK; j++) {
           p->task->storage[i].layout.storage_dim[j] =
             p->task->storage[i].layout.dims[j];
         }
