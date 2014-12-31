@@ -328,7 +328,7 @@ int CheckLayout(module *m, unsigned int banks, storage *s) {
 
     if (s[i].layout.storage_type == STORAGE_TEXTURE &&
         s[i].layout.rank < TASK_BOARD_RANK) {
-      Message(MESSAGE_ERR, "Minimum rank for STORAGE_TEXTURE is TASK_BOARD_RANK (= 3)\n");
+      Message(MESSAGE_ERR, "Minimum rank for STORAGE_TEXTURE is TASK_BOARD_RANK (= %d)\n", TASK_BOARD_RANK);
       Error(CORE_ERR_STORAGE);
     }
 
