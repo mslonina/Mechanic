@@ -237,7 +237,7 @@ int Popt(module *m, int argc, char **argv, setup *s, int setup_mode) {
  */
 int PoptOptions(module *m, setup *s) {
   int mstat = SUCCESS, i = 0;
-  char* garbage;
+  char *garbage;
 
   /* Module options */
   while (s->options[i].name[0] != CONFIG_NULL) {

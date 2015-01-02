@@ -22,7 +22,7 @@
 task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
   unsigned int i = 0, j = 0, k = 0, l = 0;
   size_t len;
-  task* t = NULL;
+  task *t = NULL;
 
   /* Allocate the task pointer */
   t = calloc(1, sizeof(task));
