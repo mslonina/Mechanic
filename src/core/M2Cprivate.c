@@ -247,7 +247,7 @@ int ConfigAsciiParser(FILE *read, char *sep, char *comm, configNamespace *head) 
       if (c[0] == '\n') break;
 
       valuelen = strlen(c);
-			value = calloc(valuelen + 1, sizeof(char*));
+			value = calloc(valuelen + 1, sizeof(char));
       if (!value) {
         Message(MESSAGE_ERR, "ConfigAsciiParser: allocation failed");
         goto failure;

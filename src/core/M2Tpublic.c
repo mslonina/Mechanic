@@ -65,7 +65,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
 
     if (p->task->storage[i].layout.name != NULL) {
       len = strlen(p->task->storage[i].layout.name);
-      t->storage[i].layout.name = calloc(len+1, sizeof(char*));
+      t->storage[i].layout.name = calloc(len + 1, sizeof(char));
       if (!t->storage[i].layout.name) Error(CORE_ERR_MEM);
 
       strncpy(t->storage[i].layout.name, p->task->storage[i].layout.name, len);
@@ -126,7 +126,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
 
         // field name
         len = strlen(p->task->storage[i].field[j].layout.name);
-        t->storage[i].field[j].layout.name = calloc(len+1, sizeof(char*));
+        t->storage[i].field[j].layout.name = calloc(len + 1, sizeof(char));
         if (!t->storage[i].field[j].layout.name) Error(CORE_ERR_MEM);
 
         strncpy(t->storage[i].field[j].layout.name, p->task->storage[i].field[j].layout.name, len);
@@ -142,7 +142,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
 
       if (p->task->storage[i].attr[j].layout.name != NULL) {
         len = strlen(p->task->storage[i].attr[j].layout.name);
-        t->storage[i].attr[j].layout.name = calloc(len+1, sizeof(char*));
+        t->storage[i].attr[j].layout.name = calloc(len + 1, sizeof(char));
         if (!t->storage[i].attr[j].layout.name) Error(CORE_ERR_MEM);
 
         strncpy(t->storage[i].attr[j].layout.name, p->task->storage[i].attr[j].layout.name, len);
@@ -198,7 +198,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
 
           // field name
           len = strlen(p->task->storage[i].attr[j].field[k].layout.name);
-          t->storage[i].attr[j].field[k].layout.name = calloc(len+1, sizeof(char*));
+          t->storage[i].attr[j].field[k].layout.name = calloc(len + 1, sizeof(char));
           if (!t->storage[i].attr[j].field[k].layout.name) Error(CORE_ERR_MEM);
 
           strncpy(t->storage[i].attr[j].field[k].layout.name, p->task->storage[i].attr[j].field[k].layout.name, len);
