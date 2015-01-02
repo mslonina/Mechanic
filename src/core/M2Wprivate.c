@@ -33,7 +33,7 @@ int Work(module *m) {
   /**
    * (A) Initialize the pool bank
    */
-  p = calloc(m->layer->init->pools * sizeof(pool*), sizeof(pool*));
+  p = calloc(m->layer->init->pools, sizeof(pool*));
   if (!p) Error(CORE_ERR_MEM);
 
   for (pid = 0; pid < m->layer->init->pools; pid++) {

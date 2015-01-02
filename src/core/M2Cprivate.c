@@ -113,7 +113,7 @@ int ConfigCharCount(char *l, char *s) {
 configNamespace* ConfigNewNamespace(char *cfg) {
   configNamespace *newNM = NULL;
 
-  newNM = calloc(sizeof(configNamespace), sizeof(configNamespace));
+  newNM = calloc(1, sizeof(configNamespace));
   if (!newNM) {
     Message(MESSAGE_ERR, "ConfigNewNamespace: allocation failed.");
     Error(CORE_ERR_MEM);
@@ -433,7 +433,7 @@ configNamespace* ConfigAssignDefaults(options *cd) {
 				currentOP = ConfigFindOption(name, current);
 
         if (currentOP == NULL) {
-					newOP = calloc(sizeof(config), sizeof(config));
+					newOP = calloc(1, sizeof(config));
           if (!newOP) {
             Message(MESSAGE_ERR, "ConfigAssignDefaults: allocation failed");
             Error(CORE_ERR_MEM);
@@ -906,7 +906,7 @@ options* ConfigHead2Struct(configNamespace *head) {
 
   opts = ConfigAllOptions(head);
 
-  c = calloc(opts * sizeof(options), sizeof(options));
+  c = calloc(opts, sizeof(options));
 
   ConfigHead2StructNoalloc(head, c);
   return c;
