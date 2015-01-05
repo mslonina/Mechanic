@@ -236,9 +236,12 @@ int ModuleInit(module *m) {
   CheckStatus(mstat);
 
   opts = m->layer->init->options;
+
   if (m->fallback) {
     if (m->fallback->handler) opts = opts + m->fallback->init->options;
   }
+
+  m->layer->init->options = opts; // important!
 
   m->layer->setup->options = calloc(opts, sizeof(options));
   if (!m->layer->setup->options) Error(CORE_ERR_MEM);
