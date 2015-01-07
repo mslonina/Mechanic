@@ -485,7 +485,7 @@ void TaskFinalize(module *m, pool *p, task *t) {
       }
     }
 
-    FreeMemoryLayout(p->task_banks, t->storage);
+    FreeMemoryLayout(m->layer->init->banks_per_task, m->layer->init->attr_per_dataset, t->storage);
 
     if (t->storage) free(t->storage);
     free(t);

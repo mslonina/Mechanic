@@ -643,13 +643,13 @@ void PoolFinalize(module *m, pool *p) {
 
   if (p) {
     if (p->storage) {
-      FreeMemoryLayout(p->pool_banks, p->storage);
+      FreeMemoryLayout(m->layer->init->banks_per_pool, m->layer->init->attr_per_dataset, p->storage);
       free(p->storage);
     }
 
     if (p->task) {
       if (p->task->storage) {
-        FreeMemoryLayout(p->task_banks, p->task->storage);
+        FreeMemoryLayout(m->layer->init->banks_per_task, m->layer->init->attr_per_dataset, p->task->storage);
         free(p->task->storage);
       }
 
@@ -672,7 +672,7 @@ void PoolFinalize(module *m, pool *p) {
       for (i = 0; i < p->board->attr_banks; i++) {
         free(p->board->attr[i].layout.name);
       }
-      FreeMemoryLayout(1, p->board);
+      FreeMemoryLayout(1, m->layer->init->options, p->board);
       free(p->board);
     }
 

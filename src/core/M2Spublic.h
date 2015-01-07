@@ -470,7 +470,7 @@ void FreeAttribute(attr *s); /**< Garbage cleaner */
 int CommitMemoryLayout(int banks, storage *s);
 int CommitAttrMemoryLayout(int banks, storage *s);
 int CommitAttribute(hid_t h5location, attr *a);
-void FreeMemoryLayout(int banks, storage *s);
+void FreeMemoryLayout(unsigned int banks, unsigned int attr_banks, storage *s);
 
 int CommitData(hid_t h5location, int banks, storage *s);
 int ReadDataset(hid_t h5location, int banks, storage *s, unsigned int size);

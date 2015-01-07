@@ -484,23 +484,21 @@ int CommitAttrMemoryLayout(int banks, storage *s) {
  * @param banks The number of memory/storage banks
  * @param s The storage structure to free
  */
-void FreeMemoryLayout(int banks, storage *s) {
-  int i = 0, j = 0;
+void FreeMemoryLayout(unsigned int banks, unsigned int attr_banks, storage *s) {
+  unsigned int i = 0, j = 0;
 
   for (i = 0; i < banks; i++) {
-    if (s[i].layout.rank > 0) {
-      if (s[i].attr) {
-        for (j = 0; j < s[i].attr_banks; j++) {
-          FreeAttribute(&s[i].attr[j]);
-        }
-        free(s[i].attr);
+    if (s[i].attr) {
+      for (j = 0; j < attr_banks; j++) {
+        FreeAttribute(&s[i].attr[j]);
       }
-      if (s[i].field) {
-        free(s[i].field);
-      }
-      if (s[i].memory) {
-        Free(&s[i]);
-      }
+      free(s[i].attr);
+    }
+    if (s[i].field) {
+      free(s[i].field);
+    }
+    if (s[i].memory) {
+      Free(&s[i]);
     }
   }
 }
