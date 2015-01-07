@@ -466,20 +466,20 @@ int CommitAttrMemoryLayout(int banks, storage *s) {
 void FreeMemoryLayout(unsigned int banks, unsigned int attr_banks, storage *s) {
   unsigned int i = 0, j = 0;
 
-  for (i = 0; i < banks; i++) {
-    if (s[i].attr) {
-      for (j = 0; j < attr_banks; j++) {
-        if (s[i].attr[j].field) free(s[i].attr[j].field);
-        if (s[i].attr[j].memory) free(s[i].attr[j].memory);
+  if (s) {
+    for (i = 0; i < banks; i++) {
+      if (s[i].attr) {
+        for (j = 0; j < attr_banks; j++) {
+          if (s[i].attr[j].field) free(s[i].attr[j].field);
+          if (s[i].attr[j].memory) free(s[i].attr[j].memory);
+        }
+        free(s[i].attr);
       }
-      free(s[i].attr);
+      if (s[i].field) free(s[i].field);
+      if (s[i].memory) free(s[i].memory);
     }
-    if (s[i].field) {
-      free(s[i].field);
-    }
-    if (s[i].memory) {
-      free(s[i].memory);
-    }
+
+    free(s);
   }
 }
 
