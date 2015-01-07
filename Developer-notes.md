@@ -48,3 +48,12 @@ VIM users
     if has("autocmd")
       au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g`\"" | endif
     end if
+
+Valgrind testing
+----------------
+
+    mpirun -np 2 valgrind -v --track-origins=yes --leak-check=full --show-leak-kinds=all \
+       --vgdb=full --dsymutil=yes --log-file=mechanic--farm-leaks.txt src/core/mechanic
+     
+    mpirun -np 1 valgrind -v --track-origins=yes --leak-check=full --show-leak-kinds=all \
+       --vgdb=full --dsymutil=yes --log-file=mechanic--master-leaks.txt src/core/mechanic -m master
