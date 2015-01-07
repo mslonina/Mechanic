@@ -369,7 +369,10 @@ void CheckpointReset(module *m, pool *p, checkpoint *c, int cid) {
  */
 void CheckpointFinalize(module *m, pool *p, checkpoint *c) {
   if (c) {
-    if (c->storage->memory) free(c->storage->memory);
+    if (c->storage) {
+      if (c->storage->memory) free(c->storage->memory);
+      free(c->storage);
+    }
     free(c);
   }
 }
