@@ -409,18 +409,6 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype) {
 }
 
 /**
- * @brief Free the memory buffer of the attribute
- *
- * @param s The storage object
- */
-void FreeAttribute(attr *s) {
-  if (s->field) {
-    free(s->field);
-  }
-  if (s->memory) free(s->memory);
-}
-
-/**
  * @brief Commits the memory layout
  *
  * This function must run on every node -- the size of data arrays shared between nodes
@@ -481,7 +469,8 @@ void FreeMemoryLayout(unsigned int banks, unsigned int attr_banks, storage *s) {
   for (i = 0; i < banks; i++) {
     if (s[i].attr) {
       for (j = 0; j < attr_banks; j++) {
-        FreeAttribute(&s[i].attr[j]);
+        if (s[i].attr[j].field) free(s[i].attr[j].field);
+        if (s[i].attr[j].memory) free(s[i].attr[j].memory);
       }
       free(s[i].attr);
     }

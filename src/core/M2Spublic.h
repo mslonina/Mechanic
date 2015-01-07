@@ -307,7 +307,6 @@ double***** AllocateDouble5(storage *s);
 
 int Allocate(storage *s, size_t size, size_t datatype); /**< Memory allocator */
 int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory allocator */
-void FreeAttribute(attr *s); /**< Garbage cleaner */
 
 /**
  * High level memory allocation macros
