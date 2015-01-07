@@ -27,13 +27,10 @@ modules and is freely available at [the project page](http://github.com/mslonina
 If you are going to use this code, or its parts, please consider referring to the Authors
 by the following paper:
 
-Slonina M., Gozdziewski K., Migaszewski C.
-"Mechanic: the MPI/HDF code framework for dynamical astronomy"
-New Astronomy, 2015, Vol. 34, pp.98-107
-DOI: 10.1016/j.newast.2014.05.006
+[Slonina M., Gozdziewski K., Migaszewski C., _"Mechanic: the MPI/HDF code framework for dynamical astronomy"_,
+New Astronomy, 2015, Vol. 34, pp.98-107, DOI: 10.1016/j.newast.2014.05.006](http://adsabs.harvard.edu/abs/2015NewA...34...98S)
 
-http://arxiv.org/abs/1401.6344
+This project was supported by the following grants:
 
-_This project is supported by the Polish Ministry of Science and Higher Education through
-the grant N/N203/402739. This work is conducted within the POWIEW project of the European
-Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08._
+- Polish Ministry of Science and Higher Education through the grant N/N203/402739
+- The POWIEW project of the European Regional Development Fund in Innovative Economy Programme POIG.02.03.00-00-018/08
