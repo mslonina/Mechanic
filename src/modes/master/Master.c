@@ -178,5 +178,7 @@ finalize:
   CheckpointFinalize(m, p, c);
   TaskFinalize(m, p, t);
 
+  if (board_buffer) free(board_buffer);
+
   return mstat;
 }
