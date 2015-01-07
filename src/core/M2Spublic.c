@@ -383,15 +383,6 @@ int Allocate(storage *s, size_t size, size_t datatype) {
 }
 
 /**
- * @brief Free the memory buffer
- *
- * @param s The storage object
- */
-void Free(storage *s) {
-  if (s->memory) free(s->memory);
-}
-
-/**
  * @brief Allocates the memory buffer for attribute
  *
  * @param buffer The memory buffer to allocate
@@ -498,7 +489,7 @@ void FreeMemoryLayout(unsigned int banks, unsigned int attr_banks, storage *s) {
       free(s[i].field);
     }
     if (s[i].memory) {
-      Free(&s[i]);
+      free(s[i].memory);
     }
   }
 }
