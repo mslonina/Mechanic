@@ -51,7 +51,7 @@ checkpoint* CheckpointLoad(module *m, pool *p, int cid) {
   Message(MESSAGE_DEBUG, "[%s:%d] Checkpoint size %d %d\n", __FILE__, __LINE__,
       c->size, c->size * c->storage->layout.size);
 
-  c->storage->memory = malloc(c->size * c->storage->layout.size * sizeof(unsigned char));
+  c->storage->memory = calloc(c->size * c->storage->layout.size, sizeof(unsigned char));
   if (!c->storage->memory) Error(CORE_ERR_MEM);
 
   CheckpointReset(m, p, c, 0);
