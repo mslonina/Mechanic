@@ -41,10 +41,10 @@ int Worker(module *m, pool *p) {
 
   recv_buffer->layout.size = send_buffer->layout.size;
   
-  send_buffer->memory = malloc(send_buffer->layout.size);
+  send_buffer->memory = calloc(send_buffer->layout.size, sizeof(unsigned char));
   if (!send_buffer->memory) Error(CORE_ERR_MEM);
   
-  recv_buffer->memory = malloc(recv_buffer->layout.size);
+  recv_buffer->memory = calloc(recv_buffer->layout.size, sizeof(unsigned char));
   if (!recv_buffer->memory) Error(CORE_ERR_MEM);
 
   while (1) {
