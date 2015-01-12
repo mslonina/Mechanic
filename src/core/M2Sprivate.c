@@ -15,7 +15,6 @@
 int Storage(module *m, pool *p) {
   int mstat = SUCCESS;
   unsigned int i = 0, j = 0, task_groups = 0, size = 0;
-  size_t len;
   query *q;
 
   int int_attr;
@@ -43,13 +42,7 @@ int Storage(module *m, pool *p) {
   i = 0;
   p->board->attr_banks = 0;
   while (m->layer->setup->options[i].name[0] != CONFIG_NULL) {
-    len = strlen(m->layer->setup->options[i].name);
-    p->board->attr[i].layout.name = calloc(len + 1, sizeof(char));
-    if (!p->board->attr[i].layout.name) Error(CORE_ERR_MEM);
-
-    strncpy(p->board->attr[i].layout.name, m->layer->setup->options[i].name, len);
-    p->board->attr[i].layout.name[len] = CONFIG_NULL;
-
+    p->board->attr[i].layout.name = StringCopy(m->layer->setup->options[i].name);
     p->board->attr[i].layout.dataspace = H5S_SCALAR;
     p->board->attr[i].layout.datatype = GetHDF5Datatype(m->layer->setup->options[i].type);
 

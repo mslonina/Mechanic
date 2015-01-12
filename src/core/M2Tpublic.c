@@ -21,7 +21,6 @@
  */
 task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
   unsigned int i = 0, j = 0, k = 0, l = 0;
-  size_t len;
   task *t = NULL;
 
   /* Allocate the task pointer */
@@ -64,12 +63,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
     t->storage[i].layout.use_hdf = p->task->storage[i].layout.use_hdf;
 
     if (p->task->storage[i].layout.name != NULL) {
-      len = strlen(p->task->storage[i].layout.name);
-      t->storage[i].layout.name = calloc(len + 1, sizeof(char));
-      if (!t->storage[i].layout.name) Error(CORE_ERR_MEM);
-
-      strncpy(t->storage[i].layout.name, p->task->storage[i].layout.name, len);
-      t->storage[i].layout.name[len] = CONFIG_NULL;
+      t->storage[i].layout.name = StringCopy(p->task->storage[i].layout.name);
     }
 
     t->storage[i].layout.rank = p->task->storage[i].layout.rank;
@@ -125,12 +119,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
         }
 
         // field name
-        len = strlen(p->task->storage[i].field[j].layout.name);
-        t->storage[i].field[j].layout.name = calloc(len + 1, sizeof(char));
-        if (!t->storage[i].field[j].layout.name) Error(CORE_ERR_MEM);
-
-        strncpy(t->storage[i].field[j].layout.name, p->task->storage[i].field[j].layout.name, len);
-        t->storage[i].field[j].layout.name[len] = CONFIG_NULL;
+        t->storage[i].field[j].layout.name = StringCopy(p->task->storage[i].field[j].layout.name);
       }
     }
 
@@ -141,12 +130,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
     for (j = 0; j < t->storage[i].attr_banks; j++) {
 
       if (p->task->storage[i].attr[j].layout.name != NULL) {
-        len = strlen(p->task->storage[i].attr[j].layout.name);
-        t->storage[i].attr[j].layout.name = calloc(len + 1, sizeof(char));
-        if (!t->storage[i].attr[j].layout.name) Error(CORE_ERR_MEM);
-
-        strncpy(t->storage[i].attr[j].layout.name, p->task->storage[i].attr[j].layout.name, len);
-        t->storage[i].attr[j].layout.name[len] = CONFIG_NULL;
+        t->storage[i].attr[j].layout.name = StringCopy(p->task->storage[i].attr[j].layout.name);
       }
 
       t->storage[i].attr[j].layout.rank = p->task->storage[i].attr[j].layout.rank;
@@ -197,12 +181,7 @@ task* M2TaskLoad(module *m, pool *p, unsigned int tid) {
           }
 
           // field name
-          len = strlen(p->task->storage[i].attr[j].field[k].layout.name);
-          t->storage[i].attr[j].field[k].layout.name = calloc(len + 1, sizeof(char));
-          if (!t->storage[i].attr[j].field[k].layout.name) Error(CORE_ERR_MEM);
-
-          strncpy(t->storage[i].attr[j].field[k].layout.name, p->task->storage[i].attr[j].field[k].layout.name, len);
-          t->storage[i].attr[j].field[k].layout.name[len] = CONFIG_NULL;
+          t->storage[i].attr[j].field[k].layout.name = StringCopy(p->task->storage[i].attr[j].field[k].layout.name);
         }
       }
 

@@ -133,6 +133,7 @@ typedef struct {
 unsigned int GetSize(unsigned int rank, unsigned int *dims); /**< Get the 1D size for given rank and dimensions */
 void GetDims(storage *s, unsigned int *dims); /**< Get the dimensions of the storage object */
 int CopyData(void *in, void *out, size_t size); /**< Copy data buffers */
+char* StringCopy(char *in); /**< Copy the given string */
 
 /**
  * Direct read/write interface

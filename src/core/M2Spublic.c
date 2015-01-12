@@ -322,6 +322,27 @@ int CopyData(void *in, void *out, size_t size) {
 }
 
 /**
+ * Wrapper to strncpy
+ *
+ * @param in The input string
+ *
+ * @result Allocated string copy, NULL otherwise
+ */
+char* StringCopy(char *in) {
+  char *s = NULL;
+  size_t len = 0;
+
+  len = strlen(in);
+  s = calloc(len + 1, sizeof(char));
+  if (!s) Error(CORE_ERR_MEM);
+
+  memcpy(s, in, len);
+  s[len] = CONFIG_NULL;
+
+  return s;
+}
+
+/**
  * @brief Get the storage bank index for a given name
  *
  * @param s The storage array
