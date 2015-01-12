@@ -215,7 +215,7 @@ module* ModuleLoad(char *name) {
  */
 int ModuleInit(module *m) {
   query *q = NULL;
-  unsigned int opts = 0;
+  unsigned int opts = 0, i = 0;
   int mstat = SUCCESS;
 
   /* Load fallback layer, at least core module must implement this */
@@ -246,6 +246,10 @@ int ModuleInit(module *m) {
 
   m->layer->setup->options = calloc(opts, sizeof(options));
   if (!m->layer->setup->options) Error(CORE_ERR_MEM);
+
+  for (i = 0; i < opts; i++) {
+    m->layer->setup->options[i] = (options) OPTIONS_END;
+  }
 
   m->layer->setup->popt = calloc(1, sizeof(popt));
   if (!m->layer->setup->popt) Error(CORE_ERR_MEM);
