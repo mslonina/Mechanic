@@ -285,7 +285,7 @@ finalize:
   MPI_Barrier(MPI_COMM_WORLD);
 
   if (core) ModuleFinalize(core);
-  //if (module) ModuleFinalize(module);
+  if (module) ModuleFinalize(module);
 
   H5close();
   MPI_Finalize();

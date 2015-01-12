@@ -60,12 +60,7 @@ module* Bootstrap(int node, int mpi_size, int argc, char **argv, char *name, mod
     /* Fallback module */
     if (f) {
       if (f->layer) {
-        if (f->layer->handler) {
-          m->fallback->handler = f->layer->handler;
-          m->fallback->mode_handler = f->layer->mode_handler;
-          m->fallback->init = f->layer->init;
-          m->fallback->setup = f->layer->setup;
-        }
+        m->fallback = f->layer;
       }
     }
 
@@ -194,7 +189,6 @@ module* ModuleLoad(char *name) {
   m->fallback = NULL;
 
   m->layer = LayerLoad();
-  m->fallback = LayerLoad();
 
   fname = Name(MECHANIC_MODULE_PREFIX, name, "", LIBEXT);
 
@@ -227,7 +221,13 @@ int ModuleInit(module *m) {
   /* Load fallback layer, at least core module must implement this */
   if (m->fallback) {
     if (m->fallback->handler) {
-      m->layer->init = m->fallback->init;
+      m->layer->init->options = m->fallback->init->options;
+      m->layer->init->pools = m->fallback->init->pools;
+      m->layer->init->banks_per_pool = m->fallback->init->banks_per_pool;
+      m->layer->init->banks_per_task = m->fallback->init->banks_per_task;
+      m->layer->init->attr_per_dataset = m->fallback->init->attr_per_dataset;
+      m->layer->init->compound_fields = m->fallback->init->compound_fields;
+      m->layer->init->min_cpu_required = m->fallback->init->min_cpu_required;
     }
   }
 
@@ -242,6 +242,7 @@ int ModuleInit(module *m) {
   }
 
   m->layer->init->options = opts; // important!
+  Message(MESSAGE_DEBUG, "Options allocated: %d\n", opts);
 
   m->layer->setup->options = calloc(opts, sizeof(options));
   if (!m->layer->setup->options) Error(CORE_ERR_MEM);
@@ -380,7 +381,6 @@ void FinalizeLayer(layer *l) {
  */
 void ModuleFinalize(module *m) {
   if (m) {
-    if (m->fallback) FinalizeLayer(m->fallback);
     if (m->layer) FinalizeLayer(m->layer);
     if (m->filename) free(m->filename);
     free(m);
