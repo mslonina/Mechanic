@@ -60,10 +60,10 @@ Download the HDF5 library from http://www.hdfgroup.org/ftp/HDF5/current/src/
     make
     make install
 
-OpenMPI 1.6+
+OpenMPI 1.8+
 ------------
 
-Download the OpenMPI library from http://www.open-mpi.org/software/ompi/v1.6/
+Download the OpenMPI library from http://www.open-mpi.org/software/ompi/v1.8/
 
     cd openmpi
     ./configure --prefix=~/mechanic-env
