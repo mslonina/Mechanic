@@ -71,6 +71,7 @@ Key features
   at the every stage of the simulation
 - **HDF5 data storage layout**
 - **All HDF5/MPI basic datatypes are supported**
+- **Support for `H5T_COMPOUND` datasets (including attributes)**
 - **Multidimensional datasets support, with minimum rank 2 up to rank `H5S_MAX_RANK` (32)**
 - **Possibility of using HDF5 attributes (directly or through API)**
 - **Automatic backup of data files and restart mode**
@@ -112,7 +113,7 @@ create a `mechanic_module_map.c` file and put in it the following code:
 
     #include "mechanic.h"
 
-    int Storage(pool *p, void *s) {
+    int Storage(pool *p) {
       p->task->storage[0].layout = (schema) {
         // the name of the output dataset
         .name = "result",
@@ -141,7 +142,7 @@ the output dataset in this case will be task_pool_size x 3.
 The second step is to create the `TaskProcess()` function, in which we will compute the
 state of the system:
 
-    int TaskProcess(pool *p, task *t, void *s) {
+    int TaskProcess(pool *p, task *t) {
       double buffer[1][3];
 
       // the vertical position of the current task
