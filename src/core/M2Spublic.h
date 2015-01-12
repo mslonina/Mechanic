@@ -320,6 +320,7 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory alloca
   if (_mobject) {\
     int _msindex;\
     unsigned int _i = 0, _dim0, _dim1;\
+    size_t _mbuffer_size = 0;\
     _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
     if (_msindex < 0) {\
       Message(MESSAGE_ERR, "MAllocate2: Storage bank '%s' could not be found\n", _mstorage_name);\
@@ -328,7 +329,9 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory alloca
       _dim0 = _mobject->storage[_msindex].layout.storage_dim[0];\
       _dim1 = _mobject->storage[_msindex].layout.storage_dim[1];\
       if (_mobject->storage[_msindex].layout.storage_size > 0) {\
-        _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype)));\
+        _mbuffer_size = (_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype));\
+        _mbuffer = malloc(_mbuffer_size);\
+        memset(_mbuffer, 0, _mbuffer_size);\
         if (_mbuffer) {\
           for (_i = 0; _i < _dim0; _i++) {\
             _mbuffer[_i] = (_mtype*)(_mbuffer + _dim0) + _i * _dim1;\
@@ -351,6 +354,7 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory alloca
   if (_mobject) {\
     int _msindex;\
     unsigned int _i = 0, _j = 0, _dim0, _dim1, _dim2;\
+    size_t _mbuffer_size = 0;\
     _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
     if (_msindex < 0) {\
       Message(MESSAGE_ERR, "MAllocate3: Storage bank '%s' could not be found\n", _mstorage_name);\
@@ -360,7 +364,9 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory alloca
       _dim1 = _mobject->storage[_msindex].layout.storage_dim[1];\
       _dim2 = _mobject->storage[_msindex].layout.storage_dim[2];\
       if (_mobject->storage[_msindex].layout.storage_size > 0) {\
-        _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype)));\
+        _mbuffer_size = (_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype));\
+        _mbuffer = malloc(_mbuffer_size);\
+        memset(_mbuffer, 0, _mbuffer_size);\
         if (_mbuffer) {\
           for (_i = 0; _i < _dim0; _i++) {\
             _mbuffer[_i] = (_mtype**)(_mbuffer + _dim0) + _i * _dim1;\
@@ -386,6 +392,7 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory alloca
   if (_mobject) {\
     int _msindex;\
     unsigned int _i = 0, _j = 0, _k = 0, _dim0, _dim1, _dim2, _dim3;\
+    size_t _mbuffer_size = 0;\
     _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
     if (_msindex < 0) {\
       Message(MESSAGE_ERR, "MAllocate4: Storage bank '%s' could not be found\n", _mstorage_name);\
@@ -396,8 +403,10 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory alloca
       _dim2 = _mobject->storage[_msindex].layout.storage_dim[2];\
       _dim3 = _mobject->storage[_msindex].layout.storage_dim[3];\
       if (_mobject->storage[_msindex].layout.storage_size > 0) {\
-        _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype***))\
-          + (_dim0 * _dim1 * _dim2 * _dim3 * sizeof(_mtype)));\
+        _mbuffer_size = (_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype***))\
+          + (_dim0 * _dim1 * _dim2 * _dim3 * sizeof(_mtype));\
+        _mbuffer = malloc(_mbuffer_size);\
+        memset(_mbuffer, 0, _mbuffer_size);\
         if (_mbuffer) {\
           for (_i = 0; _i < _dim0; _i++) {\
             _mbuffer[_i] = (_mtype***)(_mbuffer + _dim0) + _i * _dim1;\
@@ -427,6 +436,7 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory alloca
   if (_mobject) {\
     int _msindex;\
     unsigned int _i = 0, _j = 0, _k = 0, _l = 0, _dim0, _dim1, _dim2, _dim3, _dim4;\
+    size_t _mbuffer_size = 0;\
     _msindex = GetStorageIndex(_mobject->storage, _mstorage_name);\
     if (_msindex < 0) {\
       Message(MESSAGE_ERR, "MAllocate5: Storage bank '%s' could not be found\n", _mstorage_name);\
@@ -438,8 +448,10 @@ int AllocateAttribute(attr *s, size_t size, size_t datatype); /**< Memory alloca
       _dim3 = _mobject->storage[_msindex].layout.storage_dim[3];\
       _dim4 = _mobject->storage[_msindex].layout.storage_dim[4];\
       if (_mobject->storage[_msindex].layout.storage_size > 0) {\
-        _mbuffer = malloc((_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype***))\
-            + (_dim0 * _dim1 * _dim2 * _dim3 * sizeof(_mtype****)) + (_dim0 * _dim1 * _dim2 * _dim3 * _dim4 * sizeof(_mtype)));\
+        _mbuffer_size = (_dim0 * sizeof(_mtype*)) + (_dim0 * _dim1 * sizeof(_mtype**)) + (_dim0 * _dim1 * _dim2 * sizeof(_mtype***))\
+            + (_dim0 * _dim1 * _dim2 * _dim3 * sizeof(_mtype****)) + (_dim0 * _dim1 * _dim2 * _dim3 * _dim4 * sizeof(_mtype));\
+        _mbuffer = malloc(_mbuffer_size);\
+        memset(_mbuffer, 0, _mbuffer_size);\
         if (_mbuffer) {\
           for (_i = 0; _i < _dim0; _i++) {\
             _mbuffer[_i] = (_mtype****)(_mbuffer + _dim0) + _i * _dim1;\

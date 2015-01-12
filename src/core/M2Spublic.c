@@ -21,10 +21,13 @@
     x** array = NULL;\
     unsigned int i = 0;\
     unsigned int dim0, dim1;\
+    size_t array_size = 0;\
     dim0 = s->layout.storage_dim[0];\
     dim1 = s->layout.storage_dim[1];\
     if (s->layout.storage_size > 0) { \
-      array = malloc((dim0 * sizeof(x*)) + (dim0 * dim1 * sizeof(x)));\
+      array_size = (dim0 * sizeof(x*)) + (dim0 * dim1 * sizeof(x));\
+      array = malloc(array_size);\
+      memset(array, 0, array_size);\
       if (array) {\
         for (i = 0; i < dim0; i++) {\
           array[i] = (x*)(array + dim0) + i * dim1;\
@@ -62,11 +65,14 @@ ALLOCATE2(AllocateDouble2, double)
     x*** array = NULL;\
     unsigned int i = 0, j = 0;\
     unsigned int dim0, dim1, dim2;\
+    size_t array_size = 0;\
     dim0 = s->layout.storage_dim[0];\
     dim1 = s->layout.storage_dim[1];\
     dim2 = s->layout.storage_dim[2];\
     if (s->layout.storage_size > 0) {\
-      array = malloc((dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x)));\
+      array_size = (dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x));\
+      array = malloc(array_size);\
+      memset(array, 0, array_size);\
       if (array) {\
         for (i = 0; i < dim0; i++) {\
           array[i] = (x**)(array + dim0) + i * dim1;\
@@ -105,13 +111,16 @@ ALLOCATE3(AllocateDouble3, double)
     x**** array = NULL;\
     unsigned int i = 0, j = 0, k = 0;\
     unsigned int dim0, dim1, dim2, dim3;\
+    size_t array_size = 0;\
     dim0 = s->layout.storage_dim[0];\
     dim1 = s->layout.storage_dim[1];\
     dim2 = s->layout.storage_dim[2];\
     dim3 = s->layout.storage_dim[3];\
     if (s->layout.storage_size > 0) {\
-      array = malloc((dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x***))\
-          + (dim0*dim1*dim2*dim3 * sizeof(x)));\
+      array_size = (dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x***))\
+          + (dim0*dim1*dim2*dim3 * sizeof(x));\
+      array = malloc(array_size);\
+      memset(array, 0, array_size);\
       if (array) {\
         for (i = 0; i < dim0; i++) {\
           array[i] = (x***)(array + dim0) + i * dim1;\
@@ -153,14 +162,17 @@ ALLOCATE4(AllocateDouble4, double)
     x***** array = NULL;\
     unsigned int i = 0, j = 0, k = 0, l = 0;\
     unsigned int dim0, dim1, dim2, dim3, dim4;\
+    size_t array_size = 0;\
     dim0 = s->layout.storage_dim[0];\
     dim1 = s->layout.storage_dim[1];\
     dim2 = s->layout.storage_dim[2];\
     dim3 = s->layout.storage_dim[3];\
     dim4 = s->layout.storage_dim[4];\
     if (s->layout.storage_size > 0) {\
-      array = malloc((dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x***))\
-          + (dim0*dim1*dim2*dim3 * sizeof(x****)) + (dim0*dim1*dim2*dim3*dim4 * sizeof(x)));\
+      array_size = (dim0 * sizeof(x*)) + (dim0*dim1 * sizeof(x**)) + (dim0*dim1*dim2 * sizeof(x***))\
+          + (dim0*dim1*dim2*dim3 * sizeof(x****)) + (dim0*dim1*dim2*dim3*dim4 * sizeof(x));\
+      array = malloc(array_size);\
+      memset(array, 0, array_size);\
       if (array) {\
         for (i = 0; i < dim0; i++) {\
           array[i] = (x****)(array + dim0) + i * dim1;\
