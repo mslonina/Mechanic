@@ -12,7 +12,6 @@ void Welcome() {
       PACKAGE_VERSION_MAJOR, PACKAGE_VERSION_MINOR, PACKAGE_VERSION_PATCH);
   Message(MESSAGE_INFO, "Author: %s\n", PACKAGE_AUTHOR);
   Message(MESSAGE_INFO, "Bugs/features/support: %s\n", PACKAGE_BUGREPORT);
-  Message(MESSAGE_INFO, "%s\n", PACKAGE_URL);
   Message(MESSAGE_OUTPUT, "\n");
 }
 

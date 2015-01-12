@@ -13,8 +13,8 @@ set (package_version
 
 set (package_name "\"${CMAKE_PROJECT_NAME}\"")
 set (package_author "\"Celestial Mechanics Group (TCFA/NCU)\"")
-set (package_bugs "\"mechanics@astri.umk.pl\"")
-set (package_url "\"http://git.ca.umk.pl\"")
+set (package_bugs "\"http://github.com/mslonina/Mechanic\"")
+set (package_url "\"https://github.com/mslonina/Mechanic\"")
 set (package_version_major "\"${Mechanic_VERSION_MAJOR}\"")
 set (package_version_minor "\"${Mechanic_VERSION_MINOR}\"")
 set (package_version_patch "\"${Mechanic_VERSION_PATCH}\"")
