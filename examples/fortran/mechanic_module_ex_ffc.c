@@ -30,7 +30,7 @@ int cfunc(int n, double *x) {
 /**
  * Implements Storage()
  */
-int Storage(pool *p, void *s) {
+int Storage(pool *p) {
   p->task->storage[0].layout = (schema) {
     .name = "result",
     .rank = 2,
@@ -46,7 +46,7 @@ int Storage(pool *p, void *s) {
 /**
  * Implements TaskProcess()
  */
-int TaskProcess(pool *p, task *t, void *s) {
+int TaskProcess(pool *p, task *t) {
   int n, pstatus;
   double ctrl[10], x[24], f;
   double buffer[1][10];
